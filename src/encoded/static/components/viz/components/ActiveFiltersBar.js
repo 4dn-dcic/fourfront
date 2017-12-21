@@ -42,11 +42,18 @@ export class ActiveFiltersBar extends React.Component {
         if (this.props.invisible) return null;
 
         if (this.props.expSetFilters) {
+            var contextFacets = (this.props.context && this.props.context.facets) || null;
             var _this = this;
+
             return Filters.filtersToNodes(
                 this.props.expSetFilters,
                 this.props.orderedFieldNames
             ).map(function(nodeSet, j){
+
+                // Try to get more accurate title from context.facets list, if available.
+                var releventContextFacet = contextFacets && _.findWhere(contextFacets, { 'field' : nodeSet[0].data.field });
+                var facetFieldTitle = (releventContextFacet && releventContextFacet.title) || Schemas.Field.toName(nodeSet[0].data.field, _this.props.schemas) || 'N/A';
+
                 return (
                     <div className="field-group" key={j} data-field={nodeSet[0].data.field}>
                         { nodeSet.map(function(node, i){
@@ -58,7 +65,7 @@ export class ActiveFiltersBar extends React.Component {
                                 color={node.color || null}
                             />);
                         }) }
-                        <div className="field-label">{ Schemas.Field.toName(nodeSet[0].data.field, _this.props.schemas) || 'N/A' }</div>
+                        <div className="field-label">{ facetFieldTitle }</div>
                     </div>
                 );
                 
@@ -111,14 +118,7 @@ class RegularCrumb extends React.Component {
             >
                 { node.data.name }
                 <span className="icon-container" onClick={()=>{
-                    Filters.changeFilter(
-                        node.data.field,
-                        node.data.term,
-                        'sets',
-                        this.props.expSetFilters,
-                        null, false, true,
-                        this.props.href
-                    );
+                    Filters.changeFilter( node.data.field, node.data.term, 'sets', this.props.expSetFilters );
                     analytics.event('QuickInfoBar', 'Unset Filter', {
                         'eventLabel' : analytics.eventLabelFromChartNode(node.data),
                         'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)

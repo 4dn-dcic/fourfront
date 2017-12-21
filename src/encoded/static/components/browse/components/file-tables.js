@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
-import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
+import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock, FileEntryBlockPairColumn } from './StackedBlockTable';
 import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
 
 
@@ -48,89 +48,9 @@ export class RawFilesStackedTable extends React.Component {
 
     }
 
-    /**
-     * @deprecated ?
-     * Calculate amount of experiments out of provided experiments which match currently-set filters.
-     * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
-     * NOT (eventually) for /browse/ page where faceting results will be controlled by back-end.
-     */
-    static getPassedExperiments(
-        allExperiments,
-        filters = null, // aka expSetFilters (available in redux store)
-        getIgnoredFiltersMethod = 'single-term',
-        facets = null,  // Required if want to get ignored filters by missing facet(s).
-        useSet = false  // Return as array instead of set.
-    ){
-        if (!Array.isArray(allExperiments) || allExperiments.length === 0){
-            // no experiments
-            if (useSet) return new Set();
-            return [];
-        }
-        // TODO: If filters === null then filters = store.getState().expSetFilters ?
-        if (Array.isArray(allExperiments[0].experiments_in_set)){
-            // We got experiment sets, not experiments. Lets fix that (convert to arr of experiments).
-            allExperiments = _.flatten(_.map(allExperiments, function(es){ return es.experiments_in_set; }), true);
-        }
-        if (typeof filters !== 'object' || !filters || Object.keys(filters).length === 0){
-            if (useSet) return new Set(allExperiments);
-            else return allExperiments;
-        }
-        var ignoredFilters = null;
-        if (getIgnoredFiltersMethod === 'missing-facets') {
-            if (Array.isArray(facets) && facets.length > 0) {
-                //if (typeof facets[0].restrictions === 'undefined'){
-                //    // No restrictions added yet. TODO: Grab & include restrictions object.
-                //    facets = FacetList.adjustedFacets(facets);
-                //}
-                ignoredFilters = Filters.findIgnoredFiltersByMissingFacets(facets, filters);
-            }
-        } else if (getIgnoredFiltersMethod === 'single-term') {
-            // Ignore filters if none in current experiment_set match it so that if coming from
-            // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
-            ignoredFilters = Filters.findIgnoredFiltersByStaticTerms(allExperiments, filters);
-        }
-        if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
-        else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
-    }
-    /*
-    static totalExperimentsCount(experimentArray = null){
-        if (!experimentArray) return null;
-        var experimentsCount = 0;
-        var fileSet = new Set();
-        var j;
-        for (var i = 0; i < experimentArray.length; i++){
-            if (experimentArray[i].files && experimentArray[i].files.length > 0){
-                experimentsCount++; // Exclude empty experiments
-                for (j = 0; j < experimentArray[i].files.length; j++){
-                    if (!fileSet.has(experimentArray[i].files[j]['@id'])){
-                        fileSet.add(experimentArray[i].files[j]['@id']);
-                    }
-                }
-            } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
-                experimentsCount++;
-                for (j = 0; j < experimentArray[i].filesets.length; j++){
-                    for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
-                        if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
-                            fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
-                        }
-                    }
-                }
-            } else {
-                console.error("Couldn't find files for experiment - excluding from total count", experimentArray[i]);
-            }
-        }
-        return {
-            'experiments' : experimentsCount,
-            'files' : fileSet.size
-        };
-    }
-    */
-
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
         'experimentArray'           : PropTypes.array,
-        'passExperiments'           : PropTypes.instanceOf(Set),
-        'expSetFilters'             : PropTypes.object,
         'selectedFiles'             : PropTypes.object,
         'experimentSetAccession'    : PropTypes.string.isRequired,
         'replicateExpsArray'        : PropTypes.arrayOf(PropTypes.shape({
@@ -216,6 +136,7 @@ export class RawFilesStackedTable extends React.Component {
 
         var contentsClassName = 'files';
         var contents = [];
+
         if (Array.isArray(exp.file_pairs)){
             contentsClassName = 'file-pairs';
             contents = contents.concat(exp.file_pairs.map((filePair,j) =>
@@ -229,42 +150,30 @@ export class RawFilesStackedTable extends React.Component {
                 />
             ));
         }
+
         // Add in remaining unpaired files, if any.
         if (Array.isArray(exp.files) && exp.files.length > 0){
-            contents.push(
-                <StackedBlock
-                    key={object.atIdFromObject(exp)}
-                    hideNameOnHover={false}
+            contents = contents.concat(exp.files.map((file, j) =>
+                <FileEntryBlockPairColumn
+                    key={object.atIdFromObject(file) || j}
+                    file={file}
                     columnClass="file-pair"
-                >
-                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
-                        <StackedBlockName/>
-                    : null }
-                    <StackedBlockList title="Files" className="files">
-                        { exp.files.map((file) =>
-                            <FileEntryBlock
-                                key={object.atIdFromObject(file)}
-                                file={file}
-                                hideNameOnHover={false}
-                                experiment={exp}
-                                isSingleItem={exp.files.length + contents.length < 2 ? true : false}
-                            />
-                        )}
-                    </StackedBlockList>
-                </StackedBlock>
-            );
+                    hideNameOnHover={false}
+                    experiment={exp}
+                    isSingleItem={exp.files.length + contents.length < 2 ? true : false}
+                />
+            ));
         }
+
         if (contents.length === 0){
             /* No Files Exist */
             contents.push(
                 <StackedBlock
-                    key={object.atIdFromObject(exp)}
+                    key="single-empty-item"
                     hideNameOnHover={false}
                     columnClass="file-pair"
                 >
-                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
-                        <StackedBlockName/>
-                    : null }
+                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ? <StackedBlockName/> : null }
                     <StackedBlockList title="Files" className="files">
                         <FileEntryBlock
                             file={null}
@@ -286,10 +195,10 @@ export class RawFilesStackedTable extends React.Component {
                 hideNameOnHover={false}
                 columnClass="experiment"
                 label={{
-                    accession : exp.accession,
-                    title : 'Experiment',
-                    subtitle : experimentVisibleName,
-                    subtitleVisible: true
+                    'accession'       : exp.accession,
+                    'title'           : 'Experiment',
+                    'subtitle'        : experimentVisibleName,
+                    'subtitleVisible' : true
                 }}
                 stripe={this.cache.oddExpRow}
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || object.atIdFromObject(exp)}

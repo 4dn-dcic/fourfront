@@ -25,10 +25,7 @@ export let getLimit = function(){ return 25; };
  * @public
  * @static
  */
-export function currentExpSetFilters(){
-    if (!store) store = require('./../../store');
-    return hrefToFilters(store.getState().href);
-}
+export const currentExpSetFilters = contextFiltersToExpSetFilters;
 
 /** If the given term is selected, return the href for the term */
 export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
@@ -80,7 +77,6 @@ export function buildSearchHref(unselectHref, field, term, searchBase){
  * @param {Object}  [expSetFilters]     The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
  * @param {function}[callback]          Callback function to call after updating redux store.
  * @param {boolean} [returnInsteadOfSave=false]  - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
- * @param {boolean} [useAjax=true]      Whether to use AJAX to fetch and save new experiment(-sets) to (props.)context. If true, must also provide href argument.
  * @param {string}  [href]              Current or base href to use for AJAX request if using AJAX to update.
  */
 export function changeFilter(
@@ -90,19 +86,10 @@ export function changeFilter(
     expSetFilters = null,
     callback = null,
     returnInsteadOfSave = false,
-    useAjax=true,
-    href=null
+    href = null
 ){
-    // If no expSetFilters (and maybe href, which is optional)
-    // are supplied, get them from Redux store.
-    if (!expSetFilters){
-        if (!store) store = require('./../../store');
-        var storeState = store.getState();
-        if (!href) {
-            href = storeState.href;
-        }
-        expSetFilters = hrefToFilters(href);
-    }
+    // If no expSetFilters are supplied, grab current ones from Redux store.
+    if (!expSetFilters) expSetFilters = currentExpSetFilters();
 
     // store currently selected filters as a dict of sets
     var tempObj = {};
@@ -129,8 +116,8 @@ export function changeFilter(
     if (returnInsteadOfSave){
         return newObj;
     } else {
-        console.info("Saving new filters:", newObj, "Using AJAX:", useAjax);
-        return saveChangedFilters(newObj, useAjax, href, callback, expSetFilters);
+        console.info("Saving new filters:", newObj);
+        return saveChangedFilters(newObj, href, callback);
     }
 }
 
@@ -144,16 +131,9 @@ export function changeFilter(
  * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
  * @param {function}[callback]      Callback function.
  */
-export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
+export function saveChangedFilters(newExpSetFilters, href=null, callback = null){
     if (!store)   store = require('./../../store');
     if (!Alerts) Alerts = require('../alerts').default;
-    if (!useAjax) {
-    //    store.dispatch({
-    //        type : {'expSetFilters' : newExpSetFilters}
-    //    });
-        if (typeof callback === 'function') setTimeout(callback, 0);
-        return true;
-    }
 
     var originalReduxState = store.getState();
 
@@ -166,73 +146,37 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
 
     var newHref = filtersToHref(newExpSetFilters, href);
 
-    var navigateFxn = (
-        typeof navigate === 'function' ? navigate : null
-    );
-
-    if (navigateFxn){
-        navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
-            if (result && result.total === 0){
-                // No results, unset new filters.
-                Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
-                navigateFxn(originalReduxState.href, { skipRequest : true });
-            } else {
-                // Success. Remove any no result alerts.
-                Alerts.deQueue(Alerts.NoFilterResults);
-            }
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        }, (err) =>{
-            // Fallback callback
-            if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        }/*, { 'expSetFilters' : newExpSetFilters }*/);
-    } else {
-        // DEPRECATED SECTION -- MIGHT NOT WORK.
-        ajax.load(newHref, (newContext) => {
+    navigate(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
+        if (result && result.total === 0){
+            // No results, unset new filters.
+            Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
+            navigate(originalReduxState.href, { skipRequest : true });
+        } else {
+            // Success. Remove any no result alerts.
             Alerts.deQueue(Alerts.NoFilterResults);
-            store.dispatch({
-                type: {
-                    'context'       : newContext,
-                    'href'          : newHref
-                }
-            });
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        }, 'GET', ()=>{
-            // Fallback callback
-            Alerts.queue(Alerts.NoFilterResults);
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        });
-    }
+        }
+        if (typeof callback === 'function') setTimeout(callback, 0);
+    }, (err) =>{
+        // Fallback callback
+        if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
+        if (typeof callback === 'function') setTimeout(callback, 0);
+    });
 
 }
 
 
 export function isTermSelectedAccordingToExpSetFilters(term, field, expSetFilters = null){
-    // If no expSetFilters are supplied, get them from Redux store.
-    if (!expSetFilters){
-        if (!store) store = require('./../../store');
-        var storeState = store.getState();
-        expSetFilters = hrefToFilters(storeState.href);
-    }
-
-    if (typeof expSetFilters[field] !== 'undefined'){
-        if (expSetFilters[field].has && expSetFilters[field].has(term)){
-            return true;
-        }
-    }
+    if (!expSetFilters) expSetFilters = currentExpSetFilters(); // If no expSetFilters are supplied, get them from Redux store.
+    if (typeof expSetFilters[field] !== 'undefined' && typeof expSetFilters[field].has === 'function' && expSetFilters[field].has(term)) return true;
     return false;
-
 }
 
 
 export function unsetAllTermsForField(field, expSetFilters, save = true, href = null){
     var esf = _.clone(expSetFilters);
     delete esf[field];
-    if (save && href){
-        return saveChangedFilters(esf, true, href);
-    } else {
-        return esf;
-    }
+    if (save && href) return saveChangedFilters(esf, href);
+    else return esf;
 }
 
 
@@ -329,7 +273,10 @@ export const NON_FILTER_URL_PARAMS = [
 
 
 /**
+ * @deprecated - Only used for jest unit tests at the moment.
+ * 
  * Parse href to return an expSetFilters object, the opposite of @see filtersToHref.
+ * [HardCoded:] Excludes 'type' & 'experimentset_type' for time being.
  * Used for server-side rendering to set initial selected filters in UI based on request URL.
  *
  * @param {string}   href              A URL or path containing query at end in form of ?...&field.name=term1&field2.name=term2[...]
@@ -338,21 +285,22 @@ export const NON_FILTER_URL_PARAMS = [
  * @returns {Object} Shape of { field : Set([...terms]) }
  */
 export function hrefToFilters(href, contextFilters = null, checkContextFilters = true){
-    if (!navigate.isBrowseHref(href)) return {};
+    if (!navigate.isBrowseHref(href)) return {}; // Still needed?
+
+    if (checkContextFilters && !contextFilters){ // Grab context.filters from Redux store
+        if (!store) store = require('./../../store');
+        var storeState = store.getState();
+        contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
+    }
+
     return _.object(_.map(
         _.filter(
             _.pairs(url.parse(href, true).query),
-            function(queryPair){
+            function(queryPair){ // queryPair == [ <field> : term1|[term1, term2, ...] ]
 
                 if (NON_FILTER_URL_PARAMS.indexOf(queryPair[0]) > -1) return false;
 
                 if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-                
-                if (checkContextFilters && !contextFilters){ // Grab context.filters from Redux store
-                    if (!store) store = require('./../../store');
-                    var storeState = store.getState();
-                    contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
-                }
 
                 if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
                     return true; // See if in context.filters, if is available.
@@ -370,13 +318,34 @@ export function hrefToFilters(href, contextFilters = null, checkContextFilters =
     ));
 }
 
+/**
+ * Maybe have this replace hrefToFilters entirely?
+ */
+export function contextFiltersToExpSetFilters(contextFilters = null){
+    if (!contextFilters){ // Grab context.filters from Redux store if not supplied.
+        if (!store) store = require('./../../store');
+        var storeState = store.getState();
+        contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
+    }
+    if (!Array.isArray(contextFilters)){
+        console.warn('No context filters available or supplied. Fine if this message appears outside of a /search/ or /browse/ page.');
+        return {};
+    }
+    if (contextFilters.length === 0) return {};
+    return _.reduce(contextFilters, function(memo, filterObj){
+        if (filterObj.field === 'type' || filterObj.field === 'experimentset_type') return memo; // continue/skip.
+        if (typeof memo[filterObj.field] === 'undefined'){
+            memo[filterObj.field] = new Set([filterObj.term]);
+        } else {
+            memo[filterObj.field].add(filterObj.term);
+        }
+        return memo;
+    }, {});
+}
+
 
 /** Convert expSetFilters, e.g. as stored in Redux, into a partial URL query: field.name=term1&field2.something=term2[&field3...] */
-export function expSetFiltersToURLQuery(expSetFilters = null){
-    if (!expSetFilters){
-        if (!store) store = require('./../../store');
-        expSetFilters = store.getState().expSetFilters;
-    }
+export function expSetFiltersToURLQuery(expSetFilters){
     return _.pairs(expSetFilters).map(function(filterPair){
         var field = filterPair[0];
         var terms = [...filterPair[1]]; // Set to Array
@@ -386,12 +355,18 @@ export function expSetFiltersToURLQuery(expSetFilters = null){
     }).join('&');
 }
 
-
+/**
+ * Compare two versions of 'expSetFilters' structure to check if they are equal.
+ * Used by ChartDataController.
+ * 
+ * @param {Object} expSetFiltersA - 1st set of filters, object with facet/field as keys and Sets of terms as values.
+ * @param {Object} expSetFiltersB - 2nd set of filters, same as param expSetFiltersA.
+ * @returns {boolean} true if equal.
+ */
 export function compareExpSetFilters(expSetFiltersA, expSetFiltersB){
     if ((expSetFiltersA && !expSetFiltersB) || (!expSetFiltersA && expSetFiltersB)) return false;
     var keysA = _.keys(expSetFiltersA);
-    var keysB = _.keys(expSetFiltersB);
-    if (keysA.length !== keysB.length) return false;
+    if (keysA.length !== _.keys(expSetFiltersB).length) return false;
     for (var i = 0; i < keysA.length; i++){
         if (typeof expSetFiltersB[keysA[i]] === 'undefined') return false;
         if (expSetFiltersA[keysA[i]] instanceof Set && expSetFiltersB[keysA[i]] instanceof Set){
@@ -409,6 +384,7 @@ export function filtersToNodes(expSetFilters = {}, orderedFieldNames = null, fla
     // Convert orderedFieldNames into object/hash for faster lookups.
     var sortObj = null;
     if (Array.isArray(orderedFieldNames)) sortObj = _.invert(_.object(_.pairs(orderedFieldNames)));
+
     return _(expSetFilters).chain()
         .pairs() // fieldPair[0] = field, fieldPair[1] = Set of terms
         .sortBy(function(fieldPair){

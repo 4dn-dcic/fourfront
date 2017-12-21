@@ -397,11 +397,10 @@ export const barPlotCursorActions = [
 
             Filters.saveChangedFilters(
                 newExpSetFilters,
-                true,
                 href,
                 function(){
                     // Scroll to top of browse page container after navigation is complete.
-                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 125);
+                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
                 }
             );
 

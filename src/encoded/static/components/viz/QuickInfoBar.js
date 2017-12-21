@@ -309,6 +309,7 @@ export default class QuickInfoBar extends React.Component {
                         href={this.props.href}
                         showTitle={false}
                         schemas={this.props.schemas}
+                        context={this.props.context}
                     />
                     <div className="graph-icon" onMouseEnter={_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)}>
                         <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />

@@ -4,9 +4,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Panel } from 'react-bootstrap';
-import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout } from './../util';
+import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
@@ -25,15 +26,14 @@ import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, Processed
  * @type {Component}
  * @prop {Object} schemas - state.schemas passed down from app Component.
  * @prop {Object} context - JSON representation of current ExperimentSet item.
- * @prop {Object} expSetFilters - Currently-set expSetFilters from Redux store. Used for FacetList.
  * @prop {Object[]} expIncompleteFacets - Facets to aggregate counts for and display in the form of objects containing at least a title and field property.
  */
 export default class ExperimentSetView extends WorkflowRunTracingView {
 
     static propTypes = {
-        schemas : PropTypes.object,
-        context : PropTypes.object,
-        facets : PropTypes.array
+        'schemas' : PropTypes.object,
+        'context' : PropTypes.object,
+        'facets' : PropTypes.array
     }
 
     static contextTypes = {
@@ -41,49 +41,30 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     static defaultProps = {
-        facets : null
+        'facets' : null
     }
 
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         var state = {
             'selectedFiles': new Set(),
-            'passExperiments' : RawFilesStackedTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
             'mounted' : false
         };
-        if (!this.state) this.state = state;
-        else {
-            _.extend(this.state, state);
-        }
+        if (!this.state) this.state = state; // May inherit from WorkfowRunTracingView
+        else _.extend(this.state, state);
     }
-    
-    /*
-    componentWillReceiveProps(nextProps) {
-
-        // Make sure state is updated upon filtering
-        if(this.props.expSetFilters !== nextProps.expSetFilters || this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
-            this.setState({
-                selectedFiles: new Set(),
-                passExperiments : RawFilesStackedTable.getPassedExperiments(nextProps.context.experiments_in_set, nextProps.expSetFilters, 'single-term')
-            });
-        }
-    }
-    */
 
     getTabViewContents(){
 
         var context = this.props.context;
 
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
-        var expTableColumnHeaders = [
-            { columnClass: 'file-detail', title : 'File Info'}
-        ];
+        var expTableColumnHeaders = [{ 'columnClass' : 'file-detail', 'title' : 'File Info'}];
 
         if (context.experimentset_type === 'replicate') {
-            expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
+            expTableColumnHeaders.unshift({ 'columnClass' : 'file-detail', 'title' : 'File Type'});
         }
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context);
@@ -170,37 +151,25 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
                 <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={context.produced_in_pub} />
 
+                <OverviewHeading context={context} />
+
                 <div className="row">
 
                     { experimentsInSetExist ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
-                        <ReduxExpSetFiltersInterface
-                            experimentSets={context.experiments_in_set}
-                            itemTypes={['Experiment']}
-                            expSetFilters={this.props.expSetFilters}
-                            experimentsOrSets="experiments"
-                            filterOnClientSide
-                            facets={null}
-                            href={this.props.href}
-                            schemas={this.props.schemas}
-                            session={this.props.session}
-                        >
-                            <FacetList
-                                orientation="vertical"
-                                className="with-header-bg"
-                                filterFacetsFxn={FacetList.filterFacetsForExpSetView}
-                                isTermSelected={(term, field, expsOrSets)=>
-                                    Filters.isTermSelectedAccordingToExpSetFilters(term, field, this.props.expSetFilters)
-                                }
-                            />
-                        </ReduxExpSetFiltersInterface>
+                        <FacetList
+                            orientation="vertical"
+                            className="with-header-bg"
+                            filterFacetsFxn={FacetList.filterFacetsForExpSetView}
+                            isTermSelected={(term, field, expsOrSets)=>
+                                Filters.isTermSelectedAccordingToExpSetFilters(term, field, this.props.expSetFilters)
+                            }
+                        />
                     </div>
                     : null }
 
-                    <div className={experimentsInSetExist ? "col-sm-7 col-md-8 col-lg-9" : "col-sm-12"} ref="tabViewContainer">
-                        <layout.WindowResizeUpdateTrigger>
-                            { this.tabbedView() }
-                        </layout.WindowResizeUpdateTrigger>
+                    <div className="col-sm-12" ref="tabViewContainer">
+                        <layout.WindowResizeUpdateTrigger children={ this.tabbedView() } />
                     </div>
 
                 </div>
@@ -216,6 +185,34 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 // Register ExperimentSetView to be the view for these @types.
 globals.content_views.register(ExperimentSetView, 'ExperimentSet');
 globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
+
+
+class OverviewHeading extends React.Component {
+
+    render(){
+        var expSet = this.props.context;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), expSet);
+        var expSetSchema = Schemas.getSchemaForItemType('ExperimentSet');
+
+        var col = 'col-sm-6 col-md-3';
+        console.log('TIPS', tips, expSetSchema);
+        return (
+            <div className="row overview-blocks">
+                <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experimentset_type' fallbackTitle="Set Type" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.biosource.individual.organism' fallbackTitle="Organism" wrapInColumn={col} />
+
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.biosource.biosource_type' fallbackTitle="Biosource Type" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.digestion_enzyme' fallbackTitle="Enzyme" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" wrapInColumn={col} />
+                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" wrapInColumn={col} />
+            </div>
+        );
+    }
+
+}
 
 
 /**

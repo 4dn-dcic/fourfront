@@ -23,18 +23,6 @@ import {
 
 
 
-
-export function compareResultsByID(listA, listB){
-    var listALen = listA.length;
-    if (listALen !== listB.length) return false;
-    for (let i = 0; i < listALen; i++){
-        if (object.atIdFromObject(listA[i]) !== object.atIdFromObject(listB[i])) return false;
-    }
-    return true;
-}
-
-
-
 class ResultRowColumnBlock extends React.Component {
 
     render(){
@@ -697,10 +685,7 @@ class DimensioningContainer extends React.Component {
 
     componentWillReceiveProps(nextProps){
         // Reset results on change in results, total, or href.
-        if (
-            nextProps.href !== this.props.href ||
-            !compareResultsByID(nextProps.results, this.props.results)
-        ){
+        if ( nextProps.href !== this.props.href || !object.itemUtil.compareResultsByID(nextProps.results, this.props.results) ){
             this.setState({
                 'results' : nextProps.results.slice(0),
                 'openDetailPanes' : {},

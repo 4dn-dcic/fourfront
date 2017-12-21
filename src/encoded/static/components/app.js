@@ -207,7 +207,7 @@ export default class App extends React.Component {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.render = this.render.bind(this);
 
-        console.log('APP FILTERS', Filters.hrefToFilters(props.href, (props.context && Array.isArray(props.context.filters) && props.context.filters) || null));
+        console.log('App Filters on Initial Page Load', Filters.currentExpSetFilters((props.context && props.context.filters) || null));
 
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
@@ -236,8 +236,6 @@ export default class App extends React.Component {
         navigate.setNavigateFunction(this.navigate);
         navigate.registerCallbackFunction(Alerts.updateCurrentAlertsTitleMap.bind(this, null));
 
-        console.log("App Initial State: ", session, user_actions);
-
         if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
 
         this.state = {
@@ -250,6 +248,8 @@ export default class App extends React.Component {
             'isSubmitting': false,
             'mounted' : false
         };
+
+        console.log("App Initial State: ", this.state);
     }
 
     // Once the app component is mounted, bind keydowns to handleKey function
@@ -531,10 +531,6 @@ export default class App extends React.Component {
                 if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
                     hrefHash = hrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
-                }
-                if (hrefParts.pathname.indexOf('/browse/') > -1){
-                    var filters = Filters.hrefToFilters(href, null, false);
-                    Filters.saveChangedFilters(filters, false);
                 }
             });
             if (this.refs && this.refs.navigation){

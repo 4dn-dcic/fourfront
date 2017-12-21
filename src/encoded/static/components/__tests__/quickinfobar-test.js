@@ -11,20 +11,20 @@ jest.dontMock('underscore');
 
 
 describe('Testing viz/QuickInfoBar.js', function() {
-    var React, TestUtils, page, context, filters, _, Wrapper, QuickInfoBar, href, expSetFilters;
+    var React, TestUtils, page, context, Filters, _, Wrapper, QuickInfoBar, href, expSetFilters;
 
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
+        Filters = require('./../util/experiments-filters');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         context = require('../testdata/browse/context');
         QuickInfoBar = require('./../viz/QuickInfoBar').default;
-        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
-        expSetFilters = {
-            "experiments_in_set.biosample.biosource.individual.organism.name" : new Set(["mouse"]),
-            "experiments_in_set.biosample.biosource.biosource_type" : new Set(["immortalized cell line"])
-        };
+        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line";
+        
+        // N.B. 'context.filters' in our case is incorrect, and context itself lacks the href defined above. TODO: Change this (use another testData context?)
+        expSetFilters = Filters.hrefToFilters(href, context.filters);
 
         page = TestUtils.renderIntoDocument(
             <QuickInfoBar href={href} expSetFilters={expSetFilters} />

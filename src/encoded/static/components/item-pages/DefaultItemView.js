@@ -205,21 +205,37 @@ export class OverViewBodyItem extends React.Component {
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
+
+        // Preprocess / uniqify:
+        if (Array.isArray(items)) items = _.flatten(items);
+        if (Array.isArray(items) && _.every(items, function(item){ return typeof item === 'string' || typeof item === 'number'; } )) {
+            items = _.uniq(items);
+        } else if (Array.isArray(items) && items.length > 1 && items[0] && items[0].display_title && object.atIdFromObject(items[0])) {
+            items = _.uniq(items, false, function(b){ return object.atIdFromObject(b); });
+        }
+
+        // Null value
+        if (items === null || typeof items === 'undefined') {
+            return null;
+        } else if (Array.isArray(items) && items.length === 0){
+            return null;
+        } else if (Array.isArray(items) && _.every(items, function(item){ return item === null || typeof item === 'undefined'; })){
+            return null;
+        }
+
         // Item List
         if (Array.isArray(items) && items.length > 1 && items[0].display_title && object.atIdFromObject(items[0])){
-            items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b,i){
+            items = _.map(items, function(b,i){
                 return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
             });
         } else if (Array.isArray(items) && items.length === 1 && items[0].display_title && object.atIdFromObject(items[0])) {
             return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
-        } else if (Array.isArray(items) && items.length > 1){
+        } else if (Array.isArray(items) && items.length > 1){            
             items = _.map(items, function(b,i){
-                return React.createElement(listItemElement, _.extend({ 'key' : i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
+                return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement)  );
             });
         } else if (Array.isArray(items) && items.length === 1){
             items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
-        } else if (Array.isArray(items) && items.length === 0){
-            return null;
         } else if (!Array.isArray(items)){
             return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, 'div');
         }
@@ -227,16 +243,18 @@ export class OverViewBodyItem extends React.Component {
     }
 
     static defaultProps = {
-        'titleRenderFxn' : OverViewBodyItem.titleRenderPresets.default,
-        'hideIfNoValue' : false,
-        'wrapInColumn' : false,
-        'addDescriptionTipForLinkTos' : true,
-        'listWrapperElement' : 'ol',
-        'listWrapperElementProps' : null,
-        'listItemElement' : 'li',
-        'listItemElementProps' : null,
-        'columnExtraClassName' : null,
-        'singleItemClassName' : null
+        'titleRenderFxn'                : OverViewBodyItem.titleRenderPresets.default,
+        'hideIfNoValue'                 : false,
+        'wrapInColumn'                  : false,
+        'addDescriptionTipForLinkTos'   : true,
+        'listWrapperElement'            : 'ol',
+        'listWrapperElementProps'       : null,
+        'listItemElement'               : 'li',
+        'listItemElementProps'          : null,
+        'columnExtraClassName'          : null,
+        'singleItemClassName'           : null,
+        'fallbackTitle'                 : null,
+        'propertyForLabel'              : null
     }
 
     /** Feeds params + props into static function */
@@ -263,7 +281,6 @@ export class OverViewBodyItem extends React.Component {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
-
         var resultPropertyValue = this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
 
         if (this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){

@@ -528,20 +528,6 @@ export class FacetList extends React.Component {
     /**
      * @deprecated
      *
-     * Compare two arrays of experiments to check if contain same experiments, by their ID.
-     * @returns {boolean} true if equal.
-     */
-    static compareExperimentLists(exps1, exps2){
-        if (exps1.length != exps2.length) return false;
-        for (var i = 0; i < exps1.length; i++){
-            if (exps1[i]['@id'] != exps2[i]['@id']) return false;
-        }
-        return true;
-    }
-
-    /**
-     * @deprecated
-     *
      * @returns {boolean} True if filled.
      */
     static checkFilledFacets(facets){
@@ -687,14 +673,10 @@ export class FacetList extends React.Component {
     }
 
     componentWillReceiveProps(nextProps){
-        if (
-            !_.isEqual(nextProps.facets, this.props.facets)
-        ){
+        if (!this.props.debug) return;
 
-            if (nextProps.facets && this.props.facets !== nextProps.facets){
-                if (this.props.debug) console.log('FacetList props.facets updated.');
-            }
-
+        if (!_.isEqual(nextProps.facets, this.props.facets)){
+            if (nextProps.facets && this.props.facets !== nextProps.facets) console.log('FacetList props.facets updated.');
         }
     }
 
@@ -749,7 +731,7 @@ export class FacetList extends React.Component {
         var exptypeDropdown;
         var facets = this.props.facets;
         if (!facets || !facets.length) {
-            if (!this.state.facetsLoaded && (!Array.isArray(this.props.facets) || this.props.facets.length === 0)) {
+            if (!this.state.facetsLoaded && (!Array.isArray(facets) || facets.length === 0)) {
                 return (
                     <div className="text-center" style={{ padding : "162px 0", fontSize : '26px', color : "#aaa" }}>
                         <i className="icon icon-spin icon-circle-o-notch"></i>

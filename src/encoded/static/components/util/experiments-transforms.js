@@ -277,6 +277,8 @@ export function experimentSetsFromFile(file){
 
 
 
+
+
 /**** **** **** **** **** **** **** **** ****
  **** Processed Files -related Functions ****
  **** **** **** **** **** **** **** **** ****/
@@ -385,6 +387,9 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
         }
     );
 }
+
+
+
 
 /*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *
  * Partial Funcs (probably don't use these unless composing a function) *
@@ -609,27 +614,6 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
 
         return exp;
     });
-}
-
-/**
- * @deprecated
- */
-export function getProcessedFilesFromExperiment(experiment){
-    var r = [];
-    if (Array.isArray(experiment.processed_files)){
-        r = experiment.processed_files.slice(0);
-    }
-    if (Array.isArray(experiment.files) && experiment.files.length > 0){
-        _.forEach(ensureArray(experiment.files), function(f){
-            if (
-                (typeof f.file_classification === 'string' && f.file_classification.slice(0,9).toLowerCase() === 'processed') ||
-                (Array.isArray(f['@type']) && f['@type'][0] === 'FileProcessed')
-            ){
-                r.push(f);
-            }
-        });
-    }
-    return _.uniq(r, false, function(f){ return f.link_id; });
 }
 
 export function flattenFileSetsToFilesIfNoFilesOnExperiment(experiment){

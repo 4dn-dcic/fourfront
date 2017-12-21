@@ -113,7 +113,7 @@ class OverViewBody extends React.Component {
                     </div>
 
                     { this.cellLineDetails(commonProps) }
-                    { result.modifications || result.url || result.biosource_vendor ?
+                    { (Array.isArray(result.modifications) && result.modifications.length > 0) || result.url || result.biosource_vendor ?
                         <h4 className="tab-section-title">
                             <span>Other</span>
                         </h4>

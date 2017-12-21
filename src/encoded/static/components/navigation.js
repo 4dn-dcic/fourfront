@@ -244,7 +244,7 @@ export default class Navigation extends React.Component {
             navClass += " scrolled-at-top";
         }
 
-        var expSetFilters = Filters.hrefToFilters(this.props.href, (this.props.context && this.props.context.filters) || null, true);
+        var expSetFilters = Filters.currentExpSetFilters((this.props.context && this.props.context.filters) || null);
 
         return (
             <div className={navClass}>
@@ -277,7 +277,7 @@ export default class Navigation extends React.Component {
                         <SearchBar href={this.props.href} />
                         </Navbar.Collapse>
                     </Navbar>
-                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={expSetFilters} schemas={this.props.schemas} />
+                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={expSetFilters} schemas={this.props.schemas} context={this.props.context} />
                 </div>
             </div>
         );

@@ -294,6 +294,10 @@ export class TooltipInfoIconContainerAuto extends React.Component {
 }
 
 
+
+/**
+ * Functions which are specific to Items [structure] in the 4DN/Encoded database. Some are just aliased from functions above for now for backwards compatibility.
+ */
 export const itemUtil = {
 
     // Aliases
@@ -301,6 +305,8 @@ export const itemUtil = {
     isAnItem : isAnItem,
     generateLink : linkFromItem,
     atId : atIdFromObject,
+
+
 
     // Funcs
 
@@ -349,5 +355,22 @@ export const itemUtil = {
         if (checkContains && displayTitle.indexOf(context.accession) > -1) return true;
         return false;
     },
+
+    /**
+     * Compare two arrays of Items to check if they contain the same Items, by their @id.
+     * Does _NOT_ compare the fields within each Item (e.g. to detect changed or more 'complete').
+     * 
+     * @param {Object[]} listA - 1st list of Items to compare.
+     * @param {Object[]} listB - 2nd list of Items to compare.
+     * @returns {boolean} true if equal.
+     */
+    compareResultsByID : function(listA, listB){
+        var listALen = listA.length;
+        if (listALen !== listB.length) return false;
+        for (let i = 0; i < listALen; i++){
+            if (atIdFromObject(listA[i]) !== atIdFromObject(listB[i])) return false;
+        }
+        return true;
+    }
 
 };

@@ -25,6 +25,7 @@ var vizUtil = require('./utilities');
 var refs = {
     store       : null,
     href        : null, // Cached from redux store updates // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+    contextFilters : null,
     requestURLBase : null,//'/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
     updateStats : null, // Function to update stats @ top of page.
     fieldsToFetch : [ // What fields we need from /browse/... for this chart.
@@ -51,8 +52,7 @@ var refs = {
         'experiments_in_set.digestion_enzyme.name',
         'award.project',
         'lab.title'
-    ],
-    expSetFilters : null,
+    ]
 };
 
 /**
@@ -255,11 +255,8 @@ class Provider extends React.Component {
 
     constructor(props){
         super(props);
-        if (typeof props.id === 'string') {
-            this.id = props.id;
-        } else {
-            this.id = object.randomId();
-        }
+        if (typeof props.id === 'string') this.id = props.id;
+        else this.id = object.randomId();
     }
 
     /**
@@ -304,7 +301,8 @@ class Provider extends React.Component {
 
         childChartProps.experiment_sets = state.experiment_sets;
         childChartProps.filtered_experiment_sets = state.filtered_experiment_sets;
-        childChartProps.expSetFilters = refs.expSetFilters;
+        childChartProps.expSetFilters = Filters.contextFiltersToExpSetFilters();
+        childChartProps.providerId = this.id;
 
         return React.cloneElement(this.props.children, childChartProps);
     }
@@ -335,13 +333,13 @@ export const ChartDataController = {
         requestURLBase = null,
         updateStats = null,
         callback = null,
-        resync = false,
-        href = null
+        resync = false
     ){
-        refs.href = href;
-        if (!refs.store) {
-            refs.store = require('./../../store');
-        }
+        if (!refs.store) refs.store = require('./../../store');
+
+        var initStoreState = refs.store.getState();
+        refs.href = initStoreState.href;
+        refs.contextFilters = (initStoreState.context && initStoreState.context.filters) || null;
         if (typeof requestURLBase === 'string'){
             refs.requestURLBase = requestURLBase;
         }
@@ -356,15 +354,24 @@ export const ChartDataController = {
         // Subscribe to Redux store updates to listen for changed expSetFilters.
         reduxSubscription = refs.store.subscribe(function(){
             var prevHref = refs.href;
-            var prevExpSetFilters = Filters.hrefToFilters(prevHref); //refs.expSetFilters;
             var reduxStoreState = refs.store.getState();
             refs.href = reduxStoreState.href;
-            refs.expSetFilters = Filters.hrefToFilters(refs.href);
+            if (refs.href === prevHref) return; // Exit.
+            var prevContextFilters = refs.contextFilters;
+            var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters);
+
+            refs.href = reduxStoreState.href;
+            refs.contextFilters = (reduxStoreState.context && reduxStoreState.context.filters) || null;
+
+            var nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters);
 
             // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
-            if (!Filters.compareExpSetFilters(refs.expSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href))){
+
+            var didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href));
+
+            if (didFiltersChange){
                 ChartDataController.handleUpdatedFilters(
-                    refs.expSetFilters,
+                    nextExpSetFilters,
                     notifyUpdateCallbacks,
                     { 'searchQuery' : Filters.searchQueryStringFromHref(refs.href) }
                 );
@@ -595,6 +602,8 @@ export const ChartDataController = {
     /**
      * Called internally by setState to update stats in top left corner of page, if updateState param was passed in during initialization.
      * 
+     * TODO: Get rid of this, instead, have this be done in QuickInfoBar itself and wrap QuickInfoBar in a ChartDataController.Provider.
+     * 
      * @static
      * @ignore
      * @returns {void} Nothing
@@ -665,12 +674,9 @@ export const ChartDataController = {
             reduxStoreState = refs.store.getState();
         }
 
-        // Set refs.expSetFilters if is null (e.g. if called from initialize() and not triggered Redux store filter change).
-        if (refs.expSetFilters === null){
-            refs.expSetFilters = Filters.hrefToFilters(reduxStoreState.href);
-        }
+        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
 
-        var filtersSet = (_.keys(refs.expSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
+        var filtersSet = (_.keys(currentExpSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
         var experiment_sets = null,
             filtered_experiment_sets = null;
 
@@ -684,7 +690,7 @@ export const ChartDataController = {
 
         var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
         var filteredExpsHref = ChartDataController.getFilteredContextHref(
-            refs.expSetFilters, reduxStoreState.href, opts
+            currentExpSetFilters, reduxStoreState.href, opts
         ) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart();
 
         notifyLoadStartCallbacks();
@@ -760,7 +766,6 @@ export const ChartDataController = {
      */
     fetchAndSetFilteredExperimentSets : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
-        console.log('TESTING URL', ChartDataController.getFilteredContextHref(null, null, opts));
         ajax.load(
             ChartDataController.getFilteredContextHref(null, null, opts) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
@@ -806,9 +811,8 @@ export const ChartDataController = {
         if (!expSetFilters || !href){
             var storeState = refs.store.getState();
             if (!href)          href = storeState.href;
-            if (!expSetFilters) expSetFilters = Filters.hrefToFilters(href);
+            if (!expSetFilters) expSetFilters = Filters.contextFiltersToExpSetFilters((storeState.context && storeState.context.filters) || null);
         }
-        console.log('TESTING URL2', href, expSetFilters);
         // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
         var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(href);
         return Filters.filtersToHref(expSetFilters, href, 0, 'experiments_in_set.accession', false, '/browse/') + (searchQuery ? '&q=' + searchQuery : '');

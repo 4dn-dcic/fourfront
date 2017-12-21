@@ -163,8 +163,7 @@ export function registerPageView(href = null, context = {}){
         if (Array.isArray(context['@graph'])){ // We have a results page of some kind. Likely, browse, search, or collection.
             // If browse page, get current filters and add to pageview event for 'dimension1'.
             opts[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
-                origHref,
-                (context && context.filters) || null
+                (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null
             );
             if (context['@graph'].length > 0){
                 // We have some results, lets impression them as product list views.
@@ -272,18 +271,12 @@ export function eventLabelFromChartNodes(nodes){
 /**
  * Converts expSetFilters object or href with query (as string) to stringified JSON representation.
  *
- * @export
- * @param {Object.<Set>|string} filters - expSetFilters object or href string. 
- * @param {any} [contextFilters=null] - Filters potentially set on a /browse/-type page, to use when filters param is an href.
- * @returns {string} Stringied JSON.
+ * @param {Object} expSetFilters - expSetFilters object.
+ * @returns {string} Stringified JSON to be saved to analytics.
  */
-export function getStringifiedCurrentFilters(filters, contextFilters = null){
-    if (typeof filters === 'string'){
-        filters = Filters.hrefToFilters(filters, contextFilters);
-    } else if (typeof filters === 'undefined' || !filters){ // Allow filters to be blank.
-        filters = Filters.currentExpSetFilters();
-    }
-    return JSON.stringify(filters, _.keys(filters).sort());
+export function getStringifiedCurrentFilters(expSetFilters = null){
+    if (typeof expSetFilters === 'undefined' || !expSetFilters) expSetFilters = Filters.currentExpSetFilters(); // Allow to be blank
+    return JSON.stringify(expSetFilters, _.keys(expSetFilters).sort());
 }
 
 
@@ -367,8 +360,7 @@ function impressionListOfItems(itemList, origHref = null, listName = null, conte
     return itemList.map(function(expSet, i){
         var pObj = createProductObjectFromItem(expSet);
         pObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
-            origHref || {},
-            (context && context.filters) || null
+            (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null
         );
         if (typeof listName === 'string'){
             pObj.list = listName;

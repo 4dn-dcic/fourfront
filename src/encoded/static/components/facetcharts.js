@@ -91,8 +91,7 @@ export class FacetCharts extends React.Component {
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     setTimeout(() => this.setState(newState), 100);
                 },
-                60 * 1000, // 1min auto-refresh,
-                this.props.href // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+                60 * 1000, // 1min auto-refresh
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');
