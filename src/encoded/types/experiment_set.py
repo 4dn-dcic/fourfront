@@ -129,7 +129,7 @@ class ExperimentSet(Item):
                 "processed_files.file_classification",
                 "processed_files.file_type_detailed",
                 "processed_files.status",
-                "processed_files.md5sum"
+                "processed_files.md5sum",
                 #"processed_files.@type",
 
                 "experiments_in_set.processed_files.href",
