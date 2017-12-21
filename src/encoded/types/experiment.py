@@ -8,7 +8,8 @@ from snovault import (
 )
 from .base import (
     Item,
-    paths_filtered_by_status
+    paths_filtered_by_status,
+    get_item_if_you_can
 )
 
 
@@ -79,28 +80,54 @@ class Experiment(Item):
         mapid = mapid + delim + ''.join(experiment_type.split())
         return mapid + delim + str(num)
 
-    def find_current_sop_map(self, experiment_type):
+    def has_bad_status(self, status):
+        bad_statuses = ["revoked", "deleted", "obsolete", "replaced"]
+        return status in bad_statuses
+
+    def find_current_sop_map(self, experiment_type, sop_coll=None):
         maps = []
         suffnum = 1
         mapid = self.generate_mapid(experiment_type, suffnum)
-        sop_coll = self.registry['collections']['SopMap']
         if sop_coll is not None:
             while(True):
                 m = sop_coll.get(mapid)
                 if not m:
                     break
-                maps.append(m)
+                if not self.has_bad_status(m.properties.get('status')):
+                    maps.append(m)
                 suffnum += 1
                 mapid = self.generate_mapid(experiment_type, suffnum)
 
         if len(maps) > 0:
-            return maps[-1]
+            sopmap = maps[-1]
+            try:
+                status = sopmap.properties.get('status')
+                if not self.has_bad_status(status):
+                    return sopmap
+            except AttributeError:
+                pass
         return None
 
     def _update(self, properties, sheets=None):
-        # if the sop_mapping field is not present see if it should be
+        sop_coll = None
+        if 'sop_mapping' in properties.keys():
+            # check if the SopMap has bad Status
+            sop_coll = self.registry['collections']['SopMap']
+            currmap = properties['sop_mapping'].get('sopmap')
+            if currmap:
+                try:
+                    if self.has_bad_status(sop_coll.get(currmap)['status']):
+                        # delete mapping from properties
+                        del properties['sop_mapping']
+                except AttributeError:
+                    # want to do some logging
+                    print("CHECK STATUS OF SOP MAP")
+
         if 'sop_mapping' not in properties.keys():
-            sopmap = self.find_current_sop_map(properties['experiment_type'])
+            if sop_coll is None:
+                sop_coll = self.registry['collections']['SopMap']
+            # if sop_mapping field not present see if it should be
+            sopmap = self.find_current_sop_map(properties['experiment_type'], sop_coll)
             properties['sop_mapping'] = {}
             if sopmap is not None:
                 sop_mapping = str(sopmap.uuid)
@@ -108,6 +135,7 @@ class Experiment(Item):
                 properties['sop_mapping']['has_sop'] = "Yes"
             else:
                 properties['sop_mapping']['has_sop'] = "No"
+
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
 
