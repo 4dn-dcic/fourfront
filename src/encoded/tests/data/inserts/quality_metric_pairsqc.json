@@ -3,7 +3,14 @@
         "uuid": "131106bc-8535-4448-903e-854abbbbbbbb",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
-        "Cis-to-trans Ratio": 50,
+        "Total reads": 651962,
+        "Short cis reads (<20kb)": 221017,
+        "Cis reads (>20kb)": 276411,
+        "Trans reads": 154534,
+        "Cis/Trans ratio": 64.141,
+        "% Long-range intrachromosomal reads": 42.397,
+        "convergence": "Good",
+        "slope": -0.95,
         "overall_quality_status": "PASS"
     }
 ]

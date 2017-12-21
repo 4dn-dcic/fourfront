@@ -1,0 +1,11 @@
+[
+    {
+        "uuid": "28cba4d2-d068-4945-a812-37c04bddb538",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "Total aligned": 6790791,
+        "Number of removed duplicates": 45218,
+        "Proportion of removed duplicates": 0.0067,
+        "overall_quality_status": "PASS"
+    }
+]

@@ -17,12 +17,45 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "quality_metric.json#/properties" }
-   ],
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
         },
-        "Cis-to-trans Ratio": {
+        "Total reads": {
+            "type": "number",
+            "description": "PairsQC Summary metric"
+        },
+        "Short cis reads (<20kb)": {
+            "type": "number",
+            "description": "PairsQC Summary metric"
+        },
+        "Cis reads (>20kb)": {
+            "type": "number",
+            "description": "PairsQC Summary metric"
+        },
+        "Trans reads": {
+            "type": "number",
+            "description": "PairsQC Summary metric"
+        },
+        "Cis/Trans ratio": {
+            "type": "number",
+            "description": "PairsQC Summary metric"
+        },
+        "% Long-range intrachromosomal reads": {
+            "type": "number",
+            "description": "PairsQC Summary metric"
+        },
+        "convergence": {
+            "type": "string",
+            "enum": [
+                "Very Good",
+                "Good",
+                "Not converged"
+            ],
+            "description": "PairsQC Summary metric"
+        },
+        "slope": {
             "type": "number",
             "description": "PairsQC Summary metric"
         }

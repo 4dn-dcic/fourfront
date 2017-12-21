@@ -158,21 +158,5 @@
         "title":"pairsamtools",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab"
-    },
-    {
-        "uuid":"15731f58-868f-44ab-b4ed-77b82ecd032b",
-        "name":"pairsqc",
-        "software_type":["quality metric generator"],
-        "title":"pairsqc",
-        "award": "1U01CA200059-01",
-        "lab": "4dn-dcic-lab"
-    },
-    {
-        "uuid": "42adeb1b-c46c-4ba8-b191-56036ddcd544",
-        "award": "1U01CA200059-01",
-        "lab": "4dn-dcic-lab",
-        "name": "bwa",
-        "software_type": ["aligner"],
-        "version": "0.7.17"
     }
 ]

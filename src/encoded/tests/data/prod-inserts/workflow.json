@@ -580,6 +580,132 @@
     ]
 },
 {
+    "title": "PairsQC",
+    "accession": "4DNWF36CF3A1",
+    "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/pairsqc-0-11-4/0",
+    "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "cwl_main_filename" : "pairsqc-single.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsqc-single",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "arguments": [
+        {
+            "workflow_argument_name": "input_pairs",
+            "argument_format": "pairs",
+            "argument_type": "Input file"
+        },
+        {
+            "workflow_argument_name": "chromsizes",
+            "argument_format": "chromsizes",
+            "argument_type": "Input file"
+        },
+        {
+            "workflow_argument_name": "enzyme",
+            "argument_type": "parameter"
+        },
+        {
+            "workflow_argument_name": "sample_name",
+            "argument_type": "parameter"
+        },
+        {
+            "workflow_argument_name": "report",
+            "argument_type": "Output QC file"
+        }
+    ],
+    "name": "pairsqc-single",
+    "workflow_type": "Data QC",
+    "workflow_diagram": "",
+    "description": "PairsQC quality control step for pairs files",
+    "data_types": ["Hi-C","Capture Hi-C"],
+    "category": "QC",
+    "steps": [
+        {
+            "inputs":[
+                {
+                    "name":"input_pairs",
+                    "source":[
+                        {
+                            "name":"input_pairs",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_format":"pairs",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"chromsizes",
+                    "source":[
+                        {
+                            "name":"chromsizes",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_format":"chromsizes",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"enzyme",
+                    "source":[
+                        {
+                            "name":"enzyme",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Parameter",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"sample_name",
+                    "source":[
+                        {
+                            "name":"sample_name",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Parameter",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"report",
+                    "target":[
+                        {
+                            "name":"report",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output QC file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"PairsQC",
+            "meta":{
+                "description":"PairsQC QC for pairs files",
+                "software_used":"/software/15731f58-868f-44ab-b4ed-77b82ecd032b/",
+                "analysis_step_types":[
+                    "QC calculation"
+                ]
+            }
+        }
+    ]
+},
+{
     "title": "ValidateFiles",
     "accession": "4DNWF6DUSPTF",
     "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7",
@@ -3400,6 +3526,141 @@
     "app_name" : "bwa-mem",
     "app_version" : "0.2.0",
     "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+    "description": "Creating a lossless alignment bam file from a pair of fastq files"
+},
+{
+    "title": "Alignment for Hi-C using bwa-mem",
+    "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
+    "accession": "4DNWF84NFOQP",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "name": "bwa-mem",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "cwl_pointer": "",
+    "steps": [
+        {
+            "inputs": [
+                {
+                    "name": "fastq1",
+                    "source": [
+                        {
+                            "name": "fastq1",
+                            "type": "Workflow Input File"
+                        }
+                    ],
+                    "meta": {
+                        "description": "",
+                        "argument_type": "Input file",
+                        "argument_format": "fastq",
+                        "argument_cardinality": "1"
+                    }
+                },
+                {
+                    "name": "fastq2",
+                    "source": [
+                        {
+                            "name": "fastq2",
+                            "type": "Workflow Input File"
+                        }
+                    ],
+                    "meta": {
+                        "description": "",
+                        "argument_type": "Input file",
+                        "argument_format": "fastq",
+                        "argument_cardinality": "1"
+                    }
+                },
+                {
+                    "name": "bwa_index",
+                    "source": [
+                        {
+                            "name": "bwa_index",
+                            "type": "Workflow Input File"
+                        }
+                    ],
+                    "meta": {
+                        "description": "",
+                        "argument_type": "Input file",
+                        "argument_format": "bwaIndex",
+                        "argument_cardinality": "1"
+                    }
+                },
+                {
+                    "name": "nThreads",
+                    "source": [
+                        {
+                            "name": "nThreads",
+                            "type": "Workflow Parameter"
+                        }
+                    ],
+                    "meta": {
+                        "argument_type": "parameter",
+                        "argument_cardinality": "1"
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "out_bam",
+                    "target": [
+                        {
+                            "name": "out_bam",
+                            "type": "Workflow Output File"
+                        }
+                    ],
+                    "meta": {
+                        "argument_type": "Output processed file",
+                        "argument_format": "bam",
+                        "argument_cardinality": "1"
+                    }
+                }
+            ],
+            "name": "bwa-mem",
+            "meta": {
+                "software_used": "/software/42adeb1b-c46c-4ba8-b191-56036ddcd544/",
+                "analysis_step_types": [
+                    "alignment"
+                ]
+            }
+        }
+    ],
+    "arguments": [
+        {
+            "workflow_argument_name": "fastq1",
+            "argument_type": "Input file",
+            "argument_format": "fastq",
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "fastq2",
+            "argument_type": "Input file",
+            "argument_format": "fastq",
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "bwa_index",
+            "argument_type": "Input file",
+            "argument_format": "bwaIndex",
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "nThreads",
+            "argument_type": "parameter"
+        },
+        {
+            "workflow_argument_name": "out_bam",
+            "argument_type": "Output processed file",
+            "argument_format": "bam"
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "alignment",
+    "cwl_main_filename" : "bwa-mem.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "bwa-mem",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
     "description": "Creating a lossless alignment bam file from a pair of fastq files"
 },
 {
