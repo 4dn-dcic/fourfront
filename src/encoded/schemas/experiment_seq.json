@@ -36,6 +36,8 @@
             "enum": [
             "CHIP-seq",
             "RNA-seq",
+            "NAD-seq",
+            "SPRITE",
             "GAM"
           ]
         },
