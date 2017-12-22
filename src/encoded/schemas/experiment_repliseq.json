@@ -34,7 +34,8 @@
         },
         "experiment_type": {
             "enum": [
-            "Repli-seq"
+            "Repli-seq",
+            "single cell Repli-seq"
           ]
         },
         "dna_label": {
