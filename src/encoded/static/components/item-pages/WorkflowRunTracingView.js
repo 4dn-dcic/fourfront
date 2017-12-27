@@ -226,7 +226,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             iconClass += 'times';
             tooltip = "Graph currently not available for this file. Please check back later.";
         } else {
-            iconClass += 'code-fork';
+            iconClass += 'sitemap';
         }
         var parts = url.parse(props.href);
         var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;

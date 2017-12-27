@@ -216,7 +216,7 @@ export class IndividualItemTitle extends React.Component {
 
     toggleIcon(){
         if (!this.moreInfoExists()) return null;
-        return [<i className={"icon clickable icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} onClick={this.toggle} />, <span>&nbsp;</span>];
+        return <i className={"icon clickable icon-caret-right" + (this.state.open ? ' icon-rotate-90' : '')} onClick={this.toggle} />;
     }
 
     moreInfoExists(){
@@ -260,8 +260,9 @@ export class IndividualItemTitle extends React.Component {
         }
 
         return (
-            <div className="individual-organism">{ this.toggleIcon() } { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a>
+            <div className="individual-organism">
+                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
+                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a> { this.toggleIcon() }
                 { this.moreInfoExists() ? <Collapse in={this.state.open}>{ this.moreInfoPanel() }</Collapse> : null }
             </div>
         );

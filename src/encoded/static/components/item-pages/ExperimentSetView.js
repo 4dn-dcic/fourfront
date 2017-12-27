@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Panel } from 'react-bootstrap';
+import { Panel, Collapse } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
@@ -155,19 +155,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
                 <div className="row">
 
-                    { experimentsInSetExist ?
-                    <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList
-                            orientation="vertical"
-                            className="with-header-bg"
-                            filterFacetsFxn={FacetList.filterFacetsForExpSetView}
-                            isTermSelected={(term, field, expsOrSets)=>
-                                Filters.isTermSelectedAccordingToExpSetFilters(term, field, this.props.expSetFilters)
-                            }
-                        />
-                    </div>
-                    : null }
-
                     <div className="col-sm-12" ref="tabViewContainer">
                         <layout.WindowResizeUpdateTrigger children={ this.tabbedView() } />
                     </div>
@@ -189,25 +176,55 @@ globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
 class OverviewHeading extends React.Component {
 
+    static defaultProps = {
+        'className'     : 'with-background mb-2 mt-1',
+        'defaultOpen'   : true,
+        'headingTitleElement' : 'h4',
+        'headingTitle'  : 'Properties'
+    }
+
+    constructor(props){
+        super(props);
+        this.toggle = _.throttle(function(){ this.setState({ 'open' : !this.state.open }); }.bind(this), 500);
+        this.state = { 'open' : props.defaultOpen };
+    }
+
+    renderTitle(){
+        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-caret-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
+    }
+
     render(){
         var expSet = this.props.context;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), expSet);
         var expSetSchema = Schemas.getSchemaForItemType('ExperimentSet');
 
-        var col = 'col-sm-6 col-md-3';
-        console.log('TIPS', tips, expSetSchema);
-        return (
-            <div className="row overview-blocks">
-                <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experimentset_type' fallbackTitle="Set Type" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.biosource.individual.organism' fallbackTitle="Organism" wrapInColumn={col} />
+        var commonProps = {
+            result : expSet,
+            tips : tips,
+            wrapInColumn : 'col-sm-6 col-md-3',
+        };
 
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.biosource.biosource_type' fallbackTitle="Biosource Type" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.digestion_enzyme' fallbackTitle="Enzyme" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" wrapInColumn={col} />
-                <OverViewBodyItem result={expSet} tips={tips} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" wrapInColumn={col} />
+        return (
+            <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
+                { this.props.headingTitleElement ? React.createElement(this.props.headingTitleElement, { 'className' : 'tab-section-title clickable with-accent', 'onClick' : this.toggle }, this.renderTitle()) : null }
+                <Collapse in={this.state.open}>
+                    <div className="inner">
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <div className="row overview-blocks">
+                            {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
+
+                            <OverViewBodyItem {...commonProps} property='experimentset_type' fallbackTitle="Set Type" />
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.individual.organism' fallbackTitle="Organism" />
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.biosource_type' fallbackTitle="Biosource Type" />
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" />
+
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" />
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.digestion_enzyme' fallbackTitle="Enzyme" />
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" />
+                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" />
+                        </div>
+                    </div>
+                </Collapse>
             </div>
         );
     }

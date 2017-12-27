@@ -971,6 +971,97 @@ $download-button-width : 100px;
 }
 
 .item-page-container {
+
+	.overview-blocks-header {
+		&.with-background {
+			background: #fbfbfb;
+			padding-left: 16px;
+			padding-right: 16px;
+			padding-bottom: 2px;
+			border: 1px solid #f4f4f4;
+			transition: background-color .5s, border-radius .5s, box-shadow .5s;
+			
+			> .inner > .overview-blocks {
+				padding-bottom: 10px;
+			}
+			&.is-closed {
+				background-color: #f4f4f4;
+				border-color: #eee;
+				border-radius: 3px;
+				transition: border-color .5s, background-color .5s, border-radius .5s, box-shadow .5s;
+				box-shadow: 0 4px 8px -4px rgba(0,0,0,0.5);
+			}
+		}
+		> h4.tab-section-title:first-child {
+			padding-top: 14px;
+			padding-bottom: 13px;
+			font-weight: 500;
+			user-select: none;
+		}
+		
+		> h3.tab-section-title:first-child {
+			padding-top: 19px;
+		}
+		> h3.tab-section-title:first-child, > h4.tab-section-title:first-child {
+
+			&.with-accent {
+
+				padding-left: 17px;
+				padding-right: 17px;
+				margin-left: -17px;
+				margin-right: -17px;
+				margin-top: -1px; // Account for border
+				margin-bottom: -3px;
+				padding-top: 13px;
+				padding-bottom: 14px;
+				background-color: #22656d;
+				color: #fff;
+				border-radius: 3px;
+				position: relative;
+				z-index: 2;
+
+			}
+
+
+			> span {
+				i.icon-caret-right {
+					opacity: 0.66;
+					transition: transform .5s, opacity .25s;
+					padding-left: 3px;
+					margin-left: 5px;
+					font-size: 1.125rem;
+				}
+				i.title-icon {
+					margin-right: 12px;
+					font-size: 1rem;
+					vertical-align: middle;
+					position: relative;
+					top: -1px;
+				}
+			}
+			&:hover > span {
+				i.icon-caret-right {
+					opacity: 1;
+				}
+			}
+		}
+
+		&.is-open {
+			> h4.tab-section-title:first-child {
+				border-radius: 0;
+				> span {
+					i.icon-caret-right {
+						opacity: 0.33;
+					}
+				}
+				&:hover > span {
+					i.icon-caret-right {
+						opacity: 1;
+					}
+				}
+			}
+		}
+	}
 		
 	.overview-blocks {
 		> div {
@@ -1068,6 +1159,18 @@ $download-button-width : 100px;
 						&:not(.no-value){
 							margin-top: 10px;
 							@include overview-block-value-block;
+							i.icon-caret-right {
+								transition: opacity .25s, transform .5s;
+								padding-left: 3px;
+								margin-left: 5px;
+								opacity: 0.33;
+								&:not(.icon-rotate-90){
+									opacity: 0.66;
+								}
+								&:hover {
+									opacity: 1;
+								}
+							}
 						}
 					}
 				}

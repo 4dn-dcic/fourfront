@@ -680,19 +680,22 @@ const fileEntryBlockMixins = {
         return this.props.selectedFiles[accessionTriple];
     },
 
-    renderCheckBox : function(){
-        if (!this.props.file) return null; // No file to select.
-        if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
-        if (this.props.excludeCheckbox) return null;
-
-        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
-
+    hasCheckbox : function(){
+        if (!this.props.file) return false; // No file to select.
+        if (this.props.pairParent) return false; // Part of pair -- FilePairBlock has own checkbox.
+        if (this.props.excludeCheckbox) return false;
         var checked = this.isChecked();
-        if (checked === null) return null; // No checked state.
+        if (checked === null) return false; // No checked state.
+        return true;
+    },
+
+    renderCheckBox : function(){
+        if (!this.hasCheckbox()) return null;
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
         return (
             <Checkbox
                 validationState='warning'
-                checked={checked}
+                checked={this.isChecked()}
                 name="file-checkbox"
                 id={'checkbox-for-' + accessionTriple}
                 className='file-entry-table-checkbox'
@@ -713,6 +716,7 @@ export class FileEntryBlockPairColumn extends React.Component {
     constructor(props){
         super(props);
         this.isChecked = fileEntryBlockMixins.isChecked.bind(this);
+        this.hasCheckbox = fileEntryBlockMixins.hasCheckbox.bind(this);
         this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
     }
     
@@ -723,8 +727,9 @@ export class FileEntryBlockPairColumn extends React.Component {
                 {...this.props}
                 label={{ 'title' : 'File' }}
                 hideNameOnHover={false}
-                keepLabelOnHover={!tableHasFilePairColumn}
+                keepLabelOnHover={!tableHasFilePairColumn || !this.hasCheckbox()}
                 columnClass={this.props.columnClass || 'file-pair'}
+                className={this.props.isSingleItem ? 'single-item' : null}
             >
                 { tableHasFilePairColumn ? <StackedBlockName>{ this.renderCheckBox() }</StackedBlockName> : null }
                 <StackedBlockList title="Files" className="files">
@@ -773,8 +778,9 @@ export class FileEntryBlock extends React.Component {
     constructor(props){
         super(props);
         this.isChecked = fileEntryBlockMixins.isChecked.bind(this);
-        this.filledFileRow = this.filledFileRow.bind(this);
+        this.hasCheckbox = fileEntryBlockMixins.hasCheckbox.bind(this);
         this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
+        this.filledFileRow = this.filledFileRow.bind(this);
         this.renderName = this.renderName.bind(this);
         this.render = this.render.bind(this);
     }

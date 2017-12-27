@@ -1018,6 +1018,11 @@ $small-label-accession-font-size : 0.75rem;
 						//line-height: 25px;
 						white-space: nowrap;
 					}
+
+					&.single-item .name.col-file-pair {
+						line-height: 55px;
+						white-space: nowrap;
+					}
 				}
 
 				.s-block.file {
