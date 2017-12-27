@@ -50,7 +50,7 @@
                 "DNase Hi-C",
                 "TCC",
                 "single cell Hi-C",
-                "sciHi-C"
+                "sci-Hi-C"
             ]
         },
         "crosslinking_method": {
