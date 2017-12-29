@@ -711,7 +711,7 @@ $navbar-transition-easing: ease-out;
 
 #user_actions_dropdown {
     max-width: 115px;
-    width: 115px;
+    //width: 115px;
     min-width: 65px;
     white-space: nowrap;
     overflow: hidden;
@@ -725,11 +725,11 @@ $navbar-transition-easing: ease-out;
     }
     @media screen and (min-width: $screen-lg-min) {
         max-width: 150px;
-        width: 150px;
+        min-width: 115px;
     }
     @media screen and (max-width: $screen-sm-max) {
         max-width: 150px;
-        width: 150px;
+        //width: 150px;
     }
     @media screen and (max-width: $screen-xs-max) {
         max-width: none;

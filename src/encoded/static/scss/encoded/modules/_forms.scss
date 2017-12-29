@@ -80,9 +80,11 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		}
 	}
 	@media (min-width: $screen-lg-min) {
-		#navbar-search { width: 200px; }
+		#navbar-search {
+			width: 200px;
+		}
 		&.has-input #navbar-search,
-		#navbar-search:focus, #navbar-search:hover {
+		#navbar-search:focus {
 			width: 320px;
 		}
 	}
