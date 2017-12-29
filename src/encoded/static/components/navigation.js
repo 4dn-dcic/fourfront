@@ -7,7 +7,7 @@ import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem, Checkbox, Dropdow
 import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
-import { JWT, console, layout, isServerSide, navigate, Filters } from './util';
+import { JWT, console, layout, isServerSide, navigate, Filters, object } from './util';
 import { requestAnimationFrame } from './viz/utilities';
 import QuickInfoBar from './viz/QuickInfoBar';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -84,10 +84,9 @@ export default class Navigation extends React.Component {
                 onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                 className="global-entry"
                 active={Navigation.isMenuItemActive.call(this, action, mounted)}
+                children={action.title}
                 {...extraProps}
-            >
-                {action.title}
-            </MenuItem>
+            />
         );
     }
 
@@ -111,6 +110,15 @@ export default class Navigation extends React.Component {
                 </NavItem>
             );
         }
+    }
+
+    static propTypes = {
+        'href'              : PropTypes.string,
+        'session'           : PropTypes.bool,
+        'listActionsFor'    : PropTypes.func,
+        'updateUserInfo'    : PropTypes.func.isRequired,
+        'context'           : PropTypes.object,
+        'schemas'           : PropTypes.any
     }
 
     constructor(props){
@@ -274,7 +282,7 @@ export default class Navigation extends React.Component {
                                 updateUserInfo={this.props.updateUserInfo} // function
                                 listActionsFor={this.props.listActionsFor} // function
                             />
-                        <SearchBar href={this.props.href} />
+                            <SearchBar href={this.props.href} />
                         </Navbar.Collapse>
                     </Navbar>
                     <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={expSetFilters} schemas={this.props.schemas} context={this.props.context} />
@@ -283,11 +291,6 @@ export default class Navigation extends React.Component {
         );
     }
 }
-
-Navigation.propTypes = {
-    href : PropTypes.string,
-    session : PropTypes.bool
-};
 
 
 class SearchBar extends React.Component{
@@ -415,88 +418,79 @@ class SearchBar extends React.Component{
 
 class UserActions extends React.Component {
 
+    static propTypes = {
+        'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
+        'listActionsFor'  : PropTypes.func.isRequired,      /** Passed in by App */
+        'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
+        'closeMobileMenu' : PropTypes.func.isRequired,      /** Passed in by Navigation */
+        'updateUserInfo'  : PropTypes.func.isRequired,      /** Passed in by App */
+        'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
+    }
+
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.setIsLoading = this.setIsLoading.bind(this);
-        this.state = {
-            'isLoading' : false
-        };
+        this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
+        this.render = this.render.bind(this);
+        this.state = { 'isLoading' : false };
     }
 
     setIsLoading(isLoading = !this.state.isLoading){
         this.setState({ 'isLoading' : isLoading });
     }
 
-    render() {
-        var session = this.props.session;
-        var acctTitle = "Account";
-
-        if (session){
-            var userDetails = JWT.getUserDetails();
-            if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) {
-                acctTitle = userDetails.first_name;
-            }
-        }
-
-        if (this.state.isLoading){
-            acctTitle = <span><i className="icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
-        } else acctTitle = (
-            <span>
-                <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
-            </span>
-        );
-
+    listUserActionsAsMenuItems(){
+        var { session, closeMobileMenu, href, updateUserInfo, mounted, listActionsFor } = this.props;
         var actions = [];
-        this.props.listActionsFor('user_section').forEach((action) => {
+        _.forEach(listActionsFor('user_section'), (action) => {
             if (action.id === "login-menu-item"){
-                actions.push(
-                    <Login
-                        key={action.id}
-                        navCloseMobileMenu={this.props.closeMobileMenu}
-                        session={this.props.session}
-                        href={this.props.href}
-                        updateUserInfo={this.props.updateUserInfo}
-                        setIsLoadingIcon={this.setIsLoading}
-                    />
-                );
+                actions.push( <Login {...{ closeMobileMenu, session, href, updateUserInfo }} key={action.id} setIsLoadingIcon={this.setIsLoading} /> );
             } else if (action.id === "accountactions-menu-item"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session) {
-                    actions.push(Navigation.buildMenuItem.call(this, action, this.props.mounted));
+                    actions.push(Navigation.buildMenuItem.call(this, action, mounted));
                 } else {
                     // Account Actions
-                    actions = actions.concat(this.props.listActionsFor('user').map((action, idx) => {
-                        return Navigation.buildMenuItem.call(this, action, this.props.mounted, {"data-no-cache" : true});
+                    actions = actions.concat(_.map(listActionsFor('user'), (action, idx) => {
+                        return Navigation.buildMenuItem.call(this, action, mounted, {"data-no-cache" : true});
                     }));
                 }
             } else if (action.id === "contextactions-menu-item") {
                 // Context Actions
-                actions = actions.concat(this.props.listActionsFor('context').map((action) => {
-                    return Navigation.buildMenuItem.call(
-                        this,
-                        _.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }),
-                        this.props.mounted
-                    );
+                actions = actions.concat(listActionsFor('context').map((action) => {
+                    return Navigation.buildMenuItem.call(this, _.extend( _.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> } ), mounted);
                 }));
             }
         });
+        return actions;
+    }
+
+    render() {
+        var acctTitle = "Account", acctIcon = null, userDetails = null;
+
+        if (this.state.isLoading){
+            acctTitle = <span><i className="icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
+        } else {
+            if (this.props.session){
+                userDetails = JWT.getUserDetails();
+                if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) acctTitle = userDetails.first_name;
+                if (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1){
+                    acctIcon = object.itemUtil.User.gravatar(userDetails.email, 32, { 'className' : 'account-icon-image' }, 'mm');
+                } else acctIcon = <i title="Signed In" className="account-icon icon icon-user" />;
+            } else {
+                acctIcon = <i className="account-icon icon icon-user-o" />;
+            }
+        }
 
         return (
             <Nav className="navbar-acct" pullRight>
-                <NavDropdown id="user_actions_dropdown" label="context" title={acctTitle} >
-                    { actions }
-                </NavDropdown>
+                <NavDropdown
+                    className={'user-account-item' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')} title={<span>{ acctIcon }{ acctTitle }</span>}
+                    id="user_actions_dropdown" label="context" children={this.listUserActionsAsMenuItems()} />
             </Nav>
         );
     }
 }
-
-UserActions.propTypes = {
-    session         : PropTypes.bool.isRequired,
-    listActionsFor  : PropTypes.func.isRequired,
-    href            : PropTypes.string.isRequired
-};
 
 
 // Display breadcrumbs with contents given in 'crumbs' object.

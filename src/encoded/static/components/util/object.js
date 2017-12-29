@@ -159,6 +159,13 @@ export function isValidJSON(content) {
     return isJson;
 }
 
+/**
+ * Performs a rudimentary check on an object to determine whether it is an Item.
+ * Checks for presence of properties 'display_title' and '@id'.
+ * 
+ * @param {Object} content - Object to check.
+ * @returns {boolean} Whether 'content' param is (likely to be) an Item.
+ */
 export function isAnItem(content){
     return (
         content &&
@@ -297,6 +304,7 @@ export class TooltipInfoIconContainerAuto extends React.Component {
 
 /**
  * Functions which are specific to Items [structure] in the 4DN/Encoded database. Some are just aliased from functions above for now for backwards compatibility.
+ * Contains sections for Aliases, Functions, and Secondary Dictionaries of functions (e.g. for 'User').
  */
 export const itemUtil = {
 
@@ -345,8 +353,8 @@ export const itemUtil = {
      * Determine whether the title which is displayed is an accession or not.
      * Use for determining whether to include accession in ItemHeader.TopRow.
      * 
-     * @param {Object} context - JSON representation of an Item object.
-     * @param {string} [displayTitle] - Display title of Item object. Gets it from context if not provided.
+     * @param {Object} context          JSON representation of an Item object.
+     * @param {string} [displayTitle]   Display title of Item object. Gets it from context if not provided.
      * @returns {boolean} If title is an accession (or contains it).
      */
     isDisplayTitleAccession : function(context, displayTitle = null, checkContains = false){
@@ -360,9 +368,9 @@ export const itemUtil = {
      * Compare two arrays of Items to check if they contain the same Items, by their @id.
      * Does _NOT_ compare the fields within each Item (e.g. to detect changed or more 'complete').
      * 
-     * @param {Object[]} listA - 1st list of Items to compare.
-     * @param {Object[]} listB - 2nd list of Items to compare.
-     * @returns {boolean} true if equal.
+     * @param {Object[]} listA      1st list of Items to compare.
+     * @param {Object[]} listB      2nd list of Items to compare.
+     * @returns {boolean} True if equal.
      */
     compareResultsByID : function(listA, listB){
         var listALen = listA.length;
@@ -371,6 +379,44 @@ export const itemUtil = {
             if (atIdFromObject(listA[i]) !== atIdFromObject(listB[i])) return false;
         }
         return true;
+    },
+
+
+
+    // Secondary Dictionaries -- functions by Item type.
+
+    User : {
+
+        /**
+         * Generate a URL to get Gravatar image from Gravatar service.
+         *
+         * @param {string} email                    User's email address.
+         * @param {number} size                     Width & height of image square.
+         * @param {string} [defaultImg='retro']     Style of Gravatar image.
+         * @returns {string} A URL.
+         */
+        buildGravatarURL : function(email, size=null, defaultImg='retro'){
+            var md5 = require('js-md5');
+            if (defaultImg === 'kanye') defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif'; // Easter egg-ish option.
+            var url = 'https://www.gravatar.com/avatar/' + md5(email);
+            url += "?d=" + defaultImg;
+            if (size) url += '&s=' + size;
+            return url;
+        },
+
+        /**
+         * Generate an <img> element with provided size, className, and Gravatar src.
+         *
+         * @param {string} email                    User's email address.
+         * @param {number} size                     Width & height of image square.
+         * @param {Object} props                    Extra element props for <img> element returned.
+         * @param {string} [defaultImg='retro']     Style of Gravatar image.
+         * @returns {Element} A React Image (<img>) element.
+         */
+        gravatar(email, size=null, props={}, defaultImg='retro'){
+            return <img title="Obtained via Gravatar" {...props} src={itemUtil.User.buildGravatarURL(email, size, defaultImg)} className={'gravatar' + (props.className ? ' ' + props.className : '')} />;
+        }
+
     }
 
 };

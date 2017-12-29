@@ -1,4 +1,4 @@
-var aws = require('aws-sdk');
+import * as aws from 'aws-sdk';
 
 /** 
  * Is this used? Should we put it into util/index.js exports? Rename to 'AWS' to prevent confusion with 'aws-sdk' package?

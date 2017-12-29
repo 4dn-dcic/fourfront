@@ -246,46 +246,6 @@ class AccessKeyTable extends React.Component {
 }
 
 
-/**
- * Generate a URL to get Gravatar image from Gravatar service.
- *
- * @param {string} email - User's email address.
- * @param {number} size - Width & height of image square.
- * @param {string} [defaultImg='retro'] Style of Gravatar image.
- * @returns {string} A URL.
- */
-export function buildGravatarURL(email, size=null, defaultImg='retro'){
-    var md5 = require('js-md5');
-    if (defaultImg === 'kanye'){
-        defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
-    }
-    var url = 'https://www.gravatar.com/avatar/' + md5(email);
-    url += "?d=" + defaultImg;
-    if (size) url += '&s=' + size;
-    return url;
-}
-
-
-/**
- * Generate an <img> element with provided size, className, and Gravatar src.
- *
- * @param {string} email - User's email address.
- * @param {number} size - Width & height of image square.
- * @param {string} className - ClassName of <img> element.
- * @param {string} [defaultImg='retro'] Style of Gravatar image.
- * @returns {Element} A React Image (<img>) element.
- */
-export function gravatar(email, size=null, className=null, defaultImg='retro'){
-    return (
-        <img
-            src={ buildGravatarURL(email, size, defaultImg)}
-            className={'gravatar' + (className ? ' ' + className : '')}
-            title="Obtained via Gravatar"
-        />
-    );
-}
-
-
 
 /**
  * Draws a User Profile page.
@@ -366,7 +326,8 @@ export default class UserView extends React.Component {
                                 <div className="user-title-row-container">
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
-                                            { gravatar(user.email, 70) }
+                                            { object.itemUtil.User.gravatar(user.email, 70) }
+                                            <a className="edit-button-remote text-center" target="_blank" href="https://gravatar.com"><i className="icon icon-pencil"/></a>
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
