@@ -177,7 +177,7 @@ globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 class OverviewHeading extends React.Component {
 
     static defaultProps = {
-        'className'     : 'with-background mb-2 mt-1',
+        'className'     : 'with-background mb-3 mt-1',
         'defaultOpen'   : true,
         'headingTitleElement' : 'h4',
         'headingTitle'  : 'Properties'
@@ -196,13 +196,7 @@ class OverviewHeading extends React.Component {
     render(){
         var expSet = this.props.context;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), expSet);
-        var expSetSchema = Schemas.getSchemaForItemType('ExperimentSet');
-
-        var commonProps = {
-            result : expSet,
-            tips : tips,
-            wrapInColumn : 'col-sm-6 col-md-3',
-        };
+        var commonProps = { 'result' : expSet, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
 
         return (
             <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>

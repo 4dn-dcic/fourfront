@@ -1128,6 +1128,23 @@ $small-label-accession-font-size : 0.75rem;
 			margin-right: 5px;
 		}
 	}
+	&[data-field="display_title"]{
+		img.in-search-table-title-image {
+			margin-top: -10px;
+			margin-bottom: -8px;
+			border-radius: 4px;
+			margin-right: 10px;
+			filter: saturate(0.3);
+			transition: filter .2s, opacity .2s;
+			opacity: 0.75;
+		}
+		&:hover {
+			img.in-search-table-title-image {
+				filter: none;
+				opacity: 1;
+			}
+		}
+	}
 }
 
 @mixin search-result-toggle-open-button-container {
@@ -1414,6 +1431,10 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 								&[data-field="display_title"]{
 									@include search-result-toggle-open-button-container-open;
+									img.in-search-table-title-image {
+										filter: none;
+										opacity: 1;
+									}
 								}
 
 

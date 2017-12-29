@@ -469,7 +469,7 @@ class UserActions extends React.Component {
         var acctTitle = "Account", acctIcon = null, userDetails = null;
 
         if (this.state.isLoading){
-            acctTitle = <span><i className="icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
+            acctTitle = <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
         } else {
             if (this.props.session){
                 userDetails = JWT.getUserDetails();
