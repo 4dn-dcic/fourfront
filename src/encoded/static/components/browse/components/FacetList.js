@@ -467,13 +467,7 @@ class Facet extends React.Component {
                 </div>
             );
         } else {
-            return (
-                <FacetTermsList
-                    {...this.props}
-                    standardizedFieldKey={standardizedFieldKey}
-                    tooltip={description}
-                />
-            );
+            return <FacetTermsList {...this.props} standardizedFieldKey={standardizedFieldKey} tooltip={description} />;
         }
 
 

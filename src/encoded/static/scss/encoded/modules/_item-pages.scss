@@ -1032,7 +1032,7 @@ $download-button-width : 100px;
 
 
 			> span {
-				i.icon-caret-right {
+				i.icon-caret-right, i.icon-angle-right {
 					opacity: 0.66;
 					transition: transform .5s, opacity .25s;
 					padding-left: 3px;
@@ -1048,7 +1048,7 @@ $download-button-width : 100px;
 				}
 			}
 			&:hover > span {
-				i.icon-caret-right {
+				i.icon-caret-right, i.icon-angle-right {
 					opacity: 1;
 				}
 			}
@@ -1058,12 +1058,12 @@ $download-button-width : 100px;
 			> h4.tab-section-title:first-child {
 				border-radius: 0;
 				> span {
-					i.icon-caret-right {
+					i.icon-caret-right, i.icon-angle-right {
 						opacity: 0.33;
 					}
 				}
 				&:hover > span {
-					i.icon-caret-right {
+					i.icon-caret-right, i.icon-angle-right {
 						opacity: 1;
 					}
 				}

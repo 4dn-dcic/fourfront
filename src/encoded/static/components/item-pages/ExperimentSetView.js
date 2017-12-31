@@ -190,7 +190,7 @@ class OverviewHeading extends React.Component {
     }
 
     renderTitle(){
-        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-caret-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
+        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
     }
 
     render(){

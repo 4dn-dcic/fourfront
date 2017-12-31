@@ -143,7 +143,8 @@ export class StackedBlockName extends React.Component {
     }
 
     static defaultProps = {
-        visible : true
+        'visible' : true,
+        'passProps' : true
     }
 
     constructor(props){
@@ -178,7 +179,7 @@ export class StackedBlockName extends React.Component {
                 addedProps.className = c.props.className + ' name-title';
             }
 
-            if (c && c.type && typeof c.type === 'function'){
+            if (c && c.type && typeof c.type === 'function' && this.props.passProps){
                 // Is component, not element.
                 addedProps.stackDepth = this.props.stackDepth;
                 if (this.props.colWidthStyles && !c.props.colWidthStyles){
@@ -329,7 +330,7 @@ export class StackedBlockList extends React.Component {
     static defaultProps = {
         collapseLimit : 4,
         collapseShow : 3,
-        //collapseLongLists : true
+        collapseLongLists : false
     }
 
     constructor(props){
@@ -731,7 +732,7 @@ export class FileEntryBlockPairColumn extends React.Component {
                 columnClass={this.props.columnClass || 'file-pair'}
                 className={this.props.isSingleItem ? 'single-item' : null}
             >
-                { tableHasFilePairColumn ? <StackedBlockName>{ this.renderCheckBox() }</StackedBlockName> : null }
+                { tableHasFilePairColumn ? <StackedBlockName passProps={false}>{ this.renderCheckBox() }</StackedBlockName> : null }
                 <StackedBlockList title="Files" className="files">
                     <FileEntryBlock
                         file={this.props.file}

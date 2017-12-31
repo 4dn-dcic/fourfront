@@ -259,7 +259,11 @@ class ResultTableContainer extends React.Component {
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var urlPartQueryCorrectedForType = _.clone(urlParts.query);
                                 if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
-                                return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
+                                var urlPartsForClearURLQuery = url.parse(clearFiltersURL, true).query;
+                                // Exclude 'experimentset_type' for now
+                                delete urlPartsForClearURLQuery.experimentset_type;
+                                delete urlPartQueryCorrectedForType.experimentset_type;
+                                return !object.isEqual(urlPartsForClearURLQuery, urlPartQueryCorrectedForType);
                             })()}
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
