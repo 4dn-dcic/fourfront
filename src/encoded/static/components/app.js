@@ -1257,7 +1257,6 @@ export default class App extends React.Component {
                                         updateStats={this.updateStats}
                                         schemas={this.state.schemas}
                                         session={this.state.session}
-                                        debug
                                     />
                                 </div>
                                 <div id="content" className="container">

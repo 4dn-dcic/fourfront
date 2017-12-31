@@ -25,33 +25,28 @@ export function getCurrentHeight(){
 
 
 /** May be bound to access this.props.href (if available) as fallback */
-export function getWindowPath(mounted){
-    var href = getWindowLocation.call(this, mounted);
-    if (!href) return null;
-    return (href.pathname || '/') + (href.search || '') + (href.hash || '');
+export function getWindowPath(mounted, href = null){
+    var windowLocation = getWindowLocation.call(this, mounted, href);
+    if (!windowLocation) return null;
+    return (windowLocation.pathname || '/') + (windowLocation.search || '') + (windowLocation.hash || '');
 }
 
 
-export function getWindowURL(mounted){
-    var href = getWindowLocation.call(this, mounted);
-    return href.href;
+export function getWindowURL(mounted, href = null){
+    var windowLocation = getWindowLocation.call(this, mounted, href);
+    return windowLocation.href;
 }
 
 
 /** May be bound to access this.props.href (if available) as fallback */
-export function getWindowLocation(mounted){
-    if (this && this.props && this.props.href) {
-        return url.parse(this.props.href);
-    }
+export function getWindowLocation(mounted, href = null){
+    if (typeof href === 'string' && href) return url.parse(href);
+    if (this && this.props && this.props.href && typeof this.props.href === 'string') return url.parse(this.props.href);
     if (store && typeof store.getState === 'function'){
         var storeState = store.getState();
-        if (typeof storeState.href === 'string' && storeState.href){
-            return url.parse(storeState.href); 
-        }
+        if (typeof storeState.href === 'string' && storeState.href) return url.parse(storeState.href); 
     }
-    if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
-        return window.location;
-    }
+    if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined') return window.location;
     return null;
 }
 
@@ -59,31 +54,31 @@ export function getWindowLocation(mounted){
 export default class Navigation extends React.Component {
 
 
-    static isMenuItemActive(action, mounted){
+    static isMenuItemActive(action, mounted, href){
         return (
-            (typeof action.active === 'function' && action.active(getWindowPath.call(this, mounted))) ||
-            (Navigation.getMenuItemURL(action, mounted) === getWindowPath.call(this, mounted))
+            (typeof action.active === 'function' && action.active(getWindowPath(mounted, href))) ||
+            (Navigation.getMenuItemURL(action, mounted) === getWindowPath(mounted, href))
         );
     }
 
-    static getMenuItemURL(action, mounted = false){
+    static getMenuItemURL(action, mounted = false, href){
         if (typeof action.url === 'string') return action.url;
-        if (typeof action.url === 'function') return action.url(getWindowLocation.call(this, mounted));
+        if (typeof action.url === 'function') return action.url(getWindowLocation(mounted, href));
         if (typeof action.href === 'string') return action.href;
-        if (typeof action.href === 'function') return action.href(getWindowLocation.call(this, mounted));
+        if (typeof action.href === 'function') return action.href(getWindowLocation(mounted, href));
         return '#';
     }
 
     /** Can be bound to access this.props.href for getWindowPath (if available) */
-    static buildMenuItem(action, mounted, extraProps){
+    static buildMenuItem(action, mounted, href, extraProps){
         return (
             <MenuItem
                 key={action.id}
                 id={action.sid || action.id}
-                href={Navigation.getMenuItemURL(action, mounted)}
+                href={Navigation.getMenuItemURL(action, mounted, href)}
                 onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                 className="global-entry"
-                active={Navigation.isMenuItemActive.call(this, action, mounted)}
+                active={Navigation.isMenuItemActive(action, mounted, href)}
                 children={action.title}
                 {...extraProps}
             />
@@ -91,11 +86,11 @@ export default class Navigation extends React.Component {
     }
 
     /** Can be bound to access this.props.href for getWindowPath (if available) */
-    static buildDropdownMenu(action, mounted){
+    static buildDropdownMenu(action, mounted, href){
         if (action.children){
             return (
                 <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
-                    {action.children.map((a) => Navigation.buildMenuItem(a, mounted) )}
+                    {action.children.map((a) => Navigation.buildMenuItem(a, mounted, href) )}
                 </NavDropdown>
             );
         } else {
@@ -103,8 +98,8 @@ export default class Navigation extends React.Component {
                 <NavItem
                     key={action.id}
                     id={action.sid || action.id}
-                    href={Navigation.getMenuItemURL(action, mounted)}
-                    active={Navigation.isMenuItemActive.call(this, action, mounted)}
+                    href={Navigation.getMenuItemURL(action, mounted, href)}
+                    active={Navigation.isMenuItemActive.call(action, mounted, href)}
                 >
                         {action.title}
                 </NavItem>
@@ -243,24 +238,18 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        var navClass = "navbar-container";
-        if (this.state.testWarning) navClass += ' test-warning-visible';
-        if (this.state.navInitialized) navClass += ' nav-initialized';
-        if (this.state.scrolledPastTop) {
-            navClass += " scrolled-past-top";
-        } else {
-            navClass += " scrolled-at-top";
-        }
-
-        var expSetFilters = Filters.currentExpSetFilters((this.props.context && this.props.context.filters) || null);
+        var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted } = this.state;
+        var { href, context, listActionsFor, session, updateUserInfo, schemas } = this.props;
+        var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top");
+        var expSetFilters = Filters.currentExpSetFilters((context && context.filters) || null);
 
         return (
             <div className={navClass}>
                 <div id="top-nav" className="navbar-fixed-top">
-                    <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} href={this.props.href} />
+                    <TestWarning visible={testWarning} setHidden={this.hideTestWarning} href={href} />
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
-                        this.setState({ mobileDropdownOpen : open });
-                    }} expanded={this.state.mobileDropdownOpen}>
+                        this.setState({ 'mobileDropdownOpen' : open });
+                    }} expanded={mobileDropdownOpen}>
                         <Navbar.Header>
                             <Navbar.Brand>
                                 <NavItem href="/">
@@ -273,19 +262,12 @@ export default class Navigation extends React.Component {
                             </Navbar.Toggle>
                         </Navbar.Header>
                         <Navbar.Collapse>
-                            <Nav children={_.map(this.props.listActionsFor('global_sections'), (a) => Navigation.buildDropdownMenu.call(this, a, this.state.mounted) )} />
-                            <UserActions
-                                mounted={this.state.mounted} // boolean
-                                closeMobileMenu={this.closeMobileMenu} // function
-                                session={this.props.session} // boolean
-                                href={this.props.href} // string
-                                updateUserInfo={this.props.updateUserInfo} // function
-                                listActionsFor={this.props.listActionsFor} // function
-                            />
-                            <SearchBar href={this.props.href} />
+                            <Nav children={_.map(listActionsFor('global_sections'), function(a){ return Navigation.buildDropdownMenu(a, mounted, href); })} />
+                            <UserActions closeMobileMenu={this.closeMobileMenu} {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
+                            <SearchBar href={href} />
                         </Navbar.Collapse>
                     </Navbar>
-                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={expSetFilters} schemas={this.props.schemas} context={this.props.context} />
+                    <QuickInfoBar ref="stats" href={href} expSetFilters={expSetFilters} schemas={schemas} context={context} />
                 </div>
             </div>
         );
@@ -440,29 +422,28 @@ class UserActions extends React.Component {
     }
 
     listUserActionsAsMenuItems(){
-        var { session, closeMobileMenu, href, updateUserInfo, mounted, listActionsFor } = this.props;
-        var actions = [];
-        _.forEach(listActionsFor('user_section'), (action) => {
+        var { mounted, listActionsFor, href } = this.props;
+        return _.reduce(listActionsFor('user_section'), (actions, action) => {
             if (action.id === "login-menu-item"){
-                actions.push( <Login {...{ closeMobileMenu, session, href, updateUserInfo }} key={action.id} setIsLoadingIcon={this.setIsLoading} /> );
+                actions.push( <Login {..._.pick(this.props, 'closeMobileMenu', 'session', 'href', 'updateUserInfo')} key={action.id} setIsLoadingIcon={this.setIsLoading} /> );
             } else if (action.id === "accountactions-menu-item"){
                 // link to registration page if logged out or account actions if logged in
-                if (!session) {
-                    actions.push(Navigation.buildMenuItem.call(this, action, mounted));
+                if (!this.props.session) {
+                    actions.push(Navigation.buildMenuItem(action, mounted, href));
                 } else {
                     // Account Actions
-                    actions = actions.concat(_.map(listActionsFor('user'), (action, idx) => {
-                        return Navigation.buildMenuItem.call(this, action, mounted, {"data-no-cache" : true});
+                    actions = actions.concat(_.map(listActionsFor('user'), function(action, idx){
+                        return Navigation.buildMenuItem(action, mounted, href, {"data-no-cache" : true});
                     }));
                 }
             } else if (action.id === "contextactions-menu-item") {
                 // Context Actions
-                actions = actions.concat(listActionsFor('context').map((action) => {
-                    return Navigation.buildMenuItem.call(this, _.extend( _.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> } ), mounted);
+                actions = actions.concat(_.map(listActionsFor('context'), function(action){
+                    return Navigation.buildMenuItem(_.extend( _.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> } ), mounted, href);
                 }));
             }
-        });
-        return actions;
+            return actions;
+        }, []);
     }
 
     render() {
@@ -475,7 +456,7 @@ class UserActions extends React.Component {
                 userDetails = JWT.getUserDetails();
                 if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) acctTitle = userDetails.first_name;
                 if (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1){
-                    acctIcon = object.itemUtil.User.gravatar(userDetails.email, 32, { 'className' : 'account-icon-image' }, 'mm');
+                    acctIcon = object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm');
                 } else acctIcon = <i title="Signed In" className="account-icon icon icon-user" />;
             } else {
                 acctIcon = <i className="account-icon icon icon-user-o" />;

@@ -361,21 +361,14 @@ export const ChartDataController = {
             var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters);
 
             refs.href = reduxStoreState.href;
-            refs.contextFilters = (reduxStoreState.context && reduxStoreState.context.filters) || null;
+            refs.contextFilters = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
 
             var nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters);
 
             // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
 
             var didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href));
-
-            if (didFiltersChange){
-                ChartDataController.handleUpdatedFilters(
-                    nextExpSetFilters,
-                    notifyUpdateCallbacks,
-                    { 'searchQuery' : Filters.searchQueryStringFromHref(refs.href) }
-                );
-            }
+            if (didFiltersChange) ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { 'searchQuery' : Filters.searchQueryStringFromHref(refs.href) });
         });
 
         isInitialized = true;

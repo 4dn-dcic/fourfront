@@ -997,13 +997,13 @@ $download-button-width : 100px;
 				border-color: #eee;
 				border-radius: 3px;
 				transition: border-color .5s, background-color .5s, border-radius .5s, box-shadow .5s;
-				box-shadow: 0 4px 8px -4px rgba(0,0,0,0.5);
+				box-shadow: 0 4px 4px -4px rgba(0,0,0,0.25);
 			}
 		}
 		> h4.tab-section-title:first-child {
 			padding-top: 14px;
 			padding-bottom: 13px;
-			font-weight: 500;
+			font-weight: 400;
 			user-select: none;
 		}
 		
@@ -1022,8 +1022,8 @@ $download-button-width : 100px;
 				margin-bottom: -3px;
 				padding-top: 13px;
 				padding-bottom: 14px;
-				background-color: #22656d;
-				color: #fff;
+				//background-color: #22656d;
+				//color: #fff;
 				border-radius: 3px;
 				position: relative;
 				z-index: 2;
