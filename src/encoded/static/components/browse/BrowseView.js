@@ -327,85 +327,6 @@ class ResultTableContainer extends React.Component {
 
 
 
-class ControlsAndResults extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
-    render(){
-
-        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status', 'number_of_files'];
-        /*
-        var hiddenColumns = [];
-        // Hide columns by default which have same value for all items.
-        if (this.props.context && this.props.context.columns && this.props.context.facets){
-            hiddenColumns = _.pluck(_.filter(this.props.context.facets, (facet)=>{
-                return (facet.terms.length <= 1 && typeof this.props.context.columns[facet.field] !== 'undefined');
-            }), 'field');
-        }
-        */
-
-
-
-        //var fileStats = this.state.fileStats;
-        //var targetFiles = this.state.filesToFind;
-        //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
-        //    var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
-        //    return(
-        //        <FileButton key={format} defaults={targetFiles} fxn={this.selectFiles} format={format} count={count}/>
-        //    );
-        //}.bind(this));
-        // var deselectButton = <Button className="expset-selector-button" bsSize="xsmall">Deselect</Button>;
-        var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
-        return(
-            <div>
-
-                {/*<div className="row">
-                    <div className="box expset-whole-selector col-sm-12 col-md-10 col-lg-9 col-md-push-2 col-lg-push-3">
-                        <div className="col-sm-8 col-md-8 col-lg-8 expset-file-selector">
-                            <div className="row">
-                                <div className="expset-selector-header">
-                                    <h5>For all experiments, display files of type:</h5>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <ButtonToolbar>{selectorButtons}</ButtonToolbar>
-                            </div>
-                        </div>
-                        <div className="col-sm-3 col-md-3 col-lg-3">
-                            <div className="row">
-                                <div className="expset-selector-header">
-                                    <h5>For all selected files:</h5>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <ButtonToolbar>
-                                    {downloadButton}
-                                </ButtonToolbar>
-                            </div>
-                        </div>
-                    </div>
-                </div>*/}
-
-                <SelectedFilesController href={this.props.href}>
-                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
-                        <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer
-                                session={this.props.session}
-                                schemas={this.props.schemas}
-                            />
-                        </SortController>
-                    </CustomColumnController>
-                </SelectedFilesController>
-            </div>
-
-        );
-    }
-
-}
-
 
 
 export default class BrowseView extends React.Component {
@@ -415,6 +336,10 @@ export default class BrowseView extends React.Component {
         'session' : PropTypes.bool,
         'schemas' : PropTypes.object,
         'href' : PropTypes.string.isRequired
+    }
+
+    static defaultProps = {
+        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'status', 'number_of_files']
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -463,12 +388,24 @@ export default class BrowseView extends React.Component {
 
         return (
             <div className="browse-page-container search-page-container" id="browsePageContainer">
+                {/*
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}
                     href={this.props.href}
                     schemas={this.props.schemas}
                 />
+                */}
+                <SelectedFilesController href={this.props.href}>
+                    <CustomColumnController defaultHiddenColumns={this.props.defaultHiddenColumns}>
+                        <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
+                            <ResultTableContainer
+                                session={this.props.session}
+                                schemas={this.props.schemas}
+                            />
+                        </SortController>
+                    </CustomColumnController>
+                </SelectedFilesController>
             </div>
         );
     }

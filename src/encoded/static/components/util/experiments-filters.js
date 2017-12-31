@@ -273,53 +273,11 @@ export const NON_FILTER_URL_PARAMS = [
 
 
 /**
- * @deprecated - Only used for jest unit tests at the moment.
+ * Convert back-end-supplied 'context.filters' array of filter objects into commonly-used 'expSetFilters' structure.
+ * Replaces now-removed 'hrefToFilters' function and copy of expSetFilters passed down from Redux store.
  * 
- * Parse href to return an expSetFilters object, the opposite of @see filtersToHref.
- * [HardCoded:] Excludes 'type' & 'experimentset_type' for time being.
- * Used for server-side rendering to set initial selected filters in UI based on request URL.
- *
- * @param {string}   href              A URL or path containing query at end in form of ?...&field.name=term1&field2.name=term2[...]
- * @param {Object[]} [contextFilters]  Collection of objects from (props.)context.filters or context.facets which have a 'field' property to cross-ref and check if URL query args are facets.
- * @param {string}   [contextFilters.field]
- * @returns {Object} Shape of { field : Set([...terms]) }
- */
-export function hrefToFilters(href, contextFilters = null, checkContextFilters = true){
-    if (!navigate.isBrowseHref(href)) return {}; // Still needed?
-
-    if (checkContextFilters && !contextFilters){ // Grab context.filters from Redux store
-        if (!store) store = require('./../../store');
-        var storeState = store.getState();
-        contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
-    }
-
-    return _.object(_.map(
-        _.filter(
-            _.pairs(url.parse(href, true).query),
-            function(queryPair){ // queryPair == [ <field> : term1|[term1, term2, ...] ]
-
-                if (NON_FILTER_URL_PARAMS.indexOf(queryPair[0]) > -1) return false;
-
-                if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-
-                if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
-                    return true; // See if in context.filters, if is available.
-                }
-
-                // These happen to all start w/ 'experiments_in_set.' currently. Woops not anymore.
-                if (!checkContextFilters || queryPair[0].indexOf('experiments_in_set.') > -1) return true;
-                return false;
-            }
-        ),
-        function(queryPair){
-            if (Array.isArray(queryPair[1])) return [  queryPair[0], new Set(queryPair[1])  ];
-            else return [  queryPair[0], new Set([queryPair[1]])  ];
-        }
-    ));
-}
-
-/**
- * Maybe have this replace hrefToFilters entirely?
+ * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
+ * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
 export function contextFiltersToExpSetFilters(contextFilters = null){
     if (!contextFilters){ // Grab context.filters from Redux store if not supplied.

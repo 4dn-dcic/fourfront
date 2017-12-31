@@ -381,12 +381,13 @@ class LoadMoreAsYouScroll extends React.Component {
     */
     render(){
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
-        var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
-            if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                //console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
-                return this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight + 2;
+        var { children, rowHeight, openDetailPanes, openRowHeight, tableContainerWidth, tableContainerScrollLeft } = this.props;
+        var elementHeight = _.keys(openDetailPanes).length === 0 ? rowHeight : React.Children.map(children, function(c){
+            if (typeof openDetailPanes[c.props['data-key']] === 'number'){
+                //console.log('height', openDetailPanes[c.props['data-key']], rowHeight, 2 + openDetailPanes[c.props['data-key']] + openRowHeight);
+                return openDetailPanes[c.props['data-key']] + openRowHeight + 2;
             }
-            return this.props.rowHeight;
+            return rowHeight;
         });
         return (
             <Infinite
@@ -398,8 +399,8 @@ class LoadMoreAsYouScroll extends React.Component {
                 //onChangeScrollState={this.handleScrollingStateChange}
                 loadingSpinnerDelegate={(
                     <div className="search-result-row loading text-center" style={{
-                        'maxWidth' : this.props.tableContainerWidth,
-                        'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
+                        'maxWidth' : tableContainerWidth,
+                        'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
                     }}>
                         <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
                     </div>
@@ -407,9 +408,8 @@ class LoadMoreAsYouScroll extends React.Component {
                 infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(1.5)}
                 preloadBatchSize={Infinite.containerHeightScaleFactor(1.5)}
-            >
-                { this.props.children }
-            </Infinite>
+                children={children}
+            />
         );
     }
 }
@@ -1048,6 +1048,7 @@ export class SearchResultTable extends React.Component {
                 return true;
             });
         }
+
         if (columnDefinitionOverrideMap) columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
         return (
                 <layout.WindowResizeUpdateTrigger>

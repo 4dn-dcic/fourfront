@@ -137,5 +137,6 @@
         "source_ontology": {
             "title": "Ontology"
         }
-    }
+    },
+    "excludedColumns" : ["lab.display_title"]
 }
