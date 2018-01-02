@@ -14,7 +14,7 @@ import { isServerSide, expFxn, Filters, navigate, object, layout } from './../ut
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
     SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
-    FacetList, onFilterHandlerMixin, ReduxExpSetFiltersInterface
+    FacetList, onFilterHandlerMixin
 } from './components';
 
 
@@ -40,16 +40,11 @@ export class ExperimentSetCheckBox extends React.Component {
     static isIndeterminate(selectedFiles: Array, allFiles){ return selectedFiles.length > 0 && selectedFiles.length < allFiles.length; }
 
     render(){
-        var props = this.props;
+        var { checked, disabled, onChange, indeterminate } = this.props;
         return(
-            <input
-                className="expset-checkbox"
-                checked={props.checked}
-                disabled={props.disabled}
-                onChange={props.onChange}
-                type="checkbox"
-                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}}
-            />
+            <input {...{ checked, disabled, onChange }} type="checkbox" className="expset-checkbox" ref={function(r){
+                if (r) r.indeterminate = (checked ? false : indeterminate);
+            }} />
         );
     }
 }
