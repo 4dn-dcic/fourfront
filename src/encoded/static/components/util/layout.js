@@ -393,3 +393,45 @@ export class WindowResizeUpdateTrigger extends React.Component {
     }
 
 }
+
+export class VerticallyCenteredChild extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
+    render(){
+        var style = null;
+        //var domParentBlock = (this.state.mounted && this.refs && this.refs.parentBlock) || null;
+        var domChildBlock = (this.state.mounted && this.refs && this.refs.childElement) || null;
+        if (domChildBlock){
+            var domParentBlock = domChildBlock.parentElement;
+
+            var heightParent = domParentBlock.offsetHeight;
+            if (typeof this.props.verticalPaddingOffset === 'number'){
+                heightParent -= this.props.verticalPaddingOffset;
+            }
+            var heightChild = domChildBlock.offsetHeight;
+            if (heightParent && heightChild && heightChild < heightParent){
+                style = {
+                    'transform' : 'translateY(' + Math.floor((heightParent - heightChild) / 2) + 'px)'
+                };
+            }
+
+        }
+        if (style){
+            var origStyle = this.props.children.props.style || {};
+            style = _.extend(style, origStyle);
+        }
+        var childClassName = this.props.children.props.className;
+        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
+
+        return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
+    }
+
+}
