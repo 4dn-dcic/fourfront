@@ -4,7 +4,7 @@
 /* ^ see http://stackoverflow.com/questions/30110437/leading-underscore-transpiled-wrong-with-es6-classes */
 
 /** @ignore */
-var _ = require('underscore');
+import _ from 'underscore';
 import { ajax } from './../util';
 
 /**

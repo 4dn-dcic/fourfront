@@ -26,7 +26,7 @@ var vizUtil = require('./utilities');
 var refs = {
     store       : null,
     href        : null, // Cached from redux store updates // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-    contextFilters : null,
+    contextFilters : {},
     requestURLBase : null,//'/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
     updateStats : null, // Function to update stats @ top of page.
     fieldsToFetch : [ // What fields we need from /browse/... for this chart.
