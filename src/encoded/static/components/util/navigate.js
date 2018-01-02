@@ -3,7 +3,6 @@
 import url from 'url';
 import _ from 'underscore';
 import { filtersToHref } from './experiments-filters';
-let store = null;
 
 
 let cachedNavFunction = null;

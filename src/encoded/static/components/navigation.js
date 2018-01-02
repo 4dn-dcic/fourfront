@@ -44,7 +44,7 @@ export function getWindowLocation(mounted, href = null){
     if (this && this.props && this.props.href && typeof this.props.href === 'string') return url.parse(this.props.href);
     if (store && typeof store.getState === 'function'){
         var storeState = store.getState();
-        if (typeof storeState.href === 'string' && storeState.href) return url.parse(storeState.href); 
+        if (typeof storeState.href === 'string' && storeState.href) return url.parse(storeState.href);
     }
     if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined') return window.location;
     return null;

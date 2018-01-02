@@ -207,7 +207,9 @@ export class OverViewBodyItem extends React.Component {
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
 
         // Preprocess / uniqify:
-        if (Array.isArray(items)) items = _.flatten(items);
+        if (Array.isArray(items)) {
+            items = _.filter(_.flatten(items), function(item){ return item !== null && typeof item !== 'undefined'; });
+        }
         if (Array.isArray(items) && _.every(items, function(item){ return typeof item === 'string' || typeof item === 'number'; } )) {
             items = _.uniq(items);
         } else if (Array.isArray(items) && items.length > 1 && items[0] && items[0].display_title && object.atIdFromObject(items[0])) {
