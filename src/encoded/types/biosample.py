@@ -87,8 +87,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             ret_str = ''
             for i in range(len(treatments)):
                 treat_props = request.embed(treatments[i], '@@object')
-                ret_str += (treat_props['treatment_type'] + ' and ') if treat_props['treatment_type'] else ''
-            if len(ret_str) > 0:
+                ret_str += treat_props.get('treatment_type', '') + ' and '
+            if len(ret_str) > 5:
                 return ret_str[:-5]
             else:
                 return 'None'
