@@ -84,7 +84,6 @@ class Term extends React.Component {
     constructor(props){
         super(props);
         this.experimentSetsCount = this.experimentSetsCount.bind(this);
-        this.standardizeFieldKey = this.standardizeFieldKey.bind(this);
         this.handleClick = _.debounce(this.handleClick.bind(this), 500, true);
         this.state = {
             'filtering' : false
@@ -93,12 +92,6 @@ class Term extends React.Component {
 
     experimentSetsCount(){
         return (this.props.term && this.props.term.doc_count) || 0;
-    }
-
-
-    // Correct field to match that of browse page (ExpSet)
-    standardizeFieldKey(field = this.props.facet.field, reverse = false){
-        return Filters.standardizeFieldKey(field, this.props.experimentsOrSets, reverse);
     }
 
     handleClick(e) {
@@ -259,7 +252,7 @@ class FacetTermsList extends React.Component {
     }
 
     render(){
-        var { facet, standardizedFieldKey, tooltip } = this.props;
+        var { facet, tooltip } = this.props;
 
         var indicator = (
                 <Fade in={this.state.facetClosing || !this.state.facetOpen}>
@@ -275,7 +268,7 @@ class FacetTermsList extends React.Component {
             <div
                 className={"facet row" + (this.state.facetOpen ? ' open' : ' closed') + (this.state.facetClosing ? ' closing' : '')}
                 hidden={false/*this.isEmpty()*/}
-                data-field={standardizedFieldKey}
+                data-field={facet.field}
             >
                 <h5 className="facet-title" onClick={this.handleOpenToggleClick}>
                     <span className="expand-toggle">
@@ -354,7 +347,6 @@ class Facet extends React.Component {
 
     render() {
         var facet = this.props.facet;
-        var standardizedFieldKey = Filters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
         if (typeof facet.title !== 'string'){
             facet = _.extend({}, facet, {
                 'title' : Schemas.Field.toName(facet.field, this.props.schemas || null)
@@ -363,15 +355,15 @@ class Facet extends React.Component {
 
         var schemaProperty, description;
         try {
-            schemaProperty = Schemas.Field.getSchemaProperty(standardizedFieldKey, this.props.schemas, this.props.itemTypeForSchemas || 'ExperimentSet');
+            schemaProperty = Schemas.Field.getSchemaProperty(facet.field, this.props.schemas, this.props.itemTypeForSchemas || 'ExperimentSet');
             description = schemaProperty && schemaProperty.description;
         } catch(e){
-            console.warn("Could not find schema property (for description tooltip) for field " + standardizedFieldKey, e);
+            console.warn("Could not find schema property (for description tooltip) for field " + facet.field, e);
         }
 
         if (this.isStatic()){
             // Only one term
-            var selected = this.props.isTermSelected(facet.terms[0].key, standardizedFieldKey);
+            var selected = this.props.isTermSelected(facet.terms[0].key, facet.field);
             var termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
             if (!termName || termName === 'null' || termName === 'undefined') termName = 'None';
             return (
@@ -383,7 +375,7 @@ class Facet extends React.Component {
                         ( this.props.extraClassname ? ' ' + this.props.extraClassname : '' )
                     }
                     style={{width: this.props.width}}
-                    data-field={standardizedFieldKey}
+                    data-field={facet.field}
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
@@ -418,7 +410,7 @@ class Facet extends React.Component {
                 </div>
             );
         } else {
-            return <FacetTermsList {...this.props} standardizedFieldKey={standardizedFieldKey} tooltip={description} />;
+            return <FacetTermsList {...this.props} tooltip={description} />;
         }
 
 

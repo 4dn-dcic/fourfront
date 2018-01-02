@@ -95,21 +95,18 @@ export function changeFilter(
     var tempObj = {};
     var newObj = {};
 
-    // standardize on field naming convention for expSetFilters before they hit the redux store.
-    field = standardizeFieldKey(field, experimentsOrSets);
-
     var expSet = expSetFilters[field] ? new Set(expSetFilters[field]) : new Set();
-    if(expSet.has(term)){
+    if (expSet.has(term)) {
         // term is already present, so delete it
         expSet.delete(term);
-    }else{
+    } else {
         expSet.add(term);
     }
     if(expSet.size > 0){
         tempObj[field] = expSet;
-        newObj = Object.assign({}, expSetFilters, tempObj);
+        newObj = _.extend({}, expSetFilters, tempObj);
     }else{ //remove key if set is empty
-        newObj = Object.assign({}, expSetFilters);
+        newObj = _.extend({}, expSetFilters);
         delete newObj[field];
     }
 
@@ -446,100 +443,6 @@ export function filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.e
     );
 }
 
-
-/**
- * Filter experiments or sets (graph arg) by filters, adjusting for adding/removing field or term (if defined) or ignored filters.
- *
- * @param {Object[]} graph      Array of experiment_sets or experiments as obtained from (props.)context['@graph'].
- * @param {Object}   filters    expSetFilters in form as obtained from Redux store, e.g. { experiments_in_set...organism.name : Set(['human','mouse']), ... }
- * @param {Object}   [ignored]
- * @param {string}   [field]
- * @param {string}   [term]
- */
-export function siftExperimentsClientSide(graph, filters, ignored=null, field=null, term=null) {
-    var passExperiments = new Set();
-    // Start by adding all applicable experiments to set
-    for(var i=0; i < graph.length; i++){
-        if(graph[i].experiments_in_set){
-            for(var j=0; j < graph[i].experiments_in_set.length; j++){
-                passExperiments.add(graph[i].experiments_in_set[j]);
-            }
-        } else {
-            passExperiments.add(graph[i]);
-        }
-    }
-    // search through currently selected expt filters
-    var filterKeys = Object.keys(filters);
-    if (field && !_.contains(filterKeys, field)){
-        filterKeys.push(field);
-    }
-    for(let experiment of passExperiments){
-        var eliminated = false;
-        for(var k=0; k < filterKeys.length; k++){
-            var refinedFilterSet = null;
-            if (ignored && typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
-                // remove the ignored filters by using the difference between sets
-                refinedFilterSet = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
-            }
-            if (refinedFilterSet === null) refinedFilterSet = filters[filterKeys[k]];
-            if (eliminated){
-                break;
-            }
-            var valueProbe = experiment;
-            var filterSplit = filterKeys[k].split('.');
-            for(var l=0; l < filterSplit.length; l++){
-                if(filterSplit[l] === 'experiments_in_set'){
-                    continue;
-                }
-                // for now, use first item in an array (for things such as biosamples)
-                if(Array.isArray(valueProbe)){
-                    valueProbe = valueProbe[0];
-                }
-                if(valueProbe[filterSplit[l]]){
-                    valueProbe = valueProbe[filterSplit[l]];
-                    if(l === filterSplit.length-1){ // last level of filter
-                        if(field && filterKeys[k] === field){
-                            if(valueProbe !== term){
-                                eliminated = true;
-                                passExperiments.delete(experiment);
-                            }
-                        }else if(refinedFilterSet.size > 0 && !refinedFilterSet.has(valueProbe)){ // OR behavior if not active field
-                            eliminated = true;
-                            passExperiments.delete(experiment);
-                        }
-                    }
-                }else{
-                    if(filterKeys[k] !== field && refinedFilterSet.size > 0){
-                        eliminated = true;
-                        passExperiments.delete(experiment);
-                        break;
-                    }else{
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    return passExperiments;
-}
-
-
-/** For client-side filtering, add or remove experiments_in_set at start of field depending if filtering experiments or sets. */
-export function standardizeFieldKey(field, expsOrSets = 'sets', reverse = false){
-    if (expsOrSets === 'experiments' && field !== 'experimentset_type'){
-        // ToDo: arrays of expSet- and exp- exclusive fields
-        if (reverse){
-            return field.replace('experiments_in_set.', '');
-        } else if (field.slice(0, 19) !== 'experiments_in_set.') {
-            if (field === 'type') return field;
-            //if (field.slice(0, 6) === 'audit.') return field;
-            return 'experiments_in_set.' + field;
-        }
-    }
-    return field;
-}
-
 /****
  **** Legacy Client-Side Filtering Facets Functions. For local filtering, e.g. of ExperimentSets' Experiments
  ****/
@@ -599,7 +502,7 @@ export function findIgnoredFiltersByStaticTerms(experimentArray, expSetFilters, 
                 experimentArray.map((experiment, j)=>{
                     var termVal = object.getNestedProperty(
                         experiment,
-                        standardizeFieldKey(selectedFacet, expsOrSets, true)
+                        selectedFacet
                     );
                     if (Array.isArray(termVal)){ // Only include terms by which we're filtering
                         return termVal.filter((term) => expSetFilters[selectedFacet].has(term));

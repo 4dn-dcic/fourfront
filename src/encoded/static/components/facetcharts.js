@@ -40,7 +40,6 @@ export class FacetCharts extends React.Component {
         'views' : ['small', 'large'],
         'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0&sort=experiments_in_set.accession',
         'colWidthPerScreenSize' : {
-            /* Previous, for mosaic: */
             'small' : [
                 //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
                 {'xs' : 12, 'sm' : 9,  'md' : 9, 'lg' : 9},
@@ -170,6 +169,7 @@ export class FacetCharts extends React.Component {
         }
 
         var height = show === 'small' ? 300 : 450;
+
         if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
 
         vizUtil.unhighlightTerms();

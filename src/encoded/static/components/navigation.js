@@ -241,7 +241,7 @@ export default class Navigation extends React.Component {
         var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted } = this.state;
         var { href, context, listActionsFor, session, updateUserInfo, schemas } = this.props;
         var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top");
-        var expSetFilters = Filters.currentExpSetFilters((context && context.filters) || null);
+        var expSetFilters = Filters.currentExpSetFilters((context && context.filters) || []);
 
         return (
             <div className={navClass}>
