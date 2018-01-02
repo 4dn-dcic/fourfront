@@ -451,16 +451,14 @@ class UserActions extends React.Component {
 
         if (this.state.isLoading){
             acctTitle = <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
+        } else if (this.props.session){
+            userDetails = JWT.getUserDetails();
+            if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) acctTitle = userDetails.first_name;
+            if (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1){
+                acctIcon = object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm');
+            } else acctIcon = <i title="Signed In" className="account-icon icon icon-user" />;
         } else {
-            if (this.props.session){
-                userDetails = JWT.getUserDetails();
-                if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) acctTitle = userDetails.first_name;
-                if (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1){
-                    acctIcon = object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm');
-                } else acctIcon = <i title="Signed In" className="account-icon icon icon-user" />;
-            } else {
-                acctIcon = <i className="account-icon icon icon-user-o" />;
-            }
+            acctIcon = <i className="account-icon icon icon-user-o" />;
         }
 
         return (

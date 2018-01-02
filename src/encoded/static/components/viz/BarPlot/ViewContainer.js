@@ -373,20 +373,10 @@ export const barPlotCursorActions = [
 
             var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
                 // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                if (
-                    expSetFilters && expSetFilters[node.field] &&
-                    expSetFilters[node.field].has(node.term)
-                ){
+                if (expSetFilters && expSetFilters[node.field] &&  expSetFilters[node.field].has(node.term)){
                     return expSetFilters;
                 }
-                return Filters.changeFilter(
-                    node.field,
-                    node.term,
-                    'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
-                    expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
-                    null,               // Callback
-                    true,               // Only return new expSetFilters vs saving them == set to TRUE
-                );
+                return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE
             }, currentExpSetFilters);
 
             // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
@@ -395,18 +385,14 @@ export const barPlotCursorActions = [
                 'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
             });
 
-            Filters.saveChangedFilters(
-                newExpSetFilters,
-                href,
-                function(){
-                    // Scroll to top of browse page container after navigation is complete.
-                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
-                }
-            );
+            Filters.saveChangedFilters(newExpSetFilters, href, () => {
+                // Scroll to top of browse page container after navigation is complete.
+                setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
+            });
 
         },
         'disabled' : function(cursorProps){
-            var expSetFilters = store.getState().expSetFilters;
+            var expSetFilters = Filters.currentExpSetFilters();
 
             if (expSetFilters && typeof expSetFilters === 'object'){
                 if (

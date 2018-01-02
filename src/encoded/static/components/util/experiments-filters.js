@@ -82,7 +82,6 @@ export function buildSearchHref(unselectHref, field, term, searchBase){
 export function changeFilter(
     field,
     term,
-    experimentsOrSets = 'experiments',
     expSetFilters = null,
     callback = null,
     returnInsteadOfSave = false,

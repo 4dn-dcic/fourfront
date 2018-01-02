@@ -287,7 +287,7 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
         if (!this.props.produced_in_pub){
             return null;
         }
-        
+
         inner = (
             <Publications.DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
                 <div className="more-details">
@@ -295,7 +295,6 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
                 </div>
             </Publications.DetailBlock>
         );
-        
 
         return (
             <div className="row mb-2">

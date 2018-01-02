@@ -5,6 +5,7 @@ var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
 var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate, object } = require('./../util');
+import ChartDetailCursor from './ChartDetailCursor';
 var vizUtil = require('./utilities');
 
 
@@ -368,7 +369,9 @@ export const ChartDataController = {
             // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
 
             var didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href));
-            if (didFiltersChange) ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { 'searchQuery' : Filters.searchQueryStringFromHref(refs.href) });
+            if (didFiltersChange) {
+                ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { 'searchQuery' : Filters.searchQueryStringFromHref(refs.href) });
+            }
         });
 
         isInitialized = true;
@@ -556,10 +559,20 @@ export const ChartDataController = {
      * @returns {void} Nothing
      */
     handleUpdatedFilters : function(expSetFilters, callback, opts){
+
+        var cb = function(){
+            // Hide any pop-overs still persisting with old filters.
+            setTimeout(function(){
+                ChartDetailCursor.reset(true);
+            }, 750);
+            if (typeof callback === 'function') callback();
+        };
+
+        // Reset or re-fetch 'filtered-in' data.
         if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiment_sets) && (!opts || !opts.searchQuery)){
-            ChartDataController.setState({ filtered_experiment_sets : null }, callback);
+            ChartDataController.setState({ filtered_experiment_sets : null }, cb);
         } else {
-            ChartDataController.fetchAndSetFilteredExperimentSets(callback, opts);
+            ChartDataController.fetchAndSetFilteredExperimentSets(cb, opts);
         }
     },
 

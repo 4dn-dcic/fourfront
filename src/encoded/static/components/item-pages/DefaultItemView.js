@@ -230,7 +230,7 @@ export class OverViewBodyItem extends React.Component {
             });
         } else if (Array.isArray(items) && items.length === 1 && items[0].display_title && object.atIdFromObject(items[0])) {
             return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
-        } else if (Array.isArray(items) && items.length > 1){            
+        } else if (Array.isArray(items) && items.length > 1){
             items = _.map(items, function(b,i){
                 return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement)  );
             });

@@ -118,7 +118,7 @@ class RegularCrumb extends React.Component {
             >
                 { node.data.name }
                 <span className="icon-container" onClick={()=>{
-                    Filters.changeFilter( node.data.field, node.data.term, 'sets', this.props.expSetFilters );
+                    Filters.changeFilter( node.data.field, node.data.term, this.props.expSetFilters );
                     analytics.event('QuickInfoBar', 'Unset Filter', {
                         'eventLabel' : analytics.eventLabelFromChartNode(node.data),
                         'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)

@@ -118,7 +118,7 @@ class ControlsAndResults extends React.Component {
         if (schemaForType && Array.isArray(schemaForType.excludedColumns) && _.every(schemaForType.excludedColumns, function(c){ return typeof c === 'string'; }) ){
             hiddenColumns = hiddenColumns.concat(schemaForType.excludedColumns);
         }
-        
+
         var columnDefinitionOverrides = {};
 
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
