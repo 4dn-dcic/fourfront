@@ -9,7 +9,7 @@ import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
+import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
@@ -81,9 +81,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
                 content : <RawFilesStackedTableSection
-                    width={width}
-                    context={context}
-                    {..._.pick(this.props, 'schemas', 'facets', 'expSetFilters')}
+                    width={width} context={context}
+                    {..._.pick(this.props, 'schemas', 'facets')}
                     {...this.state}
                 />
             });
@@ -97,9 +96,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 key : 'processed-files',
                 content : <ProcessedFilesStackedTableSection
                     processedFiles={processedFiles}
-                    width={width}
-                    context={context}
-                    {..._.pick(this.props, 'schemas', 'expSetFilters')}
+                    width={width} context={context}
+                    {..._.pick(this.props, 'schemas')}
                     {...this.state}
                 />
             });
@@ -289,7 +287,6 @@ export class RawFilesStackedTableSection extends React.Component {
                         ref="experimentsTable"
                         width={this.props.width}
                         experimentSetType={this.props.context.experimentset_type}
-                        expSetFilters={this.props.expSetFilters}
                         facets={ this.props.facets }
                         experimentSetAccession={this.props.context.accession || null}
                         experimentArray={this.props.context.experiments_in_set}

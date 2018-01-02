@@ -103,34 +103,9 @@ class Term extends React.Component {
 
     handleClick(e) {
         e.preventDefault();
-        /*
-        var existingFilters;
-        if (this.props.expSetFilters) existingFilters = _.clone(this.props.expSetFilters);
-        */
-        this.setState(
-            { filtering : true },
-            () => {
-                this.props.onFilter(
-                    this.props.facet.field,
-                    this.props.term.key,
-                    () => this.setState({ filtering : false })
-                );
-                /*
-                if (this.props.expSetFilters){
-                    var isUnset = false;
-                    if (
-                        existingFilters &&
-                        existingFilters[this.props.facet.field] &&
-                        existingFilters[this.props.facet.field].has(this.props.term.key)
-                    ) isUnset = true;
-                    analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
-                        'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.term.key,
-                        'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
-                    });
-                }
-                */
-            }
-        );
+        this.setState({ filtering : true }, () => {
+            this.props.onFilter( this.props.facet.field, this.props.term.key, () => this.setState({ filtering : false }) );
+        });
     }
 
     render() {
@@ -372,33 +347,9 @@ class Facet extends React.Component {
     handleStaticClick(e) {
         e.preventDefault();
         if (!this.isStatic()) return false;
-        //if (this.props.expSetFilters) var existingFilters = _.clone(this.props.expSetFilters);
-        this.setState(
-            { filtering : true },
-            () => {
-                this.props.onFilter(
-                    this.props.facet.field,
-                    this.props.facet.terms[0].key,
-                    ()=> {
-                        this.setState({ filtering : false });
-                        /*
-                        if (this.props.expSetFilters){
-                            var isUnset = false;
-                            if (
-                                existingFilters &&
-                                existingFilters[this.props.facet.field] &&
-                                existingFilters[this.props.facet.field].has(this.props.facet.terms[0].key)
-                            ) isUnset = true;
-                            analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
-                                'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.facet.terms[0].key,
-                                'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
-                            });
-                        }
-                        */
-                    }
-                );
-            }
-        );
+        this.setState({ filtering : true }, () => {
+            this.props.onFilter( this.props.facet.field, this.props.facet.terms[0].key, () => this.setState({ filtering : false }) );
+        });
     }
 
     render() {

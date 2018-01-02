@@ -223,9 +223,9 @@ export function event(category, action, fields = {}){
     if (!shouldTrack()) return false;
 
     var eventObj = _.extend(fields, {
-        hitType : 'event',
-        eventCategory : category,
-        eventAction : action
+        'hitType'       : 'event',
+        'eventCategory' : category,
+        'eventAction'   : action
     });
 
     // Convert internal dimension names to Google Analytics ones.

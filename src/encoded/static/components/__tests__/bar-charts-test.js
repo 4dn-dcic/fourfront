@@ -60,15 +60,6 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
     });
 
     /*
-    it('Has chart elements such as SVG, bar parts', function() {
-        server.respond();
-        jest.runAllTimers();
-        var svg = TestUtils.scryRenderedDOMComponentsWithClass(page, 'sunburst-svg-chart');
-        expect(svg.length).toBe(1);
-    });
-    */
-
-    /*
     it('Has multiple paths that theoretically may be clicked (have field & term related to them)', function() {
         var exClickablePaths = TestUtils.scryRenderedDOMComponentsWithClass(page, 'clickable');
         expect(exClickablePaths.length).toBeGreaterThan(1);

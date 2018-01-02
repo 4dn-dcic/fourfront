@@ -349,7 +349,7 @@ export default class BrowseView extends React.Component {
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.context !== nextProps.context) return true;
         if (this.props.session !== nextProps.session) return true;
-        if (this.props.href !== nextProps.href) return true; // Includes expSetFilters check as expSetFilters is now read from href.
+        if (this.props.href !== nextProps.href) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
