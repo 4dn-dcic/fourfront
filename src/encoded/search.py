@@ -232,8 +232,6 @@ def get_date_range(request):
 
 
 def get_all_subsequent_results(initial_search_result, search, extraRequestsNeeded, from_, sizeIncrement):
-    total = initial_search_result['hits'].get('total',0)
-
     while extraRequestsNeeded > 0:
         # print(str(extraRequestsNeeded) + " requests left to get all results.")
         from_ = from_ + sizeIncrement
