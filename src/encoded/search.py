@@ -231,29 +231,28 @@ def get_date_range(request):
     return before, after
 
 
-def get_all_subsequent_results(initial_search_result, search, extraRequestsNeeded, from_, sizeIncrement):
-    while extraRequestsNeeded > 0:
-        # print(str(extraRequestsNeeded) + " requests left to get all results.")
-        from_ = from_ + sizeIncrement
-        size = from_ + sizeIncrement
-        subsequent_search = search[from_:size]
+def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
+    from_ = 0
+    while extra_requests_needed_count > 0:
+        #print(str(extra_requests_needed_count) + " requests left to get all results.")
+        from_ = from_ + size_increment
+        subsequent_search = search[from_:from_ + size_increment]
         subsequent_search_result = execute_search(subsequent_search)
-        extraRequestsNeeded -= 1
-        yield subsequent_search_result['hits'].get('hits', [])
+        extra_requests_needed_count -= 1
+        for hit in subsequent_search_result['hits'].get('hits', []):
+            yield hit
 
 def execute_search_for_all_results(search):
-    from_ = 0
-    sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
-    size = from_ + sizeIncrement
+    size_increment = 1000 # Decrease this to like 5 or 10 to test.
 
-    first_search = search[from_:size] # get aggregations from here
+    first_search = search[0:size_increment] # get aggregations from here
     es_result = execute_search(first_search)
 
-    total = es_result['hits'].get('total',0)
-    extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
+    total_results_expected = es_result['hits'].get('total',0)
+    extra_requests_needed_count = int(math.ceil(total_results_expected / size_increment)) - 1 # Decrease by 1 (first es_result already happened)
 
-    if extraRequestsNeeded > 0:
-        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], itertools.chain.from_iterable(get_all_subsequent_results(es_result, search, extraRequestsNeeded, from_, sizeIncrement)))
+    if extra_requests_needed_count > 0:
+        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, size_increment))
     return es_result
 
 

@@ -220,35 +220,26 @@ export class RawFilesStackedTable extends React.Component {
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
+        var biosample = expsWithBiosample[0].biosample;
 
-        var visibleBiosampleTitle = (
-            expsWithBiosample[0].biosample.bio_rep_no ?
-                'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no
-                :
-                expsWithBiosample[0].biosample.biosource_summary
-        );
-
+        var bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
+        var biosampleAtId = object.itemUtil.atId(biosample);
+        var linkTitle = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
         return (
             <StackedBlock
                 columnClass="biosample"
                 hideNameOnHover={false}
-                key={object.atIdFromObject(expsWithBiosample[0].biosample)}
-                id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
+                key={biosampleAtId || biosample.bio_rep_no || i + 1}
+                id={'bio-' + (biosample.bio_rep_no || i + 1)}
                 label={{
                     title : 'Biosample',
-                    subtitle : visibleBiosampleTitle,
+                    subtitle : bioRepTitle,
                     subtitleVisible : true,
-                    accession : expsWithBiosample[0].biosample.accession
+                    accession : biosample.accession
                 }}
             >
-                <StackedBlockName
-                    relativePosition={
-                        expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
-                    }
-                >
-                    <a href={ object.atIdFromObject(expsWithBiosample[0].biosample) || '#' } className="name-title">
-                        { visibleBiosampleTitle }
-                    </a>
+                <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
+                    { biosampleAtId ? <a href={ biosampleAtId || '#' } className="name-title">{ linkTitle }</a> : <span  className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList
                     className="experiments"
