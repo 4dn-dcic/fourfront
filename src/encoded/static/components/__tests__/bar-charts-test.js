@@ -18,7 +18,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         FacetCharts = require('./../facetcharts').FacetCharts;
         ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
         context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
-        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
+        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate";
 
         var fieldsToFetch = ChartDataController.getRefs().fieldsToFetch;
 
@@ -48,7 +48,6 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         page = TestUtils.renderIntoDocument(
             <FacetCharts
                 href={href}
-                expSetFilters={{}}
                 updateStats={function(stats){ console.log("CHARTS-TEST: props.updateStats called by FacetCharts (good) with: ", stats); }}
                 schemas={null}
                 fieldsToFetch={fieldsToFetch} />

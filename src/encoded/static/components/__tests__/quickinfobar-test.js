@@ -44,8 +44,8 @@ describe('Testing viz/QuickInfoBar.js', function() {
                 "remove": "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse"
             }
         ];
-
-        page = TestUtils.renderIntoDocument(<QuickInfoBar href={href} expSetFilters={Filters.contextFiltersToExpSetFilters(contextFilters)} />);
+        expSetFilters = Filters.contextFiltersToExpSetFilters(contextFilters);
+        page = TestUtils.renderIntoDocument(<QuickInfoBar href={href} expSetFilters={expSetFilters} />);
     });
 
     it('Has elements for stats (file, exps, expsets)', function() {
