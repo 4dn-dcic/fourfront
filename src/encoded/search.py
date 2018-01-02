@@ -1,5 +1,6 @@
 import re
 import math
+import itertools
 from pyramid.view import view_config
 from snovault import (
     AbstractCollection,
@@ -103,7 +104,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Execute the query
     if size == 'all':
-        es_results = get_all_results(search)
+        es_results = execute_search_for_all_results(search)
     elif size:
         offset_size = from_ + size
         size_search = search[from_:offset_size]
@@ -230,7 +231,19 @@ def get_date_range(request):
     return before, after
 
 
-def get_all_results(search):
+def get_all_subsequent_results(initial_search_result, search, extraRequestsNeeded, from_, sizeIncrement):
+    total = initial_search_result['hits'].get('total',0)
+
+    while extraRequestsNeeded > 0:
+        # print(str(extraRequestsNeeded) + " requests left to get all results.")
+        from_ = from_ + sizeIncrement
+        size = from_ + sizeIncrement
+        subsequent_search = search[from_:size]
+        subsequent_search_result = execute_search(subsequent_search)
+        extraRequestsNeeded -= 1
+        yield subsequent_search_result['hits'].get('hits', [])
+
+def execute_search_for_all_results(search):
     from_ = 0
     sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
     size = from_ + sizeIncrement
@@ -241,18 +254,8 @@ def get_all_results(search):
     total = es_result['hits'].get('total',0)
     extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
 
-    if extraRequestsNeeded <= 0:
-        return es_result
-
-    while extraRequestsNeeded > 0:
-        # print(str(extraRequestsNeeded) + " requests left to get all results.")
-        from_ = from_ + sizeIncrement
-        size = from_ + sizeIncrement
-        subsequent_search = search[from_:size]
-        subsequent_es_result = execute_search(subsequent_search)
-        es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
-        extraRequestsNeeded -= 1
-        # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
+    if extraRequestsNeeded > 0:
+        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], itertools.chain.from_iterable(get_all_subsequent_results(es_result, search, extraRequestsNeeded, from_, sizeIncrement)))
     return es_result
 
 

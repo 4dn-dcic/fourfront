@@ -433,5 +433,4 @@ export class VerticallyCenteredChild extends React.Component {
 
         return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
     }
-
 }

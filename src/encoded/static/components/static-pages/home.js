@@ -88,9 +88,9 @@ class LinksRow extends React.Component {
                     </div>
                     <div className="link-block col-sm-3">
                         <a href="http://dcic.4dnucleome.org/" target="_blank">
-                        <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                            <span>4DN DCIC</span>
-                        </layout.VerticallyCenteredChild>
+                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
+                                <span>4DN DCIC</span>
+                            </layout.VerticallyCenteredChild>
                         </a>
                     </div>
                     <div className="link-block col-sm-3">
