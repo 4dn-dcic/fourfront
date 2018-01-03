@@ -6,7 +6,7 @@ import pytest
 def workflow_2(software_used):
     return{
         "schema_version": '2',
-        "steps": { "meta": { "software_used" : software_used['@id'] } } }
+        "steps": { "meta": { "software_used" : software_used['@id'] } }
     }
 
 
