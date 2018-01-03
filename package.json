@@ -86,6 +86,7 @@
     "form-serialize": "^0.6.0",
     "google-analytics": "file:node_shims/google-analytics",
     "immutable": "^3.8.1",
+    "jest": "^22.0.4",
     "js-md5": "^0.4.2",
     "jsonwebtoken": "^7.1.9",
     "lodash": "^4.17.4",
