@@ -20,4 +20,4 @@ def test_workflow_convert_software_used_to_list(
     migrator = app.registry['upgrader']
     value = migrator.upgrade('workflow', workflow_2, current_version='2', target_version='3')
     assert value['schema_version'] == '3'
-    assert value['steps']['meta']['software_used'] == [software['@id']] 
+    assert value['steps']['meta']['software_used'] == [software['@id']]
