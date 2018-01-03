@@ -175,10 +175,7 @@ export class RawFilesStackedTable extends React.Component {
                 >
                     { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ? <StackedBlockName/> : null }
                     <StackedBlockList title="Files" className="files">
-                        <FileEntryBlock
-                            file={null}
-                            columnHeaders={columnHeaders}
-                        />
+                        <FileEntryBlock file={null} columnHeaders={columnHeaders} />
                     </StackedBlockList>
                 </StackedBlock>
             );
@@ -189,9 +186,12 @@ export class RawFilesStackedTable extends React.Component {
                 exp.experiment_type ? exp.experiment_type : exp.accession
         );
 
+        var experimentAtId = object.itemUtil.atId(exp);
+        var linkTitle = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
+
         return (
             <StackedBlock
-                key={ object.atIdFromObject(exp) || exp.tec_rep_no || i }
+                key={ experimentAtId || exp.tec_rep_no || i }
                 hideNameOnHover={false}
                 columnClass="experiment"
                 label={{
@@ -204,16 +204,15 @@ export class RawFilesStackedTable extends React.Component {
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || object.atIdFromObject(exp)}
             >
                 <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
-                    <a href={ object.atIdFromObject(exp) || '#' } className="name-title">{ experimentVisibleName }</a>
+                    { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList
                     className={contentsClassName}
                     collapseLimit={3}
                     collapseShow={2}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
-                >
-                    { contents }
-                </StackedBlockList>
+                    children={contents}
+                />
             </StackedBlock>
         );
     }
@@ -229,7 +228,7 @@ export class RawFilesStackedTable extends React.Component {
             <StackedBlock
                 columnClass="biosample"
                 hideNameOnHover={false}
-                key={biosampleAtId || biosample.bio_rep_no || i + 1}
+                key={biosampleAtId || biosample.bio_rep_no || i }
                 id={'bio-' + (biosample.bio_rep_no || i + 1)}
                 label={{
                     title : 'Biosample',
@@ -239,12 +238,12 @@ export class RawFilesStackedTable extends React.Component {
                 }}
             >
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
-                    { biosampleAtId ? <a href={ biosampleAtId || '#' } className="name-title">{ linkTitle }</a> : <span  className="name-title">{ linkTitle }</span> }
+                    { biosampleAtId ? <a href={biosampleAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList
                     className="experiments"
                     title="Experiments"
-                    children={expsWithBiosample.map(this.renderExperimentBlock)}
+                    children={_.map(expsWithBiosample, this.renderExperimentBlock)}
                     collapseShow={2}
                     showMoreExtTitle={
                         expsWithBiosample.length > 5 ?
