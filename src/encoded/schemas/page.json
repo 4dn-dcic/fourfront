@@ -101,9 +101,20 @@
             "description": "location of additional files needed to assemble the static page",
             "type": "string"
         },
+        "content": {
+            "title": "Content Sections",
+            "description": "Sections used to compose the static page",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string",
+                "linkTo" : "StaticSection"
+            }
+        },
         "sections": {
             "title": "Sections",
-            "description": "sections used to compose the static page",
+            "notes" : "REMOVE THIS AFTER EVERYTHING IS MIGRATED TO 'content' (LINKTO StaticSection[])",
+            "description": "Deprecated",
             "type": "array",
             "items": {
                 "type": "object",

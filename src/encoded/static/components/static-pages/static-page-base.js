@@ -46,6 +46,11 @@ export function sortedSections(){
 
 export function renderSections(renderMethod, context){
     if (!context || !context.content) return null;
+    // Arr
+    if (Array.isArray(context.content)){
+        return _.map(context.content, function(section){ return renderMethod(section.id || section.name, section, context); });
+    }
+    // Obj - todo remove after complete migration
     return _(context.content).chain()
         .pairs()
         .sort(function(a,b){
@@ -65,29 +70,35 @@ export function renderSections(renderMethod, context){
 
 export function parseSectionsContent(context = this.props.context){
 
-    return _.extend({}, context, {
-        'content' : _(context.content).chain().pairs().map(function(sectionPair){ // [key, value] pairs
-            var s = sectionPair[1];
-            // If Markdown, we convert 's.content' to JSX elements.
-            if (s.filetype === 'md'){
-                var content = compiler(s.content, {
-                    'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
-                        .map(function(type){
-                            return [type, {
-                                component : Entry.Heading,
-                                props : { 'type' : type }
-                            }];
-                        })
-                        .object()
-                        .value()
-                });
-                s =  _.extend({}, s, { 'content' : content });
-            }
-            // TODO: other parsing stuff based on other filetypes.
-            // Else: return the plaintext representation.
-            return [sectionPair[0], s];
-        }).object().value()
-    });
+    function parse(section){
+        if (section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
+            var content = compiler(section.content, {
+                'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
+                    .map(function(type){
+                        return [type, {
+                            component : Entry.Heading,
+                            props : { 'type' : type }
+                        }];
+                    })
+                    .object()
+                    .value()
+            });
+            section =  _.extend({}, section, { 'content' : content });
+        }
+        // TODO: other parsing stuff based on other filetypes.
+        // Else: return the plaintext representation.
+        return section;
+    }
+
+    if (Array.isArray(context.content)){
+        return _.extend({}, context, { 'content' : _.map(context.content, parse) });
+    } else {
+        return _.extend({}, context, {
+            'content' : _(context.content).chain().pairs().map(function(sectionPair){ // [key, value] pairs
+                return [sectionPair[0], parse(sectionPair[1])];
+            }).object().value()
+        });
+    }
 }
 
 
@@ -310,9 +321,10 @@ export const Entry = {
         }
 
         var className = "fourDN-content" + (baseClassName? ' ' + baseClassName : '');
+
         if (filetype === 'csv'){
             return <CSVMatrixView csv={content} options={this.props.content.options} />;
-        } else if (placeholder || filetype === 'md'){
+        } else if (placeholder || (filetype === 'md')){
             content = correctRelativeLinks(content, this.props.context);
             //console.log(this.props.section, content, this.props.context);
             return <div className={className}>{ content }</div>;
@@ -322,14 +334,16 @@ export const Entry = {
     },
 
     render : function(){
-        var c = this.props.content;
+        var { content, entryType, sectionName, className } = this.props;
+        if (sectionName.indexOf('#') > -1){
+            var sectionParts = sectionName.split('#');
+            sectionName = sectionParts[sectionParts.length - 1];
+        }
 
         return (
-            <div className={this.props.entryType + "-entry static-section-entry"} id={this.props.section}>
-                { c && c.title ?
-                    <h2 className="fourDN-header">{ c.title }</h2>
-                : null }
-                { this.renderEntryContent(this.props.className) }
+            <div className={entryType + "-entry static-section-entry"} id={sectionName}>
+                { content && content.title ? <h2 className="fourDN-header">{ content.title }</h2> : null }
+                { this.renderEntryContent(className) }
             </div>
         );
     }
@@ -366,12 +380,7 @@ class StaticPageExample extends React.Component {
     static propTypes = {
         context : PropTypes.shape({
             "title" : PropTypes.string,
-            "content" : PropTypes.shape({
-                "sectionID1" : PropTypes.object,
-                "sectionID2" : PropTypes.object,
-                "sectionID3" : PropTypes.object,
-                "sectionIDFour" : PropTypes.object
-            }).isRequired
+            "content" : PropTypes.any.isRequired
         }).isRequired
     }
 
@@ -381,8 +390,8 @@ class StaticPageExample extends React.Component {
         this.render = render.simple.bind(this);
     }
     
-    entryRenderFxn(key, content, context){
-        return <EntryExample key={key} section={key} content={content} context={context} />;
+    entryRenderFxn(sectionName, content, context){
+        return <EntryExample key={sectionName} sectionName={sectionName} content={content} context={context} />;
     }
 
 }

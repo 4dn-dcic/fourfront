@@ -21,6 +21,7 @@ ORDER = [
     'user',
     'award',
     'lab',
+    'static_section',
     'page',
     'ontology',
     'ontology_term',

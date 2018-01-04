@@ -49,8 +49,11 @@ def listFilesInInDirectory(dirLocation):
     return [fn for fn in os.listdir(dirLocation) if os.path.isfile(dirLocation + '/' + fn)]
 
 
-def get_local_file_contents(filename, contentFilesLocation):
-    full_file_path = contentFilesLocation + '/' + filename
+def get_local_file_contents(filename, contentFilesLocation=None):
+    if contentFilesLocation is None:
+        full_file_path = filename
+    else:
+        full_file_path = contentFilesLocation + '/' + filename
     if not os.path.isfile(full_file_path):
         return None
     file = open(full_file_path, encoding="utf-8")
@@ -59,12 +62,65 @@ def get_local_file_contents(filename, contentFilesLocation):
     return output
 
 
-def get_remote_file_contents(uri, cached_remote_files):
+def get_remote_file_contents(uri, cached_remote_files={}):
     if cached_remote_files.get(uri) is not None:
         return cached_remote_files[uri]
     resp = requests.get(uri)
     cached_remote_files[uri] = resp.text
     return resp.text
+
+
+@collection(
+    name='static-sections',
+    lookup_key='name',
+    properties={
+        'title': 'Static Sections',
+        'description': 'Static Sections for the Portal',
+    })
+class StaticSection(Item):
+    """The Software class that contains the software... used."""
+    item_type = 'static_section'
+    schema = load_schema('encoded:schemas/static_section.json')
+    embedded_list = []
+
+    @calculated_property(schema={
+        "title": "Content",
+        "description": "Content for the page",
+        "type": "any"
+    })
+    def content(self, request, body=None, file=None):
+
+        if isinstance(body, str):
+            # Don't need to load in anything.
+            return body
+
+        if isinstance(file, str):
+            content = None
+            if file[0:4] == 'http' and '://' in file[4:8]:  # Remote File
+                return get_remote_file_contents(file)
+            else:                                           # Local File
+                file_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../../.." + file)   # Go to top of repo, append file
+                return get_local_file_contents(file_path)
+
+        return None
+
+    @calculated_property(schema={
+        "title": "File Type",
+        "description": "Type of file used for content",
+        "type": "string"
+    })
+    def filetype(self, request, body=None, file=None):
+        if isinstance(body, str):
+            return 'txt'
+        if isinstance(file, str):
+            filename_parts = file.split('.')
+            if len(filename_parts) > 1:
+                return filename_parts[len(filename_parts) - 1]
+            else:
+                return 'txt' # Default if no file extension.
+        return None
+
+
 
 
 @collection(
@@ -77,85 +133,7 @@ class Page(Item):
     """The Software class that contains the software... used."""
     item_type = 'page'
     schema = load_schema('encoded:schemas/page.json')
-    embedded_list = []
-
-    @calculated_property(schema={
-        "title": "Content",
-        "description": "Content for the page",
-        "type": "object",
-    })
-    def content(self, request):
-        page = self.properties.get('name', None)
-        content = None
-        contentFilesLocation = None #os.path.dirname(os.path.realpath(__file__))
-
-        cached_remote_files = {}
-
-        pageMeta = self.properties
-
-        content = {} # Our output object/dict
-        sections = pageMeta.get('sections', None) # Used to fill up our output object/dict
-
-        if pageMeta.get('directory'):
-            contentFilesLocation = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../../.." + pageMeta['directory']) # Go to top of repo, append directory
-        else:
-            contentFilesLocation = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../static/data/" + page)
-            print("No explicit directory set for page with pathname \"" + page + "\", will check default directory location (/static/data/<pathname> : " + contentFilesLocation + ") for sections with filenames")
-
-
-        if sections is None and os.path.isdir(contentFilesLocation):
-            print("No explicity-defined sections for page " + page + ', attempting to use filenames from this directory as sections: ' + contentFilesLocation)
-            sections = [{'filename': fn} for fn in listFilesInInDirectory(contentFilesLocation)]
-
-        if sections is None or len(sections) == 0:
-            print("No sections nor local directory of files defined for page " + page + ', CANCELLING - NO CONTENT WILL BE AVAILABLE FOR PAGE')
-            return None
-
-
-        try:
-            for i, s in enumerate(sections):
-                sectionID = s.get('id')  # use section 'id', or 'filename' minus extension
-                if sectionID is None:
-                    sectionID = s['filename'].split('.')[0]
-                # We have content defined in JSON definition file already, skip any fetching.
-                if s.get('content', None) is not None:
-                    content[sectionID] = {
-                        'content': s['content'],
-                        'title': s.get('title', None),
-                        'filetype': 'txt'
-                    }
-                else:
-                    content_for_section = None
-                    if s['filename'][0:4] == 'http' and '://' in s['filename'][4:8]:
-                        # Remote File
-                        content_for_section = get_remote_file_contents(
-                            s['filename'], cached_remote_files)
-                    else:
-                        content_for_section = get_local_file_contents(
-                            s['filename'], contentFilesLocation)
-                    filenameParts = s['filename'].split('.')
-                    content[sectionID] = {
-                        'content': content_for_section,
-                        'title': s.get('title', None),
-                        'filetype': filenameParts[len(filenameParts) - 1]
-                    }
-                if s.get('title', None):
-                    content[sectionID]['title'] = s['title']
-                if s.get('toc-title', None):
-                    content[sectionID]['toc-title'] = s['toc-title']
-
-                content[sectionID].update({
-                    k: v for k, v in s.items() if k not in [
-                        'id', 'title', 'toc-title', 'order', 'filetype', 'filename']
-                })
-
-                content[sectionID]["order"] = i
-
-        except Exception as e:
-            print(e)
-            print('Could not get contents for ' + page)
-
-        return content
+    embedded_list = ['content.*']
 
 
 def static_page(request):

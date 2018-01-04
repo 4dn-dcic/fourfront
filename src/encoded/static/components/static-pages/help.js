@@ -7,6 +7,8 @@ import { content_views } from '../globals';
 import * as StaticPageBase from './static-page-base';
 import { Button } from 'react-bootstrap';
 
+/** Used instead of StaticPageBase EntryExample to support help-specific placeholder(s) */
+/** TODO: Extend StaticPageBase / Entry(Example) instead -- simplifying StaticPageBase in process */
 class Entry extends React.Component {
 
     static defaultProps = {
@@ -35,12 +37,7 @@ export default class HelpPage extends React.Component {
     static propTypes = {
         'context' : PropTypes.shape({
             "title" : PropTypes.string,
-            "content" : PropTypes.shape({
-                "introduction" : PropTypes.object,
-                "metadataStructure1" : PropTypes.object,
-                "metadataStructure2" : PropTypes.object,
-                "restAPI" : PropTypes.object
-            }).isRequired
+            "content" : PropTypes.any.isRequired
         }).isRequired
     }
 
@@ -54,8 +51,8 @@ export default class HelpPage extends React.Component {
         this.render = StaticPageBase.render.base.bind(this);
     }
 
-    entryRenderFxn(key, content, context){
-        return (<Entry key={key} section={key} content={content} context={context} />);
+    entryRenderFxn(sectionName, content, context){
+        return (<Entry key={sectionName} sectionName={sectionName} content={content} context={context} />);
     }
 
 }
