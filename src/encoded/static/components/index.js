@@ -14,7 +14,7 @@ require('./app');
 require('./footer');
 require('./globals');
 require('./static-pages/StaticPage');
-require('./static-pages/home');
+require('./static-pages/HomePage');
 require('./static-pages/HelpPage');
 require('./static-pages/PlannedDataSubmission');
 require('./submissions');

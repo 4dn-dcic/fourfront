@@ -4,8 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { compiler } from 'markdown-to-jsx';
-import TableOfContents from './table-contents';
-import { CSVMatrixView } from './components';
+import { CSVMatrixView, TableOfContents } from './components';
 import * as globals from './../globals';
 import { layout, console } from './../util';
 
@@ -47,10 +46,12 @@ export function parseSectionsContent(context = this.props.context){
 
 
 /**
- * Converts links to other files into links to sections from a React element and its children.
+ * Converts links to other files into links to sections from a React element and its children (recursively).
  * 
- * @param {Element} content - A high-level React element representation of some content which might have relative links.
- * 
+ * @param {JSX.Element} elem - A high-level React element representation of some content which might have relative links.
+ * @param {{ 'content' : { 'name' : string } }} context - Backend-provided data.
+ * @param {number} depth - Current depth.
+ * @returns {JSX.Element} - Copy of original 'elem' param with corrected links.
  */
 export function correctRelativeLinks(elem, context, depth = 0){
     if (typeof elem !== 'object' || !elem) return elem; // Could be a string, or null.
@@ -70,7 +71,7 @@ export function correctRelativeLinks(elem, context, depth = 0){
                 }
             } else { // Check if is name of a section, and if so, correct.
                 var filenameWithoutExtension = href.split('.').slice(0, -1).join('.');
-                if (typeof context.content[filenameWithoutExtension] !== 'undefined'){
+                if (typeof _.find(context.content, { 'name' : filenameWithoutExtension }) !== 'undefined'){
                     href = '#' + filenameWithoutExtension;
                 }
             }
@@ -322,9 +323,7 @@ export default class StaticPage extends React.Component {
 
     render(){
         var parsedContent = parseSectionsContent(this.props.context);
-
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
-
         return (
             <Wrapper
                 title={parsedContent.title}
