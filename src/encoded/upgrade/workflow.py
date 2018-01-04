@@ -201,3 +201,16 @@ def workflow_1_2(value, system):
 
     value['arguments'] = filtered_arguments
     return value
+
+
+@upgrade_step('workflow', '2', '3')
+def workflow_2_3(value, system):
+    '''Change software_used to a list'''
+
+    if value.get('steps') is not None:
+        if value.get('steps').get('meta') is not None:
+            if value.get('steps').get('meta').get('software_used') is not None:
+                sf = value.get('steps').get('meta').get('software_used')
+                if not isinstance(sf, list):
+                    value.get('steps').get('meta')['software_used'] = [sf]
+    return value

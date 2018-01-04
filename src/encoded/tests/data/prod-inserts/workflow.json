@@ -81,7 +81,7 @@
             "name":"hictool_fastq2bam",
             "meta":{
                 "description":"Alignment according to the GITAR pipeline",
-                "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
+                "software_used": ["/software/7868f960-50ac-11e4-916c-0800200c9a66/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -173,7 +173,7 @@
             "name":"hictool_bam2hdf5",
             "meta":{
                 "description":"Converting bam to hdf5 according to the GITAR pipeline",
-                "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
+                "software_used": ["/software/7868f960-50ac-11e4-916c-0800200c9a66/"],
                 "analysis_step_types":[
                     "file format conversion"
                 ]
@@ -293,7 +293,7 @@
             "name":"hictool_hdf52matrix",
             "meta":{
                 "description":"Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
-                "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
+                "software_used": ["/software/7868f960-50ac-11e4-916c-0800200c9a66/"],
                 "analysis_step_types":[
                     "normalization"
                 ]
@@ -571,7 +571,7 @@
             "name":"FastQC",
             "meta":{
                 "description":"FastQC QC for fastq files",
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13131/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a13131/"],
                 "analysis_step_types":[
                     "QC calculation"
                 ]
@@ -697,7 +697,7 @@
             "name":"PairsQC",
             "meta":{
                 "description":"PairsQC QC for pairs files",
-                "software_used":"/software/15731f58-868f-44ab-b4ed-77b82ecd032b/",
+                "software_used": ["/software/15731f58-868f-44ab-b4ed-77b82ecd032b/"],
                 "analysis_step_types":[
                     "QC calculation"
                 ]
@@ -937,7 +937,7 @@
             ],
             "name":"bwa-mem",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a13209/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -994,7 +994,7 @@
             ],
             "name":"sort_bam",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a06735/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a06735/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -1053,7 +1053,7 @@
             ],
             "name":"bam2pairs",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -1201,7 +1201,7 @@
             ],
             "name":"bwa-mem",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a13209/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -1258,7 +1258,7 @@
             ],
             "name":"sort_bam",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a06735/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a06735/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -1317,7 +1317,7 @@
             ],
             "name":"bam2pairs",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types":[
                     "alignment"
                 ]
@@ -1522,7 +1522,7 @@
             ],
             "name":"merge_pairs",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types":[
                     "file merging"
                 ]
@@ -1601,7 +1601,7 @@
             ],
             "name":"cooler",
             "meta":{
-                "software_used":"/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types":[
                     "aggregation"
                 ]
@@ -1673,7 +1673,7 @@
             ],
             "name":"pairs2hic",
             "meta":{
-                "software_used":"/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"],
                 "analysis_step_types":[
                     "aggregation",
                     "normalization"
@@ -1727,7 +1727,7 @@
             ],
             "name":"hic2mcool",
             "meta":{
-                "software_used":"/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types":[
                     "file format conversion"
                 ]
@@ -1856,7 +1856,7 @@
             ],
             "name":"merge_pairs",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types":[
                     "file merging"
                 ]
@@ -1971,7 +1971,7 @@
             ],
             "name":"juicer",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23548/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23548/"],
                 "analysis_step_types":[
                     "alignment",
                     "filtering"
@@ -2053,7 +2053,7 @@
             ],
             "name":"juicer2pairs",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types":[
                     "file format conversion"
                 ]
@@ -2224,7 +2224,7 @@
             ],
             "name":"juicer",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23599/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23599/"],
                 "analysis_step_types":[
                     "alignment",
                     "filtering"
@@ -2306,7 +2306,7 @@
             ],
             "name":"juicer2pairs",
             "meta":{
-                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types":[
                     "file format conversion"
                 ]
@@ -2505,7 +2505,7 @@
             ],
             "name": "merge_pairs",
             "meta": {
-                "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types": [
                     "file merging"
                 ]
@@ -2572,7 +2572,7 @@
             ],
             "name": "pairs2hic",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"],
                 "analysis_step_types": [
                     "aggregation",
                     "normalization"
@@ -2652,7 +2652,7 @@
             ],
             "name": "cooler",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types": [
                     "aggregation"
                 ]
@@ -2767,7 +2767,7 @@
             ],
             "name": "merge_pairs",
             "meta": {
-                "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                 "analysis_step_types": [
                     "file merging"
                 ]
@@ -2834,7 +2834,7 @@
             ],
             "name": "pairs2hic",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"],
                 "analysis_step_types": [
                     "aggregation",
                     "normalization"
@@ -2901,7 +2901,7 @@
             ],
             "name": "cooler",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types": [
                     "aggregation"
                 ]
@@ -2996,7 +2996,7 @@
             ],
             "name": "add-hic-normvector-to-mcool",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types": [
                     "file format conversion"
                 ]
@@ -3085,7 +3085,7 @@
             ],
             "name": "extract-mcool-normvector-for-juicebox",
             "meta": {
-                "software_used": "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
+                "software_used": ["/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"],
                 "analysis_step_types": [
                     "file format conversion"
                 ]
@@ -3191,7 +3191,7 @@
             ],
             "name": "addnormtohic",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"],
                 "analysis_step_types": [
                     "normalization"
                 ]
@@ -3276,7 +3276,7 @@
             ],
             "name": "cool2mcool",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types": [
                     "aggregation",
                     "normalization",
@@ -3318,7 +3318,7 @@
             ],
             "name": "extract_mcool_normvector_for_juicebox",
             "meta": {
-                "software_used": "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
+                "software_used": ["/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"],
                 "analysis_step_types": [
                     "file format conversion"
                 ]
@@ -3377,7 +3377,7 @@
             ],
             "name": "add_hic_normvector_to_mcool",
             "meta": {
-                "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                 "analysis_step_types": [
                     "file format conversion"
                 ]
@@ -3483,7 +3483,7 @@
             ],
             "name": "bwa-mem",
             "meta": {
-                "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
+                "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a13209/"],
                 "analysis_step_types": [
                     "alignment"
                 ]
@@ -3618,7 +3618,7 @@
             ],
             "name": "bwa-mem",
             "meta": {
-                "software_used": "/software/42adeb1b-c46c-4ba8-b191-56036ddcd544/",
+                "software_used": ["/software/42adeb1b-c46c-4ba8-b191-56036ddcd544/"],
                 "analysis_step_types": [
                     "alignment"
                 ]
@@ -3693,7 +3693,7 @@
         {
             "name": "pairsam-parse-sort",
             "meta": {
-                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "software_used": ["/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"],
                 "analysis_step_types": [
                     "sorting"
                 ]
@@ -3806,7 +3806,7 @@
         {
             "name": "pairsam-merge",
             "meta": {
-                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "software_used": ["/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"],
                 "analysis_step_types": [
                     "merging"
                 ]
@@ -3893,7 +3893,7 @@
         {
             "name":"pairsam-markasdup",
             "meta":{
-                "software_used":"/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "software_used": ["/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"],
                 "analysis_step_types":[
                     "annotating"
                 ]
@@ -3978,7 +3978,7 @@
         {
             "name": "pairsam-filter",
             "meta": {
-                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "software_used": ["/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"],
                 "analysis_step_types": [
                     "filtering"
                 ]
@@ -4089,7 +4089,7 @@
         {
             "name": "addfragtopairs",
             "meta": {
-                "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
+                "software_used": ["/software/e17c3e9c-8882-4478-93da-062c5213341d/"],
                 "analysis_step_types": [
                     "file format conversion"
                 ]
@@ -4181,7 +4181,7 @@
         {
             "name": "pairs-patch",
             "meta": {
-                "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
+                "software_used": ["/software/e17c3e9c-8882-4478-93da-062c5213341d/"],
                 "analysis_step_types": [
                     "file format conversion"
                 ]
