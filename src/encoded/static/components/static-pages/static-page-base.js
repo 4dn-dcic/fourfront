@@ -170,7 +170,7 @@ export const render = {
         var parsedContent = parseSectionsContent(this.props.context);
         // .toc && .toc.enabled should be exactly as were delivered from back-end.
         var isTableOfContentsEnabled = false;
-        if (parsedContent && parsedContent.toc && parsedContent.toc.enabled){
+        if (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled){
             isTableOfContentsEnabled = true;
         }
         return (
@@ -233,7 +233,7 @@ export class Wrapper extends React.Component {
         if (!this.props.tableOfContents || this.props.tableOfContents.enabled === false) return null;
         var contentColSize = this.contentColSize();
         var context = this.props.context;
-        var toc = context.toc || typeof this.props.tableOfContents === 'object' ? this.props.tableOfContents : {};
+        var toc = context['table-of-contents'] || (this.props.tableOfContents && typeof this.props.tableOfContents === 'object' ? this.props.tableOfContents : {});
         var title = this.props.title || (context && context.title) || null;
         return (
             <div className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
@@ -243,10 +243,10 @@ export class Wrapper extends React.Component {
                     fixedWidth={(1140 * ((12 - contentColSize) / 12))}
                     navigate={this.props.navigate}
                     href={this.props.href}
-                    skipDepth={toc && context.toc['skip-depth'] || 0}
-                    maxHeaderDepth={toc && context.toc['header-depth'] || 6}
-                    includeTop={toc && context.toc['include-top-link']}
-                    listStyleTypes={['none'].concat((toc && context.toc['list-styles']) || this.props.tocListStyles)}
+                    skipDepth={toc['skip-depth'] || 0}
+                    maxHeaderDepth={toc['header-depth'] || 6}
+                    includeTop={toc['include-top-link']}
+                    listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
                 />
             </div>
         );

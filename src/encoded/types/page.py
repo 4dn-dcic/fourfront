@@ -85,8 +85,7 @@ class StaticSection(Item):
 
     @calculated_property(schema={
         "title": "Content",
-        "description": "Content for the page",
-        "type": "any"
+        "description": "Content for the page"
     })
     def content(self, request, body=None, file=None):
 
@@ -95,7 +94,6 @@ class StaticSection(Item):
             return body
 
         if isinstance(file, str):
-            content = None
             if file[0:4] == 'http' and '://' in file[4:8]:  # Remote File
                 return get_remote_file_contents(file)
             else:                                           # Local File

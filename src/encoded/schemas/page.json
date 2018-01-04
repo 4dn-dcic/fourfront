@@ -43,8 +43,8 @@
         },
         "description": {
             "title": "Description",
-            "type": "string",
-            "default": ""
+            "description" : "Internal description of page.",
+            "type": "string"
         },
         "notification": {
             "title": "Notification",
