@@ -9,65 +9,13 @@ import { CSVMatrixView } from './components';
 import * as globals from './../globals';
 import { layout, console } from './../util';
 
+
 /**
- * These are a set of 'mixin' functions which can be used directly on Static Page components.
- * Simply reference the component method to the relevant method below in React.createClass(..)
+ * Converts context.content into different format if necessary and returns copy of context with updated 'content'.
+ * Currently only converts Markdown content (if a context.content[] item has 'filetype' === 'md'). Others may follow.
+ * 
+ * @param {Object} context - Context provided from back-end, including all properties.
  */
-export const defaultProps = {
-    "context" : {
-        "title" : "Page Title",
-        "content" : {
-            "sectionNameID1" : {
-                "order"      : 0,
-                "title"      : "Section Title 1",
-                "content"    : "<h2>Hello</h2>",
-                "filetype"   : "html"
-            },
-            "sectionNameID2" : {
-                "order"      : 1,
-                "title"      : "Section Title 2",
-                "content"    : "<h2>World</h2>",
-                "filetype"   : "html"
-            }
-        }
-    }
-};
-
-
-export function getDefaultProps(){
-    return _.clone(defaultProps);
-}
-
-
-export function sortedSections(){
-    if (!this.props.context || !this.props.context.content) return null;
-}
-
-
-export function renderSections(renderMethod, context){
-    if (!context || !context.content) return null;
-    // Arr
-    if (Array.isArray(context.content)){
-        return _.map(context.content, function(section){ return renderMethod(section.id || section.name, section, context); });
-    }
-    // Obj - todo remove after complete migration
-    return _(context.content).chain()
-        .pairs()
-        .sort(function(a,b){
-            a = a[1]; b = b[1];
-            return (a.order || 0) - (b.order || 0);
-        })
-        .map(function(contentPair){
-            return renderMethod(
-                contentPair[0] /* = key for section */,
-                contentPair[1] /* = content */,
-                context /* = full content */
-            );
-        })
-        .value();
-}
-
-
 export function parseSectionsContent(context = this.props.context){
 
     function parse(section){
@@ -76,7 +24,7 @@ export function parseSectionsContent(context = this.props.context){
                 'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
                     .map(function(type){
                         return [type, {
-                            component : Entry.Heading,
+                            component : MarkdownHeading,
                             props : { 'type' : type }
                         }];
                     })
@@ -90,17 +38,12 @@ export function parseSectionsContent(context = this.props.context){
         return section;
     }
 
-    if (Array.isArray(context.content)){
-        return _.extend({}, context, { 'content' : _.map(context.content, parse) });
-    } else {
-        return _.extend({}, context, {
-            'content' : _(context.content).chain().pairs().map(function(sectionPair){ // [key, value] pairs
-                return [sectionPair[0], parse(sectionPair[1])];
-            }).object().value()
-        });
+    if (!Array.isArray(context.content)){
+        throw new Error('context.content is not an array.');
     }
-}
 
+    return _.extend({}, context, { 'content' : _.map(context.content, parse) });
+}
 
 
 /**
@@ -164,57 +107,11 @@ export function correctRelativeLinks(elem, context, depth = 0){
 
 
 
-export const render = {
-
-    base : function(){
-        var parsedContent = parseSectionsContent(this.props.context);
-        // .toc && .toc.enabled should be exactly as were delivered from back-end.
-        var isTableOfContentsEnabled = false;
-        if (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled){
-            isTableOfContentsEnabled = true;
-        }
-        return (
-            <Wrapper
-                title={parsedContent.title}
-                tableOfContents={isTableOfContentsEnabled}
-                context={parsedContent}
-                navigate={this.props.navigate}
-                href={this.props.href}
-            >
-                { renderSections(this.entryRenderFxn, parsedContent) }
-            </Wrapper>
-        );
-    },
-
-    simple : function() {
-        var context = parseSectionsContent(this.props.context);
-        return (
-            <Wrapper title={context.title}>
-                { renderSections(this.entryRenderFxn, context) }
-            </Wrapper>
-        );
-    },
-
-    withTableOfContents : function(){
-
-        var context = parseSectionsContent(this.props.context);
-        return (
-            <Wrapper
-                title={context.title}
-                tableOfContents={true}
-                context={context}
-                navigate={this.props.navigate}
-                href={this.props.href}
-            >
-                { renderSections(this.entryRenderFxn, context) }
-            </Wrapper>
-        );
-    },
-};
 
 
 
-export class Wrapper extends React.Component {
+
+class Wrapper extends React.Component {
 
     static defaultProps = {
         'contentColSize' : 12,
@@ -270,45 +167,65 @@ export class Wrapper extends React.Component {
 }
 
 
-export const Entry = {
+export class MarkdownHeading extends React.Component {
 
-    Heading : class Heading extends React.Component {
+    static defaultProps = {
+        'type' : 'h1',
+        'id' : null
+    }
 
-        static defaultProps = {
-            'type' : 'h1',
-            'id' : null
+    constructor(props){
+        super(props);
+        this.getID = this.getID.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    getID(set = false){
+        if (typeof this.id === 'string') return this.id;
+        var id = (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
+        if (set){
+            this.id = id;
         }
+        return id;
+    }
 
-        constructor(props){
-            super(props);
-            this.getID = this.getID.bind(this);
-            this.render = this.render.bind(this);
-        }
+    componentWillUnmount(){ delete this.id; }
 
-        getID(set = false){
-            if (typeof this.id === 'string') return this.id;
-            var id = (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
-            if (set){
-                this.id = id;
+    render(){
+        return React.createElement(
+            this.props.type,
+            {
+                'children' : this.props.children,
+                'id' : this.getID(true),
+                'ref' : 'el'
             }
-            return id;
-        }
+        );
+    }
+}
 
-        componentWillUnmount(){ delete this.id; }
 
-        render(){
-            return React.createElement(
-                this.props.type,
-                {
-                    'children' : this.props.children,
-                    'id' : this.getID(true),
-                    'ref' : 'el'
-                }
-            );
-        }
-    },
 
-    renderEntryContent : function(baseClassName){
+export class StaticEntry extends React.Component {
+
+    static defaultProps = {
+        'section'   : null,
+        'content'   : null,
+        'entryType' : 'help',
+        'className' : null
+    }
+
+    constructor(props){
+        super(props);
+        this.replacePlaceholder = this.replacePlaceholder.bind(this);
+        this.renderEntryContent = this.renderEntryContent.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    replacePlaceholder(placeholderString){
+        return placeholderString;
+    }
+
+    renderEntryContent(baseClassName){
         var content  = (this.props.content && this.props.content.content)  || null;
         if (!content) return null;
 
@@ -331,9 +248,9 @@ export const Entry = {
         } else {
             return <div className={className} dangerouslySetInnerHTML={{__html: content }}></div>;
         }
-    },
+    }
 
-    render : function(){
+    render(){
         var { content, entryType, sectionName, className } = this.props;
         if (sectionName.indexOf('#') > -1){
             var sectionParts = sectionName.split('#');
@@ -348,52 +265,80 @@ export const Entry = {
         );
     }
 
-};
+}
 
-class EntryExample extends React.Component {
+
+export default class StaticPage extends React.Component {
+
+    static Entry = StaticEntry
+
+    static Wrapper = Wrapper
+
+    static renderSections(renderMethod, parsedContent){
+        if (!parsedContent || !parsedContent.content || !Array.isArray(parsedContent.content)){
+            console.error('No content defined for page', parsedContent);
+            return null;
+        }
+        return _.map(parsedContent.content, function(section){ return renderMethod(section.id || section.name, section, parsedContent); });
+    }
 
     static defaultProps = {
-        'section'   : null,
-        'content'   : null,
-        'entryType' : 'help',
-        'className' : null
-    }
-
-    constructor(props){
-        super(props);
-        this.renderEntryContent = Entry.renderEntryContent.bind(this);
-        this.render = Entry.render.bind(this);
-    }
-
-    replacePlaceholder(placeholderString){
-        return placeholderString;
-    }
-
-}
-
-class StaticPageExample extends React.Component {
-
-    static Entry = EntryExample
-
-    static defaultProps = _.clone(defaultProps);
+        "context" : {
+            "title" : "Page Title",
+            "content" : {
+                "sectionNameID1" : {
+                    "order"      : 0,
+                    "title"      : "Section Title 1",
+                    "content"    : "<h2>Hello</h2>",
+                    "filetype"   : "html"
+                },
+                "sectionNameID2" : {
+                    "order"      : 1,
+                    "title"      : "Section Title 2",
+                    "content"    : "<h2>World</h2>",
+                    "filetype"   : "html"
+                }
+            }
+        },
+        'entryRenderFxn' : function(sectionName, content, context){
+            return <StaticEntry key={sectionName} sectionName={sectionName} content={content} context={context} />;
+        }
+    };
 
     static propTypes = {
-        context : PropTypes.shape({
+        'context' : PropTypes.shape({
             "title" : PropTypes.string,
-            "content" : PropTypes.any.isRequired
-        }).isRequired
+            "content" : PropTypes.any.isRequired,
+            "table-of-contents" : PropTypes.object
+        }).isRequired,
+        'entryRenderFxn' : PropTypes.func
     }
 
     constructor(props){
         super(props);
-        this.renderSections = renderSections.bind(this);
-        this.render = render.simple.bind(this);
-    }
-    
-    entryRenderFxn(sectionName, content, context){
-        return <EntryExample key={sectionName} sectionName={sectionName} content={content} context={context} />;
+        this.render = this.render.bind(this);
+        this.entryRenderFxn = typeof this.entryRenderFxn === 'function' ? this.entryRenderFxn.bind(this) : this.props.entryRenderFxn;
     }
 
+    render(){
+        var parsedContent = parseSectionsContent(this.props.context);
+
+        var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
+
+        return (
+            <Wrapper
+                title={parsedContent.title}
+                tableOfContents={tableOfContents}
+                context={parsedContent}
+                navigate={this.props.navigate}
+                href={this.props.href}
+                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent)}
+            />
+        );
+    }
 }
 
-globals.content_views.register(StaticPageExample, 'StaticPage');
+
+globals.content_views.register(StaticPage, 'StaticPage');
+
+

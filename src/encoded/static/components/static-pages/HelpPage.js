@@ -4,24 +4,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { content_views } from '../globals';
-import * as StaticPageBase from './static-page-base';
+import StaticPage, { StaticEntry } from './StaticPage';
 import { Button } from 'react-bootstrap';
 
-/** Used instead of StaticPageBase EntryExample to support help-specific placeholder(s) */
-/** TODO: Extend StaticPageBase / Entry(Example) instead -- simplifying StaticPageBase in process */
-class Entry extends React.Component {
+/**
+ * Extends StaticEntry with 'replacePlaceholder' function which renders the pre-defined SlideCarousel component.
+ * Emulate this approach for other placeholders (?).
+ */
+class HelpEntry extends StaticEntry {
 
     static defaultProps = {
         'section'   : null,
         'content'   : null,
         'entryType' : 'help',
         'className' : 'text-justified'
-    }
-
-    constructor(props){
-        super(props);
-        this.renderEntryContent = StaticPageBase.Entry.renderEntryContent.bind(this);
-        this.render = StaticPageBase.Entry.render.bind(this);
     }
 
     replacePlaceholder(placeholderString){
@@ -32,33 +28,18 @@ class Entry extends React.Component {
     }
 }
 
-export default class HelpPage extends React.Component {
 
-    static propTypes = {
-        'context' : PropTypes.shape({
-            "title" : PropTypes.string,
-            "content" : PropTypes.any.isRequired
-        }).isRequired
-    }
-
-    static defaultProps = StaticPageBase.getDefaultProps()
-
-    constructor(props){
-        super(props);
-        this.entryRenderFxn = this.entryRenderFxn.bind(this);
-        this.parseSectionsContent = StaticPageBase.parseSectionsContent.bind(this);
-        this.renderSections = StaticPageBase.renderSections.bind(this);
-        this.render = StaticPageBase.render.base.bind(this);
-    }
+export default class HelpPage extends StaticPage {
 
     entryRenderFxn(sectionName, content, context){
-        return (<Entry key={sectionName} sectionName={sectionName} content={content} context={context} />);
+        return (<HelpEntry key={sectionName} sectionName={sectionName} content={content} context={context} />);
     }
 
 }
 
-
 content_views.register(HelpPage, 'HelpPage');
+
+
 
 class SlideCarousel extends React.Component {
 
