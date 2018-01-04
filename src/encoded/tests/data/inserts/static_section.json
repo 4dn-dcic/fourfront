@@ -1,5 +1,32 @@
 
 [
+
+    {
+        "name" : "search-info-header.WorkflowRun",
+        "section_type" : "Search Info Header",
+        "title" : "Workflow Run Information",
+        "body" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
+    },
+
+
+    {
+        "name" : "search-info-header.Workflow",
+        "section_type" : "Search Info Header",
+        "title" : "Workflow Information",
+        "body" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>"
+    },
+
+
+    {
+        "name" : "search-info-header.FileSetMicroscopeQc",
+        "section_type" : "Search Info Header",
+        "title" : "Basic Protocol",
+        "body" : "<div><p>This page contains the Microscope Optical QC recordings from 4DN labs. 4DN Imaging Group strongly advices this QC to be performed once a month, and uploaded to this page. To produce this data,</p><ol><li>Please use the <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">TetraSpeckTM</a> Fluorescent Microspheres from Thermo Fisher Scientific (catalog number <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">T14792</a>)</li><li>Follow the simple step in this <a href=\"http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/protocols/fbc19c00-d377-461c-98a4-9c3c32544d40/\">Protocol</a> to produce a PSFj report.</li></ol></div>"
+    },
+
+    
+
+
     {
         "name" : "about#introduction",
         "file" : "/src/encoded/static/data/about/introduction.html"

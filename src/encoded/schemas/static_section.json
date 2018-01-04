@@ -20,6 +20,7 @@
         "name": {
             "title": "Name/ID",
             "description": "Unique name or ID of this section.",
+            "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. '/static-section/search-info-header.WorkflowRun'.",
             "type": "string"
         },
         "status": {
@@ -30,6 +31,17 @@
                 "released",
                 "draft",
                 "deleted"
+            ]
+        },
+        "section_type": {
+            "title": "Section Type",
+            "type": "string",
+            "description": "What this section is used for",
+            "default": "Page Section",
+            "enum" : [
+                "Page Section",
+                "Announcement",
+                "Search Info Header"
             ]
         },
         "title": {
@@ -58,9 +70,17 @@
             "description": "Content of this section (plain html or text)"
         }
     },
+    "facets" : {
+        "section_type" : {
+            "title" : "Type"
+        }
+    },
     "columns" : {
         "name" : {
-            "title" : "ID"
+            "title" : "Name / ID"
+        },
+        "section_type" : {
+            "title" : "Type"
         }
     },
     "excludedColumns" : ["lab.display_title"]

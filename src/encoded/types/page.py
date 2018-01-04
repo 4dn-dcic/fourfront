@@ -90,8 +90,8 @@ class StaticSection(Item):
     })
     def content(self, request, body=None, file=None):
 
-        if isinstance(body, str):
-            # Don't need to load in anything.
+        if isinstance(body, str) or isinstance(body, dict) or isinstance(body, list):
+            # Don't need to load in anything. We don't currently support dict/json body (via schema) but could in future.
             return body
 
         if isinstance(file, str):
@@ -112,6 +112,8 @@ class StaticSection(Item):
     def filetype(self, request, body=None, file=None):
         if isinstance(body, str):
             return 'txt'
+        if isinstance(body, dict) or isinstance(body, list):
+            return 'json'
         if isinstance(file, str):
             filename_parts = file.split('.')
             if len(filename_parts) > 1:

@@ -223,33 +223,6 @@
     },
 
 
-
-
-    {
-        "name" : "search-info-header/WorkflowRun",
-        "uuid" : "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
-        "title" : "Workflow Run Information",
-        "sections" : [
-            {
-                "id" : "information",
-                "title" : "Introduction",
-                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
-            }
-        ]
-    },
-    {
-        "name" : "search-info-header/Workflow",
-        "uuid" : "db5ed2fd-b4fb-1ddf-9053-4137d99960b0",
-        "title" : "Workflow Information",
-        "sections" : [
-            {
-                "id" : "information",
-                "title" : "Introduction",
-                "content" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>"
-            }
-        ]
-    },
-
     {
         "name" : "privacy-policy",
         "uuid" : "db5ed2fd-b4fb-4f4d-9053-9991d90560b0",
