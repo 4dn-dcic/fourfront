@@ -288,7 +288,7 @@ class TableEntryChildren extends React.Component {
             return childHeaders.map((h, index) =>{
 
                 var childContent = TableEntryChildren.getSubsequentChildHeaders(h, jsxContent, maxHeaderDepth, currentDepth);
-                
+
                 if (currentDepth + 1 > 0 && skipDepth >= currentDepth + 1){
                     return TableEntryChildren.renderChildrenElements(
                         childHeaders, childContent.content, maxHeaderDepth, currentDepth + 1,
