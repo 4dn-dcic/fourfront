@@ -208,9 +208,10 @@ def workflow_2_3(value, system):
     '''Change software_used to a list'''
 
     if value.get('steps') is not None:
-        if value.get('steps').get('meta') is not None:
-            if value.get('steps').get('meta').get('software_used') is not None:
-                sf = value.get('steps').get('meta').get('software_used')
-                if not isinstance(sf, list):
-                    value.get('steps').get('meta')['software_used'] = [sf]
+        for step in value.get('steps'):
+            if step.get('meta') is not None:
+                if step.get('meta').get('software_used') is not None:
+                    sf = step.get('meta').get('software_used')
+                    if not isinstance(sf, list):
+                        step.get('meta')['software_used'] = [sf]
     return value
