@@ -218,13 +218,12 @@ class Publication(Item):
         return
 
     @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
+        "title": "Short Attribution",
+        "description": "Short string containing <= 2 authors & year published.",
         "type": "string"
     })
-    def display_title(self, request, authors=None, date_published=None, title=None):
+    def short_attribution(self, authors=None, date_published=None):
         minipub = ''
-
         if authors is not None:
             minipub = authors[0]
             if len(authors) > 2:
@@ -233,6 +232,19 @@ class Publication(Item):
                 minipub = minipub + ' and ' + authors[1]
         if date_published is not None:
             minipub = minipub + ' (' + date_published[0:4] + ')'
-        if title is not None:
-            minipub = minipub + ' ' + title[0:100]
         return minipub
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, authors=None, date_published=None, title=None):
+        minipub = self.short_attribution(authors, date_published)
+        if minipub and title is not None:
+            return minipub + ' ' + title[0:100]
+        if not minipub and title is not None:
+            return title[0:120]
+        return Item.display_title(self)
+
+    

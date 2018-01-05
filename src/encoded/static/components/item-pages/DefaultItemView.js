@@ -41,6 +41,14 @@ export class ItemBaseView extends React.Component {
 
     getCommonTabs(){
         return [
+            AttributionTabView.getTabObject(this.props.context),
+            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
+            AuditTabView.getTabObject(this.props.context)
+        ];
+    }
+
+    getDefaultTabs(){
+        return [
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
             AttributionTabView.getTabObject(this.props.context),
             AuditTabView.getTabObject(this.props.context)
@@ -52,7 +60,7 @@ export class ItemBaseView extends React.Component {
     }
 
     getTabViewContents(){
-        return this.getCommonTabs();
+        return this.getDefaultTabs();
     }
 
     itemHeader(){

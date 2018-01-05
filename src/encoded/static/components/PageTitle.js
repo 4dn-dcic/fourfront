@@ -159,6 +159,13 @@ export default class PageTitle extends React.Component {
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
+            if (itemTypeTitle === 'Publication'){ // Long title string
+                if (context.title && context.short_attribution){
+                    return { 'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span> };
+                }
+                return { 'title' : itemTypeTitle, 'subtitle' : context.title || title };
+            }
+
             if (object.itemUtil.isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
 
                 // But show rest of title if it is in form 'Something - ACCESSION'
@@ -224,7 +231,7 @@ export default class PageTitle extends React.Component {
             );
         }
 
-        var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
+        var { title, subtitle, calloutTitle, subtitlePrepend } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
         
 
         if (title) {
@@ -246,7 +253,7 @@ export default class PageTitle extends React.Component {
         if (subtitle){
             subtitle = (
                 <div className="page-subtitle smaller">
-                    { subtitle }
+                    { subtitlePrepend }{ subtitle }
                 </div>
             );
         }
@@ -260,10 +267,16 @@ export default class PageTitle extends React.Component {
 
 }
 
-
+/**
+ * Used for most page titles.
+ * 
+ * @prop {JSX.Element|string} title - Shown @ top left, text-300 font
+ */
 class PageTitleElement extends React.Component {
+
     render(){
         var { title, calloutTitle, subtitle, context, href, mounted } = this.props;
+        console.log('title', title, calloutTitle, subtitle);
 
         return ((title || subtitle) && (
             <h1 className="page-title top-of-page" style={PageTitle.getStyles(context, href, mounted)} >
@@ -272,6 +285,7 @@ class PageTitleElement extends React.Component {
         )) || <br/>;
     }
 }
+
 
 class HomePageTitleElement extends React.Component {
     render(){

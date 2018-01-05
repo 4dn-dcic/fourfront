@@ -123,11 +123,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             }
         }
 
-        return tabs.concat([
-            AttributionTabView.getTabObject(context),
-            ItemDetailList.getTabObject(context, this.props.schemas),
-            AuditTabView.getTabObject(context)
-        ]).map((tabObj)=>{ // Common properties
+        return tabs.concat(this.getCommonTabs()).map((tabObj)=>{
             return _.extend(tabObj, {
                 'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });

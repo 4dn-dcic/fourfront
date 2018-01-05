@@ -45,10 +45,10 @@ const portal = {
     global_sections: [
         {
             id: 'browse-menu-item', sid:'sBrowse', title: 'Browse',
-            url : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate', // May also be a function.
+            url : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate', // May also be a function which returns URL.
             active : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
         },
-        { 
+        {
             id: 'help-menu-item', sid:'sHelp', title: 'Help',
             children: [
                 { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
