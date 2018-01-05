@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { panel_views, itemClass, content_views } from './../globals';
-import { Button } from 'react-bootstrap';
+import { Button, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas, fileUtil } from './../util';
@@ -73,8 +73,16 @@ export class ItemBaseView extends React.Component {
         );
     }
 
+    itemMidSection(){
+        return <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />;
+    }
+
     tabbedView(){
         return <TabbedView contents={this.getTabViewContents} />;
+    }
+
+    itemFooter(){
+        return null; /*<ItemFooterRow context={context} schemas={schemas} />*/
     }
 
     render() {
@@ -85,25 +93,17 @@ export class ItemBaseView extends React.Component {
             <div className={this.itemClassName()}>
 
                 { this.itemHeader() }
-
-                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
+                { this.itemMidSection() }
 
                 <div className="row">
-
                     <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer">
-
                         <layout.WindowResizeUpdateTrigger>
                             { this.tabbedView() }
                         </layout.WindowResizeUpdateTrigger>
-
                     </div>
-
                 </div>
-
                 <br/>
-
-                {/*<ItemFooterRow context={context} schemas={schemas} />*/}
-
+                { this.itemFooter() }
             </div>
         );
     }
@@ -139,6 +139,42 @@ content_views.register(DefaultItemView, 'Item');
 
 
 /** Helper Components */
+
+export class OverviewHeadingContainer extends React.Component {
+
+    static defaultProps = {
+        'className'     : 'with-background mb-3 mt-1',
+        'defaultOpen'   : true,
+        'headingTitleElement' : 'h4',
+        'headingTitle'  : 'Properties'
+    }
+
+    constructor(props){
+        super(props);
+        this.toggle = _.throttle(function(){ this.setState({ 'open' : !this.state.open }); }.bind(this), 500);
+        this.state = { 'open' : props.defaultOpen };
+    }
+
+    renderTitle(){
+        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
+    }
+
+    render(){
+        return (
+            <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
+                { this.props.headingTitleElement ? React.createElement(this.props.headingTitleElement, { 'className' : 'tab-section-title clickable with-accent', 'onClick' : this.toggle }, this.renderTitle()) : null }
+                <Collapse in={this.state.open}>
+                    <div className="inner">
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <div className="row overview-blocks">{ this.props.children }</div>
+                    </div>
+                </Collapse>
+            </div>
+        );
+    }
+}
+
+
 export class OverViewBodyItem extends React.Component {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
@@ -343,4 +379,3 @@ export class OverViewBodyItem extends React.Component {
 
     }
 }
-

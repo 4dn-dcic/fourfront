@@ -3,11 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Panel, Collapse } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
+import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
@@ -32,16 +31,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     static propTypes = {
         'schemas' : PropTypes.object,
-        'context' : PropTypes.object,
-        'facets' : PropTypes.array
-    }
-
-    static contextTypes = {
-        location_href: PropTypes.string
-    }
-
-    static defaultProps = {
-        'facets' : null
+        'context' : PropTypes.object
     }
 
     constructor(props){
@@ -131,34 +121,16 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     }
 
-    render() {
-        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
-        var context = this.props.context;
-        if (this.props.debug) console.log('render ExperimentSet view');
+    itemHeader(){
+        return <ExperimentSetHeader {...this.props} />;
+    }
 
-        var experimentsInSetExist = Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0;
+    itemMidSection(){
+        return [<Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />, <OverviewHeading context={this.props.context} />];
+    }
 
-        return (
-            <div className={itemClass}>
-
-                <ExperimentSetHeader {...this.props} />
-
-                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={context.produced_in_pub} />
-
-                <OverviewHeading context={context} />
-
-                <div className="row">
-
-                    <div className="col-sm-12" ref="tabViewContainer">
-                        <layout.WindowResizeUpdateTrigger children={ this.tabbedView() } />
-                    </div>
-
-                </div>
-
-                <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />
-
-            </div>
-        );
+    itemFooter(){
+        return <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />;
     }
 
 }
@@ -167,57 +139,29 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 globals.content_views.register(ExperimentSetView, 'ExperimentSet');
 globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
-
 class OverviewHeading extends React.Component {
-
-    static defaultProps = {
-        'className'     : 'with-background mb-3 mt-1',
-        'defaultOpen'   : true,
-        'headingTitleElement' : 'h4',
-        'headingTitle'  : 'Properties'
-    }
-
-    constructor(props){
-        super(props);
-        this.toggle = _.throttle(function(){ this.setState({ 'open' : !this.state.open }); }.bind(this), 500);
-        this.state = { 'open' : props.defaultOpen };
-    }
-
-    renderTitle(){
-        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
-    }
-
     render(){
         var expSet = this.props.context;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), expSet);
         var commonProps = { 'result' : expSet, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
-
         return (
-            <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
-                { this.props.headingTitleElement ? React.createElement(this.props.headingTitleElement, { 'className' : 'tab-section-title clickable with-accent', 'onClick' : this.toggle }, this.renderTitle()) : null }
-                <Collapse in={this.state.open}>
-                    <div className="inner">
-                        <hr className="tab-section-title-horiz-divider"/>
-                        <div className="row overview-blocks">
-                            {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
+            <OverviewHeadingContainer {...this.props}>
+                {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
+                <OverViewBodyItem {...commonProps} property='experimentset_type' fallbackTitle="Set Type" />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.individual.organism' fallbackTitle="Organism" />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.biosource_type' fallbackTitle="Biosource Type" />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" />
 
-                            <OverViewBodyItem {...commonProps} property='experimentset_type' fallbackTitle="Set Type" />
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.individual.organism' fallbackTitle="Organism" />
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.biosource_type' fallbackTitle="Biosource Type" />
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" />
-
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" />
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.digestion_enzyme' fallbackTitle="Enzyme" />
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" />
-                            <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" />
-                        </div>
-                    </div>
-                </Collapse>
-            </div>
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.digestion_enzyme' fallbackTitle="Enzyme" />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" />
+            </OverviewHeadingContainer>
         );
     }
-
 }
+
+
 
 
 /**

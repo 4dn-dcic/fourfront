@@ -21,7 +21,8 @@ export class ExperimentSetTables extends React.Component {
             if (expSetA['@type'].indexOf('ExperimentSetReplicate') > -1) return -1;
             if (expSetB['@type'].indexOf('ExperimentSetReplicate') > -1) return 1;
             return 0;
-        }
+        },
+        'title' : <span>In Experiment Sets</span>
     }
 
     render(){
@@ -42,9 +43,7 @@ export class ExperimentSetTables extends React.Component {
         
         return (
             <div className="file-part-of-experiment-sets-container" ref="experimentSetsContainer">
-                <h3 className="tab-section-title">
-                    <span>In Experiment Sets</span>
-                </h3>
+                <h3 className="tab-section-title">{ this.props.title }</h3>
                 <ItemPageTable
                     results={experiment_sets}
                     renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
