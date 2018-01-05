@@ -21,7 +21,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "accession": {
             "accessionType": "WF"
@@ -278,9 +278,14 @@
                         "properties" : {
                             "software_used": {
                                 "title": "Software Used",
-                                "description": "Reference to Software Used",
-                                "type": "string",
-                                "linkTo" : "Software"
+                                "description": "List of References to Software Used",
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "title": "Software Used",
+                                  "description": "Reference to Software Used",
+                                  "linkTo" : "Software"
+                                }
                             },
                             "@id" : {
                                 "title" : "Unique identifier of Item in database represented by this step node. If present, will be loaded in via AJAX upon node click.",

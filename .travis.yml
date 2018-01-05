@@ -5,8 +5,6 @@ cache:
   pip: true
   directories:
   - eggs
-  - .npm
-  - node_modules
 addons:
   apt:
     packages:
