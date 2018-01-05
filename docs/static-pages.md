@@ -2,7 +2,7 @@
 Creating & Editing Static Pages
 ===============================
 
-Most static pages content - unless hard-coded for the front-end (in case of custom interactivity, etc.) - exists in HTML or Markdown files in the repository, in an S3 bucket, or in-line within insert. Content is loaded in the same way as other Items, and exposed via a calculated "content" property. The "name" property of the Page Item becomes the static page's path.
+Most static pages content - unless hard-coded for the front-end (in case of custom interactivity, etc.) - exists in HTML or Markdown files in the repository, in an S3 bucket, or in-line within insert. Content of a page is an array of linkTo StaticSection items loaded in the same way as other Items, and exists in the "content" property on the Page Item. The "name" property of the Page Item becomes the static page's path where it may be viewed.
 
 Configuration for which pages and routes are available & accessible is currently controlled by a JSON config file: _src/encoded/static/data/static_pages.json_. This file may be moved to _src/encoded/schemas_ eventually.
 
@@ -12,6 +12,7 @@ In the `/src/encoded/tests/data/[..]/page.json` file, an insert defining the pag
 {
     "title" : "<page_title>",
     "name" : "help/submitting",
+    "content" : ["help.submitting#gettingStarted", "help.submitting#metadatastructure1"],
     "directory" : "<absolute_from_repo_root_path_to_static_files>",
     "sections" : [
         {
@@ -35,9 +36,24 @@ In the `/src/encoded/tests/data/[..]/page.json` file, an insert defining the pag
 ...]
 ```
 
-What the above configuration objects says, is for the back-end to enable a page route 'help/submitting', and at that route to return some JSON which has two sections - one with no title visible on page but with one in the table of contents ("Introduction"); and one with the same title for both table of contents and on page ("Metadata Structure"). If do not include "title" nor "toc-title", or have "title" set to null without a "toc-title", the section (& any children) will be excluded from the table of contents (but not the page). Page title is mandatory.
+Notice the "content" property, which links to StaticSection Items which might look like the following in `/src/encoded/tests/data/[..]/static_section.json` inserts:
+```json
+[...
+{
+    "name" : "help.submitting#gettingStarted",
+    "file" : "/docs/public/metadata-submission/getting_started.md",
+    "toc-title" : "Getting Started"
+}, {
+    "name" : "help.submitting#metadatastructure1",
+    "file" : "/docs/public/metadata-submission/metadatastructure1.html",
+    "title" : "Metadata Structure"
+},
+...]
+```
 
-The section content will be the raw contents of the file located at `insert["directory"] + insert["sections"][i]["filename"]`. The entirety of the "table-of-contents" object is sent across to the front-end to be used as configuration options for the table of contents. If "enabled" is set to false in this configuration, the page rendered on front-end will have just a single wider pane with all the content in lieu of a Table of Contents.
+What the above configuration objects says, is for the back-end to enable a page route 'help/submitting', and at that route to return some JSON which has two sections - one with no title visible on page but with one in the table of contents ("Getting Started"); and one with the same title for both table of contents and on page ("Metadata Structure"). If do not include "title" nor "toc-title", or have "title" set to null without a "toc-title", the section (& any children) will be excluded from the table of contents (but not the page). A Page title is mandatory (but not StaticSection title).
+
+The section content will be the raw contents of the file located at `file` property (which maybe a remote location). The entirety of the "table-of-contents" object is sent across to the front-end to be used as configuration options for the table of contents. If "enabled" is set to false in this configuration, the page rendered on front-end will have just a single wider pane with all the content in lieu of a Table of Contents.
 
 If exclude "directory" property, it will default to and check `src/encoded/static/data/<section-route-name>`.
 
@@ -101,7 +117,7 @@ Examples of effective_principals options include the following:
 
 N.B. Currently uses static page but may change to static section or block in future. TBD. Should look like https://gyazo.com/0d8d60750c1e0139ed345046df052696 after setup:
 
-## Static Page Header `@type` Mapping
+## Static Section Header `@type` Mapping
 
 Currently this can be dynamically updated via the `SysInfo` Item : `/sysinfos/search-header-mappings/`
 
@@ -118,8 +134,8 @@ Again, the name of the sysinfo object **MUST** be **`search-header-mappings`**
   "title" : "Search Header Mapping",
   "description": "Mapping of Static search result header URIs to Item @type",
   "mapping" : {
-      "WorkflowRun" : "/search-info-header/WorkflowRun",
-      "Workflow" : "/search-info-header/Workflow"
+      "WorkflowRun" : "/static-sections/search-info-header.WorkflowRun",
+      "Workflow" : "/static-sections/search-info-header.Workflow"
   }
 }
 ```
@@ -128,11 +144,17 @@ Again, the name of the sysinfo object **MUST** be **`search-header-mappings`**
 ```json
 {
   "mapping" : {
-      "WorkflowRun" : "/search-info-header/WorkflowRun",
-      "Workflow" : "/search-info-header/Workflow"
+      "WorkflowRun" : "/static-sections/search-info-header.WorkflowRun",
+      "Workflow" : "/static-sections/search-info-header.Workflow",
+      "FileSetMicroscopeQc" : "/static-sections/search-info-header.FileSetMicroscopeQc"
   }
 }
 ```
+
+The "value" in the 'mapping' dictionary/object is the @id or link to a StaticSection Item.
+Here these static sections are referenced by their name (rather than UUID).
+In order to allow such a link to your StaticSection, ensure the 'name' of it doesn't have any slashes (`/`) or hashes (`#`).
+For example, in the case above the names are `search-info-header.WorkflowRun`, `search-info-header.Workflow`, & `search-info-header.FileSetMicroscopeQc`. 
 
 ## Static Page Definition
 
