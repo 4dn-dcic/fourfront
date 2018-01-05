@@ -53,7 +53,7 @@ export default class HomePage extends React.Component {
 
                     <div className="col-md-6 col-xs-12">
                         <h2 className="fourDN-header">Announcements</h2>
-                        <Announcements/>
+                        <Announcements loaded session={this.props.session} />
                     </div>
 
                 </div>

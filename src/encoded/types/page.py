@@ -81,11 +81,12 @@ class StaticSection(Item):
     """The Software class that contains the software... used."""
     item_type = 'static_section'
     schema = load_schema('encoded:schemas/static_section.json')
-    embedded_list = []
+    embedded_list = ["submitted_by.display_title"]
 
     @calculated_property(schema={
         "title": "Content",
-        "description": "Content for the page"
+        "description": "Content for the page",
+        "type": "string"
     })
     def content(self, request, body=None, file=None):
 
