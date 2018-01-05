@@ -138,22 +138,20 @@ class TableEntry extends React.Component {
                 var nextHeaderElement = this.getNextHeaderElement(props);
                 if (nextHeaderElement) nextHeaderTop = getElementTop(nextHeaderElement);
             }
-            
             if (
                 nextHeaderTop &&
                 props.pageScrollTop >= (elemTop      - props.offsetBeforeTarget - 150) &&
                 props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 150)
             ) return true;
             else return false;
-            
         } else if (targetElem && targetElem.className.split(' ').indexOf('static-section-entry') > -1) {
             var elemStyle = (targetElem.computedStyle || window.getComputedStyle(targetElem));
             if (
                 props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 150) &&
                 props.pageScrollTop <  (
-                    elemTop + 
+                    elemTop +
                     parseInt(elemStyle.marginTop) +
-                    targetElem.offsetHeight - 
+                    targetElem.offsetHeight -
                     props.offsetBeforeTarget - 150
                 )
             ) return true;
@@ -195,13 +193,7 @@ class TableEntry extends React.Component {
             title = (
                 <div className="title-link-wrapper">
                     { collapsibleButton }
-                    <a href={'#' + this.props.link} onClick={(e)=>{ 
-                        e.preventDefault(); 
-                        //e.target.blur();
-                        this.handleClick();
-                    }}>
-                        { title }
-                    </a>
+                    <a href={'#' + this.props.link} onClick={(e)=>{ e.preventDefault(); this.handleClick(); }}>{ title }</a>
                 </div>
             );
         }
@@ -217,13 +209,12 @@ class TableEntry extends React.Component {
 
         return (
             <li className={
-                "table-content-entry" + 
+                "table-content-entry" +
                 (this.props.className ? ' ' + this.props.className : '') +
                 (this.props.depth === 0 ? ' top' : '') +
                 (active ? ' active' : '')
             } data-depth={this.props.depth} ref="listItem">
                 { title }
-                
                 <Collapse in={this.state === null || this.state.open === true} transitionAppear>
                     <div>
                         <TableEntryChildren
@@ -244,7 +235,6 @@ class TableEntry extends React.Component {
                         />
                     </div>
                 </Collapse>
-
             </li>
         );
     }
@@ -287,7 +277,7 @@ class TableEntryChildren extends React.Component {
             return m;
         }, /* m = */ []);
 
-        return { 
+        return {
             'content' : React.cloneElement(jsxContent, {}, nextHeaderComponents),
             'nextMajorHeader' : nextMajorHeader
         };
@@ -297,7 +287,7 @@ class TableEntryChildren extends React.Component {
         if (childHeaders && childHeaders.length){
             return childHeaders.map((h, index) =>{
 
-                var childContent = TableEntryChildren.getSubsequentChildHeaders(h, jsxContent, maxHeaderDepth, currentDepth);                
+                var childContent = TableEntryChildren.getSubsequentChildHeaders(h, jsxContent, maxHeaderDepth, currentDepth);
                 
                 if (currentDepth + 1 > 0 && skipDepth >= currentDepth + 1){
                     return TableEntryChildren.renderChildrenElements(
@@ -311,7 +301,7 @@ class TableEntryChildren extends React.Component {
                 var link = TableOfContents.slugify(hString);
                 var collapsible = currentDepth >= (1 + (skipDepth || 0));
                 return (
-                    <TableEntry 
+                    <TableEntry
                         link={link}
                         title={hString}
                         key={link}
@@ -410,7 +400,11 @@ export class TableOfContents extends React.Component {
         );
     }
 
-    static isContentJSX(content){ return content && content.__proto__ && content.__proto__.isPrototypeOf(React.Component.prototype); }
+    static isContentJSX(content){
+        if (!content || typeof content !== 'object') return false;
+        var proto = Object.getPrototypeOf(content);
+        return proto && proto.isPrototypeOf(React.Component.prototype);
+    }
 
     static defaultProps = {
         "context" : {
@@ -455,7 +449,7 @@ export class TableOfContents extends React.Component {
         if (window && !isServerSide()){
             this.setState(
                 { 'mounted' : true, 'scrollTop' : parseInt(getPageVerticalScrollPosition()) },
-                () => { 
+                () => {
                     window.addEventListener('scroll', this.onPageScroll);
                     window.addEventListener('resize', this.onResize);
                 }
@@ -523,7 +517,7 @@ export class TableOfContents extends React.Component {
                             listStyleTypes, this.state.scrollTop, this.state.mounted, this.props.skipDepth, s.nextHeader || (i === all.length - 1 ? 'bottom' : all[i + 1].link || null  )
                         );
                     }
-                    return (<TableEntry 
+                    return (<TableEntry
                         link={s.link}
                         title={s['toc-title'] || s.title}
                         key={s.link}
@@ -545,10 +539,10 @@ export class TableOfContents extends React.Component {
         if (this.props.includeTop) {
             var children = sectionEntries.call(this);
             content = (
-                <TableEntry 
+                <TableEntry
                     link="top"
                     title={this.props.pageTitle || null}
-                    key="top" 
+                    key="top"
                     depth={0}
                     listStyleTypes={listStyleTypes}
                     pageScrollTop={this.state.scrollTop}
@@ -557,9 +551,8 @@ export class TableOfContents extends React.Component {
                     nextHeader={(children[0] && children[0].props && children[0].props.link) || null}
                     maxHeaderDepth={this.props.maxHeaderDepth}
                     skipDepth={this.props.skipDepth}
-                >
-                    { children }
-                </TableEntry>
+                    children={children}
+                />
             );
         } else {
             content = sectionEntries.call(this);
@@ -577,7 +570,7 @@ export class TableOfContents extends React.Component {
         return (
             <div className="table-of-contents" ref="container" style={{
                 width : this.state.mounted ?
-                        window.innerWidth > 1200 ? this.props.fixedWidth || 'inherit' 
+                        window.innerWidth > 1200 ? this.props.fixedWidth || 'inherit'
                         :'inherit'
                     : this.props.fixedWidth,
                 height:
@@ -590,12 +583,10 @@ export class TableOfContents extends React.Component {
                 marginTop : marginTop
             }}>
                 <h4 className="toc-title">{ this.props.title }</h4>
-                <ol className="inner" style={{ 
+                <ol className="inner" style={{
                     listStyleType : listStyleTypes[this.props.includeTop ? 0 : 1],
                     paddingLeft : !Array.isArray(content) ? 0 : null
-                }}>
-                    { content }
-                </ol>
+                }}>{ content }</ol>
             </div>
         );
     }

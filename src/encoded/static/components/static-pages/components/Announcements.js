@@ -97,7 +97,7 @@ class AnnouncementsLoaded extends React.Component {
             this.setState({ 'announcements' : null, 'loading' : false, 'loadedAll' : true });
         }
     }
-    
+
     render (){
         if (Array.isArray(this.state.announcements)){
             return <Announcements {...this.props} loaded={false} announcements={this.state.announcements} total={this.state.totalCount} />;
@@ -111,7 +111,6 @@ class AnnouncementsLoaded extends React.Component {
 
 /**
  * Component which shows currents announcements.
- * Announcements are (temporarily) currently stored in src/encoded/static/data/announcements_data.js.
  * 
  * @prop {string} className - Outer <div> element's className
  * @prop {string} id - Outer <div> element's id attribute.

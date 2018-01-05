@@ -58,10 +58,10 @@ export function correctRelativeLinks(elem, context, depth = 0){
     if (elem.type === 'a'){
         var href = elem.props.href;
         if (
-            typeof href === 'string' && 
+            typeof href === 'string' &&
             href.charAt(0) !== '#' &&
             href.charAt(0) !== '/' &&
-            href.slice(0,4) !== 'http' && 
+            href.slice(0,4) !== 'http' &&
             href.slice(0,7) !== 'mailto:'
         ){ // We have a relative href link.
             if (href.indexOf('#') > -1){ // It references a title on some other page or section. Likely, this is section is on same page, so we can just use that.
@@ -89,10 +89,7 @@ export function correctRelativeLinks(elem, context, depth = 0){
                 }),
                 elem.props.children || null
             );
-        } else {
-            return elem;
-        }
-        
+        } else return elem;
     } else if (elem.props.children && typeof elem.type === 'string') {
         return React.cloneElement(
             elem,
@@ -101,9 +98,7 @@ export function correctRelativeLinks(elem, context, depth = 0){
                 return correctRelativeLinks(child, context, depth + 1);
             })
         );
-    } else {
-        return elem;
-    }
+    } else return elem;
 }
 
 
