@@ -247,4 +247,3 @@ class Publication(Item):
             return title[0:120]
         return Item.display_title(self)
 
-    

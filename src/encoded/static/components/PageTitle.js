@@ -269,8 +269,11 @@ export default class PageTitle extends React.Component {
 
 /**
  * Used for most page titles.
- * 
- * @prop {JSX.Element|string} title - Shown @ top left, text-300 font
+ *
+ * @prop {JSX.Element|string} title - Shown @ top left, 300 font weight.
+ * @prop {JSX.Element|string} calloutTitle - Shown @ right of title in similar size, 400 font weight.
+ * @prop {JSX.Element|string} subtitle - Shown @ bottom title in small size, 400 font weight.
+ * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
  */
 class PageTitleElement extends React.Component {
 
