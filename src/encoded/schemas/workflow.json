@@ -107,30 +107,6 @@
                 "type": "string"
             }
         },
-        "docker_info": {
-            "title": "Docker Container Information",
-            "description": "A short description of the docker container",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "docker_registry_url": {
-                    "title": "Docker Registry URL",
-                    "description": "Docker Hub or 7 bridges registry URL.",
-                    "type": "string",
-                    "format": "uri"
-                },
-                "docker_image_name": {
-                    "title": "Image Name",
-                    "description": "The name of the image that is downloaded",
-                    "type": "string"
-                },
-                "docker_image_version": {
-                    "title": "Image Version",
-                    "description": "The version of the image that is downloaded",
-                    "type": "string"
-                }
-            }
-        },
         "arguments": {
             "title": "Workflow Arguments",
             "description": "arguments of the workflow.",
@@ -322,6 +298,22 @@
                                 "items" : {
                                     "type" : "string"
                                 }
+                            },
+                            "docker_registry_url": {
+                                "title": "Docker Registry URL",
+                                "description": "Docker Hub or 7 bridges registry URL.",
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            "docker_image_name": {
+                                "title": "Image Name",
+                                "description": "The name of the image that is downloaded",
+                                "type": "string"
+                            },
+                            "docker_image_version": {
+                                "title": "Image Version",
+                                "description": "The version of the image that is downloaded",
+                                "type": "string"
                             }
                         }
                     }
