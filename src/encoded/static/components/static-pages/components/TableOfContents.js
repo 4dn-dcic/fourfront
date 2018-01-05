@@ -178,7 +178,7 @@ class TableEntry extends React.Component {
         }
 
         var childHeaders = TableEntry.getChildHeaders(this.props.content, this.props.maxHeaderDepth, this.props.depth);
-   
+
         var collapsibleButton;
         if (this.props.collapsible && childHeaders.length > 0){
             collapsibleButton = <i

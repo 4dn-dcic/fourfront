@@ -163,10 +163,10 @@ export class WFRStepDetailBody extends React.Component {
         // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
         var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
             _.any(wfr.workflow.steps, function(workflowStep){ return workflowStep.meta && workflowStep.meta.software_used; }) &&
-            _.uniq(_.filter(
+            _.uniq(_.flatten(_.filter(
                 _.map(wfr.workflow.steps, function(workflowStep){ return (workflowStep.meta && workflowStep.meta.software_used) || null; }),
-                function(s) { return s !== null; }
-            ), false, object.atIdFromObject)
+                function(s) { return Array.isArray(s) && s.length > 0; }
+            )), false, object.itemUtil.atId)
         ) || null;
 
         return(

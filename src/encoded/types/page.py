@@ -62,11 +62,8 @@ def get_local_file_contents(filename, contentFilesLocation=None):
     return output
 
 
-def get_remote_file_contents(uri, cached_remote_files={}):
-    if cached_remote_files.get(uri) is not None:
-        return cached_remote_files[uri]
+def get_remote_file_contents(uri):
     resp = requests.get(uri)
-    cached_remote_files[uri] = resp.text
     return resp.text
 
 
