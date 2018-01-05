@@ -362,7 +362,7 @@ export const ChartDataController = {
             // Hide any pop-overs still persisting with old filters or URL.
             setTimeout(function(){
                 ChartDetailCursor.reset(true);
-            }, 750);
+            }, 0);
 
             var prevContextFilters = refs.contextFilters;
             var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters);
