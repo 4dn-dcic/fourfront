@@ -120,7 +120,7 @@ export default class SubmissionView extends React.Component{
      * available.
      */
     componentDidMount(){
-        if(this.props.schemas && Object.keys(this.props.schemas).length > 0){
+        if(this.props.schemas && _.keys(this.props.schemas).length > 0){
             this.initializePrincipal(this.props.context, this.props.schemas);
         }
     }
@@ -234,13 +234,14 @@ export default class SubmissionView extends React.Component{
         var continueInitProcess = function(){
             // if @id cannot be found or we are creating from scratch, start with empty fields
             if(!contextID || this.props.create){
-                initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                // We may not have schema (if Abstract type). If so, leave empty and allow initCreateObj ... -> createObj() to create it.
+                if (schema) initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
                 initBookmarks[0] = bookmarksList;
 
                 this.setState({
                     'keyContext': initContext,
                     'keyValid': initValid,
-                    'keyTypes': initType,
+                    'keyTypes': initType, // Gets updated in submitAmbiguousType
                     'keyDisplay': initDisplay,
                     'currKey': 0,
                     'keyLinkBookmarks': initBookmarks
@@ -335,26 +336,23 @@ export default class SubmissionView extends React.Component{
      * If the current object's schemas does not support aliases, finish out the
      * creation process with createObj using a boilerplate placeholer obj name.
      */
-    initCreateAlias = (type, newIdx, newLink, parentField=null) => {
+    initCreateAlias = (type, newIdx, newLink, parentField=null, extraState={}) => {
         var schema = this.props.schemas[type] || null;
         var autoSuggestedAlias = '';
         if (this.state.currentSubmittingUser && Array.isArray(this.state.currentSubmittingUser.submits_for) && this.state.currentSubmittingUser.submits_for[0] && typeof this.state.currentSubmittingUser.submits_for[0].name === 'string'){
             autoSuggestedAlias = this.state.currentSubmittingUser.submits_for[0].name + ':';
         }
         if(schema && schema.properties.aliases){
-            this.setState({
-                'ambiguousIdx': null,
-                'ambiguousType': null,
-                'ambiguousSelected': null,
+            this.setState(_.extend({
                 'creatingAlias' : autoSuggestedAlias,
                 'creatingIdx': newIdx,
                 'creatingType': type,
                 'creatingLink': newLink,
                 'creatingLinkForField' : parentField
-            });
+            }, extraState));
         }else{ // schema doesn't support aliases
             var fallbackAlias = 'My ' + type + ' ' + newIdx;
-            this.createObj(type, newIdx, newLink, fallbackAlias);
+            this.createObj(type, newIdx, newLink, fallbackAlias, extraState);
         }
     }
 
@@ -369,16 +367,20 @@ export default class SubmissionView extends React.Component{
         var schema = this.props.schemas[type];
         var newIdx = this.state.ambiguousIdx;
         var newLink = this.state.creatingLink;
+
+        var newKeyTypes = _.clone(this.state.keyTypes);
+        newKeyTypes[newIdx] = type;
+        var stateChange = {
+            'keyTypes'          : newKeyTypes,
+            'ambiguousIdx'      : null,
+            'ambiguousType'     : null,
+            'ambiguousSelected' : null
+        };
         // safety check to ensure schema exists for selected type
         if(schema && type){
-            this.initCreateAlias(type, newIdx, newLink);
+            this.initCreateAlias(type, newIdx, newLink, null, stateChange);
         }else{
-            // abort
-            this.setState({
-                'ambiguousIdx': null,
-                'ambiguousType': null,
-                'ambiguousSelected': null
-            });
+            this.setState(stateChange); // abort
         }
     }
 
@@ -444,27 +446,28 @@ export default class SubmissionView extends React.Component{
             var patt = new RegExp('\\S+:\\S+');
             var regexRes = patt.test(alias);
             if(!regexRes){
-                this.setState({
-                    'creatingAliasMessage': 'ERROR. Aliases must be formatted as: <text>:<text> (e.g. dcic-lab:42).'
-                });
+                this.setState({ 'creatingAliasMessage': 'ERROR. Aliases must be formatted as: <text>:<text> (e.g. dcic-lab:42).' });
                 return false;
             }
             for(var key in this.state.keyDisplay){
                 if(this.state.keyDisplay[key] === alias){
-                    this.setState({
-                        'creatingAliasMessage': 'You have already used this alias.'
-                    });
+                    this.setState({ 'creatingAliasMessage': 'You have already used this alias.' });
                     return false;
                 }
             }
             // see if the input alias is already being used
             ajax.promise('/' + alias).then(data => {
                 if (data && data.title && data.title === "Not Found"){
-                    this.createObj(type, newIdx, newLink, alias);
-                }else{
-                    this.setState({
-                        'creatingAliasMessage': 'ERROR. That alias is already taken.'
+                    this.createObj(type, newIdx, newLink, alias, {
+                        'creatingIdx'           : null,
+                        'creatingType'          : null,
+                        'creatingLink'          : null,
+                        'creatingAlias'         : '',
+                        'creatingAliasMessage'  : null,
+                        'creatingLinkForField'  : null
                     });
+                }else{
+                    this.setState({ 'creatingAliasMessage': 'ERROR. That alias is already taken.' });
                     return false;
                 }
             });
@@ -509,7 +512,7 @@ export default class SubmissionView extends React.Component{
      * the next created object. Sets currKey to the idx of the newly created object
      * so the view changes to it.
      */
-    createObj = (type, newIdx, newLink, alias) => {
+    createObj = (type, newIdx, newLink, alias, extraState={}) => {
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
         var typesCopy = this.state.keyTypes;
@@ -550,7 +553,7 @@ export default class SubmissionView extends React.Component{
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
         }
-        this.setState({
+        this.setState(_.extend({
             'keyContext': contextCopy,
             'keyValid': validCopy,
             'keyTypes': typesCopy,
@@ -561,17 +564,8 @@ export default class SubmissionView extends React.Component{
             'keyLinkBookmarks': bookmarksCopy,
             'keyLinks': linksCopy,
             'processingFetch': false,
-            'errorCount': 0,
-            'ambiguousIdx': null,
-            'ambiguousType': null,
-            'ambiguousSelected': null,
-            'creatingIdx': null,
-            'creatingType': null,
-            'creatingLink': null,
-            'creatingAlias': '',
-            'creatingAliasMessage': null,
-            'creatingLinkForField' : null
-        });
+            'errorCount': 0
+        }, extraState));
     }
 
     /**
