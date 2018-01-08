@@ -150,6 +150,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             result['@graph'] = list(graph)
             return result
 
+
     if types[doc_types[0]].name in request.registry[COLLECTIONS]:
         result['actions'] = request.registry[COLLECTIONS][types[doc_types[0]].name].actions(request)
 
