@@ -312,9 +312,9 @@ export class FlexibleDescriptionBox extends React.Component {
                 ref={this.props.fitTo === 'grid' ? null : "box"}
                 className={"flexible-description-box " + (this.props.className ? this.props.className : '')}
                 style={{
-                    height : containerHeightSet,
-                    whiteSpace : expanded ? 'normal' : this.state.descriptionWhiteSpace,
-                    visibility : !this.state.mounted && this.props.showOnMount ? 'hidden' : null
+                    'height'        : containerHeightSet,
+                    'whiteSpace'    : expanded ? 'normal' : this.state.descriptionWhiteSpace,
+                    'visibility'    : !this.state.mounted && this.props.showOnMount ? 'hidden' : null
                 }}
             >
                 { expandButton }

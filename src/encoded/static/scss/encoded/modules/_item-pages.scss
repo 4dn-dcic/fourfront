@@ -24,11 +24,12 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	height: 36px;
 	/* line-height: 36px; */
 	margin: 0;
-	padding-left: 13px;
+	padding-top: 9px;
+	padding-left: 12px;
 
 	> span:not(:last-child){
-		padding-right: 5px;
-		margin-right: 5px;
+		padding-right: 8px;
+		margin-right: 7px;
 		border-right: 1px solid #ccc;
 	}
 
@@ -69,7 +70,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-/******* Item Page Headings *********/
+/*************************
+    Item Page Headings
+**************************/
 
 
 .flexible-description-box {
@@ -102,10 +105,12 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-heading {
     /** Extends .flexible-description-box **/
-	border-radius: 2px;
-	border: 1px solid #eee;
-	min-height: 42px;
-	padding: 10px 15px 8px;
+	border: 1px solid transparent;
+	border-top-color: #dadada;
+	//min-height: 42px;
+	padding: 10px 0px 0px; 
+
+	h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 20px; }
 
 	h4 {
 		font-weight: 500;
@@ -119,24 +124,46 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.flexcol-heading, .item-page-heading, .submission-page-heading{
+.flexcol-heading,
+.submission-page-heading {
     position: relative;
-    //margin-right: -10px;
-    //margin-left: -10px;
     background-color: #f4f4f4;
 
     h1, h2, h3, h4, h5, h6 {
         margin: 0;
     }
 
-    // For the Experiment Summary header
-    &.experiment-heading {
+    
+}
 
-        h1, h2, h3, h4, h5, h6 {
-            line-height: 20px;  // 50px - 20px of vertical padding
-        }
+/*** Submissions ***/
 
-    }
+// For submissions page headers
+h3.submission-subtitle {
+	font-weight: 400;
+	display: inline-block;
+}
+
+.submission-page-heading {
+    /** Extends .flexible-description-box **/
+	border-radius: 2px;
+	border: 1px solid #ddd;
+	min-height: 42px;
+	padding: 10px 15px 8px;
+}
+
+.submission-btn {
+	background-color: #f4f4f4;
+	border-color: #f4f4f4;
+	margin-left: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+	box-shadow: none;
+}
+
+.submission-btn:hover, .submission-btn:focus{
+	background-color: #ddd;
+	border-color: #f4f4f4;
 }
 
 .item-header-indicators {

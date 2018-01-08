@@ -203,33 +203,7 @@ h1.page-title + .page-subtitle {
 	font-weight: 400;
 }
 
-// For submissions page headers
-h3.submission-subtitle {
-	font-weight: 400;
-	display: inline-block;
-}
 
-.submission-page-heading {
-    /** Extends .flexible-description-box **/
-	border-radius: 2px;
-	border: 1px solid #ddd;
-	min-height: 42px;
-	padding: 10px 15px 8px;
-}
-
-.submission-btn {
-	background-color: #f4f4f4;
-	border-color: #f4f4f4;
-	margin-left: 5px;
-	padding-left: 5px;
-	padding-right: 5px;
-	box-shadow: none;
-}
-
-.submission-btn:hover, .submission-btn:focus{
-	background-color: #ddd;
-	border-color: #f4f4f4;
-}
 
 /* *********************************************************
 		FOOTER
@@ -451,9 +425,9 @@ h3.submission-subtitle {
 	top: 0;
 	right :0;
 	bottom: 0;
-	pointer-events: none;
 	z-index: -10;
 	background-color: rgba(255,255,255,0.8);
+	transform: translate3d(0,0,0);
 	opacity: 0;
 	transition: opacity .5s, z-index 0s 0.5s;
 	.inner {
@@ -480,7 +454,7 @@ h3.submission-subtitle {
 }
 
 /** Margin Classes, inspired by Swiss github-pages/jekyll template **/
-$margin-util-sizes: 0, 1, 2, 3, 4, 5;   // * 10px
+$margin-util-sizes: 0, 1, 2, 3, 4, 5, 6;   // * 10px
 $margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
 
 @each $util-size in $margin-util-sizes {
@@ -498,6 +472,24 @@ $margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
 	}
 	.mt-0#{$util-size}, * > .mt-0#{$util-size}{
 		margin-top : $util-size * 1px !important;
+	}
+}
+
+@each $util-size in $margin-util-sizes {
+	.ml-#{$util-size}, * > .ml-#{$util-size}{
+		margin-left : $util-size * 10px !important;
+	}
+	.mr-#{$util-size}, * > .mr-#{$util-size}{
+		margin-right : $util-size * 10px !important;
+	}
+}
+
+@each $util-size in $margin-util-sizes-mini {
+	.ml-0#{$util-size}, * > .ml-0#{$util-size}{
+		margin-left : $util-size * 1px !important;
+	}
+	.mr-0#{$util-size}, * > .mr-0#{$util-size}{
+		margin-right : $util-size * 1px !important;
 	}
 }
 

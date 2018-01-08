@@ -4,8 +4,9 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'querystring';
-import { console, DateUtility, Filters, Schemas } from './../../util';
+import { console, DateUtility, Filters, Schemas, object } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
+import { itemUtil } from '../../util/object';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -51,7 +52,6 @@ export class TopRow extends React.Component {
         this.parsedStatus = this.parsedStatus.bind(this);
         this.viewJSONButton = this.viewJSONButton.bind(this);
         this.itemActions = this.itemActions.bind(this);
-        this.baseItemTypeInfo = this.baseItemTypeInfo.bind(this);
         this.typeInfoLabel = this.typeInfoLabel.bind(this);
         this.wrapChildren = this.wrapChildren.bind(this);
     }
@@ -139,31 +139,17 @@ export class TopRow extends React.Component {
         });
     }
 
-    /**
-     * @memberof module:item-pages/components.ItemHeader.TopRow
-     * @private
-     * @instance
-     */
-    baseItemTypeInfo(){
+    typeInfoLabel(){
         var baseItemType = Schemas.getBaseItemType(this.props.context);
         var itemType = Schemas.getItemType(this.props.context);
         if (itemType === baseItemType) return null;
 
-        return Schemas.getSchemaForItemType(
-            baseItemType,
-            this.props.schemas || null
-        );
-    }
+        var baseTypeInfo = Schemas.getSchemaForItemType(baseItemType, this.props.schemas || null);
+        var title = (baseTypeInfo && baseTypeInfo.title) || baseItemType;
+        var detailTypeInfo = Schemas.getSchemaForItemType(itemType, this.props.schemas || null);
+        var detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
 
-    typeInfoLabel(typeInfo = null){
-        if (!typeInfo) typeInfo = this.baseItemTypeInfo();
-        if (!typeInfo || !typeInfo.title) return null;
-
-        return (
-            <span className="type-info inline-block" data-tip={typeInfo.description}>
-                { typeInfo.title }
-            </span>
-        );
+        return <span className="type-info inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>{ title }</span>;
     }
 
     /**
@@ -180,9 +166,8 @@ export class TopRow extends React.Component {
                 className="expset-indicator expset-type right"
                 title={this.props.title || null}
                 key={i}
-            >
-                { child }
-            </div>
+                children={child}
+            />
         );
     }
 
@@ -209,7 +194,7 @@ export class TopRow extends React.Component {
                 <h5 className="col-sm-5 item-label-title">
                     { this.typeInfoLabel(this.props.typeInfo || null) }
                     { this.props.context.accession ?
-                        <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
+                        <object.CopyWrapper value={this.props.context.accession} className="accession inline-block" data-tip={accessionTooltip} children={this.props.context.accession} wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -5 } }} />
                     : null }
                 </h5>
                 <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
@@ -240,21 +225,18 @@ export class MiddleRow extends React.Component {
     }
 
     render(){
-        var isTextShort = false;
-        if (typeof this.props.context.description === 'string' && this.props.context.description.length <= 120){
-            isTextShort = true;
-        }
+        var isTextShort = typeof this.props.context.description === 'string' && this.props.context.description.length <= 120;
         return (
             <FlexibleDescriptionBox
                 description={ this.props.context.description || <em>No description provided.</em> }
-                className="item-page-heading experiment-heading"
+                className="item-page-heading"
                 textClassName={ isTextShort ? "text-larger" : "text-large" }
                 fitTo="grid"
                 dimensions={{
-                    paddingWidth : 32,
-                    paddingHeight : 22,
-                    buttonWidth : 30,
-                    initialHeight : 45
+                    'paddingWidth' : 0,
+                    'paddingHeight' : 11,
+                    'buttonWidth' : 30,
+                    'initialHeight' : 36
                 }}
             />
         );
