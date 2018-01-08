@@ -19,56 +19,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
-	font-weight: 300;
-	height: 36px;
-	/* line-height: 36px; */
-	margin: 0;
-	padding-top: 9px;
-	padding-left: 12px;
 
-	> span:not(:last-child){
-		padding-right: 8px;
-		margin-right: 7px;
-		border-right: 1px solid #ccc;
-	}
-
-	/*
-	.accession-label {
-		font-size: 1rem;
-		font-weight: 400;
-		color: #888;
-	}
-	*/
-
-	.accession {
-		font-weight: 500;
-		font-size: 1.15rem;
-	}
-}
-
-.item-label-extra {
-	font-weight: 300;
-
-	.icon[class*=" ss-"] {
-		margin-bottom: -4px;
-		vertical-align: middle;
-	}
-
-	.icon[class*=" sbt-"] {
-		margin-top: -2px;
-		vertical-align: middle;
-	}
-}
-
-@media screen and (max-width: $screen-xs-max){
-
-	.item-label-extra.text-right {
-		// Hackishly making text left-aligned for collapsed mobile view(s)
-		text-align: left !important;
-	}
-
-}
 
 /*************************
     Item Page Headings
@@ -123,7 +74,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	&.no-description {
 		padding-top: 0;
-		border-top-color: #dadada;
+		border-top-color: #eee;
+		@media screen and (min-width: $screen-md-min){
+			width: 33%;
+			float: right;
+		}
 		& + div.bottom-row {
 			clear: both;
 		}
@@ -132,8 +87,54 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 .item-view-header {
-	> .bottom-row {
-
+	.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
+		font-weight: 300;
+		height: 3px;
+		/* line-height: 36px; */
+		margin: 0;
+		padding-top: 8px;
+		padding-left: 12px;
+	
+		> span:not(:last-child){
+			padding-right: 8px;
+			margin-right: 7px;
+			border-right: 1px solid #ccc;
+		}
+	
+		/*
+		.accession-label {
+			font-size: 1rem;
+			font-weight: 400;
+			color: #888;
+		}
+		*/
+	
+		.accession {
+			font-weight: 500;
+			font-size: 1.15rem;
+		}
+	}
+	
+	.item-label-extra {
+		font-weight: 300;
+	
+		.icon[class*=" ss-"] {
+			margin-bottom: -4px;
+			vertical-align: middle;
+		}
+	
+		.icon[class*=" sbt-"] {
+			margin-top: -2px;
+			vertical-align: middle;
+		}
+	}
+	
+	@media screen and (max-width: $screen-xs-max){
+	
+		.item-label-extra.text-right {
+			text-align: left !important;
+		}
+	
 	}
 }
 

@@ -303,7 +303,14 @@ export class TooltipInfoIconContainerAuto extends React.Component {
     }
 }
 
-
+/**
+ * Use this Component to generate a 'copy' button.
+ * 
+ * @prop {string} value - What to copy to clipboard upon clicking the button.
+ * @prop {boolean} [flash=true] - Whether to do a 'flash' effect of the button and children wrapper on click.
+ * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
+ * @prop {string|React.Component} [wrapperElement='div'] - Element type to wrap props.children in, if any.
+ */
 export class CopyWrapper extends React.Component {
 
     static defaultProps = {
@@ -385,7 +392,7 @@ export class CopyWrapper extends React.Component {
         if (!children) return icon;
         var wrapperProps = _.extend(
             { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },
-            _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted')
+            _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted', 'iconProps')
         );
 
         return React.createElement(wrapperElement, wrapperProps, [children, ' ', icon]);

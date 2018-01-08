@@ -227,11 +227,12 @@ export class MiddleRow extends React.Component {
                 className="item-page-heading"
                 textClassName="text-large"
                 fitTo="grid"
+                lineHeight={24}
                 dimensions={{
                     'paddingWidth' : 0,
                     'paddingHeight' : 11, // Padding-top + border-top
                     'buttonWidth' : 30,
-                    'initialHeight' : 36
+                    'initialHeight' : 35
                 }}
             />
         );
@@ -295,23 +296,22 @@ export class Wrapper extends React.Component {
     }
 
     adjustChildren(){
-        if (!this.props.context) return this.props.children;
-        return React.Children.map(this.props.children, (child)=>{
+        var { context, href, schemas, children } = this.props;
+        if (!context) return children;
+        return React.Children.map(children, (child)=>{
             if (typeof child.props.context !== 'undefined' && typeof child.props.href === 'string') return child;
             else {
                 return React.cloneElement(child, {
-                    'context'   : this.props.context,
-                    'href'      : this.props.href,
-                    'schemas'   : this.props.schemas || (Schemas.get && Schemas.get()) || null
+                    'context'   : context,
+                    'href'      : href,
+                    'schemas'   : schemas || (Schemas.get && Schemas.get()) || null
                 }, child.props.children);
             }
         });
     }
 
     render(){
-        return (
-            <div className={"item-view-header " + (this.props.className || '')}>{ this.adjustChildren() }</div>
-        );
+        return <div className={"item-view-header " + (this.props.className || '') + (!this.props.context.description ? ' no-description' : '')}>{ this.adjustChildren() }</div>;
     }
 
 }
