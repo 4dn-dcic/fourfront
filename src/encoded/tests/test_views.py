@@ -14,11 +14,11 @@ def _type_length():
     for name in ORDER:
         try:
             type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/master-inserts/%s.json' % name))))
-        except Exception as e:
+        except Exception:
             type_length_dict[name] = 0
         try:
             type_length_dict[name] += len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
-        except Exception as e:
+        except Exception:
             type_length_dict[name] += 0
 
     # hot fix for Inherited Non-Abstract Collections
