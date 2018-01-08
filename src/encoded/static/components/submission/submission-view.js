@@ -367,11 +367,7 @@ export default class SubmissionView extends React.Component{
         var schema = this.props.schemas[type];
         var newIdx = this.state.ambiguousIdx;
         var newLink = this.state.creatingLink;
-
-        var newKeyTypes = _.clone(this.state.keyTypes);
-        newKeyTypes[newIdx] = type;
         var stateChange = {
-            'keyTypes'          : newKeyTypes,
             'ambiguousIdx'      : null,
             'ambiguousType'     : null,
             'ambiguousSelected' : null
@@ -537,8 +533,8 @@ export default class SubmissionView extends React.Component{
             newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
             validCopy[keyIdx] = 1; // new object has no incomplete children yet
             validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
-            typesCopy[keyIdx] = type;
         }
+        typesCopy[keyIdx] = type;
         var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
         if(contextWithAlias.aliases){
             contextWithAlias.aliases.push(alias);
