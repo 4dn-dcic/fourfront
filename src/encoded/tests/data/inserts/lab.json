@@ -1,23 +1,5 @@
 [
     {
-        "address2": "10 Schattuck Street",
-        "address1": "Biomedical Bioinfomatics",
-        "awards": ["1U01CA200059-01"],
-        "city": "Boston",
-        "country": "USA",
-        "fax": "000-000-0000",
-        "institute_label": "HMS",
-        "institute_name": "Harvard Medical School",
-        "name": "4dn-dcic-lab",
-        "phone1": "000-000-0000",
-        "phone2": "000-000-0000",
-        "pi": "4dndcic@gmail.com",
-        "postal_code": "02115",
-        "state": "MA",
-        "title": "4DN DCIC Lab, HMS",
-        "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
-    },
-    {
         "awards": ["Test-4DN"],
         "name": "test-4dn-lab",
         "title": "4DN Testing Lab",

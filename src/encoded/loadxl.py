@@ -713,7 +713,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         if isinstance(itype, list):
             order = itype
         else:
-            order = [itype]
+            order = [itype]    
     for item_type in order:
         try:
             source = read_single_sheet(filename, item_type)
@@ -818,8 +818,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts',
-              docsdir=None):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None):
     '''
     generic load data function
     indir for inserts should be relative to tests/data/
@@ -832,6 +831,10 @@ def load_data(app, access_key_loc=None, indir='inserts',
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
+    if indir != 'master-inserts': # Load up master_inserts
+        master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
+        load_all(testapp, master_inserts, [])
+
     if not indir.endswith('/'):
         indir += '/'
     inserts = resource_filename('encoded', 'tests/data/' + indir)
@@ -847,7 +850,7 @@ def load_data(app, access_key_loc=None, indir='inserts',
 
 
 def load_test_data(app, access_key_loc=None):
-    load_data(app, access_key_loc, docsdir='documents')
+    load_data(app, access_key_loc, docsdir='documents', indir='inserts')
 
 
 def load_prod_data(app, access_key_loc=None):
