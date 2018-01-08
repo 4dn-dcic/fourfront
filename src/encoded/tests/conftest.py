@@ -172,9 +172,8 @@ def workbook(conn, app, app_settings):
 
         from ..loadxl import load_all
         from pkg_resources import resource_filename
-        inserts = resource_filename('encoded', 'tests/data/inserts/')
-        docsdir = [resource_filename('encoded', 'tests/data/documents/')]
-        load_all(testapp, inserts, docsdir)
+        load_all(testapp, resource_filename('encoded', 'tests/data/master-inserts/'), []) # Master Inserts
+        load_all(testapp, resource_filename('encoded', 'tests/data/inserts/'), [resource_filename('encoded', 'tests/data/documents/')]) # Test Inserts
 
         yield
     finally:
