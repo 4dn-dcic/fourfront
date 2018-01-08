@@ -510,7 +510,6 @@ export class TableOfContents extends React.Component {
                 })
                 .map((s,i,all) => {
                     if (this.props.skipDepth && this.props.skipDepth > 0) {
-                        
                         var childHeaders = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
                         return TableEntryChildren.renderChildrenElements(
                             childHeaders, s.content, this.props.maxHeaderDepth, 1,
