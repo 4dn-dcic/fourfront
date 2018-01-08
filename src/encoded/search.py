@@ -150,10 +150,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             result['@graph'] = list(graph)
             return result
 
-
-    if types[doc_types[0]].name in request.registry[COLLECTIONS]:
-        result['actions'] = request.registry[COLLECTIONS][types[doc_types[0]].name].actions(request)
-
+    result['actions'] = get_collection_actions(request, types[doc_types[0]])
     result['@graph'] = list(graph)
     return result
 
@@ -198,6 +195,14 @@ def get_available_facets(context, request, search_type=None):
         })
 
     return result
+
+
+def get_collection_actions(request, type_info):
+    collection = request.registry[COLLECTIONS].get(type_info.name)
+    if collection: # We don't find a collection if type=Item, for example.
+        return collection.actions(request)
+    else:
+        return None
 
 
 def get_pagination(request):

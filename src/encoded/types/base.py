@@ -51,7 +51,7 @@ ONLY_ADMIN_VIEW = [
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
 SUBMITTER_CREATE = [
-    (Allow, 'group.submitter', 'create'),
+    (Allow, 'group.submitter', ['add', 'create'])
 ]
 
 ALLOW_EVERYONE_VIEW = [
@@ -92,9 +92,7 @@ DELETED = [
 
 # Collection acls
 
-ALLOW_SUBMITTER_ADD = [
-    (Allow, 'group.submitter', ['add']),
-] + SUBMITTER_CREATE
+ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -470,7 +468,7 @@ class SharedItem(Item):
         return roles
 
 
-@snovault.calculated_property(context=Item.Collection, category='action')
+@snovault.calculated_property(context=Item.AbstractCollection, category='action')
 def add(context, request):
     """smth."""
     if request.has_permission('add'):
