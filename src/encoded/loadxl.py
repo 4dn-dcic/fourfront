@@ -713,7 +713,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         if isinstance(itype, list):
             order = itype
         else:
-            order = [itype]    
+            order = [itype]
     for item_type in order:
         try:
             source = read_single_sheet(filename, item_type)
