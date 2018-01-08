@@ -105,8 +105,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-heading {
     /** Extends .flexible-description-box **/
-	border: 1px solid transparent;
-	border-top-color: #dadada;
+	border-top:1px solid #ccc;
 	//min-height: 42px;
 	padding: 10px 0px 0px; 
 
@@ -122,6 +121,20 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 	}
 
+	&.no-description {
+		padding-top: 0;
+		border-top-color: #dadada;
+		& + div.bottom-row {
+			clear: both;
+		}
+	}
+
+}
+
+.item-view-header {
+	> .bottom-row {
+
+	}
 }
 
 .flexcol-heading,
@@ -171,9 +184,10 @@ h3.submission-subtitle {
 	margin-top: 8px;
 	margin-bottom: 8px;
 
-	.expset-indicator {
+	> .indicator-item {
 		display: inline-block;
 		box-sizing: border-box;
+		position: relative;
 		/* border: 1px solid rgba(0,0,0,0.125); */
 		/* border-radius: 5px; */
 		line-height: 20px;
@@ -184,51 +198,29 @@ h3.submission-subtitle {
 		text-transform: capitalize;
 		color: #444;
 
-		&.right, .left {
-			max-width: 50%;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			&:after {
-				content : "";
-				display: block;
-				position: absolute;
-				height: 100%;
-				top: 0;
-			}
-		}
+		max-width: 50%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 
-		&.right {
-			padding-left: 21px;
+		padding-right: 21px;
+		padding-left: 0;
+		max-width: 50%;
+		&:after {
+			content : "";
+			display: block;
+			position: absolute;
+			right: 10px;
+			height: 100%;
+			top: 0;
+			border-right: 1px solid rgba(0,0,0,0.125);
+		}
+		&:last-child {
 			padding-right: 0;
-			&:after {
-				margin-left: -11px;
-				border-left: 1px solid rgba(0,0,0,0.125);
-			}
-			&:last-child {
-				padding-left: 0;
-				margin-left: 0;
-			}
-			&:last-child:after {
-				display: none;
-			}
+			margin-right: 0;
 		}
-
-		&.left {
-			padding-right: 21px;
-			padding-left: 0;
-			max-width: 50%;
-			&:after {
-				margin-right: -10px;
-				border-right: 1px solid rgba(0,0,0,0.125);
-			}
-			&:last-child {
-				padding-right: 0;
-				margin-right: 0;
-			}
-			&:last-child:after {
-				display: none;
-			}
+		&:last-child:after {
+			display: none;
 		}
 
 		&.expset-status:before {

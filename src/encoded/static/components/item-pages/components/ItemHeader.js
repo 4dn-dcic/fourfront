@@ -80,12 +80,11 @@ export class TopRow extends React.Component {
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
             <div
-                className="expset-indicator expset-status right"
+                className="indicator-item expset-status"
                 data-status={ this.props.context.status.toLowerCase() }
                 data-tip="Current Status"
-            >
-                { this.props.context.status }
-            </div>
+                children={this.props.context.status}
+            />
         );
     }
     /**
@@ -103,7 +102,7 @@ export class TopRow extends React.Component {
         urlParts.search = '?' + queryString.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
         var viewUrl = url.format(urlParts);
         return (
-            <div className="expset-indicator right view-ajax-button">
+            <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code-o"/> <a 
                     href={viewUrl}
                     className="inline-block"
@@ -132,7 +131,7 @@ export class TopRow extends React.Component {
         return this.props.context.actions.map(function(action, i){
             var title = action.title;
             return (
-                <div className="expset-indicator right action-button" data-action={action.name || null} key={action.name || i}>
+                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
                     <a href={action.href}>{ title }</a>
                 </div>
             );
@@ -163,7 +162,7 @@ export class TopRow extends React.Component {
         if (!this.props.children) return null;
         return React.Children.map(this.props.children, (child,i) =>
             <div
-                className="expset-indicator expset-type right"
+                className="indicator-item expset-type"
                 title={this.props.title || null}
                 key={i}
                 children={child}
@@ -198,10 +197,7 @@ export class TopRow extends React.Component {
                     : null }
                 </h5>
                 <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
-                    { this.viewJSONButton() }
-                    { this.itemActions() }
-                    { this.wrapChildren() }
-                    { this.parsedStatus() }
+                    { this.parsedStatus() }{ this.wrapChildren() }{ this.itemActions() }{ this.viewJSONButton() }
                 </h5>
             </div>
         );
@@ -218,23 +214,22 @@ export class TopRow extends React.Component {
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
 export class MiddleRow extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
     render(){
-        var isTextShort = typeof this.props.context.description === 'string' && this.props.context.description.length <= 120;
+        var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
+
+        if (!description){
+            return <div className="item-page-heading no-description"/>;
+        }
+
         return (
             <FlexibleDescriptionBox
                 description={ this.props.context.description || <em>No description provided.</em> }
                 className="item-page-heading"
-                textClassName={ isTextShort ? "text-larger" : "text-large" }
+                textClassName="text-large"
                 fitTo="grid"
                 dimensions={{
                     'paddingWidth' : 0,
-                    'paddingHeight' : 11,
+                    'paddingHeight' : 11, // Padding-top + border-top
                     'buttonWidth' : 30,
                     'initialHeight' : 36
                 }}
@@ -305,9 +300,9 @@ export class Wrapper extends React.Component {
             if (typeof child.props.context !== 'undefined' && typeof child.props.href === 'string') return child;
             else {
                 return React.cloneElement(child, {
-                    context : this.props.context,
-                    href : this.props.href,
-                    schemas : this.props.schemas || (Schemas.get && Schemas.get()) || null
+                    'context'   : this.props.context,
+                    'href'      : this.props.href,
+                    'schemas'   : this.props.schemas || (Schemas.get && Schemas.get()) || null
                 }, child.props.children);
             }
         });
@@ -320,3 +315,4 @@ export class Wrapper extends React.Component {
     }
 
 }
+
