@@ -9,13 +9,15 @@ from snovault import (
 from .base import (
     Item,
     paths_filtered_by_status,
-    get_item_if_you_can
+    get_item_if_you_can,
+    ALLOW_SUBMITTER_ADD
 )
 
 
 @abstract_collection(
     name='experiments',
     unique_key='accession',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': "Experiments",
         'description': 'Listing of all types of experiments.',
