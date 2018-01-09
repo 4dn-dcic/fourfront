@@ -51,7 +51,8 @@ ONLY_ADMIN_VIEW = [
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
 SUBMITTER_CREATE = [
-    (Allow, 'group.submitter', ['add', 'create'])
+    (Allow, 'group.submitter', 'add'),
+    (Allow, 'group.submitter', 'create')
 ]
 
 ALLOW_EVERYONE_VIEW = [
@@ -471,7 +472,7 @@ class SharedItem(Item):
 @snovault.calculated_property(context=Item.AbstractCollection, category='action')
 def add(context, request):
     """smth."""
-    if request.has_permission('add'):
+    if request.has_permission('add', context):
         return {
             'name': 'add',
             'title': 'Add',
