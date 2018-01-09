@@ -199,7 +199,7 @@ def get_available_facets(context, request, search_type=None):
 
 def get_collection_actions(request, type_info):
     collection = request.registry[COLLECTIONS].get(type_info.name)
-    if collection: # We don't find a collection if type=Item, for example.
+    if collection and hasattr(collection, 'actions'):
         return collection.actions(request)
     else:
         return None
