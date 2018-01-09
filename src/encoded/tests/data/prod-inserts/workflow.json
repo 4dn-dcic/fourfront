@@ -4474,7 +4474,7 @@
                     ],
                     "description": "Parsing and sorting bam file",
                     "software_used": [
-                        "software/4bb8d91b-4ea3-43da-afdb-53a7e28671d3"
+                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
                     ]
                 },
                 "name": "pairsam-parse-sort",
@@ -4531,7 +4531,7 @@
                     ],
                     "description": "Merging pairsam files",
                     "software_used": [
-                        "software/4bb8d91b-4ea3-43da-afdb-53a7e28671d3"
+                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
                     ]
                 },
                 "name": "pairsam-merge",
@@ -4575,7 +4575,7 @@
                     ],
                     "description": "Marking duplicates to pairsam file",
                     "software_used": [
-                        "software/4bb8d91b-4ea3-43da-afdb-53a7e28671d3"
+                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
                     ]
                 },
                 "name": "pairsam-markasdup",
@@ -4633,7 +4633,7 @@
                     ],
                     "description": "Filtering duplicate and invalid reads",
                     "software_used": [
-                        "software/4bb8d91b-4ea3-43da-afdb-53a7e28671d3"
+                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
                     ]
                 },
                 "name": "pairsam-filter",
@@ -4704,7 +4704,7 @@
                     ],
                     "description": "Adding restriction enzyme site information",
                     "software_used": [
-                        "software/a90c8993-0a73-404c-b52e-0c7561c374f9"
+                        "software/1e70ee8c-9b05-4bf7-9d4a-c74fbe096262"
                     ]
                 },
                 "name": "addfragtopairs",
@@ -4727,7 +4727,7 @@
             }
         ],
         "title": "Hi-C Post-alignment Processing",
-        "uuid": "8781b85b-0dd5-486a-849a-52fd3a2d828f",
+        "uuid": "750496b5-5a88-4cea-bba9-b4976f570f15",
         "workflow_type": "Hi-C data processing"
     }
 ]
