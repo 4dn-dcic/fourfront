@@ -83,6 +83,7 @@ class SubmissionProperty extends React.Component {
         var { field, schemas, keyTypes, keyIdx, hierarchy, keyLinks, depth } = this.props;
 
         var itemSchema = schemas[keyTypes[keyIdx]];
+        if (!itemSchema) return null;
         var isRequired = Array.isArray(itemSchema.required) && _.contains(itemSchema.required, field);
         var fieldBase = field.split('.')[0];
         var fieldSchema = itemSchema.properties[fieldBase];
@@ -146,6 +147,7 @@ class SubmissionLeaf extends React.Component{
 
     placeholderSortFxn(fieldA, fieldB){
         var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
+        if (!itemSchema) return 0;
         var fieldABase = fieldA.split('.')[0];
         var fieldBBase = fieldB.split('.')[0];
 
