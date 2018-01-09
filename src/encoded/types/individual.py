@@ -7,14 +7,15 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    ALLOW_SUBMITTER_ADD
 )
 
 
 @abstract_collection(
     name='individuals',
     unique_key='accession',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': "Individuals",
         'description': 'Listing of all types of individuals.',

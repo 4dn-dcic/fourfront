@@ -128,6 +128,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         params.append(('limit', 'all'))
         result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
 
+    # add actions (namely 'add')
+    result['actions'] = get_collection_actions(request, types[doc_types[0]])
+
     if not result['total']:
         # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
         request.response.status_code = 404
@@ -150,9 +153,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         else:
             result['@graph'] = list(graph)
             return result
-
-    if types[doc_types[0]].name in request.registry[COLLECTIONS]:
-        result['actions'] = request.registry[COLLECTIONS][types[doc_types[0]].name].actions(request)
 
     result['@graph'] = list(graph)
     return result
@@ -198,6 +198,14 @@ def get_available_facets(context, request, search_type=None):
         })
 
     return result
+
+
+def get_collection_actions(request, type_info):
+    collection = request.registry[COLLECTIONS].get(type_info.name)
+    if collection and hasattr(collection, 'actions'):
+        return collection.actions(request)
+    else:
+        return None
 
 
 def get_pagination(request):
