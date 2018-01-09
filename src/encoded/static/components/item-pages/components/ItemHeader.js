@@ -139,6 +139,9 @@ export class TopRow extends React.Component {
     }
 
     typeInfoLabel(){
+        if (this.props.typeInfo){
+            return <span className="type-info inline-block" data-tip={(this.props.typeInfo && this.props.typeInfo.description) || null}>{ this.props.typeInfo && this.props.typeInfo.title }</span>;
+        }
         var baseItemType = Schemas.getBaseItemType(this.props.context);
         var itemType = Schemas.getItemType(this.props.context);
         if (itemType === baseItemType) return null;
@@ -220,7 +223,7 @@ export class MiddleRow extends React.Component {
         if (!description){
             return <div className="item-page-heading no-description"/>;
         }
-        
+
         return (
             <FlexibleDescriptionBox
                 description={ description || <em>No description provided.</em> }

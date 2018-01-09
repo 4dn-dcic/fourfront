@@ -130,7 +130,7 @@ export class ViewFileButton extends React.Component {
             '4' : fileNameLower.slice(-4),
             '5' : fileNameLower.slice(-5)
         };
-        if (fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['5'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['5'] === '.png' || fileNameLowerEnds['5'] === '.bmp' || fileNameLowerEnds['5'] === '.gif'){
+        if (isFilenameAnImage(fileNameLowerEnds)){
             action = 'View';
             preLink = <i className="icon icon-fw icon-picture-o" />;
         } else if (fileNameLowerEnds['4'] === '.pdf'){
@@ -149,6 +149,25 @@ export class ViewFileButton extends React.Component {
             </Button>
         );
     }
+}
+
+export function isFilenameAnImage(filename, suppressErrors = false){
+    var fileNameLower, fileNameLowerEnds;
+    if (typeof filename === 'string'){
+        fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
+        fileNameLowerEnds = {
+            '3' : fileNameLower.slice(-3),
+            '4' : fileNameLower.slice(-4),
+            '5' : fileNameLower.slice(-5)
+        };
+    } else if (filename && typeof filename === 'object' && filename['3'] && filename['4']) {
+        fileNameLowerEnds = filename;
+    } else if (!suppressErrors) {
+        throw new Error('Param \'filename\' must be a string or pre-formatted map of last char-lengths to their values.');
+    } else {
+        return false;
+    }
+    return fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['4'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['4'] === '.png' || fileNameLowerEnds['4'] === '.bmp' || fileNameLowerEnds['4'] === '.gif';
 }
 
 

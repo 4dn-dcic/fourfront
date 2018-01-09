@@ -188,6 +188,11 @@ h1.page-title {
 			font-size : 0.75em;
 			display: inline-block;
 			margin-left: 9px;
+			vertical-align: middle;
+
+			body[data-pathname="/search/"] & {
+				margin-left: 6px;
+			}
 		}
 
 	}

@@ -192,6 +192,8 @@ class CellCultureInfoBody extends React.Component {
 
                         <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='synchronization_stage' fallbackTitle="Synchronization Stage" wrapInColumn />
 
+                        <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='morphology_image' fallbackTitle="Morphology Image" singleItemClassName="block" wrapInColumn titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_image_attachment} />
+
                         <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_duration' fallbackTitle="Total Days in Culture" wrapInColumn />
  
                         <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_start_date' fallbackTitle="Culture Start Date" wrapInColumn titleRenderFxn={OverViewBodyItem.titleRenderPresets.local_date_time} />

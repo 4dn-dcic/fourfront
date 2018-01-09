@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { console, object, Schemas, JWT, layout } from './util';
+import { console, object, Schemas, JWT, layout, DateUtility } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 
@@ -182,6 +182,9 @@ export default class PageTitle extends React.Component {
                 // Re-Enable below if want Accessions as Page Subtitles.
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
             } else {
+                if (title.indexOf(context['@type'][0] + ' from ') === 0){ // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
+                    title = (context.date_created && <span>from <DateUtility.LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
+                }
                 if (!context.accession && !Schemas.itemTypeHierarchy[context['@type'][0]] && typeof title === 'string' && title.length > 20) {
                     return { 'title' : itemTypeTitle, 'subtitle' : title }; // Long title & no text right under it from Item page -- render it under Type title instd.
                 }

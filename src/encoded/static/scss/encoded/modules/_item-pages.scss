@@ -92,7 +92,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		min-height: 30px;
 		/* line-height: 36px; */
 		margin: 0;
-		padding-top: 8px;
+		padding-top: 10px;
 		padding-left: 12px;
 
 		@media screen and (max-width: $screen-xs-max){
@@ -1181,6 +1181,25 @@ $download-button-width : 100px;
 
 						}
 					}
+
+					&.is-image {
+						margin-left: -5px;
+						margin-right: -5px;
+						> .inner {
+							> a.image-wrapper {
+								display: block;
+								margin: 0 auto;
+							}
+							> .caption {
+								margin-top: 5px;
+								font-style: italic;
+							}
+						}
+						img.embedded-item-image {
+							max-width: 100%;
+						}
+					}
+
 				}
 
 				> div.overview-single-element {

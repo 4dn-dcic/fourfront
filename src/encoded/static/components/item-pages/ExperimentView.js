@@ -97,6 +97,10 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return initTabs.concat(this.getFilesTabs(width)).concat(this.getCommonTabs());
     }
 
+    typeInfo(){
+        return { 'title' : this.props.context.experiment_type || null, 'description' : "Type of Experiment" };
+    }
+
     itemMidSection(){
         return [<Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />, <OverviewHeading context={this.props.context} />];
     }

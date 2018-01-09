@@ -152,15 +152,8 @@ export class WorkflowView extends ItemBaseView {
         });
     }
 
-    itemHeader(){
-        var context = this.props.context;
-        return (
-            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
-        );
+    typeInfo(){
+        return { 'title' : this.props.context.workflow_type, description : 'Type of Workflow' };
     }
 
 }

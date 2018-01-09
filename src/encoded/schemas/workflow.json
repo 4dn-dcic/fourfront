@@ -306,5 +306,24 @@
         }
 
 
+    },
+    "facets" : {
+        "category": {
+            "title": "Workflow Category"
+        },
+        "workflow_type": {
+            "title": "Workflow Type"
+        },
+        "data_types": {
+            "title": "Data Type"
+        }
+    },
+    "columns" : {
+        "category": {
+            "title": "Workflow Category"
+        },
+        "workflow_type": {
+            "title": "Workflow Type"
+        }
     }
 }

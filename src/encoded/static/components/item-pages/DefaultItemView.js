@@ -63,10 +63,17 @@ export class ItemBaseView extends React.Component {
         return this.getDefaultTabs();
     }
 
+    /**
+     * @returns {{ 'title' : string, 'description' : string }} Object with 'title' and 'description' (used for tooltip) to show detailed or base type info at top left of page, under title.
+     */
+    typeInfo(){
+        return null;
+    }
+
     itemHeader(){
         return (
             <ItemHeader.Wrapper context={this.props.context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                <ItemHeader.TopRow />
+                <ItemHeader.TopRow typeInfo={this.typeInfo()} />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>
@@ -97,9 +104,7 @@ export class ItemBaseView extends React.Component {
 
                 <div className="row">
                     <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer">
-                        <layout.WindowResizeUpdateTrigger>
-                            { this.tabbedView() }
-                        </layout.WindowResizeUpdateTrigger>
+                        <layout.WindowResizeUpdateTrigger children={this.tabbedView()} />
                     </div>
                 </div>
                 <br/>
@@ -175,6 +180,89 @@ export class OverviewHeadingContainer extends React.Component {
 }
 
 
+export class EmbeddedItemWithAttachment extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.filename = this.filename.bind(this);
+    }
+
+    filename(){
+        return (this.props.item && this.props.item.attachment && this.props.item.attachment.download) || object.itemUtil.getTitleStringFromContext(this.props.item) || null;
+    }
+    
+    render(){
+        var { item, index } = this.props,
+            linkToItem = object.itemUtil.atId(item),
+            isInArray = typeof index === 'number';
+
+        if (!item || !linkToItem) return null;
+
+        var itemTitle = object.itemUtil.getTitleStringFromContext(item);
+
+        var viewAttachmentButton = null;
+        var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
+        if (haveAttachment){
+            viewAttachmentButton = (
+                <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={this.filename()} href={linkToItem + item.attachment.href} disabled={!haveAttachment} className='text-ellipsis-container btn-block' />
+            );
+        }
+        
+        return (
+            <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToItem}>
+                <div className="row">
+                    <div className={"col-xs-12 col-sm-6 col-md-6 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
+                        <div className="inner">
+                            { isInArray ? <span>{ index + 1 }. </span> : null}{ object.itemUtil.generateLink(item, true) }
+                        </div>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-6 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
+                </div>
+            </div>
+        );
+    }
+}
+
+export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment {
+
+    isAttachmentImage(filename = null){
+        return fileUtil.isFilenameAnImage(this.filename());
+    }
+
+    caption(){
+        var item = this.props.item;
+        var captionText = item.caption || item.description || (item.attachment && item.attachment.caption) || this.filename();
+        //var size = item.attachment && item.attachment.size
+        if (captionText){
+            return <div className="caption">{ captionText }</div>;
+        }
+        return null;
+    }
+
+    render(){
+        var { item, index } = this.props,
+            linkToItem = object.itemUtil.atId(item),
+            isInArray = typeof index === 'number';
+
+        if (!item || !linkToItem) return null;
+
+        var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
+        var isAttachmentImage = this.isAttachmentImage();
+
+        if (!haveAttachment || !isAttachmentImage) return <EmbeddedItemWithAttachment {...this.props} />;
+
+        var imageElem = <a href={linkToItem} className="image-wrapper"><img className="embedded-item-image" src={linkToItem + item.attachment.href} /></a>;
+        var captionText = (item.attachment && item.attachment.caption) || this.filename();
+        
+        return (
+            <div className={"embedded-item-with-attachment is-image" + (isInArray ? ' in-array' : '')} key={linkToItem}>
+                <div className="inner">{ imageElem }{ this.caption() }</div>
+            </div>
+        );
+    }
+}
+
+
 export class OverViewBodyItem extends React.Component {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
@@ -205,41 +293,10 @@ export class OverViewBodyItem extends React.Component {
             return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : null;
         },
         'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
-            if (!item || !object.itemUtil.atId(item)){
-                return null;
-            }
-            var itemTitle = object.itemUtil.getTitleStringFromContext(item);
-            var linkToProtocolItem = object.itemUtil.atId(item);
-
-            var viewAttachmentButton = null;
-            var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
-            if (haveAttachment){
-                var fullProtocolDocumentHref = linkToProtocolItem + item.attachment.href;
-                viewAttachmentButton = (
-                    <Button bsSize="small" bsStyle="primary" href={fullProtocolDocumentHref} target="_blank" className="text-400 text-ellipsis-container btn-block">
-                        View File &nbsp;<i className="icon icon-fw icon-external-link"/>
-                    </Button>
-                );
-                viewAttachmentButton = (
-                    <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={(haveAttachment && item.attachment.type) || null} filename={itemTitle || null} href={fullProtocolDocumentHref} disabled={!haveAttachment} className={'text-ellipsis-container btn-block'} />
-                );
-            }
-
-            var linkToItem = object.itemUtil.generateLink(item, true);
-            var isInArray = typeof index === 'number';
-            
-            return (
-                <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToProtocolItem}>
-                    <div className="row">
-                        <div className={"col-xs-12 col-sm-6 col-md-6 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
-                            <div className="inner">
-                                { isInArray ? <span>{ index + 1 }. </span> : null}{ linkToItem }
-                            </div>
-                        </div>
-                        <div className="col-xs-12 col-sm-6 col-md-6 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
-                    </div>
-                </div>
-            );
+            return <EmbeddedItemWithAttachment {...{ item, index }} />;
+        },
+        'embedded_item_with_image_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
+            return <EmbeddedItemWithImageAttachment {...{ item, index }} />;
         },
         'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li'){
             if (typeof value !== 'string') return null;
