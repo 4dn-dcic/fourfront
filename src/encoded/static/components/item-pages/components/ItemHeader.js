@@ -220,12 +220,13 @@ export class MiddleRow extends React.Component {
         if (!description){
             return <div className="item-page-heading no-description"/>;
         }
-
+        
         return (
             <FlexibleDescriptionBox
-                description={ this.props.context.description || <em>No description provided.</em> }
+                description={ description || <em>No description provided.</em> }
                 className="item-page-heading"
                 textClassName="text-large"
+                defaultExpanded={description.length < 600}
                 fitTo="grid"
                 lineHeight={24}
                 dimensions={{

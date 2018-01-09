@@ -89,11 +89,15 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .item-view-header {
 	.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
 		font-weight: 300;
-		height: 3px;
+		min-height: 30px;
 		/* line-height: 36px; */
 		margin: 0;
 		padding-top: 8px;
 		padding-left: 12px;
+
+		@media screen and (max-width: $screen-xs-max){
+			min-height: 42px;
+		}
 	
 		> span:not(:last-child){
 			padding-right: 8px;
@@ -111,7 +115,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	
 		.accession {
 			font-weight: 500;
-			font-size: 1.15rem;
+			font-size: 1rem;
 		}
 	}
 	
@@ -1059,12 +1063,11 @@ $download-button-width : 100px;
 					margin-left: 5px;
 					font-size: 1.125rem;
 				}
+				i.expand-icon,
 				i.title-icon {
 					margin-right: 12px;
 					font-size: 1rem;
-					vertical-align: middle;
 					position: relative;
-					top: -1px;
 				}
 			}
 			&:hover > span {

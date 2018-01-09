@@ -159,14 +159,16 @@ export default class PageTitle extends React.Component {
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
-            if (itemTypeTitle === 'Publication'){ // Long title string
+            // Handle long title strings
+            if (itemTypeTitle === 'Publication'){
                 if (context.title && context.short_attribution){
                     return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
                 }
                 return { 'title' : itemTypeTitle, 'subtitle' : context.title || title, 'subtitleEllipsis' : true };
             }
 
-            if (object.itemUtil.isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
+            // Don't show Accessions in titles.
+            if (object.itemUtil.isDisplayTitleAccession(context, title, true)){
 
                 // But show rest of title if it is in form 'Something - ACCESSION'
                 if (typeof context.accession === 'string' && context.accession.length >= 12 && title.indexOf(' - ' + context.accession) > -1){
@@ -180,6 +182,9 @@ export default class PageTitle extends React.Component {
                 // Re-Enable below if want Accessions as Page Subtitles.
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
             } else {
+                if (!context.accession && !Schemas.itemTypeHierarchy[context['@type'][0]] && typeof title === 'string' && title.length > 20) {
+                    return { 'title' : itemTypeTitle, 'subtitle' : title }; // Long title & no text right under it from Item page -- render it under Type title instd.
+                }
                 return { 'title' : itemTypeTitle, 'calloutTitle' : title };
             }
 

@@ -138,7 +138,8 @@ export class FlexibleDescriptionBox extends React.Component {
         'textStyle' : null,
         'debug' : false,
         'linesOfText' : 1,
-        'lineHeight' : 21
+        'lineHeight' : 21,
+        'defaultExpanded' : false
     }
 
     constructor(props){
@@ -152,7 +153,7 @@ export class FlexibleDescriptionBox extends React.Component {
         this.render = this.render.bind(this);
         this.descriptionHeight = null;
         this.state = {
-            'descriptionExpanded' : false,
+            'descriptionExpanded' : props.defaultExpanded,
             'descriptionWillFitOneLine' : true,
             'descriptionWhiteSpace' : this.props.linesOfText > 1 ? 'normal' : 'nowrap',
             'shortContent' : null,

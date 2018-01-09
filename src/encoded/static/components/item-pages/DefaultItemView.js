@@ -156,7 +156,7 @@ export class OverviewHeadingContainer extends React.Component {
     }
 
     renderTitle(){
-        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
+        return <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
     }
 
     render(){
