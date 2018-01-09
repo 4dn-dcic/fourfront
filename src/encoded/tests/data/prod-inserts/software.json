@@ -221,7 +221,7 @@
         ],
         "source_url": "https://github.com/4dn-dcic/pairix",
         "title": "pairix_0.3.3",
-        "uuid": "1e70ee8c-9b05-4bf7-9d4a-c74fbe096262",
+        "uuid": "9baf9f73-2d59-4eca-a326-340007b2a8b8",
         "version": "0.3.3"
     },
     {
@@ -234,7 +234,7 @@
         ],
         "source_url": "https://github.com/mirnylab/cooler",
         "title": "cooler_0.7.6",
-        "uuid": "459a9167-9198-428d-b87d-9e075aaa47b3",
+        "uuid": "b43e5d6d-f1a6-4713-9b48-8f5c060dad6c",
         "version": "0.7.6"
     },
     {
@@ -246,7 +246,7 @@
         ],
         "source_url": "https://github.com/4dn-dcic/pairsqc",
         "title": "pairsqc_0.2.0",
-        "uuid": "cf1b4990-e277-49a3-8bfa-59e0c3d600af",
+        "uuid": "4ab53542-93e3-46c4-883b-0dd113e5f867",
         "version": "0.2.0"
     },
     {
@@ -259,7 +259,7 @@
         ],
         "source_url": "https://github.com/theaidenlab/juicebox",
         "title": "juicebox_1.7.6-cuda8",
-        "uuid": "2ffb21fe-35c3-4d51-bd69-1e042959990f",
+        "uuid": "7dec9b37-fd52-4b32-971e-90b4b3bb581e",
         "version": "1.7.6-cuda8"
     },
     {
@@ -278,7 +278,7 @@
         ],
         "source_url": "https://github.com/theaidenlab/juicer",
         "title": "juicer_e6d600",
-        "uuid": "7633f70d-9114-4a13-beb6-f0bba2f203ba"
+        "uuid": "5c553760-b51f-4860-b53d-8f909ffe34ee"
     },
     {
         "award": "1U01CA200059-01",
@@ -289,7 +289,7 @@
         ],
         "source_url": "https://github.com/4dn-dcic/hic2cool",
         "title": "hic2cool_0.4.1",
-        "uuid": "4fa74d8d-7375-4500-b40e-fedb61b1e328",
+        "uuid": "c1c772a8-5d1c-4481-8ab7-30729f3f6cb2",
         "version": "0.4.1"
     },
     {
@@ -302,7 +302,7 @@
         ],
         "source_url": "https://github.com/SooLee/mcool2hic",
         "title": "mcool2hic_f2d128",
-        "uuid": "c7efe66a-0057-403b-9194-e8dcecebe3c3"
+        "uuid": "e153ac9f-6bdd-40d1-8a1b-d0dc68a6bae2"
     },
     {
         "award": "1U01CA200059-01",
@@ -317,6 +317,6 @@
         ],
         "source_url": "https://github.com/mirnylab/pairsamtools",
         "title": "pairsamtools_49489c",
-        "uuid": "b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
+        "uuid": "6668cc53-1414-4fca-9493-240b19e91845"
     }
 ]

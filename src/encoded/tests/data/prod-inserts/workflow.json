@@ -4407,13 +4407,13 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output processedfile",
-                "workflow_argument_name": "merged_annotated_bam"
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "annotated_bam"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output processedfile",
-                "workflow_argument_name": "out_pairs"
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "filtered_pairs_with_frags"
             }
         ],
         "award": "1U01CA200059-01",
@@ -4430,7 +4430,7 @@
         "data_types": [
             "Hi-C"
         ],
-        "description": "Hi-C data processing pipeline",
+        "description": "This is a subworkflow of the Hi-C data processing pipeline. It takes a bam file as input and performs parsing, sorting, filtering and deduping. It produces two output files, a lossless, filter-annotated bam file and a filtered pairs (contact list) file.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-bam",
         "steps": [
@@ -4439,6 +4439,7 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "bam",
                             "argument_type": "Input file"
                         },
                         "name": "bam",
@@ -4452,6 +4453,7 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "chromsize",
                             "argument_type": "Input file"
                         },
                         "name": "chromsize",
@@ -4483,7 +4485,7 @@
                     ],
                     "description": "Parsing and sorting bam file",
                     "software_used": [
-                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
+                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
                     ]
                 },
                 "name": "pairsam-parse-sort",
@@ -4491,9 +4493,10 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairsam",
                             "argument_type": "Output processed file"
                         },
-                        "name": "out_pairsam",
+                        "name": "sorted_pairsam",
                         "target": [
                             {
                                 "name": "input_pairsams",
@@ -4509,12 +4512,13 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairsam",
                             "argument_type": "Input file"
                         },
                         "name": "input_pairsams",
                         "source": [
                             {
-                                "name": "out_pairsam",
+                                "name": "sorted_pairsam",
                                 "step": "pairsam-parse-sort",
                                 "type": "Output file"
                             }
@@ -4540,7 +4544,7 @@
                     ],
                     "description": "Merging pairsam files",
                     "software_used": [
-                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
+                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
                     ]
                 },
                 "name": "pairsam-merge",
@@ -4548,6 +4552,7 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairsam",
                             "argument_type": "Output processed file"
                         },
                         "name": "merged_pairsam",
@@ -4566,6 +4571,7 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairsam",
                             "argument_type": "Input file"
                         },
                         "name": "input_pairsam",
@@ -4584,7 +4590,7 @@
                     ],
                     "description": "Marking duplicates to pairsam file",
                     "software_used": [
-                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
+                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
                     ]
                 },
                 "name": "pairsam-markasdup",
@@ -4592,9 +4598,10 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairsam",
                             "argument_type": "Output processed file"
                         },
-                        "name": "out_markedpairsam",
+                        "name": "dupmarked_pairsam",
                         "target": [
                             {
                                 "name": "input_pairsam",
@@ -4610,12 +4617,13 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairsam",
                             "argument_type": "Input file"
                         },
                         "name": "input_pairsam",
                         "source": [
                             {
-                                "name": "out_markedpairsam",
+                                "name": "dupmarked_pairsam",
                                 "step": "pairsam-markasdup",
                                 "type": "Output file"
                             }
@@ -4624,6 +4632,7 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "chromsize",
                             "argument_type": "Input file"
                         },
                         "name": "chromsize",
@@ -4642,7 +4651,7 @@
                     ],
                     "description": "Filtering duplicate and invalid reads",
                     "software_used": [
-                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
+                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
                     ]
                 },
                 "name": "pairsam-filter",
@@ -4656,7 +4665,7 @@
                         "name": "lossless_bamfile",
                         "target": [
                             {
-                                "name": "merged_annotated_bam",
+                                "name": "annotated_bam",
                                 "type": "Workflow Output File"
                             }
                         ]
@@ -4664,9 +4673,10 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairs",
                             "argument_type": "Output processed file"
                         },
-                        "name": "dedup_pairs",
+                        "name": "filtered_pairs",
                         "target": [
                             {
                                 "name": "input_pairs",
@@ -4682,12 +4692,14 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "pairs",
                             "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
                             {
                                 "name": "dedup_pairs",
+                                "name": "filtered_pairs",
                                 "step": "pairsam-filter",
                                 "type": "Output file"
                             }
@@ -4696,6 +4708,7 @@
                     {
                         "meta": {
                             "argument_cardinality": "1",
+                            "argument_format": "juicer_format_restriction_site_file",
                             "argument_type": "Input file"
                         },
                         "name": "restriction_file",
@@ -4713,7 +4726,7 @@
                     ],
                     "description": "Adding restriction enzyme site information",
                     "software_used": [
-                        "/software/1e70ee8c-9b05-4bf7-9d4a-c74fbe096262/"
+                        "/software/9baf9f73-2d59-4eca-a326-340007b2a8b8/"
                     ]
                 },
                 "name": "addfragtopairs",
@@ -4724,10 +4737,10 @@
                             "argument_format": "pairs",
                             "argument_type": "Output processed file"
                         },
-                        "name": "out_pairs",
+                        "name": "pairs_with_frags",
                         "target": [
                             {
-                                "name": "out_pairs",
+                                "name": "filtered_pairs_with_frags",
                                 "type": "Workflow Output File"
                             }
                         ]
@@ -4736,7 +4749,7 @@
             }
         ],
         "title": "Hi-C Post-alignment Processing",
-        "uuid": "f27c8fa4-6342-482f-ab78-9a4379f7e601",
-        "workflow_type": "Hi-C data processing"
+        "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
+        "workflow_type": "Hi-C data analysis"
     }
 ]
