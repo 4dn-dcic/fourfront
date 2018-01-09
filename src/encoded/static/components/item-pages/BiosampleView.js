@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
-import { FormattedInfoBlock } from './components';
+import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
 import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
@@ -23,6 +23,7 @@ export default class BiosampleView extends ItemBaseView {
         if (width) width -= 20;
 
         initTabs.push(BiosampleViewOverview.getTabObject(context, this.props.schemas, width));
+        initTabs.push(ExpSetsUsedIn.getTabObject(context, this.props.schemas, width));
 
         return initTabs.concat(this.getCommonTabs());
     }
@@ -250,6 +251,24 @@ class BiosourceInfoBody extends React.Component {
     }
 }
 
+class ExpSetsUsedIn extends React.Component {
 
+    static getTabObject(context, schemas, width){
+        return {
+            tab : <span><i className="icon icon-users icon-fw"/> Experiment Sets</span>,
+            key : "experiment-sets",
+            //disabled : (!context.lab && !context.award && !context.submitted_by),
+            content : (
+                <div className="overflow-hidden">
+                    <ExperimentSetTablesLoadedFromSearch width={width} requestHref="/search/?type=ExperimentSetReplicate" schemas={schemas} />
+                </div>
+            )
+        };
+    }
+
+    render(){
+        return <div>Test</div>;
+    }
+}
 
 
