@@ -127,6 +127,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         params.append(('limit', 'all'))
         result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
 
+    # add actions (namely 'add')
+    result['actions'] = get_collection_actions(request, types[doc_types[0]])
+
     if not result['total']:
         # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
         request.response.status_code = 404
@@ -150,7 +153,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             result['@graph'] = list(graph)
             return result
 
-    result['actions'] = get_collection_actions(request, types[doc_types[0]])
     result['@graph'] = list(graph)
     return result
 
