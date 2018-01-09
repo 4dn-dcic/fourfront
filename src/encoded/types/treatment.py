@@ -7,13 +7,14 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    ALLOW_SUBMITTER_ADD
 )
 
 
 @abstract_collection(
     name='treatments',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': "Treatments",
         'description': 'Listing of all types of treatments.',
