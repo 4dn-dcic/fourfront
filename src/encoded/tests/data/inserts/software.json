@@ -1,7 +1,6 @@
 [
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "STAR",
         "software_type": [
@@ -14,20 +13,17 @@
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "DOCKER STAR",
         "software_type": [
             "docker container"
         ],
-        "source_url": null,
         "title": "DOCKER STAR_1",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a67",
         "version": "1"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "TopHat",
         "software_type": [
@@ -40,82 +36,70 @@
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "bwa",
         "software_type": [
             "aligner"
         ],
-        "source_url": null,
         "title": "bwa_0.7.15-1142-dirty",
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a13209",
         "version": "0.7.15-1142-dirty"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "samtools",
         "software_type": [
             "aligner",
             "file format converter"
         ],
-        "source_url": null,
         "title": "samtools_1.2",
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a06735",
         "version": "1.2"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "pairix",
         "software_type": [
             "file format converter",
             "indexer"
         ],
-        "source_url": null,
         "title": "pairix_0.1.1",
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a23547",
         "version": "0.1.1"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "pairix",
         "software_type": [
             "file format converter",
             "indexer"
         ],
-        "source_url": null,
         "title": "pairix_0.1.8",
         "uuid": "02d636b9-d82d-4da9-950c-2ca994aababc",
         "version": "0.1.8"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "pairix",
         "software_type": [
             "file format converter",
             "indexer"
         ],
-        "source_url": null,
         "title": "pairix_0.2.6",
         "uuid": "e17c3e9c-8882-4478-93da-062c5213341d",
         "version": "0.2.6"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "fastqc",
         "software_type": [
             "quality metric generator"
         ],
-        "source_url": null,
         "title": "fastqc_0.11.4",
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
         "version": "0.11.4"
@@ -130,14 +114,11 @@
             "filter",
             "normalizer"
         ],
-        "source_url": null,
         "title": "juicer_855e62",
-        "uuid": "02d636b9-d82d-4da9-950c-2ca994a23548",
-        "version": null
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a23548"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "juicer",
         "software_type": [
@@ -145,48 +126,41 @@
             "filter",
             "normalizer"
         ],
-        "source_url": null,
         "title": "juicer_1.5.5",
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a23599",
         "version": "1.5.5"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "hic2cool",
         "software_type": [
             "file format converter"
         ],
-        "source_url": null,
         "title": "hic2cool_0.3.3",
         "uuid": "02d636b9-d8dd-4da9-950c-2ca994b23588",
         "version": "0.3.3"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "cooler",
         "software_type": [
             "aggregator",
             "normalizer"
         ],
-        "source_url": null,
         "title": "cooler_0.7.4",
         "uuid": "02d636b9-d8dd-4da9-950c-2ca994b23555",
         "version": "0.7.4"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "juicebox",
         "software_type": [
             "aggregator",
             "normalizer"
         ],
-        "source_url": null,
         "title": "juicebox_1.6.2-cuda8",
         "uuid": "02d636b9-d8dd-4da9-950c-2ca994b23576",
         "version": "1.6.2-cuda8"
@@ -199,10 +173,8 @@
         "software_type": [
             "file format converter"
         ],
-        "source_url": null,
         "title": "hic2cool_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
-        "uuid": "c91a2c9d-079c-4647-9951-da95f2c9baf1",
-        "version": null
+        "uuid": "c91a2c9d-079c-4647-9951-da95f2c9baf1"
     },
     {
         "award": "1U01CA200059-01",
@@ -215,40 +187,32 @@
             "annotater",
             "filter"
         ],
-        "source_url": null,
         "title": "pairsamtools",
-        "uuid": "c9bf856d-0356-4a8e-8141-2fea6a0ac550",
-        "version": null
+        "uuid": "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "pairsqc",
         "software_type": [
             "quality metric generator"
         ],
-        "source_url": null,
         "title": "pairsqc",
-        "uuid": "15731f58-868f-44ab-b4ed-77b82ecd032b",
-        "version": null
+        "uuid": "15731f58-868f-44ab-b4ed-77b82ecd032b"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "bwa",
         "software_type": [
             "aligner"
         ],
-        "source_url": null,
         "title": "bwa_0.7.17",
         "uuid": "42adeb1b-c46c-4ba8-b191-56036ddcd544",
         "version": "0.7.17"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "pairix",
         "software_type": [
@@ -257,12 +221,11 @@
         ],
         "source_url": "https://github.com/4dn-dcic/pairix",
         "title": "pairix_0.3.3",
-        "uuid": "a90c8993-0a73-404c-b52e-0c7561c374f9",
+        "uuid": "1e70ee8c-9b05-4bf7-9d4a-c74fbe096262",
         "version": "0.3.3"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "cooler",
         "software_type": [
@@ -271,12 +234,11 @@
         ],
         "source_url": "https://github.com/mirnylab/cooler",
         "title": "cooler_0.7.6",
-        "uuid": "aa238473-401c-48c1-884b-f4bcf544aa5c",
+        "uuid": "459a9167-9198-428d-b87d-9e075aaa47b3",
         "version": "0.7.6"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "pairsqc",
         "software_type": [
@@ -284,12 +246,11 @@
         ],
         "source_url": "https://github.com/4dn-dcic/pairsqc",
         "title": "pairsqc_0.2.0",
-        "uuid": "4ba9a5db-6abc-4de2-89cb-eeb58bceb632",
+        "uuid": "cf1b4990-e277-49a3-8bfa-59e0c3d600af",
         "version": "0.2.0"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "juicebox",
         "software_type": [
@@ -298,7 +259,7 @@
         ],
         "source_url": "https://github.com/theaidenlab/juicebox",
         "title": "juicebox_1.7.6-cuda8",
-        "uuid": "9bc1565e-ab3e-47df-b785-69f7112eadb4",
+        "uuid": "2ffb21fe-35c3-4d51-bd69-1e042959990f",
         "version": "1.7.6-cuda8"
     },
     {
@@ -317,12 +278,10 @@
         ],
         "source_url": "https://github.com/theaidenlab/juicer",
         "title": "juicer_e6d600",
-        "uuid": "90da4783-3719-4bbe-aeb1-8406dde6960d",
-        "version": null
+        "uuid": "7633f70d-9114-4a13-beb6-f0bba2f203ba"
     },
     {
         "award": "1U01CA200059-01",
-        "commit": null,
         "lab": "4dn-dcic-lab",
         "name": "hic2cool",
         "software_type": [
@@ -330,7 +289,7 @@
         ],
         "source_url": "https://github.com/4dn-dcic/hic2cool",
         "title": "hic2cool_0.4.1",
-        "uuid": "12514630-5f60-4593-bc73-fb62855f188d",
+        "uuid": "4fa74d8d-7375-4500-b40e-fedb61b1e328",
         "version": "0.4.1"
     },
     {
@@ -343,8 +302,7 @@
         ],
         "source_url": "https://github.com/SooLee/mcool2hic",
         "title": "mcool2hic_f2d128",
-        "uuid": "4102042a-46be-4bab-b187-e2f1104be6a5",
-        "version": null
+        "uuid": "c7efe66a-0057-403b-9194-e8dcecebe3c3"
     },
     {
         "award": "1U01CA200059-01",
@@ -359,7 +317,6 @@
         ],
         "source_url": "https://github.com/mirnylab/pairsamtools",
         "title": "pairsamtools_49489c",
-        "uuid": "4bb8d91b-4ea3-43da-afdb-53a7e28671d3",
-        "version": null
+        "uuid": "b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
     }
 ]
