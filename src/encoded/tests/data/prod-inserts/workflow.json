@@ -4383,18 +4383,18 @@
     {
         "arguments": [
             {
+                "argument_format": "bam",
                 "argument_type": "Input file",
-                "format": "bam",
                 "workflow_argument_name": "input_bams"
             },
             {
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
-                "format": "chromsizes",
                 "workflow_argument_name": "chromsize"
             },
             {
+                "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file",
-                "format": "juicer_format_restriction_site_file",
                 "workflow_argument_name": "restriction_file"
             },
             {
@@ -4406,13 +4406,13 @@
                 "workflow_argument_name": "nthreads_merge"
             },
             {
+                "argument_format": "bam",
                 "argument_type": "Output processedfile",
-                "format": "bam",
                 "workflow_argument_name": "merged_annotated_bam"
             },
             {
+                "argument_format": "pairs",
                 "argument_type": "Output processedfile",
-                "format": "pairs",
                 "workflow_argument_name": "out_pairs"
             }
         ],
@@ -4474,7 +4474,7 @@
                     ],
                     "description": "Parsing and sorting bam file",
                     "software_used": [
-                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
+                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
                     ]
                 },
                 "name": "pairsam-parse-sort",
@@ -4531,7 +4531,7 @@
                     ],
                     "description": "Merging pairsam files",
                     "software_used": [
-                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
+                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
                     ]
                 },
                 "name": "pairsam-merge",
@@ -4575,7 +4575,7 @@
                     ],
                     "description": "Marking duplicates to pairsam file",
                     "software_used": [
-                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
+                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
                     ]
                 },
                 "name": "pairsam-markasdup",
@@ -4633,7 +4633,7 @@
                     ],
                     "description": "Filtering duplicate and invalid reads",
                     "software_used": [
-                        "software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76"
+                        "/software/b4a4d91b-fc9a-4887-94c9-1c7e2da8ec76/"
                     ]
                 },
                 "name": "pairsam-filter",
@@ -4704,7 +4704,7 @@
                     ],
                     "description": "Adding restriction enzyme site information",
                     "software_used": [
-                        "software/1e70ee8c-9b05-4bf7-9d4a-c74fbe096262"
+                        "/software/1e70ee8c-9b05-4bf7-9d4a-c74fbe096262/"
                     ]
                 },
                 "name": "addfragtopairs",
@@ -4727,7 +4727,7 @@
             }
         ],
         "title": "Hi-C Post-alignment Processing",
-        "uuid": "750496b5-5a88-4cea-bba9-b4976f570f15",
+        "uuid": "743f8bc9-b1bc-4160-8c01-fda9933fe3af",
         "workflow_type": "Hi-C data processing"
     }
 ]
