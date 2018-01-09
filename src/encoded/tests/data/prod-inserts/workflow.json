@@ -4418,6 +4418,15 @@
         ],
         "award": "1U01CA200059-01",
         "category": "filter",
+        "cwl_child_filenames": [
+            "pairsam-parse-sort.cwl",
+            "pairsam-merge.cwl",
+            "pairsam-markasdup.cwl",
+            "pairsam-filter.cwl",
+            "addfragtopairs.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_main_filename": "hi-c-processing-bam.cwl",
         "data_types": [
             "Hi-C"
         ],
@@ -4727,7 +4736,7 @@
             }
         ],
         "title": "Hi-C Post-alignment Processing",
-        "uuid": "743f8bc9-b1bc-4160-8c01-fda9933fe3af",
+        "uuid": "f27c8fa4-6342-482f-ab78-9a4379f7e601",
         "workflow_type": "Hi-C data processing"
     }
 ]
