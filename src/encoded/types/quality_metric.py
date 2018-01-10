@@ -7,8 +7,8 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    ALLOW_SUBMITTER_ADD
 )
 
 
@@ -27,6 +27,7 @@ class QualityMetricFlag(Item):
 
 @abstract_collection(
     name='quality-metrics',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': 'Quality Metrics',
         'description': 'Listing of quality metrics',
