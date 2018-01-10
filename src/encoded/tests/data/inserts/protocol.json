@@ -25,5 +25,18 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "status": "in review by lab"
+    },
+    {
+        "uuid": "131436bc-8535-4448-903e-854af460b244",
+        "description": "Stable transfection protocol",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "aliases": ["dcic:test_protocol2"],
+        "protocol_type": "Experimental protocol",
+        "submitted_by": "wrangler@wrangler.com",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "status": "in review by lab",
+        "tags": ["4DN Standard"]
     }
 ]

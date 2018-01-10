@@ -206,8 +206,13 @@ class Protocol(Item, ItemWithAttachment):
     def display_title(self):
         if self.properties.get('attachment'):
             attach = self.properties['attachment']
-            if attach.get('download'):
+            if attach.get('download'):  # this must be or attachment shouldn't be valid
                 return attach['download']
+        else:
+            ptype = self.properties.get('protocol_type')
+            if ptype == 'Other':
+                ptype = 'Protocol'
+            return ptype + " from " + self.properties.get("date_created", None)[:10]
 
 
 @collection(
