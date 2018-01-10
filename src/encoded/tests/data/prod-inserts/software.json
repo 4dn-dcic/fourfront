@@ -9,7 +9,11 @@
         "source_url": "https://github.com/alexdobin/STAR/releases",
         "title": "STAR_2.5.1b",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66",
-        "version": "2.5.1b"
+        "version": "2.5.1b",
+        "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
+        "purpose": ["Hi-C"],
+        "references": ["52e85c70-fe2d-11e3-9191-0800200c9a66"]
     },
     {
         "award": "1U01CA200059-01",
@@ -20,7 +24,9 @@
         ],
         "title": "DOCKER STAR_1",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a67",
-        "version": "1"
+        "version": "1",
+        "documentation_url": "https://docs.docker.com",
+        "references": ["52e85c70-fe2d-11e3-9191-0800200c9a66"]
     },
     {
         "award": "1U01CA200059-01",
