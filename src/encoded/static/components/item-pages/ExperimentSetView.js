@@ -130,7 +130,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     itemFooter(){
-        return <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />;
+        return null; //<ItemFooterRow context={this.props.context} schemas={this.props.schemas} />;
     }
 
 }

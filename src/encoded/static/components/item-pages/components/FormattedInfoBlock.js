@@ -3,7 +3,142 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console, isServerSide, analytics } from './../../util';
+import { ajax, console, isServerSide, analytics, object } from './../../util';
+
+
+// TODO: CLEANUP FILE
+
+/**
+ * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
+ * 
+ * @memberof module:item-pages/components.Publications
+ * @class FormattedInfoWrapper
+ * @extends {React.Component}
+ * @type {Component}
+ * 
+ * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
+ * @prop {Element[]} children       - React Elements or Components to be wrapped.
+ * @prop {string} [singularTitle]   - Optional. Title displayed in top left label. Defaults to 'Publication'.
+ * @prop {string} [className]       - Additional className to be added to wrapper element. 
+ * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
+ */
+export class FormattedInfoWrapper extends React.Component {
+
+    static defaultProps = {
+        'isSingleItem'  : false,
+        'singularTitle' : 'Publication',
+        'iconClass'     : 'book',
+        'className'     : null
+    }
+
+    render(){
+        return (
+            <div className={
+                "publications-block formatted-info-panel formatted-wrapper" +
+                (this.props.isSingleItem ? ' single-item' : '') +
+                (this.props.className ? ' ' + this.props.className : '')
+            }>
+                <h6 className="publication-label">{ this.props.singularTitle }{ this.props.isSingleItem ? '' : 's' }</h6>
+                <div className="row">
+                    <div className="icon-container col-xs-2 col-lg-1">
+                        <i className={"icon icon-" + this.props.iconClass} />
+                    </div>
+                    <div className="col-xs-10 col-lg-11">
+                        { this.props.children }
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+}
+
+export class WrappedListBlock extends React.Component {
+    render(){
+        var context = this.props.context;
+        var atId = object.itemUtil.atId(context);
+        return (
+            <li className={this.props.className} key={atId}>
+                <a className="text-500" href={atId}>{ context.display_title || context.title }</a>
+            </li>
+        );
+    }
+}
+
+
+export class WrappedCollapsibleList extends React.Component {
+
+    /**
+     * Default props.
+     * 
+     * @static
+     * @memberof ListBlock
+     */
+    static defaultProps = {
+        'persistentCount' : 3,
+        'publications' : [],
+        'singularTitle' : 'Publication',
+        'itemClassName' : null,
+        'iconClass' : 'book'
+    }
+
+    state = {
+        'open' : false
+    }
+
+    constructor(props){
+        super(props);
+        this.renderItems = this.renderItems.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    renderItems(items = this.props.items){
+
+        var itemsToElements = function(pubs){
+            return pubs.map((pub, i) => <WrappedListBlock className={this.props.itemClassName} context={pub} key={pub.link_id || i} /> );
+        }.bind(this);
+
+        if (items.length <= this.props.persistentCount){
+            return <ul>{ itemsToElements(items) }</ul>;
+        } else {
+            // Only show first 3, then a 'more' button.
+            return (
+                <PartialList
+                    persistent={itemsToElements(items.slice(0, this.props.persistentCount))}
+                    collapsible={itemsToElements(items.slice(this.props.persistentCount)) }
+                    containerType="ul"
+                    open={this.state && this.state.open}
+                />
+            );
+        }
+    }
+
+    render(){
+        var { items, iconClass, singularTitle, persistentCount } = this.props;
+        // publications = testData; // Uncomment to test listview.
+
+        if (!Array.isArray(items) || items.length < 1){
+            return null;
+        }
+
+        var isSingleItem = items.length === 1;
+
+        return (
+            <FormattedInfoWrapper isSingleItem={isSingleItem} singularTitle={singularTitle} iconClass={iconClass}>
+                <div>
+                    { this.renderItems(items) }
+                    { items.length > persistentCount ?
+                        <Button bsStyle="default" bsSize="small" onClick={()=>{
+                            this.setState({ open : !(this.state && this.state.open) });
+                        }}>{ this.state && this.state.open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }</Button>
+                    : null }
+                </div>
+            </FormattedInfoWrapper>
+        );
+    }
+
+}
+
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.

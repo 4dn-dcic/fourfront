@@ -4,7 +4,7 @@ import React from 'react';
 import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } from './components';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
