@@ -1617,8 +1617,7 @@
                         "name": "out_mcool",
                         "target": [
                             {
-                                "name": "out_mcool",
-                                
+                                "name": "out_mcool"
                             }
                         ]
                     }
