@@ -141,7 +141,8 @@ class Document(ItemWithAttachment, Item):
         if self.properties.get('attachment'):
             attach = self.properties['attachment']
             if attach.get('download'):
-                return attach['download']
+                display_title = attach['download']
+                return self.add_status_2_display_title(display_title)
 
 
 @collection(
@@ -204,15 +205,17 @@ class Protocol(Item, ItemWithAttachment):
     embedded_list = ["award.project", "lab.title"]
 
     def display_title(self):
+        diplay_title = ''
         if self.properties.get('attachment'):
             attach = self.properties['attachment']
             if attach.get('download'):  # this must be or attachment shouldn't be valid
-                return attach['download']
+                display_title = attach['download']
         else:
             ptype = self.properties.get('protocol_type')
             if ptype == 'Other':
                 ptype = 'Protocol'
-            return ptype + " from " + self.properties.get("date_created", None)[:10]
+            display_title = ptype + " from " + self.properties.get("date_created", None)[:10]
+        return self.add_status_2_display_title(display_title)
 
 
 @collection(

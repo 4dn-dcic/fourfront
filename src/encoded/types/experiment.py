@@ -256,7 +256,11 @@ class ExperimentHiC(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
+            )
+        )
 
 
 @collection(
@@ -299,7 +303,11 @@ class ExperimentCaptureC(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
+            )
+        )
 
 
 @collection(
@@ -339,7 +347,11 @@ class ExperimentRepliseq(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample)
+            )
+        )
 
 
 @collection(
@@ -376,7 +388,11 @@ class ExperimentAtacseq(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, biosample)
+            )
+        )
 
 
 @collection(
@@ -419,7 +435,11 @@ class ExperimentChiapet(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, biosample, target)
+            )
+        )
 
 
 @collection(
@@ -460,7 +480,11 @@ class ExperimentDamid(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None, fusion=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, fusion))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, biosample, fusion)
+            )
+        )
 
 
 @collection(
@@ -503,7 +527,11 @@ class ExperimentSeq(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, biosample, target)
+            )
+        )
 
 
 @collection(
@@ -539,7 +567,11 @@ class ExperimentMic(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
+        return self.add_status_2_display_title(
+            self.add_accession_to_title(
+                self.experiment_summary(request, experiment_type, biosample)
+            )
+        )
 
 
 @calculated_property(context=Experiment, category='action')

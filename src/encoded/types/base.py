@@ -302,6 +302,13 @@ class Item(snovault.Item):
                                     break
         return roles
 
+    def add_status_2_display_title(self, title):
+        bad_stati = ['revoked', 'deleted', 'replaced', 'obsolete']
+        status = self.properties.get('status', None)
+        if status in bad_stati:
+            title = status.upper() + ' ' + title
+        return title
+
     def add_accession_to_title(self, title):
         if self.properties.get('accession') is not None:
             return title + ' - ' + self.properties.get('accession')
@@ -407,14 +414,15 @@ class Item(snovault.Item):
             if display_title:
                 if field != 'accession':
                     display_title = self.add_accession_to_title(display_title)
-                return display_title
+                break
         # if none of the existing terms are available, use @type + date_created
         try:
             type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
-            return type_date
+            diplay_title = type_date
         # last resort, use uuid
         except:
-            return self.properties.get('uuid', None)
+            display_title = self.properties.get('uuid', None)
+        return self.add_status_2_display_title(display_title)
 
     @snovault.calculated_property(schema={
         "title": "link_id",

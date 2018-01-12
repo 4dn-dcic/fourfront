@@ -59,7 +59,7 @@ class TreatmentChemical(Treatment):
             conditions = " (" + " ".join(d_t) + ")"
 
         dis_tit = chemical + " treatment" + conditions
-        return dis_tit
+        return self.add_status_2_display_title(dis_tit)
 
 
 @collection(
@@ -88,4 +88,4 @@ class TreatmentRnai(Treatment):
             rnai_value = rnai_type + " treatment for " + targetObj['target_summary']
         else:
             rnai_value = rnai_type + " treatment"
-        return rnai_value
+        return self.add_status_2_display_title(rnai_value)
