@@ -12,7 +12,7 @@ import { layout, console } from './../util';
 /**
  * Converts context.content into different format if necessary and returns copy of context with updated 'content'.
  * Currently only converts Markdown content (if a context.content[] item has 'filetype' === 'md'). Others may follow.
- * 
+ *
  * @param {Object} context - Context provided from back-end, including all properties.
  */
 export function parseSectionsContent(context = this.props.context){

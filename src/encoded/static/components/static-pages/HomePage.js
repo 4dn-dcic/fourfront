@@ -12,7 +12,7 @@ import { Announcements } from './components';
 
 /**
  * Homepage View component. Gets rendered at '/' and '/home' paths.
- * 
+ *
  * @module {Component} static-pages/home
  * @prop {Object} context - Should have properties typically needed for any static page.
  */
