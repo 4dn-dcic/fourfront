@@ -201,7 +201,7 @@
             "description": "Other labs associated with the submitted data.",
             "type": "array",
             "items": {
-                "title": "Contributin Lab",
+                "title": "Contributing Lab",
                 "description": "A lab that has contributed to the associated data.",
                 "type": "string",
                 "linkTo": "Lab"

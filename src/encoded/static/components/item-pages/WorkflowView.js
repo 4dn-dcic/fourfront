@@ -6,7 +6,7 @@ import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
-    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane,
+    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
     WorkflowNodeElement
 } from './components';
 import { ItemBaseView } from './DefaultItemView';

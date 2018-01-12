@@ -26,10 +26,6 @@
                 "deleted"
             ]
         },
-		"source_uri": {
-            "title": "URI of source file",
-            "type": "string"
-		},
         "name": {
             "title": "Path Name",
             "comment": "Unique route/pathname of this page.",
@@ -45,11 +41,6 @@
             "title": "Description",
             "description" : "Internal description of page.",
             "type": "string"
-        },
-        "notification": {
-            "title": "Notification",
-            "type": "string",
-            "default": ""
         },
         "table-of-contents": {
             "title": "Table of Contents",
@@ -96,11 +87,6 @@
                 "header-depth" : 4
             }
         },
-        "directory": {
-            "title": "Directory",
-            "description": "location of additional files needed to assemble the static page",
-            "type": "string"
-        },
         "content": {
             "title": "Content Sections",
             "description": "Sections used to compose the static page",
@@ -109,38 +95,6 @@
             "items": {
                 "type": "string",
                 "linkTo" : "StaticSection"
-            }
-        },
-        "sections": {
-            "title": "Sections",
-            "notes" : "REMOVE THIS AFTER EVERYTHING IS MIGRATED TO 'content' (LINKTO StaticSection[])",
-            "description": "Deprecated",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "id": {
-                        "title": "section id",
-                        "type": "string"
-                    },
-                    "options": {
-                        "title": "Options",
-                        "type": "object"
-                    },
-                    "filename": {
-                        "title": "Filename",
-                        "type": "string"
-                    },
-                    "title": {
-                        "title": "Section Title",
-                        "type": "string"
-                    },
-                    "content":{
-                        "title": "content",
-                        "type": "string"
-                    }
-                }
             }
         }
     },

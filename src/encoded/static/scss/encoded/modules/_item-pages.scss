@@ -842,7 +842,7 @@ $download-button-width : 100px;
 .formatted-info-panel {
 	padding : 0 10px 12px;
 	/* border-bottom: 1px solid #e2e2e2; */
-	margin-bottom: 5px;
+	margin-bottom: 8px;
 
 	/* Adjustments based on available props, ToDo: .no-title */
 
@@ -918,8 +918,6 @@ $download-button-width : 100px;
 
 	}
 
-	
-
 	@include icon-container-child();
 
 }
@@ -944,54 +942,48 @@ $download-button-width : 100px;
 		transition: opacity .5s;
 	}
 
-}
+	&.formatted-wrapper {
 
-/************** Publications Block ****************/
-
-.publications-block {
-
-	ul {
-		margin-bottom: 0;
-		padding-left: 10px;
-	}
-
-	&.single-item {
 		ul {
-			margin-bottom: 1px;
-    		margin-top: 7px;
+			margin-bottom: 0;
+			padding-left: 18px;
 		}
-	}
-
-	.details {
-		padding-top: 3px;
-		> .details-row {
-			margin-top: 7px;
+	
+		&.single-item {
+			ul {
+				margin-bottom: 1px;
+				margin-top: 7px;
+			}
 		}
-	}
-
-	h6.publication-label {
-		@include small-block-label();
-	}
-
-	.label-col {
-		user-select: none;
-	}
-
-	.label-col span {
-		position: relative;
-		.icon.abstract-toggle {
-			cursor : pointer;
-			color : #888;
-			position: absolute;
-			left: -20px;
-			top: 2px;
+	
+		.details {
+			padding-top: 3px;
+			> .details-row {
+				margin-top: 7px;
+			}
 		}
-
+	
+		.label-col {
+			user-select: none;
+		}
+	
+		.label-col span {
+			position: relative;
+			.icon.abstract-toggle {
+				cursor : pointer;
+				color : #888;
+				position: absolute;
+				left: -20px;
+				top: 2px;
+			}
+	
+		}
+	
+		@include icon-container-child();
 	}
-
-	@include icon-container-child();
 
 }
+
 
 /**********************************************************
 					OverViewBody

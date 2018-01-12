@@ -32,27 +32,26 @@ export class ItemBaseView extends React.Component {
 
     constructor(props){
         super(props);
-        //this.componentDidMount = this.componentDidMount.bind(this);
         this.getCommonTabs = this.getCommonTabs.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.itemHeader = this.itemHeader.bind(this);
         this.state = {};
     }
 
-    getCommonTabs(){
-        return [
-            AttributionTabView.getTabObject(this.props.context),
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
-        ];
+    getCommonTabs(context = this.props.context){
+        var returnArr = [];
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
+        returnArr.push(AuditTabView.getTabObject(context));
+        return returnArr;
     }
 
-    getDefaultTabs(){
-        return [
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AttributionTabView.getTabObject(this.props.context),
-            AuditTabView.getTabObject(this.props.context)
-        ];
+    getDefaultTabs(context = this.props.context){
+        var returnArr = [];
+        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
+        returnArr.push(AuditTabView.getTabObject(context));
+        return returnArr;
     }
     
     itemClassName(){
@@ -93,9 +92,6 @@ export class ItemBaseView extends React.Component {
     }
 
     render() {
-        var schemas = this.props.schemas || {};
-        var context = this.props.context;
-
         return (
             <div className={this.itemClassName()}>
 

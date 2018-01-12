@@ -7,7 +7,7 @@
  */
 
 
-export { FormattedInfoBlock } from './FormattedInfoBlock';
+export { FormattedInfoBlock, FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 import * as ih from './ItemHeader';
 export const ItemHeader = ih;
