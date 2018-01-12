@@ -21,7 +21,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "accession": {
             "accessionType": "WF"
@@ -155,12 +155,6 @@
                             "parameter",
                             "NA"
                         ]
-                    },
-                    "argument_cardinality":{
-                       "title": "Cardinality",
-                       "description": "Number of items in the argument, or N for dynamic number.",
-                       "type": "string",
-                       "default": "1"
                     },
                     "argument_format":{
                         "title": "Format",

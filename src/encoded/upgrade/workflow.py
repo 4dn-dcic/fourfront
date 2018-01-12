@@ -215,3 +215,14 @@ def workflow_2_3(value, system):
                     if not isinstance(sf, list):
                         step.get('meta')['software_used'] = [sf]
     return value
+
+
+@upgrade_step('workflow', '3', '4')
+def workflow_3_4(value, system):
+    '''Remove argument_cardinality'''
+
+    for arg in value.get('arguments'):
+        del arg['rgument_cardinality']
+
+    return value
+

@@ -89,8 +89,7 @@
                         "name": "input_fastq2",
                         "source": [
                             {
-                                "name": "input_fastq2",
-                                "type": "Workflow Input File"
+                                "name": "input_fastq2"
                             }
                         ]
                     },
@@ -101,8 +100,7 @@
                         "name": "input_fastq1",
                         "source": [
                             {
-                                "name": "input_fastq1",
-                                "type": "Workflow Input File"
+                                "name": "input_fastq1"
                             }
                         ]
                     },
@@ -113,8 +111,7 @@
                         "name": "bowtie_index",
                         "source": [
                             {
-                                "name": "bowtie_index",
-                                "type": "Workflow Input File"
+                                "name": "bowtie_index"
                             }
                         ]
                     }
@@ -137,8 +134,7 @@
                         "name": "sorted_bam_pe",
                         "target": [
                             {
-                                "name": "sorted_bam_pe",
-                                "type": "Workflow Output File"
+                                "name": "sorted_bam_pe"
                             }
                         ]
                     },
@@ -148,8 +144,7 @@
                         "target": [
                             {
                                 "name": "input_bam2",
-                                "step": "hictool_bam2hdf5",
-                                "type": "Input file"
+                                "step": "hictool_bam2hdf5"
                             }
                         ]
                     },
@@ -159,8 +154,7 @@
                         "target": [
                             {
                                 "name": "input_bam1",
-                                "step": "hictool_bam2hdf5",
-                                "type": "Input file"
+                                "step": "hictool_bam2hdf5"
                             }
                         ]
                     }
@@ -175,8 +169,7 @@
                         "name": "RE_bed",
                         "source": [
                             {
-                                "name": "RE_bed",
-                                "type": "Workflow Input File"
+                                "name": "RE_bed"
                             }
                         ]
                     },
@@ -186,8 +179,7 @@
                         "source": [
                             {
                                 "name": "split_bam2",
-                                "step": "hictool_fastq2bam",
-                                "type": "Output file"
+                                "step": "hictool_fastq2bam"
                             }
                         ]
                     },
@@ -197,8 +189,7 @@
                         "source": [
                             {
                                 "name": "split_bam1",
-                                "step": "hictool_fastq2bam",
-                                "type": "Output file"
+                                "step": "hictool_fastq2bam"
                             }
                         ]
                     }
@@ -221,8 +212,7 @@
                         "name": "HiC_project_object_hdf5",
                         "target": [
                             {
-                                "name": "HiC_project_object_hdf5",
-                                "type": "Workflow Output File"
+                                "name": "HiC_project_object_hdf5"
                             }
                         ]
                     },
@@ -233,8 +223,7 @@
                         "name": "HiC_distance_function_hdf5",
                         "target": [
                             {
-                                "name": "HiC_distance_function_hdf5",
-                                "type": "Workflow Output File"
+                                "name": "HiC_distance_function_hdf5"
                             }
                         ]
                     },
@@ -244,8 +233,7 @@
                         "target": [
                             {
                                 "name": "fend_object_hdf5",
-                                "step": "hictool_hdf52matrix",
-                                "type": "Input file"
+                                "step": "hictool_hdf52matrix"
                             }
                         ]
                     },
@@ -257,8 +245,7 @@
                         "target": [
                             {
                                 "name": "HiC_norm_binning_hdf5",
-                                "step": "hictool_hdf52matrix",
-                                "type": "Input file"
+                                "step": "hictool_hdf52matrix"
                             }
                         ]
                     },
@@ -270,8 +257,7 @@
                         "target": [
                             {
                                 "name": "HiC_data_object_hdf5",
-                                "step": "hictool_hdf52matrix",
-                                "type": "Input file"
+                                "step": "hictool_hdf52matrix"
                             }
                         ]
                     }
@@ -286,8 +272,7 @@
                         "name": "chrlen_file",
                         "source": [
                             {
-                                "name": "chrlen_file",
-                                "type": "Workflow Input File"
+                                "name": "chrlen_file"
                             }
                         ]
                     },
@@ -298,8 +283,7 @@
                         "name": "contact_matrix_binsize",
                         "source": [
                             {
-                                "name": "contact_matrix_binsize",
-                                "type": "Workflow Parameter"
+                                "name": "contact_matrix_binsize"
                             }
                         ]
                     },
@@ -310,8 +294,7 @@
                         "name": "chromosome",
                         "source": [
                             {
-                                "name": "chromosome",
-                                "type": "Workflow Parameter"
+                                "name": "chromosome"
                             }
                         ]
                     },
@@ -334,8 +317,7 @@
                         "source": [
                             {
                                 "name": "HiC_norm_binning_hdf5",
-                                "step": "hictool_bam2hdf5",
-                                "type": "Output file"
+                                "step": "hictool_bam2hdf5"
                             }
                         ]
                     },
@@ -347,8 +329,7 @@
                         "source": [
                             {
                                 "name": "HiC_data_object_hdf5",
-                                "step": "hictool_bam2hdf5",
-                                "type": "Output file"
+                                "step": "hictool_bam2hdf5"
                             }
                         ]
                     }
@@ -371,8 +352,7 @@
                         "name": "normalized_fend_contact_matrix",
                         "target": [
                             {
-                                "name": "normalized_fend_contact_matrix",
-                                "type": "Workflow Output File"
+                                "name": "normalized_fend_contact_matrix"
                             }
                         ]
                     },
@@ -383,8 +363,7 @@
                         "name": "normalized_enrich_contact_matrix",
                         "target": [
                             {
-                                "name": "normalized_enrich_contact_matrix",
-                                "type": "Workflow Output File"
+                                "name": "normalized_enrich_contact_matrix"
                             }
                         ]
                     },
@@ -395,8 +374,7 @@
                         "name": "expected_enrich_contact_matrix",
                         "target": [
                             {
-                                "name": "expected_enrich_contact_matrix",
-                                "type": "Workflow Output File"
+                                "name": "expected_enrich_contact_matrix"
                             }
                         ]
                     },
@@ -407,8 +385,7 @@
                         "name": "observed_contact_matrix",
                         "target": [
                             {
-                                "name": "observed_contact_matrix",
-                                "type": "Workflow Output File"
+                                "name": "observed_contact_matrix"
                             }
                         ]
                     },
@@ -419,8 +396,7 @@
                         "name": "expected_fend_contact_matrix",
                         "target": [
                             {
-                                "name": "expected_fend_contact_matrix",
-                                "type": "Workflow Output File"
+                                "name": "expected_fend_contact_matrix"
                             }
                         ]
                     }
@@ -485,8 +461,8 @@
                         "name": "limits_file",
                         "source": [
                             {
-                                "name": "limits_file",
-                                "type": "Workflow Input File"
+                                "name": "limits_file"
+                                
                             }
                         ]
                     },
@@ -498,8 +474,8 @@
                         "name": "input_fastq",
                         "source": [
                             {
-                                "name": "input_fastq",
-                                "type": "Workflow Input File"
+                                "name": "input_fastq"
+                                
                             }
                         ]
                     },
@@ -510,8 +486,8 @@
                         "name": "contaminants_file",
                         "source": [
                             {
-                                "name": "contaminants_file",
-                                "type": "Workflow Input File"
+                                "name": "contaminants_file"
+                                
                             }
                         ]
                     },
@@ -522,8 +498,8 @@
                         "name": "adapters_file",
                         "source": [
                             {
-                                "name": "adapters_file",
-                                "type": "Workflow Input File"
+                                "name": "adapters_file"
+                                
                             }
                         ]
                     }
@@ -546,8 +522,8 @@
                         "name": "report_zip",
                         "target": [
                             {
-                                "name": "report_zip",
-                                "type": "Workflow Output File"
+                                "name": "report_zip"
+                                
                             }
                         ]
                     }
@@ -611,8 +587,8 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
+                                
                             }
                         ]
                     },
@@ -624,8 +600,8 @@
                         "name": "chromsizes",
                         "source": [
                             {
-                                "name": "chromsizes",
-                                "type": "Workflow Input File"
+                                "name": "chromsizes"
+                                
                             }
                         ]
                     },
@@ -636,8 +612,7 @@
                         "name": "enzyme",
                         "source": [
                             {
-                                "name": "enzyme",
-                                "type": "Workflow Parameter"
+                                "name": "enzyme"
                             }
                         ]
                     },
@@ -648,8 +623,7 @@
                         "name": "sample_name",
                         "source": [
                             {
-                                "name": "sample_name",
-                                "type": "Workflow Parameter"
+                                "name": "sample_name"
                             }
                         ]
                     }
@@ -672,8 +646,7 @@
                         "name": "report",
                         "target": [
                             {
-                                "name": "report",
-                                "type": "Workflow Output File"
+                                "name": "report"
                             }
                         ]
                     }
@@ -722,8 +695,7 @@
                         "name": "input_file",
                         "source": [
                             {
-                                "name": "input_file",
-                                "type": "Workflow Input File"
+                                "name": "input_file"
                             }
                         ]
                     }
@@ -743,8 +715,7 @@
                         "name": "report",
                         "target": [
                             {
-                                "name": "report",
-                                "type": "Workflow Output File"
+                                "name": "report"
                             }
                         ]
                     }
@@ -798,8 +769,7 @@
                         "name": "input_file",
                         "source": [
                             {
-                                "name": "input_file",
-                                "type": "Workflow Input File"
+                                "name": "input_file"
                             }
                         ]
                     }
@@ -819,8 +789,7 @@
                         "name": "report",
                         "target": [
                             {
-                                "name": "report",
-                                "type": "Workflow Output File"
+                                "name": "report"
                             }
                         ]
                     }
@@ -903,8 +872,7 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ]
                     },
@@ -917,8 +885,7 @@
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ]
                     },
@@ -931,8 +898,7 @@
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ]
                     },
@@ -943,8 +909,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nThreads",
-                                "type": "Workflow Parameter"
+                                "name": "nThreads"
                             }
                         ]
                     }
@@ -965,8 +930,7 @@
                         "target": [
                             {
                                 "name": "input_bam",
-                                "step": "sort_bam",
-                                "type": "Input file"
+                                "step": "sort_bam"
                             }
                         ]
                     }
@@ -980,8 +944,7 @@
                         "source": [
                             {
                                 "name": "out_bam",
-                                "step": "bwa-mem",
-                                "type": "Output file"
+                                "step": "bwa-mem"
                             }
                         ]
                     }
@@ -1006,8 +969,7 @@
                         "target": [
                             {
                                 "name": "input_bam",
-                                "step": "bam2pairs",
-                                "type": "Input file"
+                                "step": "bam2pairs"
                             }
                         ]
                     },
@@ -1020,8 +982,7 @@
                         "name": "out_sorted_bam_index",
                         "target": [
                             {
-                                "name": "out_sorted_bam_index",
-                                "type": "Workflow Output File"
+                                "name": "out_sorted_bam_index"
                             }
                         ]
                     }
@@ -1039,8 +1000,7 @@
                         "source": [
                             {
                                 "name": "out_sorted_bam",
-                                "step": "sort_bam",
-                                "type": "Output file"
+                                "step": "sort_bam"
                             }
                         ]
                     }
@@ -1064,8 +1024,7 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ]
                     },
@@ -1078,8 +1037,7 @@
                         "name": "out_pairs_index",
                         "target": [
                             {
-                                "name": "out_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs_index"
                             }
                         ]
                     }
@@ -1162,8 +1120,7 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ]
                     },
@@ -1176,8 +1133,7 @@
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ]
                     },
@@ -1190,8 +1146,7 @@
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ]
                     },
@@ -1202,8 +1157,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nThreads",
-                                "type": "Workflow Parameter"
+                                "name": "nThreads"
                             }
                         ]
                     }
@@ -1224,8 +1178,7 @@
                         "target": [
                             {
                                 "name": "input_bam",
-                                "step": "sort_bam",
-                                "type": "Input file"
+                                "step": "sort_bam"
                             }
                         ]
                     }
@@ -1239,8 +1192,7 @@
                         "source": [
                             {
                                 "name": "out_bam",
-                                "step": "bwa-mem",
-                                "type": "Output file"
+                                "step": "bwa-mem"
                             }
                         ]
                     }
@@ -1265,8 +1217,7 @@
                         "target": [
                             {
                                 "name": "input_bam",
-                                "step": "bam2pairs",
-                                "type": "Input file"
+                                "step": "bam2pairs"
                             }
                         ]
                     },
@@ -1279,8 +1230,7 @@
                         "name": "out_sorted_bam_index",
                         "target": [
                             {
-                                "name": "out_sorted_bam_index",
-                                "type": "Workflow Output File"
+                                "name": "out_sorted_bam_index"
                             }
                         ]
                     }
@@ -1298,8 +1248,7 @@
                         "source": [
                             {
                                 "name": "out_sorted_bam",
-                                "step": "sort_bam",
-                                "type": "Output file"
+                                "step": "sort_bam"
                             }
                         ]
                     }
@@ -1323,8 +1272,7 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ]
                     },
@@ -1337,8 +1285,7 @@
                         "name": "out_pairs_index",
                         "target": [
                             {
-                                "name": "out_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs_index"
                             }
                         ]
                     }
@@ -1429,8 +1376,7 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ]
                     },
@@ -1442,8 +1388,7 @@
                         "name": "input_pairs_index",
                         "source": [
                             {
-                                "name": "input_pairs_index",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs_index"
                             }
                         ]
                     }
@@ -1466,13 +1411,11 @@
                         "name": "output_pairs_index",
                         "target": [
                             {
-                                "name": "output_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs_index"
                             },
                             {
                                 "name": "pairs_index",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             }
                         ]
                     },
@@ -1484,18 +1427,15 @@
                         "name": "output_pairs",
                         "target": [
                             {
-                                "name": "output_pairs",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs"
                             },
                             {
                                 "name": "input_pairs",
-                                "step": "pairs2hic",
-                                "type": "Input file or parameter"
+                                "step": "pairs2hic"
                             },
                             {
                                 "name": "pairs",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             }
                         ]
                     }
@@ -1510,8 +1450,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ]
                     },
@@ -1522,8 +1461,7 @@
                         "name": "binsize",
                         "source": [
                             {
-                                "name": "binsize",
-                                "type": "Workflow Parameter"
+                                "name": "binsize"
                             }
                         ]
                     },
@@ -1533,8 +1471,7 @@
                         "source": [
                             {
                                 "name": "output_pairs_index",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     },
@@ -1544,8 +1481,7 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     }
@@ -1568,8 +1504,7 @@
                         "name": "out_cool",
                         "target": [
                             {
-                                "name": "out_cool",
-                                "type": "Workflow Output File"
+                                "name": "out_cool"
                             }
                         ]
                     }
@@ -1585,8 +1520,7 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ]
                     },
@@ -1597,8 +1531,7 @@
                         "name": "min_res",
                         "source": [
                             {
-                                "name": "min_res",
-                                "type": "Workflow Parameter"
+                                "name": "min_res"
                             }
                         ]
                     },
@@ -1608,8 +1541,7 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     }
@@ -1633,13 +1565,11 @@
                         "name": "output_hic",
                         "target": [
                             {
-                                "name": "output_hic",
-                                "type": "Workflow Output File"
+                                "name": "output_hic"
                             },
                             {
                                 "name": "input_hic",
-                                "step": "hic2mcool",
-                                "type": "Input file or parameter"
+                                "step": "hic2mcool"
                             }
                         ]
                     }
@@ -1654,8 +1584,7 @@
                         "name": "normalization_type",
                         "source": [
                             {
-                                "name": "normalization_type",
-                                "type": "Workflow Parameter"
+                                "name": "normalization_type"
                             }
                         ]
                     },
@@ -1665,8 +1594,7 @@
                         "source": [
                             {
                                 "name": "output_hic",
-                                "step": "pairs2hic",
-                                "type": "Output file or parameter"
+                                "step": "pairs2hic"
                             }
                         ]
                     }
@@ -1690,7 +1618,7 @@
                         "target": [
                             {
                                 "name": "out_mcool",
-                                "type": "Workflow Output File"
+                                
                             }
                         ]
                     }
@@ -1756,8 +1684,7 @@
                         "name": "input_pairs_index",
                         "source": [
                             {
-                                "name": "input_pairs_index",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs_index"
                             }
                         ]
                     },
@@ -1770,8 +1697,7 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ]
                     },
@@ -1783,8 +1709,7 @@
                         "name": "outprefix",
                         "source": [
                             {
-                                "name": "outprefix",
-                                "type": "Workflow Parameter"
+                                "name": "outprefix"
                             }
                         ]
                     }
@@ -1808,8 +1733,7 @@
                         "name": "output_pairs_index",
                         "target": [
                             {
-                                "name": "output_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs_index"
                             }
                         ]
                     },
@@ -1822,8 +1746,7 @@
                         "name": "output_pairs",
                         "target": [
                             {
-                                "name": "output_pairs",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs"
                             }
                         ]
                     }
@@ -1903,8 +1826,7 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ]
                     },
@@ -1916,8 +1838,7 @@
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ]
                     },
@@ -1929,8 +1850,7 @@
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ]
                     },
@@ -1942,8 +1862,7 @@
                         "name": "reference_fasta",
                         "source": [
                             {
-                                "name": "reference_fasta",
-                                "type": "Workflow Input File"
+                                "name": "reference_fasta"
                             }
                         ]
                     },
@@ -1955,8 +1874,7 @@
                         "name": "restriction_file",
                         "source": [
                             {
-                                "name": "restriction_file",
-                                "type": "Workflow Input File"
+                                "name": "restriction_file"
                             }
                         ]
                     }
@@ -1978,8 +1896,7 @@
                         "target": [
                             {
                                 "name": "input_merged_nodups",
-                                "step": "juicer2pairs",
-                                "type": "Input file or parameter"
+                                "step": "juicer2pairs"
                             }
                         ]
                     }
@@ -1995,8 +1912,7 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ]
                     },
@@ -2007,8 +1923,7 @@
                         "name": "nsplit",
                         "source": [
                             {
-                                "name": "nsplit",
-                                "type": "Workflow Parameter"
+                                "name": "nsplit"
                             }
                         ]
                     },
@@ -2018,8 +1933,7 @@
                         "source": [
                             {
                                 "name": "merged_nodups",
-                                "step": "juicer",
-                                "type": "Output file or parameter"
+                                "step": "juicer"
                             }
                         ]
                     }
@@ -2042,8 +1956,7 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ]
                     },
@@ -2055,8 +1968,7 @@
                         "name": "out_pairs_index",
                         "target": [
                             {
-                                "name": "out_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs_index"
                             }
                         ]
                     }
@@ -2140,8 +2052,7 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ]
                     },
@@ -2153,8 +2064,7 @@
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ]
                     },
@@ -2166,8 +2076,7 @@
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ]
                     },
@@ -2179,8 +2088,7 @@
                         "name": "reference_fasta",
                         "source": [
                             {
-                                "name": "reference_fasta",
-                                "type": "Workflow Input File"
+                                "name": "reference_fasta"
                             }
                         ]
                     },
@@ -2192,8 +2100,7 @@
                         "name": "restriction_file",
                         "source": [
                             {
-                                "name": "restriction_file",
-                                "type": "Workflow Input File"
+                                "name": "restriction_file"
                             }
                         ]
                     },
@@ -2204,8 +2111,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ]
                     }
@@ -2227,8 +2133,7 @@
                         "target": [
                             {
                                 "name": "input_merged_nodups",
-                                "step": "juicer2pairs",
-                                "type": "Input file or parameter"
+                                "step": "juicer2pairs"
                             }
                         ]
                     }
@@ -2244,8 +2149,7 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ]
                     },
@@ -2256,8 +2160,7 @@
                         "name": "nsplit",
                         "source": [
                             {
-                                "name": "nsplit",
-                                "type": "Workflow Parameter"
+                                "name": "nsplit"
                             }
                         ]
                     },
@@ -2267,8 +2170,7 @@
                         "source": [
                             {
                                 "name": "merged_nodups",
-                                "step": "juicer",
-                                "type": "Output file or parameter"
+                                "step": "juicer"
                             }
                         ]
                     }
@@ -2291,8 +2193,7 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ]
                     },
@@ -2304,8 +2205,7 @@
                         "name": "out_pairs_index",
                         "target": [
                             {
-                                "name": "out_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs_index"
                             }
                         ]
                     }
@@ -2388,8 +2288,7 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ]
                     },
@@ -2401,8 +2300,7 @@
                         "name": "input_pairs_index",
                         "source": [
                             {
-                                "name": "input_pairs_index",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs_index"
                             }
                         ]
                     }
@@ -2425,13 +2323,11 @@
                         "name": "output_pairs_index",
                         "target": [
                             {
-                                "name": "output_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs_index"
                             },
                             {
                                 "name": "pairs_index",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             }
                         ]
                     },
@@ -2443,18 +2339,15 @@
                         "name": "output_pairs",
                         "target": [
                             {
-                                "name": "output_pairs",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs"
                             },
                             {
                                 "name": "pairs",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             },
                             {
                                 "name": "input_pairs",
-                                "step": "pairs2hic",
-                                "type": "Input file or parameter"
+                                "step": "pairs2hic"
                             }
                         ]
                     }
@@ -2470,8 +2363,7 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ]
                     },
@@ -2482,8 +2374,7 @@
                         "name": "min_res",
                         "source": [
                             {
-                                "name": "min_res",
-                                "type": "Workflow Parameter"
+                                "name": "min_res"
                             }
                         ]
                     },
@@ -2493,8 +2384,7 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     }
@@ -2518,8 +2408,7 @@
                         "name": "output_hic",
                         "target": [
                             {
-                                "name": "output_hic",
-                                "type": "Workflow Output File"
+                                "name": "output_hic"
                             }
                         ]
                     }
@@ -2534,8 +2423,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ]
                     },
@@ -2546,8 +2434,7 @@
                         "name": "binsize",
                         "source": [
                             {
-                                "name": "binsize",
-                                "type": "Workflow Parameter"
+                                "name": "binsize"
                             }
                         ]
                     },
@@ -2557,8 +2444,7 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     },
@@ -2568,8 +2454,7 @@
                         "source": [
                             {
                                 "name": "output_pairs_index",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     }
@@ -2592,8 +2477,7 @@
                         "name": "out_cool",
                         "target": [
                             {
-                                "name": "out_cool",
-                                "type": "Workflow Output File"
+                                "name": "out_cool"
                             }
                         ]
                     }
@@ -2678,8 +2562,7 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ]
                     }
@@ -2705,18 +2588,15 @@
                         "name": "output_pairs",
                         "target": [
                             {
-                                "name": "output_pairs",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs"
                             },
                             {
                                 "name": "pairs",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             },
                             {
                                 "name": "input_pairs",
-                                "step": "pairs2hic",
-                                "type": "Input file or parameter"
+                                "step": "pairs2hic"
                             }
                         ]
                     }
@@ -2732,8 +2612,7 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ]
                     },
@@ -2744,8 +2623,7 @@
                         "name": "min_res",
                         "source": [
                             {
-                                "name": "min_res",
-                                "type": "Workflow Parameter"
+                                "name": "min_res"
                             }
                         ]
                     },
@@ -2755,8 +2633,7 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     }
@@ -2780,8 +2657,7 @@
                         "name": "output_hic",
                         "target": [
                             {
-                                "name": "output_hic",
-                                "type": "Workflow Output File"
+                                "name": "output_hic"
                             }
                         ]
                     }
@@ -2796,8 +2672,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ]
                     },
@@ -2808,8 +2683,7 @@
                         "name": "binsize",
                         "source": [
                             {
-                                "name": "binsize",
-                                "type": "Workflow Parameter"
+                                "name": "binsize"
                             }
                         ]
                     },
@@ -2819,8 +2693,7 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ]
                     }
@@ -2843,8 +2716,7 @@
                         "name": "out_cool",
                         "target": [
                             {
-                                "name": "out_cool",
-                                "type": "Workflow Output File"
+                                "name": "out_cool"
                             }
                         ]
                     }
@@ -2898,8 +2770,7 @@
                         "name": "input_hic",
                         "source": [
                             {
-                                "name": "input_hic",
-                                "type": "Workflow Input File"
+                                "name": "input_hic"
                             }
                         ]
                     },
@@ -2912,8 +2783,7 @@
                         "name": "input_mcool",
                         "source": [
                             {
-                                "name": "input_mcool",
-                                "type": "Workflow Input File"
+                                "name": "input_mcool"
                             }
                         ]
                     }
@@ -2937,8 +2807,7 @@
                         "name": "output_mcool",
                         "target": [
                             {
-                                "name": "output_mcool",
-                                "type": "Workflow Output File"
+                                "name": "output_mcool"
                             }
                         ]
                     }
@@ -2990,8 +2859,7 @@
                         "name": "input_mcool",
                         "source": [
                             {
-                                "name": "input_mcool",
-                                "type": "Workflow Input File"
+                                "name": "input_mcool"
                             }
                         ]
                     },
@@ -3002,8 +2870,7 @@
                         "name": "nres",
                         "source": [
                             {
-                                "name": "nres",
-                                "type": "Workflow Parameter"
+                                "name": "nres"
                             }
                         ]
                     }
@@ -3027,8 +2894,7 @@
                         "name": "output_normvector",
                         "target": [
                             {
-                                "name": "output_normvector",
-                                "type": "Workflow Output File"
+                                "name": "output_normvector"
                             }
                         ]
                     }
@@ -3084,8 +2950,7 @@
                         "name": "input_hic",
                         "source": [
                             {
-                                "name": "input_hic",
-                                "type": "Workflow Input File"
+                                "name": "input_hic"
                             }
                         ]
                     },
@@ -3096,8 +2961,7 @@
                         "name": "min_res",
                         "source": [
                             {
-                                "name": "min_res",
-                                "type": "Workflow Parameter"
+                                "name": "min_res"
                             }
                         ]
                     },
@@ -3108,8 +2972,7 @@
                         "name": "max_mem",
                         "source": [
                             {
-                                "name": "max_mem",
-                                "type": "Workflow Parameter"
+                                "name": "max_mem"
                             }
                         ]
                     }
@@ -3133,8 +2996,7 @@
                         "name": "output_hic",
                         "target": [
                             {
-                                "name": "output_hic",
-                                "type": "Workflow Output File"
+                                "name": "output_hic"
                             }
                         ]
                     }
@@ -3189,8 +3051,7 @@
                         "name": "input_cool",
                         "source": [
                             {
-                                "name": "input_cool",
-                                "type": "Workflow Input File"
+                                "name": "input_cool"
                             }
                         ]
                     },
@@ -3201,8 +3062,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ]
                     }
@@ -3225,8 +3085,7 @@
                         "target": [
                             {
                                 "name": "input_mcool",
-                                "step": "add_hic_normvector_to_mcool",
-                                "type": "Input file or parameter"
+                                "step": "add_hic_normvector_to_mcool"
                             }
                         ]
                     }
@@ -3240,8 +3099,7 @@
                         "source": [
                             {
                                 "name": "output_mcool",
-                                "step": "add_hic_normvector_to_mcool",
-                                "type": "Output file or parameter"
+                                "step": "add_hic_normvector_to_mcool"
                             }
                         ]
                     }
@@ -3264,8 +3122,7 @@
                         "name": "output_normvector",
                         "target": [
                             {
-                                "name": "output_normvector",
-                                "type": "Workflow Output File"
+                                "name": "output_normvector"
                             }
                         ]
                     }
@@ -3281,8 +3138,7 @@
                         "name": "input_hic",
                         "source": [
                             {
-                                "name": "input_hic",
-                                "type": "Workflow Input File"
+                                "name": "input_hic"
                             }
                         ]
                     },
@@ -3292,8 +3148,7 @@
                         "source": [
                             {
                                 "name": "output_mcool",
-                                "step": "cool2mcool",
-                                "type": "Output file or parameter"
+                                "step": "cool2mcool"
                             }
                         ]
                     }
@@ -3316,13 +3171,11 @@
                         "name": "output_mcool",
                         "target": [
                             {
-                                "name": "output_mcool",
-                                "type": "Workflow Output File"
+                                "name": "output_mcool"
                             },
                             {
                                 "name": "input_mcool",
-                                "step": "extract_mcool_normvector_for_juicebox",
-                                "type": "Input file or parameter"
+                                "step": "extract_mcool_normvector_for_juicebox"
                             }
                         ]
                     }
@@ -3391,8 +3244,7 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ]
                     },
@@ -3405,8 +3257,7 @@
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ]
                     },
@@ -3419,8 +3270,7 @@
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ]
                     },
@@ -3431,8 +3281,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nThreads",
-                                "type": "Workflow Parameter"
+                                "name": "nThreads"
                             }
                         ]
                     }
@@ -3455,8 +3304,7 @@
                         "name": "out_bam",
                         "target": [
                             {
-                                "name": "out_bam",
-                                "type": "Workflow Output File"
+                                "name": "out_bam"
                             }
                         ]
                     }
@@ -3525,8 +3373,7 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ]
                     },
@@ -3539,8 +3386,7 @@
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ]
                     },
@@ -3553,8 +3399,7 @@
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ]
                     },
@@ -3565,8 +3410,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nThreads",
-                                "type": "Workflow Parameter"
+                                "name": "nThreads"
                             }
                         ]
                     }
@@ -3589,8 +3433,7 @@
                         "name": "out_bam",
                         "target": [
                             {
-                                "name": "out_bam",
-                                "type": "Workflow Output File"
+                                "name": "out_bam"
                             }
                         ]
                     }
@@ -3650,8 +3493,7 @@
                         "name": "bam",
                         "source": [
                             {
-                                "name": "bam",
-                                "type": "Workflow Input File"
+                                "name": "bam"
                             }
                         ]
                     },
@@ -3663,8 +3505,7 @@
                         "name": "chromsize",
                         "source": [
                             {
-                                "name": "chromsize",
-                                "type": "Workflow Input File"
+                                "name": "chromsize"
                             }
                         ]
                     },
@@ -3675,8 +3516,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nThreads",
-                                "type": "Workflow Parameter"
+                                "name": "nThreads"
                             }
                         ]
                     }
@@ -3699,8 +3539,7 @@
                         "name": "out_pairsam",
                         "target": [
                             {
-                                "name": "out_pairsam",
-                                "type": "Workflow Output File"
+                                "name": "out_pairsam"
                             }
                         ]
                     }
@@ -3755,8 +3594,7 @@
                         "name": "input_pairsams",
                         "source": [
                             {
-                                "name": "input_pairsams",
-                                "type": "Workflow Input File"
+                                "name": "input_pairsams"
                             }
                         ]
                     },
@@ -3767,8 +3605,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nThreads",
-                                "type": "Workflow Parameter"
+                                "name": "nThreads"
                             }
                         ]
                     }
@@ -3791,8 +3628,7 @@
                         "name": "merged_pairsam",
                         "target": [
                             {
-                                "name": "merged_pairsam",
-                                "type": "Workflow Output File"
+                                "name": "merged_pairsam"
                             }
                         ]
                     }
@@ -3843,8 +3679,7 @@
                         "name": "input_pairsams",
                         "source": [
                             {
-                                "name": "input_pairsams",
-                                "type": "Workflow Input File"
+                                "name": "input_pairsams"
                             }
                         ]
                     }
@@ -3867,8 +3702,7 @@
                         "name": "out_markedpairsam",
                         "target": [
                             {
-                                "name": "out_markedpairsam",
-                                "type": "Workflow Output File"
+                                "name": "out_markedpairsam"
                             }
                         ]
                     }
@@ -3932,8 +3766,7 @@
                         "name": "input_pairsam",
                         "source": [
                             {
-                                "name": "input_pairsam",
-                                "type": "Workflow Input File"
+                                "name": "input_pairsam"
                             }
                         ]
                     },
@@ -3945,8 +3778,7 @@
                         "name": "chromsize",
                         "source": [
                             {
-                                "name": "chromsize",
-                                "type": "Workflow Input File"
+                                "name": "chromsize"
                             }
                         ]
                     }
@@ -3972,8 +3804,7 @@
                         "name": "dedup_pairs",
                         "target": [
                             {
-                                "name": "dedup_pairs",
-                                "type": "Workflow Output File"
+                                "name": "dedup_pairs"
                             }
                         ]
                     },
@@ -3985,8 +3816,7 @@
                         "name": "lossless_bamfile",
                         "target": [
                             {
-                                "name": "lossless_bamfile",
-                                "type": "Workflow Output File"
+                                "name": "lossless_bamfile"
                             }
                         ]
                     }
@@ -4045,8 +3875,7 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ]
                     },
@@ -4058,8 +3887,7 @@
                         "name": "restriction_file",
                         "source": [
                             {
-                                "name": "restriction_file",
-                                "type": "Workflow Input File"
+                                "name": "restriction_file"
                             }
                         ]
                     }
@@ -4085,8 +3913,7 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ]
                     }
@@ -4140,8 +3967,7 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ]
                     }
@@ -4167,8 +3993,7 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ]
                     }
@@ -4247,8 +4072,7 @@
                         "name": "bam",
                         "source": [
                             {
-                                "name": "input_bams",
-                                "type": "Workflow Input file"
+                                "name": "input_bams"
                             }
                         ]
                     },
@@ -4260,8 +4084,7 @@
                         "name": "chromsize",
                         "source": [
                             {
-                                "name": "chromsize",
-                                "type": "Workflow Input file"
+                                "name": "chromsize"
                             }
                         ]
                     },
@@ -4272,8 +4095,7 @@
                         "name": "Threads",
                         "source": [
                             {
-                                "name": "nthreads_parse_sort",
-                                "type": "Workflow Input file"
+                                "name": "nthreads_parse_sort"
                             }
                         ]
                     }
@@ -4299,8 +4121,7 @@
                         "target": [
                             {
                                 "name": "input_pairsams",
-                                "step": "pairsam-merge",
-                                "type": "Input file"
+                                "step": "pairsam-merge"
                             }
                         ]
                     }
@@ -4317,8 +4138,7 @@
                         "source": [
                             {
                                 "name": "sorted_pairsam",
-                                "step": "pairsam-parse-sort",
-                                "type": "Output file"
+                                "step": "pairsam-parse-sort"
                             }
                         ]
                     },
@@ -4329,8 +4149,7 @@
                         "name": "nThreads",
                         "source": [
                             {
-                                "name": "nthreads_merge",
-                                "type": "Workflow Input file"
+                                "name": "nthreads_merge"
                             }
                         ]
                     }
@@ -4355,8 +4174,7 @@
                         "target": [
                             {
                                 "name": "input_pairsam",
-                                "step": "pairsam-markasdup",
-                                "type": "Input file"
+                                "step": "pairsam-markasdup"
                             }
                         ]
                     }
@@ -4373,8 +4191,7 @@
                         "source": [
                             {
                                 "name": "merged_pairsam",
-                                "step": "pairsam-merge",
-                                "type": "Output file"
+                                "step": "pairsam-merge"
                             }
                         ]
                     }
@@ -4399,8 +4216,7 @@
                         "target": [
                             {
                                 "name": "input_pairsam",
-                                "step": "pairsam-filter",
-                                "type": "Input file"
+                                "step": "pairsam-filter"
                             }
                         ]
                     }
@@ -4417,8 +4233,7 @@
                         "source": [
                             {
                                 "name": "dupmarked_pairsam",
-                                "step": "pairsam-markasdup",
-                                "type": "Output file"
+                                "step": "pairsam-markasdup"
                             }
                         ]
                     },
@@ -4430,8 +4245,7 @@
                         "name": "chromsize",
                         "source": [
                             {
-                                "name": "chromsize",
-                                "type": "Workflow Input file"
+                                "name": "chromsize"
                             }
                         ]
                     }
@@ -4456,8 +4270,7 @@
                         "name": "lossless_bamfile",
                         "target": [
                             {
-                                "name": "annotated_bam",
-                                "type": "Workflow Output File"
+                                "name": "annotated_bam"
                             }
                         ]
                     },
@@ -4470,8 +4283,7 @@
                         "target": [
                             {
                                 "name": "input_pairs",
-                                "step": "addfragtopairs",
-                                "type": "Input file"
+                                "step": "addfragtopairs"
                             }
                         ]
                     }
@@ -4488,8 +4300,7 @@
                         "source": [
                             {
                                 "name": "filtered_pairs",
-                                "step": "pairsam-filter",
-                                "type": "Output file"
+                                "step": "pairsam-filter"
                             }
                         ]
                     },
@@ -4501,8 +4312,7 @@
                         "name": "restriction_file",
                         "source": [
                             {
-                                "name": "restriction_file",
-                                "type": "Workflow Input file"
+                                "name": "restriction_file"
                             }
                         ]
                     }
@@ -4526,8 +4336,7 @@
                         "name": "pairs_with_frags",
                         "target": [
                             {
-                                "name": "filtered_pairs_with_frags",
-                                "type": "Workflow Output File"
+                                "name": "filtered_pairs_with_frags"
                             }
                         ]
                     }
