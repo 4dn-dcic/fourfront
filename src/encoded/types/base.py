@@ -306,7 +306,8 @@ class Item(snovault.Item):
         bad_stati = ['revoked', 'deleted', 'replaced', 'obsolete']
         status = self.properties.get('status', None)
         if status in bad_stati:
-            title = status.upper() + ' ' + title
+            if title:  # account for access key
+                title = status.upper() + ' ' + title
         return title
 
     def add_accession_to_title(self, title):
