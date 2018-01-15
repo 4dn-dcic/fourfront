@@ -41,7 +41,7 @@ def _award_viewing_group(award_uuid, root):
 
 # Item acls
 ONLY_ADMIN_VIEW = [
-    (Allow, 'group.admin', ['view', 'edit']),
+    (Allow, 'group.admin', ['view', 'edit', 'delete']),
     (Allow, 'group.read-only-admin', ['view']),
     (Allow, 'remoteuser.INDEXER', ['view']),
     (Allow, 'remoteuser.EMBED', ['view']),
