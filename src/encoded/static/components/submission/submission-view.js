@@ -1641,7 +1641,7 @@ class AliasSelectModal extends TypeSelectModal {
 class SelectExistingItemModal extends React.Component {
 
     render(){
-        var { onCancel, selectData, navigate  } = this.props;
+        var { onCancel, selectData, navigate, submissionBase  } = this.props;
 
         var selecting = false;
         if(selectData !== null){
@@ -1847,6 +1847,44 @@ class IndividualObjectView extends React.Component{
     checkObjectRemoval = (value, prevValue) => {
         if(value === null){
             this.props.removeObj(prevValue);
+        }
+    }
+
+    /**
+     * Navigation function passed to Search so that faceting can be done in-place
+     * through ajax. If no results are returned from the search, abort.
+     */
+    inPlaceNavigate = (destination, options, callback) => {
+        if(this.state.selectQuery){
+            var dest = destination;
+            // ensure destination is formatted correctly when clearing/removing filters
+            if(destination == '/'){
+                dest = '/search/?type=' + this.state.selectType;
+            }else if(destination.slice(0,8) != '/search/' && destination.slice(0,1) == '?'){
+                dest = '/search/' + destination;
+            }
+            ajax.promise(dest).then(data => {
+                if (data && data['@graph']){
+                    this.setState({
+                        'selectData': data,
+                        'selectQuery': dest
+                    });
+                }else{
+                    this.setState({
+                        'selectType': null,
+                        'selectData': null,
+                        'selectQuery': null,
+                        'selectField': null,
+                        'selectLink': null,
+                        'selectArrayIdx': null
+                    });
+                    this.props.setSubmissionState('fullScreen', false);
+                }
+            }).then(data => {
+                if (typeof callback === 'function'){
+                    callback(data);
+                }
+            });
         }
     }
 
