@@ -11,7 +11,7 @@
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66",
         "version": "2.5.1b",
         "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",		
-        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf"
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "purpose": ["Hi-C"],
         "references": ["52e85c70-fe2d-11e3-9191-0800200c9a66"]
     },
