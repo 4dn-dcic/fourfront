@@ -2,7 +2,6 @@
     {
         "award": "1U01CA200059-01",
         "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
-        "documentatioin_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "lab": "4dn-dcic-lab",
         "name": "STAR",
         "purpose": [
@@ -22,7 +21,6 @@
     {
         "award": "1U01CA200059-01",
         "description": "Docker container for star",
-        "documentatioin_url": "https://docs.docker.com",
         "lab": "4dn-dcic-lab",
         "name": "DOCKER STAR",
         "references": [

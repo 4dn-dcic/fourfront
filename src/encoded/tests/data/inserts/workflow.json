@@ -3998,6 +3998,7 @@
         "workflow_type": "Hi-C data analysis"
     },
     {
+        "app_name": "hi-c-processing-bam",
         "arguments": [
             {
                 "argument_format": "bam",
