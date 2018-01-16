@@ -3,7 +3,7 @@
 
     {
         "name" : "search-info-header.WorkflowRun",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000000",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b000",
         "section_type" : "Search Info Header",
         "title" : "Workflow Run Information",
         "body" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
@@ -12,7 +12,7 @@
 
     {
         "name" : "search-info-header.Workflow",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000001",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b001",
         "section_type" : "Search Info Header",
         "title" : "Workflow Information",
         "body" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>"
@@ -21,7 +21,7 @@
 
     {
         "name" : "search-info-header.FileSetMicroscopeQc",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000002",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b002",
         "section_type" : "Search Info Header",
         "title" : "Basic Protocol",
         "body" : "<div><p>This page contains the Microscope Optical QC recordings from 4DN labs. 4DN Imaging Group strongly advices this QC to be performed once a month, and uploaded to this page. To produce this data,</p><ol><li>Please use the <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">TetraSpeckTM</a> Fluorescent Microspheres from Thermo Fisher Scientific (catalog number <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">T14792</a>)</li><li>Follow the simple step in this <a href=\"http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/protocols/fbc19c00-d377-461c-98a4-9c3c32544d40/\">Protocol</a> to produce a PSFj report.</li></ol></div>"
@@ -32,7 +32,7 @@
 
     {
         "name" : "announcements.4dn-perspective-published",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000003",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b003",
         "section_type" : "Announcement",
         "title" : "The 4D Nucleome Perspective is Published",
         "date_created" : "2017-09-13",
@@ -43,7 +43,7 @@
 
     {
         "name" : "announcements.reference-repliseq-data-released",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000004",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b004",
         "section_type" : "Announcement",
         "title" : "Reference Repli-seq Data Released",
         "date_created" : "2017-09-05",
@@ -54,7 +54,7 @@
 
     {
         "name" : "announcements.first-4dn-experiments-released",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000005",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b005",
         "section_type" : "Announcement",
         "title" : "First 4DN Experiments Released",
         "date_created" : "2017-06-30",
@@ -65,7 +65,7 @@
 
     {
         "name" : "announcements.ontology-utilization-updated",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000006",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b006",
         "section_type" : "Announcement",
         "title" : "Ontology Utilization Updated",
         "date_created" : "2017-04-26",
@@ -76,7 +76,7 @@
 
     {
         "name" : "announcements.data-submission-open-beta",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000007",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b007",
         "section_type" : "Announcement",
         "title" : "Data Submission Open (Beta)",
         "date_created" : "2016-09-19",
@@ -89,16 +89,16 @@
 
     {
         "name" : "about#introduction",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000008",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b008",
         "file" : "/src/encoded/static/data/about/introduction.html"
     }, {
         "name" : "about#dcic",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000009",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b009",
         "title" : "Team",
         "file" : "/src/encoded/static/data/about/dcic.html"
     }, {
         "name" : "about#acknowledgements",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000010",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b010",
         "title" : "Acknowledgements",
         "file" : "/src/encoded/static/data/about/acknowledgements.html"
     },
@@ -108,61 +108,61 @@
 
     {
         "name" : "help#introduction",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000011",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b011",
         "file" : "/docs/public/help/introduction.md"
     }, {
         "name" : "help#carousel-place-holder",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000012",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b012",
         "body" : "placeholder: <SlideCarousel />"
     }, {
         "name" : "help#introduction2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000013",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b013",
         "file" : "/docs/public/help/introduction2.md"
     },
 
 
     {
         "name" : "help.account-creation#account_creation",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000014",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b014",
         "file" : "/docs/public/metadata-submission/account_creation.md"
     },
 
 
     {
         "name" : "help.getting-started#getting_started",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000015",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b015",
         "file" : "/docs/public/metadata-submission/getting_started.md"
     },
 
 
     {
         "name" : "help.biosample#metadata",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000016",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b016",
         "file" : "/docs/public/metadata-submission/biosample_metadata.md"
     },
 
 
     {
         "name" : "help.web-submission#web_submission",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000017",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b017",
         "file" : "/docs/public/metadata-submission/web_submission.md"
     },
 
 
     {
         "name" : "help.spreadsheet#excel_submission",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000018",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b018",
         "file" : "/docs/public/metadata-submission/excel_submission.md"
     }, {
         "name" : "help.spreadsheet#schema_info",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000019",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b019",
         "file" : "/docs/public/metadata-submission/schema_info.md"
     },
 
 
     {
         "name" : "help.rest-api#rest_api_submission",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159800000020",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020",
         "file" : "/docs/public/metadata-submission/rest_api_submission.md"
     },
 
@@ -170,7 +170,7 @@
 
 
     {
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000000",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b021",
         "name" : "error.login-failed#no_account",
         "body" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium.<br/><b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>."
     },
@@ -180,12 +180,12 @@
 
     {
         "name" : "nofic-matrix.2017-05#introduction",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000001",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b022",
         "title" : "Introduction",
         "body" : "This matrix shows a cross-section of experiment methods & groups vs cell lines."
     }, {
         "name" : "nofic-matrix.2017-05#nofic-matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000002",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b023",
         "file" : "/src/encoded/static/data/nofic-collab.csv",
         "options" : {
             "yaxisCols":[1,2],
@@ -199,7 +199,7 @@
         }
     }, {
         "name" : "nofic-matrix.2017-05#nofic-matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000003",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b024",
         "file" : "/src/encoded/static/data/nofic-collab.csv",
         "options" : {
             "yaxisCols":[1,2],
@@ -216,11 +216,11 @@
 
     {
         "name" : "joint-analysis-data-plans#legend",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000004",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b025",
         "file" : "/src/encoded/static/data/joint_data_analysis-legend.html"
     }, {
         "name" : "joint-analysis-data-plans#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000005",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b026",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -233,7 +233,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans#matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000006",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b027",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -246,7 +246,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans#matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000007",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b028",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -259,7 +259,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans#matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000008",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b029",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -275,7 +275,7 @@
 
     {
         "name" : "joint-analysis-data-plans.dev#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-1599000000089",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b030",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -288,7 +288,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.dev#matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000010",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b031",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -301,7 +301,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.dev#matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000011",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b032",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -314,7 +314,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.dev#matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000012",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b033",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -330,7 +330,7 @@
 
     {
         "name" : "joint-analysis-data-plans.jan2018#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000013",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b034",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -343,7 +343,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.jan2018#matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000014",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b035",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -356,7 +356,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.jan2018#matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000015",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b036",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -369,7 +369,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.jan2018#matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000016",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b037",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -385,7 +385,7 @@
 
     {
         "name" : "joint-analysis-data-plans.jan2018.dev#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000017",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b038",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -398,7 +398,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.jan2018.dev#matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000018",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b039",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -411,7 +411,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.jan2018.dev#matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000019",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b040",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -424,7 +424,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.jan2018.dev#matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000020",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b041",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -440,7 +440,7 @@
 
     {
         "name" : "joint-analysis-data-plans.july2018#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000021",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b042",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -453,7 +453,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.july2018#matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000022",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b043",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -466,7 +466,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.july2018#matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000023",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b044",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -479,7 +479,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.july2018#matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000024",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b045",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -495,7 +495,7 @@
 
     {
         "name" : "joint-analysis-data-plans.july2018.dev#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000025",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b046",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -508,7 +508,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.july2018.dev#matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000026",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b047",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -521,7 +521,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.july2018.dev#matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000027",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b048",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -534,7 +534,7 @@
         }
     }, {
         "name" : "joint-analysis-data-plans.july2018.dev#matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000028",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b049",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -552,7 +552,7 @@
 
     {
         "name" : "planned-submissions-matrix#matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000029",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b050",
         "file" : "/src/encoded/static/data/dense_format.csv",
         "options": {
             "yaxisCols":[2,3],
@@ -569,7 +569,7 @@
 
     {
         "name" : "privacy-policy#policy-content",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-159900000030",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b051",
         "file" : "/src/encoded/static/data/privacy-policy.md"
     }
 
