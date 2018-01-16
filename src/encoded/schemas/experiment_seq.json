@@ -37,7 +37,8 @@
             "CHIP-seq",
             "RNA-seq",
             "NAD-seq",
-            "SPRITE",
+            "DNA SPRITE",
+            "RNA-DNA SPRITE",
             "GAM"
           ]
         },
