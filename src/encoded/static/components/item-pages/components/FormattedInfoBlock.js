@@ -3,7 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Button } from 'react-bootstrap';
 import { ajax, console, isServerSide, analytics, object } from './../../util';
+import { PartialList } from './PartialList';
 
 
 // TODO: CLEANUP FILE

@@ -3,11 +3,8 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import { Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, DateUtility, object } from './../../util';
-import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
-import { PartialList } from './PartialList';
 import { FormattedInfoWrapper, WrappedListBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 /*
