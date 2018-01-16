@@ -113,7 +113,7 @@ class OverViewBody extends React.Component {
                     </div>
 
                     { this.cellLineDetails(commonProps) }
-                    { result.modifications || result.url || result.biosource_vendor ?
+                    { (Array.isArray(result.modifications) && result.modifications.length > 0) || result.url || result.biosource_vendor ?
                         <h4 className="tab-section-title">
                             <span>Other</span>
                         </h4>
@@ -122,7 +122,7 @@ class OverViewBody extends React.Component {
                     <hr className="tab-section-title-horiz-divider"/>
                     <div className="row overview-blocks">
                         <OverViewBodyItem {...commonProps} property='modifications' fallbackTitle="Modifications" hideIfNoValue />
-                        <OverViewBodyItem {...commonProps} property='url' fallbackTitle="URL" hideIfNoValue />
+                        <OverViewBodyItem {...commonProps} property='url' fallbackTitle="URL" titleRenderFxn={OverViewBodyItem.titleRenderPresets.url_string} hideIfNoValue />
                         <OverViewBodyItem {...commonProps} property='biosource_vendor' fallbackTitle="Biosource Vendor" hideIfNoValue />
                     </div>
 
@@ -216,7 +216,7 @@ export class IndividualItemTitle extends React.Component {
 
     toggleIcon(){
         if (!this.moreInfoExists()) return null;
-        return [<i className={"icon clickable icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} onClick={this.toggle} />, <span>&nbsp;</span>];
+        return <i className={"icon clickable icon-caret-right" + (this.state.open ? ' icon-rotate-90' : '')} onClick={this.toggle} />;
     }
 
     moreInfoExists(){
@@ -260,8 +260,9 @@ export class IndividualItemTitle extends React.Component {
         }
 
         return (
-            <div className="individual-organism">{ this.toggleIcon() } { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a>
+            <div className="individual-organism">
+                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
+                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a> { this.toggleIcon() }
                 { this.moreInfoExists() ? <Collapse in={this.state.open}>{ this.moreInfoPanel() }</Collapse> : null }
             </div>
         );

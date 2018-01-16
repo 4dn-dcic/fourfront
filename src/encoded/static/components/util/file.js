@@ -58,6 +58,22 @@ export class FileDownloadButton extends React.Component {
 
 export class FileDownloadButtonAuto extends React.Component {
 
+    static canDownload(file, validStatuses = FileDownloadButtonAuto.defaultProps.canDownloadStatuses){
+        if (!file || typeof file !== 'object'){
+            console.error("Incorrect data type");
+            return false;
+        }
+        if (typeof file.status !== 'string'){
+            console.error("No 'status' property on file:", file);
+            return false;
+        }
+
+        if (validStatuses.indexOf(file.status) > -1){
+            return true;
+        }
+        return false;
+    }
+
     static propTypes = {
         'result' : PropTypes.shape({
             'href' : PropTypes.string.isRequired,
@@ -75,29 +91,16 @@ export class FileDownloadButtonAuto extends React.Component {
         ]
     }
 
-    canDownload(){
-        var file = this.props.result;
-        if (!file || typeof file !== 'object'){
-            console.error("Incorrect data type");
-            return false;
-        }
-        if (typeof file.status !== 'string'){
-            console.error("No 'status' property on file:", file);
-            return false;
-        }
-
-        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
-            return true;
-        }
-        return false;
-    }
+    canDownload(){ return FileDownloadButtonAuto.canDownload(this.props.result, this.props.canDownloadStatuses); }
 
     render(){
         var file = this.props.result;
+        var isDisabled = !this.canDownload();
         var props = {
             'href' : file.href,
             'filename' : file.filename,
-            'disabled' : !this.canDownload()
+            'disabled' : isDisabled,
+            'title' : isDisabled ? 'Not ready to download' : FileDownloadButton.defaultProps.title
         };
         return <FileDownloadButton {...this.props} {...props} />;
     }

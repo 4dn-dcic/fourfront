@@ -61,15 +61,9 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
 
         if (reloadIfBadUserInfo(true)) return;
 
-        var expSetFiltersPropContainer = App.getRenderedPropValues(document, ['expSetFilters']);
-
         store.dispatch({
             // Update Redux store from Redux store props that've been rendered into <script data-prop-name={ propName }> elems server-side
-            type: _.extend(
-                    App.getRenderedProps(document, Object.keys(store.reducers)),
-                    // Convert Arrays back to Sets (which don't work well w. JSON.stringify)
-                    { 'expSetFilters' : convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
-                )
+            type: App.getRenderedProps(document, Object.keys(store.reducers))
         });
 
         var server_stats = require('querystring').parse(window.stats_cookie);
