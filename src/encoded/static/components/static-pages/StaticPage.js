@@ -12,7 +12,7 @@ import { layout, console } from './../util';
 /**
  * Converts context.content into different format if necessary and returns copy of context with updated 'content'.
  * Currently only converts Markdown content (if a context.content[] item has 'filetype' === 'md'). Others may follow.
- * 
+ *
  * @param {Object} context - Context provided from back-end, including all properties.
  */
 export function parseSectionsContent(context = this.props.context){
@@ -47,7 +47,7 @@ export function parseSectionsContent(context = this.props.context){
 
 /**
  * Converts links to other files into links to sections from a React element and its children (recursively).
- * 
+ *
  * @param {JSX.Element} elem - A high-level React element representation of some content which might have relative links.
  * @param {{ 'content' : { 'name' : string } }} context - Backend-provided data.
  * @param {number} depth - Current depth.
