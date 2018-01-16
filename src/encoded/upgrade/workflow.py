@@ -224,5 +224,13 @@ def workflow_3_4(value, system):
     for arg in value.get('arguments'):
         del arg['rgument_cardinality']
 
+    for step in value.get('steps'):
+        for op in step.get('outputs'):
+            for tg in op.get('target'):
+                del tg['type']
+        for ip in step.get('inputs'):
+            for sc in ip.get('source'):
+                del sc['type']
+
     return value
 
