@@ -1,11 +1,13 @@
 'use strict';
 
-var _ = require('underscore');
-var url = require('url');
-var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
-var object = require('./object');
+
+import _ from 'underscore';
+import url from 'url';
+import queryString from 'query-string';
+import * as ajax from './ajax';
+import * as object from './object';
 import * as Schemas from './Schemas';
 import { navigate } from './navigate';
 
@@ -23,9 +25,46 @@ export let getLimit = function(){ return 25; };
  * @public
  * @static
  */
-export function currentExpSetFilters(){
-    if (!store) store = require('./../../store');
-    return store.getState().expSetFilters;
+export const currentExpSetFilters = contextFiltersToExpSetFilters;
+
+/** If the given term is selected, return the href for the term */
+export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
+    for (var filter in filters) {
+        if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
+            return url.parse(filters[filter]['remove']).search;
+        }
+    }
+    return null;
+}
+
+/**
+ * @param {string} unselectHref - Returned from unselectHrefIfSelected, if used.
+ * @param {string} field - What field to build for.
+ * @param {string} term - What term to build for.
+ * @param {string} searchBase - Original href or search base of current page.
+ */
+export function buildSearchHref(unselectHref, field, term, searchBase){
+    var href;
+    if (unselectHref) {
+        href = unselectHref;
+    } else {
+        var parts = url.parse(searchBase, true);
+        var query = _.clone(parts.query);
+        // format multiple filters on the same field
+        if(field in query){
+            if(Array.isArray(query[field])){
+                query[field] = query[field].concat(term);
+            }else{
+                query[field] = [query[field]].concat(term);
+            }
+        }else{
+            query[field] = term;
+        }
+        query = queryString.stringify(query);
+        parts.search = query && query.length > 0 ? ('?' + query) : '';
+        href = url.format(parts);
+    }
+    return href;
 }
 
 
@@ -38,63 +77,49 @@ export function currentExpSetFilters(){
  * @param {Object}  [expSetFilters]     The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
  * @param {function}[callback]          Callback function to call after updating redux store.
  * @param {boolean} [returnInsteadOfSave=false]  - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
- * @param {boolean} [useAjax=true]      Whether to use AJAX to fetch and save new experiment(-sets) to (props.)context. If true, must also provide href argument.
  * @param {string}  [href]              Current or base href to use for AJAX request if using AJAX to update.
  */
 export function changeFilter(
     field,
     term,
-    experimentsOrSets = 'experiments',
     expSetFilters = null,
     callback = null,
     returnInsteadOfSave = false,
-    useAjax=true,
-    href=null
+    href = null
 ){
-    // If no expSetFilters (and maybe href, which is optional)
-    // are supplied, get them from Redux store.
-    if (!expSetFilters){
-        if (!store) store = require('./../../store');
-        var storeState = store.getState();
-        expSetFilters = storeState.expSetFilters;
-        if (!href) {
-            href = storeState.href;
-        }
-    }
+    // If no expSetFilters are supplied, grab current ones from Redux store.
+    if (!expSetFilters) expSetFilters = currentExpSetFilters();
 
     // store currently selected filters as a dict of sets
     var tempObj = {};
     var newObj = {};
 
-    // standardize on field naming convention for expSetFilters before they hit the redux store.
-    field = standardizeFieldKey(field, experimentsOrSets);
-
     var expSet = expSetFilters[field] ? new Set(expSetFilters[field]) : new Set();
-    if(expSet.has(term)){
+    if (expSet.has(term)) {
         // term is already present, so delete it
         expSet.delete(term);
-    }else{
+    } else {
         expSet.add(term);
     }
     if(expSet.size > 0){
         tempObj[field] = expSet;
-        newObj = Object.assign({}, expSetFilters, tempObj);
+        newObj = _.extend({}, expSetFilters, tempObj);
     }else{ //remove key if set is empty
-        newObj = Object.assign({}, expSetFilters);
+        newObj = _.extend({}, expSetFilters);
         delete newObj[field];
     }
 
     if (returnInsteadOfSave){
         return newObj;
     } else {
-        console.info("Saving new filters:", newObj, "Using AJAX:", useAjax);
-        return saveChangedFilters(newObj, useAjax, href, callback, expSetFilters);
+        console.info("Saving new filters:", newObj);
+        return saveChangedFilters(newObj, href, callback);
     }
 }
 
 
 /**
- * Update expSetFilters in redux store and, if using AJAX, update context and href as well after fetching.
+ * Update expSetFilters by generating new href from supplied expSetFilters and fetching/navigating to copy of current href/URL with updated query.
  * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
  *
  * @param {Object}  expSetFilters   A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
@@ -102,16 +127,9 @@ export function changeFilter(
  * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
  * @param {function}[callback]      Callback function.
  */
-export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
+export function saveChangedFilters(newExpSetFilters, href=null, callback = null){
     if (!store)   store = require('./../../store');
     if (!Alerts) Alerts = require('../alerts').default;
-    if (!useAjax) {
-        store.dispatch({
-            type : {'expSetFilters' : newExpSetFilters}
-        });
-        if (typeof callback === 'function') setTimeout(callback, 0);
-        return true;
-    }
 
     var originalReduxState = store.getState();
 
@@ -120,91 +138,41 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
         href = originalReduxState.href;
     }
 
-    // Else we fetch new experiment_sets (i.e. (props.)context['@graph'] ) via AJAX.
     if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters: " + href);
 
     var newHref = filtersToHref(newExpSetFilters, href);
 
-    var navigateFxn = (
-        typeof navigate === 'function' ? navigate : null
-    );
-
-    store.dispatch({
-        type: {
-            'expSetFilters' : newExpSetFilters,
-        }
-    });
-
-    if (navigateFxn){
-        navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
-            if (result && result.total === 0){
-                // No results, unset new filters.
-                Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
-                store.dispatch({
-                    type : {
-                        'expSetFilters' : originalReduxState.expSetFilters,
-                        'context' : originalReduxState.context
-                    }
-                });
-                navigateFxn(originalReduxState.href, { skipRequest : true });
-            } else {
-                // Success. Remove any no result alerts.
-                Alerts.deQueue(Alerts.NoFilterResults);
-            }
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        }, (err) =>{
-            // Fallback callback
-            if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        }/*, { 'expSetFilters' : newExpSetFilters }*/);
-    } else {
-        // DEPRECATED SECTION -- MIGHT NOT WORK.
-        ajax.load(newHref, (newContext) => {
+    navigate(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
+        if (result && result.total === 0){
+            // No results, unset new filters.
+            Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
+            navigate(originalReduxState.href, { skipRequest : true });
+        } else {
+            // Success. Remove any no result alerts.
             Alerts.deQueue(Alerts.NoFilterResults);
-            store.dispatch({
-                type: {
-                    'context'       : newContext,
-                    //'expSetFilters' : newExpSetFilters,
-                    'href'          : newHref
-                }
-            });
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        }, 'GET', ()=>{
-            // Fallback callback
-            Alerts.queue(Alerts.NoFilterResults);
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        });
-    }
+        }
+        if (typeof callback === 'function') setTimeout(callback, 0);
+    }, (err) =>{
+        // Fallback callback
+        if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
+        if (typeof callback === 'function') setTimeout(callback, 0);
+    });
 
 }
 
 
 export function isTermSelectedAccordingToExpSetFilters(term, field, expSetFilters = null){
-    // If no expSetFilters are supplied, get them from Redux store.
-    if (!expSetFilters){
-        if (!store) store = require('./../../store');
-        var storeState = store.getState();
-        expSetFilters = storeState.expSetFilters;
-    }
-
-    if (typeof expSetFilters[field] !== 'undefined'){
-        if (expSetFilters[field].has && expSetFilters[field].has(term)){
-            return true;
-        }
-    }
+    if (!expSetFilters) expSetFilters = currentExpSetFilters(); // If no expSetFilters are supplied, get them from Redux store.
+    if (typeof expSetFilters[field] !== 'undefined' && typeof expSetFilters[field].has === 'function' && expSetFilters[field].has(term)) return true;
     return false;
-
 }
 
 
 export function unsetAllTermsForField(field, expSetFilters, save = true, href = null){
     var esf = _.clone(expSetFilters);
     delete esf[field];
-    if (save && href){
-        return saveChangedFilters(esf, true, href);
-    } else {
-        return esf;
-    }
+    if (save && href) return saveChangedFilters(esf, href);
+    else return esf;
 }
 
 
@@ -289,7 +257,11 @@ export function filtersToHref(expSetFilters, currentHref, page = null, sortColum
     return urlString;
 }
 
-export const NON_FILTER_URL_PARAMS = [ // Taken from search.py
+/**
+ * Hardcoded URL query params which are _definitely_ not filters.
+ * Taken from search.py
+ */
+export const NON_FILTER_URL_PARAMS = [
     'limit', 'y.limit', 'x.limit', 'mode',
     'format', 'frame', 'datastore', 'field', 'region', 'genome',
     'sort', 'from', 'referrer', 'q', 'before', 'after'
@@ -297,46 +269,37 @@ export const NON_FILTER_URL_PARAMS = [ // Taken from search.py
 
 
 /**
- * Parse href to return an expSetFilters object, the opposite of @see filtersToHref.
- * Used for server-side rendering to set initial selected filters in UI based on request URL.
- *
- * @param {string}   href              A URL or path containing query at end in form of ?...&field.name=term1&field2.name=term2[...]
- * @param {Object[]} [contextFilters]  Collection of objects from (props.)context.filters or context.facets which have a 'field' property to cross-ref and check if URL query args are facets.
- * @param {string}   [contextFilters.field]
- * @returns {Object} Shape of { field : Set([...terms]) }
+ * Convert back-end-supplied 'context.filters' array of filter objects into commonly-used 'expSetFilters' structure.
+ * Replaces now-removed 'hrefToFilters' function and copy of expSetFilters passed down from Redux store.
+ * 
+ * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
+ * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
-export function hrefToFilters(href, contextFilters = null, checkContextFilters = true){
-    if (!navigate.isBrowseHref(href)) return {};
-    return _.object(_.map(
-        _.filter(
-            _.pairs(url.parse(href, true).query),
-            function(queryPair){
-                if (NON_FILTER_URL_PARAMS.indexOf(queryPair[0]) > -1) return false;
-                if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-                
-                if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
-                    return true; // See if in context.filters, if is available.
-                }
-
-                // These happen to all start w/ 'experiments_in_set.' currently. Woops not anymore.
-                if (!checkContextFilters || queryPair[0].indexOf('experiments_in_set.') > -1) return true;
-                return false;
-            }
-        ),
-        function(queryPair){
-            if (Array.isArray(queryPair[1])) return [  queryPair[0], new Set(queryPair[1])  ];
-            else return [  queryPair[0], new Set([queryPair[1]])  ];
+export function contextFiltersToExpSetFilters(contextFilters = null){
+    if (!contextFilters){ // Grab context.filters from Redux store if not supplied.
+        if (!store) store = require('./../../store');
+        var storeState = store.getState();
+        contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
+    }
+    if (!Array.isArray(contextFilters)){
+        console.warn('No context filters available or supplied. Fine if this message appears outside of a /search/ or /browse/ page.');
+        return {};
+    }
+    if (contextFilters.length === 0) return {};
+    return _.reduce(contextFilters, function(memo, filterObj){
+        if (filterObj.field === 'type' || filterObj.field === 'experimentset_type') return memo; // continue/skip.
+        if (typeof memo[filterObj.field] === 'undefined'){
+            memo[filterObj.field] = new Set([filterObj.term]);
+        } else {
+            memo[filterObj.field].add(filterObj.term);
         }
-    ));
+        return memo;
+    }, {});
 }
 
 
 /** Convert expSetFilters, e.g. as stored in Redux, into a partial URL query: field.name=term1&field2.something=term2[&field3...] */
-export function expSetFiltersToURLQuery(expSetFilters = null){
-    if (!expSetFilters){
-        if (!store) store = require('./../../store');
-        expSetFilters = store.getState().expSetFilters;
-    }
+export function expSetFiltersToURLQuery(expSetFilters){
     return _.pairs(expSetFilters).map(function(filterPair){
         var field = filterPair[0];
         var terms = [...filterPair[1]]; // Set to Array
@@ -346,11 +309,36 @@ export function expSetFiltersToURLQuery(expSetFilters = null){
     }).join('&');
 }
 
+/**
+ * Compare two versions of 'expSetFilters' structure to check if they are equal.
+ * Used by ChartDataController.
+ * 
+ * @param {Object} expSetFiltersA - 1st set of filters, object with facet/field as keys and Sets of terms as values.
+ * @param {Object} expSetFiltersB - 2nd set of filters, same as param expSetFiltersA.
+ * @returns {boolean} true if equal.
+ */
+export function compareExpSetFilters(expSetFiltersA, expSetFiltersB){
+    if ((expSetFiltersA && !expSetFiltersB) || (!expSetFiltersA && expSetFiltersB)) return false;
+    var keysA = _.keys(expSetFiltersA);
+    if (keysA.length !== _.keys(expSetFiltersB).length) return false;
+    for (var i = 0; i < keysA.length; i++){
+        if (typeof expSetFiltersB[keysA[i]] === 'undefined') return false;
+        if (expSetFiltersA[keysA[i]] instanceof Set && expSetFiltersB[keysA[i]] instanceof Set){
+            if (expSetFiltersA[keysA[i]].size !== expSetFiltersB[keysA[i]].size) return false;
+            for (var termFromSetA of expSetFiltersA[keysA[i]]){
+                if (!expSetFiltersB[keysA[i]].has(termFromSetA)) return false;
+            }
+        }
+    }
+    return true;
+}
+
 
 export function filtersToNodes(expSetFilters = {}, orderedFieldNames = null, flatten = false){
     // Convert orderedFieldNames into object/hash for faster lookups.
     var sortObj = null;
     if (Array.isArray(orderedFieldNames)) sortObj = _.invert(_.object(_.pairs(orderedFieldNames)));
+
     return _(expSetFilters).chain()
         .pairs() // fieldPair[0] = field, fieldPair[1] = Set of terms
         .sortBy(function(fieldPair){
@@ -453,177 +441,4 @@ export function filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.e
         && _.keys(expSetFilters).length === 0
     );
 }
-
-
-/**
- * Filter experiments or sets (graph arg) by filters, adjusting for adding/removing field or term (if defined) or ignored filters.
- *
- * @param {Object[]} graph      Array of experiment_sets or experiments as obtained from (props.)context['@graph'].
- * @param {Object}   filters    expSetFilters in form as obtained from Redux store, e.g. { experiments_in_set...organism.name : Set(['human','mouse']), ... }
- * @param {Object}   [ignored]
- * @param {string}   [field]
- * @param {string}   [term]
- */
-export function siftExperimentsClientSide(graph, filters, ignored=null, field=null, term=null) {
-    var passExperiments = new Set();
-    // Start by adding all applicable experiments to set
-    for(var i=0; i < graph.length; i++){
-        if(graph[i].experiments_in_set){
-            for(var j=0; j < graph[i].experiments_in_set.length; j++){
-                passExperiments.add(graph[i].experiments_in_set[j]);
-            }
-        } else {
-            passExperiments.add(graph[i]);
-        }
-    }
-    // search through currently selected expt filters
-    var filterKeys = Object.keys(filters);
-    if (field && !_.contains(filterKeys, field)){
-        filterKeys.push(field);
-    }
-    for(let experiment of passExperiments){
-        var eliminated = false;
-        for(var k=0; k < filterKeys.length; k++){
-            var refinedFilterSet = null;
-            if (ignored && typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
-                // remove the ignored filters by using the difference between sets
-                refinedFilterSet = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
-            }
-            if (refinedFilterSet === null) refinedFilterSet = filters[filterKeys[k]];
-            if (eliminated){
-                break;
-            }
-            var valueProbe = experiment;
-            var filterSplit = filterKeys[k].split('.');
-            for(var l=0; l < filterSplit.length; l++){
-                if(filterSplit[l] === 'experiments_in_set'){
-                    continue;
-                }
-                // for now, use first item in an array (for things such as biosamples)
-                if(Array.isArray(valueProbe)){
-                    valueProbe = valueProbe[0];
-                }
-                if(valueProbe[filterSplit[l]]){
-                    valueProbe = valueProbe[filterSplit[l]];
-                    if(l === filterSplit.length-1){ // last level of filter
-                        if(field && filterKeys[k] === field){
-                            if(valueProbe !== term){
-                                eliminated = true;
-                                passExperiments.delete(experiment);
-                            }
-                        }else if(refinedFilterSet.size > 0 && !refinedFilterSet.has(valueProbe)){ // OR behavior if not active field
-                            eliminated = true;
-                            passExperiments.delete(experiment);
-                        }
-                    }
-                }else{
-                    if(filterKeys[k] !== field && refinedFilterSet.size > 0){
-                        eliminated = true;
-                        passExperiments.delete(experiment);
-                        break;
-                    }else{
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    return passExperiments;
-}
-
-
-/** For client-side filtering, add or remove experiments_in_set at start of field depending if filtering experiments or sets. */
-export function standardizeFieldKey(field, expsOrSets = 'sets', reverse = false){
-    if (expsOrSets === 'experiments' && field !== 'experimentset_type'){
-        // ToDo: arrays of expSet- and exp- exclusive fields
-        if (reverse){
-            return field.replace('experiments_in_set.', '');
-        } else if (field.slice(0, 19) !== 'experiments_in_set.') {
-            if (field === 'type') return field;
-            //if (field.slice(0, 6) === 'audit.') return field;
-            return 'experiments_in_set.' + field;
-        }
-    }
-    return field;
-}
-
-/****
- **** Legacy Client-Side Filtering Facets Functions. For local filtering, e.g. of ExperimentSets' Experiments
- ****/
-
-/**
- * Find filters to ignore - i.e. filters which are set in expSetFilters but are
- * not present in facets.
- * 
- * @param {Object[]} facets - Array of complete facet objects (must have 'terms' & 'fields' properties).
- * @param {Object} expSetFilters - Object containing facet fields and their enabled terms: '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
- * 
- * @return {Object} The filters which are ignored. Object looks like expSetFilters.
- */
-export function findIgnoredFiltersByMissingFacets(facets, expSetFilters){
-    var ignoredFilters = {};
-    for(var i=0; i < facets.length; i++){
-        var ignoredSet = new Set();
-        if(expSetFilters[facets[i].field]){
-            for(let expFilter of [...expSetFilters[facets[i].field]]){ // [... ] to convert Set to Array
-                var found = false;
-                for(var j=0; j < facets[i].terms.length; j++){
-                    if(expFilter === facets[i].terms[j].key){
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found){
-                    ignoredSet.add(expFilter);
-                }
-            }
-            if(ignoredSet.size > 0){
-                ignoredFilters[facets[i].field] = ignoredSet;
-            }
-        }
-
-    }
-    return ignoredFilters;
-}
-
-
-/**
- * Find filters which to ignore based on if all experiments in experimentArray which are being filtered
- * have the same term for that selected filter. Geared towards usage by ExperimentSetView.
- * 
- * @param {Object[]} experimentArray - Experiments which are being filtered.
- * @param {Object} expSetFilters - Object containing facet field name as key and set of terms to filter by as value.
- * @param {string} [expsOrSets] - Whether are filtering experiments or sets, in order to standardize facet names.
- */
-export function findIgnoredFiltersByStaticTerms(experimentArray, expSetFilters, expsOrSets = 'experiments'){
-    var ignored = {};
-    _.forEach(_.keys(expSetFilters), (selectedFacet, i)=>{ // Get facets/filters w/ only 1 applicable term
-
-        // Unique terms in all experiments per filter
-        if (
-            _.flatten(
-                // getNestedProperty returns array(s) if property is nested within array(s), so we needa flatten to get list of terms.
-                experimentArray.map((experiment, j)=>{
-                    var termVal = object.getNestedProperty(
-                        experiment,
-                        standardizeFieldKey(selectedFacet, expsOrSets, true)
-                    );
-                    if (Array.isArray(termVal)){ // Only include terms by which we're filtering
-                        return termVal.filter((term) => expSetFilters[selectedFacet].has(term));
-                    }
-                    return termVal;
-                })
-            ).filter((experimentTermValue, j, allTermValues)=>{ 
-                // Reduce to unique term vals (indexOf returns first index, so if is repeat occurance, returns false)
-                return allTermValues.indexOf(experimentTermValue) === j;
-            }).length < 2
-        ) {
-            ignored[selectedFacet] = expSetFilters[selectedFacet]; // Ignore all terms in filter.
-        }
-
-    });
-    return ignored;
-}
-
 

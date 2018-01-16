@@ -70,9 +70,9 @@ class BarSection extends React.Component {
                     
                 }}
                 ref={(r)=>{
-                    if (this.props.isNew) setTimeout(function(){
+                    if (this.props.isNew || this.props.transitioning) setTimeout(function(){
                         vizUtil.requestAnimationFrame(function(){
-                            if (r) r.style.height = d.attr.height + 'px';
+                            if (r && r.style && (r.style.height < d.attr.height)) r.style.height = d.attr.height + 'px';
                         });
                     }, 0);
                 }}
@@ -118,14 +118,9 @@ class Bar extends React.Component {
         var styleOpts = this.props.styleOptions;
 
         // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-        if ((d.removing) && this.props.transitioning){
-            style.opacity = 0;
-            style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
-        } else {
-            // 'Default' (no transitioning) style
-            style.opacity = 1;
-            style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
-        }
+        style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
+        if (d.removing && this.props.transitioning) style.opacity = 0; // Fade it out from current (opacity=1) via CSS3.
+        else style.opacity = 1; // 'Default' (no transitioning) style
         style.left = styleOpts.offset.left;
         style.bottom = styleOpts.offset.bottom;
         style.width = d.attr.width;
@@ -155,6 +150,7 @@ class Bar extends React.Component {
                 hoverTerm={this.props.hoverTerm}
                 isNew={isNew}
                 isRemoving={d.removing}
+                transitioning={this.props.transitioning}
                 canBeHighlighted={this.props.canBeHighlighted}
             />
         );
@@ -178,29 +174,36 @@ class Bar extends React.Component {
         );
 
         // If transitioning, add existing bar sections to fade out.
-        if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
-            _.filter(_.pairs(cachedPastBarSections[d.term]), function(pastNodePair){
-                if (
-                    _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
-                        //if (typeof barNode.pastWidth !== 'number'){
-                        //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
-                        //}
-                        if (barNode.term === pastNodePair[0]){
-                            barNode.existing = true;
-                            return true;
+        if (transitioning && cachedPastBarSections[d.term]){
+            barSections = barSections.concat(
+                _.map(
+                    _.filter(
+                        _.pairs(cachedPastBarSections[d.term]), // [ barNode.term, { <barSectionNode.term> : { ...barSectionNode } } ][]
+                        function(pastNodePair){
+                            if (
+                                _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
+                                    //if (typeof barNode.pastWidth !== 'number'){
+                                    //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
+                                    //}
+                                    if (barNode.term === pastNodePair[0]){
+                                        barNode.existing = true;
+                                        return true;
+                                    }
+                                    return false;
+                                }).length === 0) return true;
+                            return false;
                         }
-                        return false;
-                    })
-                    .length === 0) return true;
-                return false;
-            }).map(function(pastNodePair){
-                var pastNode = pastNodePair[1];
-                pastNode.removing = true;
-                //pastNode.attr.width = d.attr.width;
-                //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
-                return pastNode;
-            })
-        );
+                    ),
+                    function(pastNodePair){
+                        var pastNode = pastNodePair[1];
+                        pastNode.removing = true;
+                        //pastNode.attr.width = d.attr.width;
+                        //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
+                        return pastNode;
+                    }
+                )
+            );
+        }
 
         var className = "chart-bar";
         if (!this.props.canBeHighlighted) className += ' no-highlight';
@@ -225,14 +228,8 @@ class Bar extends React.Component {
                     }
                 }}
             >
-                { this.props.showBarCount ?
-                <span className="bar-top-label" key="text-label">
-                    { d.count }
-                </span>
-                : null }
-                {
-                    barSections.map(this.renderBarSection)
-                }
+                { this.props.showBarCount ? <span className="bar-top-label" key="text-label">{ d.count }</span> : null }
+                { barSections.map(this.renderBarSection) }
             </div>
         );
     }
@@ -269,24 +266,25 @@ export class ViewContainer extends React.Component {
      */
     renderBars(){
 
+        // Global/Module-level Variables
         cachedPastBars = _.clone(cachedBars);
         cachedBars = {};
         cachedPastBarSections = _.clone(cachedBarSections);
         cachedBarSections = {};
 
-        // Current Bars only.
-        var currentBars = this.props.bars.map((d)=>{
+        var barsToRender, currentBars;
+
+        // Current Bars only (unless transitioning).
+        barsToRender = currentBars = this.props.bars.map((d)=>{
             // Determine whether bar existed before.
             return _.extend(d, { 
                 'existing' : typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null
             });
         });
 
-        var barsToRender = currentBars;
-
         // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
         if (this.props.transitioning){
-            var barsToRemove = _.difference(  _.keys(cachedPastBars),  _.pluck(this.props.bars, 'term')).map((barTerm) => {
+            var barsToRemove = _.difference(  _.keys(cachedPastBars),  _.pluck(this.props.bars, 'term') ).map((barTerm) => {
                 return _.extend(cachedPastBars[barTerm].__data__, { 'removing' : true });
             });
             barsToRender = barsToRemove.concat(currentBars);
@@ -375,20 +373,10 @@ export const barPlotCursorActions = [
 
             var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
                 // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                if (
-                    expSetFilters && expSetFilters[node.field] &&
-                    expSetFilters[node.field].has(node.term)
-                ){
+                if (expSetFilters && expSetFilters[node.field] &&  expSetFilters[node.field].has(node.term)){
                     return expSetFilters;
                 }
-                return Filters.changeFilter(
-                    node.field,
-                    node.term,
-                    'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
-                    expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
-                    null,               // Callback
-                    true,               // Only return new expSetFilters vs saving them == set to TRUE
-                );
+                return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE
             }, currentExpSetFilters);
 
             // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
@@ -397,19 +385,14 @@ export const barPlotCursorActions = [
                 'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
             });
 
-            Filters.saveChangedFilters(
-                newExpSetFilters,
-                true,
-                href,
-                function(){
-                    // Scroll to top of browse page container after navigation is complete.
-                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 125);
-                }
-            );
+            Filters.saveChangedFilters(newExpSetFilters, href, () => {
+                // Scroll to top of browse page container after navigation is complete.
+                setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
+            });
 
         },
         'disabled' : function(cursorProps){
-            var expSetFilters = store.getState().expSetFilters;
+            var expSetFilters = Filters.currentExpSetFilters();
 
             if (expSetFilters && typeof expSetFilters === 'object'){
                 if (

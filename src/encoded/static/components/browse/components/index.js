@@ -14,7 +14,7 @@ export { AboveTableControls } from './AboveTableControls';
 export { AboveSearchTablePanel } from './AboveSearchTablePanel';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 export { SearchResultDetailPane } from './SearchResultDetailPane';
-export { FacetList, ReduxExpSetFiltersInterface } from './FacetList';
+export { FacetList, onFilterHandlerMixin } from './FacetList';
 export { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockListViewMoreButton, StackedBlockTable } from './StackedBlockTable';
 export { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
 

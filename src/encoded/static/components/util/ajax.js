@@ -1,7 +1,7 @@
 'use strict';
 
-var _ = require('underscore');
-var jwt = require('./json-web-token');
+import _ from 'underscore';
+import * as JWT from './json-web-token';
 var console = require('./patched-console').default;
 
 /**
@@ -21,7 +21,7 @@ const defaultHeaders = {
  * @returns {XMLHttpRequest} XHR object with set headers.
  */
 function setHeaders(xhr, headers = {}) {
-    headers = jwt.addToHeaders(_.extend({}, defaultHeaders, headers)); // Set defaults, add JWT if set
+    headers = JWT.addToHeaders(_.extend({}, defaultHeaders, headers)); // Set defaults, add JWT if set
 
     // Put everything in the header
     var headerKeys = Object.keys(headers);
