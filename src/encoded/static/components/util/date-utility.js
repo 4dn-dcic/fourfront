@@ -1,9 +1,9 @@
 'use strict';
 
-var moment = require('moment');
-var { isServerSide } = require('./misc');
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
+import { isServerSide } from './misc';
 
 var DateUtility = module.exports = (function(){
 

@@ -11,24 +11,41 @@ jest.dontMock('underscore');
 
 
 describe('Testing viz/QuickInfoBar.js', function() {
-    var React, TestUtils, page, context, filters, _, Wrapper, QuickInfoBar, href, expSetFilters;
+    var React, TestUtils, page, context, Filters, _, Wrapper, QuickInfoBar, href, expSetFilters, contextFilters;
 
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
+        Filters = require('./../util/experiments-filters');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         context = require('../testdata/browse/context');
         QuickInfoBar = require('./../viz/QuickInfoBar').default;
-        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
-        expSetFilters = {
-            "experiments_in_set.biosample.biosource.individual.organism.name" : new Set(["mouse"]),
-            "experiments_in_set.biosample.biosource.biosource_type" : new Set(["immortalized cell line"])
-        };
-
-        page = TestUtils.renderIntoDocument(
-            <QuickInfoBar href={href} expSetFilters={expSetFilters} />
-        );
+        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line";
+        contextFilters = [ // N.B. 'context.filters' in our case is incorrect, and context itself lacks the href defined above, so we use this contextFilters instead for this test. TODO: Change this (use another testData context?)
+            {
+                "field": "type",
+                "term": "ExperimentSetReplicate",
+                "remove": "/browse/?experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line"
+            },
+            {
+                "field": "experimentset_type",
+                "term": "replicate",
+                "remove": "/browse/?type=ExperimentSetReplicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line"
+            },
+            {
+                "field": "experiments_in_set.biosample.biosource.individual.organism.name",
+                "term": "mouse",
+                "remove": "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line"
+            },
+            {
+                "field": "experiments_in_set.biosample.biosource.biosource_type",
+                "term": "immortalized cell line",
+                "remove": "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse"
+            }
+        ];
+        expSetFilters = Filters.contextFiltersToExpSetFilters(contextFilters);
+        page = TestUtils.renderIntoDocument(<QuickInfoBar href={href} expSetFilters={expSetFilters} />);
     });
 
     it('Has elements for stats (file, exps, expsets)', function() {

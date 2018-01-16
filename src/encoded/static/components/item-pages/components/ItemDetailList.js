@@ -747,28 +747,13 @@ export class Detail extends React.Component {
             }
 
             if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
-                // this is a download link. Format appropriately
+                // This is a download link. Format appropriately
                 var split_item = item.split('/');
                 var attach_title = decodeURIComponent(split_item[split_item.length-1]);
-                return (
-                    <a key={item} href={item} target="_blank" download>
-                        {attach_title || item}
-                    </a>
-                );
+                return <a key={item} href={item} target="_blank" download>{ attach_title || item }</a>;
             } else if (item.charAt(0) === '/') {
-                if(popLink){
-                    return (
-                        <a key={item} href={item} target="_blank">
-                            {item}
-                        </a>
-                    );
-                }else{
-                    return (
-                        <a key={item} href={item}>
-                            {item}
-                        </a>
-                    );
-                }
+                if (popLink) return <a key={item} href={item} target="_blank">{ item }</a>;
+                else return <a key={item} href={item}>{ item }</a>;
             } else if (item.slice(0,4) === 'http') {
                 // Is a URL. Check if we should render it as a link/uri.
                 var schemaProperty = Schemas.Field.getSchemaProperty(keyPrefix, schemas, atType);
@@ -776,18 +761,14 @@ export class Detail extends React.Component {
                     schemaProperty &&
                     typeof schemaProperty.format === 'string' &&
                     ['uri','url'].indexOf(schemaProperty.format.toLowerCase()) > -1
-                ){
-                    return (
-                        <a key={item} href={item} target="_blank">
-                            {item}
-                        </a>
-                    );
-                }
+                ) return <a key={item} href={item} target="_blank">{ item }</a>;
             } else {
                 return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
             }
         } else if (typeof item === 'number'){
             return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
+        } else if (typeof item === 'boolean'){
+            return <span style={{ 'textTransform' : 'capitalize' }}>{ (item + '') }</span>;
         }
         return(<span>{ item }</span>); // Fallback
     }

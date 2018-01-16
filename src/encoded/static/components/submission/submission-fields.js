@@ -752,7 +752,7 @@ class S3FileInput extends React.Component{
         var extension = this.getFileExtensionRequired();
         var file = e.target.files[0];
         // file was not chosen
-        if(!file || !extension){
+        if(!file || typeof extension !== 'string'){
             return;
         }else{
             var filename = file.name ? file.name : "unknown";

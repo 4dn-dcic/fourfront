@@ -132,5 +132,11 @@
                 }
             }
         }
-    }
+    },
+    "columns" : {
+        "name" : {
+            "title" : "Path Name"
+        }
+    },
+    "excludedColumns" : ["lab.display_title"]
 }

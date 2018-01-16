@@ -160,6 +160,31 @@ $navbar-transition-easing: ease-out;
             i.icon {
                 font-size: 1.15rem;
             }
+            
+        }
+
+        &.user-account-item
+
+            i.icon.account-icon {
+                margin-right: 8px;
+            }
+
+            &.has-image {
+                > a {
+                    padding-left: 8px;
+                    img.account-icon-image {
+                        margin-right: 8px;
+                        border-radius: 8px;
+                        width: 30px;
+                        height: 30px;
+                    }
+                    @media screen and (min-width: $screen-lg-min){
+                        padding-left: 10px;
+                        img.account-icon-image {
+                            margin-right: 12px;
+                        }
+                    }
+                }
         }
         /*
         &:not(:last-child) > a {
@@ -514,7 +539,7 @@ $navbar-transition-easing: ease-out;
         }
         > a:hover {
             background-color: #5d8a8e !important;
-            color: #fff;
+            color: #fff !important;
         }
         &>div>a {
             font-weight: 300;
@@ -618,7 +643,7 @@ $navbar-transition-easing: ease-out;
                 line-height: $line-height-computed;
                 &:hover,
                 &:focus {
-                    color: #000000 !important;
+                    color: #fff;
                 }
             }
                         
@@ -627,7 +652,7 @@ $navbar-transition-easing: ease-out;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
-                    color: #000000 !important;
+                    color: #fff;
                 }
             }
 
@@ -636,7 +661,7 @@ $navbar-transition-easing: ease-out;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
-                    color: #000000 !important;
+                    color: #fff;
                 }
             }
 
@@ -673,15 +698,20 @@ $navbar-transition-easing: ease-out;
     stroke: #000000;
 }
 
+
+
 // User Actions Dropwdown
 
 .navbar-acct {
-    margin-left: 15px;
-    margin-right: 0px; // Align w/ right-most container edge.
+    @media screen and (min-width: $screen-md-min) {
+        margin-left: 10px;
+        margin-right: 0px; // Align w/ right-most container edge.
+    }
 }
 
 #user_actions_dropdown {
     max-width: 115px;
+    //width: 115px;
     min-width: 65px;
     white-space: nowrap;
     overflow: hidden;
@@ -695,5 +725,14 @@ $navbar-transition-easing: ease-out;
     }
     @media screen and (min-width: $screen-lg-min) {
         max-width: 150px;
+        min-width: 115px;
+    }
+    @media screen and (max-width: $screen-sm-max) {
+        max-width: 150px;
+        //width: 150px;
+    }
+    @media screen and (max-width: $screen-xs-max) {
+        max-width: none;
+        width: auto;
     }
 }
