@@ -462,7 +462,6 @@
                         "source": [
                             {
                                 "name": "limits_file"
-                                
                             }
                         ]
                     },
@@ -475,7 +474,6 @@
                         "source": [
                             {
                                 "name": "input_fastq"
-                                
                             }
                         ]
                     },
@@ -487,7 +485,6 @@
                         "source": [
                             {
                                 "name": "contaminants_file"
-                                
                             }
                         ]
                     },
@@ -499,7 +496,6 @@
                         "source": [
                             {
                                 "name": "adapters_file"
-                                
                             }
                         ]
                     }
@@ -523,7 +519,6 @@
                         "target": [
                             {
                                 "name": "report_zip"
-                                
                             }
                         ]
                     }
@@ -588,7 +583,6 @@
                         "source": [
                             {
                                 "name": "input_pairs"
-                                
                             }
                         ]
                     },
@@ -601,7 +595,6 @@
                         "source": [
                             {
                                 "name": "chromsizes"
-                                
                             }
                         ]
                     },
@@ -4040,7 +4033,7 @@
                 "secondary_file_formats": [
                     "pairs_px2"
                 ],
-                "workflow_argument_name": "filtered_pairs_with_frags"
+                "workflow_argument_name": "filtered_pairs"
             }
         ],
         "award": "1U01CA200059-01",
@@ -4049,8 +4042,7 @@
             "pairsam-parse-sort.cwl",
             "pairsam-merge.cwl",
             "pairsam-markasdup.cwl",
-            "pairsam-filter.cwl",
-            "addfragtopairs.cwl"
+            "pairsam-filter.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
@@ -4106,7 +4098,7 @@
                     ],
                     "description": "Parsing and sorting bam file",
                     "software_used": [
-                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
+                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-parse-sort",
@@ -4159,7 +4151,7 @@
                     ],
                     "description": "Merging pairsam files",
                     "software_used": [
-                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
+                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-merge",
@@ -4201,7 +4193,7 @@
                     ],
                     "description": "Marking duplicates to pairsam file",
                     "software_used": [
-                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
+                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-markasdup",
@@ -4256,7 +4248,7 @@
                     ],
                     "description": "Filtering duplicate and invalid reads",
                     "software_used": [
-                        "/software/6668cc53-1414-4fca-9493-240b19e91845/"
+                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-filter",
@@ -4281,61 +4273,7 @@
                         "name": "filtered_pairs",
                         "target": [
                             {
-                                "name": "input_pairs",
-                                "step": "addfragtopairs"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "inputs": [
-                    {
-                        "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
-                        },
-                        "name": "input_pairs",
-                        "source": [
-                            {
-                                "name": "filtered_pairs",
-                                "step": "pairsam-filter"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input file"
-                        },
-                        "name": "restriction_file",
-                        "source": [
-                            {
-                                "name": "restriction_file"
-                            }
-                        ]
-                    }
-                ],
-                "meta": {
-                    "analysis_step_types": [
-                        "annotation"
-                    ],
-                    "description": "Adding restriction enzyme site information",
-                    "software_used": [
-                        "/software/9baf9f73-2d59-4eca-a326-340007b2a8b8/"
-                    ]
-                },
-                "name": "addfragtopairs",
-                "outputs": [
-                    {
-                        "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file"
-                        },
-                        "name": "pairs_with_frags",
-                        "target": [
-                            {
-                                "name": "filtered_pairs_with_frags"
+                                "name": "filtered_pairs"
                             }
                         ]
                     }

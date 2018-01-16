@@ -318,5 +318,20 @@
         "source_url": "https://github.com/mirnylab/pairsamtools",
         "title": "pairsamtools_49489c",
         "uuid": "6668cc53-1414-4fca-9493-240b19e91845"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "eccd21",
+        "lab": "4dn-dcic-lab",
+        "name": "pairsamtools",
+        "software_type": [
+            "file format converter",
+            "sorter",
+            "annotater",
+            "filter"
+        ],
+        "source_url": "https://github.com/mirnylab/pairsamtools",
+        "title": "pairsamtools_eccd21",
+        "uuid": "58ed98d7-10d8-4c51-8166-4a813c62ef8c"
     }
 ]
