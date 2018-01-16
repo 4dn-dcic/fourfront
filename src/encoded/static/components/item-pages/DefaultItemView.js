@@ -19,20 +19,13 @@ import { console, object, DateUtility, Filters, layout, Schemas, fileUtil } from
  * The ItemBaseView class extends React.Component to provide some helper functions to be used from an Item View page.
  * Notably, a componentDidMount and this.state is created, where upon mounting, details of submitter, lab, and award are AJAXed in.
  * These can then be used from your Item view render method via this.state.details_submitted_by or this.props.context.submitted_by (if not fetched), etc.
- * 
+ *
  * Alternatively, a this.renderAttributionColumn function is available to render out a Bootstrap column (provide own className containing col sizes) containing all 3 attributions.
- * 
- * this.getDetailAndAuditsTabs() function is also available to get the common tabs and details tabs.
- * 
- * @export
- * @class ItemBaseView
- * @extends {React.Component}
  */
 export class ItemBaseView extends React.Component {
 
     constructor(props){
         super(props);
-        //this.componentDidMount = this.componentDidMount.bind(this);
         this.getCommonTabs = this.getCommonTabs.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.itemHeader = this.itemHeader.bind(this);

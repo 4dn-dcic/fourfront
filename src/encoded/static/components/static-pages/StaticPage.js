@@ -47,7 +47,7 @@ export function parseSectionsContent(context = this.props.context){
 
 /**
  * Converts links to other files into links to sections from a React element and its children (recursively).
- * 
+ *
  * @param {JSX.Element} elem - A high-level React element representation of some content which might have relative links.
  * @param {{ 'content' : { 'name' : string } }} context - Backend-provided data.
  * @param {number} depth - Current depth.

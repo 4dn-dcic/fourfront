@@ -10,22 +10,12 @@ import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
-/**
- * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
- *
- * @module item-pages/experiment-set-view
- */
-
  
 /**
  * ExperimentSet Item view/page.
- * 
- * @memberof module:item-pages/experiment-set-view
- * @namespace
- * @type {Component}
+ *
  * @prop {Object} schemas - state.schemas passed down from app Component.
  * @prop {Object} context - JSON representation of current ExperimentSet item.
- * @prop {Object[]} expIncompleteFacets - Facets to aggregate counts for and display in the form of objects containing at least a title and field property.
  */
 export default class ExperimentSetView extends WorkflowRunTracingView {
 
@@ -213,13 +203,6 @@ export class RawFilesStackedTableSection extends React.Component {
                 { expSetCount ? 
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ fileCount }</span> Raw Files</span>
-                    {/* Array.isArray(this.props.passExperiments) ? 
-                    <span className="exp-number small right">
-                        <span className="hidden-xs">Showing </span>
-                        { this.props.passExperiments.length } of { expSetCount }
-                        <span className="hidden-xs"> Experiments</span>
-                    </span>
-                    : null */}
                 </h3>
                 : null }
                 <div className="exp-table-container">
