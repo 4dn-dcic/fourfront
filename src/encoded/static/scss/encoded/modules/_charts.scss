@@ -150,10 +150,12 @@
             right: -10px;
             color: #555;
         }
+        
     }
 
     .chart-crumb {
         display: inline-block;
+        font-size: 0.925rem;
         margin-bottom: 2px;
         height: inherit;
         line-height: inherit;
@@ -182,11 +184,29 @@
                 margin-right: 7px;
             }
             &:not(:last-of-type):after {
-                content: "|";
                 position: absolute;
-                font-size: 0.8rem;
-                right: -5px;
-                color: #555;
+                font-size: 0.5rem;
+                right: -4px;
+                content: " ";
+                top: 7px;
+                height: 12px;
+                width: 0px;
+                border-right: 1px solid #777;
+            }
+        }
+    }
+
+    .field-group {
+        > .chart-crumb {
+            &:after {
+                border-color: #777;
+            }
+        }
+        &:hover {
+            > .chart-crumb {
+                &:after {
+                    border-color: #000;
+                }
             }
         }
     }

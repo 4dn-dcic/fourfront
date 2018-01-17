@@ -196,26 +196,48 @@ export class OverViewBodyItem extends React.Component {
                     </div>
                 </div>
             );
+        },
+        'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li'){
+            if (typeof value !== 'string') return null;
+            return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
         }
     }
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
+
+        // Preprocess / uniqify:
+        if (Array.isArray(items)) {
+            items = _.filter(_.flatten(items), function(item){ return item !== null && typeof item !== 'undefined'; });
+        }
+        if (Array.isArray(items) && _.every(items, function(item){ return typeof item === 'string' || typeof item === 'number'; } )) {
+            items = _.uniq(items);
+        } else if (Array.isArray(items) && items.length > 1 && items[0] && items[0].display_title && object.atIdFromObject(items[0])) {
+            items = _.uniq(items, false, function(b){ return object.atIdFromObject(b); });
+        }
+
+        // Null value
+        if (items === null || typeof items === 'undefined') {
+            return null;
+        } else if (Array.isArray(items) && items.length === 0){
+            return null;
+        } else if (Array.isArray(items) && _.every(items, function(item){ return item === null || typeof item === 'undefined'; })){
+            return null;
+        }
+
         // Item List
         if (Array.isArray(items) && items.length > 1 && items[0].display_title && object.atIdFromObject(items[0])){
-            items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b,i){
+            items = _.map(items, function(b,i){
                 return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
             });
         } else if (Array.isArray(items) && items.length === 1 && items[0].display_title && object.atIdFromObject(items[0])) {
             return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
         } else if (Array.isArray(items) && items.length > 1){
             items = _.map(items, function(b,i){
-                return React.createElement(listItemElement, _.extend({ 'key' : i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
+                return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement)  );
             });
         } else if (Array.isArray(items) && items.length === 1){
             items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
-        } else if (Array.isArray(items) && items.length === 0){
-            return null;
         } else if (!Array.isArray(items)){
             return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, 'div');
         }
@@ -223,16 +245,18 @@ export class OverViewBodyItem extends React.Component {
     }
 
     static defaultProps = {
-        'titleRenderFxn' : OverViewBodyItem.titleRenderPresets.default,
-        'hideIfNoValue' : false,
-        'wrapInColumn' : false,
-        'addDescriptionTipForLinkTos' : true,
-        'listWrapperElement' : 'ol',
-        'listWrapperElementProps' : null,
-        'listItemElement' : 'li',
-        'listItemElementProps' : null,
-        'columnExtraClassName' : null,
-        'singleItemClassName' : null
+        'titleRenderFxn'                : OverViewBodyItem.titleRenderPresets.default,
+        'hideIfNoValue'                 : false,
+        'wrapInColumn'                  : false,
+        'addDescriptionTipForLinkTos'   : true,
+        'listWrapperElement'            : 'ol',
+        'listWrapperElementProps'       : null,
+        'listItemElement'               : 'li',
+        'listItemElementProps'          : null,
+        'columnExtraClassName'          : null,
+        'singleItemClassName'           : null,
+        'fallbackTitle'                 : null,
+        'propertyForLabel'              : null
     }
 
     /** Feeds params + props into static function */
@@ -259,7 +283,6 @@ export class OverViewBodyItem extends React.Component {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
-
         var resultPropertyValue = this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
 
         if (this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
@@ -296,10 +319,19 @@ export class OverViewBodyItem extends React.Component {
             );
         }
 
-        if (wrapInColumn) return (
-            <div className={(typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-6 col-md-4") + (columnExtraClassName ? ' ' + columnExtraClassName : '')} key="outer" children={innerBlockReturned} />
-        );
-        else return innerBlockReturned;
+        if (wrapInColumn){
+            var outerClassName = (columnExtraClassName ? columnExtraClassName : '');
+            if (typeof wrapInColumn === 'string'){
+                // MAYBE TODO-REMOVE / ANTI-PATTERN
+                if (wrapInColumn === 'auto' && this._reactInternalInstance && this._reactInternalInstance._hostParent && this._reactInternalInstance._hostParent._currentElement && this._reactInternalInstance._hostParent._currentElement.props && Array.isArray(this._reactInternalInstance._hostParent._currentElement.props.children)){
+                    var rowCountItems = React.Children.count(this._reactInternalInstance._hostParent._currentElement.props.children);
+                    outerClassName += ' col-md-' + (12 / rowCountItems) + ' col-xs-6';
+                } else outerClassName += ' ' + wrapInColumn;
+            } else {
+                outerClassName += " col-xs-6 col-md-4"; // Default column sizing
+            }
+            return <div className={outerClassName} key="outer" children={innerBlockReturned} />;
+        } else return innerBlockReturned;
 
     }
 }
