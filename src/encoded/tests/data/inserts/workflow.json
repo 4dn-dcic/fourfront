@@ -2,23 +2,23 @@
     {
         "arguments": [
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_fastq2"
             },
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_fastq1"
             },
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "bowtie_index"
             },
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "RE_bed"
             },
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chrlen_file"
             },
             {
@@ -30,43 +30,43 @@
                 "workflow_argument_name": "chromosome"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "sorted_bam_pe"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "HiC_project_object_hdf5"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "HiC_distance_function_hdf5"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "normalized_fend_contact_matrix"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "normalized_enrich_contact_matrix"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "expected_enrich_contact_matrix"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "observed_contact_matrix"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "expected_fend_contact_matrix"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "HiC_norm_binning_hdf5"
             },
             {
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "HiC_data_object_hdf5"
             }
         ],
@@ -88,7 +88,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_fastq2",
                         "source": [
@@ -103,7 +103,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_fastq1",
                         "source": [
@@ -118,7 +118,7 @@
                             "global" : true,
                             "type" : "reference file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "bowtie_index",
                         "source": [
@@ -145,7 +145,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "sorted_bam_pe",
                         "target": [
@@ -160,7 +160,7 @@
                             "global" : false,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "split_bam2",
                         "target": [
@@ -176,7 +176,7 @@
                             "global" : false,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "split_bam1",
                         "target": [
@@ -196,7 +196,7 @@
                             "global" : true,
                             "type" : "reference file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "RE_bed",
                         "source": [
@@ -211,7 +211,7 @@
                             "global" : false,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "split_bam2",
                         "source": [
@@ -227,7 +227,7 @@
                             "global" : false,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "split_bam1",
                         "source": [
@@ -255,7 +255,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "HiC_project_object_hdf5",
                         "target": [
@@ -270,7 +270,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "HiC_distance_function_hdf5",
                         "target": [
@@ -300,7 +300,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "HiC_norm_binning_hdf5",
                         "target": [
@@ -316,7 +316,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "HiC_data_object_hdf5",
                         "target": [
@@ -336,7 +336,7 @@
                             "global" : true,
                             "type" : "reference file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chrlen_file",
                         "source": [
@@ -392,7 +392,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "HiC_norm_binning_hdf5",
                         "source": [
@@ -408,7 +408,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "HiC_data_object_hdf5",
                         "source": [
@@ -436,7 +436,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "normalized_fend_contact_matrix",
                         "target": [
@@ -451,7 +451,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "normalized_enrich_contact_matrix",
                         "target": [
@@ -466,7 +466,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "expected_enrich_contact_matrix",
                         "target": [
@@ -481,7 +481,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "observed_contact_matrix",
                         "target": [
@@ -496,7 +496,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "expected_fend_contact_matrix",
                         "target": [
@@ -519,20 +519,20 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "limits_file"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_fastq"
             },
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "contaminants_file"
             },
             {
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "adapters_file"
             },
             {
@@ -565,7 +565,7 @@
                             "global" : true,
                             "type" : "reference file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "limits_file",
                         "source": [
@@ -580,7 +580,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_fastq",
                         "source": [
@@ -595,7 +595,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "contaminants_file",
                         "source": [
@@ -610,7 +610,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "adapters_file",
                         "source": [
@@ -661,12 +661,12 @@
         "arguments": [
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
             {
@@ -704,7 +704,7 @@
                             "global" : true,
                             "type" : "file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -719,7 +719,7 @@
                             "global" : true,
                             "type" : "reference file",
                             "cardinality" : "single",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chromsizes",
                         "source": [
@@ -796,7 +796,7 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "The file(s) input into this Workflow.",
                 "workflow_argument_name": "input_file"
             },
@@ -822,7 +822,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": "The file(s) input into this Workflow."
                         },
                         "name": "input_file",
@@ -867,7 +867,7 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "File on which MD5 calculation is run on.",
                 "workflow_argument_name": "input_file"
             },
@@ -896,7 +896,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": "File on which MD5 calculation is run on."
                         },
                         "name": "input_file",
@@ -939,19 +939,19 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
                 "argument_format": "bwaIndex",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
             },
@@ -961,25 +961,25 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam"
             },
             {
                 "argument_format": "bai",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam_index"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs"
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs_index"
             }
@@ -999,7 +999,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq1",
@@ -1012,7 +1012,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq2",
@@ -1025,7 +1025,7 @@
                     {
                         "meta": {
                             "argument_format": "bwaIndex",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "bwa_index",
@@ -1095,7 +1095,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_sorted_bam",
@@ -1109,7 +1109,7 @@
                     {
                         "meta": {
                             "argument_format": "bai",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_sorted_bam_index",
@@ -1126,7 +1126,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_sorted_bam",
@@ -1151,7 +1151,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_pairs",
@@ -1164,7 +1164,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_pairs_index",
@@ -1187,19 +1187,19 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
                 "argument_format": "bwaIndex",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
             },
@@ -1209,25 +1209,25 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam"
             },
             {
                 "argument_format": "bai",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam_index"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs"
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs_index"
             }
@@ -1247,7 +1247,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq1",
@@ -1260,7 +1260,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq2",
@@ -1273,7 +1273,7 @@
                     {
                         "meta": {
                             "argument_format": "bwaIndex",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "bwa_index",
@@ -1343,7 +1343,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_sorted_bam",
@@ -1357,7 +1357,7 @@
                     {
                         "meta": {
                             "argument_format": "bai",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_sorted_bam_index",
@@ -1374,7 +1374,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_sorted_bam",
@@ -1399,7 +1399,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_pairs",
@@ -1412,7 +1412,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "out_pairs_index",
@@ -1434,17 +1434,17 @@
         "arguments": [
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs_index"
             },
             {
@@ -1465,27 +1465,27 @@
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs_index"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs"
             },
             {
                 "argument_format": "cool",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_cool"
             },
             {
                 "argument_format": "hic",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_hic"
             },
             {
                 "argument_format": "mcool",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_mcool"
             }
         ],
@@ -1504,7 +1504,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -1516,7 +1516,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -1539,7 +1539,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -1555,7 +1555,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -1632,7 +1632,7 @@
                     {
                         "meta": {
                             "argument_format": "cool",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_cool",
                         "target": [
@@ -1648,7 +1648,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -1693,7 +1693,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -1745,7 +1745,7 @@
                     {
                         "meta": {
                             "argument_format": "mcool",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_mcool",
                         "target": [
@@ -1767,13 +1767,13 @@
         "arguments": [
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_pairs_index"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_pairs"
             },
@@ -1784,13 +1784,13 @@
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_pairs_index"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_pairs"
             }
@@ -1810,7 +1810,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "input_pairs_index",
@@ -1823,7 +1823,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "input_pairs",
@@ -1859,7 +1859,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "output_pairs_index",
@@ -1872,7 +1872,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "output_pairs",
@@ -1895,32 +1895,32 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "fastq1"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "fastq2"
             },
             {
                 "argument_format": "bwaIndex",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "bwa_index"
             },
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
                 "argument_format": "reference_fasta",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "reference_fasta"
             },
             {
                 "argument_format": "juicer_format_restriction_site_file",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
             {
@@ -1929,12 +1929,12 @@
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs"
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs_index"
             }
         ],
@@ -1953,7 +1953,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -1965,7 +1965,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -1977,7 +1977,7 @@
                     {
                         "meta": {
                             "argument_format": "bwaIndex",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -1989,7 +1989,7 @@
                     {
                         "meta": {
                             "argument_format": "reference_fasta",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "reference_fasta",
                         "source": [
@@ -2001,7 +2001,7 @@
                     {
                         "meta": {
                             "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -2039,7 +2039,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2083,7 +2083,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -2095,7 +2095,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -2117,32 +2117,32 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "fastq1"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "fastq2"
             },
             {
                 "argument_format": "bwaIndex",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "bwa_index"
             },
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
                 "argument_format": "reference_fasta",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "reference_fasta"
             },
             {
                 "argument_format": "juicer_format_restriction_site_file",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
             {
@@ -2155,12 +2155,12 @@
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs"
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs_index"
             }
         ],
@@ -2179,7 +2179,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -2191,7 +2191,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -2203,7 +2203,7 @@
                     {
                         "meta": {
                             "argument_format": "bwaIndex",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -2215,7 +2215,7 @@
                     {
                         "meta": {
                             "argument_format": "reference_fasta",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "reference_fasta",
                         "source": [
@@ -2227,7 +2227,7 @@
                     {
                         "meta": {
                             "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -2276,7 +2276,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2320,7 +2320,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -2332,7 +2332,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -2354,17 +2354,17 @@
         "arguments": [
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs_index"
             },
             {
@@ -2381,22 +2381,22 @@
             },
             {
                 "argument_format": "pairs_px2",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs_index"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs"
             },
             {
                 "argument_format": "cool",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_cool"
             },
             {
                 "argument_format": "hic",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_hic"
             }
         ],
@@ -2415,7 +2415,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -2427,7 +2427,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -2450,7 +2450,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs_px2",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -2466,7 +2466,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -2490,7 +2490,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2535,7 +2535,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -2604,7 +2604,7 @@
                     {
                         "meta": {
                             "argument_format": "cool",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_cool",
                         "target": [
@@ -2628,12 +2628,12 @@
         "arguments": [
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
@@ -2650,7 +2650,7 @@
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "secondary_file_formats": [
                     "pairs_px2"
                 ],
@@ -2658,12 +2658,12 @@
             },
             {
                 "argument_format": "cool",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_cool"
             },
             {
                 "argument_format": "hic",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_hic"
             }
         ],
@@ -2689,7 +2689,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -2712,7 +2712,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ]
@@ -2739,7 +2739,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2784,7 +2784,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -2843,7 +2843,7 @@
                     {
                         "meta": {
                             "argument_format": "cool",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_cool",
                         "target": [
@@ -2865,19 +2865,19 @@
         "arguments": [
             {
                 "argument_format": "hic",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_hic"
             },
             {
                 "argument_format": "mcool",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_mcool"
             },
             {
                 "argument_format": "mcool",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_mcool"
             }
@@ -2896,7 +2896,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "input_hic",
@@ -2909,7 +2909,7 @@
                     {
                         "meta": {
                             "argument_format": "mcool",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "input_mcool",
@@ -2933,7 +2933,7 @@
                     {
                         "meta": {
                             "argument_format": "mcool",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "output_mcool",
@@ -2956,7 +2956,7 @@
         "arguments": [
             {
                 "argument_format": "mcool",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_mcool"
             },
@@ -2966,7 +2966,7 @@
             },
             {
                 "argument_format": "normvector_juicerformat",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_normvector"
             }
@@ -2985,7 +2985,7 @@
                     {
                         "meta": {
                             "argument_format": "mcool",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "input_mcool",
@@ -3020,7 +3020,7 @@
                     {
                         "meta": {
                             "argument_format": "normvector_juicerformat",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "output_normvector",
@@ -3043,7 +3043,7 @@
         "arguments": [
             {
                 "argument_format": "hic",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_hic"
             },
@@ -3057,7 +3057,7 @@
             },
             {
                 "argument_format": "hic",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_hic"
             }
@@ -3076,7 +3076,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "input_hic",
@@ -3122,7 +3122,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "description": ""
                         },
                         "name": "output_hic",
@@ -3145,12 +3145,12 @@
         "arguments": [
             {
                 "argument_format": "cool",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_cool"
             },
             {
                 "argument_format": "hic",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_hic"
             },
             {
@@ -3159,7 +3159,7 @@
             },
             {
                 "argument_format": "mcool",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "output_mcool"
             }
         ],
@@ -3178,7 +3178,7 @@
                     {
                         "meta": {
                             "argument_format": "cool",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_cool",
                         "source": [
@@ -3249,7 +3249,7 @@
                     {
                         "meta": {
                             "argument_format": "normvector_juicerformat",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_normvector",
                         "target": [
@@ -3265,7 +3265,7 @@
                     {
                         "meta": {
                             "argument_format": "hic",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_hic",
                         "source": [
@@ -3298,7 +3298,7 @@
                     {
                         "meta": {
                             "argument_format": "mcool",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "output_mcool",
                         "target": [
@@ -3326,19 +3326,19 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
                 "argument_format": "bwaIndex",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
             },
@@ -3348,7 +3348,7 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_bam"
             }
         ],
@@ -3370,7 +3370,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq1",
@@ -3383,7 +3383,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq2",
@@ -3396,7 +3396,7 @@
                     {
                         "meta": {
                             "argument_format": "bwaIndex",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "bwa_index",
@@ -3431,7 +3431,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_bam",
                         "target": [
@@ -3455,19 +3455,19 @@
         "arguments": [
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
                 "argument_format": "fastq",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
                 "argument_format": "bwaIndex",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
             },
@@ -3477,7 +3477,7 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_bam"
             }
         ],
@@ -3499,7 +3499,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq1",
@@ -3512,7 +3512,7 @@
                     {
                         "meta": {
                             "argument_format": "fastq",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "fastq2",
@@ -3525,7 +3525,7 @@
                     {
                         "meta": {
                             "argument_format": "bwaIndex",
-                            "argument_type": "Input File",
+                            "argument_type": "Input file",
                             "description": ""
                         },
                         "name": "bwa_index",
@@ -3560,7 +3560,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_bam",
                         "target": [
@@ -3584,12 +3584,12 @@
         "arguments": [
             {
                 "argument_format": "bam",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "bam"
             },
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
             {
@@ -3598,7 +3598,7 @@
             },
             {
                 "argument_format": "pairsam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairsam"
             }
         ],
@@ -3620,7 +3620,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "bam",
                         "source": [
@@ -3632,7 +3632,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -3666,7 +3666,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_pairsam",
                         "target": [
@@ -3690,7 +3690,7 @@
         "arguments": [
             {
                 "argument_format": "pairsam",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairsams"
             },
             {
@@ -3699,7 +3699,7 @@
             },
             {
                 "argument_format": "pairsam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "merged_pairsam"
             }
         ],
@@ -3721,7 +3721,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -3755,7 +3755,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "merged_pairsam",
                         "target": [
@@ -3779,12 +3779,12 @@
         "arguments": [
             {
                 "argument_format": "pairsam",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairsams"
             },
             {
                 "argument_format": "pairsam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "out_markedpairsam"
             }
         ],
@@ -3806,7 +3806,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -3829,7 +3829,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "out_markedpairsam",
                         "target": [
@@ -3853,17 +3853,17 @@
         "arguments": [
             {
                 "argument_format": "pairsam",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairsam"
             },
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "secondary_file_formats": [
                     "pairs_px2"
                 ],
@@ -3871,7 +3871,7 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "lossless_bamfile"
             }
         ],
@@ -3893,7 +3893,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -3905,7 +3905,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsizes",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -3928,7 +3928,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ]
@@ -3943,7 +3943,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "lossless_bamfile",
                         "target": [
@@ -3967,17 +3967,17 @@
         "arguments": [
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
                 "argument_format": "juicer_format_restriction_site_file",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "secondary_file_formats": [
                     "pairs_px2"
                 ],
@@ -4002,7 +4002,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -4014,7 +4014,7 @@
                     {
                         "meta": {
                             "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -4037,7 +4037,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ]
@@ -4064,12 +4064,12 @@
         "arguments": [
             {
                 "argument_format": "pairs",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "secondary_file_formats": [
                     "pairs_px2"
                 ],
@@ -4094,7 +4094,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -4117,7 +4117,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File",
+                            "argument_type": "Output processed file",
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ]
@@ -4142,17 +4142,17 @@
         "arguments": [
             {
                 "argument_format": "bam",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "input_bams"
             },
             {
                 "argument_format": "chromsizes",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
             {
                 "argument_format": "juicer_format_restriction_site_file",
-                "argument_type": "Input File",
+                "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
             {
@@ -4165,12 +4165,12 @@
             },
             {
                 "argument_format": "bam",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "workflow_argument_name": "annotated_bam"
             },
             {
                 "argument_format": "pairs",
-                "argument_type": "Output Processed File",
+                "argument_type": "Output processed file",
                 "secondary_file_formats": [
                     "pairs_px2"
                 ],
@@ -4199,7 +4199,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "bam",
                         "source": [
@@ -4211,7 +4211,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsize",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4222,7 +4222,7 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "Threads",
                         "source": [
@@ -4247,7 +4247,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "sorted_pairsam",
                         "target": [
@@ -4264,7 +4264,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -4276,7 +4276,7 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "nThreads",
                         "source": [
@@ -4300,7 +4300,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "merged_pairsam",
                         "target": [
@@ -4317,7 +4317,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -4342,7 +4342,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "dupmarked_pairsam",
                         "target": [
@@ -4359,7 +4359,7 @@
                     {
                         "meta": {
                             "argument_format": "pairsam",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -4372,7 +4372,7 @@
                     {
                         "meta": {
                             "argument_format": "chromsize",
-                            "argument_type": "Input File"
+                            "argument_type": "Input file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4397,7 +4397,7 @@
                     {
                         "meta": {
                             "argument_format": "bam",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "lossless_bamfile",
                         "target": [
@@ -4409,7 +4409,7 @@
                     {
                         "meta": {
                             "argument_format": "pairs",
-                            "argument_type": "Output Processed File"
+                            "argument_type": "Output processed file"
                         },
                         "name": "filtered_pairs",
                         "target": [
