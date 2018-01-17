@@ -68,7 +68,7 @@
         "award.project": {
             "title": "Project"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         },
         "tags": {
