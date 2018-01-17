@@ -37,9 +37,7 @@ export function parseSectionsContent(context = this.props.context){
         return section;
     }
 
-    if (!Array.isArray(context.content)){
-        throw new Error('context.content is not an array.');
-    }
+    if (!Array.isArray(context.content)) throw new Error('context.content is not an array.');
 
     return _.extend({}, context, { 'content' : _.map(context.content, parse) });
 }
@@ -154,9 +152,7 @@ class Wrapper extends React.Component {
         return (
             <div className="static-page row">
                 { this.renderToC() }
-                <div className={mainColClassName}>
-                    { this.props.children }
-                </div>
+                <div className={mainColClassName} children={this.props.children}/>
             </div>
         );
     }
