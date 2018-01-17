@@ -215,7 +215,34 @@
                                 "meta" : {
                                     "type" : "object",
                                     "title" : "Additional metadata for input argument",
-                                    "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality."
+                                    "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality.",
+                                    "additionalProperties": true,
+                                    "properties": {
+                                        "type" : {
+                                            "title" : "Input Type",
+                                            "type" : "string",
+                                            "enum": [
+                                                "file",
+                                                "report",
+                                                "QC",
+                                                "parameter",
+                                                "reference file"
+                                            ]
+                                        },
+                                        "file_format" : {
+                                            "title" : "File Format",
+                                            "type" : "string"
+                                        },
+                                        "cardinality" : {
+                                            "title" : "Cardinality",
+                                            "type" : "string",
+                                            "enum" : ["single", "array"]
+                                        },
+                                        "global" : {
+                                            "title" : "Global Argument",
+                                            "type" : "boolean"
+                                        }
+                                    }
                                 },
                                 "source" : {
                                     "title" : "Source Step",
