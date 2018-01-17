@@ -127,7 +127,7 @@
         "biosource.biosource_type": {
             "title": "Biosource Type"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         },
         "biosource_summary": {

@@ -119,7 +119,7 @@
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         }
     },
