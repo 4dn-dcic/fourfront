@@ -16,7 +16,7 @@ import * as aggregationFxn from './aggregation-functions';
  * @class
  * @type {Component}
  * @prop {Object[]} experiment_sets - "All" sets, passed from ChartDataController[.Provider].
- * @prop {Object[]} filtered_experiment_sets - "Selected" experiment_sets, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
+ * @prop {Object[]} filtered_experiment_sets - "Selected" experiment_sets, if filters set in URL. Passed from ChartDataController[.Provider].
  * @prop {Object[]} fields - Passed from UIControlsWrapper.
  * @prop {string} aggregateType - Passed from UIControlsWrapper.
  * @prop {string} showType - Passed from UIControlsWrapper.
@@ -72,7 +72,7 @@ export class Aggregator extends React.Component {
 
     constructor(props){
         super(props);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.render = this.render.bind(this);
 
@@ -84,7 +84,7 @@ export class Aggregator extends React.Component {
         }
 
     }
-
+    
     shouldComponentUpdate(nextProps){
         if (
             nextProps.aggregateType !== this.props.aggregateType ||
@@ -153,6 +153,7 @@ export class Aggregator extends React.Component {
      * @returns {BarPlotChart} - A BarPlotChart with aggregated field/term data props.
      */
     render(){
+        if (this.props.debug) console.log('RENDERING BarPlotChart Aggregator, props:', this.props);
         return (
             React.cloneElement(
                 this.props.children,

@@ -3,7 +3,6 @@
 import url from 'url';
 import _ from 'underscore';
 import { filtersToHref } from './experiments-filters';
-let store = null;
 
 
 let cachedNavFunction = null;
@@ -53,17 +52,6 @@ navigate.getBrowseHrefRoot = function(href){
     }
     return href;
 };
-
-navigate.getBrowseHref = function(currentUrlParts){
-    if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
-    if (!store) store = require('./../../store');
-    return filtersToHref(
-        store.getState().expSetFilters,
-        currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
-    );
-};
-
-
 
 /** Utility function to check if we are on a browse page. */
 navigate.isBrowseHref = function(href){

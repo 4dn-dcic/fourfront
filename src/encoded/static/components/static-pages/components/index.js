@@ -9,4 +9,3 @@
 
 export { CSVMatrixView, CSVParsingUtilities } from './CSVMatrixView';
 export { Announcements } from './Announcements';
-export { BannerEntry } from './BannerEntry';

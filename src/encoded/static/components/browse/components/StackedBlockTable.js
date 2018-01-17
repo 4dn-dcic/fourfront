@@ -143,7 +143,8 @@ export class StackedBlockName extends React.Component {
     }
 
     static defaultProps = {
-        visible : true
+        'visible' : true,
+        'passProps' : true
     }
 
     constructor(props){
@@ -178,7 +179,7 @@ export class StackedBlockName extends React.Component {
                 addedProps.className = c.props.className + ' name-title';
             }
 
-            if (c && c.type && typeof c.type === 'function'){
+            if (c && c.type && typeof c.type === 'function' && this.props.passProps){
                 // Is component, not element.
                 addedProps.stackDepth = this.props.stackDepth;
                 if (this.props.colWidthStyles && !c.props.colWidthStyles){
@@ -329,7 +330,7 @@ export class StackedBlockList extends React.Component {
     static defaultProps = {
         collapseLimit : 4,
         collapseShow : 3,
-        //collapseLongLists : true
+        collapseLongLists : false
     }
 
     constructor(props){
@@ -520,6 +521,7 @@ export class StackedBlock extends React.Component {
         var className = this.props.columnClass ? this.props.columnClass + ' ' : '';
         className += "s-block"  + (' stack-depth-' + this.props.stackDepth);
         if (this.props.hideNameOnHover) className += ' hide-name-on-block-hover';
+        if (this.props.keepLabelOnHover) className += ' keep-label-on-name-hover';
         if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
             if (this.props.stripe === true || this.props.stripe === 'even') className += ' even';
             else className += ' odd';
@@ -533,6 +535,7 @@ export class StackedBlock extends React.Component {
                 ((this.childIDList instanceof Set) && this.childIDList.has(this.props.currentlyCollapsing))
             ) className += ' collapsing-child';
         }
+        if (typeof this.props.className === 'string') className += ' ' + this.props.className;
         return (
             <div className={className}>
                 { this.adjustedChildren() }
@@ -571,6 +574,7 @@ export class FilePairBlock extends React.Component {
         this.isChecked = this.isChecked.bind(this);
         this.renderFileEntryBlock = this.renderFileEntryBlock.bind(this);
         this.renderCheckBox = this.renderCheckBox.bind(this);
+        this.nameColumn = this.nameColumn.bind(this);
         this.render = this.render.bind(this);
     }
 
@@ -628,32 +632,29 @@ export class FilePairBlock extends React.Component {
         );
     }
 
-    render(){
-
-        function label(){
-            if (typeof this.props.label === 'string'){
-                return <StackedBlock.Name.Label title="Pair" subtitle={this.props.label} />;
-            } else if (typeof this.props.label === 'object' && this.props.label){
-                return <StackedBlock.Name.Label {...this.props.label} />;
-            } else return null;
+    nameColumn(){
+        if (this.props.colVisible === false) return null;
+        var label = null;
+        if (typeof this.props.label === 'string'){
+            label = <StackedBlock.Name.Label title="Pair" subtitle={this.props.label} />;
+        } else if (typeof this.props.label === 'object' && this.props.label){
+            label = <StackedBlock.Name.Label {...this.props.label} />;
         }
-
-        function nameColumn(){
-            if (this.props.colVisible === false) return null;
-            return (
-                <div className="name col-file-pair" style={this.props.colWidthStyles ? _.clone(this.props.colWidthStyles['file-pair']) : null}>
-                    { label.call(this) }
-                    <div className="name-title">
-                        { this.renderCheckBox() }
-                        { this.props.name }
-                    </div>
-                </div>
-            );
-        }
-
         return (
-            <div className="s-block file-pair">
-                { nameColumn.call(this) }
+            <div className="name col-file-pair" style={this.props.colWidthStyles ? _.clone(this.props.colWidthStyles['file-pair']) : null}>
+                { label }
+                <div className="name-title">
+                    { this.renderCheckBox() }
+                    { this.props.name }
+                </div>
+            </div>
+        );
+    }
+
+    render(){
+        return (
+            <div className="s-block file-pair keep-label-on-name-hover">
+                { this.nameColumn() }
                 <div className="files s-block-list">
                     { Array.isArray(this.props.files) ?
                         this.props.files.map(this.renderFileEntryBlock)
@@ -670,7 +671,80 @@ export class FilePairBlock extends React.Component {
             </div>
         );
     }
+}
 
+const fileEntryBlockMixins = {
+
+    isChecked : function(){
+        if (!this.props.file || !this.props.file.accession || !this.props.selectedFiles) return null;
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+        return this.props.selectedFiles[accessionTriple];
+    },
+
+    hasCheckbox : function(){
+        if (!this.props.file) return false; // No file to select.
+        if (this.props.pairParent) return false; // Part of pair -- FilePairBlock has own checkbox.
+        if (this.props.excludeCheckbox) return false;
+        var checked = this.isChecked();
+        if (checked === null) return false; // No checked state.
+        return true;
+    },
+
+    renderCheckBox : function(){
+        if (!this.hasCheckbox()) return null;
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+        return (
+            <Checkbox
+                validationState='warning'
+                checked={this.isChecked()}
+                name="file-checkbox"
+                id={'checkbox-for-' + accessionTriple}
+                className='file-entry-table-checkbox'
+                data-select-files={[accessionTriple]}
+                onChange={this.props.handleFileCheckboxChange.bind(
+                    this.props.handleFileCheckboxChange,
+                    accessionTriple,
+                    this.props.file
+                )}
+            />
+        );
+    }
+
+};
+
+export class FileEntryBlockPairColumn extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.isChecked = fileEntryBlockMixins.isChecked.bind(this);
+        this.hasCheckbox = fileEntryBlockMixins.hasCheckbox.bind(this);
+        this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
+    }
+    
+    render(){
+        var tableHasFilePairColumn = _.pluck(this.props.columnHeaders || [], 'title').indexOf('File Pair') > -1;
+        return (
+            <StackedBlock
+                {...this.props}
+                label={{ 'title' : 'File' }}
+                hideNameOnHover={false}
+                keepLabelOnHover={!tableHasFilePairColumn || !this.hasCheckbox()}
+                columnClass={this.props.columnClass || 'file-pair'}
+                className={this.props.isSingleItem ? 'single-item' : null}
+            >
+                { tableHasFilePairColumn ? <StackedBlockName passProps={false}>{ this.renderCheckBox() }</StackedBlockName> : null }
+                <StackedBlockList title="Files" className="files">
+                    <FileEntryBlock
+                        file={this.props.file}
+                        experiment={this.props.experiment}
+                        isSingleItem={this.props.isSingleItem}
+                        excludeCheckbox={tableHasFilePairColumn}
+                        label={tableHasFilePairColumn ? null : FileEntryBlock.defaultProps.label}
+                    />
+                </StackedBlockList>
+            </StackedBlock>
+        );
+    }
 
 }
 
@@ -687,23 +761,29 @@ export class FileEntryBlock extends React.Component {
     }
 
     static propTypes = {
-        selectedFiles : PropTypes.object,
-        handleFileCheckboxChange : PropTypes.func
+        'selectedFiles' : PropTypes.object,
+        'handleFileCheckboxChange' : PropTypes.func,
+        'excludeCheckbox' : PropTypes.bool
+    }
+
+    static defaultProps = {
+        'excludeCheckbox' : false,
+        'label' : {
+            'title' : 'File',
+            'subtitle' : null
+        },
+        'hideNameOnHover' : false,
+        'keepLabelOnHover' : true
     }
 
     constructor(props){
         super(props);
-        this.isChecked = this.isChecked.bind(this);
+        this.isChecked = fileEntryBlockMixins.isChecked.bind(this);
+        this.hasCheckbox = fileEntryBlockMixins.hasCheckbox.bind(this);
+        this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
         this.filledFileRow = this.filledFileRow.bind(this);
-        this.renderCheckBox = this.renderCheckBox.bind(this);
         this.renderName = this.renderName.bind(this);
         this.render = this.render.bind(this);
-    }
-
-    isChecked(){
-        if (!this.props.file || !this.props.file.accession || !this.props.selectedFiles) return null;
-        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
-        return this.props.selectedFiles[accessionTriple];
     }
 
     fileTypeSummary(file = this.props.file){
@@ -767,31 +847,6 @@ export class FileEntryBlock extends React.Component {
         return row;
     }
 
-    renderCheckBox(){
-        if (!this.props.file) return null; // No file to select.
-        if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
-
-        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
-
-        var checked = this.isChecked();
-        if (checked === null) return null; // No checked state.
-        return (
-            <Checkbox
-                validationState='warning'
-                checked={checked}
-                name="file-checkbox"
-                id={'checkbox-for-' + accessionTriple}
-                className='exp-table-checkbox'
-                data-select-files={[accessionTriple]}
-                onChange={this.props.handleFileCheckboxChange.bind(
-                    this.props.handleFileCheckboxChange,
-                    accessionTriple,
-                    this.props.file
-                )}
-            />
-        );
-    }
-
     renderName(){
 
         var file = this.props.file;
@@ -814,18 +869,16 @@ export class FileEntryBlock extends React.Component {
             if (!file) return null;
 
             var commonProperties = {
-                title : 'File',
-                inline : false,
-                className : 'col-file',
-                subtitle : null
+                'title'     : this.props.label && this.props.label.title,
+                'inline'    : false,
+                'className' : 'col-file',
+                'subtitle'  : this.props.label && this.props.label.subtitle
             };
 
             if (this.props.label) {
                 return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label)} />;
             } else if (this.props.type === 'sequence-replicate') {
-                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label, {
-                    subtitle : this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null
-                })} />;
+                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label, { 'subtitle' : (this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null) })} />;
             } else if (this.props.type === 'paired-end') {
                 return <StackedBlock.Name.Label {...commonProperties} />;
                 //return RawFilesStackedTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
@@ -839,17 +892,13 @@ export class FileEntryBlock extends React.Component {
                     (file.file_type || file.file_format) &&
                     _.intersection(headerTitles,['File Type', 'File Format']).length === 0
                 ){
-                    return <StackedBlock.Name.Label {..._.extend(commonProperties, {
-                        subtitle : file.file_type || file.file_format,
-                    })} />;
+                    return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || file.file_format} />;
                 }
                 if (
                     file.instrument &&
                     _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
                 ){
-                    return <StackedBlock.Name.Label {..._.extend(commonProperties, {
-                        subtitle : file.instrument
-                    })} />;
+                    return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
                 }
             }
 
@@ -871,6 +920,7 @@ export class FileEntryBlock extends React.Component {
     render(){
         var sBlockClassName = "s-block file";
         if (this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
+        if (this.props.keepLabelOnHover) sBlockClassName += ' keep-label-on-name-hover';
         if (this.props.isSingleItem) sBlockClassName += ' single-item';
         if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
             if (this.props.stripe === true || this.props.stripe === 'even') sBlockClassName += ' even';

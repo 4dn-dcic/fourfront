@@ -285,22 +285,22 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
     render(){
         var inner = null;
         if (!this.props.produced_in_pub){
-            inner = <br/>;
-        } else {
-            inner = (
-                <Publications.DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
-                    <div className="more-details">
-                        <Publications.ShortAttribution publication={this.props.produced_in_pub} />
-                    </div>
-                    <br/>
-                </Publications.DetailBlock>
-            );
+            return null;
         }
 
+        inner = (
+            <Publications.DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
+                <div className="more-details">
+                    <Publications.ShortAttribution publication={this.props.produced_in_pub} />
+                </div>
+            </Publications.DetailBlock>
+        );
+
         return (
-            <div className="row">
+            <div className="row mb-2">
                 <div className="col-sm-12">
                     { inner }
+                    {/* <hr className="mb-1 mt-1" /> */}
                 </div>
             </div>
         );

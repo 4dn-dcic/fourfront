@@ -6,11 +6,10 @@
  * @module viz/components
  * @example
  * <caption>Import and use components like any other modules, e.g.</caption>
- * var { FetchingView, Legend } = require('./viz/components');
+ * var { RotatedLabel, Legend } = require('./viz/components');
  */
 
 export { ActiveFiltersBar } from './ActiveFiltersBar';
 export { SVGFilters } from './SVGFilters';
-export { FetchingView } from './FetchingView';
 export { Legend } from './Legend';
 export { RotatedLabel } from './RotatedLabel';
