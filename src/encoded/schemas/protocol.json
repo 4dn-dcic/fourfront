@@ -53,6 +53,7 @@
                "Differentiation Authentication",
                "Cell cycle Authentication",
                "Instrument Authentication",
+               "Antibody Authentication",
                "Tissue Preparation Methods"
             ]
         }
