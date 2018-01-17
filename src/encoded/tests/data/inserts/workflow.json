@@ -86,7 +86,7 @@
                         "meta": {
                             "file_format" : "fastq",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -101,7 +101,7 @@
                         "meta": {
                             "file_format" : "fastq",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -143,7 +143,7 @@
                         "meta": {
                             "file_format" : "pe",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -158,7 +158,7 @@
                         "meta": {
                             "file_format" : "bam",
                             "global" : false,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -174,7 +174,7 @@
                         "meta": {
                             "file_format" : "bam",
                             "global" : false,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -209,7 +209,7 @@
                         "meta": {
                             "file_format" : "bam",
                             "global" : false,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -225,7 +225,7 @@
                         "meta": {
                             "file_format" : "bam",
                             "global" : false,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -253,7 +253,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -268,7 +268,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -283,7 +283,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : false,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single"
                         },
                         "name": "fend_object_hdf5",
@@ -298,7 +298,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -314,7 +314,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -375,7 +375,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : false,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single"
                         },
                         "name": "fend_object_hdf5",
@@ -390,7 +390,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -406,7 +406,7 @@
                         "meta": {
                             "file_format" : "hdf5",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -434,7 +434,7 @@
                         "meta": {
                             "file_format" : "matrix",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -449,7 +449,7 @@
                         "meta": {
                             "file_format" : "matrix",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -464,7 +464,7 @@
                         "meta": {
                             "file_format" : "matrix",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -479,7 +479,7 @@
                         "meta": {
                             "file_format" : "matrix",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -494,7 +494,7 @@
                         "meta": {
                             "file_format" : "matrix",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Output processed file"
                         },
@@ -578,7 +578,7 @@
                         "meta": {
                             "file_format" : "fastq",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -593,7 +593,7 @@
                         "meta": {
                             "file_format" : "contaminants",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -608,7 +608,7 @@
                         "meta": {
                             "file_format" : "adapters",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },
@@ -702,7 +702,7 @@
                         "meta": {
                             "file_format" : "pairs",
                             "global" : true,
-                            "type" : "file",
+                            "type" : "data file",
                             "cardinality" : "single",
                             "argument_type": "Input file"
                         },

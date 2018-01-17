@@ -222,7 +222,7 @@
                                             "title" : "Input Type",
                                             "type" : "string",
                                             "enum": [
-                                                "file",
+                                                "data file",
                                                 "report",
                                                 "QC",
                                                 "parameter",
