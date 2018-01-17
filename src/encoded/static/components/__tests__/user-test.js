@@ -10,7 +10,6 @@ jest.dontMock('underscore');
 
 function mapStateToProps(store) {
     return {
-        expSetFilters: store.expSetFilters,
         context : store.context
     };
 }

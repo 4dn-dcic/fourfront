@@ -47,82 +47,81 @@
               "tissue",
               "multicellular organism"
             ]
-          },
-          "individual": {
-              "title": "Individual",
-              "description": "Source of the biological material, donor.",
-              "comment": "See Individual sheet or collection for existing items",
-              "type": "string",
-              "linkTo": "Individual"
-          },
-          "modifications": {
-              "title": "Stable Genomic Modifications",
-              "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
-              "type": "array",
-              "uniqueItems": true,
-              "items": {
-                  "title": "Modifications",
-                  "description": "A single stable genomic modification of the biosource.",
-                  "type":  "string",
-                  "linkTo": "Modification"
-              }
-          },
-          "cell_line": {
-              "title": "Cell Line Name",
-              "description": "Ontology term for the cell line used.",
-              "type":  "string",
-              "linkTo": "OntologyTerm"
-          },
-          "cell_line_tier": {
-              "title": "Cell Line Tier",
-              "description": "DON'T SUBMIT - CALCULATED",
-              "type": "string",
-              "default": "Unclassified",
-              "permission": "import_items",
-              "enum": [
-                  "Tier 1",
-                  "Tier 2",
-                  "Unclassified"
-              ]
-          },
-          "tissue": {
-              "title": "Tissue Name",
-              "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string",
-              "linkTo": "OntologyTerm"
-          },
-          "biosource_vendor": {
-                "title": "Biosource Vendor",
-                "description": "The Lab or Vendor that provided the biosource.",
-                "type": "string",
-                "linkTo": "Vendor"
-          },
-          "url": {
-              "title": "URL",
-              "description": "An external resource with additional information about the biosource.",
-              "type": "string",
-              "format": "uri"
-          },
-          "SOP_cell_line":{
-              "title": "SOP for the Cell Line",
-              "description": "Standard operation protocol for the cell line as determined by 4DN Cells Working Group",
-              "type": "string",
-              "linkTo": "Protocol"
-          }
-      },
-      "facets": {
-          "biosource_type": {
-              "title": "Biosource Type"
-          },
-          "biosource_name": {
-              "title": "Biosource"
-          },
-          "individual.organism.name": {
-              "title": "Organism"
-          },
-          "cell_line_tier": {
-              "title": "Tier"
-          }
-
-      }
+        },
+        "individual": {
+            "title": "Individual",
+            "description": "Source of the biological material, donor.",
+            "comment": "See Individual sheet or collection for existing items",
+            "type": "string",
+            "linkTo": "Individual"
+        },
+        "modifications": {
+            "title": "Stable Genomic Modifications",
+            "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Modifications",
+                "description": "A single stable genomic modification of the biosource.",
+                "type":  "string",
+                "linkTo": "Modification"
+            }
+        },
+        "cell_line": {
+            "title": "Cell Line Name",
+            "description": "Ontology term for the cell line used.",
+            "type":  "string",
+            "linkTo": "OntologyTerm"
+        },
+        "cell_line_tier": {
+            "title": "Cell Line Tier",
+            "description": "DON'T SUBMIT - CALCULATED",
+            "type": "string",
+            "default": "Unclassified",
+            "permission": "import_items",
+            "enum": [
+                "Tier 1",
+                "Tier 2",
+                "Unclassified"
+            ]
+        },
+        "tissue": {
+            "title": "Tissue Name",
+            "description": "Anatomy (UBERON) Ontology term for the tissue used.",
+            "type":  "string",
+            "linkTo": "OntologyTerm"
+        },
+        "biosource_vendor": {
+            "title": "Biosource Vendor",
+            "description": "The Lab or Vendor that provided the biosource.",
+            "type": "string",
+            "linkTo": "Vendor"
+        },
+        "url": {
+            "title": "URL",
+            "description": "An external resource with additional information about the biosource.",
+            "type": "string",
+            "format": "uri"
+        },
+        "SOP_cell_line":{
+            "title": "SOP for the Cell Line",
+            "description": "Standard operation protocol for the cell line as determined by 4DN Cells Working Group",
+            "type": "string",
+            "linkTo": "Protocol"
+        }
+    },
+    "facets": {
+        "biosource_type": {
+            "title": "Biosource Type"
+        },
+        "biosource_name": {
+            "title": "Biosource"
+        },
+        "individual.organism.name": {
+            "title": "Organism"
+        },
+        "cell_line_tier": {
+            "title": "Tier"
+        }
+    }
 }

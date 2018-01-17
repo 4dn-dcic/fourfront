@@ -130,5 +130,20 @@
             "type": "string",
             "format": "uri"
         }
-    }
+    },
+    "columns": {
+        "pi" : {
+            "title" : "P.I."
+        },
+        "institute_name" : {
+            "title" : "Institute"
+        },
+        "state" : {
+            "title" : "State"
+        },
+        "country" : {
+            "title" : "Country"
+        }
+    },
+    "excludedColumns" : ["lab.display_title"]
 }
