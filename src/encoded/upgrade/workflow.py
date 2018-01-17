@@ -222,7 +222,7 @@ def workflow_3_4(value, system):
     '''Remove argument_cardinality'''
 
     for arg in value.get('arguments'):
-        del arg['rgument_cardinality']
+        del arg['argument_cardinality']
 
     for step in value.get('steps'):
         for op in step.get('outputs'):

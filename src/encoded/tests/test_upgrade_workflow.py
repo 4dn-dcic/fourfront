@@ -32,8 +32,12 @@ def workflow_3(software, award, lab):
         "name": "some workflow",
         "workflow_type": "Other",
         "arguments": [{"argumant_cardinality": 1},{}],
-        "steps": [{ "inputs": [{"source: {"type": "Workflow Input File"}},{}],
-                    "outputs": [{"target": {"type": {Workflow Output File"}},{}] }]
+        "steps": [
+            {
+                "inputs":  [ {"source": [{"type": "Workflow Input File"} ] }, {} ],
+                "outputs": [ {"target": [{"type": "Workflow Output File"}] }, {} ]
+            }
+        ]
     }
 
 def test_workflow_convert_software_used_to_list(
