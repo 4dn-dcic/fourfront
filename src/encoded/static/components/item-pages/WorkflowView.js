@@ -90,7 +90,7 @@ export function doValidAnalysisStepsExist(steps){
 export function filterOutParametersFromGraphData(graphData){
     var deleted = {  };
     var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && n.format === 'Workflow Parameter') {
+        if (n.nodeType === 'input' && n.ioType && n.ioType === 'parameter') {
             deleted[n.id] = true;
             return false;
         }

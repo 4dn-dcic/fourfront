@@ -140,7 +140,7 @@ export class WorkflowRunView extends ItemBaseView {
 class GraphSection extends WorkflowGraphSection {
 
     static isNodeDisabled(node){
-        if (node.type === 'step') return false;
+        if (node.nodeType === 'step') return false;
         if (node && node.meta && node.meta.run_data){
             return false;
         }

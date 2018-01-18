@@ -291,6 +291,9 @@
                             {
                                 "name": "fend_object_hdf5",
                                 "step": "hictool_hdf52matrix"
+                            },
+                            {
+                                "name": "fend_object_hdf5"
                             }
                         ]
                     },
@@ -307,6 +310,9 @@
                             {
                                 "name": "HiC_norm_binning_hdf5",
                                 "step": "hictool_hdf52matrix"
+                            },
+                            {
+                                "name": "HiC_norm_binning_hdf5"
                             }
                         ]
                     },
@@ -323,6 +329,9 @@
                             {
                                 "name": "HiC_data_object_hdf5",
                                 "step": "hictool_hdf52matrix"
+                            },
+                            {
+                                "name": "HiC_data_object_hdf5"
                             }
                         ]
                     }

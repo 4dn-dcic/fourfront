@@ -19,6 +19,10 @@ export class WorkflowNodeElement extends React.Component {
         'columnWidth' : PropTypes.number
     }
 
+    static isNodeParameter(node){
+        return node.ioType === 'parameter';
+    }
+
     doesRunDataFileExist(){
         var node = this.props.node;
         return (
@@ -26,46 +30,42 @@ export class WorkflowNodeElement extends React.Component {
             && typeof node.meta.run_data.file['@id'] === 'string'
             /* && typeof node.meta.run_data.file.display_title === 'string'*/);
     }
-
-    doesRunDataValueExist(){
-        var node = this.props.node;
-        return (node.meta && node.meta.run_data && node.meta.run_data.value && (typeof node.meta.run_data.value === 'string' || typeof node.meta.run_data.value === 'number'));
-    }
     
     icon(){
+        var node = this.props.node;
         var iconClass;
-        if (this.props.node.type === 'input-group' || this.props.node.type === 'output-group'){
+        if (node.nodeType === 'input-group' || node.nodeType === 'output-group'){
             iconClass = 'folder-open';
-        } else if (this.props.node.type === 'input' || this.props.node.type === 'output'){
-            var formats = this.props.node.format;
-            if (typeof formats === 'undefined'){
+        } else if (node.nodeType === 'input' || node.nodeType === 'output'){
+            var ioTypes = this.props.node.ioType;
+            if (typeof ioTypes === 'undefined'){
                 iconClass = 'question';
-            } else if (typeof formats === 'string') {
-                formats = formats.toLowerCase();
-                if (formats.indexOf('file') > -1){
+            } else if (typeof ioTypes === 'string') {
+                ioTypes = ioTypes.toLowerCase();
+                if (ioTypes.indexOf('file') > -1){
                     iconClass = 'file-text-o';
                 } else if (
-                    formats.indexOf('parameter') > -1 || formats.indexOf('int') > -1 || formats.indexOf('string') > -1
+                    ioTypes.indexOf('parameter') > -1 || ioTypes.indexOf('int') > -1 || ioTypes.indexOf('string') > -1
                 ){
                     iconClass = 'wrench';
                 } else {
                     iconClass = 'question';
                 }
-            } else if (Array.isArray(formats)) {
+            } else if (Array.isArray(ioTypes)) {
                 if (
-                    formats[0] === 'File' ||
-                    (formats[0] === 'null' && formats[1] === 'File')
+                    ioTypes[0] === 'File' ||
+                    (ioTypes[0] === 'null' && ioTypes[1] === 'File')
                 ){
                     iconClass = 'file-text-o';
                 } else if (
-                    (formats[0] === 'int' || formats[0] === 'string') ||
-                    (formats[0] === 'null' && (formats[1] === 'int' || formats[1] === 'string'))
+                    (ioTypes[0] === 'int' || ioTypes[0] === 'string') ||
+                    (ioTypes[0] === 'null' && (ioTypes[1] === 'int' || ioTypes[1] === 'string'))
                 ){
                     iconClass = 'wrench';
                 }
             }
 
-        } else if (this.props.node.type === 'step'){
+        } else if (node.nodeType === 'step'){
             iconClass = 'cogs';
         }
         if (!iconClass) return null;
@@ -77,7 +77,7 @@ export class WorkflowNodeElement extends React.Component {
         var output = '';
 
         // Node Type -specific
-        if (node.type === 'step'){
+        if (node.nodeType === 'step'){
             if (node.meta && node.meta.workflow){
                 output += '<small>Workflow Run</small>'; // Workflow Run
             } else {
@@ -85,10 +85,10 @@ export class WorkflowNodeElement extends React.Component {
             }
             // Step Title
             output += '<h5 class="text-600 tooltip-title">' + ((node.meta && node.meta.display_title) || node.title || node.name) + '</h5>';
-        } else if (node.type === 'input-group'){
+        } else if (node.nodeType === 'input-group'){
             output += '<small>Input Argument</small>';
         } else {
-            var title = node.type;
+            var title = node.nodeType;
             title = title.charAt(0).toUpperCase() + title.slice(1);
             if (title === 'Input' || title === 'Output'){
                 title += ' Argument &nbsp; <b>' + node.name + '</b>';
@@ -98,7 +98,7 @@ export class WorkflowNodeElement extends React.Component {
 
         // If file, and has file-size, add it (idk, why not)
         if (
-            (node.type === 'input' || node.type === 'output') &&
+            (node.nodeType === 'input' || node.nodeType === 'output') &&
             this.doesRunDataFileExist() &&
             typeof node.meta.run_data.file.file_size === 'number'
         ){
@@ -106,12 +106,12 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // Workflow name, if any
-        if (node.type === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
+        if (node.nodeType === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
             //title 
             output += '<hr class="mt-08 mb-05"/><div><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
-        if (node.type === 'input'){ // Old/deprecated -- remove?
+        if (node.nodeType === 'input'){ // Old/deprecated -- remove?
             if (node.meta && node.meta['sbg:toolDefaultValue']){
                 output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
             }
@@ -126,7 +126,7 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     containerStyle(){
-        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
+        if (this.props.node.nodeType === 'input' || this.props.node.nodeType === 'output'){
             return {
                 width : (this.props.columnWidth || 100),
                 opacity : 0 // We change this to one post-mount.
@@ -143,12 +143,12 @@ export class WorkflowNodeElement extends React.Component {
             'className' : "text-ellipsis-container above-node-title"
         };
 
-        if (node.type === 'input-group'){
+        if (node.nodeType === 'input-group'){
             return <div {...elemProps}>{ this.props.title }</div>;
         }
 
         // If WorkflowRun & Workflow w/ steps w/ name
-        if (node.type === 'step' && node.meta.workflow
+        if (node.nodeType === 'step' && node.meta.workflow
             && Array.isArray(node.meta.workflow.steps)
             && node.meta.workflow.steps.length > 0
             && typeof node.meta.workflow.steps[0].name === 'string'
@@ -158,7 +158,7 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // If Parameter
-        if (this.doesRunDataValueExist()){
+        if (WorkflowNodeElement.isNodeParameter(node)){
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ node.name }</div>;
         }
@@ -173,7 +173,7 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         if ( // If Analysis Step
-            node.type === 'step' && node.meta.uuid &&
+            node.nodeType === 'step' && node.meta.uuid &&
             Array.isArray(node.meta.analysis_step_types) &&
             node.meta.analysis_step_types.length > 0
         ){
@@ -181,13 +181,13 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // If IO Arg w/o file but w/ format
-        if ((node.type === 'input' || node.type === 'output') && node.meta && typeof node.meta.argument_format === 'string'){
-            return <div {...elemProps}>{ node.meta.argument_format }</div>;
+        if ((node.nodeType === 'input' || node.nodeType === 'output') && node.meta && typeof node.meta.file_format === 'string'){
+            return <div {...elemProps}>{ node.meta.file_format }</div>;
         }
 
-        // Default-ish
-        if (typeof node.format === 'string') {
-            return <div {...elemProps}>{ node.format }</div>;
+        // Default-ish for IO node
+        if (typeof node.ioType === 'string') {
+            return <div {...elemProps}>{ Schemas.Term.capitalize(node.ioType) }</div>;
         }
 
         return null;
@@ -213,7 +213,7 @@ export class WorkflowNodeElement extends React.Component {
         }
         */
 
-        if (node.type === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
+        if (node.nodeType === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
             if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){
                 return <div {...elemProps}>{ node.meta.software_used.name } <span className="lighter">v{ node.meta.software_used.version }</span></div>;
             }
@@ -249,7 +249,7 @@ export class WorkflowNodeElement extends React.Component {
             </span>;
         }
 
-        if (this.doesRunDataValueExist()){
+        if (WorkflowNodeElement.isNodeParameter(node)){
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
 

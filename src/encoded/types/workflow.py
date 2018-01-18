@@ -532,6 +532,7 @@ class WorkflowRun(Item):
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
                 #'workflow.*',
+                'workflow.title',
                 'workflow.steps.name',
                 'workflow.steps.meta.software_used.name',
                 'workflow.steps.meta.software_used.title',
@@ -579,43 +580,49 @@ class WorkflowRun(Item):
 
         # fileCache = {} # Unnecessary unless we'll convert file @id into plain embedded dictionary, in which case we use this to avoid re-requests for same file UUID.
 
-        def handleSourceTargetFile(stepOutput, stepOutputTarget, runParams):
+        def get_global_source_or_target(all_io_source_targets):
+            global_pointing_source_target = [ source_target for source_target in all_io_source_targets if source_target.get('step') == None ] # Find source or target w/o a 'step'.
+            if len(global_pointing_source_target) > 1:
+                raise Exception('Found more than one source or target without a step.')
+            if len(global_pointing_source_target) == 0:
+                return None
+            return global_pointing_source_target[0]
+
+
+        def map_run_data_to_io_arg(step_io_arg, wfr_runtime_inputs, io_type):
             '''
             Add file metadata in form of 'run_data' : { 'file' : { '@id', 'display_title', etc. } } to AnalysisStep dict's 'input' or 'output' list item dict
             if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
 
-            :param stepOutput: Reference to an 'input' or 'output' dict passed in from a Workflow-derived analysis_step.
-            :param stepTarget: Reference to an 'source' or 'target' array item belonging to the 'input' or 'output' above.
-            :param runParams: List Step inputs or outputs, such as 'input_files', 'output_files', 'quality_metric', or 'parameters'.
+            :param step_io_arg: Reference to an 'input' or 'output' dict passed in from a Workflow-derived analysis_step.
+            :param wfr_runtime_inputs: List of Step inputs or outputs, such as 'input_files', 'output_files', 'quality_metric', or 'parameters'.
             :returns: True if found and added run_data property to analysis_step.input or analysis_step.output (param inputOrOutput).
             '''
-            if 'Workflow' in stepOutputTarget.get('type', ''): # Make sure is global target or source
+            #is_global_arg = step_io_arg.get('meta', {}).get('global', False) == True
+            #if not is_global_arg:
+            #    return False # Skip. We only care about global arguments.
 
-                # Gather params (e.g. files) with same workflow_argument_name.
-                # Assume these have been combined correctly unless have differing ordinal number.
-                paramsForTarget = []
+            global_pointing_source_target = get_global_source_or_target(step_io_arg.get('source', step_io_arg.get('target', [])))
+            if not global_pointing_source_target:
+                return False
 
-                for param in runParams:
-                    if (stepOutputTarget['name'] == param.get('workflow_argument_name')) and param.get('value') is not None:
-                        paramsForTarget.append(param)
+            matched_runtime_io_data = [ io_object for io_object in wfr_runtime_inputs if global_pointing_source_target['name'] == io_object.get('workflow_argument_name') ]
 
-                if len(paramsForTarget) > 0:
+            value_variable_name = 'value' if io_type == 'parameter' else 'file' 
 
-                    # Ensure sort by ordinal.
-                    paramsForTarget = sorted( paramsForTarget, key=lambda p: p.get('ordinal', 1) )
-
-                    stepOutput['run_data'] = {
-                        "file" : [ p['value'] for p in paramsForTarget ], #[ '/files/' + p['value'] + '/' for p in paramsForTarget ], # List of file @ids.
-                        "type" : paramsForTarget[0].get('type'),
-                        "meta" : [ # Aligned-to-file-list list of file metadata
-                            {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
-                                k:v for (k,v) in param.items()
-                                if k not in [ 'value', 'type', 'workflow_argument_name' ]
-                            } for p in paramsForTarget
-                        ]
-                    }
-                    return True
-
+            if len(matched_runtime_io_data) > 0:
+                matched_runtime_io_data = sorted(matched_runtime_io_data, key=lambda io_object: io_object.get('ordinal', 1))
+                step_io_arg['run_data'] = {
+                    value_variable_name : [ p['value'] for p in matched_runtime_io_data ], #[ '/files/' + p['value'] + '/' for p in paramsForTarget ], # List of file UUIDs.
+                    "type" : io_type,
+                    "meta" : [ # Aligned-to-file-list list of file metadata
+                        {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
+                            k:v for (k,v) in p.items()
+                            if k not in [ 'value', 'type', 'workflow_argument_name' ]
+                        } for p in matched_runtime_io_data
+                    ]
+                }
+                return True
             return False
 
 
@@ -632,11 +639,12 @@ class WorkflowRun(Item):
                     else:
                         resultArgs.append(arg)
                         seen_argument_names[argName] = arg
+            print('\n\n\nARGS', resultArgs)
             return resultArgs
 
 
         # Metrics will overwrite output_files in case of duplicate keys.
-        combined_outputs = mergeArgumentsWithSameArgumentName(
+        combined_output_files = mergeArgumentsWithSameArgumentName(
             [ dict(f, type = "output" ) for f in self.properties.get('output_files',[]) ] +
             [ dict(f, type = "quality_metric" ) for f in self.properties.get('output_quality_metrics',[]) ]
         )
@@ -652,31 +660,13 @@ class WorkflowRun(Item):
             # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
 
             for output in step['outputs']:
-                found = False
-                for outputTarget in output.get('target',[]):
-                    found = handleSourceTargetFile(output, outputTarget, combined_outputs)
-                    if found:
-                        break
-                if not found:
-                    found = handleSourceTargetFile(output, output, combined_outputs)
+                map_run_data_to_io_arg(output, combined_output_files, 'output')
 
             for input in step['inputs']:
-                found = False
-                for inputSource in input.get('source',[]):
-                    found = handleSourceTargetFile(input, inputSource, input_files)
-
-                    # If we don't have an input file yet for this workflow input, see if have a 'parameter' for it.
-                    if not found and 'Workflow' in inputSource.get('type',''):
-                        for param in input_params:
-                            if inputSource['name'] == param.get('workflow_argument_name'):
-                                input['run_data'] = {
-                                    "value" : param.get('value'),
-                                    "type"  : "parameter"
-                                }
-                                found = True
-                                break
-                    if found:
-                        break
+                if input.get('meta', {}).get('type') != 'parameter':
+                    map_run_data_to_io_arg(input, input_files, 'input')
+                else:
+                    map_run_data_to_io_arg(input, input_params, 'parameter')
 
         return analysis_steps
 

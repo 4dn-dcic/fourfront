@@ -132,8 +132,8 @@ export class FileDetailBody extends React.Component {
             <div className={colClassName + " file-title box"}>
                 <div className="text-600">
                     {
-                        node.type === 'output' ? 'Generated' :
-                            node.type === 'input' ? 'Used' :
+                        node.nodeType === 'output' ? 'Generated' :
+                            node.nodeType === 'input' ? 'Used' :
                                 null
                     } {
                         Array.isArray(this.props.file) ?

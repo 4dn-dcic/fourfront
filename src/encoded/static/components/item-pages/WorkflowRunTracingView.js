@@ -31,7 +31,7 @@ export function allFilesForWorkflowRunsMappedByUUID(items){
 export function filterOutIndirectFilesFromGraphData(graphData){
     var deleted = {  };
     var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' || n.type === 'output'){
+        if (n.nodeType === 'input' || n.nodeType === 'output'){
             if (n && n.meta && n.meta.in_path === true){
                 return true;
             }

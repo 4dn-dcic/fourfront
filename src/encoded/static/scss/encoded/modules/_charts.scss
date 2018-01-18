@@ -1266,7 +1266,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         &.node-type-input,
         &.node-type-output {
             &:before {
-                background-color: $workflow-node-color-disabled !important;
+                background-color: $workflow-node-color-disabled;
             }
         }
     }
@@ -1457,6 +1457,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             &:before {
                 background-color: $workflow-node-color-type-global-input;
             }
+            &[data-node-type-detail="parameter"],
             &[data-node-type-detail="Workflow Parameter"] {
                 &:before {
                     // background-color: #d1cde2;
@@ -1466,7 +1467,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
             @include pre-node-dot;
             
         }
-        &.node-item-type-file-reference {
+        &.node-item-type-file-reference,
+        &[data-node-type-detail="reference file"] {
             &:before {
                 background-color: $workflow-node-color-type-input-file-reference;
             }

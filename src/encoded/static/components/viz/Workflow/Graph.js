@@ -49,7 +49,8 @@ export default class Graph extends React.Component {
         'nodes'             : PropTypes.arrayOf(PropTypes.shape({
             'column'            : PropTypes.number.isRequired,
             'name'              : PropTypes.string.isRequired,
-            'type'              : PropTypes.string.isRequired,
+            'nodeType'          : PropTypes.string.isRequired,
+            'ioType'            : PropTypes.string,
             'id'                : PropTypes.string,  // Optional unique ID if node names might be same.
             'outputOf'          : PropTypes.object,  // Unused currently
             'inputOf'           : PropTypes.arrayOf(PropTypes.object),  // Unused currently
@@ -108,7 +109,7 @@ export default class Graph extends React.Component {
             // For any 'global input files', put them in first column (index 0).
             // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
             _.forEach(nodes, function(node){
-                if (node.type === 'input' && node.format === 'Workflow Input File' && !node.outputOf && node.column !== 0){
+                if (node.nodeType === 'input' && node.meta && node.meta.global && !node.outputOf && node.column !== 0){
                     node.column = 0;
                 }
             });
@@ -122,11 +123,12 @@ export default class Graph extends React.Component {
         'nodesInColumnSortFxn' : function(node1, node2){
 
             function isNodeFileReference(n){
-                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
+                return typeof n.ioType === 'string' && n.ioType === 'reference file';
             }
 
             function isNodeParameter(n){
-                return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
+                return typeof n.ioType === 'string' && n.ioType === 'parameter';
+                //return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
             }
 
             function getNodeFromListForComparison(nodeList, highestColumn = true){
@@ -155,8 +157,8 @@ export default class Graph extends React.Component {
             }
 
             function compareNodeInputOf(n1, n2){
-                var n1InputOf = getNodeFromListForComparison(n1.type === 'step' ? n1.outputNodes : n1.inputOf, false);
-                var n2InputOf = getNodeFromListForComparison(n2.type === 'step' ? n2.outputNodes : n2.inputOf, false);
+                var n1InputOf = getNodeFromListForComparison(n1.nodeType === 'step' ? n1.outputNodes : n1.inputOf, false);
+                var n2InputOf = getNodeFromListForComparison(n2.nodeType === 'step' ? n2.outputNodes : n2.inputOf, false);
 
                 var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
                 if (ioResult !== 0) return ioResult;
@@ -169,8 +171,8 @@ export default class Graph extends React.Component {
             }
 
             function compareNodeOutputOf(n1, n2){
-                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && getNodeFromListForComparison(n1.inputNodes)) : n1.outputOf;
-                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && getNodeFromListForComparison(n2.inputNodes)) : n2.outputOf;
+                var n1OutputOf = n1.nodeType === 'step' ? (n1.inputNodes && getNodeFromListForComparison(n1.inputNodes)) : n1.outputOf;
+                var n2OutputOf = n2.nodeType === 'step' ? (n2.inputNodes && getNodeFromListForComparison(n2.inputNodes)) : n2.outputOf;
 
                 if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
                     if (n1OutputOf.column === n2OutputOf.column){
@@ -202,7 +204,7 @@ export default class Graph extends React.Component {
 
             var ioResult;
 
-            if (node1.type === 'step' && node2.type === 'step'){
+            if (node1.nodeType === 'step' && node2.nodeType === 'step'){
 
 
                 if (node1.inputNodes && !node2.inputNodes) return -1;
@@ -217,29 +219,29 @@ export default class Graph extends React.Component {
                 
                 return nonIOStepCompare(node1,node2);
             }
-            if (node1.type === 'output' && node2.type === 'input'){
+            if (node1.nodeType === 'output' && node2.nodeType === 'input'){
                 return -1;
-            } else if (node1.type === 'input' && node2.type === 'output'){
+            } else if (node1.nodeType === 'input' && node2.nodeType === 'output'){
                 return 1;
             }
 
             // Groups go to bottom always. For now.
-            if (node1.type === 'input-group' && node2.type !== 'input-group'){
+            if (node1.nodeType === 'input-group' && node2.nodeType !== 'input-group'){
                 return 1;
-            } else if (node1.type !== 'input-group' && node2.type === 'input-group'){
+            } else if (node1.nodeType !== 'input-group' && node2.nodeType === 'input-group'){
                 return -1;
             }
 
-            if (node1.type === node2.type){
+            if (node1.nodeType === node2.nodeType){
 
-                if (node1.type === 'output'){
+                if (node1.nodeType === 'output'){
                     ioResult = compareNodeOutputOf(node1, node2);
                     return ioResult;
                 }
 
                 
 
-                if (node1.type === 'input'){
+                if (node1.nodeType === 'input'){
                     if (isNodeParameter(node1) && isNodeParameter(node2)){
                         return compareNodeInputOf(node1, node2);
                     }
@@ -265,10 +267,10 @@ export default class Graph extends React.Component {
             return  0;
         },
         'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
-            var groupNodes = _.filter(nodesInColumn, { 'type' : 'input-group' });
+            var groupNodes = _.filter(nodesInColumn, { 'nodeType' : 'input-group' });
             if (groupNodes.length > 0){
                 _.forEach(groupNodes, function(gN){
-                    var relatedFileSource = _.find(gN.meta.source, function(s){ var typeToCheck = s.type.toLowerCase(); return typeToCheck === 'input file' || typeToCheck === 'output file'; });
+                    var relatedFileSource = _.find(gN._source, function(s){ return typeof s.grouped_by === 'undefined' && typeof s.name === 'string' && s.for_file; });
                     var relatedFileNode = relatedFileSource && _.find(nodesInColumn, function(n){
                         if (n && n.meta && n.meta.run_data && n.meta.run_data.file && (n.meta.run_data.file.uuid || n.meta.run_data.file) === (relatedFileSource.for_file || 'x') ){
                             return true;
@@ -285,7 +287,7 @@ export default class Graph extends React.Component {
                 });
             }
             
-            if (_.every(nodesInColumn, function(n){ return n.type === 'step'; })){
+            if (_.every(nodesInColumn, function(n){ return n.nodeType === 'step'; })){
                 // If all step nodes, move those with more inputs toward the middle.
                 var nodesByNumberOfInputs = _.groupBy(nodesInColumn.slice(0), function(n){ return n.inputNodes.length; });
                 var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();

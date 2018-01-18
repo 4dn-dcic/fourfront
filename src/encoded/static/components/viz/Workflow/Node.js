@@ -47,10 +47,10 @@ export class DefaultNodeElement extends React.Component {
         var output = '';
 
         // Node Type
-        if (node.type === 'step'){
+        if (node.nodeType === 'step'){
             output += '<small>Step ' + ((node.column - 1) / 2 + 1) + '</small>';
         } else {
-            var nodeType = node.type;
+            var nodeType = node.nodeType;
             nodeType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
             output += '<small>' + nodeType + '</small>';
         }
@@ -69,7 +69,7 @@ export class DefaultNodeElement extends React.Component {
     }
 
     style(){
-        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
+        if (this.props.node.nodeType === 'input' || this.props.node.nodeType === 'output'){
             return {
                 width : (this.props.columnWidth || 100)
             };
@@ -127,7 +127,7 @@ export default class Node extends React.Component {
             if (selectedNode.name === currentNode.name || _.any((currentNode.meta.source || []).concat(currentNode.meta.target || []), function(s){ return s.name === selectedNode.name; })) {
                 // Make sure target.step == selectedNode.inputOf.name
                 var i;
-                if (currentNode.type === 'input' || currentNode.type === 'output'){
+                if (currentNode.nodeType === 'input' || currentNode.nodeType === 'output'){
                     if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].name) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].name) || 'b')) return true;
                     if (Array.isArray(selectedNode.inputOf) && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
@@ -140,7 +140,7 @@ export default class Node extends React.Component {
                     
 
                 }
-                if (currentNode.type === 'output'){
+                if (currentNode.nodeType === 'output'){
                     if (((selectedNode.outputOf && selectedNode.outputOf.name) || 'a') === ((currentNode.outputOf && currentNode.outputOf.name) || 'b')) return true;
                     if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.source)){
                         for (i = 0; i < currentNode.meta.source.length; i++){
@@ -211,7 +211,7 @@ export default class Node extends React.Component {
     render(){
         var node        = this.props.node,
             disabled    = typeof node.disabled !== 'undefined' ? node.disabled : null,
-            className   = "node node-type-" + node.type;
+            className   = "node node-type-" + node.nodeType;
 
         if (disabled === null && typeof this.props.isNodeDisabled === 'function'){
             disabled = this.props.isNodeDisabled(node);
@@ -238,11 +238,11 @@ export default class Node extends React.Component {
             <div
                 className={className}
                 data-node-key={node.id || node.name}
-                data-node-type={node.type}
-                data-node-global={node.isGlobal || null}
+                data-node-type={node.nodeType}
+                data-node-global={node.meta && node.meta.global === true}
                 data-node-selected={selected}
                 data-node-related={related}
-                data-node-type-detail={node.format}
+                data-node-type-detail={node.ioType && node.ioType.toLowerCase()}
                 style={{
                     'top' : node.y,
                     'left' : node.x,
