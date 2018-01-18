@@ -20,7 +20,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
                 </div>
             );
         }
-        if (typeof soft === 'string'){
+        if (typeof soft === 'string' || (Array.isArray(soft) && _.every(soft, function(s){ return typeof s === 'string'; }))){
             return (
                 <div className="col-sm-6 box">
                     <span className="text-600">Software Used</span>
@@ -30,21 +30,25 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
                 </div>
             );
         }
-        var link = object.atIdFromObject(soft);
-        var title;
-        if (typeof soft.name === 'string' && soft.version){
-            title = soft.name + ' v' + soft.version;
-        } else if (soft.title) {
-            title = soft.title;
-        } else {
-            title = link;
-        }
+
+        var renderLink = function(s, idx=0){
+            var link = object.atIdFromObject(s);
+            var title;
+            if (typeof s.name === 'string' && s.version){
+                title = s.name + ' v' + s.version;
+            } else if (s.title) {
+                title = s.title;
+            } else {
+                title = link;
+            }
+            return <span>{ idx > 0 ? ', ' : '' }<a href={link} key={idx}>{ title }</a></span>;
+        };
 
         return (
             <div className="col-sm-6 box">
                 <span className="text-600">Software Used</span>
                 <h4 className="text-400 text-ellipsis-container">
-                    <a href={link}>{ title }</a>
+                    { Array.isArray(soft) ? _.map(soft, renderLink) : renderLink(soft) }
                 </h4>
             </div>
         );
