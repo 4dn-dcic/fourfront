@@ -221,16 +221,110 @@ def workflow_2_3(value, system):
 def workflow_3_4(value, system):
     '''Remove argument_cardinality'''
 
-    for arg in value.get('arguments'):
-        del arg['argument_cardinality']
+    def io_type_from_arg_type(arg_type):
+        if 'report' in arg_type:
+            if step and step.get('meta') and step['meta'].get('analysis_step_types') and 'QC calculation' in step['meta']['analysis_step_types']:
+                return 'QC'
+            else:
+                return 'report'
+        elif arg_type == 'parameter' or arg_type == 'Parameter':
+            return 'parameter'
+        return None
 
-    for step in value.get('steps'):
-        for op in step.get('outputs'):
-            for tg in op.get('target'):
+    def common_io_meta_upgrade(io, io_type, step):
+        io_meta = io.get('meta', {})
+
+        target_type = 'target' if io_type == 'output' else 'source'
+
+        # We used to check 'global' by presence of anyOf(io.(source[]|target[]).type) = 'Workflow Output File' or 'Workflow Input File'. Re-use approach for upgrader.
+        global_targets = [ tg for tg in io.get(target_type, []) if (not tg.get('step') or 'Workflow' in tg.get('type','x') ) ]
+
+        if len(global_targets) > 1:
+            raise Exception('There are 2+ global targets or sources (without a step) on this workflow/step: ' + value.get('title', 'Unknown') + ' / ' + io.get('name', 'Unknown'))
+
+        if len(global_targets) > 0:
+            io_meta['global'] = True
+        else:
+            io_meta['global'] = False
+
+        # Upgrade io.meta.type, try to look for 'hints' and assign report, QC, param, reference file; fallback to 'data file' (most common)
+        if io_meta.get('argument_type'):
+            initial_type = io_type_from_arg_type(io_meta['argument_type'])
+            if initial_type:
+                io_meta['type'] = initial_type
+            del io_meta['argument_type']
+        if io_type == 'input' and ( # Lol sorry
+            'index' in io.get('name','') or
+            'Index' in io.get('name','') or
+            '_file' in io.get('name','') or
+            'chromsize' in io.get('name','') or # Includes variations incl. 'chromsizes'
+            'chrsize' in io.get('name','') or
+            'reference' in io.get('name','')
+        ):
+            io_meta['type'] = 'reference file'
+
+
+        # Grab name of our global source or target. Find corresponding argument and check it for 'hints' which may not be on original meta.
+        wf_name = (len(global_targets) == 1 and global_targets[0].get('name'))
+
+        for arg in value.get('arguments', []):
+            if arg.get('workflow_argument_name') == wf_name:
+
+                if arg.get('argument_format') and not io_meta.get('file_format'): # Set file_format if available and not yet set.
+                    io_meta['file_format'] = arg['argument_format']
+
+                if arg.get('argument_cardinality'): # Translate old cardinality, if exists, to new io.meta.cardinality enum.
+                    if arg['argument_cardinality'] == 1:
+                        io_meta['cardinality'] = 'single'
+                    elif arg['argument_cardinality'] == 'N':
+                        io_meta['cardinality'] = 'array'
+
+                # Set io.meta.type here if not already set
+                if not io_meta.get('type') and arg.get('argument_type'):
+                    initial_type = io_type_from_arg_type(arg['argument_type'])
+                    if initial_type:
+                        io_meta['type'] = initial_type
+
+
+                break
+
+        # Set default 'data file' if can't determine type of input/output otherwise.abs
+        if not io_meta.get('type'):
+            io_meta['type'] = 'data file'
+
+        # Update argument_format to file_format -if- we're working with a file and not a parameter.
+        if io_meta['type'] != 'parameter' and io_meta.get('argument_format'):
+            io_meta['file_format'] = io_meta['argument_format']
+            del io_meta['argument_format']
+
+        # If cardinality is not yet set, try to determine from name of step we're on.
+        if not io_meta.get('cardinality') and io.get('name') == 'input_pairs' and step.get('name') == 'merge_pairs':
+            io_meta['cardinality'] = 'array'
+
+        # Delete description if is blank
+        if io_meta.get('description') == '':
+            del io_meta['description']
+
+        for tg in io.get(target_type, []):
+            if tg.get('type'):
                 del tg['type']
-        for ip in step.get('inputs'):
-            for sc in ip.get('source'):
-                del sc['type']
+
+        return io_meta
+
+        
+    # Update step.inputs|outputs.meta properties from existing WF step & argument data
+    for step in value.get('steps'):
+        for op in step.get('outputs', []):
+            op['meta'] = common_io_meta_upgrade(op, 'output', step)
+        for ip in step.get('inputs', []):
+            ip['meta'] = common_io_meta_upgrade(ip, 'input', step)
+
+    # Delete old cardinality
+    for arg in value.get('arguments'):
+        if arg.get('argument_cardinality'):
+            del arg['argument_cardinality']
+ 
+    print('\n\nUPGRADING')
 
     return value
 
