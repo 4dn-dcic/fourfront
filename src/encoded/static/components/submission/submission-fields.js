@@ -965,7 +965,7 @@ export class AliasInputField extends React.Component {
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
             firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
-        } else if (submits_for_list.length > 1){
+        } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
                 <DropdownButton
                     className="alias-lab-select form-control"

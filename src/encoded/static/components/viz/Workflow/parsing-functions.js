@@ -492,11 +492,19 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             var currentInputNodesMatched = (
                 _.filter(nodes /*allRelatedIONodes*/, function(n){
                     
-                    // Skip any step nodes
+                    // Ignore any step nodes
                     if (n.nodeType === 'step') return false;
 
+                    // Re-use global inputs nodes if not cardinality:array
+                    if (fullStepInput.name === 'chromsize' && n.name === 'chromsize') console.log('TTT', fullStepInput, n);
+                    if (fullStepInput.source.length === 1 && typeof fullStepInput.source[0].step === 'undefined' && !(fullStepInput.meta && fullStepInput.meta.cardinality === 'array')){ // Is global input file
+                        if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && n._source[0].name === fullStepInput.source[0].name){
+                            return true;
+                        }
+                    }
+
                     // Compare IO nodes against step input arg sources
-                    if (_.find(fullStepInput.source, function(s){
+                    else if (_.find(fullStepInput.source, function(s){
                         
                         // Match nodes by source step & name, check that they target this step.
                         if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n._target) && _.any(n._target, function(t){ return t.step === step.name; })) return true;
@@ -568,7 +576,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     }
 
                     // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
-                    var combinedMeta = _.extend(n.meta, inNode.meta);
+                    var combinedMeta = _.extend(n.meta, inNode.meta, {
+                        'global' : n.meta.global || inNode.meta.global || false // Make true if either is true.
+                    });
                     _.extend(n, {
                         'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
                         'meta' : combinedMeta,
