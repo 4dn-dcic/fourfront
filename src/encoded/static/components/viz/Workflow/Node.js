@@ -159,13 +159,13 @@ export default class Node extends React.Component {
         if (typeof currentNode.meta.workflow === 'string' && typeof selectedNode.meta.workflow === 'string' && selectedNode.meta.workflow === currentNode.meta.workflow){
             return true;
         }
-        if (typeof selectedNode.meta.workflow === 'string' && Array.isArray(currentNode.meta.source)){
-            if (_.any(currentNode.meta.source, function(s){ return typeof s.workflow === 'string' && s.workflow === selectedNode.meta.workflow; })){
+        if (typeof selectedNode.meta.workflow === 'string' && Array.isArray(currentNode._source)){
+            if (_.any(currentNode._source, function(s){ return typeof s.workflow === 'string' && s.workflow === selectedNode.meta.workflow; })){
                 return true;
             }
         }
-        if (typeof currentNode.meta.workflow === 'string' && Array.isArray(selectedNode.meta.source)){
-            if (_.any(selectedNode.meta.source, function(s){ return typeof s.workflow === 'string' && s.workflow === currentNode.meta.workflow; })){
+        if (typeof currentNode.meta.workflow === 'string' && Array.isArray(selectedNode._source)){
+            if (_.any(selectedNode._source, function(s){ return typeof s.workflow === 'string' && s.workflow === currentNode.meta.workflow; })){
                 return true;
             }
         }

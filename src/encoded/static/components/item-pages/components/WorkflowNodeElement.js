@@ -19,18 +19,32 @@ export class WorkflowNodeElement extends React.Component {
         'columnWidth' : PropTypes.number
     }
 
+    static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
+
     static isNodeParameter(node){
         return node.ioType === 'parameter';
     }
 
-    doesRunDataFileExist(){
-        var node = this.props.node;
-        return (
-            node.meta && node.meta.run_data && node.meta.run_data.file
-            && typeof node.meta.run_data.file['@id'] === 'string'
-            /* && typeof node.meta.run_data.file.display_title === 'string'*/);
+    static isNodeFile(node){
+        return WorkflowNodeElement.ioFileTypes.has(node.ioType);
     }
-    
+
+    static doesRunDataExist(node){
+        if (WorkflowNodeElement.isNodeParameter(node)){
+            return (node.meta && node.meta.run_data && (
+                typeof node.meta.run_data.value === 'string' ||
+                typeof node.meta.run_data.value === 'number' ||
+                typeof node.meta.run_data.value === 'boolean'
+            ));
+        } else /*if (WorkflowNodeElement.isNodeFile(node))*/ { // Uncomment this in-line comment once all Workflows have been upgraded and have 'step.inputs[]|outputs[].meta.type'
+            return (
+                node.meta && node.meta.run_data && node.meta.run_data.file
+                && typeof node.meta.run_data.file['@id'] === 'string'
+                /* && typeof node.meta.run_data.file.display_title === 'string'*/
+            );
+        }
+    }
+
     icon(){
         var node = this.props.node;
         var iconClass;
@@ -99,7 +113,8 @@ export class WorkflowNodeElement extends React.Component {
         // If file, and has file-size, add it (idk, why not)
         if (
             (node.nodeType === 'input' || node.nodeType === 'output') &&
-            this.doesRunDataFileExist() &&
+            WorkflowNodeElement.isNodeFile(node) &&
+            WorkflowNodeElement.doesRunDataExist(node) &&
             typeof node.meta.run_data.file.file_size === 'number'
         ){
             output += '<div><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
@@ -159,15 +174,19 @@ export class WorkflowNodeElement extends React.Component {
 
         // If Parameter
         if (WorkflowNodeElement.isNodeParameter(node)){
-            elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ node.name }</div>;
+            if (WorkflowNodeElement.doesRunDataExist(node)){
+                elemProps.className += ' mono-text';
+                return <div {...elemProps}>{ node.name }</div>;
+            }
+            return <div {...elemProps}>Parameter</div>;
         }
 
         // If File
-        if (this.doesRunDataFileExist()){
-            if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
-                return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
-            }
+        if (WorkflowNodeElement.isNodeFile(node)){
+            //if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
+            //    return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
+            //}
+            if (node.meta && typeof node.meta.file_format === 'string') return <div {...elemProps}>{ node.meta.file_format }</div>;
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ this.props.title }</div>;
         }
@@ -226,7 +245,7 @@ export class WorkflowNodeElement extends React.Component {
     nodeTitle(){
         var node = this.props.node;
 
-        if (node.type === 'input-group'){
+        if (node.nodeType === 'input-group'){
             var files = node.meta.run_data.file;
             if (Array.isArray(files)){
                 var len = files.length - 1;
@@ -237,19 +256,19 @@ export class WorkflowNodeElement extends React.Component {
             }
         }
 
-        if (node.type === 'step' && node.meta && node.meta.workflow && typeof node.meta.workflow === 'object' && node.meta.workflow.display_title && typeof node.meta.workflow.display_title === 'string'){
+        if (node.nodeType === 'step' && node.meta && node.meta.workflow && typeof node.meta.workflow === 'object' && node.meta.workflow.display_title && typeof node.meta.workflow.display_title === 'string'){
             return <span className="node-name">{ this.icon() }{ node.meta.workflow.display_title }</span>;
         }
 
-        if (this.doesRunDataFileExist()){
+        if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
             var file = node.meta.run_data.file;
             return <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
                 { this.icon() }
-                { typeof file === 'string' ? node.format.replace('Workflow ', '') : file.accession || file.display_title }
+                { typeof file === 'string' ? node.ioType : file.accession || file.display_title }
             </span>;
         }
 
-        if (WorkflowNodeElement.isNodeParameter(node)){
+        if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
 

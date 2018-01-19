@@ -249,10 +249,8 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     static isNodeDisabled(node){
-        if (node.type === 'step') return false;
-        if (node && node.meta && node.meta.run_data){
-            return false;
-        }
+        if (node.nodeType === 'step') return false;
+        if (WorkflowNodeElement.doesRunDataExist(node)) return false;
         return true;
     }
 
@@ -294,7 +292,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
-        this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.type === 'input-group' || n.type === 'output-group'; });
+        this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.nodeType === 'input-group' || n.nodeType === 'output-group'; });
 
         //var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
         if (!this.state.showIndirectFiles){

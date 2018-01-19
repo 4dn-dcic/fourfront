@@ -209,7 +209,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      */
     function generateStepNode(step, column){
         return {
-            type : 'step',
             nodeType : 'step',
             name : step.name,
             _inputs : step.inputs,
@@ -245,7 +244,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var ioNode = {
             column          : column,
             ioType          : ioType,
-            format          : ioType, // First source type takes priority
             id              : ioNodeID(stepIOArgument, readOnly),
             name            : ioNodeName(stepIOArgument),// stepInput.name, 
             argNamesOnSteps : namesOnSteps,
@@ -436,6 +434,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         if (nodes[i].meta && oN.meta && oN.meta.file_format) nodes[i].meta.file_format = oN.meta.file_format;
                         if (nodes[i].meta && oN.meta && oN.meta.global) nodes[i].meta.global = oN.meta.global;
                         if (nodes[i].meta && oN.meta && oN.meta.argument_type) nodes[i].meta.argument_type = oN.meta.argument_type;
+                        if (!nodes[i]._source && oN._source) nodes[i]._source = oN._source;
+                        if (!nodes[i]._target && oN._target) nodes[i]._source = oN._target;
                         nodes[i].wasMatchedAsOutputOf = stepNode.name; // For debugging.
                         edges.push({
                             'source' : stepNode,
@@ -574,7 +574,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         'meta' : combinedMeta,
                         'name' : ioNodeName(combinedMeta) || n.name,
                         'argNamesOnSteps' : _.extend(n.argNamesOnSteps, inNode.argNamesOnSteps),
-                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name) // Used only for debugging.
+                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name), // Used only for debugging.
+                        '_source' : n._source || inNode._source,
+                        '_target' : n._target || inNode._target
                     });
                 });
             }

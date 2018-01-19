@@ -56,6 +56,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareLinkBox(){
         var soft = this.props.software;
+        // TODO: MAKE THIS HANDLE ARRAYS!!
         if (!soft || !soft.source_url) return (
             <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
