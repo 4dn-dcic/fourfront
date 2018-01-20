@@ -47,33 +47,40 @@ export class WorkflowNodeElement extends React.Component {
 
     icon(){
         var node = this.props.node;
+        var ioType = node.ioType;
+        var nodeMetaType = (node.meta && node.meta.type) || null;
+        var fileFormat = (node.meta && node.meta.file_format) || null;
         var iconClass;
+        
         if (node.nodeType === 'input-group' || node.nodeType === 'output-group'){
             iconClass = 'folder-open';
         } else if (node.nodeType === 'input' || node.nodeType === 'output'){
-            var ioTypes = this.props.node.ioType;
-            if (typeof ioTypes === 'undefined'){
+            // By file_format
+            if (fileFormat === 'zip' || fileFormat === 'tar' || fileFormat === 'gz') {
+                iconClass = 'file-zip-o';
+            }
+            // By meta.type & ioType
+            else if (typeof ioType === 'undefined'){
                 iconClass = 'question';
-            } else if (typeof ioTypes === 'string') {
-                ioTypes = ioTypes.toLowerCase();
-                if (ioTypes.indexOf('file') > -1){
-                    iconClass = 'file-text-o';
-                } else if (
-                    ioTypes.indexOf('parameter') > -1 || ioTypes.indexOf('int') > -1 || ioTypes.indexOf('string') > -1
-                ){
+            } else if (typeof ioType === 'string') {
+                if (ioType === 'qc' || ioType === 'QC') {
+                    iconClass = 'check-square-o';
+                } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
                     iconClass = 'wrench';
+                } else if (WorkflowNodeElement.isNodeFile(node)){
+                    iconClass = 'file-text-o';
                 } else {
                     iconClass = 'question';
                 }
-            } else if (Array.isArray(ioTypes)) {
+            } else if (Array.isArray(ioType)) { // Deprecated?
                 if (
-                    ioTypes[0] === 'File' ||
-                    (ioTypes[0] === 'null' && ioTypes[1] === 'File')
+                    ioType[0] === 'File' ||
+                    (ioType[0] === 'null' && ioType[1] === 'File')
                 ){
                     iconClass = 'file-text-o';
                 } else if (
-                    (ioTypes[0] === 'int' || ioTypes[0] === 'string') ||
-                    (ioTypes[0] === 'null' && (ioTypes[1] === 'int' || ioTypes[1] === 'string'))
+                    (ioType[0] === 'int' || ioType[0] === 'string') ||
+                    (ioType[0] === 'null' && (ioType[1] === 'int' || ioType[1] === 'string'))
                 ){
                     iconClass = 'wrench';
                 }

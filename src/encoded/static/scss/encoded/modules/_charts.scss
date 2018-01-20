@@ -1365,9 +1365,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         transform: translateY(-1px);
                         transform: translateY(-0.5px);
                         > i.icon {
-                            transform: translateY(1px);
                             transform: translateY(0.5px);
                         }
+                    }
+                    > i.icon {
+                        transform: translateY(1px);
                     }
                 }
             }

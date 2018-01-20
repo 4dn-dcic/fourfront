@@ -496,7 +496,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     if (n.nodeType === 'step') return false;
 
                     // Re-use global inputs nodes if not cardinality:array
-                    if (fullStepInput.name === 'chromsize' && n.name === 'chromsize') console.log('TTT', fullStepInput, n);
                     if (fullStepInput.source.length === 1 && typeof fullStepInput.source[0].step === 'undefined' && !(fullStepInput.meta && fullStepInput.meta.cardinality === 'array')){ // Is global input file
                         if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && n._source[0].name === fullStepInput.source[0].name){
                             return true;
@@ -504,10 +503,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     }
 
                     // Compare IO nodes against step input arg sources
-                    else if (_.find(fullStepInput.source, function(s){
+                    else if (_.any(fullStepInput.source, function(s){
                         
                         // Match nodes by source step & name, check that they target this step.
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n._target) && _.any(n._target, function(t){ return t.step === step.name; })) return true;
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n._target) && _.any(n._target, function(t){ return t.step === step.name; })){
+                            return true;
+                        }
 
                         // Extra CWL-like check case by existing node target step match
                         if (Array.isArray(n._target) && _.any(n._target, function(t){
@@ -650,23 +651,20 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     function findNextStepsFromIONode(ioNodes){
 
-        var targetPropertyName = parsingMethod === 'output' ? 'target' : 'source';
+        var targetPropertyName = parsingMethod === 'output' ? '_target' : '_source';
         var nextSteps = new Set();
 
-        ioNodes.forEach(function(n){
-            if (n.meta && Array.isArray(n.meta[targetPropertyName])){
-                n.meta[targetPropertyName].forEach(function(t){
-                    if (typeof t.step === 'string'){
-                        var matchedStep = _.findWhere(analysis_steps, { 'name' : t.step });
-                        if (matchedStep) {
-                            nextSteps.add(matchedStep);
-                        }
+        _.forEach(ioNodes, function(n){
+            if (!Array.isArray(n[targetPropertyName])) return;
+            _.forEach(n[targetPropertyName], function(t){
+                if (typeof t.step === 'string'){
+                    var matchedStep = _.findWhere(analysis_steps, { 'name' : t.step });
+                    if (matchedStep) {
+                        nextSteps.add(matchedStep);
                     }
-                });
-            }
+                }
+            });
         });
-
-        
 
         return [...nextSteps];
     }

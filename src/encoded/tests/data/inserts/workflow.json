@@ -158,6 +158,9 @@
                             {
                                 "name": "input_bam2",
                                 "step": "hictool_bam2hdf5"
+                            },
+                            {
+                                "name": "split_bam2"
                             }
                         ]
                     },
@@ -173,6 +176,9 @@
                             {
                                 "name": "input_bam1",
                                 "step": "hictool_bam2hdf5"
+                            },
+                            {
+                                "name": "split_bam1"
                             }
                         ]
                     }

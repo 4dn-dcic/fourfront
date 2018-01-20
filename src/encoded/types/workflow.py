@@ -639,7 +639,6 @@ class WorkflowRun(Item):
                     else:
                         resultArgs.append(arg)
                         seen_argument_names[argName] = arg
-            print('\n\n\nARGS', resultArgs)
             return resultArgs
 
 
