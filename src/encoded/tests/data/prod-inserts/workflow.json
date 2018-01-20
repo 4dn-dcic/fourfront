@@ -84,7 +84,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_fastq2",
                         "source": [
@@ -95,7 +97,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_fastq1",
                         "source": [
@@ -106,7 +110,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bowtie_index",
                         "source": [
@@ -122,14 +127,16 @@
                     ],
                     "description": "Alignment according to the GITAR pipeline",
                     "software_used": [
-                        "/software/7868f960-50ac-11e4-916c-0800200c9a66/"
+                        "/softwares/7868f960-50ac-11e4-916c-0800200c9a66/"
                     ]
                 },
                 "name": "hictool_fastq2bam",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "sorted_bam_pe",
                         "target": [
@@ -139,7 +146,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "split_bam2",
                         "target": [
                             {
@@ -149,7 +160,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "split_bam1",
                         "target": [
                             {
@@ -164,7 +179,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "RE_bed",
                         "source": [
@@ -174,7 +191,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "split_bam2",
                         "source": [
                             {
@@ -184,7 +205,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "split_bam1",
                         "source": [
                             {
@@ -200,14 +225,16 @@
                     ],
                     "description": "Converting bam to hdf5 according to the GITAR pipeline",
                     "software_used": [
-                        "/software/7868f960-50ac-11e4-916c-0800200c9a66/"
+                        "/softwares/7868f960-50ac-11e4-916c-0800200c9a66/"
                     ]
                 },
                 "name": "hictool_bam2hdf5",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "hdf5",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "HiC_project_object_hdf5",
                         "target": [
@@ -218,7 +245,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "hdf5",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "HiC_distance_function_hdf5",
                         "target": [
@@ -228,7 +257,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "hdf5",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "fend_object_hdf5",
                         "target": [
                             {
@@ -239,7 +272,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "hdf5",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "HiC_norm_binning_hdf5",
                         "target": [
@@ -251,7 +286,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "hdf5",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "HiC_data_object_hdf5",
                         "target": [
@@ -267,7 +304,8 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrlen_file",
                         "source": [
@@ -278,7 +316,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "file_format": "matrix",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "contact_matrix_binsize",
                         "source": [
@@ -289,7 +329,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "chromosome",
                         "source": [
@@ -299,19 +340,24 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "hdf5",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "fend_object_hdf5",
                         "source": [
                             {
                                 "name": "fend_object_hdf5",
-                                "step": "hictool_bam2hdf5",
-                                "type": "Output file"
+                                "step": "hictool_bam2hdf5"
                             }
                         ]
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "hdf5",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "HiC_norm_binning_hdf5",
                         "source": [
@@ -323,7 +369,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "hdf5",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "HiC_data_object_hdf5",
                         "source": [
@@ -340,14 +388,16 @@
                     ],
                     "description": "Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
                     "software_used": [
-                        "/software/7868f960-50ac-11e4-916c-0800200c9a66/"
+                        "/softwares/7868f960-50ac-11e4-916c-0800200c9a66/"
                     ]
                 },
                 "name": "hictool_hdf52matrix",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "matrix",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "normalized_fend_contact_matrix",
                         "target": [
@@ -358,7 +408,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "matrix",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "normalized_enrich_contact_matrix",
                         "target": [
@@ -369,7 +421,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "matrix",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "expected_enrich_contact_matrix",
                         "target": [
@@ -380,7 +434,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "matrix",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "observed_contact_matrix",
                         "target": [
@@ -391,7 +447,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Output processed file"
+                            "file_format": "matrix",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "expected_fend_contact_matrix",
                         "target": [
@@ -456,7 +514,8 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "limits_file",
                         "source": [
@@ -467,8 +526,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_fastq",
                         "source": [
@@ -479,7 +539,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "contaminants_file",
                         "source": [
@@ -490,7 +551,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "adapters_file",
                         "source": [
@@ -506,14 +568,16 @@
                     ],
                     "description": "FastQC QC for fastq files",
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a13131/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a13131/"
                     ]
                 },
                 "name": "FastQC",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output QC file"
+                            "file_format": "zip",
+                            "global": true,
+                            "type": "report"
                         },
                         "name": "report_zip",
                         "target": [
@@ -576,8 +640,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -588,8 +653,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsizes",
                         "source": [
@@ -600,7 +666,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "enzyme",
                         "source": [
@@ -611,7 +678,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "sample_name",
                         "source": [
@@ -627,14 +695,15 @@
                     ],
                     "description": "PairsQC QC for pairs files",
                     "software_used": [
-                        "/software/15731f58-868f-44ab-b4ed-77b82ecd032b/"
+                        "/softwares/15731f58-868f-44ab-b4ed-77b82ecd032b/"
                     ]
                 },
                 "name": "PairsQC",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output QC file"
+                            "global": true,
+                            "type": "report"
                         },
                         "name": "report",
                         "target": [
@@ -681,9 +750,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": "The file(s) input into this Workflow."
+                            "description": "The file(s) input into this Workflow.",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "input_file",
                         "source": [
@@ -702,8 +772,9 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output report file",
-                            "description": "The file(s) output of this Workflow."
+                            "description": "The file(s) output of this Workflow.",
+                            "global": true,
+                            "type": "QC"
                         },
                         "name": "report",
                         "target": [
@@ -755,9 +826,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": "File on which MD5 calculation is run on."
+                            "description": "File on which MD5 calculation is run on.",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "input_file",
                         "source": [
@@ -776,8 +848,9 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output report file",
-                            "description": "The MD5 checksum generated."
+                            "description": "The MD5 checksum generated.",
+                            "global": true,
+                            "type": "QC"
                         },
                         "name": "report",
                         "target": [
@@ -858,9 +931,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -871,9 +944,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -884,9 +957,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bwaIndex",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -897,7 +970,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -912,13 +986,17 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a13209/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a13209/"
                     ]
                 },
                 "name": "bwa-mem",
                 "outputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "out_bam",
                         "target": [
                             {
@@ -932,7 +1010,11 @@
             {
                 "inputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_bam",
                         "source": [
                             {
@@ -947,16 +1029,16 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a06735/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "sort_bam",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "out_sorted_bam",
                         "target": [
@@ -968,9 +1050,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bai",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "bai",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_sorted_bam_index",
                         "target": [
@@ -985,9 +1067,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "out_sorted_bam",
                         "source": [
@@ -1003,16 +1085,16 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "bam2pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -1023,9 +1105,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -1106,9 +1188,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -1119,9 +1201,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -1132,9 +1214,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bwaIndex",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -1145,7 +1227,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -1160,13 +1243,17 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a13209/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a13209/"
                     ]
                 },
                 "name": "bwa-mem",
                 "outputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "out_bam",
                         "target": [
                             {
@@ -1180,7 +1267,11 @@
             {
                 "inputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_bam",
                         "source": [
                             {
@@ -1195,16 +1286,16 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a06735/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "sort_bam",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "out_sorted_bam",
                         "target": [
@@ -1216,9 +1307,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bai",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "bai",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_sorted_bam_index",
                         "target": [
@@ -1233,9 +1324,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "out_sorted_bam",
                         "source": [
@@ -1251,16 +1342,16 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "bam2pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -1271,9 +1362,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -1363,8 +1454,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "cardinality": "array",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -1375,8 +1468,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -1391,15 +1485,16 @@
                         "file merging"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "merge_pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -1414,8 +1509,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -1438,7 +1534,8 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -1449,7 +1546,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "binsize",
                         "source": [
@@ -1459,7 +1557,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "reference file"
+                        },
                         "name": "pairs_index",
                         "source": [
                             {
@@ -1469,7 +1571,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "pairs",
                         "source": [
                             {
@@ -1484,15 +1590,16 @@
                         "aggregation"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "cooler",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "cool",
-                            "argument_type": "Output processed file"
+                            "file_format": "cool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_cool",
                         "target": [
@@ -1507,8 +1614,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -1519,7 +1627,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "min_res",
                         "source": [
@@ -1529,7 +1638,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_pairs",
                         "source": [
                             {
@@ -1545,15 +1658,16 @@
                         "normalization"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
                     ]
                 },
                 "name": "pairs2hic",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Output processed file"
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -1572,7 +1686,8 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "normalization_type",
                         "source": [
@@ -1582,7 +1697,10 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_hic",
                         "source": [
                             {
@@ -1597,15 +1715,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "hic2mcool",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Output processed file"
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_mcool",
                         "target": [
@@ -1669,9 +1788,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -1682,9 +1801,10 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "cardinality": "array",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -1695,8 +1815,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter",
-                            "description": ""
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "outprefix",
                         "source": [
@@ -1711,16 +1831,16 @@
                         "file merging"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "merge_pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -1731,9 +1851,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -1812,8 +1932,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -1824,8 +1945,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -1836,8 +1958,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bwaIndex",
-                            "argument_type": "Input file"
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -1848,8 +1971,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "reference_fasta",
-                            "argument_type": "Input file"
+                            "file_format": "reference_fasta",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "reference_fasta",
                         "source": [
@@ -1860,8 +1984,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input file"
+                            "file_format": "juicer_format_restriction_site_file",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -1877,13 +2002,16 @@
                         "filtering"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23548/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23548/"
                     ]
                 },
                 "name": "juicer",
                 "outputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "merged_nodups",
                         "target": [
                             {
@@ -1898,8 +2026,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -1910,7 +2039,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nsplit",
                         "source": [
@@ -1920,7 +2050,10 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_merged_nodups",
                         "source": [
                             {
@@ -1935,15 +2068,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "juicer2pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -1954,8 +2088,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -2038,8 +2173,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -2050,8 +2186,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file"
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -2062,8 +2199,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bwaIndex",
-                            "argument_type": "Input file"
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -2074,8 +2212,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "reference_fasta",
-                            "argument_type": "Input file"
+                            "file_format": "reference_fasta",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "reference_fasta",
                         "source": [
@@ -2086,8 +2225,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input file"
+                            "file_format": "juicer_format_restriction_site_file",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -2098,7 +2238,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -2114,13 +2255,16 @@
                         "filtering"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23599/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23599/"
                     ]
                 },
                 "name": "juicer",
                 "outputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "merged_nodups",
                         "target": [
                             {
@@ -2135,8 +2279,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2147,7 +2292,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nsplit",
                         "source": [
@@ -2157,7 +2303,10 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_merged_nodups",
                         "source": [
                             {
@@ -2172,15 +2321,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "juicer2pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -2191,8 +2341,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -2274,8 +2425,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "cardinality": "array",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -2286,8 +2439,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -2302,15 +2456,16 @@
                         "file merging"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "merge_pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs_px2",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs_px2",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -2325,8 +2480,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -2349,8 +2505,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2361,7 +2518,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "min_res",
                         "source": [
@@ -2371,7 +2529,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_pairs",
                         "source": [
                             {
@@ -2387,15 +2549,16 @@
                         "normalization"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
                     ]
                 },
                 "name": "pairs2hic",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Output processed file"
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -2410,7 +2573,8 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -2421,7 +2585,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "binsize",
                         "source": [
@@ -2431,7 +2596,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "pairs",
                         "source": [
                             {
@@ -2441,7 +2610,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "reference file"
+                        },
                         "name": "pairs_index",
                         "source": [
                             {
@@ -2456,15 +2629,16 @@
                         "aggregation"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "cooler",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "cool",
-                            "argument_type": "Output processed file"
+                            "file_format": "cool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_cool",
                         "target": [
@@ -2548,8 +2722,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "cardinality": "array",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -2564,18 +2740,19 @@
                         "file merging"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a23547/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
                     ]
                 },
                 "name": "merge_pairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
+                            "file_format": "pairs",
+                            "global": true,
                             "secondary_file_formats": [
                                 "pairs_px2"
-                            ]
+                            ],
+                            "type": "data file"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -2598,8 +2775,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2610,7 +2788,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "min_res",
                         "source": [
@@ -2620,7 +2799,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_pairs",
                         "source": [
                             {
@@ -2636,15 +2819,16 @@
                         "normalization"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
                     ]
                 },
                 "name": "pairs2hic",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Output processed file"
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -2659,7 +2843,8 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -2670,7 +2855,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "binsize",
                         "source": [
@@ -2680,7 +2866,11 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "pairs",
                         "source": [
                             {
@@ -2695,15 +2885,16 @@
                         "aggregation"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "cooler",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "cool",
-                            "argument_type": "Output processed file"
+                            "file_format": "cool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_cool",
                         "target": [
@@ -2755,9 +2946,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_hic",
                         "source": [
@@ -2768,9 +2959,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -2785,16 +2976,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "add-hic-normvector-to-mcool",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_mcool",
                         "target": [
@@ -2844,9 +3035,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -2857,7 +3048,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nres",
                         "source": [
@@ -2872,16 +3064,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
+                        "/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
                     ]
                 },
                 "name": "extract-mcool-normvector-for-juicebox",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "normvector_juicerformat",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "normvector_juicerformat",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_normvector",
                         "target": [
@@ -2935,9 +3127,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_hic",
                         "source": [
@@ -2948,7 +3140,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "min_res",
                         "source": [
@@ -2959,7 +3152,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "max_mem",
                         "source": [
@@ -2974,16 +3168,16 @@
                         "normalization"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
                     ]
                 },
                 "name": "addnormtohic",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Output processed file",
-                            "description": ""
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_hic",
                         "target": [
@@ -3037,8 +3231,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "cool",
-                            "argument_type": "Input file"
+                            "file_format": "cool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_cool",
                         "source": [
@@ -3049,7 +3244,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -3066,13 +3262,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "cool2mcool",
                 "outputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "output_mcool",
                         "target": [
                             {
@@ -3086,7 +3285,10 @@
             {
                 "inputs": [
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_mcool",
                         "source": [
                             {
@@ -3101,15 +3303,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
+                        "/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
                     ]
                 },
                 "name": "extract_mcool_normvector_for_juicebox",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "normvector_juicerformat",
-                            "argument_type": "Output processed file"
+                            "file_format": "normvector_juicerformat",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_normvector",
                         "target": [
@@ -3124,8 +3327,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "hic",
-                            "argument_type": "Input file"
+                            "file_format": "hic",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_hic",
                         "source": [
@@ -3135,7 +3339,10 @@
                         ]
                     },
                     {
-                        "meta": {},
+                        "meta": {
+                            "global": false,
+                            "type": "data file"
+                        },
                         "name": "input_mcool",
                         "source": [
                             {
@@ -3150,15 +3357,16 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                        "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                     ]
                 },
                 "name": "add_hic_normvector_to_mcool",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Output processed file"
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "output_mcool",
                         "target": [
@@ -3229,9 +3437,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -3242,9 +3450,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -3255,9 +3463,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bwaIndex",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -3268,7 +3476,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3283,15 +3492,16 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/02d636b9-d82d-4da9-950c-2ca994a13209/"
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a13209/"
                     ]
                 },
                 "name": "bwa-mem",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_bam",
                         "target": [
@@ -3358,9 +3568,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq1",
                         "source": [
@@ -3371,9 +3581,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "fastq",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "fastq2",
                         "source": [
@@ -3384,9 +3594,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bwaIndex",
-                            "argument_type": "Input file",
-                            "description": ""
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -3397,7 +3607,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3412,15 +3623,16 @@
                         "alignment"
                     ],
                     "software_used": [
-                        "/software/42adeb1b-c46c-4ba8-b191-56036ddcd544/"
+                        "/softwares/42adeb1b-c46c-4ba8-b191-56036ddcd544/"
                     ]
                 },
                 "name": "bwa-mem",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_bam",
                         "target": [
@@ -3479,8 +3691,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Input file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "bam",
                         "source": [
@@ -3491,8 +3704,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -3503,7 +3717,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3518,15 +3733,16 @@
                         "sorting"
                     ],
                     "software_used": [
-                        "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
+                        "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
                     ]
                 },
                 "name": "pairsam-parse-sort",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairsam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_pairsam",
                         "target": [
@@ -3580,8 +3796,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Input file"
+                            "file_format": "pairsam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -3592,7 +3809,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "parameter"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3607,15 +3825,16 @@
                         "merging"
                     ],
                     "software_used": [
-                        "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
+                        "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
                     ]
                 },
                 "name": "pairsam-merge",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairsam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "merged_pairsam",
                         "target": [
@@ -3665,8 +3884,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Input file"
+                            "file_format": "pairsam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -3681,15 +3901,16 @@
                         "annotating"
                     ],
                     "software_used": [
-                        "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
+                        "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
                     ]
                 },
                 "name": "pairsam-markasdup",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairsam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "out_markedpairsam",
                         "target": [
@@ -3752,8 +3973,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Input file"
+                            "file_format": "pairsam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -3764,8 +3986,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "chromsizes",
-                            "argument_type": "Input file"
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -3780,18 +4003,19 @@
                         "filtering"
                     ],
                     "software_used": [
-                        "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
+                        "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
                     ]
                 },
                 "name": "pairsam-filter",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
+                            "file_format": "pairs",
+                            "global": true,
                             "secondary_file_formats": [
                                 "pairs_px2"
-                            ]
+                            ],
+                            "type": "data file"
                         },
                         "name": "dedup_pairs",
                         "target": [
@@ -3802,8 +4026,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "lossless_bamfile",
                         "target": [
@@ -3861,8 +4086,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -3873,8 +4099,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "juicer_format_restriction_site_file",
-                            "argument_type": "Input file"
+                            "file_format": "juicer_format_restriction_site_file",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -3889,18 +4116,19 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/e17c3e9c-8882-4478-93da-062c5213341d/"
+                        "/softwares/e17c3e9c-8882-4478-93da-062c5213341d/"
                     ]
                 },
                 "name": "addfragtopairs",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
+                            "file_format": "pairs",
+                            "global": true,
                             "secondary_file_formats": [
                                 "pairs_px2"
-                            ]
+                            ],
+                            "type": "data file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -3953,8 +4181,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -3969,18 +4198,19 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/software/e17c3e9c-8882-4478-93da-062c5213341d/"
+                        "/softwares/e17c3e9c-8882-4478-93da-062c5213341d/"
                     ]
                 },
                 "name": "pairs-patch",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
+                            "file_format": "pairs",
+                            "global": true,
                             "secondary_file_formats": [
                                 "pairs_px2"
-                            ]
+                            ],
+                            "type": "data file"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -4058,8 +4288,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Input file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "bam",
                         "source": [
@@ -4070,8 +4301,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "chromsize",
-                            "argument_type": "Input file"
+                            "file_format": "chromsize",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4082,7 +4314,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "Threads",
                         "source": [
@@ -4099,15 +4332,16 @@
                     ],
                     "description": "Parsing and sorting bam file",
                     "software_used": [
-                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
+                        "/softwares/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-parse-sort",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairsam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "sorted_pairsam",
                         "target": [
@@ -4123,8 +4357,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Input file"
+                            "file_format": "pairsam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -4136,7 +4371,8 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file"
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "nThreads",
                         "source": [
@@ -4152,15 +4388,16 @@
                     ],
                     "description": "Merging pairsam files",
                     "software_used": [
-                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
+                        "/softwares/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-merge",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairsam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "merged_pairsam",
                         "target": [
@@ -4176,8 +4413,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Input file"
+                            "file_format": "pairsam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -4194,15 +4432,16 @@
                     ],
                     "description": "Marking duplicates to pairsam file",
                     "software_used": [
-                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
+                        "/softwares/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-markasdup",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairsam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "dupmarked_pairsam",
                         "target": [
@@ -4218,8 +4457,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairsam",
-                            "argument_type": "Input file"
+                            "file_format": "pairsam",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -4231,8 +4471,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "chromsize",
-                            "argument_type": "Input file"
+                            "file_format": "chromsize",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4249,15 +4490,16 @@
                     ],
                     "description": "Filtering duplicate and invalid reads",
                     "software_used": [
-                        "/software/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
+                        "/softwares/58ed98d7-10d8-4c51-8166-4a813c62ef8c/"
                     ]
                 },
                 "name": "pairsam-filter",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "bam",
-                            "argument_type": "Output processed file"
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "lossless_bamfile",
                         "target": [
@@ -4268,8 +4510,9 @@
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file"
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "filtered_pairs",
                         "target": [
