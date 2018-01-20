@@ -221,9 +221,9 @@ def workflow_2_3(value, system):
 def workflow_3_4(value, system):
     '''Remove argument_cardinality'''
 
-    def io_type_from_arg_type(arg_type):
+    def io_type_from_arg_type(arg_type, step):
         if 'report' in arg_type:
-            if step and step.get('meta') and step['meta'].get('analysis_step_types') and 'QC calculation' in step['meta']['analysis_step_types']:
+            if 'QC calculation' in step.get('meta',{}).get('analysis_step_types',[]):
                 return 'QC'
             else:
                 return 'report'
@@ -247,19 +247,22 @@ def workflow_3_4(value, system):
         else:
             io_meta['global'] = False
 
-        # Upgrade io.meta.type, try to look for 'hints' and assign report, QC, param, reference file; fallback to 'data file' (most common)
+
+        # Upgrade io.meta.type: try to look for 'hints' and assign report, QC, param, reference file; eventually fallback to 'data file' (most common)
         if io_meta.get('argument_type'):
-            initial_type = io_type_from_arg_type(io_meta['argument_type'])
+            initial_type = io_type_from_arg_type(io_meta['argument_type'], step)
             if initial_type:
                 io_meta['type'] = initial_type
             del io_meta['argument_type']
-        if io_type == 'input' and ( # Lol sorry
-            'index' in io.get('name','') or
-            'Index' in io.get('name','') or
-            '_file' in io.get('name','') or
-            'chromsize' in io.get('name','') or # Includes variations incl. 'chromsizes'
-            'chrsize' in io.get('name','') or
-            'reference' in io.get('name','')
+        if not io_meta.get('type') and 'report' in io['name']:
+            io_meta['type'] = 'report'
+        if not io_meta.get('type') and io_type == 'input' and (
+            'index'     in io['name'] or
+            'Index'     in io['name'] or
+            '_file'     in io['name'] or
+            'chromsize' in io['name'] or # Includes variations incl. 'chromsizes'
+            'chrsize'   in io['name'] or
+            'reference' in io['name']
         ):
             io_meta['type'] = 'reference file'
 
@@ -281,14 +284,13 @@ def workflow_3_4(value, system):
 
                 # Set io.meta.type here if not already set
                 if not io_meta.get('type') and arg.get('argument_type'):
-                    initial_type = io_type_from_arg_type(arg['argument_type'])
+                    initial_type = io_type_from_arg_type(arg['argument_type'], step)
                     if initial_type:
                         io_meta['type'] = initial_type
 
-
                 break
 
-        # Set default 'data file' if can't determine type of input/output otherwise.abs
+        # Finally set default 'data file' if don't determine type of input/output to be something else.
         if not io_meta.get('type'):
             io_meta['type'] = 'data file'
 
@@ -296,6 +298,18 @@ def workflow_3_4(value, system):
         if io_meta['type'] != 'parameter' and io_meta.get('argument_format'):
             io_meta['file_format'] = io_meta['argument_format']
             del io_meta['argument_format']
+
+        if not io_meta.get('file_format'): # If no argument_format, try to determine from IO name.
+            if     'fastq'   in io['name']:   io_meta['file_format'] = 'fastq'
+            elif   'fasta'   in io['name']:   io_meta['file_format'] = 'fasta'
+            elif   'pairs'   in io['name']:   io_meta['file_format'] = 'pairs'
+            elif   '_bam'    in io['name']:   io_meta['file_format'] = 'bam'
+            elif   '_hdf5'   in io['name']:   io_meta['file_format'] = 'hdf5'
+            elif   '_bed'    in io['name']:   io_meta['file_format'] = 'bed'
+            elif   '_matrix' in io['name']:   io_meta['file_format'] = 'matrix'
+            elif   '_zip'    in io['name']:   io_meta['file_format'] = 'zip'
+            elif   '_tar'    in io['name']:   io_meta['file_format'] = 'tar'
+
 
         # If cardinality is not yet set, try to determine from name of step we're on.
         if not io_meta.get('cardinality') and io.get('name') == 'input_pairs' and step.get('name') == 'merge_pairs':
@@ -323,8 +337,6 @@ def workflow_3_4(value, system):
     for arg in value.get('arguments'):
         if arg.get('argument_cardinality'):
             del arg['argument_cardinality']
- 
-    print('\n\nUPGRADING')
 
     return value
 
