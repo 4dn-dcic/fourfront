@@ -256,7 +256,7 @@ def workflow_3_4(value, system):
             del io_meta['argument_type']
         if not io_meta.get('type') and 'report' in io['name']:
             io_meta['type'] = 'report'
-        if not io_meta.get('type') and io_type == 'input' and len(step.get('inputs')) > 1) and (
+        if not io_meta.get('type') and io_type == 'input' and len(step.get('inputs')) > 1 and (
             'index'     in io['name'] or
             'Index'     in io['name'] or
             '_file'     in io['name'] or

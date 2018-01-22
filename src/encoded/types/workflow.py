@@ -611,7 +611,7 @@ class WorkflowRun(Item):
                 if global_pointing_source_target['name'] == io_object.get('workflow_argument_name')
             ]
 
-            value_field_name = 'value' if io_type == 'parameter' else 'file' 
+            value_field_name = 'value' if io_type == 'parameter' else 'file'
 
             if len(matched_runtime_io_data) > 0:
                 matched_runtime_io_data = sorted(matched_runtime_io_data, key=lambda io_object: io_object.get('ordinal', 1))
