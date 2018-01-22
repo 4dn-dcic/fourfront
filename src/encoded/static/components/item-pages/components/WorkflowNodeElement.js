@@ -239,11 +239,21 @@ export class WorkflowNodeElement extends React.Component {
         }
         */
 
-        if (node.nodeType === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
-            if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){
-                return <div {...elemProps}>{ node.meta.software_used.name } <span className="lighter">v{ node.meta.software_used.version }</span></div>;
+        // STEPS -  SOFTWARE USED
+        function softwareTitle(s, i){
+            if (typeof s.name === 'string' && typeof s.version === 'string'){
+                return [ i > 0 ? ', ' : null , s.name, ' ', <span className="lighter">v{ s.version }</span>];
             }
-            return <div {...elemProps}>{ node.meta.software_used.title }</div>;
+            return [i > 0 ? ', ' : null, s.title || s.display_title];
+        }
+
+        if (node.nodeType === 'step' && node.meta && Array.isArray(node.meta.software_used) && node.meta.software_used.length > 0 && node.meta.software_used[0].title){
+            return <div {...elemProps}>{ _.map(node.meta.software_used, softwareTitle) }</div>;
+        }
+
+
+        if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
+            return <div {...elemProps}>{ node.name }</div>;
         }
 
         return null;

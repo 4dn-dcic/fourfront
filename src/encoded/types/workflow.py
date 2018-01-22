@@ -606,14 +606,19 @@ class WorkflowRun(Item):
             if not global_pointing_source_target:
                 return False
 
-            matched_runtime_io_data = [ io_object for io_object in wfr_runtime_inputs if global_pointing_source_target['name'] == io_object.get('workflow_argument_name') ]
+            matched_runtime_io_data = [ 
+                io_object for io_object in wfr_runtime_inputs
+                if global_pointing_source_target['name'] == io_object.get('workflow_argument_name')
+            ]
 
-            value_variable_name = 'value' if io_type == 'parameter' else 'file' 
+            value_field_name = 'value' if io_type == 'parameter' else 'file' 
 
             if len(matched_runtime_io_data) > 0:
                 matched_runtime_io_data = sorted(matched_runtime_io_data, key=lambda io_object: io_object.get('ordinal', 1))
                 step_io_arg['run_data'] = {
-                    value_variable_name : [ p['value'] for p in matched_runtime_io_data ], #[ '/files/' + p['value'] + '/' for p in paramsForTarget ], # List of file UUIDs.
+                    value_field_name : [
+                        io_object.get('value', io_object.get('value_qc')) for io_object in matched_runtime_io_data # List of file UUIDs.
+                    ],
                     "type" : io_type,
                     "meta" : [ # Aligned-to-file-list list of file metadata
                         {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.

@@ -857,22 +857,16 @@ export function correctColumnAssignments(graphData){
 
 export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
 
-    var allWorkflowInputs = _.filter(
-        _.flatten( _.pluck(analysis_steps, 'inputs'), true ),
-        function(input){ return input.meta && input.meta.global; }
-    );
-
-    var allWorkflowOutputs = _.filter(
-        _.flatten( _.pluck(analysis_steps, 'outputs'), true ),
-        function(output){ return output.meta && output.meta.global; }
-    );
+    function checkIfGlobal(io){
+        return (io.meta && io.meta.global) || (_.any((io.source || io.target || []), function(tg){ return tg.name && !tg.step; })) || false;
+    }
 
     return parseAnalysisSteps([
         _.extend(
             _.omit(workflowItem, 'arguments', 'analysis_steps', 'link_id', '@context', 'cwl_data'), // Use workflowItem as if it were AnalysisStep
             {
-                'inputs' : allWorkflowInputs,
-                'outputs' : allWorkflowOutputs
+                'inputs'    : _.filter(_.flatten( _.pluck(analysis_steps, 'inputs'), true ), checkIfGlobal),
+                'outputs'   : _.filter(_.flatten( _.pluck(analysis_steps, 'outputs'), true ), checkIfGlobal)
             }
         )
     ]);
