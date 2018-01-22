@@ -779,7 +779,7 @@
                         ],
                         "meta": {
                             "global": true,
-                            "type": "data file",
+                            "type": "reference file",
                             "file_format": "fasta",
                             "cardinality": "single"
                         }

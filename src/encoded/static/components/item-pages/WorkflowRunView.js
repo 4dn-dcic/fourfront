@@ -8,7 +8,7 @@ import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, It
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStepsExist, WorkflowGraphSection, WorkflowGraphSectionControls } from './WorkflowView';
+import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStepsExist, WorkflowGraphSection } from './WorkflowView';
 
 // Test/Debug Data
 //import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
@@ -154,6 +154,7 @@ class GraphSection extends WorkflowGraphSection {
         this.state = {
             'showChart' : 'detail',
             'showParameters' : false,
+            'showReferenceFiles' : true,
             'rowSpacingType' : 'compact',
             'fullscreenViewEnabled' : false
         };

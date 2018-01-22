@@ -105,6 +105,31 @@ export function filterOutParametersFromGraphData(graphData){
     return { nodes, edges };
 }
 
+export function filterOutReferenceFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+
+        if (
+            n && n.meta && (
+                n.meta.type === 'reference file'
+                || (n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1)
+            )
+        ){
+            deleted[n.id] = true;
+            return false;
+        }
+
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
+}
+
 
 /**
  * @export
@@ -255,6 +280,17 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
     }
 
+    referenceFilesCheckbox(){
+        if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
+        return (
+            <div className="inline-block show-params-checkbox-container">
+                <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles}>
+                    Show Reference Files
+                </Checkbox>
+            </div>
+        );
+    }
+
     toggleOpenMenu(){
         this.setState({ 'open' : !this.state.open });
     }
@@ -285,7 +321,7 @@ export class WorkflowGraphSectionControls extends React.Component {
     }
 
     render(){
-        return this.wrapper(this.parametersCheckbox(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
+        return this.wrapper(this.referenceFilesCheckbox(), this.parametersCheckbox(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
     }
 }
 
@@ -353,6 +389,7 @@ export class WorkflowGraphSection extends React.Component {
         this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
         this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
         this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
         this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
         this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
@@ -360,6 +397,7 @@ export class WorkflowGraphSection extends React.Component {
         this.state = {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
+            'showReferenceFiles' : true,
             'rowSpacingType' : 'wide',
             'fullscreenViewEnabled' : false
         };
@@ -378,20 +416,29 @@ export class WorkflowGraphSection extends React.Component {
                 :
                 parseAnalysisSteps(context.steps)
         );
-        if (this.state.showParameters) return graphData;
-        else return filterOutParametersFromGraphData(graphData);
+        if (!this.state.showParameters) {
+            graphData = filterOutParametersFromGraphData(graphData);
+        }
+        if (!this.state.showReferenceFiles){
+            graphData = filterOutReferenceFilesFromGraphData(graphData);
+        }
+
+        return graphData;
     }
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps();
         
         // Filter out legend items which aren't relevant for this context.
-        var keepItems = ['Input File','Output File'];
+        var keepItems = ['Input File', 'Output File', 'Input Reference File'];
         if (this.state.showParameters){
             keepItems.push('Input Parameter');
         }
+        if (this.state.showReferenceFiles){
+            keepItems.push('Input Reference File');
+        }
         keepItems.push('Intermediate File');
-        var legendItems = _.pick(...[WorkflowDetailPane.Legend.defaultProps.items].concat(keepItems));
+        var legendItems = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems);
         var commonGraphProps = commonGraphPropsFromProps(_.extend({ 'legendItems' : legendItems }, this.props));
 
         return _.extend(commonGraphProps, this.parseAnalysisSteps(), {'rowSpacingType' : this.state.rowSpacingType });
@@ -418,6 +465,10 @@ export class WorkflowGraphSection extends React.Component {
 
     onToggleShowParameters(){
         this.setState({ 'showParameters' : !this.state.showParameters });
+    }
+
+    onToggleReferenceFiles(){
+        this.setState({ 'showReferenceFiles' : !this.state.showReferenceFiles });
     }
 
     onChangeRowSpacingType(eventKey, evt){
@@ -460,14 +511,15 @@ export class WorkflowGraphSection extends React.Component {
                     <WorkflowGraphSectionControls
                         {..._.pick(this.props, 'context', 'href')}
                         showChartType={this.state.showChart}
-                        onChangeShowChartType={this.onChangeShowChartType}
                         rowSpacingType={this.state.rowSpacingType}
-                        onChangeRowSpacingType={this.onChangeRowSpacingType}
                         showParameters={this.state.showParameters}
+                        showReferenceFiles={this.state.showReferenceFiles}
+                        onChangeShowChartType={this.onChangeShowChartType}
+                        onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleShowParameters={this.onToggleShowParameters}
+                        onToggleReferenceFiles={this.onToggleReferenceFiles}
                         fullscreenViewEnabled={this.state.fullscreenViewEnabled}
                         onToggleFullScreenView={this.onToggleFullScreenView}
-
                     />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>

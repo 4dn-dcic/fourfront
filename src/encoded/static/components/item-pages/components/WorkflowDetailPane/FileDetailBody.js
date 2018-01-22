@@ -50,12 +50,11 @@ export class FileDetailBody extends React.Component {
         var hrefToRequest = null;
 
         if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
-            if (file === 'Forbidden') {
-                return false;
-            }
-            hrefToRequest = '/files/' + file + '/';
+            if (file === 'Forbidden' || file.length === 0) return false;
+            if (file.charAt(0) === '/') hrefToRequest = file; // Handle @ids just in case.
+            else hrefToRequest = '/' + file + '/';
         } else if (file && typeof file === 'object' && !Array.isArray(file)){ // If we have file object but has little info. TODO: REMOVE
-            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.itemUtil.atId(file);
         } else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){ // If we have a group of files
             hrefToRequest = this.props.node.meta.workflow;
         }

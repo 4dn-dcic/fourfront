@@ -29,14 +29,24 @@ export class WorkflowNodeElement extends React.Component {
         return WorkflowNodeElement.ioFileTypes.has(node.ioType);
     }
 
+    static isNodeGroup(node){
+        return ((node.nodeType || '').indexOf('group') > -1);
+    }
+
     static doesRunDataExist(node){
-        if (WorkflowNodeElement.isNodeParameter(node)){
+        if (WorkflowNodeElement.isNodeGroup(node)){
+            return (
+                node.meta && node.meta.run_data && node.meta.run_data.file
+                && Array.isArray(node.meta.run_data.file) && node.meta.run_data.file.length > 0 && typeof node.meta.run_data.file[0]['@id'] === 'string'
+                /* && typeof node.meta.run_data.file.display_title === 'string'*/
+            );
+        } else if (WorkflowNodeElement.isNodeParameter(node)){
             return (node.meta && node.meta.run_data && (
                 typeof node.meta.run_data.value === 'string' ||
                 typeof node.meta.run_data.value === 'number' ||
                 typeof node.meta.run_data.value === 'boolean'
             ));
-        } else /*if (WorkflowNodeElement.isNodeFile(node))*/ { // Uncomment this in-line comment once all Workflows have been upgraded and have 'step.inputs[]|outputs[].meta.type'
+        } else if (WorkflowNodeElement.isNodeFile(node)) { // Uncomment this in-line comment once all Workflows have been upgraded and have 'step.inputs[]|outputs[].meta.type'
             return (
                 node.meta && node.meta.run_data && node.meta.run_data.file
                 && typeof node.meta.run_data.file['@id'] === 'string'

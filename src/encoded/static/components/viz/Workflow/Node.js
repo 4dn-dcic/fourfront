@@ -209,24 +209,26 @@ export default class Node extends React.Component {
     isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
 
     render(){
-        var node        = this.props.node,
-            disabled    = typeof node.disabled !== 'undefined' ? node.disabled : null,
-            className   = "node node-type-" + node.nodeType;
+        var node             = this.props.node,
+            disabled         = typeof node.disabled !== 'undefined' ? node.disabled : null,
+            isCurrentContext = typeof node.isCurrentContext !== 'undefined' ? node.isCurrentContext : null,
+            classNameList    = ["node", "node-type-" + node.nodeType];
 
         if (disabled === null && typeof this.props.isNodeDisabled === 'function'){
             disabled = this.props.isNodeDisabled(node);
         }
 
+        if (isCurrentContext === null && typeof this.props.isNodeCurrentContext === 'function'){
+            isCurrentContext = this.props.isNodeCurrentContext(node);
+        }
+
         var selected = this.isSelected() || false;
         var related = this.isRelated() || false;
 
-        if      (disabled)                                   className += ' disabled';
-        if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
-        else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className;
-
-        if (this.props.isCurrentContext){
-            className += ' ' + 'current-context';
-        }
+        if      (disabled)                                   classNameList.push('disabled');
+        if      (isCurrentContext)                           classNameList.push('current-context');
+        if      (typeof this.props.className === 'function') classNameList.push(this.props.className(node));
+        else if (typeof this.props.className === 'string'  ) classNameList.push(this.props.className);
 
         var visibleNodeProps = _.extend(_.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'), {
             'disabled' : disabled,
@@ -236,7 +238,7 @@ export default class Node extends React.Component {
 
         return (
             <div
-                className={className}
+                className={classNameList.join(' ')}
                 data-node-key={node.id || node.name}
                 data-node-type={node.nodeType}
                 data-node-global={node.meta && node.meta.global === true}

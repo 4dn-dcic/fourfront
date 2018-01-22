@@ -209,16 +209,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      */
     function generateStepNode(step, column){
         return {
-            nodeType : 'step',
-            name : step.name,
-            _inputs : step.inputs,
-            _outputs : step.outputs,
-            meta : _.extend(
-                {},
-                step.meta || {},
-                _.omit(step, 'inputs', 'outputs', 'meta'),
-            ),
-            column : column
+            'nodeType' : 'step',
+            'name'      : step.name,
+            '_inputs'   : step.inputs,
+            '_outputs'  : step.outputs,
+            'meta'      : _.extend( {}, step.meta || {}, _.omit(step, 'inputs', 'outputs', 'meta') ),
+            'column'    : column
         };
     }
 
@@ -242,15 +238,15 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var ioType = stepIOArgument.meta && typeof stepIOArgument.meta.type === 'string' && stepIOArgument.meta.type.toLowerCase(); // Will be one of "data file", "report", "QC", "reference file", "parameter"
 
         var ioNode = {
-            column          : column,
-            ioType          : ioType,
-            id              : ioNodeID(stepIOArgument, readOnly),
-            name            : ioNodeName(stepIOArgument),// stepInput.name, 
-            argNamesOnSteps : namesOnSteps,
-            nodeType        : nodeType,
-            _source         : stepIOArgument.source,
-            _target         : stepIOArgument.target,
-            meta            : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta', 'source', 'target'))
+            'column'          : column,
+            'ioType'          : ioType,
+            'id'              : ioNodeID(stepIOArgument, readOnly),
+            'name'            : ioNodeName(stepIOArgument),// stepInput.name, 
+            'argNamesOnSteps' : namesOnSteps,
+            'nodeType'        : nodeType,
+            '_source'         : stepIOArgument.source,
+            '_target'         : stepIOArgument.target,
+            'meta'            : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta', 'source', 'target'))
         };
 
         if (nodeType === 'input')       ioNode.inputOf = [stepNode]; // May be input of multiple steps
@@ -330,9 +326,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         //console.log('PARAM', isParameterArgument, valuesForArgument);
 
         // CREATE/HANDLE GROUP NODES ---- N.B. THIS IS LIKELY TEMPORARY AND WILL CHANGE ONCE WE HAVE DESIGN/IDEA FOR GROUPED WFRs. DOES NOT HANDLE PARAMETERS
-        var groupTypeToCheck = nodeType === 'output' ? 'Output File Group' : 'Input File Group';
         var groupSources = _.filter(stepIOArgument.source || [], function(s){
-            return (s.type === groupTypeToCheck && typeof s.for_file === 'string');
+            return (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] !== 'undefined' && typeof s.for_file === 'string');
         });
 
         if (groupSources.length > 0){
@@ -380,16 +375,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 var namesOnSteps = {};
                 namesOnSteps[stepNode.name] = stepIOArgument.name;
                 var groupNode = {
-                    column      : column,
-                    format      : groupTypeToCheck.toLowerCase(),
-                    id          : ioNodeName(stepIOArgument)+ '.group:' + groupingName + '.' + wfPair[0],
-                    name        : ioNodeName(stepIOArgument),
-                    argNamesOnSteps : namesOnSteps,
-                    nodeType    : nodeType + '-group',
-                    _source     : stepIOArgument.source,
-                    _target     : stepIOArgument.target,
-                    meta        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta', 'source', 'target')),
-                    inputOf     : [stepNode]
+                    'column'      : column,
+                    'ioType'      : (stepIOArgument.meta && stepIOArgument.meta.type) || 'group',
+                    'id'          : ioNodeName(stepIOArgument)+ '.group:' + groupingName + '.' + wfPair[0],
+                    'name'        : ioNodeName(stepIOArgument),
+                    'argNamesOnSteps' : namesOnSteps,
+                    'nodeType'    : nodeType + '-group',
+                    '_source'     : stepIOArgument.source,
+                    '_target'     : stepIOArgument.target,
+                    'meta'        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta', 'source', 'target')),
+                    'inputOf'     : [stepNode]
                 };
                 groupNode.meta[groupingName] = wfPair[0];
                 m.push(groupNode);
@@ -498,12 +493,17 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     // Re-use global inputs nodes if not cardinality:array
                     if (fullStepInput.source.length === 1 && typeof fullStepInput.source[0].step === 'undefined' && !(fullStepInput.meta && fullStepInput.meta.cardinality === 'array')){ // Is global input file
                         if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && n._source[0].name === fullStepInput.source[0].name){
-                            return true;
+                            // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
+                            if (
+                                !(n.meta && n.meta.run_data)
+                                || (n.meta.run_data.file && n.meta.run_data.file.uuid && typeof fullStepInput.source[0].for_file === 'string' && n.meta.run_data.file.uuid === fullStepInput.source[0].for_file)
+                                || (typeof n.meta.run_data.value !== 'undefined' && fullStepInput.run_data && typeof fullStepInput.run_data.value !== 'undefined' && n.meta.run_data.file.value === fullStepInput.run_data.value)
+                            ){
+                                ioNodeIDsMatched[n.id] = ioNodeName(fullStepInput);
+                                return true;
+                            }
                         }
-                    }
-
-                    // Compare IO nodes against step input arg sources
-                    else if (_.any(fullStepInput.source, function(s){
+                    } else if (_.any(fullStepInput.source, function(s){ // Compare IO nodes against step input arg sources
                         
                         // Match nodes by source step & name, check that they target this step.
                         if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n._target) && _.any(n._target, function(t){ return t.step === step.name; })){
@@ -519,8 +519,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
                         // Match Groups
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
-                            if (n.meta && Array.isArray(n._source) && _.any(n._source, function(nS){
-                                return typeof nS.grouped_by === 'string' && typeof nS[nS.grouped_by] === 'string' && nS[nS.grouped_by] === s[s.grouped_by];
+                            if (n.meta && Array.isArray(n._source) && _.any(n._source, function(nodeSource){
+                                return typeof nodeSource.grouped_by === 'string' && typeof nodeSource[nodeSource.grouped_by] === 'string' && nodeSource[nodeSource.grouped_by] === s[s.grouped_by];
                             })){ // Matched by Workflow (or other grouping type), now lets ensure it's the right group.
                                 var nodeBeingCheckedGroupFiles = _.pluck(_.filter(n._source, function(nS){ return typeof nS.for_file === 'string'; }), 'for_file');
                                 return (s.for_file && _.contains(nodeBeingCheckedGroupFiles, s.for_file) && true) || false;
@@ -543,11 +543,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 })
             );
 
-            //console.log('MATCHED', currentInputNodesMatched, nodes);
+            //console.log('MATCHED', currentInputNodesMatched, nodes, ioNodeIDsMatched);
 
             // Step 1b. Create input nodes we need to add, and extend our matched node with its fake-new-node-counterpart's data.
             var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
             //console.log('NEED TO FILTER for' + fullStepInput.name, _.pluck(inputNodesToMatch, 'id'));
+            //console.log('NEED TO EXTEND FROM', inputNodesToMatch);
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
@@ -572,7 +573,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         }
                         if (!inNode) throw new Error(n.id + " new node version not found");
                     } catch (e){
-                        console.warn("Didn't find new node to extend from which was previously matched against node", n, e);
+                        console.warn("Didn't find newly-created temporary node to extend from which was previously matched against node", n, e);
                         return;
                     }
 
