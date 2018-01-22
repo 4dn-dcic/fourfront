@@ -205,7 +205,7 @@ class Protocol(Item, ItemWithAttachment):
     embedded_list = ["award.project", "lab.title"]
 
     def display_title(self):
-        diplay_title = ''
+        display_title = ''
         if self.properties.get('attachment'):
             attach = self.properties['attachment']
             if attach.get('download'):  # this must be or attachment shouldn't be valid

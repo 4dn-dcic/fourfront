@@ -419,7 +419,7 @@ class Item(snovault.Item):
         # if none of the existing terms are available, use @type + date_created
         try:
             type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
-            diplay_title = type_date
+            display_title = type_date
         # last resort, use uuid
         except:
             display_title = self.properties.get('uuid', None)
