@@ -20,7 +20,7 @@ import ReactTooltip from 'react-tooltip';
 
 /**
  * Pass this to props.onNodeClick for Graph.
- * 
+ *
  * @export
  * @param {Object} node - Node clicked on.
  * @param {Object|null} selectedNode - Node currently selected, if any.
@@ -81,8 +81,8 @@ export function doValidAnalysisStepsExist(steps){
 
 /**
  * For when "Show Parameters" UI setting === false.
- * 
- * @param {Object}      graphData 
+ *
+ * @param {Object}      graphData
  * @param {Object[]}    graphData.nodes
  * @param {Object[]}    graphData.edges
  * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.

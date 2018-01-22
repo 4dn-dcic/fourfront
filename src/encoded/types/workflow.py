@@ -606,7 +606,7 @@ class WorkflowRun(Item):
             if not global_pointing_source_target:
                 return False
 
-            matched_runtime_io_data = [ 
+            matched_runtime_io_data = [
                 io_object for io_object in wfr_runtime_inputs
                 if global_pointing_source_target['name'] == io_object.get('workflow_argument_name')
             ]

@@ -325,7 +325,6 @@ def workflow_3_4(value, system):
 
         return io_meta
 
-        
     # Update step.inputs|outputs.meta properties from existing WF step & argument data
     for step in value.get('steps'):
         for op in step.get('outputs', []):
