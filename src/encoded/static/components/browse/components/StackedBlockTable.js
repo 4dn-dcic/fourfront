@@ -305,7 +305,7 @@ export class StackedBlockListViewMoreButton extends React.Component {
         return (
             <div className="view-more-button" onClick={this.props.handleCollapseToggle}>
                 <i className={"icon icon-" + (collapsedMsg ? 'plus': 'minus')}></i>
-                &nbsp; { collapseTitle.call(this) }
+                { collapseTitle.call(this) }
             </div>
         );
     }

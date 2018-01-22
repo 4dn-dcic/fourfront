@@ -553,6 +553,7 @@ $open-expset-table-side-border-color : #e4e4e4;
 					cursor: pointer;
 					margin-right: 6px;
 					padding: 2px 0;
+					margin-left: 8px;
 					opacity: 0.66;
 				}
 			}
@@ -712,7 +713,7 @@ $small-label-accession-font-size : 0.75rem;
 
 			.view-more-button {
 				text-align: left;
-				padding: 0px 12px;
+				padding: 1px 12px 0;
 				line-height: 32px;
 				cursor: pointer;
 				border-top: 1px solid #888;
@@ -722,6 +723,9 @@ $small-label-accession-font-size : 0.75rem;
 				font-size: 0.85rem;
 				position: relative;
 				z-index: 10;
+				> i.icon {
+					margin-right: 10px;
+				}
 				&:hover {
 					//background: rgba(0,0,0,0.05);
 				}
@@ -732,6 +736,7 @@ $small-label-accession-font-size : 0.75rem;
 			display: block;
 			position: relative;
 			overflow-y: hidden;
+			transform: translate3d(0px,0px,0px);
 
 			> .name {
 				//@media screen and (min-width: $screen-md-min){
