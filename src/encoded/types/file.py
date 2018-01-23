@@ -269,7 +269,7 @@ class File(Item):
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
-        return '{}{}'.format(accession, file_extension)
+        return self.add_status_2_display_title('{}{}'.format(accession, file_extension))
 
     @calculated_property(schema={
         "title": "File Type",

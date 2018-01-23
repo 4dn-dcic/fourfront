@@ -32,8 +32,10 @@ class OntologyTerm(Item):
     })
     def display_title(self, request, term_id, term_name=None):
         if term_name is not None:
-            return term_name
-        return term_id
+            display_title = term_name
+        else:
+            display_title = term_id
+        return self.add_status_2_display_title(display_title)
 
 
 @collection(
@@ -59,4 +61,4 @@ class Ontology(Item):
         "type": "string"
     })
     def display_title(self, request, ontology_name):
-        return ontology_name
+        return self.add_status_2_display_title(ontology_name)

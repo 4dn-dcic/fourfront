@@ -235,4 +235,4 @@ class Publication(Item):
             minipub = minipub + ' (' + date_published[0:4] + ')'
         if title is not None:
             minipub = minipub + ' ' + title[0:100]
-        return minipub
+        return self.add_status_2_display_title(minipub)

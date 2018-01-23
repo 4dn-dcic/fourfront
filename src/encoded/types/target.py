@@ -101,5 +101,7 @@ class Target(Item):
     def display_title(self, request, targeted_genes=None, description=None,
                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.target_summary_short(request, targeted_genes, description,
-                                         targeted_proteins, targeted_rnas, targeted_structure)
+        return self.add_status_2_display_title(
+            self.target_summary_short(request, targeted_genes, description,
+                                      targeted_proteins, targeted_rnas, targeted_structure)
+        )

@@ -69,4 +69,6 @@ class Modification(Item):
     })
     def display_title(self, request, modification_type=None, genomic_change=None, target_of_mod=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.modification_name_short(request, modification_type, genomic_change, target_of_mod)
+        return self.add_status_2_display_title(
+            self.modification_name_short(request, modification_type, genomic_change, target_of_mod)
+        )
