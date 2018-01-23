@@ -417,12 +417,13 @@ class Item(snovault.Item):
                     display_title = self.add_accession_to_title(display_title)
                 break
         # if none of the existing terms are available, use @type + date_created
-        try:
-            type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
-            display_title = type_date
-        # last resort, use uuid
-        except:
-            display_title = self.properties.get('uuid', None)
+        if not display_title:
+            try:
+                type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
+                display_title = type_date
+                # last resort, use uuid
+            except:
+                display_title = self.properties.get('uuid', None)
         return self.add_status_2_display_title(display_title)
 
     @snovault.calculated_property(schema={
