@@ -392,41 +392,17 @@
           ]
         }
     },
-    "antibody": {
-        "targeted_factor": {
-            "title": "Target",
-            "description": "Information about the target of the Antibody in the IP",
+    "antibody_info": {
+        "antibody": {
+            "title": "Antibody",
+            "description": "Reference to a 4DN antibody object",
             "type": "string",
-            "linkTo": "Target"
-        },
-        "antibody_name": {
-            "title": "Antibody Name",
-            "description": "Short label for the antibody - label like anti-CTCF",
-            "type": "string"
-        },
-        "antibody_product_no": {
-            "title": "Antibody Catalog Number",
-            "description": "The catalog number for commercially obtained antibody",
-            "type": "string"
+            "linkTo": "Antibody"
         },
         "antibody_lot_no": {
             "title": "Antibody Lot Number",
             "description": "A lot number or other unique identifier for a particular antibody lot",
             "type": "string"
-        },
-        "antibody_vendor":{
-            "title": "Antibody Vendor",
-            "description": "The company or lab that is the source of the antibody.",
-            "type": "string",
-            "linkTo": "Vendor"
-        },
-        "encode_ab_accession": {
-            "@type": "@id",
-            "rdfs:subPropertyOf": "rdfs:seeAlso",
-            "title": "ENCODE ACCESSION",
-            "description": "If the antibody exists in ENCODE enter it's accession.",
-            "type": "string",
-            "pattern": "^ENCAB[0-9]{3}[A-Z]{3}"
         }
     },
     "sop_mapping": {

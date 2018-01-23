@@ -84,6 +84,30 @@ class Award(Item):
 
 
 @collection(
+    name='antibodies',
+    unique_key='antibody:antibody_name',
+    properties={
+        'title': 'Antibodies',
+        'description': 'Listing of antibodies',
+    })
+class Antibody(Item):
+    """Antibody class."""
+
+    item_type = 'antibody'
+    schema = load_schema('encoded:schemas/antibody.json')
+    name_key = 'antibody_name'
+
+    def display_title(self):
+        dt = ''
+        if self.properties.get('antibody_name'):
+            dt = self.properties.get('antibody_name')
+        if self.properties.get('antibody_encode_accession'):
+            acc = self.properties.get('antibody_encode_accession')
+            dt = dt + ' (' + acc + ')'
+        return dt
+
+
+@collection(
     name='badges',
     unique_key='badge:badgename',
     properties={
