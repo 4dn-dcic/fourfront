@@ -84,7 +84,7 @@ class Award(Item):
 
 
 @collection(
-    name='antibodies',
+    name='antibodys',
     unique_key='antibody:antibody_name',
     properties={
         'title': 'Antibodies',
