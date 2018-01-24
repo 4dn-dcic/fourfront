@@ -79,6 +79,7 @@
         "description": "GITAR Hi-C data processing pipeline",
         "lab": "4dn-dcic-lab",
         "name": "gitar",
+        "status" : "released",
         "steps": [
             {
                 "inputs": [

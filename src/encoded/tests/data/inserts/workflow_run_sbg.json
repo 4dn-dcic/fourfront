@@ -147,6 +147,7 @@
             "workflow_argument_name":"chrlen_file"
         }
     ],
+    "status" : "released",
     "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 },{
     "uuid": "d8a60edf-49e5-4c33-afab-9ec90d65fae4",

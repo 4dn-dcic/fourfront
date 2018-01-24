@@ -58,10 +58,15 @@ export function allFilesForWorkflowRunMappedByUUID(item){
     return _.object(
         _.map(
             _.filter(
-                _.pluck( (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []), 'value' ),
-                function(file){
+                (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []),
+                function(fileContainer){
+                    var file = fileContainer.value || fileContainer.value_qc || null;
                     if (!file || typeof file !== 'object') {
                         console.error("No file ('value' property) embedded for: ", file);
+                        return false;
+                    }
+                    if (typeof file.uuid !== 'string' && typeof file.error === 'string'){
+                        console.error('Error on file for argument ' +  + ': ' + file.error);
                         return false;
                     }
                     if (typeof file.uuid !== 'string') {
@@ -70,7 +75,8 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                     return true;
                 }
             ),
-            function(file){
+            function(fileContainer){
+                var file = fileContainer.value || fileContainer.value_qc || null;
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value
