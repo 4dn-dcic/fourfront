@@ -1660,7 +1660,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         &:not(.constant-panel) {
             > div.inline-block {
 
-                &.show-params-checkbox-container {
+                &.checkbox-container {
                     padding: 8px 12px 6px 0;
                     vertical-align: middle;
                     font-size: 0.9rem;
@@ -1675,7 +1675,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
                 @media screen and (max-width: $screen-md-max){
                     display: block;
-                    &.show-params-checkbox-container {
+                    &.checkbox-container {
                         padding-top: 5px;
                         padding-bottom: 5px;
                         height: auto;

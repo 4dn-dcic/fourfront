@@ -245,6 +245,7 @@ export default class Node extends React.Component {
                 data-node-selected={selected}
                 data-node-related={related}
                 data-node-type-detail={node.ioType && node.ioType.toLowerCase()}
+                data-node-column={node.column}
                 style={{
                     'top' : node.y,
                     'left' : node.x,

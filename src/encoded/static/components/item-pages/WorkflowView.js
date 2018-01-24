@@ -205,7 +205,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
 
         return (
-            <div className="inline-block" key="chart-type-dropdown">
+            <div className="inline-block for-state-showChart" key="chart-type-dropdown">
                 <DropdownButton
                     id="detail-granularity-selector"
                     pullRight
@@ -223,7 +223,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block" key="rowspacing-dropdown-block">
+            <div className="inline-block" key="rowspacing-dropdown-block for-state-rowSpacingType">
                 <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType}/>
             </div>
         );
@@ -233,7 +233,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
         if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <div className="inline-block" key="toggle-fullscreen">
+                <div className="inline-block for-state-fullscreenViewEnabled" key="toggle-fullscreen">
                     <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
                         <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
                     </Button>
@@ -248,7 +248,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block show-params-checkbox-container" key="show-params">
+            <div className="inline-block checkbox-container for-state-showParameters" key="show-params">
                 <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}>
                     Show Parameters
                 </Checkbox>
@@ -259,7 +259,7 @@ export class WorkflowGraphSectionControls extends React.Component {
     referenceFilesCheckbox(){
         if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
         return (
-            <div className="inline-block show-params-checkbox-container">
+            <div className="inline-block checkbox-container for-state-showReferenceFiles" key="show-reference-files">
                 <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles}>
                     Show Reference Files
                 </Checkbox>

@@ -155,7 +155,7 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
     indirectFilesCheckbox(){
         if (typeof this.props.showIndirectFiles !== 'boolean' || typeof this.props.onToggleIndirectFiles !== 'function') return null;
         return (
-            <div className="inline-block show-params-checkbox-container">
+            <div className="inline-block checkbox-container">
                 <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles} disabled={this.props.isShowMoreContextCheckboxDisabled}>
                     Show More Context
                 </Checkbox>
@@ -165,7 +165,7 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
     allRunsCheckbox(){
         if (typeof this.props.allRuns !== 'boolean' || typeof this.props.onToggleAllRuns !== 'function') return null;
         return (
-            <div className="inline-block show-params-checkbox-container">
+            <div className="inline-block checkbox-container">
                 <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns} disabled={this.props.isAllRunsCheckboxDisabled}>
                     { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
                 </Checkbox>
