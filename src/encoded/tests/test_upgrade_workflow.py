@@ -109,7 +109,6 @@ def workflow_3(software, award, lab):
                     },
                     {
                         "meta": {
-                            "argument_format": "pairs",
                             "argument_type": "Input file"
                         },
                         "name": "input_pairs_index",
@@ -363,5 +362,22 @@ def test_workflow_upgrade_3_4(
     assert value['steps'][0]['inputs'][0]['source'][0].get('type') == None
     assert value['steps'][0]['outputs'][0]['target'][0].get('type') == None
 
-    # TODO: More checks and things.
+    assert value['steps'][0]['inputs'][0]['meta'].get('file_format') == 'pairs'
+    assert value['steps'][0]['inputs'][1]['meta'].get('file_format') == 'pairs'
+    assert value['steps'][0]['inputs'][0]['meta'].get('cardinality') == 'array' # 'input_pairs' arg of 'merge_pairs' should get this auto-assigned
+
+    assert value['steps'][0]['inputs'][0]['meta'].get('type') == 'data file'
+    assert value['steps'][0]['inputs'][1]['meta'].get('type') == 'reference file' # 'input_pairs_index' has 'index' in name ==> 'reference file' upgrade.
+
+    assert value['steps'][0]['inputs'][0]['meta'].get('global') == True
+    assert value['steps'][0]['inputs'][1]['meta'].get('global') == True
+
+    assert value['steps'][0]['outputs'][0]['meta'].get('file_format') == 'pairs_px2'
+    assert value['steps'][0]['outputs'][1]['meta'].get('file_format') == 'pairs'
+
+    assert value['steps'][0]['outputs'][0]['meta'].get('global') == True
+    assert value['steps'][0]['outputs'][1]['meta'].get('global') == True
+
+    assert value['steps'][0]['outputs'][0]['meta'].get('type') == 'data file' # We don't transform outputs to reference files
+    assert value['steps'][0]['outputs'][1]['meta'].get('type') == 'data file'
 
