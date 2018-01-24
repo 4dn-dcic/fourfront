@@ -2,7 +2,6 @@
     {
         "award": "1U01CA200059-01",
         "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
-        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "lab": "4dn-dcic-lab",
         "name": "STAR",
         "purpose": [
@@ -15,6 +14,7 @@
             "aligner"
         ],
         "source_url": "https://github.com/alexdobin/STAR/releases",
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "title": "STAR_2.5.1b",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66",
         "version": "2.5.1b"
@@ -22,7 +22,6 @@
     {
         "award": "1U01CA200059-01",
         "description": "Docker container for star",
-        "documentation_url": "https://docs.docker.com",
         "lab": "4dn-dcic-lab",
         "name": "DOCKER STAR",
         "references": [
@@ -31,6 +30,7 @@
         "software_type": [
             "docker container"
         ],
+        "documentation_url": "https://docs.docker.com",
         "title": "DOCKER STAR_1",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a67",
         "version": "1"
@@ -346,5 +346,68 @@
         "source_url": "https://github.com/mirnylab/pairsamtools",
         "title": "pairsamtools_eccd21",
         "uuid": "58ed98d7-10d8-4c51-8166-4a813c62ef8c"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "f2eb460",
+        "lab": "4dn-dcic-lab",
+        "name": "repli-seq-pipeline",
+        "software_type": [
+            "aligner",
+            "filter",
+            "normalizer",
+            "smoother"
+        ],
+        "source_url": "https://github.com/4dn-dcic/repli-seq-pipeline",
+        "title": "repli-seq-pipeline_f2eb46",
+        "uuid": "653499f6-0b91-48e0-b2d6-a40e1771e466"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "cutadapt",
+        "software_type": [
+            "adapter remover"
+        ],
+        "source_url": "https://github.com/marcelm/cutadapt",
+        "title": "cutadapt_1.14",
+        "uuid": "97ffd707-b673-4184-a0f6-ca1dfc324067",
+        "version": "1.14"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bwa",
+        "software_type": [
+            "aligner"
+        ],
+        "source_url": "https://github.com/lh3/bwa",
+        "title": "bwa_0.7.15",
+        "uuid": "5befdeda-66a8-43bc-a469-5a5e7248198e",
+        "version": "0.7.15"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bedtools",
+        "software_type": [
+            "filter"
+        ],
+        "source_url": "https://github.com/arq5x/bedtools2",
+        "title": "bedtools_2.26.0",
+        "uuid": "13d47cb7-79d1-4472-8d6f-1e1263631b4e",
+        "version": "2.26.0"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "samtools",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "https://github.com/samtools/samtools",
+        "title": "samtools_1.4",
+        "uuid": "752e712f-4ebe-4335-a95e-53cd55a8a42f",
+        "version": "1.4"
     }
 ]
