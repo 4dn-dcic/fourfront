@@ -14,6 +14,7 @@
             "aligner"
         ],
         "source_url": "https://github.com/alexdobin/STAR/releases",
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "title": "STAR_2.5.1b",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66",
         "version": "2.5.1b"
@@ -29,6 +30,7 @@
         "software_type": [
             "docker container"
         ],
+        "documentation_url": "https://docs.docker.com",
         "title": "DOCKER STAR_1",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a67",
         "version": "1"
