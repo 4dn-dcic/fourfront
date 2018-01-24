@@ -850,7 +850,7 @@
                         "meta": {
                             "global": true,
                             "type": "reference file",
-                            "file_format": "fastq",
+                            "file_format": "chromsizes",
                             "cardinality": "single"
                         }
                     },

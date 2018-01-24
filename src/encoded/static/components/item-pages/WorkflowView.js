@@ -45,20 +45,7 @@ export function commonGraphPropsFromProps(props){
             return <WorkflowNodeElement {...graphProps} schemas={props.schemas} node={node}/>;
         },
         'rowSpacingType' : 'wide',
-        'nodeClassName' : function(node){
-            var file = (
-                node.meta.run_data && node.meta.run_data.file
-                && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
-                && node.meta.run_data.file
-            );
-
-            if (file && Array.isArray(file['@type'])){
-                if (file['@type'].indexOf('FileReference') > -1){
-                    return 'node-item-type-file-reference';
-                }
-            }
-            return '';
-        },
+        'nodeClassName' : null,
         'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : onItemPageNodeClick,
         'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : true,
         'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : true
@@ -97,10 +84,7 @@ export function filterOutParametersFromGraphData(graphData){
         return true;
     });
     var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
+        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
     });
     return { nodes, edges };
 }
@@ -109,12 +93,7 @@ export function filterOutReferenceFilesFromGraphData(graphData){
     var deleted = {  };
     var nodes = _.filter(graphData.nodes, function(n, i){
 
-        if (
-            n && n.meta && (
-                n.meta.type === 'reference file'
-                || (n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1)
-            )
-        ){
+        if (n.ioType === 'reference file'){
             deleted[n.id] = true;
             return false;
         }
@@ -122,10 +101,7 @@ export function filterOutReferenceFilesFromGraphData(graphData){
         return true;
     });
     var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
+        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
     });
     return { nodes, edges };
 }
@@ -398,7 +374,7 @@ export class WorkflowGraphSection extends React.Component {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
             'showReferenceFiles' : true,
-            'rowSpacingType' : 'wide',
+            'rowSpacingType' : 'compact',
             'fullscreenViewEnabled' : false
         };
     }

@@ -148,7 +148,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         files_by_argument_name = OrderedDict()
         for f in set_of_files:
             arg_name = f.get('workflow_argument_name')
-            if arg_name:
+            if arg_name and f.get('value', f.get('value_qc')):
                 if files_by_argument_name.get(arg_name) is None:
                     files_by_argument_name[arg_name] = [f]
                 else:
@@ -195,7 +195,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
                         "step" : workflow_run_model_obj.get('@id'),
-                        "type" : "Output file",
                         "for_file" : in_file_uuid,
                         "workflow" : workflow_run_model_obj.get('workflow')
                     })
@@ -252,7 +251,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_out_workflow_runs:
             untraced_in_files.append(in_file_uuid)
             source_for_in_file = {
-                "type" : "Input File Group",
                 "for_file" : in_file_uuid,
                 "step" : workflow_run_model_obj.get('@id'),
                 "grouped_by" : "workflow",
@@ -364,7 +362,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         output_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('output_files', []))
         for argument_name, output_files_for_arg in output_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
-            files = [ f.get('value', f.get('value_qc')) for f in output_files_for_arg if (f.get('value', f.get('value_qc'))) ]
+            files = [ f.get('value', f.get('value_qc')) for f in output_files_for_arg ]
             file_items = []
             original_file_in_output = False
             file_format = (workflow_step_io and workflow_step_io.get('meta', {}).get('file_format')) or None

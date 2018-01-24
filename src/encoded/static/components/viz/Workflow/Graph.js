@@ -109,7 +109,7 @@ export default class Graph extends React.Component {
             // For any 'global input files', put them in first column (index 0).
             // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
             _.forEach(nodes, function(node){
-                if (node.nodeType === 'input' && node.meta && node.meta.global && !node.outputOf && node.column !== 0){
+                if (node.nodeType === 'input' && node.ioType === 'data file' && node.meta && node.meta.global && !node.outputOf && node.column !== 0){
                     node.column = 0;
                 }
             });

@@ -181,6 +181,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     }
 
     function compareTwoFilesByUUID(file1, file2){
+        if (!file1 || !file2) return false;
         if (typeof file1 === 'string' && typeof file2 === 'string' && file1 === file2){ // Somewhat deprecated case, but can still occur if WorkflowRun has not finished indexing and we are graphing it.
             return true;
         }
