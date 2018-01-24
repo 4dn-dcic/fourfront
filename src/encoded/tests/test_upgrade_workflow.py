@@ -380,4 +380,3 @@ def test_workflow_upgrade_3_4(
 
     assert value['steps'][0]['outputs'][0]['meta'].get('type') == 'data file' # We don't transform outputs to reference files
     assert value['steps'][0]['outputs'][1]['meta'].get('type') == 'data file'
-
