@@ -63,6 +63,7 @@
                 "Hi-C data analysis",
                 "Image processing",
                 "Visualization processing",
+                "Repli-seq data processing",
                 "Data QC",
                 "Other"
             ]
