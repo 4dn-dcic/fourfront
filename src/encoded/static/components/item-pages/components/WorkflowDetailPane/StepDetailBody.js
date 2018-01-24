@@ -46,20 +46,18 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareLinkBox(){
         var soft = this.props.software;
+        var inner = null;
         // TODO: MAKE THIS HANDLE ARRAYS!! Hidden for now.
-        if (!soft || !soft.source_url) return (
-            <div className="col-sm-6 box">
-                <span className="text-600">Software Source</span>
-                <h5 className="text-400 text-ellipsis-container">
-                    <em>N/A</em>
-                </h5>
-            </div>
-        );
+        if (!soft || !soft.source_url){
+            inner = <em>N/A</em>;
+        } else {
+            inner = <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>;
+        }
         return (
             <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
                 <h5 className="text-400 text-ellipsis-container">
-                    <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>
+                    { inner }
                 </h5>
             </div>
         );
