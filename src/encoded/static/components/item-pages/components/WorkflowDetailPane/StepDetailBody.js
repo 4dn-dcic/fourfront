@@ -10,26 +10,6 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareUsedBox(){
         var soft = this.props.software;
-        if (!soft){
-            return (
-                <div className="col-sm-6 box">
-                    <span className="text-600">Software Used</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        <em>N/A</em>
-                    </h5>
-                </div>
-            );
-        }
-        if (typeof soft === 'string' || (Array.isArray(soft) && _.every(soft, function(s){ return typeof s === 'string'; }))){
-            return (
-                <div className="col-sm-6 box">
-                    <span className="text-600">Software Used</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        <i className="icon icon-circle-o-notch icon-spin icon-fw"/>
-                    </h5>
-                </div>
-            );
-        }
 
         var renderLink = function(s, idx=0){
             var link = object.atIdFromObject(s);
@@ -44,11 +24,21 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
             return <span>{ idx > 0 ? ', ' : '' }<a href={link} key={idx}>{ title }</a></span>;
         };
 
+        var inner = null;
+        
+        if (!soft){
+            inner = <em>N/A</em>;
+        } else if (typeof soft === 'string' || (Array.isArray(soft) && _.every(soft, function(s){ return typeof s === 'string'; }))){
+            inner = <i className="icon icon-circle-o-notch icon-spin icon-fw"/>;
+        } else {
+            inner = Array.isArray(soft) ? _.map(soft, renderLink) : renderLink(soft);
+        }
+
         return (
-            <div className="col-sm-6 box">
+            <div className="col-sm-12 box">
                 <span className="text-600">Software Used</span>
                 <h4 className="text-400 text-ellipsis-container">
-                    { Array.isArray(soft) ? _.map(soft, renderLink) : renderLink(soft) }
+                    { inner }
                 </h4>
             </div>
         );
@@ -56,7 +46,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareLinkBox(){
         var soft = this.props.software;
-        // TODO: MAKE THIS HANDLE ARRAYS!!
+        // TODO: MAKE THIS HANDLE ARRAYS!! Hidden for now.
         if (!soft || !soft.source_url) return (
             <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
@@ -81,7 +71,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
             <div className="row">
 
                 { this.softwareUsedBox() }
-                { this.softwareLinkBox() }
+                {/* this.softwareLinkBox() */}
 
             </div>
         );
