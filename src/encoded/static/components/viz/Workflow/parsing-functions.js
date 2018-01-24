@@ -242,7 +242,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             'column'          : column,
             'ioType'          : ioType,
             'id'              : ioNodeID(stepIOArgument, readOnly),
-            'name'            : ioNodeName(stepIOArgument),// stepInput.name, 
+            'name'            : ioNodeName(stepIOArgument),
             'argNamesOnSteps' : namesOnSteps,
             'nodeType'        : nodeType,
             '_source'         : stepIOArgument.source,

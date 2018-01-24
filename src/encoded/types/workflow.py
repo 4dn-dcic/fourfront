@@ -81,14 +81,14 @@ class WorkflowRunTracingException(Exception):
 
 def get_step_io_for_argument_name(argument_name, workflow_model_obj):
     for step in workflow_model_obj.get('steps', []):
-        for input in step.get('inputs', []):
-            for source in input.get('source', []):
+        for input_io in step.get('inputs', []):
+            for source in input_io.get('source', []):
                 if not source.get('step') and source.get('name') == argument_name:
-                    return input
-        for output in step.get('outputs', []):
-            for target in output.get('target', []):
+                    return input_io
+        for output_io in step.get('outputs', []):
+            for target in output_io.get('target', []):
                 if not target.get('step') and target.get('name') == argument_name:
-                    return output
+                    return output_io
     return None
 
 
