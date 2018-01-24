@@ -66,7 +66,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                         return false;
                     }
                     if (typeof file.uuid !== 'string' && typeof file.error === 'string'){
-                        console.error('Error on file for argument ' +  + ': ' + file.error);
+                        console.error('Error on file for argument ' + (fileContainer.workflow_argument_name || 'Unknown') + ': ' + file.error);
                         return false;
                     }
                     if (typeof file.uuid !== 'string') {
