@@ -81,7 +81,7 @@ class WorkflowRunTracingException(Exception):
 
 
 def item_model_to_object(model, request):
-    
+
     ClassForItem = request.registry[TYPES].by_item_type.get(model.item_type).factory
     item_instance = ClassForItem(request.registry, model)
     dict_repr = item_instance.__json__(request)
@@ -259,15 +259,12 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
             last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
             workflow_run_uuid = last_workflow_run_output_of #get_unique_key_from_at_id(last_workflow_run_output_of)
-            if workflow_argument_name == 'input_hic': print('\n\nOUT OF', workflow_run_uuid, uuidCacheTracedHistory.get(workflow_run_uuid))
             if not workflow_run_uuid:
                 continue
             workflow_run_model_obj = get_model_obj(workflow_run_uuid)
             if not workflow_run_model_obj:
                 continue
             all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
-
-        # Filter WFRs by WF down to most recent WFR - working, but not enabled as no UI for it yet.
 
         filtered_in_workflow_runs, filtered_out_workflow_runs = filter_workflow_runs(all_workflow_runs)
 

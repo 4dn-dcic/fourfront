@@ -5,7 +5,6 @@ from pyramid.httpexceptions import (
 )
 from snovault import (
     CONNECTION,
-    TYPES,
     Item as SnowyItem
 )
 from collections import OrderedDict
@@ -21,7 +20,6 @@ from .search import _ASSEMBLY_MAPPER
 from .types.base import Item
 from .types.workflow import (
     trace_workflows,
-    get_unique_key_from_at_id,
     DEFAULT_TRACING_OPTIONS,
     WorkflowRunTracingException,
     item_model_to_object
