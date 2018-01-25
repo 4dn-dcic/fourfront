@@ -5,6 +5,7 @@ from pyramid.httpexceptions import (
 )
 from snovault import (
     CONNECTION,
+    TYPES,
     Item as SnowyItem
 )
 from collections import OrderedDict
@@ -22,7 +23,8 @@ from .types.workflow import (
     trace_workflows,
     get_unique_key_from_at_id,
     DEFAULT_TRACING_OPTIONS,
-    WorkflowRunTracingException
+    WorkflowRunTracingException,
+    item_model_to_object
 )
 
 
@@ -423,12 +425,7 @@ def trace_workflow_runs(context, request):
         options['track_performance'] = True
 
     itemTypes = context.jsonld_type()
-    item_model = context.model
-
-    if not hasattr(item_model, 'source') or item_model.source.get('object') is None:
-        raise HTTPBadRequest(detail="Item not yet finished indexing.")
-
-    item_model_obj = item_model.source.get('object', {})
+    item_model_obj = item_model_to_object(context.model, request)
 
     processed_files_to_trace = []
 
@@ -436,32 +433,30 @@ def trace_workflow_runs(context, request):
         processed_files_to_trace.append(item_model_obj)
     elif 'ExperimentSet' in itemTypes:
 
-        processed_file_atids_to_trace_from_experiments = []
-        for exp_atid in item_model_obj.get('experiments_in_set', []):
-            experiment_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(exp_atid))
-            if not hasattr(experiment_model, 'source') or experiment_model.source.get('object') is None:
-                raise HTTPBadRequest(detail="Item not yet finished indexing.")
-            processed_file_atids_to_trace_from_experiments = processed_file_atids_to_trace_from_experiments + experiment_model.source.get('object', {}).get('processed_files', [])
+        processed_file_uuids_to_trace_from_experiments = []
+
+        for exp_uuid in item_model_obj.get('experiments_in_set', []):
+            experiment_model = request.registry[CONNECTION].storage.get_by_uuid(exp_uuid)
+            experiment_obj = item_model_to_object(experiment_model, request)
+            processed_file_uuids_to_trace_from_experiments = processed_file_uuids_to_trace_from_experiments + experiment_obj.get('processed_files', [])
 
 
-        processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files', []) # @ids
+        processed_file_uuids_to_trace_from_experiment_set = item_model_obj.get('processed_files', [])
 
-        for file_at_id in processed_file_atids_to_trace_from_experiments + processed_file_atids_to_trace_from_experiment_set:
-            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
-            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
-                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
-            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        for file_uuid in processed_file_uuids_to_trace_from_experiments + processed_file_uuids_to_trace_from_experiment_set:
+            file_model = request.registry[CONNECTION].storage.get_by_uuid(file_uuid)
+            file_obj = item_model_to_object(file_model, request)
+            processed_files_to_trace.append(file_obj)
         processed_files_to_trace.reverse()
 
     elif 'Experiment' in itemTypes:
 
-        processed_file_atids_to_trace_from_experiment = item_model_obj.get('processed_files', []) # @ids
+        processed_file_uuids_to_trace_from_experiment = item_model_obj.get('processed_files', []) # @ids
 
-        for file_at_id in processed_file_atids_to_trace_from_experiment:
-            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
-            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
-                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
-            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        for file_uuid in processed_file_uuids_to_trace_from_experiment:
+            file_model = request.registry[CONNECTION].storage.get_by_uuid(file_uuid)
+            file_obj = item_model_to_object(file_model, request)
+            processed_files_to_trace.append(file_obj)
         processed_files_to_trace.reverse()
 
     else:

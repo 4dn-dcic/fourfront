@@ -10,7 +10,8 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
-    CONNECTION
+    CONNECTION,
+    TYPES
 )
 from .base import (
     Item
@@ -79,6 +80,36 @@ class WorkflowRunTracingException(Exception):
     pass
 
 
+def item_model_to_object(model, request):
+    
+    ClassForItem = request.registry[TYPES].by_item_type.get(model.item_type).factory
+    item_instance = ClassForItem(request.registry, model)
+    dict_repr = item_instance.__json__(request)
+    
+    # Add common properties
+    dict_repr['uuid'] = str(item_instance.uuid)
+    dict_repr['@id'] = str(item_instance.jsonld_id(request))
+    dict_repr['@type'] = item_instance.jsonld_type()
+    
+    # Add or calculate necessary rev-links; attempt to get pre-calculated value from ES first for performance. Ideally we want this to happen 100% of the time.
+    if hasattr(model, 'source') and model.source.get('object'):
+        item_es_obj = model.source['object']
+        if item_es_obj.get('workflow_run_outputs'):
+            dict_repr['workflow_run_outputs'] = [ get_unique_key_from_at_id(wfr_at_id) for wfr_at_id in item_es_obj['workflow_run_outputs'] ]
+        if item_es_obj.get('workflow_run_inputs'):
+            dict_repr['workflow_run_inputs'] = [ get_unique_key_from_at_id(wfr_at_id) for wfr_at_id in item_es_obj['workflow_run_inputs'] ]
+
+    # If not yet indexed, calculate on back-end. (Fallback).
+    # Much of the time, the entirety of rev links aren't returned?? Always get back more from ES than from here o.o'.
+    if not dict_repr.get('workflow_run_outputs') and hasattr(item_instance, 'workflow_run_outputs') and hasattr(model, 'revs'):
+        dict_repr['workflow_run_outputs'] = [ str(uuid) for uuid in request.registry[CONNECTION].storage.write.get_rev_links(model, item_instance.rev['workflow_run_outputs'][1]) ]
+    if not dict_repr.get('workflow_run_inputs') and hasattr(item_instance, 'workflow_run_inputs') and hasattr(model, 'revs'):
+        dict_repr['workflow_run_inputs'] = [ str(uuid) for uuid in request.registry[CONNECTION].storage.write.get_rev_links(model, item_instance.rev['workflow_run_inputs'][1]) ]
+
+    return dict_repr
+
+
+
 def get_step_io_for_argument_name(argument_name, workflow_model_obj):
     for step in workflow_model_obj.get('steps', []):
         for input_io in step.get('inputs', []):
@@ -130,9 +161,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         else:
             model = request.registry[CONNECTION].storage.get_by_unique_key(key, uuid)
 
-        if (not hasattr(model, 'source') or not model.source.get('object')):
-            raise WorkflowRunTracingException("In-tracing-path Item with ID " + uuid + " is not yet indexed.")
-
         if key is not None:
             uuidCacheModels[str(model.uuid)] = model
         uuidCacheModels[cacheKey] = model
@@ -140,7 +168,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         return model
 
     def get_model_obj(uuid, key = None):
-        return get_model(uuid, key).source.get('object', {})
+        return item_model_to_object(get_model(uuid, key), request)
 
 
     def group_files_by_workflow_argument_name(set_of_files):
@@ -187,14 +215,14 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         def try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model_obj, workflow_run_uuid, in_file, in_file_uuid):
             sources_for_in_file = [] # We only are looking for 1 source, but might re-use for trace_future later
             for out_file in workflow_run_model_obj.get('output_files', []):
-                out_file_atid = out_file.get('value', {})
-                if out_file_atid == in_file.get('@id', 'b'):
+                out_file_uuid = out_file.get('value', 'a')
+                if out_file_uuid == in_file.get('uuid', 'b'):
                     step_uuid = workflow_run_uuid
                     if step_uuid:
                         step_uuids.add( (step_uuid, in_file_uuid) )
                     sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
-                        "step" : workflow_run_model_obj.get('@id'),
+                        "step" : workflow_run_model_obj['@id'],
                         "for_file" : in_file_uuid,
                         "workflow" : workflow_run_model_obj.get('workflow')
                     })
@@ -230,8 +258,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 continue
             # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
             last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
-            workflow_run_uuid = get_unique_key_from_at_id(last_workflow_run_output_of)
-            if not workflow_run_uuid or uuidCacheTracedHistory.get(workflow_run_uuid):
+            workflow_run_uuid = last_workflow_run_output_of #get_unique_key_from_at_id(last_workflow_run_output_of)
+            if workflow_argument_name == 'input_hic': print('\n\nOUT OF', workflow_run_uuid, uuidCacheTracedHistory.get(workflow_run_uuid))
+            if not workflow_run_uuid:
                 continue
             workflow_run_model_obj = get_model_obj(workflow_run_uuid)
             if not workflow_run_model_obj:
@@ -252,7 +281,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             untraced_in_files.append(in_file_uuid)
             source_for_in_file = {
                 "for_file" : in_file_uuid,
-                "step" : workflow_run_model_obj.get('@id'),
+                "step" : workflow_run_model_obj['@id'],
                 "grouped_by" : "workflow",
                 "workflow" : workflow_run_model_obj.get('workflow')
             }
@@ -279,17 +308,16 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     if outfile['uuid'] == current_file_model_object['uuid']:
                         output['meta']['in_path'] = True
                         runs_current_file_goes_to = current_file_model_object.get('workflow_run_inputs', [])
-                        for run_at_id in runs_current_file_goes_to:
-                            target_workflow_run_uuid = get_unique_key_from_at_id(run_at_id)
+                        for target_workflow_run_uuid in runs_current_file_goes_to:
                             target_workflow_run_model_obj = get_model_obj(target_workflow_run_uuid)
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model_obj.get('input_files', []))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():
-                                input_files_for_arg_atids = [ f.get('value') for f in input_files_for_arg ]
-                                if current_file_model_object.get('@id') in input_files_for_arg_atids:
+                                input_files_for_arg_uuids = [ f.get('value') for f in input_files_for_arg ]
+                                if current_file_model_object['uuid'] in input_files_for_arg_uuids:
                                     # Check that we don't have this already
                                     exists = False
                                     for target in output['target']:
-                                        if target.get('name') == argument_name and target.get('step') == target_workflow_run_model_obj.get('display_title') and target.get('for_file') == current_file_model_object['uuid']:
+                                        if target['name'] == argument_name and target.get('step', 'x') == target_workflow_run_model_obj.get('@id', 'y') and target.get('for_file') == current_file_model_object['uuid']:
                                             exists = True
                                             break
                                     if not exists:
@@ -342,7 +370,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         }
 
         # Fill 'Analysis Step Types' w/ workflow name; TODO: Add component analysis_steps.
-        workflow_uuid = get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
+        workflow_uuid = workflow_run_model_obj.get('workflow') #get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
         if workflow_uuid:
             workflow_model_obj = get_model_obj(workflow_uuid)
             if workflow_model_obj and workflow_model_obj.get('workflow_type'):
@@ -367,18 +395,18 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             original_file_in_output = False
             file_format = (workflow_step_io and workflow_step_io.get('meta', {}).get('file_format')) or None
             io_type = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
-            for file_at_id in files:
-                got_item = get_model_obj(get_unique_key_from_at_id(file_at_id), 'accession')
+            for file_uuid in files:
+                got_item = get_model_obj(file_uuid)
                 if got_item is not None:
-                    if got_item.get('uuid', 'x') == current_file_model_object.get('uuid', 'y'):
+                    if got_item['uuid'] == current_file_model_object['uuid']:
                         original_file_in_output = True
                     file_items.append({ # A 'fake' embed
                         'accession' : got_item.get('accession'),
-                        'uuid' : got_item.get('uuid'),
+                        'uuid' : got_item['uuid'],
                         'file_format' : got_item.get('file_format'),
                         'file_type' : got_item.get('file_type'),
                         'description' : got_item.get('description'),
-                        '@id' : got_item.get('@id') or file_at_id
+                        '@id' : got_item['@id']
                     })
                     if not file_format:
                         file_format = got_item.get('file_format')
@@ -409,15 +437,15 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             file_items = []
             file_format = (workflow_step_io and workflow_step_io.get('meta', {}).get('file_format')) or None
             io_type = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
-            for file_at_id in files:
-                got_item = get_model_obj(get_unique_key_from_at_id(file_at_id), 'accession')
+            for file_uuid in files:
+                got_item = get_model_obj(file_uuid)
                 if got_item is not None:
                     file_items.append({
                         'accession' : got_item.get('accession'),
-                        'uuid' : got_item.get('uuid'),
+                        'uuid' : got_item['uuid'],
                         'file_format' : got_item.get('file_format'),
                         'description' : got_item.get('description'),
-                        '@id' : got_item.get('@id') or file_at_id,
+                        '@id' : got_item['@id'],
                         'TEMP_MODEL' : got_item
                     })
                     if not file_format:
@@ -462,7 +490,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     ###########################################
 
     for original_file in original_file_set_to_trace:
-        file_item_output_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_outputs', []) ]
+        file_item_output_of_workflow_run_uuids = original_file.get('workflow_run_outputs', []) # [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_outputs', []) ]
         #file_item_input_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_inputs', []) ]
         if 'history' in options.get('trace_direction', ['history']):
             if uuidCacheTracedHistory.get(original_file['uuid']) is None:
