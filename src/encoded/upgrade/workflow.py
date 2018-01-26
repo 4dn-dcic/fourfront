@@ -303,6 +303,8 @@ def workflow_3_4(value, system):
             if     'fastq'   in io['name']:   io_meta['file_format'] = 'fastq'
             elif   'fasta'   in io['name']:   io_meta['file_format'] = 'fasta'
             elif   'pairs'   in io['name']:   io_meta['file_format'] = 'pairs'
+            elif   '_mcool'  in io['name']:   io_meta['file_format'] = 'mcool'
+            elif   '_cool'   in io['name']:   io_meta['file_format'] = 'cool'
             elif   '_bam'    in io['name']:   io_meta['file_format'] = 'bam'
             elif   '_hdf5'   in io['name']:   io_meta['file_format'] = 'hdf5'
             elif   '_bed'    in io['name']:   io_meta['file_format'] = 'bed'

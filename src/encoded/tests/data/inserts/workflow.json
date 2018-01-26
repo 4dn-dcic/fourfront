@@ -86,7 +86,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_fastq2",
                         "source": [
@@ -99,7 +100,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_fastq1",
                         "source": [
@@ -111,7 +113,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bowtie_index",
                         "source": [
@@ -136,7 +139,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "sorted_bam_pe",
                         "target": [
@@ -149,7 +153,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "split_bam2",
                         "target": [
@@ -163,7 +168,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "split_bam1",
                         "target": [
@@ -181,7 +187,8 @@
                         "meta": {
                             "file_format": "bed",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "RE_bed",
                         "source": [
@@ -194,7 +201,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "split_bam2",
                         "source": [
@@ -208,7 +216,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "split_bam1",
                         "source": [
@@ -234,7 +243,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "HiC_project_object_hdf5",
                         "target": [
@@ -247,7 +257,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "HiC_distance_function_hdf5",
                         "target": [
@@ -260,7 +271,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fend_object_hdf5",
                         "target": [
@@ -274,7 +286,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "HiC_norm_binning_hdf5",
                         "target": [
@@ -288,7 +301,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "HiC_data_object_hdf5",
                         "target": [
@@ -305,7 +319,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrlen_file",
                         "source": [
@@ -318,7 +333,8 @@
                         "meta": {
                             "file_format": "matrix",
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "contact_matrix_binsize",
                         "source": [
@@ -330,7 +346,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "chromosome",
                         "source": [
@@ -343,7 +360,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fend_object_hdf5",
                         "source": [
@@ -357,7 +375,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "HiC_norm_binning_hdf5",
                         "source": [
@@ -371,7 +390,8 @@
                         "meta": {
                             "file_format": "hdf5",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "HiC_data_object_hdf5",
                         "source": [
@@ -397,7 +417,8 @@
                         "meta": {
                             "file_format": "matrix",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "normalized_fend_contact_matrix",
                         "target": [
@@ -410,7 +431,8 @@
                         "meta": {
                             "file_format": "matrix",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "normalized_enrich_contact_matrix",
                         "target": [
@@ -423,7 +445,8 @@
                         "meta": {
                             "file_format": "matrix",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "expected_enrich_contact_matrix",
                         "target": [
@@ -436,7 +459,8 @@
                         "meta": {
                             "file_format": "matrix",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "observed_contact_matrix",
                         "target": [
@@ -449,7 +473,8 @@
                         "meta": {
                             "file_format": "matrix",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "expected_fend_contact_matrix",
                         "target": [
@@ -515,7 +540,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "limits_file",
                         "source": [
@@ -528,7 +554,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_fastq",
                         "source": [
@@ -540,7 +567,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "contaminants_file",
                         "source": [
@@ -552,7 +580,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "adapters_file",
                         "source": [
@@ -577,7 +606,8 @@
                         "meta": {
                             "file_format": "zip",
                             "global": true,
-                            "type": "report"
+                            "type": "report",
+                            "cardinality": "single"
                         },
                         "name": "report_zip",
                         "target": [
@@ -642,7 +672,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -655,7 +686,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chromsizes",
                         "source": [
@@ -667,7 +699,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "enzyme",
                         "source": [
@@ -679,7 +712,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "sample_name",
                         "source": [
@@ -703,7 +737,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "report"
+                            "type": "report",
+                            "cardinality": "single"
                         },
                         "name": "report",
                         "target": [
@@ -753,7 +788,8 @@
                             "description": "The file(s) input into this Workflow.",
                             "file_format": "fastq",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "input_file",
                         "source": [
@@ -774,7 +810,8 @@
                         "meta": {
                             "description": "The file(s) output of this Workflow.",
                             "global": true,
-                            "type": "QC"
+                            "type": "QC",
+                            "cardinality": "single"
                         },
                         "name": "report",
                         "target": [
@@ -829,7 +866,8 @@
                             "description": "File on which MD5 calculation is run on.",
                             "file_format": "fastq",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "input_file",
                         "source": [
@@ -850,7 +888,8 @@
                         "meta": {
                             "description": "The MD5 checksum generated.",
                             "global": true,
-                            "type": "QC"
+                            "type": "QC",
+                            "cardinality": "single"
                         },
                         "name": "report",
                         "target": [
@@ -933,7 +972,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -946,7 +986,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq2",
                         "source": [
@@ -959,7 +1000,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -971,7 +1013,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -995,7 +1038,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_bam",
                         "target": [
@@ -1013,7 +1057,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_bam",
                         "source": [
@@ -1038,7 +1083,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_sorted_bam",
                         "target": [
@@ -1052,7 +1098,8 @@
                         "meta": {
                             "file_format": "bai",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_sorted_bam_index",
                         "target": [
@@ -1069,7 +1116,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_sorted_bam",
                         "source": [
@@ -1094,7 +1142,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -1107,7 +1156,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -1190,7 +1240,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -1203,7 +1254,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq2",
                         "source": [
@@ -1216,7 +1268,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -1228,7 +1281,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -1252,7 +1306,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_bam",
                         "target": [
@@ -1270,7 +1325,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_bam",
                         "source": [
@@ -1295,7 +1351,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_sorted_bam",
                         "target": [
@@ -1309,7 +1366,8 @@
                         "meta": {
                             "file_format": "bai",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_sorted_bam_index",
                         "target": [
@@ -1326,7 +1384,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_sorted_bam",
                         "source": [
@@ -1351,7 +1410,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -1364,7 +1424,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -1470,7 +1531,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -1494,7 +1556,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -1511,7 +1574,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -1535,7 +1599,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "ncores",
                         "source": [
@@ -1547,7 +1612,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "binsize",
                         "source": [
@@ -1560,7 +1626,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "pairs_index",
                         "source": [
@@ -1574,7 +1641,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "pairs",
                         "source": [
@@ -1599,7 +1667,8 @@
                         "meta": {
                             "file_format": "cool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_cool",
                         "target": [
@@ -1616,7 +1685,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -1628,7 +1698,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "min_res",
                         "source": [
@@ -1641,7 +1712,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -1667,7 +1739,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_hic",
                         "target": [
@@ -1687,7 +1760,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "normalization_type",
                         "source": [
@@ -1699,7 +1773,8 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_hic",
                         "source": [
@@ -1724,7 +1799,8 @@
                         "meta": {
                             "file_format": "mcool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_mcool",
                         "target": [
@@ -1790,7 +1866,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -1816,7 +1893,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "outprefix",
                         "source": [
@@ -1840,7 +1918,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -1853,7 +1932,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -1934,7 +2014,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -1947,7 +2028,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq2",
                         "source": [
@@ -1960,7 +2042,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -1973,7 +2056,8 @@
                         "meta": {
                             "file_format": "reference_fasta",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "reference_fasta",
                         "source": [
@@ -1986,7 +2070,8 @@
                         "meta": {
                             "file_format": "juicer_format_restriction_site_file",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -2010,7 +2095,8 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "merged_nodups",
                         "target": [
@@ -2028,7 +2114,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2040,7 +2127,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nsplit",
                         "source": [
@@ -2052,7 +2140,8 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_merged_nodups",
                         "source": [
@@ -2077,7 +2166,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -2090,7 +2180,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -2175,7 +2266,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -2188,7 +2280,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq2",
                         "source": [
@@ -2201,7 +2294,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -2214,7 +2308,8 @@
                         "meta": {
                             "file_format": "reference_fasta",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "reference_fasta",
                         "source": [
@@ -2227,7 +2322,8 @@
                         "meta": {
                             "file_format": "juicer_format_restriction_site_file",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -2239,7 +2335,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "ncores",
                         "source": [
@@ -2263,7 +2360,8 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "merged_nodups",
                         "target": [
@@ -2281,7 +2379,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2293,7 +2392,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nsplit",
                         "source": [
@@ -2305,7 +2405,8 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_merged_nodups",
                         "source": [
@@ -2330,7 +2431,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -2343,7 +2445,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs_index",
                         "target": [
@@ -2441,7 +2544,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs_index",
                         "source": [
@@ -2465,7 +2569,8 @@
                         "meta": {
                             "file_format": "pairs_px2",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs_index",
                         "target": [
@@ -2482,7 +2587,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -2507,7 +2613,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2519,7 +2626,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "min_res",
                         "source": [
@@ -2532,7 +2640,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -2558,7 +2667,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_hic",
                         "target": [
@@ -2574,7 +2684,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "ncores",
                         "source": [
@@ -2586,7 +2697,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "binsize",
                         "source": [
@@ -2599,7 +2711,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "pairs",
                         "source": [
@@ -2613,7 +2726,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "pairs_index",
                         "source": [
@@ -2638,7 +2752,8 @@
                         "meta": {
                             "file_format": "cool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_cool",
                         "target": [
@@ -2752,7 +2867,8 @@
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ],
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_pairs",
                         "target": [
@@ -2777,7 +2893,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -2789,7 +2906,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "min_res",
                         "source": [
@@ -2802,7 +2920,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -2828,7 +2947,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_hic",
                         "target": [
@@ -2844,7 +2964,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "ncores",
                         "source": [
@@ -2856,7 +2977,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "binsize",
                         "source": [
@@ -2869,7 +2991,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "pairs",
                         "source": [
@@ -2894,7 +3017,8 @@
                         "meta": {
                             "file_format": "cool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_cool",
                         "target": [
@@ -2948,7 +3072,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_hic",
                         "source": [
@@ -2961,7 +3086,8 @@
                         "meta": {
                             "file_format": "mcool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -2985,7 +3111,8 @@
                         "meta": {
                             "file_format": "mcool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_mcool",
                         "target": [
@@ -3037,7 +3164,8 @@
                         "meta": {
                             "file_format": "mcool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -3073,7 +3201,8 @@
                         "meta": {
                             "file_format": "normvector_juicerformat",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_normvector",
                         "target": [
@@ -3129,7 +3258,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_hic",
                         "source": [
@@ -3141,7 +3271,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "min_res",
                         "source": [
@@ -3153,7 +3284,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "max_mem",
                         "source": [
@@ -3177,7 +3309,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_hic",
                         "target": [
@@ -3233,7 +3366,8 @@
                         "meta": {
                             "file_format": "cool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_cool",
                         "source": [
@@ -3245,7 +3379,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "ncores",
                         "source": [
@@ -3270,7 +3405,9 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "file_format": "mcool",
+                            "cardinality": "single"
                         },
                         "name": "output_mcool",
                         "target": [
@@ -3287,7 +3424,9 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "file_format" : "mcool",
+                            "cardinality": "single"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -3312,7 +3451,8 @@
                         "meta": {
                             "file_format": "normvector_juicerformat",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_normvector",
                         "target": [
@@ -3329,7 +3469,8 @@
                         "meta": {
                             "file_format": "hic",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_hic",
                         "source": [
@@ -3341,7 +3482,9 @@
                     {
                         "meta": {
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "file_format": "mcool",
+                            "cardinality": "single"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -3366,7 +3509,8 @@
                         "meta": {
                             "file_format": "mcool",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "output_mcool",
                         "target": [
@@ -3439,7 +3583,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -3452,7 +3597,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq2",
                         "source": [
@@ -3465,7 +3611,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -3477,7 +3624,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3501,7 +3649,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_bam",
                         "target": [
@@ -3570,7 +3719,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -3583,7 +3733,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq2",
                         "source": [
@@ -3596,7 +3747,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -3608,7 +3760,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3632,7 +3785,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_bam",
                         "target": [
@@ -3693,7 +3847,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "bam",
                         "source": [
@@ -3706,7 +3861,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chromsize",
                         "source": [
@@ -3718,7 +3874,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3742,7 +3899,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairsam",
                         "target": [
@@ -3798,7 +3956,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -3810,7 +3969,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -3834,7 +3994,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "merged_pairsam",
                         "target": [
@@ -3886,7 +4047,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -3910,7 +4072,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_markedpairsam",
                         "target": [
@@ -3975,7 +4138,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -3988,7 +4152,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4015,7 +4180,8 @@
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ],
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "dedup_pairs",
                         "target": [
@@ -4028,7 +4194,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "lossless_bamfile",
                         "target": [
@@ -4088,7 +4255,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -4101,7 +4269,8 @@
                         "meta": {
                             "file_format": "juicer_format_restriction_site_file",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -4128,7 +4297,8 @@
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ],
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -4183,7 +4353,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -4210,7 +4381,8 @@
                             "secondary_file_formats": [
                                 "pairs_px2"
                             ],
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_pairs",
                         "target": [
@@ -4653,7 +4825,8 @@
                         "meta": {
                             "file_format": "fastq",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "fastq1",
                         "source": [
@@ -4667,7 +4840,8 @@
                         "meta": {
                             "file_format": "bwaIndex",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "bwa_index",
                         "source": [
@@ -4679,7 +4853,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -4705,7 +4880,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_bam",
                         "target": [
@@ -4726,7 +4902,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_bam",
                         "source": [
@@ -4739,7 +4916,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nthreads",
                         "source": [
@@ -4751,7 +4929,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "memperthread",
                         "source": [
@@ -4778,7 +4957,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_filtered_sorted_bam",
                         "target": [
@@ -4799,7 +4979,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_bam",
                         "source": [
@@ -4826,7 +5007,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_deduped_bam",
                         "target": [
@@ -4847,7 +5029,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_bam",
                         "source": [
@@ -4861,7 +5044,8 @@
                         "meta": {
                             "file_format": "chromsizes",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -4873,7 +5057,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "winsize",
                         "source": [
@@ -4900,7 +5085,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "out_count_bg",
                         "target": [
