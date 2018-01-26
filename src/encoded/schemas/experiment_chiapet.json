@@ -84,7 +84,7 @@
         "biosample.treatments_summary": {
             "title": "Treatments"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         }
     },
