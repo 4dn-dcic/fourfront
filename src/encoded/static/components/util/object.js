@@ -284,7 +284,11 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         var schemaProperty = null;
         var tooltip = null;
         if (tips){
-            tooltip = (tips && tips[property] && tips[property].description) || null;
+            if (typeof tips === 'string'){
+                tooltip = tips;
+            } else {
+                tooltip = (tips && tips[property] && tips[property].description) || null;
+            }
             if (!title) title = (tips && tips[property] && tips[property].title) || null;
         }
         if (!title || !tooltip) {

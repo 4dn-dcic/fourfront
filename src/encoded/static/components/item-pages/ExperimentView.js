@@ -18,12 +18,6 @@ import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData,
 
 export default class ExperimentView extends WorkflowRunTracingView {
 
-    static doesGraphExist(context){
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-        );
-    }
-
     getFilesTabs(width){
         var context = this.props.context;
         
@@ -67,6 +61,16 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return tabs;
     }
 
+    /**
+     * This function is called by base class (DefaultItemView) render method to grab list of JS Objects which describe the Tabs and their content.
+     * Properties which should be on the Objects within list are:
+     *   'tab'      - React elements ascribing the 'title' of the tab (and any icons next to it.
+     *   'key'      - Any unique string (among all tabs).
+     *   'disabled' - Whether tab should appear grayed out and unclickable, e.g. for a graph which is still loading.
+     *   'content'  - What is to be displayed in the body of the tab.
+     * 
+     * @returns {{ tab : JSX.Element, key: string, disabled: boolean, content: JSX.Element }[]} List of JSON objects representing Tabs and their content.
+     */
     getTabViewContents(){
 
         var initTabs = [];
@@ -97,19 +101,35 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return initTabs.concat(this.getFilesTabs(width)).concat(this.getCommonTabs());
     }
 
+    /**
+     * What is to be displayed at top left of page, under title, to the left of accession (if any).
+     * 
+     * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
+     */
     typeInfo(){
         return { 'title' : this.props.context.experiment_type || null, 'description' : "Type of Experiment" };
     }
 
+    /**
+     * What is to be displayed below Item description and above the TabbedView, if anything. Can return an array or single item.
+     * 
+     * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
+     */
     itemMidSection(){
-        return [<Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />, <OverviewHeading context={this.props.context} />];
+        return [
+            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
+            <OverviewHeading context={this.props.context} />
+        ];
     }
 
 }
 
-globals.content_views.register(ExperimentView, 'Experiment');
+globals.content_views.register(ExperimentView, 'Experiment'); // This function registers the "ExperimentView" class as the "view" for the "Experiment" @type.
 
-
+/**
+ * This is the first Tab of the Experiment Item view and shows what ExperimentSets the Experiment is part of.
+ * @see ExperimentView.getTabViewContents()
+ */
 class ExperimentSetsViewOverview extends React.Component {
 
     static getTabObject(context, schemas, width){
@@ -149,12 +169,20 @@ class ExperimentSetsViewOverview extends React.Component {
 
 }
 
+/** 
+ * This is rendered in middle of ExperimentView, between Item header and TabbedView.
+ * @see ExperimentView.itemMidSection()
+ */
 class OverviewHeading extends React.Component {
     render(){
         var exp = this.props.context;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp);
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
         var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
-        var commonProps = { 'tips' : tips, 'result' : exp, 'wrapInColumn' : "col-xs-6 col-md-3" };
+        var commonProps = {
+            'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
+            'result'        : exp,                  // The Item from which are getting value for 'property'.
+            'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        };
         var commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
         return (
