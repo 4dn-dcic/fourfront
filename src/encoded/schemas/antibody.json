@@ -1,0 +1,61 @@
+{
+    "title": "Antibody",
+    "id": "/profiles/antibody.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/status" }
+    ],
+    "type": "object",
+    "required": [ "antibody_name", "award", "lab"],
+    "identifyingProperties": ["uuid","aliases","antibody_name"],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "antibody_name": {
+            "title": "Enzyme Name",
+            "description": "A short name of the antibody.",
+            "type": "string",
+            "uniqueKey": "antibody:antibody_name"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the antibody.",
+            "type": "string"
+        },
+        "antibody_product_no": {
+            "title": "Antibody Catalog Number",
+            "description": "The catalog number for commercially obtained antibody",
+            "type": "string"
+        },
+        "antibody_vendor":{
+            "title": "Antibody Vendor",
+            "description": "The company or lab that is the source of the antibody.",
+            "type": "string",
+            "linkTo": "Vendor"
+        },
+        "antibody_encode_accession": {
+            "@type": "@id",
+            "rdfs:subPropertyOf": "rdfs:seeAlso",
+            "title": "ENCODE ACCESSION",
+            "description": "If the antibody exists in ENCODE enter it's accession.",
+            "type": "string",
+            "pattern": "^ENCAB[0-9]{3}[A-Z]{3}"
+        },
+        "antibody_target": {
+            "title": "Target",
+            "description": "Information about the target of the Antibody",
+            "type": "string",
+            "linkTo": "Target"
+        }
+    }
+}
