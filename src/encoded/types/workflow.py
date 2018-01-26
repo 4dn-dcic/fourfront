@@ -85,13 +85,13 @@ def item_model_to_object(model, request):
     ClassForItem = request.registry[TYPES].by_item_type.get(model.item_type).factory
     item_instance = ClassForItem(request.registry, model)
     dict_repr = item_instance.__json__(request)
-    
+
     # Add common properties
     dict_repr['uuid'] = str(item_instance.uuid)
     dict_repr['@id'] = str(item_instance.jsonld_id(request))
     dict_repr['@type'] = item_instance.jsonld_type()
     dict_repr['display_title'] = item_instance.display_title()
-    
+
     # Add or calculate necessary rev-links; attempt to get pre-calculated value from ES first for performance. Ideally we want this to happen 100% of the time.
     if hasattr(model, 'source') and model.source.get('object'):
         item_es_obj = model.source['object']
@@ -126,15 +126,15 @@ def get_step_io_for_argument_name(argument_name, workflow_model_obj):
 
 def common_props_from_file(file_obj):
     return {
-        'accession'     : file_obj.get('accession'),
         'uuid'          : file_obj['uuid'],
+        '@id'           : file_obj['@id'],
+        'accession'     : file_obj.get('accession'),
         'filename'      : file_obj.get('filename'),
         'file_format'   : file_obj.get('file_format'),
         'file_type'     : file_obj.get('file_type'),
         'file_size'     : file_obj.get('file_size'),
         'display_title' : file_obj.get('display_title'),
         'description'   : file_obj.get('description'),
-        '@id'           : file_obj['@id'],
         '@type'         : file_obj.get('@type'),
         'status'        : file_obj.get('status')
     }
@@ -286,10 +286,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_out_workflow_runs:
             untraced_in_files.append(in_file_uuid)
             source_for_in_file = {
-                "for_file" : in_file_uuid,
-                "step" : workflow_run_model_obj['@id'],
+                "for_file"   : in_file_uuid,
+                "step"       : workflow_run_model_obj['@id'],
                 "grouped_by" : "workflow",
-                "workflow" : workflow_run_model_obj.get('workflow')
+                "workflow"   : workflow_run_model_obj.get('workflow')
             }
             uuidCacheTracedHistory[in_file_uuid] = [source_for_in_file]
             uuidCacheGroupSourcesByRun[workflow_run_uuid] = uuidCacheGroupSourcesByRun.get(workflow_run_uuid, []) + [in_file_uuid] #[source_for_in_file]
@@ -303,6 +303,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         else:
             for step_uuid, in_file_uuid in step_uuids:
                 trace_history([step_uuid], get_model_obj(in_file_uuid), depth + 1)
+
         return sources
 
     def add_next_targets_to_step_from_file(step, current_file_model_object):
@@ -328,9 +329,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                             break
                                     if not exists:
                                         output['target'].append({
-                                            "name" : argument_name,
-                                            "step" : target_workflow_run_model_obj.get('@id'),
-                                            "for_file" : current_file_model_object['uuid']
+                                            "name"      : argument_name,
+                                            "step"      : target_workflow_run_model_obj.get('@id'),
+                                            "for_file"  : current_file_model_object['uuid']
                                         })
 
     def trace_history(output_of_workflow_run_uuids, current_file_model_object, depth = 0):
@@ -361,18 +362,18 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             return
 
         step = {
-            "name" : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
-            "meta" : {
+            "name"      : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
+            "meta"      : {
                 'display_title' : workflow_run_model_obj.get('display_title'),
-                "status" : workflow_run_model_obj.get('status'),
-                "run_status" : workflow_run_model_obj.get('run_status'),
-                '@type'  : workflow_run_model_obj.get('@type'),
-                '@id'    : workflow_run_model_obj.get('@id'),
-                'date_created' : workflow_run_model_obj.get('date_created'),
+                "status"        : workflow_run_model_obj.get('status'),
+                "run_status"    : workflow_run_model_obj.get('run_status'),
+                '@type'         : workflow_run_model_obj.get('@type'),
+                '@id'           : workflow_run_model_obj.get('@id'),
+                'date_created'  : workflow_run_model_obj.get('date_created'),
                 "analysis_step_types" : [],
             },
-            "inputs" : [],
-            "outputs" : []
+            "inputs"    : [],
+            "outputs"   : []
         }
 
         # Fill 'Analysis Step Types' w/ workflow name; TODO: Add component analysis_steps.
