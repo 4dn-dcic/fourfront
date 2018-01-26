@@ -277,7 +277,7 @@ def workflow_3_4(value, system):
                     io_meta['file_format'] = arg['argument_format']
 
                 if arg.get('argument_cardinality'): # Translate old cardinality, if exists, to new io.meta.cardinality enum.
-                    if arg['argument_cardinality'] == 1:
+                    if str(arg['argument_cardinality']) == '1':
                         io_meta['cardinality'] = 'single'
                     elif arg['argument_cardinality'] == 'N':
                         io_meta['cardinality'] = 'array'
@@ -311,9 +311,12 @@ def workflow_3_4(value, system):
             elif   '_tar'    in io['name']:   io_meta['file_format'] = 'tar'
 
 
-        # If cardinality is not yet set, try to determine from name of step we're on.
-        if not io_meta.get('cardinality') and io.get('name') == 'input_pairs' and step.get('name') == 'merge_pairs':
-            io_meta['cardinality'] = 'array'
+        # If cardinality is not yet set, try to determine from name of step we're on. Fallback to 'single' if nothing about step/arg to turn it into 'array'.
+        if not io_meta.get('cardinality'): 
+            if io.get('name') == 'input_pairs' and step.get('name') == 'merge_pairs': # TODO: Add more similar checks, for applicable Workflows.
+                io_meta['cardinality'] = 'array'
+            else:
+                io_meta['cardinality'] = 'single'
 
         # Delete description if is blank
         if io_meta.get('description') == '':
