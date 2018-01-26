@@ -37,7 +37,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "biosource.tissue.slim_terms",
         "biosource.tissue.synonyms",
         'cell_culture_details.*',
-        'cell_culture_details.morphology_image.description',
         'cell_culture_details.morphology_image.caption',
         'cell_culture_details.morphology_image.attachment.href',
         'cell_culture_details.morphology_image.attachment.type',
