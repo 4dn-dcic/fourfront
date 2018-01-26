@@ -312,7 +312,7 @@ def workflow_3_4(value, system):
 
 
         # If cardinality is not yet set, try to determine from name of step we're on. Fallback to 'single' if nothing about step/arg to turn it into 'array'.
-        if not io_meta.get('cardinality'): 
+        if not io_meta.get('cardinality'):
             if io.get('name') == 'input_pairs' and step.get('name') == 'merge_pairs': # TODO: Add more similar checks, for applicable Workflows.
                 io_meta['cardinality'] = 'array'
             else:
