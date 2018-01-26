@@ -392,6 +392,19 @@
           ]
         }
     },
+    "antibody_info": {
+        "antibody": {
+            "title": "Antibody",
+            "description": "Reference to a 4DN antibody object",
+            "type": "string",
+            "linkTo": "Antibody"
+        },
+        "antibody_lot_no": {
+            "title": "Antibody Lot Number",
+            "description": "A lot number or other unique identifier for a particular antibody lot",
+            "type": "string"
+        }
+    },
     "sop_mapping": {
         "sop_mapping": {
             "title": "SOP Mappping",
