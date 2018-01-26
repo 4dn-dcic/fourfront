@@ -77,3 +77,28 @@ def test_protocol_other_display_title_wo_attachment(testapp, protocol_data):
     protocol_data['protocol_type'] = 'Other'
     protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
     assert protocol['display_title'] == 'Protocol from ' + str(datetime.now())[:10]
+
+
+@pytest.fixture
+def antibody_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'Test Antibody',
+        'antibody_name': 'testAb'
+    }
+
+
+@pytest.fixture
+def ab_w_name(testapp, antibody_data):
+    return testapp.post_json('/antibody', antibody_data).json['@graph'][0]
+
+
+def test_antibody_display_title_name_only(ab_w_name):
+    assert ab_w_name['display_title'] == 'testAb'
+
+
+def test_antibody_display_title_name_and_accession(testapp, ab_w_name):
+    acc = 'ENCAB111AAA'
+    res = testapp.patch_json(ab_w_name['@id'], {'antibody_encode_accession': acc}).json['@graph'][0]
+    assert res['display_title'] == 'testAb (' + acc + ')'
