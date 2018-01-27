@@ -42,6 +42,7 @@ ORDER = [
     'individual_human',
     'individual_mouse',
     'biosource',
+    'antibody',
     'enzyme',
     'treatment_rnai',
     'treatment_chemical',
