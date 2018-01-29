@@ -138,6 +138,12 @@
                         "title": "Parameter name",
                         "description": "the name or flag of the parameter as passed to the software",
                         "type": "string"
+                    },
+                    "ordinal": {
+                        "title": "Ordinal",
+                        "description": "Ordinal of the parameter in the argument",
+                        "type": "number",
+                        "default": 1
                     }
                 }
             }

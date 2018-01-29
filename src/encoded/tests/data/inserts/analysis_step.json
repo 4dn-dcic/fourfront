@@ -154,7 +154,6 @@
         "title":"pairs2hic",
         "uuid":"a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
         "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23576",
-        "schema_version":"1",
         "name":"pairs2hic",
         "version":"12",
         "analysis_step_types":[ "aggregation", "normalization" ],

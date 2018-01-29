@@ -10,7 +10,7 @@ describe('Testing Workflow Graph', function() {
     var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
 
     function getShowParamsCheckBox(){
-        var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'show-params-checkbox-container')[0];
+        var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showParameters')[0];
         showParamsBox = showParamsBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
         return showParamsBox;
     }
@@ -198,7 +198,17 @@ describe('Testing Workflow Graph', function() {
 
         // Make sure our file accession, and proper label for it, is somewhere within content of detail pane.
         expect(detailPaneBody.textContent.indexOf('Generated File')).toBeGreaterThan(-1);
-        expect(detailPaneBody.textContent.indexOf('4DNFII7498B3')).toBeGreaterThan(-1);
+        expect(detailPaneBody.textContent.indexOf('4DNFIMCOOL02')).toBeGreaterThan(-1);
+
+        // Find another output node and make sure it is in the proper-est column.
+        // For this testdata, the steps are in improper order. "add_hic_normvector" is the last step in Workflow.steps, yet is actually 2nd step in order of events.
+        // Graphing should account for this and ensure that output of add_hic_normvector is used as input of "extract_mcool...". Easiest way to test is to check column of our last file to make sure it had been moved to proper column.
+
+        var outNormVectorNode = _.find(nodes, function(n){
+            return n.getAttribute('data-node-key') === 'output_normvector.0';
+        });
+
+        expect(parseInt(outNormVectorNode.getAttribute('data-node-column'))).toEqual(6);
 
     });
 

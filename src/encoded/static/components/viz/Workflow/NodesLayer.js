@@ -12,19 +12,7 @@ import Node from './Node';
 export default class NodesLayer extends React.Component {
 
     static processNodes(nodes, props){
-        return _.map(
-            _.sortBy(_.sortBy(nodes, 'name'), 'type'),  // Sort nodes so on updates, they stay in same(-ish) order and can transition.
-            function(n){                                // Calculate extra properties
-                n.isGlobal = false;
-                if (typeof n.format === 'string'){
-                    if (n.format.toLowerCase().indexOf('workflow') > -1){
-                        n.isGlobal = true;
-                    }
-                }
-                n.isCurrentContext = (props && typeof props.isNodeCurrentContext === 'function' && props.isNodeCurrentContext(n)) || false;
-                return n;
-            }
-        );
+        return _.sortBy(_.sortBy(nodes, 'name'), 'nodeType'); // Sort nodes so on updates, they stay in same(-ish) order and can transition.
     }
 
     static defaultProps = {
