@@ -3,6 +3,7 @@ import logging
 
 import sys
 import os
+import json
 
 from encoded.loadxl import read_single_sheet
 from pkg_resources import resource_filename
@@ -27,16 +28,17 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument('--inserts-folder', help="Pyramid app name in configfile")
-    parser.add_argument('item_type', help="Type of item or filename of inserts.")
-    parser.add_argument('upgrader_method_name', help="Name of upgrader method to use as it is defined in upgrade/<item_type> folder.")
+    parser.add_argument('--inserts-folder', help="Folder to use to get the file of inserts from. E.g. 'master-inserts' or 'inserts'. Defaults to 'inserts'.")
+    parser.add_argument('item_type', help="Type of item or filename of inserts, in lowercase/schema-filename form, e.g. 'page', 'static_section'.")
+    parser.add_argument('upgrader_method_name', help="Name of upgrader method to use as it is defined in upgrade/<item_type> folder, e.g. 'workflow_3_4'.")
     args = parser.parse_args()
 
-    upgrader_module = __import__('encoded.upgrade.' + args.item_type)
+
+    upgrader_module = __import__('encoded.upgrade.' + args.item_type, fromlist=[''])
     upgrader_fxn = getattr(upgrader_module, args.upgrader_method_name)
 
 
-    print(json.dumps([ upgrader_fxn(item, None) for item in get_inserts(args.inserts_folder, args.item_type) ], indent=4, sort_keys=True)) # Return instead of print?
+    print(json.dumps([ upgrader_fxn(item, None) for item in get_inserts(args.inserts_folder or 'inserts', args.item_type) ], indent=4, sort_keys=True)) # Return instead of print?
 
 if __name__ == "__main__":
     main()
