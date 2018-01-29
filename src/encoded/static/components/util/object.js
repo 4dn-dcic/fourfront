@@ -355,7 +355,7 @@ export class CopyWrapper extends React.Component {
     render(){
         var { value, children, mounted, wrapperElement, iconProps } = this.props;
         if (!value) return null;
-        if (!(mounted || (this.state && this.state.mounted)) || isServerSide() || !document || !document.createElement || !document.execCommand) return null;
+        var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
         function copy(){
             var textArea = document.createElement('textarea');
@@ -392,14 +392,17 @@ export class CopyWrapper extends React.Component {
             }
         }
 
-        var icon = <i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy.bind(this)} />;
-        if (!children) return icon;
+        var elemsToWrap = [];
+        if (children)               elemsToWrap.push(children);
+        if (children && isMounted)  elemsToWrap.push(' ');
+        if (isMounted)              elemsToWrap.push(<i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy.bind(this)} />);
+
         var wrapperProps = _.extend(
             { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },
             _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted', 'iconProps')
         );
 
-        return React.createElement(wrapperElement, wrapperProps, [children, ' ', icon]);
+        return React.createElement(wrapperElement, wrapperProps, elemsToWrap);
     }
 }
 
