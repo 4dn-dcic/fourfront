@@ -19,53 +19,84 @@ export class WorkflowNodeElement extends React.Component {
         'columnWidth' : PropTypes.number
     }
 
-    doesRunDataFileExist(){
-        var node = this.props.node;
-        return (
-            node.meta && node.meta.run_data && node.meta.run_data.file
-            && typeof node.meta.run_data.file['@id'] === 'string'
-            /* && typeof node.meta.run_data.file.display_title === 'string'*/);
+    static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
+
+    static isNodeParameter(node){
+        return node.ioType === 'parameter';
     }
 
-    doesRunDataValueExist(){
-        var node = this.props.node;
-        return (node.meta && node.meta.run_data && node.meta.run_data.value && (typeof node.meta.run_data.value === 'string' || typeof node.meta.run_data.value === 'number'));
+    static isNodeFile(node){
+        return WorkflowNodeElement.ioFileTypes.has(node.ioType);
     }
-    
+
+    static isNodeGroup(node){
+        return ((node.nodeType || '').indexOf('group') > -1);
+    }
+
+    static doesRunDataExist(node){
+        if (WorkflowNodeElement.isNodeGroup(node)){
+            return (
+                node.meta && node.meta.run_data && node.meta.run_data.file
+                && Array.isArray(node.meta.run_data.file) && node.meta.run_data.file.length > 0 && typeof node.meta.run_data.file[0]['@id'] === 'string'
+                /* && typeof node.meta.run_data.file.display_title === 'string'*/
+            );
+        } else if (WorkflowNodeElement.isNodeParameter(node)){
+            return (node.meta && node.meta.run_data && (
+                typeof node.meta.run_data.value === 'string' ||
+                typeof node.meta.run_data.value === 'number' ||
+                typeof node.meta.run_data.value === 'boolean'
+            ));
+        } else if (WorkflowNodeElement.isNodeFile(node)) { // Uncomment this in-line comment once all Workflows have been upgraded and have 'step.inputs[]|outputs[].meta.type'
+            return (
+                node.meta && node.meta.run_data && node.meta.run_data.file
+                && typeof node.meta.run_data.file['@id'] === 'string'
+                /* && typeof node.meta.run_data.file.display_title === 'string'*/
+            );
+        }
+    }
+
     icon(){
+        var node = this.props.node;
+        var ioType = node.ioType;
+        var nodeMetaType = (node.meta && node.meta.type) || null;
+        var fileFormat = (node.meta && node.meta.file_format) || null;
         var iconClass;
-        if (this.props.node.type === 'input-group' || this.props.node.type === 'output-group'){
+        
+        if (node.nodeType === 'input-group' || node.nodeType === 'output-group'){
             iconClass = 'folder-open';
-        } else if (this.props.node.type === 'input' || this.props.node.type === 'output'){
-            var formats = this.props.node.format;
-            if (typeof formats === 'undefined'){
+        } else if (node.nodeType === 'input' || node.nodeType === 'output'){
+            // By file_format
+            if (fileFormat === 'zip' || fileFormat === 'tar' || fileFormat === 'gz') {
+                iconClass = 'file-zip-o';
+            }
+            // By meta.type & ioType
+            else if (typeof ioType === 'undefined'){
                 iconClass = 'question';
-            } else if (typeof formats === 'string') {
-                formats = formats.toLowerCase();
-                if (formats.indexOf('file') > -1){
-                    iconClass = 'file-text-o';
-                } else if (
-                    formats.indexOf('parameter') > -1 || formats.indexOf('int') > -1 || formats.indexOf('string') > -1
-                ){
+            } else if (typeof ioType === 'string') {
+                if (ioType === 'qc' || ioType === 'QC') {
+                    iconClass = 'check-square-o';
+                } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
                     iconClass = 'wrench';
+                } else if (WorkflowNodeElement.isNodeFile(node)){
+                    iconClass = 'file-text-o';
                 } else {
                     iconClass = 'question';
                 }
-            } else if (Array.isArray(formats)) {
+            } else if (Array.isArray(ioType)) { // Deprecated?
                 if (
-                    formats[0] === 'File' ||
-                    (formats[0] === 'null' && formats[1] === 'File')
+                    ioType[0] === 'File' ||
+                    (ioType[0] === 'null' && ioType[1] === 'File')
                 ){
                     iconClass = 'file-text-o';
                 } else if (
-                    (formats[0] === 'int' || formats[0] === 'string') ||
-                    (formats[0] === 'null' && (formats[1] === 'int' || formats[1] === 'string'))
+                    (ioType[0] === 'int' || ioType[0] === 'string') ||
+                    (ioType[0] === 'null' && (ioType[1] === 'int' || ioType[1] === 'string'))
                 ){
                     iconClass = 'wrench';
                 }
             }
 
-        } else if (this.props.node.type === 'step'){
+        } else if (node.nodeType === 'step'){
             iconClass = 'cogs';
         }
         if (!iconClass) return null;
@@ -77,7 +108,7 @@ export class WorkflowNodeElement extends React.Component {
         var output = '';
 
         // Node Type -specific
-        if (node.type === 'step'){
+        if (node.nodeType === 'step'){
             if (node.meta && node.meta.workflow){
                 output += '<small>Workflow Run</small>'; // Workflow Run
             } else {
@@ -85,10 +116,10 @@ export class WorkflowNodeElement extends React.Component {
             }
             // Step Title
             output += '<h5 class="text-600 tooltip-title">' + ((node.meta && node.meta.display_title) || node.title || node.name) + '</h5>';
-        } else if (node.type === 'input-group'){
+        } else if (node.nodeType === 'input-group'){
             output += '<small>Input Argument</small>';
         } else {
-            var title = node.type;
+            var title = node.nodeType;
             title = title.charAt(0).toUpperCase() + title.slice(1);
             if (title === 'Input' || title === 'Output'){
                 title += ' Argument &nbsp; <b>' + node.name + '</b>';
@@ -98,20 +129,21 @@ export class WorkflowNodeElement extends React.Component {
 
         // If file, and has file-size, add it (idk, why not)
         if (
-            (node.type === 'input' || node.type === 'output') &&
-            this.doesRunDataFileExist() &&
+            (node.nodeType === 'input' || node.nodeType === 'output') &&
+            WorkflowNodeElement.isNodeFile(node) &&
+            WorkflowNodeElement.doesRunDataExist(node) &&
             typeof node.meta.run_data.file.file_size === 'number'
         ){
             output += '<div><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
         }
 
         // Workflow name, if any
-        if (node.type === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
+        if (node.nodeType === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
             //title 
             output += '<hr class="mt-08 mb-05"/><div><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
-        if (node.type === 'input'){ // Old/deprecated -- remove?
+        if (node.nodeType === 'input'){ // Old/deprecated -- remove?
             if (node.meta && node.meta['sbg:toolDefaultValue']){
                 output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
             }
@@ -126,7 +158,7 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     containerStyle(){
-        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
+        if (this.props.node.nodeType === 'input' || this.props.node.nodeType === 'output'){
             return {
                 width : (this.props.columnWidth || 100),
                 opacity : 0 // We change this to one post-mount.
@@ -143,12 +175,12 @@ export class WorkflowNodeElement extends React.Component {
             'className' : "text-ellipsis-container above-node-title"
         };
 
-        if (node.type === 'input-group'){
+        if (node.nodeType === 'input-group'){
             return <div {...elemProps}>{ this.props.title }</div>;
         }
 
         // If WorkflowRun & Workflow w/ steps w/ name
-        if (node.type === 'step' && node.meta.workflow
+        if (node.nodeType === 'step' && node.meta.workflow
             && Array.isArray(node.meta.workflow.steps)
             && node.meta.workflow.steps.length > 0
             && typeof node.meta.workflow.steps[0].name === 'string'
@@ -158,22 +190,26 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // If Parameter
-        if (this.doesRunDataValueExist()){
-            elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ node.name }</div>;
+        if (WorkflowNodeElement.isNodeParameter(node)){
+            if (WorkflowNodeElement.doesRunDataExist(node)){
+                elemProps.className += ' mono-text';
+                return <div {...elemProps}>{ node.name }</div>;
+            }
+            return <div {...elemProps}>Parameter</div>;
         }
 
         // If File
-        if (this.doesRunDataFileExist()){
-            if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
-                return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
-            }
+        if (WorkflowNodeElement.isNodeFile(node)){
+            //if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
+            //    return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
+            //}
+            if (node.meta && typeof node.meta.file_format === 'string') return <div {...elemProps}>{ node.meta.file_format }</div>;
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ this.props.title }</div>;
         }
 
         if ( // If Analysis Step
-            node.type === 'step' && node.meta.uuid &&
+            node.nodeType === 'step' && node.meta.uuid &&
             Array.isArray(node.meta.analysis_step_types) &&
             node.meta.analysis_step_types.length > 0
         ){
@@ -181,13 +217,13 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // If IO Arg w/o file but w/ format
-        if ((node.type === 'input' || node.type === 'output') && node.meta && typeof node.meta.argument_format === 'string'){
-            return <div {...elemProps}>{ node.meta.argument_format }</div>;
+        if ((node.nodeType === 'input' || node.nodeType === 'output') && node.meta && typeof node.meta.file_format === 'string'){
+            return <div {...elemProps}>{ node.meta.file_format }</div>;
         }
 
-        // Default-ish
-        if (typeof node.format === 'string') {
-            return <div {...elemProps}>{ node.format }</div>;
+        // Default-ish for IO node
+        if (typeof node.ioType === 'string') {
+            return <div {...elemProps}>{ Schemas.Term.capitalize(node.ioType) }</div>;
         }
 
         return null;
@@ -213,11 +249,21 @@ export class WorkflowNodeElement extends React.Component {
         }
         */
 
-        if (node.type === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
-            if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){
-                return <div {...elemProps}>{ node.meta.software_used.name } <span className="lighter">v{ node.meta.software_used.version }</span></div>;
+        // STEPS -  SOFTWARE USED
+        function softwareTitle(s, i){
+            if (typeof s.name === 'string' && typeof s.version === 'string'){
+                return [ i > 0 ? ', ' : null , s.name, ' ', <span className="lighter">v{ s.version }</span>];
             }
-            return <div {...elemProps}>{ node.meta.software_used.title }</div>;
+            return [i > 0 ? ', ' : null, s.title || s.display_title];
+        }
+
+        if (node.nodeType === 'step' && node.meta && Array.isArray(node.meta.software_used) && node.meta.software_used.length > 0 && node.meta.software_used[0].title){
+            return <div {...elemProps}>{ _.map(node.meta.software_used, softwareTitle) }</div>;
+        }
+
+
+        if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
+            return <div {...elemProps}>{ node.name }</div>;
         }
 
         return null;
@@ -226,7 +272,7 @@ export class WorkflowNodeElement extends React.Component {
     nodeTitle(){
         var node = this.props.node;
 
-        if (node.type === 'input-group'){
+        if (node.nodeType === 'input-group'){
             var files = node.meta.run_data.file;
             if (Array.isArray(files)){
                 var len = files.length - 1;
@@ -237,19 +283,19 @@ export class WorkflowNodeElement extends React.Component {
             }
         }
 
-        if (node.type === 'step' && node.meta && node.meta.workflow && typeof node.meta.workflow === 'object' && node.meta.workflow.display_title && typeof node.meta.workflow.display_title === 'string'){
+        if (node.nodeType === 'step' && node.meta && node.meta.workflow && typeof node.meta.workflow === 'object' && node.meta.workflow.display_title && typeof node.meta.workflow.display_title === 'string'){
             return <span className="node-name">{ this.icon() }{ node.meta.workflow.display_title }</span>;
         }
 
-        if (this.doesRunDataFileExist()){
+        if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
             var file = node.meta.run_data.file;
             return <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
                 { this.icon() }
-                { typeof file === 'string' ? node.format.replace('Workflow ', '') : file.accession || file.display_title }
+                { typeof file === 'string' ? node.ioType : file.accession || file.display_title }
             </span>;
         }
 
-        if (this.doesRunDataValueExist()){
+        if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
 

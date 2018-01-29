@@ -10,31 +10,25 @@
         "documents": [],
         "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
         "title": "FastQC",
-        "schema_version": "1",
         "arguments": [
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "limits_file",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "input_fastq",
                 "argument_format": "fastq",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "contaminants_file",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "adapters_file",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "report_zip",
                 "argument_type": "Output QC file"
             }
@@ -44,7 +38,7 @@
                 "name": "FastQC",
                 "meta": {
                     "description": "FastQC QC for fastq files",
-                    "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a13131/",
+                    "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a13131/"],
                     "analysis_step_types": [
                         "QC calculation"
                     ]
@@ -54,53 +48,53 @@
                         "name": "limits_file",
                         "source": [
                             {
-                                "name": "limits_file",
-                                "type": "Workflow Input File"
+                                "name": "limits_file"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "input_fastq",
                         "source": [
                             {
-                                "name": "input_fastq",
-                                "type": "Workflow Input File"
+                                "name": "input_fastq"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "fastq",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "fastq",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "contaminants_file",
                         "source": [
                             {
-                                "name": "contaminants_file",
-                                "type": "Workflow Input File"
+                                "name": "contaminants_file"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "adapters_file",
                         "source": [
                             {
-                                "name": "adapters_file",
-                                "type": "Workflow Input File"
+                                "name": "adapters_file"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -109,13 +103,14 @@
                         "name": "report_zip",
                         "target": [
                             {
-                                "name": "report_zip",
-                                "type": "Workflow Output File"
+                                "name": "report_zip"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output QC file",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "QC",
+                            "file_format": "zip",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -156,62 +151,51 @@
         "data_types": [
             "Hi-C"
         ],
-        "schema_version": "1",
         "status": "released",
         "arguments": [
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "chrsizes",
                 "argument_format": "chromsizes",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "input_pairs",
                 "argument_format": "pairs",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "input_pairs_index",
                 "argument_format": "pairs",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "ncores",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "binsize",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "min_res",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "output_pairs_index",
                 "argument_format": "pairs_px2",
                 "argument_type": "Output processed file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "output_pairs",
                 "argument_format": "pairs",
                 "argument_type": "Output processed file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "out_cool",
                 "argument_format": "cool",
                 "argument_type": "Output processed file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "output_hic",
                 "argument_format": "hic",
                 "argument_type": "Output processed file"
@@ -223,7 +207,7 @@
             {
                 "name": "merge_pairs",
                 "meta": {
-                    "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                    "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                     "analysis_step_types": ["file merging"]
                 },
                 "inputs": [
@@ -231,28 +215,28 @@
                         "name": "input_pairs",
                         "source": [
                             {
-                                "name": "input_pairs",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "pairs",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "pairs",
+                            "cardinality": "array"
                         }
                     },
                     {
                         "name": "input_pairs_index",
                         "source": [
                             {
-                                "name": "input_pairs_index",
-                                "type": "Workflow Input File"
+                                "name": "input_pairs_index"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "pairs",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "pairs",
+                            "cardinality": "array"
                         }
                     }
                 ],
@@ -261,43 +245,40 @@
                         "name": "output_pairs_index",
                         "target": [
                             {
-                                "name": "output_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs_index"
                             },
                             {
                                 "name": "pairs_index",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "pairs_px2",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "pairs_px2",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "output_pairs",
                         "target": [
                             {
-                                "name": "output_pairs",
-                                "type": "Workflow Output File"
+                                "name": "output_pairs"
                             },
                             {
                                 "name": "pairs",
-                                "step": "cooler",
-                                "type": "Input file or parameter"
+                                "step": "cooler"
                             },
                             {
                                 "name": "input_pairs",
-                                "step": "pairs2hic",
-                                "type": "Input file or parameter"
+                                "step": "pairs2hic"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "pairs",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "pairs",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -305,7 +286,7 @@
             {
                 "name": "pairs2hic",
                 "meta": {
-                    "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
+                    "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23576/"],
                     "analysis_step_types": ["aggregation", "normalization"]
                 },
                 "inputs": [
@@ -313,27 +294,27 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "chromsizes",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "chromsizes",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "min_res",
                         "source": [
                             {
-                                "name": "min_res",
-                                "type": "Workflow Parameter"
+                                "name": "min_res"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     },
                     {
@@ -341,12 +322,14 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ],
                         "meta": {
-                            "argument_cardinality": "1"
+                            "global": false,
+                            "type": "data file",
+                            "file_format": "pairs",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -355,14 +338,14 @@
                         "name": "output_hic",
                         "target": [
                             {
-                                "name": "output_hic",
-                                "type": "Workflow Output File"
+                                "name": "output_hic"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "hic",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "hic",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -370,7 +353,7 @@
             {   
                 "name": "cooler",
                 "meta": {
-                    "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                    "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                     "analysis_step_types": ["aggregation"]
                 },
                 "inputs": [
@@ -378,26 +361,26 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "binsize",
                         "source": [
                             {
-                                "name": "binsize",
-                                "type": "Workflow Parameter"
+                                "name": "binsize"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     },
                     {
@@ -405,12 +388,14 @@
                         "source": [
                             {
                                 "name": "output_pairs",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ],
                         "meta": {
-                            "argument_cardinality": "1"
+                            "global": false,
+                            "type": "data file",
+                            "file_format": "pairs",
+                            "cardinality": "single"
                         }
                     },
                     {
@@ -418,12 +403,14 @@
                         "source": [
                             {
                                 "name": "output_pairs_index",
-                                "step": "merge_pairs",
-                                "type": "Output file or parameter"
+                                "step": "merge_pairs"
                             }
                         ],
                         "meta": {
-                            "argument_cardinality": "1"
+                            "global": false,
+                            "type": "data file",
+                            "file_format": "pairs_px2",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -432,14 +419,14 @@
                         "name": "out_cool",
                         "target": [
                             {
-                                "name": "out_cool",
-                                "type": "Workflow Output File"
+                                "name": "out_cool"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "cool",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "cool",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -459,18 +446,15 @@
         "documents": [],
         "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "title": "md5",
-        "schema_version": "1",
         "arguments": [
             {
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_file",
-                "argument_cardinality": "1",
                 "argument_format": "fastq",
                 "description": "File on which MD5 calculation is run on."
             },
             {
                 "argument_type": "Output report file",
-                "argument_cardinality": "1",
                 "description": "The MD5 checksum generated.",
                 "workflow_argument_name": "report"
             }
@@ -492,9 +476,10 @@
                         ],
                         "meta": {
                             "description": "File on which MD5 calculation is run on.",
-                            "argument_type": "Input file",
-                            "argument_format": "fastq",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "fastq",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -503,14 +488,14 @@
                         "name": "report",
                         "target": [
                             {
-                                "name": "report",
-                                "type": "Workflow Output File"
+                                "name": "report"
                             }
                         ],
                         "meta": {
                             "description": "The MD5 checksum generated.",
-                            "argument_type": "Output report file",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "report",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -546,22 +531,18 @@
         "accession": "4DNWFSOZLG11",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "workflow_type": "Hi-C data analysis",
-        "schema_version": "1",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "arguments": [
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "input_cool",
                 "argument_format": "cool",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "ncores",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "output_mcool",
                 "argument_format": "mcool",
                 "argument_type": "Output processed file"
@@ -572,7 +553,7 @@
             {
                 "name": "coolerbalance",
                 "meta": {
-                    "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                    "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                     "analysis_step_types": ["normalization"]
                 },
                 "inputs": [
@@ -580,14 +561,14 @@
                         "name": "input_cool",
                         "source": [
                             {
-                                "name": "input_cool",
-                                "type": "Workflow Input File"
+                                "name": "input_cool"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "cool",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "cool",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -597,12 +578,14 @@
                         "target": [
                             {
                                 "name": "input_cool",
-                                "step": "cool2mcool",
-                                "type": "Input file or parameter"
+                                "step": "cool2mcool"
                             }
                         ],
                         "meta": {
-                            "argument_cardinality": "1"
+                            "global": false,
+                            "type": "data file",
+                            "file_format": "cool",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -610,7 +593,7 @@
             {
                 "name": "cool2mcool",
                 "meta": {
-                    "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                    "software_used": ["/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"],
                     "analysis_step_types": ["file format conversion"]
                 },
                 "inputs": [
@@ -618,13 +601,13 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     },
                     {
@@ -632,12 +615,14 @@
                         "source": [
                             {
                                 "name": "out_cool",
-                                "step": "coolerbalance",
-                                "type": "Output file or parameter"
+                                "step": "coolerbalance"
                             }
                         ],
                         "meta": {
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "cool",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -646,14 +631,14 @@
                         "name": "output_mcool",
                         "target": [
                             {
-                                "name": "output_mcool",
-                                "type": "Workflow Output File"
+                                "name": "output_mcool"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "mcool",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "mcool",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -672,70 +657,58 @@
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.21.cwl",
         "arguments": [
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "fastq1",
                 "argument_format": "fastq",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "fastq2",
                 "argument_format": "fastq",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "bwa_index",
                 "argument_format": "bwaIndex",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "chrsizes",
                 "argument_format": "chromsizes",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "reference_fasta",
                 "argument_format": "reference_fasta",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "restriction_file",
                 "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "nsplit",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "max_remove_mapq",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "ncores",
                 "argument_type": "parameter"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "out_pairs",
                 "argument_format": "pairs",
                 "argument_type": "Output processed file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "out_pairs_index",
                 "argument_format": "pairs_px2",
                 "argument_type": "Output processed file"
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "merged_nodups",
                 "argument_format": "other",
                 "argument_type": "Output processed file"
@@ -745,14 +718,13 @@
         "accession": "4DNWFSOBGKB5",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "workflow_type": "Hi-C data analysis",
-        "schema_version": "1",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "alternate_accessions": [],
         "steps": [
             {
                 "name": "juicer",
                 "meta": {
-                    "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23599/",
+                    "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23599/"],
                     "analysis_step_types": ["alignment", "filtering"]
                 },
                 "inputs": [
@@ -760,83 +732,83 @@
                         "name": "fastq1",
                         "source": [
                             {
-                                "name": "fastq1",
-                                "type": "Workflow Input File"
+                                "name": "fastq1"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "fastq",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "fastq",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "fastq2",
                         "source": [
                             {
-                                "name": "fastq2",
-                                "type": "Workflow Input File"
+                                "name": "fastq2"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "fastq",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "fastq",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "bwa_index",
                         "source": [
                             {
-                                "name": "bwa_index",
-                                "type": "Workflow Input File"
+                                "name": "bwa_index"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "bwaIndex",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "bwaIndex",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "reference_fasta",
                         "source": [
                             {
-                                "name": "reference_fasta",
-                                "type": "Workflow Input File"
+                                "name": "reference_fasta"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "reference_fasta",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "fasta",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "restriction_file",
                         "source": [
                             {
-                                "name": "restriction_file",
-                                "type": "Workflow Input File"
+                                "name": "restriction_file"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "juicer_format_restriction_site_file",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "juicer_format_restriction_site_file",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "ncores",
-                                "type": "Workflow Parameter"
+                                "name": "ncores"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -845,19 +817,18 @@
                         "name": "merged_nodups",
                         "target": [
                             {
-                                "name": "merged_nodups",
-                                "type": "Workflow Output File"
+                                "name": "merged_nodups"
                             },
                             {
                                 "name": "input_merged_nodups",
-                                "step": "juicer2pairs",
-                                "type": "Input file or parameter"
+                                "step": "juicer2pairs"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "other",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "other",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -865,7 +836,7 @@
             {
                 "name": "juicer2pairs",
                 "meta": {
-                    "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                    "software_used": ["/software/02d636b9-d82d-4da9-950c-2ca994a23547/"],
                     "analysis_step_types": ["file format conversion"]
                 },
                 "inputs": [
@@ -873,40 +844,40 @@
                         "name": "chrsizes",
                         "source": [
                             {
-                                "name": "chrsizes",
-                                "type": "Workflow Input File"
+                                "name": "chrsizes"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Input file",
-                            "argument_format": "chromsizes",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "chromsizes",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "nsplit",
                         "source": [
                             {
-                                "name": "nsplit",
-                                "type": "Workflow Parameter"
+                                "name": "nsplit"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "max_remove_mapq",
                         "source": [
                             {
-                                "name": "max_remove_mapq",
-                                "type": "Workflow Parameter"
+                                "name": "max_remove_mapq"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     },
                     {
@@ -914,12 +885,14 @@
                         "source": [
                             {
                                 "name": "merged_nodups",
-                                "step": "juicer",
-                                "type": "Output file or parameter"
+                                "step": "juicer"
                             }
                         ],
                         "meta": {
-                            "argument_cardinality": "1"
+                            "global": false,
+                            "type": "data file",
+                            "file_format": "other",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -928,28 +901,28 @@
                         "name": "out_pairs",
                         "target": [
                             {
-                                "name": "out_pairs",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "pairs",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "pairs",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "out_pairs_index",
                         "target": [
                             {
-                                "name": "out_pairs_index",
-                                "type": "Workflow Output File"
+                                "name": "out_pairs_index"
                             }
                         ],
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "argument_format": "pairs_px2",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "pairs_px2",
+                            "cardinality": "single"
                         }
                     }
                 ]
@@ -971,7 +944,6 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "workflow_type": "Hi-C data analysis",
         "status": "released",
-        "schema_version": "1",
         "data_types": [
             "Hi-C"
         ],
@@ -979,19 +951,16 @@
             {
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_mcool",
-                "argument_cardinality": "1",
                 "argument_format": "mcool",
                 "description": ""
             },
             {
-                "argument_cardinality": "1",
                 "workflow_argument_name": "nres",
                 "argument_type": "parameter"
             },
             {
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_normvector",
-                "argument_cardinality": "1",
                 "argument_format": "normvector_juicerformat",
                 "description": ""
             }
@@ -1002,7 +971,7 @@
             {
                 "name": "extract-mcool-normvector-for-juicebox",
                 "meta": {
-                    "software_used": "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
+                    "software_used": ["/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"],
                     "analysis_step_types": ["file format conversion"]
                 },
                 "inputs": [
@@ -1010,28 +979,27 @@
                         "name": "input_mcool",
                         "source": [
                             {
-                                "name": "input_mcool",
-                                "type": "Workflow Input File"
+                                "name": "input_mcool"
                             }
                         ],
                         "meta": {
-                            "description": "",
-                            "argument_type": "Input file",
-                            "argument_format": "mcool",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "mcool",
+                            "cardinality": "single"
                         }
                     },
                     {
                         "name": "nres",
                         "source": [
                             {
-                                "name": "nres",
-                                "type": "Workflow Parameter"
+                                "name": "nres"
                             }
                         ],
                         "meta": {
-                            "argument_type": "parameter",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "parameter",
+                            "cardinality": "single"
                         }
                     }
                 ],
@@ -1040,15 +1008,14 @@
                         "name": "output_normvector",
                         "target": [
                             {
-                                "name": "output_normvector",
-                                "type": "Workflow Output File"
+                                "name": "output_normvector"
                             }
                         ],
                         "meta": {
-                            "description": "",
-                            "argument_type": "Output processed file",
-                            "argument_format": "normvector_juicerformat",
-                            "argument_cardinality": "1"
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "normvector_juicerformat",
+                            "cardinality": "single"
                         }
                     }
                 ]
