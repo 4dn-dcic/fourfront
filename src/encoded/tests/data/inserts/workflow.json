@@ -3957,7 +3957,7 @@
                             "file_format": "pairsam",
                             "global": true,
                             "type": "data file",
-                            "cardinality": "single"
+                            "cardinality": "array"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -4462,7 +4462,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "array"
                         },
                         "name": "bam",
                         "source": [
@@ -4475,7 +4476,8 @@
                         "meta": {
                             "file_format": "chromsize",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4487,7 +4489,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "Threads",
                         "source": [
@@ -4513,7 +4516,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "sorted_pairsam",
                         "target": [
@@ -4531,7 +4535,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairsams",
                         "source": [
@@ -4544,7 +4549,8 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "parameter"
+                            "type": "parameter",
+                            "cardinality": "single"
                         },
                         "name": "nThreads",
                         "source": [
@@ -4569,7 +4575,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "merged_pairsam",
                         "target": [
@@ -4587,7 +4594,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -4613,7 +4621,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "dupmarked_pairsam",
                         "target": [
@@ -4631,7 +4640,8 @@
                         "meta": {
                             "file_format": "pairsam",
                             "global": false,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "input_pairsam",
                         "source": [
@@ -4645,7 +4655,8 @@
                         "meta": {
                             "file_format": "chromsize",
                             "global": true,
-                            "type": "reference file"
+                            "type": "reference file",
+                            "cardinality": "single"
                         },
                         "name": "chromsize",
                         "source": [
@@ -4671,7 +4682,8 @@
                         "meta": {
                             "file_format": "bam",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "lossless_bamfile",
                         "target": [
@@ -4684,7 +4696,8 @@
                         "meta": {
                             "file_format": "pairs",
                             "global": true,
-                            "type": "data file"
+                            "type": "data file",
+                            "cardinality": "single"
                         },
                         "name": "filtered_pairs",
                         "target": [

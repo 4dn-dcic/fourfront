@@ -315,7 +315,9 @@ def workflow_3_4(value, system):
 
         # If cardinality is not yet set, try to determine from name of step we're on. Fallback to 'single' if nothing about step/arg to turn it into 'array'.
         if not io_meta.get('cardinality'):
-            if io.get('name') == 'input_pairs' and step.get('name') == 'merge_pairs': # TODO: Add more similar checks, for applicable Workflows.
+            if  (((io['name'] == 'input_pairs' or io['name'] == 'input_pairs_index') and step['name'] == 'merge_pairs') or                                          # "input_pairs", "input_pairs_index" into "merge_pairs" on any WF
+                (io_type == 'input' and value.get('name') == 'hi-c-processing-bam' and step.get('name') == 'pairsam-parse-sort' and io.get('name') == 'bam') or     # "input_bams" into "pairsam-parse-sort" on WF "hi-c-processing-bam"
+                (io_type == 'input' and value.get('name') == 'pairsam-merge' and step.get('name') == "pairsam-merge" and io.get('name') == 'input_pairsams')):      # "input_pairsam" into "pairsam-merge" on WF "pairsam-merge"
                 io_meta['cardinality'] = 'array'
             else:
                 io_meta['cardinality'] = 'single'
