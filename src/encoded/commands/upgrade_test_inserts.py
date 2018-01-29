@@ -1,8 +1,5 @@
 import argparse
 import logging
-
-import sys
-import os
 import json
 
 from encoded.loadxl import read_single_sheet
