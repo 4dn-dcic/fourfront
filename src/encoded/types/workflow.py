@@ -81,7 +81,15 @@ class WorkflowRunTracingException(Exception):
 
 
 def item_model_to_object(model, request):
+    '''
+    Converts a model fetched via either ESStorage or RDBStorage into a class instance and then returns partial/performant JSON representation.
+    Used as a 'lite' performant version of request.subrequest(...) which avoids overhead of spinning up extra HTTP requests & (potentially recursive) embeds.
+    Item types supported or possible to pass through this function include: File, Workflow, WorkflowRun; and to a lesser extent (display_title will not be 'full'): Experiment, ExperimentSet.
 
+    :param model: Pyramid model instance as returned from e.g. RDBStorage.get_by_uuid(uuid), ESStorage.get_by_uuid(uuid), RDBStorage.get_by_unique_key(key, value), etc.
+    :param request: Pyramid request object.
+    :returns: JSON/Dictionary representation of the Item.
+    '''
     ClassForItem = request.registry[TYPES].by_item_type.get(model.item_type).factory
     item_instance = ClassForItem(request.registry, model)
     dict_repr = item_instance.__json__(request)
@@ -90,7 +98,11 @@ def item_model_to_object(model, request):
     dict_repr['uuid'] = str(item_instance.uuid)
     dict_repr['@id'] = str(item_instance.jsonld_id(request))
     dict_repr['@type'] = item_instance.jsonld_type()
-    dict_repr['display_title'] = item_instance.display_title()
+    # File.display_title() requires extra params. Other possibilies we may encounter include Experiment, ExperimentSet (display title not important for these, unused), Workflow, WorkflowRun.
+    if 'File' in dict_repr['@type']:
+        dict_repr['display_title'] = item_instance.display_title(request, dict_repr.get('file_format'), dict_repr.get('accession'))
+    else:
+        dict_repr['display_title'] = item_instance.display_title(request)
 
     # Add or calculate necessary rev-links; attempt to get pre-calculated value from ES first for performance. Ideally we want this to happen 100% of the time.
     if hasattr(model, 'source') and model.source.get('object'):
