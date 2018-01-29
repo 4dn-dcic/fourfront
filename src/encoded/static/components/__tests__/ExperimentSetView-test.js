@@ -42,7 +42,7 @@ describe('Testing ExperimentSetView', function() {
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
-        testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} expSetFilters={{}} />);
+        testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} />);
 
 
         //jest.runAllTimers();

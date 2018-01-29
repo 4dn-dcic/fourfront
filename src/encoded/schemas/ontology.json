@@ -90,5 +90,6 @@
                 "linkTo": "OntologyTerm"
             }
         }
-    }
+    },
+    "excludedColumns" : ["lab.display_title"]
 }

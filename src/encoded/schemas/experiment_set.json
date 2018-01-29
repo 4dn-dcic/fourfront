@@ -113,13 +113,13 @@
         "experiments_in_set.digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "experiments_in_set.biosample.modifications.modification_type'": {
+        "experiments_in_set.biosample.modifications.modification_type": {
             "title": "Modifications"
         },
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         }
     },

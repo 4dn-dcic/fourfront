@@ -84,6 +84,30 @@ class Award(Item):
 
 
 @collection(
+    name='antibodys',
+    unique_key='antibody:antibody_name',
+    properties={
+        'title': 'Antibodies',
+        'description': 'Listing of antibodies',
+    })
+class Antibody(Item):
+    """Antibody class."""
+
+    item_type = 'antibody'
+    schema = load_schema('encoded:schemas/antibody.json')
+    name_key = 'antibody_name'
+
+    def display_title(self):
+        dt = ''
+        if self.properties.get('antibody_name'):
+            dt = self.properties.get('antibody_name')
+        if self.properties.get('antibody_encode_accession'):
+            acc = self.properties.get('antibody_encode_accession')
+            dt = dt + ' (' + acc + ')'
+        return dt
+
+
+@collection(
     name='badges',
     unique_key='badge:badgename',
     properties={
@@ -206,8 +230,13 @@ class Protocol(Item, ItemWithAttachment):
     def display_title(self):
         if self.properties.get('attachment'):
             attach = self.properties['attachment']
-            if attach.get('download'):
+            if attach.get('download'):  # this must be or attachment shouldn't be valid
                 return attach['download']
+        else:
+            ptype = self.properties.get('protocol_type')
+            if ptype == 'Other':
+                ptype = 'Protocol'
+            return ptype + " from " + self.properties.get("date_created", None)[:10]
 
 
 @collection(

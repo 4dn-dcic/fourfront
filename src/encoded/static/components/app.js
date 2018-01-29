@@ -48,12 +48,8 @@ const portal = {
             sid:'sBrowse',
             title: 'Browse',
             //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
-            url : function(currentUrlParts){
-                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
-                return Filters.filtersToHref(
-                    store.getState().expSetFilters,
-                    currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
-                );
+            url : function(){
+                return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
             },
             active : function(currentWindowPath){
                 if (currentWindowPath && currentWindowPath.indexOf('/browse/') > -1) return true;
@@ -211,7 +207,7 @@ export default class App extends React.Component {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.render = this.render.bind(this);
 
-        console.log('APP FILTERS', Filters.hrefToFilters(props.href, (props.context && Array.isArray(props.context.filters) && props.context.filters) || null));
+        console.log('App Filters on Initial Page Load', Filters.currentExpSetFilters((props.context && props.context.filters) || null));
 
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
@@ -240,8 +236,6 @@ export default class App extends React.Component {
         navigate.setNavigateFunction(this.navigate);
         navigate.registerCallbackFunction(Alerts.updateCurrentAlertsTitleMap.bind(this, null));
 
-        console.log("App Initial State: ", session, user_actions);
-
         if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
 
         this.state = {
@@ -254,6 +248,8 @@ export default class App extends React.Component {
             'isSubmitting': false,
             'mounted' : false
         };
+
+        console.log("App Initial State: ", this.state);
     }
 
     // Once the app component is mounted, bind keydowns to handleKey function
@@ -315,8 +311,7 @@ export default class App extends React.Component {
         // Load up analytics
         analytics.initializeGoogleAnalytics(
             analytics.getTrackingId(this.props.href),
-            this.props.context,
-            this.props.expSetFilters
+            this.props.context
         );
 
         this.setState({ 'mounted' : true });
@@ -335,7 +330,7 @@ export default class App extends React.Component {
             if (this.props.href !== prevProps.href){ // We navigated somewhere else.
 
                 // Register google analytics pageview event.
-                analytics.registerPageView(this.props.href, this.props.context, this.props.expSetFilters);
+                analytics.registerPageView(this.props.href, this.props.context);
 
                 // We need to rebuild tooltips after navigation to a different page.
                 ReactTooltip.rebuild();
@@ -536,10 +531,6 @@ export default class App extends React.Component {
                 if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
                     hrefHash = hrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
-                }
-                if (hrefParts.pathname.indexOf('/browse/') > -1){
-                    var filters = Filters.hrefToFilters(href, null, false);
-                    Filters.saveChangedFilters(filters, false);
                 }
             });
             if (this.refs && this.refs.navigation){
@@ -1128,7 +1119,6 @@ export default class App extends React.Component {
             session : this.state.session,
             href : this.props.href,
             navigate : this.navigate,
-            expSetFilters : this.props.expSetFilters,
             key : key,
             uploads : this.state.uploads,
             updateUploads : this.updateUploads,
@@ -1235,9 +1225,6 @@ export default class App extends React.Component {
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
-                    <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(Filters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
-                    }}></script>
                     <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
                         <div className="inner">
                             <i className="icon icon-circle-o-notch"/>
@@ -1252,11 +1239,11 @@ export default class App extends React.Component {
                                     href={this.props.href}
                                     session={this.state.session}
                                     updateUserInfo={this.updateUserInfo}
-                                    expSetFilters={this.props.expSetFilters}
                                     portal={portal}
                                     listActionsFor={this.listActionsFor}
                                     ref="navigation"
                                     schemas={this.state.schemas}
+                                    context={context}
                                 />
                                 <div id="pre-content-placeholder"/>
                                 <div id="page-title-container" className="container">
@@ -1266,7 +1253,6 @@ export default class App extends React.Component {
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
-                                        expSetFilters={this.props.expSetFilters}
                                         navigate={navigate}
                                         updateStats={this.updateStats}
                                         schemas={this.state.schemas}

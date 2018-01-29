@@ -44,3 +44,61 @@ def test_calculated_target_summaries(testapp, targets):
         if name == 'target_w_desc':
             assert summary == 'no target'
             assert short == "I'm a region"
+
+
+@pytest.fixture
+def protocol_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'protocol_type': 'Experimental protocol',
+        'description': 'Test Protocol'
+    }
+
+
+@pytest.fixture
+def protocol_w_attach(testapp, protocol_data, attachment):
+    protocol_data['attachment'] = attachment
+    return testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+
+
+def test_protocol_display_title_w_attachment(testapp, protocol_w_attach):
+    assert protocol_w_attach['display_title'] == 'red-dot.png'
+
+
+def test_protocol_display_title_wo_attachment(testapp, protocol_data):
+    from datetime import datetime
+    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert protocol['display_title'] == 'Experimental protocol from ' + str(datetime.now())[:10]
+
+
+def test_protocol_other_display_title_wo_attachment(testapp, protocol_data):
+    from datetime import datetime
+    protocol_data['protocol_type'] = 'Other'
+    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert protocol['display_title'] == 'Protocol from ' + str(datetime.now())[:10]
+
+
+@pytest.fixture
+def antibody_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'Test Antibody',
+        'antibody_name': 'testAb'
+    }
+
+
+@pytest.fixture
+def ab_w_name(testapp, antibody_data):
+    return testapp.post_json('/antibody', antibody_data).json['@graph'][0]
+
+
+def test_antibody_display_title_name_only(ab_w_name):
+    assert ab_w_name['display_title'] == 'testAb'
+
+
+def test_antibody_display_title_name_and_accession(testapp, ab_w_name):
+    acc = 'ENCAB111AAA'
+    res = testapp.patch_json(ab_w_name['@id'], {'antibody_encode_accession': acc}).json['@graph'][0]
+    assert res['display_title'] == 'testAb (' + acc + ')'

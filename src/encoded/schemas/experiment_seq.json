@@ -37,7 +37,8 @@
             "CHIP-seq",
             "RNA-seq",
             "NAD-seq",
-            "SPRITE",
+            "DNA SPRITE",
+            "RNA-DNA SPRITE",
             "GAM"
           ]
         },
@@ -75,7 +76,7 @@
         "biosample.treatments_summary": {
             "title": "Treatments"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         }
     },

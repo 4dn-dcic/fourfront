@@ -13,6 +13,7 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
+    ALLOW_SUBMITTER_ADD
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -210,6 +211,7 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
 @abstract_collection(
     name='files',
     unique_key='accession',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': 'Files',
         'description': 'Listing of Files',
