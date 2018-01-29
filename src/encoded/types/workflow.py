@@ -2,6 +2,7 @@
 """
 from itertools import chain
 from collections import OrderedDict
+from inspect import signature
 import copy
 from encoded.schema_formats import is_uuid
 #import gevent
@@ -98,11 +99,11 @@ def item_model_to_object(model, request):
     dict_repr['uuid'] = str(item_instance.uuid)
     dict_repr['@id'] = str(item_instance.jsonld_id(request))
     dict_repr['@type'] = item_instance.jsonld_type()
-    # File.display_title() requires extra params. Other possibilies we may encounter include Experiment, ExperimentSet (display title not important for these, unused), Workflow, WorkflowRun.
-    if 'File' in dict_repr['@type']:
-        dict_repr['display_title'] = item_instance.display_title(request, dict_repr.get('file_format'), dict_repr.get('accession'))
-    else:
-        dict_repr['display_title'] = item_instance.display_title(request)
+
+    display_title_parameters_requested = list(signature(item_instance.display_title).parameters.keys())
+    display_title_parameters = { arg : dict_repr.get(arg) for arg in display_title_parameters_requested if arg != 'request' }
+
+    dict_repr['display_title'] = item_instance.display_title(request, **display_title_parameters)
 
     # Add or calculate necessary rev-links; attempt to get pre-calculated value from ES first for performance. Ideally we want this to happen 100% of the time.
     if hasattr(model, 'source') and model.source.get('object'):
