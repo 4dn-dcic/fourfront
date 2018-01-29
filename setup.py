@@ -113,6 +113,8 @@ setup(
         clone-beanstalk = encoded.commands.clone_beanstalk_env:main
         rm-beanstalk = encoded.commands.rm_beanstalk_env:main
 
+        upgrade-test-inserts = encoded.commands.upgrade_test_inserts:main
+
         [paste.app_factory]
         main = encoded:main
 
