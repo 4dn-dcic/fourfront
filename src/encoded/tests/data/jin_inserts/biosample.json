@@ -11,7 +11,6 @@
         "biosource": [
             "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
         ], 
-        "schema_version": "1", 
         "references": [], 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 
@@ -32,8 +31,7 @@
         "accession": "4DNBSJEHC2OQ", 
         "biosource": [
             "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
-        ], 
-        "schema_version": "1", 
+        ],
         "references": [], 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 
@@ -54,8 +52,7 @@
         "accession": "4DNBSTUMX83X", 
         "biosource": [
             "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
-        ], 
-        "schema_version": "1", 
+        ],
         "references": [], 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 
@@ -76,8 +73,7 @@
         "accession": "4DNBSRNYG7ER", 
         "biosource": [
             "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
-        ], 
-        "schema_version": "1", 
+        ],
         "references": [], 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 
@@ -98,8 +94,7 @@
         "accession": "4DNBSSQMP6QO", 
         "biosource": [
             "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
-        ], 
-        "schema_version": "1", 
+        ],
         "references": [], 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 
@@ -120,8 +115,7 @@
         "accession": "4DNBS27WHAQ7", 
         "biosource": [
             "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
-        ], 
-        "schema_version": "1", 
+        ],
         "references": [], 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 

@@ -1,206 +1,194 @@
 const WorkflowRunDataBlob = {
-    "run_status":"complete",
-    "workflow":{
-        "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
-        "steps":[
-            {
-                "meta":{
-                    "software_used":{
-                        "display_title":"cooler_0.7.4",
-                        "version":"0.7.4",
-                        "name":"cooler",
-                        "principals_allowed":{
-                            "audit":[
-                                "system.Everyone"
-                            ],
-                            "edit":[
-                                "group.admin"
-                            ],
-                            "view":[
-                                "system.Everyone"
-                            ]
-                        },
-                        "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
-                        "title":"cooler_0.7.4",
-                        "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~"
-                    }
-                },
-                "name":"cool2mcool"
-            },
-            {
-                "meta":{
-                    "software_used":{
-                        "display_title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
-                        "name":"mcool2hic",
-                        "principals_allowed":{
-                            "audit":[
-                                "system.Everyone"
-                            ],
-                            "edit":[
-                                "group.admin"
-                            ],
-                            "view":[
-                                "system.Everyone"
-                            ]
-                        },
-                        "@id":"/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
-                        "uuid":"c91a2c9d-079c-4647-9951-da95f2c9baf1",
-                        "title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
-                        "link_id":"~softwares~c91a2c9d-079c-4647-9951-da95f2c9baf1~"
-                    }
-                },
-                "name":"extract_mcool_normvector_for_juicebox"
-            },
-            {
-                "meta":{
-                    "software_used":{
-                        "display_title":"cooler_0.7.4",
-                        "version":"0.7.4",
-                        "name":"cooler",
-                        "principals_allowed":{
-                            "audit":[
-                                "system.Everyone"
-                            ],
-                            "edit":[
-                                "group.admin"
-                            ],
-                            "view":[
-                                "system.Everyone"
-                            ]
-                        },
-                        "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
-                        "title":"cooler_0.7.4",
-                        "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~"
-                    }
-                },
-                "name":"add_hic_normvector_to_mcool"
-            }
-        ],
-        "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
-        "principals_allowed":{
-            "audit":[
-                "system.Everyone"
-            ],
-            "edit":[
-                "group.admin"
-            ],
-            "view":[
-                "group.admin",
-                "group.read-only-admin",
-                "remoteuser.EMBED",
-                "remoteuser.INDEXER",
-                "viewing_group.4DN"
-            ]
-        },
-        "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
-        "workflow_type":"Hi-C data analysis",
-        "link_id":"~workflows~c6480905-49e5-4c33-afab-9ec90d65faf3~"
-    },
-    "principals_allowed":{
-        "audit":[
-            "system.Everyone"
-        ],
-        "edit":[
-            "group.admin"
-        ],
-        "view":[
-            "system.Everyone"
-        ]
-    },
-    "run_platform":"AWSEM",
-    "title":"hi-c-processing-partc run 2017-09-18 00:08:53.081319",
-    "actions":[
-        {
-            "profile":"/profiles/WorkflowRunAwsem.json",
-            "href":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/#!create",
-            "title":"Create",
-            "name":"create"
-        },
-        {
-            "profile":"/profiles/WorkflowRunAwsem.json",
-            "href":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/#!edit",
-            "title":"Edit",
-            "name":"edit"
-        }
-    ],
-    "display_title":"hi-c-processing-partc run 2017-09-18 00:08:53.081319",
-    "parameters":[
-        {
-            "workflow_argument_name":"ncores",
-            "value":"1"
-        }
-    ],
-    "aliases":[
-
-    ],
-    "external_references":[
-
-    ],
-    "submitted_by":{
-        "display_title":"4dn DCIC",
-        "@id":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
-        "uuid":"986b362f-4eb6-4a9c-8173-3ab267307e3a",
-        "principals_allowed":{
-            "audit":[
-                "system.Everyone"
-            ],
-            "edit":[
-                "group.admin",
-                "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
-            ],
-            "view":[
-                "group.admin",
-                "group.read-only-admin",
-                "remoteuser.EMBED",
-                "remoteuser.INDEXER",
-                "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
-            ]
-        },
-        "link_id":"~users~986b362f-4eb6-4a9c-8173-3ab267307e3a~"
-    },
-    "run_url":"https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:run_awsem_workflow_with_ponies:partc_4DNEXBZAHAQZ2ec6efb1-147d-4017-be03-18baae6c78b7",
-    "@type":[
-        "WorkflowRunAwsem",
-        "WorkflowRun",
-        "Item"
-    ],
     "lab":{
+        "uuid":"828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "link_id":"~labs~4dn-dcic-lab~",
+        "@id":"/labs/4dn-dcic-lab/",
         "display_title":"4DN DCIC Lab, HMS",
         "principals_allowed":{
-            "audit":[
+            "view":[
                 "system.Everyone"
             ],
             "edit":[
                 "group.admin",
                 "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
             ],
-            "view":[
+            "audit":[
                 "system.Everyone"
             ]
-        },
-        "@id":"/labs/4dn-dcic-lab/",
-        "uuid":"828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "link_id":"~labs~4dn-dcic-lab~"
+        }
     },
-    "date_created":"2017-09-18T00:08:53.959871+00:00",
+    "award":{
+        "@id":"/awards/1U01CA200059-01/",
+        "link_id":"~awards~1U01CA200059-01~",
+        "uuid":"b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "display_title":"4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER",
+        "principals_allowed":{
+            "view":[
+                "system.Everyone"
+            ],
+            "edit":[
+                "group.admin"
+            ],
+            "audit":[
+                "system.Everyone"
+            ]
+        }
+    },
+    "title":"hi-c-processing-partc/8 run 2017-08-14 17:27:52.701358",
+    "status":"released to project",
+    "aliases":[
+
+    ],
+    "run_url":"https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:run_sbg_workflow_5:hic-partc_partC_rao26b22ed2d-7eee-4377-b85e-f43bb41747f1",
+    "workflow":{
+        "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
+        "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
+        "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+        "workflow_type":"Hi-C data analysis",
+        "title":"hi-c-processing-partc/6",
+        "link_id":"~workflows~c6480905-49e5-4c33-afab-9ec90d65faf3~",
+        "steps":[
+            {
+                "name":"cool2mcool",
+                "meta":{
+                    "software_used":[
+                        {
+                            "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~",
+                            "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+                            "display_title":"cooler_0.7.4",
+                            "version":"0.7.4",
+                            "name":"cooler",
+                            "title":"cooler_0.7.4",
+                            "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                            "principals_allowed":{
+                                "view":[
+                                    "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                                    "group.admin",
+                                    "group.read-only-admin",
+                                    "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                                    "remoteuser.EMBED",
+                                    "remoteuser.INDEXER"
+                                ],
+                                "edit":[
+                                    "group.admin",
+                                    "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                                ],
+                                "audit":[
+                                    "system.Everyone"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name":"extract_mcool_normvector_for_juicebox",
+                "meta":{
+                    "software_used":[
+                        {
+                            "link_id":"~softwares~c91a2c9d-079c-4647-9951-da95f2c9baf1~",
+                            "uuid":"c91a2c9d-079c-4647-9951-da95f2c9baf1",
+                            "display_title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+                            "name":"mcool2hic",
+                            "title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+                            "@id":"/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
+                            "principals_allowed":{
+                                "view":[
+                                    "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                                    "group.admin",
+                                    "group.read-only-admin",
+                                    "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                                    "remoteuser.EMBED",
+                                    "remoteuser.INDEXER"
+                                ],
+                                "edit":[
+                                    "group.admin",
+                                    "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                                ],
+                                "audit":[
+                                    "system.Everyone"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name":"add_hic_normvector_to_mcool",
+                "meta":{
+                    "software_used":[
+                        {
+                            "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~",
+                            "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+                            "display_title":"cooler_0.7.4",
+                            "version":"0.7.4",
+                            "name":"cooler",
+                            "title":"cooler_0.7.4",
+                            "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                            "principals_allowed":{
+                                "view":[
+                                    "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                                    "group.admin",
+                                    "group.read-only-admin",
+                                    "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                                    "remoteuser.EMBED",
+                                    "remoteuser.INDEXER"
+                                ],
+                                "edit":[
+                                    "group.admin",
+                                    "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                                ],
+                                "audit":[
+                                    "system.Everyone"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "principals_allowed":{
+            "view":[
+                "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                "group.admin",
+                "group.read-only-admin",
+                "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                "remoteuser.EMBED",
+                "remoteuser.INDEXER"
+            ],
+            "edit":[
+                "group.admin",
+                "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+            ],
+            "audit":[
+                "system.Everyone"
+            ]
+        }
+    },
+    "parameters":[
+        {
+            "value":"8",
+            "ordinal":1,
+            "workflow_argument_name":"ncores"
+        }
+    ],
+    "run_status":"complete",
     "input_files":[
         {
-            "ordinal":1,
-            "workflow_argument_name":"input_cool",
             "value":{
-                "display_title":"4DNFIW8XBC3M.cool",
-                "file_format":"cool",
-                "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                "accession":"4DNFIO67APU1",
+                "@id":"/files-fastq/4DNFIO67APU1/",
+                "uuid":"46e82a90-49e5-4c33-afab-9ec90d65faa0",
+                "link_id":"~files-fastq~4DNFIO67APU1~",
+                "@type":[
+                    "FileFastq",
+                    "File",
+                    "Item"
+                ],
+                "file_format":"fastq",
+                "filename":"test_file1.fastq.gz",
+                "display_title":"4DNFIO67APU1.fastq.gz",
                 "principals_allowed":{
-                    "audit":[
-                        "system.Everyone"
-                    ],
-                    "edit":[
-                        "group.admin",
-                        "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
-                    ],
                     "view":[
                         "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
                         "group.admin",
@@ -208,508 +196,535 @@ const WorkflowRunDataBlob = {
                         "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
                         "remoteuser.EMBED",
                         "remoteuser.INDEXER"
+                    ],
+                    "edit":[
+                        "group.admin",
+                        "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                    ],
+                    "audit":[
+                        "system.Everyone"
                     ]
-                },
-                "@id":"/files-processed/4DNFIW8XBC3M/",
+                }
+            },
+            "ordinal":1,
+            "workflow_argument_name":"input_hic"
+        },
+        {
+            "value":{
+                "accession":"4DNFIO67APT1",
+                "@id":"/files-fastq/4DNFIO67APT1/",
+                "uuid":"46e82a90-49e5-4c33-afab-9ec90d65faa1",
+                "link_id":"~files-fastq~4DNFIO67APT1~",
                 "@type":[
-                    "FileProcessed",
+                    "FileFastq",
                     "File",
                     "Item"
                 ],
-                "accession":"4DNFIW8XBC3M",
-                "link_id":"~files-processed~4DNFIW8XBC3M~"
-            }
-        },
-        {
-            "ordinal":1,
-            "workflow_argument_name":"input_hic",
-            "value":{
-                "display_title":"4DNFI86NV3M3.hic",
-                "file_format":"hic",
-                "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                "file_format":"fastq",
+                "filename":"test_file2.fastq.gz",
+                "display_title":"4DNFIO67APT1.fastq.gz",
                 "principals_allowed":{
-                    "audit":[
-                        "system.Everyone"
-                    ],
-                    "edit":[
-                        "group.admin"
-                    ],
                     "view":[
-                        "system.Everyone"
-                    ]
-                },
-                "@id":"/files-processed/4DNFI86NV3M3/",
-                "@type":[
-                    "FileProcessed",
-                    "File",
-                    "Item"
-                ],
-                "accession":"4DNFI86NV3M3",
-                "link_id":"~files-processed~4DNFI86NV3M3~"
-            }
-        },
-        {
-            "ordinal":1,
-            "workflow_argument_name":"chromsize",
-            "value":{
-                "display_title":"4DNFI823LSII.chrom.sizes",
-                "file_format":"chromsizes",
-                "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                "principals_allowed":{
-                    "audit":[
-                        "system.Everyone"
-                    ],
-                    "edit":[
-                        "group.admin"
-                    ],
-                    "view":[
+                        "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
                         "group.admin",
                         "group.read-only-admin",
+                        "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
                         "remoteuser.EMBED",
-                        "remoteuser.INDEXER",
-                        "viewing_group.4DN"
+                        "remoteuser.INDEXER"
+                    ],
+                    "edit":[
+                        "group.admin",
+                        "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                    ],
+                    "audit":[
+                        "system.Everyone"
                     ]
-                },
-                "@id":"/files-reference/4DNFI823LSII/",
-                "@type":[
-                    "FileReference",
-                    "File",
-                    "Item"
-                ],
-                "filename":"hg38.mainonly.chrom.sizes",
-                "accession":"4DNFI823LSII",
-                "link_id":"~files-reference~4DNFI823LSII~"
-            }
+                }
+            },
+            "ordinal":1,
+            "workflow_argument_name":"input_cool"
         }
     ],
-    "schema_version":"1",
-    "status":"released",
+    "sbg_task_id":"a99e804c-2cc9-4bef-ba4a-9ec2a39a80f6",
+    "date_created":"2018-01-24T14:29:52.928403+00:00",
     "output_files":[
         {
-            "extra_files":[
-
-            ],
-            "extension":".mcool",
+            "type":"Output processed file",
             "value":{
-                "display_title":"4DNFII7498B3.mcool",
-                "file_format":"mcool",
-                "uuid":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18",
-                "principals_allowed":{
-                    "audit":[
-                        "system.Everyone"
-                    ],
-                    "edit":[
-                        "group.admin"
-                    ],
-                    "view":[
-                        "system.Everyone"
-                    ]
-                },
-                "@id":"/files-processed/4DNFII7498B3/",
+                "link_id":"~files-processed~4DNFIMCOOL02~",
+                "@id":"/files-processed/4DNFIMCOOL02/",
+                "display_title":"4DNFIMCOOL02.mcool",
                 "@type":[
                     "FileProcessed",
                     "File",
                     "Item"
                 ],
-                "accession":"4DNFII7498B3",
-                "link_id":"~files-processed~4DNFII7498B3~"
+                "file_format":"mcool",
+                "accession":"4DNFIMCOOL02",
+                "uuid":"d273d710-6b6d-4e43-a84c-5658a891c033",
+                "principals_allowed":{
+                    "view":[
+                        "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                        "group.admin",
+                        "group.read-only-admin",
+                        "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                        "remoteuser.EMBED",
+                        "remoteuser.INDEXER"
+                    ],
+                    "edit":[
+                        "group.admin",
+                        "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                    ],
+                    "audit":[
+                        "system.Everyone"
+                    ]
+                }
             },
             "format":"mcool",
-            "type":"Output processed file",
-            "workflow_argument_name":"output_mcool",
-            "upload_key":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18/4DNFII7498B3.mcool"
+            "status":"COMPLETED",
+            "export_id":"B9H2LpQuS5O4P61FlSUYQSfdurJbjRhM",
+            "extension":".mcool",
+            "upload_key":"d273d710-6b6d-4e43-a84c-5658a891c033/4DNFIMCOOL02.mcool",
+            "workflow_argument_name":"output_mcool"
         },
         {
-            "extra_files":[
-
-            ],
-            "extension":".normvector.juicerformat.gz",
+            "type":"Output processed file",
             "value":{
-                "display_title":"4DNFIDWULZXP.normvector.juicerformat.gz",
-                "file_format":"normvector_juicerformat",
-                "uuid":"f108ebb3-8693-491a-88a0-d3e2163d9966",
-                "principals_allowed":{
-                    "audit":[
-                        "system.Everyone"
-                    ],
-                    "edit":[
-                        "group.admin"
-                    ],
-                    "view":[
-                        "system.Everyone"
-                    ]
-                },
-                "@id":"/files-processed/4DNFIDWULZXP/",
+                "link_id":"~files-processed~4DNFIAAAAAA2~",
+                "@id":"/files-processed/4DNFIAAAAAA2/",
+                "display_title":"4DNFIAAAAAA2.pairs.gz",
                 "@type":[
                     "FileProcessed",
                     "File",
                     "Item"
                 ],
-                "accession":"4DNFIDWULZXP",
-                "link_id":"~files-processed~4DNFIDWULZXP~"
+                "file_format":"pairs",
+                "accession":"4DNFIAAAAAA2",
+                "uuid":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f",
+                "principals_allowed":{
+                    "view":[
+                        "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                        "group.admin",
+                        "group.read-only-admin",
+                        "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                        "remoteuser.EMBED",
+                        "remoteuser.INDEXER"
+                    ],
+                    "edit":[
+                        "group.admin",
+                        "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                    ],
+                    "audit":[
+                        "system.Everyone"
+                    ]
+                }
             },
             "format":"normvector_juicerformat",
-            "type":"Output processed file",
-            "workflow_argument_name":"output_normvector",
-            "upload_key":"f108ebb3-8693-491a-88a0-d3e2163d9966/4DNFIDWULZXP.normvector.juicerformat.gz"
+            "status":"COMPLETED",
+            "export_id":"0NW3nlHzmPxL9fbL0Oh1BI9BERpu8HsQ",
+            "extension":".normvector.juicerformat.gz",
+            "upload_key":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f/4DNFIAAAAAA2.normvector.juicerformat.gz",
+            "workflow_argument_name":"output_normvector"
         }
     ],
-    "uuid":"a6b459e4-c9b2-45c3-8912-38af6c59ea3b",
-    "@id":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
+    "run_platform":"SBG",
+    "sbg_app_name":"hi-c-processing-partc/8",
+    "sbg_import_ids":[
+        "4DNFIU59TRDY.hic",
+        "4DNFIHKCL9SF.cool"
+    ],
+    "schema_version":"1",
+    "project_release":"2018-01-24",
+    "@id":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/",
+    "@type":[
+        "WorkflowRunSbg",
+        "WorkflowRun",
+        "Item"
+    ],
+    "uuid":"0fe19e8e-c565-4c0c-8058-effe5d81f53b",
+    "external_references":[
+
+    ],
+    "display_title":"hi-c-processing-partc/8 run 2017-08-14 17:27:52.701358",
+    "link_id":"~workflow-runs-sbg~0fe19e8e-c565-4c0c-8058-effe5d81f53b~",
+    "principals_allowed":{
+        "view":[
+            "group.admin",
+            "group.read-only-admin",
+            "remoteuser.EMBED",
+            "remoteuser.INDEXER",
+            "viewing_group.4DN"
+        ],
+        "edit":[
+            "group.admin"
+        ],
+        "audit":[
+            "system.Everyone"
+        ]
+    },
+    "@context":"/terms/",
+    "actions":[
+        {
+            "name":"create",
+            "title":"Create",
+            "profile":"/profiles/WorkflowRunSbg.json",
+            "href":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/#!create"
+        },
+        {
+            "name":"edit",
+            "title":"Edit",
+            "profile":"/profiles/WorkflowRunSbg.json",
+            "href":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/#!edit"
+        }
+    ],
     "audit":{
         "INTERNAL_ACTION":[
             {
-                "name":"audit_item_status",
+                "category":"mismatched status",
+                "detail":"released to project /workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/ has uploaded subobject /files-fastq/4DNFIO67APT1/",
                 "level":30,
-                "detail":"released /workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/ has uploaded subobject /files-processed/4DNFIW8XBC3M/",
-                "path":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
                 "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
+                "path":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/",
+                "name":"audit_item_status"
             },
             {
-                "name":"audit_item_status",
+                "category":"mismatched status",
+                "detail":"released to project /workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/ has uploaded subobject /files-processed/4DNFIAAAAAA2/",
                 "level":30,
-                "detail":"released /workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/ has uploaded subobject /files-processed/4DNFI7DYQJ7I/",
-                "path":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
                 "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
+                "path":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/",
+                "name":"audit_item_status"
             },
             {
-                "name":"audit_item_status",
+                "category":"mismatched status",
+                "detail":"released to project /workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/ has uploaded subobject /files-processed/4DNFIMCOOL02/",
                 "level":30,
-                "detail":"released /workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/ has in review by lab subobject /workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
-                "path":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
                 "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
+                "path":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/",
+                "name":"audit_item_status"
             },
             {
-                "name":"audit_item_status",
+                "category":"mismatched status",
+                "detail":"released to project /workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/ has in review by lab subobject /workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
                 "level":30,
-                "detail":"released /workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/ has released to project subobject /files-reference/4DNFI823LSII/",
-                "path":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
                 "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
+                "path":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/",
+                "name":"audit_item_status"
             },
             {
-                "name":"audit_item_status",
+                "category":"mismatched status",
+                "detail":"released to project /workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/ has uploaded subobject /files-fastq/4DNFIO67APU1/",
                 "level":30,
-                "detail":"released /workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/ has uploaded subobject /files-processed/4DNFIW8XBC3M/",
-                "path":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
                 "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
-            },
-            {
-                "name":"audit_item_status",
-                "level":30,
-                "detail":"released /workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/ has released to project subobject /workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
-                "path":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
-                "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
-            },
-            {
-                "name":"audit_item_status",
-                "level":30,
-                "detail":"released /workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/ has released to project subobject /files-reference/4DNFI823LSII/",
-                "path":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
-                "level_name":"INTERNAL_ACTION",
-                "category":"mismatched status"
+                "path":"/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/",
+                "name":"audit_item_status"
             }
         ]
     },
-    "link_id":"~workflow-runs-awsem~a6b459e4-c9b2-45c3-8912-38af6c59ea3b~",
-    "awsem_app_name":"hi-c-processing-partc",
-    "award":{
-        "display_title":"4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER",
-        "principals_allowed":{
-            "audit":[
-                "system.Everyone"
-            ],
-            "edit":[
-                "group.admin"
-            ],
-            "view":[
-                "system.Everyone"
-            ]
-        },
-        "link_id":"~awards~1U01CA200059-01~",
-        "uuid":"b0b9c607-f8b4-4f02-93f4-9895b461334b",
-        "@id":"/awards/1U01CA200059-01/"
-    },
     "steps":[
         {
-            "inputs":[
-                {
-                    "run_data":{
-                        "meta":[
-                            {
-                                "ordinal":1
-                            }
-                        ],
-                        "type":"input",
-                        "file":[
-                            "290ea431-e0d9-408d-be81-a8e585bd4660"
-                        ]
-                    },
-                    "meta":{
-                        "argument_cardinality":"1",
-                        "argument_type":"Input file",
-                        "argument_format":"cool"
-                    },
-                    "source":[
-                        {
-                            "type":"Workflow Input File",
-                            "name":"input_cool"
-                        }
-                    ],
-                    "name":"input_cool"
-                },
-                {
-                    "run_data":{
-                        "type":"parameter",
-                        "value":"1"
-                    },
-                    "meta":{
-                        "argument_cardinality":"1",
-                        "argument_type":"parameter"
-                    },
-                    "source":[
-                        {
-                            "type":"Workflow Parameter",
-                            "name":"ncores"
-                        }
-                    ],
-                    "name":"ncores"
-                }
-            ],
             "meta":{
+                "software_used":[
+                    {
+                        "title":"cooler_0.7.4",
+                        "display_title":"cooler_0.7.4",
+                        "version":"0.7.4",
+                        "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~",
+                        "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                        "name":"cooler",
+                        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+                        "principals_allowed":{
+                            "view":[
+                                "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                                "group.admin",
+                                "group.read-only-admin",
+                                "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                                "remoteuser.EMBED",
+                                "remoteuser.INDEXER"
+                            ],
+                            "edit":[
+                                "group.admin",
+                                "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                            ],
+                            "audit":[
+                                "system.Everyone"
+                            ]
+                        }
+                    }
+                ],
                 "analysis_step_types":[
                     "aggregation",
                     "normalization",
                     "file format conversion"
-                ],
-                "software_used":{
-                    "version":"0.7.4",
-                    "display_title":"cooler_0.7.4",
-                    "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
-                    "principals_allowed":{
-                        "audit":[
-                            "system.Everyone"
-                        ],
-                        "view":[
-                            "system.Everyone"
-                        ],
-                        "edit":[
-                            "group.admin"
-                        ]
-                    },
-                    "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                    "name":"cooler",
-                    "title":"cooler_0.7.4",
-                    "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~"
-                }
+                ]
             },
-            "outputs":[
-                {
-                    "target":[
-                        {
-                            "step":"add_hic_normvector_to_mcool",
-                            "type":"Input file or parameter",
-                            "name":"input_mcool"
-                        }
-                    ],
-                    "meta":{
-                        "argument_cardinality":"1"
-                    },
-                    "name":"output_mcool"
-                }
-            ],
-            "name":"cool2mcool"
-        },
-        {
+            "name":"cool2mcool",
             "inputs":[
                 {
                     "meta":{
-                        "argument_cardinality":"1"
+                        "type":"data file",
+                        "global":true,
+                        "cardinality":"single",
+                        "file_format":"cool"
                     },
+                    "name":"input_cool",
                     "source":[
                         {
-                            "step":"add_hic_normvector_to_mcool",
-                            "type":"Output file or parameter",
-                            "name":"output_mcool"
+                            "name":"input_cool"
                         }
                     ],
-                    "name":"input_mcool"
-                }
-            ],
-            "meta":{
-                "analysis_step_types":[
-                    "file format conversion"
-                ],
-                "software_used":{
-                    "display_title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
-                    "name":"mcool2hic",
-                    "principals_allowed":{
-                        "audit":[
-                            "system.Everyone"
-                        ],
-                        "view":[
-                            "system.Everyone"
-                        ],
-                        "edit":[
-                            "group.admin"
-                        ]
-                    },
-                    "@id":"/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
-                    "uuid":"c91a2c9d-079c-4647-9951-da95f2c9baf1",
-                    "title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
-                    "link_id":"~softwares~c91a2c9d-079c-4647-9951-da95f2c9baf1~"
-                }
-            },
-            "outputs":[
-                {
                     "run_data":{
-                        "meta":[
-                            {
-                                "format":"normvector_juicerformat",
-                                "extra_files":[
-
-                                ],
-                                "extension":".normvector.juicerformat.gz",
-                                "upload_key":"f108ebb3-8693-491a-88a0-d3e2163d9966/4DNFIDWULZXP.normvector.juicerformat.gz"
-                            }
-                        ],
-                        "type":"output",
                         "file":[
-                            "f108ebb3-8693-491a-88a0-d3e2163d9966"
-                        ]
-                    },
-                    "target":[
-                        {
-                            "type":"Workflow Output File",
-                            "name":"output_normvector"
-                        }
-                    ],
-                    "meta":{
-                        "argument_cardinality":"1",
-                        "argument_type":"Output processed file",
-                        "argument_format":"normvector_juicerformat"
-                    },
-                    "name":"output_normvector"
-                }
-            ],
-            "name":"extract_mcool_normvector_for_juicebox"
-        },
-        {
-            "inputs":[
-                {
-                    "run_data":{
+                            "46e82a90-49e5-4c33-afab-9ec90d65faa1"
+                        ],
+                        "type":"input",
                         "meta":[
                             {
                                 "ordinal":1
                             }
-                        ],
-                        "type":"input",
-                        "file":[
-                            "265b3dbe-f1d2-4cae-957f-23f71a2c6638"
                         ]
-                    },
-                    "meta":{
-                        "argument_cardinality":"1",
-                        "argument_type":"Input file",
-                        "argument_format":"hic"
-                    },
-                    "source":[
-                        {
-                            "type":"Workflow Input File",
-                            "name":"input_hic"
-                        }
-                    ],
-                    "name":"input_hic"
+                    }
                 },
                 {
                     "meta":{
-                        "argument_cardinality":"1"
+                        "type":"parameter",
+                        "global":true,
+                        "cardinality":"single"
                     },
+                    "name":"ncores",
                     "source":[
                         {
-                            "step":"cool2mcool",
-                            "type":"Output file or parameter",
-                            "name":"output_mcool"
+                            "name":"ncores"
                         }
                     ],
-                    "name":"input_mcool"
+                    "run_data":{
+                        "value":[
+                            "8"
+                        ],
+                        "type":"parameter",
+                        "meta":[
+                            {
+                                "ordinal":1
+                            }
+                        ]
+                    }
                 }
             ],
-            "meta":{
-                "analysis_step_types":[
-                    "file format conversion"
-                ],
-                "software_used":{
-                    "version":"0.7.4",
-                    "display_title":"cooler_0.7.4",
-                    "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
-                    "principals_allowed":{
-                        "audit":[
-                            "system.Everyone"
-                        ],
-                        "view":[
-                            "system.Everyone"
-                        ],
-                        "edit":[
-                            "group.admin"
-                        ]
-                    },
-                    "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                    "name":"cooler",
-                    "title":"cooler_0.7.4",
-                    "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~"
-                }
-            },
             "outputs":[
                 {
+                    "meta":{
+                        "type":"data file",
+                        "global":false,
+                        "cardinality":"single",
+                        "file_format":"mcool"
+                    },
+                    "name":"output_mcool",
+                    "target":[
+                        {
+                            "name":"input_mcool",
+                            "step":"add_hic_normvector_to_mcool"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "meta":{
+                "software_used":[
+                    {
+                        "title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+                        "display_title":"mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+                        "link_id":"~softwares~c91a2c9d-079c-4647-9951-da95f2c9baf1~",
+                        "@id":"/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
+                        "name":"mcool2hic",
+                        "uuid":"c91a2c9d-079c-4647-9951-da95f2c9baf1",
+                        "principals_allowed":{
+                            "view":[
+                                "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                                "group.admin",
+                                "group.read-only-admin",
+                                "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                                "remoteuser.EMBED",
+                                "remoteuser.INDEXER"
+                            ],
+                            "edit":[
+                                "group.admin",
+                                "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                            ],
+                            "audit":[
+                                "system.Everyone"
+                            ]
+                        }
+                    }
+                ],
+                "analysis_step_types":[
+                    "file format conversion"
+                ]
+            },
+            "name":"extract_mcool_normvector_for_juicebox",
+            "inputs":[
+                {
+                    "meta":{
+                        "type":"data file",
+                        "global":false,
+                        "cardinality":"single",
+                        "file_format":"mcool"
+                    },
+                    "name":"input_mcool",
+                    "source":[
+                        {
+                            "name":"output_mcool",
+                            "step":"add_hic_normvector_to_mcool"
+                        }
+                    ]
+                }
+            ],
+            "outputs":[
+                {
+                    "meta":{
+                        "type":"data file",
+                        "global":true,
+                        "cardinality":"single",
+                        "file_format":"normvector_juicerformat"
+                    },
+                    "name":"output_normvector",
+                    "target":[
+                        {
+                            "name":"output_normvector"
+                        }
+                    ],
                     "run_data":{
+                        "file":[
+                            "7f9eb396-5c1a-1111-aebf-28ea39d6a50f"
+                        ],
+                        "type":"output",
                         "meta":[
                             {
                                 "format":"normvector_juicerformat",
-                                "extra_files":[
-
-                                ],
+                                "status":"COMPLETED",
+                                "export_id":"0NW3nlHzmPxL9fbL0Oh1BI9BERpu8HsQ",
                                 "extension":".normvector.juicerformat.gz",
-                                "upload_key":"f108ebb3-8693-491a-88a0-d3e2163d9966/4DNFIDWULZXP.normvector.juicerformat.gz"
+                                "upload_key":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f/4DNFIAAAAAA2.normvector.juicerformat.gz"
                             }
-                        ],
-                        "type":"output",
-                        "file":[
-                            "941b4d2b-899d-4f1c-9f6a-c9f6a3401a18"
                         ]
+                    }
+                }
+            ]
+        },
+        {
+            "meta":{
+                "software_used":[
+                    {
+                        "title":"cooler_0.7.4",
+                        "display_title":"cooler_0.7.4",
+                        "version":"0.7.4",
+                        "link_id":"~softwares~02d636b9-d8dd-4da9-950c-2ca994b23555~",
+                        "@id":"/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/",
+                        "name":"cooler",
+                        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+                        "principals_allowed":{
+                            "view":[
+                                "award.b0b9c607-f8b4-4f02-93f4-9895b461334b",
+                                "group.admin",
+                                "group.read-only-admin",
+                                "lab.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+                                "remoteuser.EMBED",
+                                "remoteuser.INDEXER"
+                            ],
+                            "edit":[
+                                "group.admin",
+                                "submits_for.828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+                            ],
+                            "audit":[
+                                "system.Everyone"
+                            ]
+                        }
+                    }
+                ],
+                "analysis_step_types":[
+                    "file format conversion"
+                ]
+            },
+            "name":"add_hic_normvector_to_mcool",
+            "inputs":[
+                {
+                    "meta":{
+                        "type":"data file",
+                        "global":true,
+                        "cardinality":"single",
+                        "file_format":"hic"
                     },
+                    "name":"input_hic",
+                    "source":[
+                        {
+                            "name":"input_hic"
+                        }
+                    ],
+                    "run_data":{
+                        "file":[
+                            "46e82a90-49e5-4c33-afab-9ec90d65faa0"
+                        ],
+                        "type":"input",
+                        "meta":[
+                            {
+                                "ordinal":1
+                            }
+                        ]
+                    }
+                },
+                {
+                    "meta":{
+                        "type":"data file",
+                        "global":false,
+                        "cardinality":"single",
+                        "file_format":"mcool"
+                    },
+                    "name":"input_mcool",
+                    "source":[
+                        {
+                            "name":"output_mcool",
+                            "step":"cool2mcool"
+                        }
+                    ]
+                }
+            ],
+            "outputs":[
+                {
+                    "meta":{
+                        "type":"data file",
+                        "global":true,
+                        "cardinality":"single",
+                        "file_format":"mcool"
+                    },
+                    "name":"output_mcool",
                     "target":[
                         {
-                            "type":"Workflow Output File",
                             "name":"output_mcool"
                         },
                         {
-                            "step":"extract_mcool_normvector_for_juicebox",
-                            "type":"Input file or parameter",
-                            "name":"input_mcool"
+                            "name":"input_mcool",
+                            "step":"extract_mcool_normvector_for_juicebox"
                         }
                     ],
-                    "meta":{
-                        "argument_cardinality":"1",
-                        "argument_type":"Output processed file",
-                        "argument_format":"mcool"
-                    },
-                    "name":"output_mcool"
+                    "run_data":{
+                        "file":[
+                            "d273d710-6b6d-4e43-a84c-5658a891c033"
+                        ],
+                        "type":"output",
+                        "meta":[
+                            {
+                                "format":"mcool",
+                                "status":"COMPLETED",
+                                "export_id":"B9H2LpQuS5O4P61FlSUYQSfdurJbjRhM",
+                                "extension":".mcool",
+                                "upload_key":"d273d710-6b6d-4e43-a84c-5658a891c033/4DNFIMCOOL02.mcool"
+                            }
+                        ]
+                    }
                 }
-            ],
-            "name":"add_hic_normvector_to_mcool"
+            ]
         }
-    ],
-    "@context":"/terms/",
-    "documents":[
-
-    ],
-    "awsem_job_id":""
+    ]
 };
 
 export default WorkflowRunDataBlob;

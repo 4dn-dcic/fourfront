@@ -126,11 +126,13 @@
         },
         {
             "workflow_argument_name": "chromosome",
-            "value": "21"
+            "value": "21",
+            "ordinal" : 1
         },
         {
             "workflow_argument_name": "chromosome",
-            "value": "22"
+            "value": "22",
+            "ordinal" : 2
         }
     ],
     "input_files": [
@@ -145,6 +147,7 @@
             "workflow_argument_name":"chrlen_file"
         }
     ],
+    "status" : "released",
     "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 },{
     "uuid": "d8a60edf-49e5-4c33-afab-9ec90d65fae4",

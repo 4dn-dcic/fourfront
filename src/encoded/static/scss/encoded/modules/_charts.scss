@@ -1266,7 +1266,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         &.node-type-input,
         &.node-type-output {
             &:before {
-                background-color: $workflow-node-color-disabled !important;
+                background-color: $workflow-node-color-disabled;
             }
         }
     }
@@ -1365,9 +1365,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         transform: translateY(-1px);
                         transform: translateY(-0.5px);
                         > i.icon {
-                            transform: translateY(1px);
                             transform: translateY(0.5px);
                         }
+                    }
+                    > i.icon {
+                        transform: translateY(1px);
                     }
                 }
             }
@@ -1457,6 +1459,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             &:before {
                 background-color: $workflow-node-color-type-global-input;
             }
+            &[data-node-type-detail="parameter"],
             &[data-node-type-detail="Workflow Parameter"] {
                 &:before {
                     // background-color: #d1cde2;
@@ -1466,7 +1469,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
             @include pre-node-dot;
             
         }
-        &.node-item-type-file-reference {
+        &.node-item-type-file-reference,
+        &[data-node-type-detail="reference file"] {
             &:before {
                 background-color: $workflow-node-color-type-input-file-reference;
             }
@@ -1656,7 +1660,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         &:not(.constant-panel) {
             > div.inline-block {
 
-                &.show-params-checkbox-container {
+                &.checkbox-container {
                     padding: 8px 12px 6px 0;
                     vertical-align: middle;
                     font-size: 0.9rem;
@@ -1671,7 +1675,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
                 @media screen and (max-width: $screen-md-max){
                     display: block;
-                    &.show-params-checkbox-container {
+                    &.checkbox-container {
                         padding-top: 5px;
                         padding-bottom: 5px;
                         height: auto;

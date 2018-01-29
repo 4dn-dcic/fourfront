@@ -78,7 +78,7 @@ export class WorkflowDetailPane extends React.Component {
                 // Parameter
                 return <ParameterDetailBody {...commonDetailProps} />;
             }
-            if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
+            if (node.nodeType === 'step' && node.meta && typeof node.meta === 'object'){
                 // Step - WorkflowRun or Basic
 
                 var nodeTypeVisible = null;

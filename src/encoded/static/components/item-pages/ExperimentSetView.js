@@ -92,7 +92,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                             if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
                             if (Array.isArray(node.meta.run_data.file)) return false;
                             if (typeof node.meta.run_data.file.accession !== 'string') return false;
-                            if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files === 0) return false;
+                            if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files.length === 0) return false;
                             if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
                             return false;
                         }.bind(this)
