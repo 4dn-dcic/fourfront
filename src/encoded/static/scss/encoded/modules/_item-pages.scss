@@ -92,17 +92,20 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		min-height: 30px;
 		/* line-height: 36px; */
 		margin: 0;
-		padding-top: 10px;
+		//padding-top: 10px;
 		padding-left: 12px;
 
 		@media screen and (max-width: $screen-xs-max){
 			min-height: 42px;
 		}
-	
-		> span:not(:last-child){
-			padding-right: 8px;
-			margin-right: 7px;
-			border-right: 1px solid #ccc;
+
+		> div.inner {
+			padding-top: 10px;
+			> span:not(:last-child){
+				padding-right: 8px;
+				margin-right: 7px;
+				border-right: 1px solid #ccc;
+			}
 		}
 	
 		/*
@@ -118,6 +121,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			font-size: 1rem;
 		}
 	}
+
+	//&.no-description .item-label-title > div.inner {
+	//	border-top: 1px solid #ddd;
+	//	margin-top: 10px;
+	//}
 	
 	.item-label-extra {
 		font-weight: 300;

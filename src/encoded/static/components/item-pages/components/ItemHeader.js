@@ -194,10 +194,12 @@ export class TopRow extends React.Component {
         return (
             <div className="row clearfix top-row">
                 <h5 className="col-sm-5 item-label-title">
-                    { this.typeInfoLabel(this.props.typeInfo || null) }
-                    { this.props.context.accession ?
-                        <object.CopyWrapper value={this.props.context.accession} className="accession inline-block" data-tip={accessionTooltip} children={this.props.context.accession} wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -5 } }} />
-                    : null }
+                    <div className="inner">
+                        { this.typeInfoLabel(this.props.typeInfo || null) }
+                        { this.props.context.accession ?
+                            <object.CopyWrapper value={this.props.context.accession} className="accession inline-block" data-tip={accessionTooltip} children={this.props.context.accession} wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -5 } }} />
+                        : null }
+                    </div>
                 </h5>
                 <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                     { this.parsedStatus() }{ this.wrapChildren() }{ this.itemActions() }{ this.viewJSONButton() }

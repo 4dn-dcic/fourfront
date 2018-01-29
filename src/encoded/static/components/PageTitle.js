@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import { content_views } from './globals';
 import { console, object, Schemas, JWT, layout, DateUtility } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
@@ -159,7 +160,7 @@ export default class PageTitle extends React.Component {
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
-            // Handle long title strings
+            // Handle long title strings by Item type
             if (itemTypeTitle === 'Publication'){
                 if (context.title && context.short_attribution){
                     return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
@@ -185,8 +186,17 @@ export default class PageTitle extends React.Component {
                 if (title.indexOf(context['@type'][0] + ' from ') === 0){ // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
                     title = (context.date_created && <span>from <DateUtility.LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
                 }
-                if (!context.accession && !Schemas.itemTypeHierarchy[context['@type'][0]] && typeof title === 'string' && title.length > 20) {
-                    return { 'title' : itemTypeTitle, 'subtitle' : title }; // Long title & no text right under it from Item page -- render it under Type title instd.
+                // Check if long title & no 'typeInfo' text right under it from Item page -- if so: render it _under_ Type title instead of to the right of it.
+                var viewForItem = content_views.lookup(context, null);
+                var viewReturnsTypeInfo = false;
+                try {
+                    viewReturnsTypeInfo = !!(viewForItem.prototype && viewForItem.prototype.typeInfo && viewForItem.prototype.typeInfo.call({ 'props' : { context, href, schemas } }).title ) || false;
+                } catch (e){
+                    viewReturnsTypeInfo = true; // Assume it failed because trying to access "this", which means typeInfo() most likely does & returns something.
+                    console.warn(e);
+                }
+                if (!context.accession && !Schemas.itemTypeHierarchy[context['@type'][0]] && !viewReturnsTypeInfo && typeof title === 'string' && title.length > 20) {
+                    return { 'title' : itemTypeTitle, 'subtitle' : title };
                 }
                 return { 'title' : itemTypeTitle, 'calloutTitle' : title };
             }
