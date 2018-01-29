@@ -100,8 +100,9 @@ def item_model_to_object(model, request):
     dict_repr['@id'] = str(item_instance.jsonld_id(request))
     dict_repr['@type'] = item_instance.jsonld_type()
 
-    display_title_parameters_requested = list(signature(item_instance.display_title).parameters.keys())
-    display_title_parameters = { arg : dict_repr.get(arg) for arg in display_title_parameters_requested if arg != 'request' }
+    display_title_parameters_requested = signature(item_instance.display_title).parameters
+    display_title_parameters_requested_names = list(display_title_parameters_requested.keys())
+    display_title_parameters = { arg : dict_repr.get(arg, display_title_parameters_requested[arg].default) for arg in display_title_parameters_requested_names if arg != 'request' }
 
     dict_repr['display_title'] = item_instance.display_title(request, **display_title_parameters)
 
