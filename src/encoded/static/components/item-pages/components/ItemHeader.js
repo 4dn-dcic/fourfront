@@ -236,9 +236,9 @@ export class MiddleRow extends React.Component {
                 lineHeight={24}
                 dimensions={{
                     'paddingWidth' : 0,
-                    'paddingHeight' : 11, // Padding-top + border-top
+                    'paddingHeight' : 22, // Padding-top + border-top
                     'buttonWidth' : 30,
-                    'initialHeight' : 35
+                    'initialHeight' : 45
                 }}
             />
         );

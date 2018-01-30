@@ -311,7 +311,7 @@ export class FlexibleDescriptionBox extends React.Component {
         return (
             <div
                 ref={this.props.fitTo === 'grid' ? null : "box"}
-                className={"flexible-description-box " + (this.props.className ? this.props.className : '')}
+                className={"flexible-description-box " + (this.props.className ? this.props.className : '') + (expandButton ? (expanded ? ' expanded' : ' collapsed') : ' not-expandable') }
                 style={{
                     'height'        : containerHeightSet,
                     'whiteSpace'    : expanded ? 'normal' : this.state.descriptionWhiteSpace,

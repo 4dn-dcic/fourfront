@@ -137,6 +137,7 @@ h1.page-title {
 	&.top-of-page {
 		margin-top: 36px;
 		margin-bottom: 0px;
+		margin-left: -2px;
 		
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
@@ -473,16 +474,19 @@ $margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
 	.mt-#{$util-size}, * > .mt-#{$util-size}{
 		margin-top : $util-size * 10px !important;
 	}
+
+	@each $util-mini-size in $margin-util-sizes-mini {
+		.mb-#{$util-size}#{$util-mini-size}, * > .mb-#{$util-size}#{$util-mini-size}{
+			margin-bottom : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+		.mt-#{$util-size}#{$util-mini-size}, * > .mt-#{$util-size}#{$util-mini-size}{
+			margin-top : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+	}
+
 }
 
-@each $util-size in $margin-util-sizes-mini {
-	.mb-0#{$util-size}, * > .mb-0#{$util-size}{
-		margin-bottom : $util-size * 1px !important;
-	}
-	.mt-0#{$util-size}, * > .mt-0#{$util-size}{
-		margin-top : $util-size * 1px !important;
-	}
-}
+
 
 @each $util-size in $margin-util-sizes {
 	.ml-#{$util-size}, * > .ml-#{$util-size}{
@@ -491,16 +495,19 @@ $margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
 	.mr-#{$util-size}, * > .mr-#{$util-size}{
 		margin-right : $util-size * 10px !important;
 	}
+
+	@each $util-mini-size in $margin-util-sizes-mini {
+		.ml-0#{$util-mini-size}, * > .ml-0#{$util-mini-size}{
+			margin-left : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+		.mr-0#{$util-mini-size}, * > .mr-0#{$util-mini-size}{
+			margin-right : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+	}
+
 }
 
-@each $util-size in $margin-util-sizes-mini {
-	.ml-0#{$util-size}, * > .ml-0#{$util-size}{
-		margin-left : $util-size * 1px !important;
-	}
-	.mr-0#{$util-size}, * > .mr-0#{$util-size}{
-		margin-right : $util-size * 1px !important;
-	}
-}
+
 
 /** Modal Stuff **/
 
