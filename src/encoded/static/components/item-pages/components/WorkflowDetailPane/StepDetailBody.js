@@ -10,41 +10,35 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareUsedBox(){
         var soft = this.props.software;
+
+        var renderLink = function(s, idx=0){
+            var link = object.atIdFromObject(s);
+            var title;
+            if (typeof s.name === 'string' && s.version){
+                title = s.name + ' v' + s.version;
+            } else if (s.title) {
+                title = s.title;
+            } else {
+                title = link;
+            }
+            return <span>{ idx > 0 ? ', ' : '' }<a href={link} key={idx}>{ title }</a></span>;
+        };
+
+        var inner = null;
+        
         if (!soft){
-            return (
-                <div className="col-sm-6 box">
-                    <span className="text-600">Software Used</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        <em>N/A</em>
-                    </h5>
-                </div>
-            );
-        }
-        if (typeof soft === 'string'){
-            return (
-                <div className="col-sm-6 box">
-                    <span className="text-600">Software Used</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        <i className="icon icon-circle-o-notch icon-spin icon-fw"/>
-                    </h5>
-                </div>
-            );
-        }
-        var link = object.atIdFromObject(soft);
-        var title;
-        if (typeof soft.name === 'string' && soft.version){
-            title = soft.name + ' v' + soft.version;
-        } else if (soft.title) {
-            title = soft.title;
+            inner = <em>N/A</em>;
+        } else if (typeof soft === 'string' || (Array.isArray(soft) && _.every(soft, function(s){ return typeof s === 'string'; }))){
+            inner = <i className="icon icon-circle-o-notch icon-spin icon-fw"/>;
         } else {
-            title = link;
+            inner = Array.isArray(soft) ? _.map(soft, renderLink) : renderLink(soft);
         }
 
         return (
-            <div className="col-sm-6 box">
+            <div className="col-sm-12 box">
                 <span className="text-600">Software Used</span>
                 <h4 className="text-400 text-ellipsis-container">
-                    <a href={link}>{ title }</a>
+                    { inner }
                 </h4>
             </div>
         );
@@ -52,19 +46,18 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareLinkBox(){
         var soft = this.props.software;
-        if (!soft || !soft.source_url) return (
-            <div className="col-sm-6 box">
-                <span className="text-600">Software Source</span>
-                <h5 className="text-400 text-ellipsis-container">
-                    <em>N/A</em>
-                </h5>
-            </div>
-        );
+        var inner = null;
+        // TODO: MAKE THIS HANDLE ARRAYS!! Hidden for now.
+        if (!soft || !soft.source_url){
+            inner = <em>N/A</em>;
+        } else {
+            inner = <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>;
+        }
         return (
             <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
                 <h5 className="text-400 text-ellipsis-container">
-                    <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>
+                    { inner }
                 </h5>
             </div>
         );
@@ -76,7 +69,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
             <div className="row">
 
                 { this.softwareUsedBox() }
-                { this.softwareLinkBox() }
+                {/* this.softwareLinkBox() */}
 
             </div>
         );

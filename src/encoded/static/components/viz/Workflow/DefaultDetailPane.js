@@ -20,10 +20,10 @@ export default class DefaultDetailPane extends React.Component {
         if (!node) return null;
 
         var type;
-        if (node.type === 'step'){
+        if (node.nodeType === 'step'){
             type = 'Analysis Step';
         } else {
-            type = node.format || node.type;
+            type = node.ioType || node.nodeType;
         }
 
         return (
