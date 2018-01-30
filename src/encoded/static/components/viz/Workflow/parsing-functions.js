@@ -490,7 +490,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             if (!(stepInput.source.length === 1 && typeof stepInput.source[0].step === 'undefined')) return false;
             return (
                 (node.meta.run_data.file && node.meta.run_data.file.uuid && typeof stepInput.source[0].for_file === 'string' && node.meta.run_data.file.uuid === stepInput.source[0].for_file) ||
-                (typeof node.meta.run_data.value !== 'undefined' && stepInput.run_data && typeof stepInput.run_data.value !== 'undefined' && node.meta.run_data.file.value === stepInput.run_data.value)
+                (typeof node.meta.run_data.value !== 'undefined' && stepInput.run_data && typeof stepInput.run_data.value !== 'undefined' && node.meta.run_data.value === stepInput.run_data.value)
             );
         }
 
