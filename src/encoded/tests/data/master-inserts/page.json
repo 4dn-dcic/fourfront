@@ -228,6 +228,12 @@
         ]
     },
     {
+        "name": "planned-submissions",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
+        "title": "Planned Data Submission",
+        "content": []
+    },
+    {
         "name": "planned-submissions-matrix",
         "uuid": "d013f70e-1ad7-4f3b-ac43-b60cb1bc96f4",
         "title": "Planned Data Submission",

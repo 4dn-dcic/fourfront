@@ -12,6 +12,7 @@ import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStep
 
 // Test/Debug Data
 //import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
+//import { WFR_JSON } from './../testdata/workflow_run/awsem-bad-output-file';
 
 
 /**
@@ -60,9 +61,9 @@ export function allFilesForWorkflowRunMappedByUUID(item){
             _.filter(
                 (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []),
                 function(fileContainer){
-                    var file = fileContainer.value || fileContainer.value_qc || null;
+                    var file = fileContainer.value || null;
                     if (!file || typeof file !== 'object') {
-                        console.error("No file ('value' property) embedded for: ", file);
+                        console.error("No file ('value' property) embedded for: ", fileContainer);
                         return false;
                     }
                     if (typeof file.uuid !== 'string' && typeof file.error === 'string'){
@@ -76,7 +77,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                 }
             ),
             function(fileContainer){
-                var file = fileContainer.value || fileContainer.value_qc || null;
+                var file = fileContainer.value || null;
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value
@@ -189,3 +190,4 @@ class GraphSection extends WorkflowGraphSection {
 
 content_views.register(WorkflowRunView, 'WorkflowRun');
 content_views.register(WorkflowRunView, 'WorkflowRunSbg');
+content_views.register(WorkflowRunView, 'WorkflowRunAwsem');

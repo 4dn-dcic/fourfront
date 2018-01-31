@@ -23,7 +23,8 @@ def page_1_2(value, system):
     value['content'] = content_map.get(value['name'])
 
     if value['content'] is None:
-        raise Exception('Page ' + value['name'] + ' is not in inserts. Could not get "content" field.') # We should have an empty list, at very least (@see def generate_content_map_for_page_1_2_upgrader)
+        print('Page ' + value['name'] + ' is not in inserts or could not get "content" field from it. This is fine if intentional.')
+        #raise Exception('Page ' + value['name'] + ' is not in inserts. Could not get "content" field.') # We should have an empty list, at very least (@see def generate_content_map_for_page_1_2_upgrader)
 
     if value.get('directory') is not None:
         del value['directory']
