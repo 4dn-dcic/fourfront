@@ -8,14 +8,15 @@ def help_page_section_json():
     return {
         "title": "",
         "name" : "help.rest-api#rest_api_submission",
-        "file": "/docs/public/metadata-submission/rest_api_submission.md"
+        "file": "/docs/public/metadata-submission/rest_api_submission.md",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020"
     }
 
 @pytest.fixture
 def help_page_json():
     return {"name": "help/rest-api",
             "title": "The REST-API",
-            "content": ["help.rest-api#rest_api_submission"],
+            "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
             "table-of-contents": {
                 "enabled": True,
                 "header-depth": 4,
