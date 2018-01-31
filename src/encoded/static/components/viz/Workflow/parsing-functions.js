@@ -295,10 +295,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     idx = val[0];
                     val = val[1];
                 }
+                if (!val) console.error('No value(s) on', value_list, stepNode);
                 var id = ioNodeName(stepIOArgument) + '.';
                 var run_data = _.extend({}, stepIOArgument.run_data, { 'meta' : (stepIOArgument.run_data.meta && stepIOArgument.run_data.meta[idx]) || null });
                 if (propertyToExpand === 'file'){
-                    id += (val.accession || val.uuid || idx);
+                    id += (val && val.accession || val && val.uuid || idx);
                     run_data.file = val;
                 } else if (propertyToExpand === 'value') { // Case: Parameter or anything else.
                     id += idx;
