@@ -1,0 +1,24 @@
+[
+    {
+        "authors":[
+            "ENCODE Project Consortium"
+        ],
+        "schema_version":"2",
+        "date_created":"2017-08-10T17:26:23.140642+00:00",
+        "categories":[
+            "integrative analysis"
+        ],
+        "title":"An integrated encyclopedia of DNA elements in the human genome.",
+        "journal":"Nature",
+        "published_by":"4DN",
+        "abstract":"The human genome encodes the blueprint of life, but the function of the vast majority of its nearly three billion bases is unknown. The Encyclopedia of DNA Elements (ENCODE) project has systematically mapped regions of transcription, transcription factor association, chromatin structure and histone modification. These data enabled us to assign biochemical functions for 80% of the genome, in particular outside of the well-studied protein-coding regions. Many discovered candidate regulatory elements are physically associated with one another and with expressed genes, providing new insights into the mechanisms of gene regulation. The newly identified elements also show a statistical correspondence to sequence  variants linked to human disease, and can thereby guide interpretation of this variation. Overall, the project provides new insights into the organization and regulation of our genes and genome, and is an expansive resource of functional annotations for biomedical research.",
+        "url":"https://www.ncbi.nlm.nih.gov/pubmed/22955616",
+        "date_published":"2012-09-07",
+        "uuid":"52e85c70-fe2d-11e3-9191-0800200c9a66",
+        "status":"current",
+        "lab": "/labs/4dn-dcic-lab/",
+        "ID":"PMID:22955616",
+        "submitted_by": "/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
+        "award": "/awards/1U01CA200059-01/"
+    }
+]
