@@ -171,6 +171,13 @@ h1.page-title {
 		margin-left: 2px;
 		margin-top: 0px;
 		font-size: 18px;
+		> .subtitle-prepend {
+			margin-right: 8px;
+			&.border-right {
+				padding-right : 8px;
+				border-right: 1px solid #ddd;
+			}
+		}
 	}
 
 	.subtitle {

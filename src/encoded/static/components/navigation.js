@@ -54,31 +54,31 @@ export function getWindowLocation(mounted, href = null){
 export default class Navigation extends React.Component {
 
 
-    static isMenuItemActive(action, mounted, href){
+    static isMenuItemActive(action, mounted, currentHref){
         return (
-            (typeof action.active === 'function' && action.active(getWindowPath(mounted, href))) ||
-            (Navigation.getMenuItemURL(action, mounted) === getWindowPath(mounted, href))
+            (typeof action.active === 'function' && action.active(getWindowPath(mounted, currentHref))) ||
+            (Navigation.getMenuItemURL(action, mounted) === getWindowPath(mounted, currentHref))
         );
     }
 
-    static getMenuItemURL(action, mounted = false, href){
+    static getMenuItemURL(action, mounted = false, currentHref){
         if (typeof action.url === 'string') return action.url;
-        if (typeof action.url === 'function') return action.url(getWindowLocation(mounted, href));
+        if (typeof action.url === 'function') return action.url(getWindowLocation(mounted, currentHref));
         if (typeof action.href === 'string') return action.href;
-        if (typeof action.href === 'function') return action.href(getWindowLocation(mounted, href));
+        if (typeof action.href === 'function') return action.href(getWindowLocation(mounted, currentHref));
         return '#';
     }
 
     /** Can be bound to access this.props.href for getWindowPath (if available) */
-    static buildMenuItem(action, mounted, href, extraProps){
+    static buildMenuItem(action, mounted, currentHref, extraProps){
         return (
             <MenuItem
                 key={action.id}
                 id={action.sid || action.id}
-                href={Navigation.getMenuItemURL(action, mounted, href)}
+                href={Navigation.getMenuItemURL(action, mounted, currentHref)}
                 onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                 className="global-entry"
-                active={Navigation.isMenuItemActive(action, mounted, href)}
+                active={Navigation.isMenuItemActive(action, mounted, currentHref)}
                 children={action.title}
                 {...extraProps}
             />
@@ -86,11 +86,11 @@ export default class Navigation extends React.Component {
     }
 
     /** Can be bound to access this.props.href for getWindowPath (if available) */
-    static buildDropdownMenu(action, mounted, href){
+    static buildDropdownMenu(action, mounted, currentHref){
         if (action.children){
             return (
                 <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
-                    {action.children.map((a) => Navigation.buildMenuItem(a, mounted, href) )}
+                    { _.map(action.children, function(actionChild){ return Navigation.buildMenuItem(actionChild, mounted, currentHref); }) }
                 </NavDropdown>
             );
         } else {
@@ -98,11 +98,10 @@ export default class Navigation extends React.Component {
                 <NavItem
                     key={action.id}
                     id={action.sid || action.id}
-                    href={Navigation.getMenuItemURL(action, mounted, href)}
-                    active={Navigation.isMenuItemActive.call(action, mounted, href)}
-                >
-                        {action.title}
-                </NavItem>
+                    href={Navigation.getMenuItemURL(action, mounted, currentHref)}
+                    active={Navigation.isMenuItemActive(action, mounted, currentHref)}
+                    children={action.title}
+                />
             );
         }
     }
@@ -126,11 +125,11 @@ export default class Navigation extends React.Component {
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.state = {
-            testWarning: this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
-            mounted : false,
-            mobileDropdownOpen : false,
-            scrolledPastTop : false,
-            navInitialized : false
+            'testWarning'           : this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
+            'mounted'               : false,
+            'mobileDropdownOpen'    : false,
+            'scrolledPastTop'       : false,
+            'navInitialized'        : false
         };
     }
 
@@ -155,9 +154,8 @@ export default class Navigation extends React.Component {
             var scrollVector = currentScrollTop - lastScrollTop;
             lastScrollTop = currentScrollTop;
 
-            if (
-                ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
-                (
+            if ( // Fixed nav takes effect at medium grid breakpoint or wider.
+                ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && (
                     (currentScrollTop > 20 && scrollVector >= 0) ||
                     (currentScrollTop > 80)
                 )
@@ -166,9 +164,7 @@ export default class Navigation extends React.Component {
                     stateChange.scrolledPastTop = true;
                     this.setState(stateChange, layout.toggleBodyClass.bind(layout, 'scrolled-past-top', true, document.body));
                 }
-                if (currentScrollTop > 80){
-                    layout.toggleBodyClass('scrolled-past-80', true, document.body);
-                }
+                if (currentScrollTop > 80) layout.toggleBodyClass('scrolled-past-80', true, document.body);
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;

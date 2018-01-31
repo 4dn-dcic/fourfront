@@ -44,28 +44,22 @@ const portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
         {
-            id: 'browse-menu-item',
-            sid:'sBrowse',
-            title: 'Browse',
-            //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
-            url : function(){
-                return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
-            },
-            active : function(currentWindowPath){
-                if (currentWindowPath && currentWindowPath.indexOf('/browse/') > -1) return true;
-                return false;
-            }
+            id: 'browse-menu-item', sid:'sBrowse', title: 'Browse',
+            url : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate', // May also be a function which returns URL.
+            active : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
         },
-
-        {id: 'help-menu-item', sid:'sHelp', title: 'Help', children: [
-            {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
-            {id: 'getting-started-menu-item', title: 'Data Submission - Getting Started', url: '/help/getting-started'},
-            {id: 'cell-culture-menu-item', title: 'Biosample Metadata', url: '/help/biosample'},
-            {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
-            {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
-            {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
-            {id: 'about-menu-item', title: 'About', url: '/about'}
-        ]}
+        {
+            id: 'help-menu-item', sid:'sHelp', title: 'Help',
+            children: [
+                { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
+                { id: 'getting-started-menu-item',  title: 'Data Submission - Getting Started', url: '/help/getting-started' },
+                { id: 'cell-culture-menu-item',     title: 'Biosample Metadata',                url: '/help/biosample' },
+                { id: 'web-submission-menu-item',   title: 'Online Submission',                 url: '/help/web-submission' },
+                { id: 'spreadsheet-menu-item',      title: 'Spreadsheet Submission',            url: '/help/spreadsheet' },
+                { id: 'rest-api-menu-item',         title: 'REST API',                          url: '/help/rest-api' },
+                { id: 'about-menu-item',            title: 'About',                             url: '/about' }
+            ]
+        }
     ],
     user_section: [
             {id: 'login-menu-item', title: 'Log in', url: '/'},
@@ -804,10 +798,13 @@ export default class App extends React.Component {
                         window.location.reload();
                     }
                 }
-                return false;
+                return false; // Unlike 'null', skips callback b.c. leaving page anyway.
             }
 
             if (this.props.contextRequest && this.requestCurrent && repeatIfError === true) {
+
+                if (href === this.props.href || href === '') return null; // For low-priority requests (refreshes), cancel them instead of other current request if there is a request already occuring (assuming to different URL).
+
                 // Abort the current request, then remember we've aborted the request so that we
                 // don't render the Network Request Error page.
                 if (this.props.contextRequest && typeof this.props.contextRequest.abort === 'function') this.props.contextRequest.abort();

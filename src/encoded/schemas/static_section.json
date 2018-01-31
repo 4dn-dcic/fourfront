@@ -1,0 +1,87 @@
+{
+    "title": "Static Section",
+    "id": "/profiles/static_section.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["name"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "name"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/submitted" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "name": {
+            "title": "Unique Identifier",
+            "description": "Unique name or ID of this section.",
+            "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. search-info-header.WorkflowRun --> '/static-section/search-info-header.WorkflowRun'.",
+            "type": "string"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "released",
+            "enum" : [
+                "released",
+                "draft",
+                "deleted"
+            ]
+        },
+        "section_type": {
+            "title": "Section Type",
+            "type": "string",
+            "description": "What this section is used for. Defaults to 'Page Section'.",
+            "default": "Page Section",
+            "enum" : [
+                "Page Section",
+                "Announcement",
+                "Search Info Header"
+            ]
+        },
+        "title": {
+            "title": "Title",
+            "description": "Title for the section",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "type": "string"
+        },
+        "options": {
+            "title": "Options",
+            "type": "object",
+            "description": "Options for section display. Currently only applicable for .CSVs"
+        },
+        "file": {
+            "title": "Source File Location",
+            "type": "string",
+            "comment" : "There should be no 'body' if this is set.",
+            "description": "Source file to use for populating content. Is superceded by contents of 'body', if one present."
+        },
+        "body":{
+            "title": "Raw Body",
+            "type": "string",
+            "comment" : "There should be no 'file' if this is set.",
+            "description": "Plain html or text content of this section."
+        }
+    },
+    "facets" : {
+        "section_type" : {
+            "title" : "Type"
+        }
+    },
+    "columns" : {
+        "name" : {
+            "title" : "Name / ID"
+        },
+        "section_type" : {
+            "title" : "Type"
+        }
+    },
+    "excludedColumns" : ["lab.display_title"]
+}

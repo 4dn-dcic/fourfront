@@ -358,6 +358,12 @@ export const ChartDataController = {
             var reduxStoreState = refs.store.getState();
             refs.href = reduxStoreState.href;
             if (refs.href === prevHref) return; // Exit.
+
+            // Hide any pop-overs still persisting with old filters or URL.
+            setTimeout(function(){
+                ChartDetailCursor.reset(true);
+            }, 750);
+
             var prevContextFilters = refs.contextFilters;
             var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters);
 
@@ -560,19 +566,11 @@ export const ChartDataController = {
      */
     handleUpdatedFilters : function(expSetFilters, callback, opts){
 
-        var cb = function(){
-            // Hide any pop-overs still persisting with old filters.
-            setTimeout(function(){
-                ChartDetailCursor.reset(true);
-            }, 750);
-            if (typeof callback === 'function') callback();
-        };
-
         // Reset or re-fetch 'filtered-in' data.
         if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiment_sets) && (!opts || !opts.searchQuery)){
-            ChartDataController.setState({ filtered_experiment_sets : null }, cb);
+            ChartDataController.setState({ filtered_experiment_sets : null }, callback);
         } else {
-            ChartDataController.fetchAndSetFilteredExperimentSets(cb, opts);
+            ChartDataController.fetchAndSetFilteredExperimentSets(callback, opts);
         }
     },
 

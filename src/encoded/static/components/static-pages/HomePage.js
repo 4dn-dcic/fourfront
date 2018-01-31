@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, layout } from'./../util';
-import * as announcements_data from '../../data/announcements_data';
 import { Collapse } from 'react-bootstrap';
 import * as store from '../../store';
 import * as globals from './../globals';
@@ -13,12 +12,10 @@ import { Announcements } from './components';
 
 /**
  * Homepage View component. Gets rendered at '/' and '/home' paths.
- * 
+ *
  * @module {Component} static-pages/home
  * @prop {Object} context - Should have properties typically needed for any static page.
  */
-
-
 export default class HomePage extends React.Component {
 
     static propTypes = {
@@ -36,30 +33,19 @@ export default class HomePage extends React.Component {
      */
     render() {
         var c = this.props.context.content; // Content
-       
         return (
             <div className="home-content-area">
-
-                
                 <div className="row">
-
                     <div className="col-md-6 col-xs-12">
                         <h2 className="fourDN-header">Introduction</h2>
                         <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}/>
-
                         <layout.WindowResizeUpdateTrigger><LinksRow/></layout.WindowResizeUpdateTrigger>
-
                     </div>
-
                     <div className="col-md-6 col-xs-12">
                         <h2 className="fourDN-header">Announcements</h2>
-                        <Announcements/>
+                        <Announcements loaded session={this.props.session} />
                     </div>
-
                 </div>
-
-                
-
             </div>
         );
     }

@@ -8,7 +8,7 @@ import * as plansData from './../testdata/stacked-block-matrix-list';
 import { Collapse } from 'react-bootstrap';
 import * as store from '../../store';
 import * as globals from './../globals';
-import { Wrapper} from './static-page-base';
+import StaticPage from './StaticPage';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
 
@@ -131,7 +131,7 @@ export default class PlannedSubmissionsPage extends React.Component {
 
 
         return ( 
-            <Wrapper>
+            <StaticPage.Wrapper>
                 <StackedBlockVisual
                     data={listOfObjectsToVisualize}
                     titleMap={plansData.titleMap}
@@ -186,7 +186,7 @@ export default class PlannedSubmissionsPage extends React.Component {
 
                     }}
                 />
-            </Wrapper>
+            </StaticPage.Wrapper>
         );
     }
 
