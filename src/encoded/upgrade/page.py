@@ -30,3 +30,9 @@ def page_1_2(value, system):
 
     if value.get('sections') is not None:
         del value['sections']
+
+    if value.get('notification') is not None:
+        del value['notification']
+
+    if value.get('description') == '':
+        del value['description']
