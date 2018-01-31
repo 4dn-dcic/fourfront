@@ -477,6 +477,23 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var inputNodesMatched = [];
         var inputNodesCreated = [];
 
+        /**
+         * Compares an input node and a step input argument to see if they refer to same file or value, independent of matching argument names.
+         * Used as an extra check to help handle provenance graphs where step argument names for terminal input files might differ, yet use the same file.
+         * 
+         * @param {Node} node - Node to compare run_data file from.
+         * @param {StepIOArgument} - Step Input argument whose source.for_file to compare against node run_data file.
+         * @returns {boolean} True if both have same file.
+         */
+        function areInputRunDataPresentAndEqual(node, stepInput){
+            if (!(node.meta && node.meta.run_data)) return false;
+            if (!(stepInput.source.length === 1 && typeof stepInput.source[0].step === 'undefined')) return false;
+            return (
+                (node.meta.run_data.file && node.meta.run_data.file.uuid && typeof stepInput.source[0].for_file === 'string' && node.meta.run_data.file.uuid === stepInput.source[0].for_file) ||
+                (typeof node.meta.run_data.value !== 'undefined' && stepInput.run_data && typeof stepInput.run_data.value !== 'undefined' && node.meta.run_data.value === stepInput.run_data.value)
+            );
+        }
+
         step.inputs.forEach(function(fullStepInput){
             if (!Array.isArray(fullStepInput.source)) return;
 
@@ -493,13 +510,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
                     // Re-use global inputs nodes if not cardinality:array
                     if (fullStepInput.source.length === 1 && typeof fullStepInput.source[0].step === 'undefined' && !(fullStepInput.meta && fullStepInput.meta.cardinality === 'array')){ // Is global input file
-                        if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && n._source[0].name === fullStepInput.source[0].name){
+                        if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && (
+                            n._source[0].name === fullStepInput.source[0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, fullStepInput) /* <-- for provenance graphs */
+                        )){
                             // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
-                            if (
-                                !(n.meta && n.meta.run_data)
-                                || (n.meta.run_data.file && n.meta.run_data.file.uuid && typeof fullStepInput.source[0].for_file === 'string' && n.meta.run_data.file.uuid === fullStepInput.source[0].for_file)
-                                || (typeof n.meta.run_data.value !== 'undefined' && fullStepInput.run_data && typeof fullStepInput.run_data.value !== 'undefined' && n.meta.run_data.file.value === fullStepInput.run_data.value)
-                            ){
+                            if (!(n.meta && n.meta.run_data) || areInputRunDataPresentAndEqual(n, fullStepInput)){
                                 ioNodeIDsMatched[n.id] = ioNodeName(fullStepInput);
                                 return true;
                             }
