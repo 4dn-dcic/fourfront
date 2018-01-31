@@ -382,7 +382,7 @@ export class ItemPageTableSearchLoader extends React.Component {
     render(){
         var { requestHref } = this.props;
         if (!requestHref) return null;
-        return <layout.WindowResizeUpdateTrigger children={React.cloneElement(this.props.children, _.extend({}, this.props, this.state) )} />; 
+        return <layout.WindowResizeUpdateTrigger children={React.cloneElement(this.props.children, _.extend({}, this.props, this.state) )} />;
     }
 
 }

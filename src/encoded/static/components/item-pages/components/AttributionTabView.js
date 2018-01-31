@@ -39,7 +39,7 @@ export class AttributionTabView extends React.Component {
                 <div className="col-sm-12">
                     <div className="row">
 
-                        { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ? 
+                        { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ?
                             <div className="col-sm-12 col-md-12 col-sm-float-right">
                                 <Publications context={context} />
                                 <hr className="mt-1 mb-2"/>
@@ -49,15 +49,15 @@ export class AttributionTabView extends React.Component {
                         <LabsSection context={context}/>
 
                         { award && typeof award !== 'string' ?
-                        <div className="col-sm-12 col-md-12 col-sm-float-right">
-                            { FormattedInfoBlock.Award(award) }
-                        </div>
+                            <div className="col-sm-12 col-md-12 col-sm-float-right">
+                                { FormattedInfoBlock.Award(award) }
+                            </div>
                         : null }
 
                         { submitted_by && typeof submitted_by !== 'string' ?
-                        <div className="col-sm-12 col-md-12 col-sm-float-right">
-                            { FormattedInfoBlock.User(submitted_by) }
-                        </div>
+                            <div className="col-sm-12 col-md-12 col-sm-float-right">
+                                { FormattedInfoBlock.User(submitted_by) }
+                            </div>
                         : null }
 
                     </div>

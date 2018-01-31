@@ -21,7 +21,7 @@ import { PartialList } from './PartialList';
  * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
  * @prop {Element[]} children       - React Elements or Components to be wrapped.
  * @prop {string} [singularTitle]   - Optional. Title displayed in top left label. Defaults to 'Publication'.
- * @prop {string} [className]       - Additional className to be added to wrapper element. 
+ * @prop {string} [className]       - Additional className to be added to wrapper element.
  * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
  */
 export class FormattedInfoWrapper extends React.Component {

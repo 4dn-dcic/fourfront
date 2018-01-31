@@ -68,7 +68,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
      *   'key'      - Any unique string (among all tabs).
      *   'disabled' - Whether tab should appear grayed out and unclickable, e.g. for a graph which is still loading.
      *   'content'  - What is to be displayed in the body of the tab.
-     * 
+     *
      * @returns {{ tab : JSX.Element, key: string, disabled: boolean, content: JSX.Element }[]} List of JSON objects representing Tabs and their content.
      */
     getTabViewContents(){
@@ -169,7 +169,7 @@ class ExperimentSetsViewOverview extends React.Component {
 
 }
 
-/** 
+/**
  * This is rendered in middle of ExperimentView, between Item header and TabbedView.
  * @see ExperimentView.itemMidSection()
  */
