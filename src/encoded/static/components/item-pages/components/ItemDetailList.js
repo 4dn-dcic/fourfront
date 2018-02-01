@@ -537,6 +537,9 @@ class SubItemTable extends React.Component {
                                 <tr key={"row-" + i}>{
                                     [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
                                         var val = colVal.value;
+                                        if (typeof val === 'boolean'){
+                                            val = <code>{ val ? 'True' : 'False' }</code>;
+                                        }
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
                                         }

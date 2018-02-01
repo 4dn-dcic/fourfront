@@ -1,0 +1,25 @@
+[
+    {
+        "uuid": "131106bc-8535-4448-903e-854af460b000",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "Per tile sequence quality": "PASS",
+        "Sequences flagged as poor quality": 0,
+        "Per base sequence quality": "PASS",
+        "Sequence Duplication Levels": "PASS",
+        "Sequence length": "101",
+        "Per base sequence content": "WARN",
+        "Per sequence GC content": "WARN",
+        "Total Sequences": 557747,
+        "Sequence Length Distribution": "PASS",
+        "Kmer Content": "WARN",
+        "Basic Statistics": "PASS",
+        "%GC": 42,
+        "Adapter Content": "PASS",
+        "Overrepresented sequences": "PASS",
+        "Per sequence quality scores": "PASS",
+        "Per base N content": "PASS",
+        "overall_quality_status": "PASS",
+        "url" : "https://s3.amazonaws.com/elasticbeanstalk-encoded-4dn-wfoutput-files/4DNFIW7Q5UDL/fastqc_report.html"
+    }
+]

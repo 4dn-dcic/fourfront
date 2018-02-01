@@ -71,7 +71,7 @@
     "webpack": "^1.13.3"
   },
   "dependencies": {
-    "auth0-lock": "^10.24.1",
+    "auth0-lock": "^10.24.3",
     "aws-sdk": "^2.175.0",
     "babel-polyfill": "^6.23.0",
     "brace": "^0.3.0",

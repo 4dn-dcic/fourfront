@@ -136,20 +136,24 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      */
     function ioNodeName(stepIOArg){
         var nameToUse = stepIOArg.name || null; // Default; name of step argument from step we're drawing IO nodes currently.
-        var list = null;
-        if (Array.isArray(stepIOArg.target)){
-            list = stepIOArg.target;
-        }
-        if (Array.isArray(stepIOArg.source)){
-            if (list) list = list.concat(stepIOArg.source);
-            else list = stepIOArg.source;
-        }
-        if (!list) return nameToUse;
-        var i, listLength = list.length;
-        for (i = 0; i < listLength; i++){
-            if (list[i] && (list[i].type === 'Workflow Output File' || list[i].type === 'Workflow Input File') && typeof list[i].name === 'string'){
-                nameToUse = list[i].name;
-                break;
+        var isGlobal = stepIOArg.meta && stepIOArg.meta.global === true;
+
+        if (isGlobal){
+            var list = null;
+            if (Array.isArray(stepIOArg.target)){
+                list = stepIOArg.target;
+            }
+            if (Array.isArray(stepIOArg.source)){
+                if (list) list = list.concat(stepIOArg.source);
+                else list = stepIOArg.source;
+            }
+            if (!list) return nameToUse;
+            var i, listLength = list.length;
+            for (i = 0; i < listLength; i++){
+                if (list[i] && (typeof list[i].step === 'undefined') && typeof list[i].name === 'string'){ // Source or Target --not-- going to a step; use name of that (assumed global source/target)
+                    nameToUse = list[i].name;
+                    break;
+                }
             }
         }
         return nameToUse;
@@ -177,6 +181,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     }
 
     function compareTwoFilesByUUID(file1, file2){
+        if (!file1 || !file2) return false;
         if (typeof file1 === 'string' && typeof file2 === 'string' && file1 === file2){ // Somewhat deprecated case, but can still occur if WorkflowRun has not finished indexing and we are graphing it.
             return true;
         }
@@ -205,14 +210,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      */
     function generateStepNode(step, column){
         return {
-            type : 'step',
-            name : step.name,
-            meta : _.extend(
-                {},
-                step.meta || {},
-                _.omit(step, 'inputs', 'outputs', 'meta'),
-            ),
-            column : column
+            'nodeType' : 'step',
+            'name'      : step.name,
+            '_inputs'   : step.inputs,
+            '_outputs'  : step.outputs,
+            'meta'      : _.extend( {}, step.meta || {}, _.omit(step, 'inputs', 'outputs', 'meta') ),
+            'column'    : column
         };
     }
 
@@ -233,21 +236,22 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var namesOnSteps = {};
         namesOnSteps[stepNode.name] = stepIOArgument.name;
 
+        var ioType = stepIOArgument.meta && typeof stepIOArgument.meta.type === 'string' && stepIOArgument.meta.type.toLowerCase(); // Will be one of "data file", "report", "QC", "reference file", "parameter"
+
         var ioNode = {
-            column       : column,
-            format       : (Array.isArray(stepIOArgument[sourceOrTarget]) && stepIOArgument[sourceOrTarget].length > 0 && stepIOArgument[sourceOrTarget][0].type) || null, // First source type takes priority
-            id           : ioNodeID(stepIOArgument, readOnly),
-            name         : ioNodeName(stepIOArgument),// stepInput.name, 
-            argNamesOnSteps : namesOnSteps,
-            type         : nodeType,
-            meta         : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta'))
+            'column'          : column,
+            'ioType'          : ioType,
+            'id'              : ioNodeID(stepIOArgument, readOnly),
+            'name'            : ioNodeName(stepIOArgument),
+            'argNamesOnSteps' : namesOnSteps,
+            'nodeType'        : nodeType,
+            '_source'         : stepIOArgument.source,
+            '_target'         : stepIOArgument.target,
+            'meta'            : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta', 'source', 'target'))
         };
 
-        if (nodeType === 'input'){
-            ioNode.inputOf = [stepNode];
-        } else if (nodeType === 'output') {
-            ioNode.outputOf = stepNode;
-        }
+        if (nodeType === 'input')       ioNode.inputOf = [stepNode]; // May be input of multiple steps
+        else if (nodeType === 'output') ioNode.outputOf = stepNode;
 
         return ioNode;
     }
@@ -291,10 +295,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     idx = val[0];
                     val = val[1];
                 }
+                if (!val) console.error('No value(s) on', value_list, stepNode);
                 var id = ioNodeName(stepIOArgument) + '.';
                 var run_data = _.extend({}, stepIOArgument.run_data, { 'meta' : (stepIOArgument.run_data.meta && stepIOArgument.run_data.meta[idx]) || null });
                 if (propertyToExpand === 'file'){
-                    id += (val.accession || val.uuid || idx);
+                    id += (val && val.accession || val && val.uuid || idx);
                     run_data.file = val;
                 } else if (propertyToExpand === 'value') { // Case: Parameter or anything else.
                     id += idx;
@@ -323,9 +328,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         //console.log('PARAM', isParameterArgument, valuesForArgument);
 
         // CREATE/HANDLE GROUP NODES ---- N.B. THIS IS LIKELY TEMPORARY AND WILL CHANGE ONCE WE HAVE DESIGN/IDEA FOR GROUPED WFRs. DOES NOT HANDLE PARAMETERS
-        var groupTypeToCheck = nodeType === 'output' ? 'Output File Group' : 'Input File Group';
         var groupSources = _.filter(stepIOArgument.source || [], function(s){
-            return (s.type === groupTypeToCheck && typeof s.for_file === 'string');
+            return (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] !== 'undefined' && typeof s.for_file === 'string');
         });
 
         if (groupSources.length > 0){
@@ -373,14 +377,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 var namesOnSteps = {};
                 namesOnSteps[stepNode.name] = stepIOArgument.name;
                 var groupNode = {
-                    column      : column,
-                    format      : groupTypeToCheck,
-                    id          : ioNodeName(stepIOArgument)+ '.group:' + groupingName + '.' + wfPair[0],
-                    name        : ioNodeName(stepIOArgument),
-                    argNamesOnSteps : namesOnSteps,
-                    type        : nodeType + '-group',
-                    meta        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta')),
-                    inputOf     : [stepNode]
+                    'column'      : column,
+                    'ioType'      : (stepIOArgument.meta && stepIOArgument.meta.type) || 'group',
+                    'id'          : ioNodeName(stepIOArgument)+ '.group:' + groupingName + '.' + wfPair[0],
+                    'name'        : ioNodeName(stepIOArgument),
+                    'argNamesOnSteps' : namesOnSteps,
+                    'nodeType'    : nodeType + '-group',
+                    '_source'     : stepIOArgument.source,
+                    '_target'     : stepIOArgument.target,
+                    'meta'        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta', 'source', 'target')),
+                    'inputOf'     : [stepNode]
                 };
                 groupNode.meta[groupingName] = wfPair[0];
                 m.push(groupNode);
@@ -420,10 +426,13 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         nodes[i].outputOf = stepNode;
                         
                         nodes[i].format = oN.format;
-                        nodes[i].type = 'output'; // Convert our found input file to an output file, if not already.
-                        if (nodes[i].meta && oN.meta && oN.meta.argument_type){
-                            nodes[i].meta.argument_type = oN.meta.argument_type;
-                        }
+                        nodes[i].nodeType = 'output'; // Convert our found input file to an output file, if not already.
+                        if (nodes[i].meta && oN.meta && oN.meta.type) nodes[i].meta.type = oN.meta.type;
+                        if (nodes[i].meta && oN.meta && oN.meta.file_format) nodes[i].meta.file_format = oN.meta.file_format;
+                        if (nodes[i].meta && oN.meta && oN.meta.global) nodes[i].meta.global = oN.meta.global;
+                        if (nodes[i].meta && oN.meta && oN.meta.argument_type) nodes[i].meta.argument_type = oN.meta.argument_type;
+                        if (!nodes[i]._source && oN._source) nodes[i]._source = oN._source;
+                        if (!nodes[i]._target && oN._target) nodes[i]._source = oN._target;
                         nodes[i].wasMatchedAsOutputOf = stepNode.name; // For debugging.
                         edges.push({
                             'source' : stepNode,
@@ -469,6 +478,23 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var inputNodesMatched = [];
         var inputNodesCreated = [];
 
+        /**
+         * Compares an input node and a step input argument to see if they refer to same file or value, independent of matching argument names.
+         * Used as an extra check to help handle provenance graphs where step argument names for terminal input files might differ, yet use the same file.
+         * 
+         * @param {Node} node - Node to compare run_data file from.
+         * @param {StepIOArgument} - Step Input argument whose source.for_file to compare against node run_data file.
+         * @returns {boolean} True if both have same file.
+         */
+        function areInputRunDataPresentAndEqual(node, stepInput){
+            if (!(node.meta && node.meta.run_data)) return false;
+            if (!(stepInput.source.length === 1 && typeof stepInput.source[0].step === 'undefined')) return false;
+            return (
+                (node.meta.run_data.file && node.meta.run_data.file.uuid && typeof stepInput.source[0].for_file === 'string' && node.meta.run_data.file.uuid === stepInput.source[0].for_file) ||
+                (typeof node.meta.run_data.value !== 'undefined' && stepInput.run_data && typeof stepInput.run_data.value !== 'undefined' && node.meta.run_data.value === stepInput.run_data.value)
+            );
+        }
+
         step.inputs.forEach(function(fullStepInput){
             if (!Array.isArray(fullStepInput.source)) return;
 
@@ -480,17 +506,29 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             var currentInputNodesMatched = (
                 _.filter(nodes /*allRelatedIONodes*/, function(n){
                     
-                    // Skip any step nodes
-                    if (n.type === 'step') return false;
+                    // Ignore any step nodes
+                    if (n.nodeType === 'step') return false;
 
-                    // Compare IO nodes against step input arg sources
-                    if (_.find(fullStepInput.source, function(s){
+                    // Re-use global inputs nodes if not cardinality:array
+                    if (fullStepInput.source.length === 1 && typeof fullStepInput.source[0].step === 'undefined' && !(fullStepInput.meta && fullStepInput.meta.cardinality === 'array')){ // Is global input file
+                        if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && (
+                            n._source[0].name === fullStepInput.source[0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, fullStepInput) /* <-- for provenance graphs */
+                        )){
+                            // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
+                            if (!(n.meta && n.meta.run_data) || areInputRunDataPresentAndEqual(n, fullStepInput)){
+                                ioNodeIDsMatched[n.id] = ioNodeName(fullStepInput);
+                                return true;
+                            }
+                        }
+                    } else if (_.any(fullStepInput.source, function(s){ // Compare IO nodes against step input arg sources
                         
                         // Match nodes by source step & name, check that they target this step.
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n.meta.target) && _.any(n.meta.target, function(t){ return t.step === step.name; })) return true;
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n._target) && _.any(n._target, function(t){ return t.step === step.name; })){
+                            return true;
+                        }
 
                         // Extra CWL-like check case by existing node target step match
-                        if (Array.isArray(n.meta.target) && _.any(n.meta.target, function(t){
+                        if (Array.isArray(n._target) && _.any(n._target, function(t){
                             return (t.step === step.name && fullStepInput.name === t.name);
                         })) return true;
 
@@ -498,10 +536,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
                         // Match Groups
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
-                            if (n.meta && Array.isArray(n.meta.source) && _.any(n.meta.source, function(nS){
-                                return typeof nS.grouped_by === 'string' && typeof nS[nS.grouped_by] === 'string' && nS[nS.grouped_by] === s[s.grouped_by];
+                            if (n.meta && Array.isArray(n._source) && _.any(n._source, function(nodeSource){
+                                return typeof nodeSource.grouped_by === 'string' && typeof nodeSource[nodeSource.grouped_by] === 'string' && nodeSource[nodeSource.grouped_by] === s[s.grouped_by];
                             })){ // Matched by Workflow (or other grouping type), now lets ensure it's the right group.
-                                var nodeBeingCheckedGroupFiles = _.pluck(_.filter(n.meta.source, function(nS){ return typeof nS.for_file === 'string'; }), 'for_file');
+                                var nodeBeingCheckedGroupFiles = _.pluck(_.filter(n._source, function(nS){ return typeof nS.for_file === 'string'; }), 'for_file');
                                 return (s.for_file && _.contains(nodeBeingCheckedGroupFiles, s.for_file) && true) || false;
                             }
                         }
@@ -522,11 +560,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 })
             );
 
-            //console.log('MATCHED', currentInputNodesMatched, nodes);
+            //console.log('MATCHED', currentInputNodesMatched, nodes, ioNodeIDsMatched);
 
             // Step 1b. Create input nodes we need to add, and extend our matched node with its fake-new-node-counterpart's data.
             var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
             //console.log('NEED TO FILTER for' + fullStepInput.name, _.pluck(inputNodesToMatch, 'id'));
+            //console.log('NEED TO EXTEND FROM', inputNodesToMatch);
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
@@ -551,18 +590,22 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         }
                         if (!inNode) throw new Error(n.id + " new node version not found");
                     } catch (e){
-                        console.warn("Didn't find new node to extend from which was previously matched against node", n, e);
+                        console.warn("Didn't find newly-created temporary node to extend from which was previously matched against node", n, e);
                         return;
                     }
 
                     // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
-                    var combinedMeta = _.extend(n.meta, inNode.meta);
+                    var combinedMeta = _.extend(n.meta, inNode.meta, {
+                        'global' : n.meta.global || inNode.meta.global || false // Make true if either is true.
+                    });
                     _.extend(n, {
                         'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
                         'meta' : combinedMeta,
                         'name' : ioNodeName(combinedMeta) || n.name,
                         'argNamesOnSteps' : _.extend(n.argNamesOnSteps, inNode.argNamesOnSteps),
-                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name) // Used only for debugging.
+                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name), // Used only for debugging.
+                        '_source' : n._source || inNode._source,
+                        '_target' : n._target || inNode._target
                     });
                 });
             }
@@ -626,23 +669,20 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     function findNextStepsFromIONode(ioNodes){
 
-        var targetPropertyName = parsingMethod === 'output' ? 'target' : 'source';
+        var targetPropertyName = parsingMethod === 'output' ? '_target' : '_source';
         var nextSteps = new Set();
 
-        ioNodes.forEach(function(n){
-            if (n.meta && Array.isArray(n.meta[targetPropertyName])){
-                n.meta[targetPropertyName].forEach(function(t){
-                    if (typeof t.step === 'string'){
-                        var matchedStep = _.findWhere(analysis_steps, { 'name' : t.step });
-                        if (matchedStep) {
-                            nextSteps.add(matchedStep);
-                        }
+        _.forEach(ioNodes, function(n){
+            if (!Array.isArray(n[targetPropertyName])) return;
+            _.forEach(n[targetPropertyName], function(t){
+                if (typeof t.step === 'string'){
+                    var matchedStep = _.findWhere(analysis_steps, { 'name' : t.step });
+                    if (matchedStep) {
+                        nextSteps.add(matchedStep);
                     }
-                });
-            }
+                }
+            });
         });
-
-        
 
         return [...nextSteps];
     }
@@ -835,48 +875,16 @@ export function correctColumnAssignments(graphData){
 
 export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
 
-    var allWorkflowInputs = _.filter(
-        _.flatten(
-            _.pluck(analysis_steps, 'inputs'), true
-        ),
-        function(input){
-            if (!Array.isArray(input.source)) return false;
-            if (
-                _.find(input.source, function(s){
-                    if (s.type.indexOf('Workflow') > -1) return true;
-                    return false;
-                })
-            ){
-                return true;
-            }
-            return false;
-        }
-    );
-
-    var allWorkflowOutputs = _.filter(
-        _.flatten(
-            _.pluck(analysis_steps, 'outputs'), true
-        ),
-        function(output){
-            if (!Array.isArray(output.target)) return false;
-            if (
-                _.find(output.target, function(t){
-                    if (t.type.indexOf('Workflow') > -1) return true;
-                    return false;
-                })
-            ){
-                return true;
-            }
-            return false;
-        }
-    );
+    function checkIfGlobal(io){
+        return (io.meta && io.meta.global) || (_.any((io.source || io.target || []), function(tg){ return tg.name && !tg.step; })) || false;
+    }
 
     return parseAnalysisSteps([
         _.extend(
             _.omit(workflowItem, 'arguments', 'analysis_steps', 'link_id', '@context', 'cwl_data'), // Use workflowItem as if it were AnalysisStep
             {
-                'inputs' : allWorkflowInputs,
-                'outputs' : allWorkflowOutputs
+                'inputs'    : _.filter(_.flatten( _.pluck(analysis_steps, 'inputs'), true ), checkIfGlobal),
+                'outputs'   : _.filter(_.flatten( _.pluck(analysis_steps, 'outputs'), true ), checkIfGlobal)
             }
         )
     ]);
