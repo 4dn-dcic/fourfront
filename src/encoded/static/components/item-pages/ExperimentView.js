@@ -240,10 +240,11 @@ class OverviewHeadingMic extends React.Component {
                 <OverViewBodyItem {...commonProps} property='experiment_type' fallbackTitle="Experiment Type" />
                 <OverViewBodyItem {...commonProps} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
                 <OverViewBodyItem {...commonProps} property='biosample' fallbackTitle="Biosample" />
+                <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
                 <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                 <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
-                <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
-                <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-12 col-md-6" property='imaging_paths' fallbackTitle="Imaging Paths" listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li')=>{
+                
+                <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-12 col-md-6 pull-right" property='imaging_paths' fallbackTitle="Imaging Paths" listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li')=>{
                     if (!value || typeof value !== 'object') return null;
                     var { channel, path } = value;
 
@@ -256,13 +257,16 @@ class OverviewHeadingMic extends React.Component {
 
                     return (
                         <div className="imaging-path-item-wrapper row">
-                            <div className="index-num col-xs-2 mono-text"><small>{ channel }</small></div>
+                            <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
                             <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
                             { matchingFile ? <div className="microscope-setting col-xs-3 text-right">{ getLightSourceCenterMicroscopeSettingFromFile(matchingFile) }</div> : null }
                         </div>
                     );
 
                 }} />
+
+                <OverViewBodyItem {...commonProps} property='microscopy_technique' fallbackTitle="Microscopy Technique" />
+                <OverViewBodyItem {...commonProps} property='microscope_qc' fallbackTitle="Microscope Quality Control" />
             </OverviewHeadingContainer>
         );
     }
