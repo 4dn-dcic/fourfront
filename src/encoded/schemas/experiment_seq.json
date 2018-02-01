@@ -40,8 +40,10 @@
             "NAD-seq",
             "DNA SPRITE",
             "RNA-DNA SPRITE",
+            "MARGI",
             "GAM",
-            "CUT&RUN"
+            "CUT&RUN",
+            "TrAC-loop"
           ]
         },
         "targeted_factor": {
