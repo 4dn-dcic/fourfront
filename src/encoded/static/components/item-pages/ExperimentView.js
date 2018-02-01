@@ -6,8 +6,8 @@ import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, SimpleFilesTableLoaded } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, SimpleFilesTableLoaded, Publications } from './components';
+import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -31,7 +31,6 @@ export default class ExperimentView extends WorkflowRunTracingView {
         var expTableColumnHeaders = [
         ];
 
-        
 
         var tabs = [];
 
@@ -75,8 +74,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
         if (width) width -= 20;
 
-        initTabs.push(ExperimentViewOverview.getTabObject(context, this.props.schemas, width));
-
+        initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));
         
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
             initTabs.push(FileViewGraphSection.getTabObject(
@@ -99,25 +97,25 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return initTabs.concat(this.getFilesTabs(width)).concat(this.getCommonTabs());
     }
 
+    itemMidSection(){
+        return [<Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />, <OverviewHeading context={this.props.context} />];
+    }
+
 }
 
 globals.content_views.register(ExperimentView, 'Experiment');
 
 
-class ExperimentViewOverview extends React.Component {
+class ExperimentSetsViewOverview extends React.Component {
 
     static getTabObject(context, schemas, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
             'key' : 'experiments-info',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>Overview</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <ExperimentViewOverview context={context} schemas={schemas} width={width} />
+                    <ExperimentSetsViewOverview context={context} schemas={schemas} width={width} />
                 </div>
             )
         };
@@ -132,10 +130,7 @@ class ExperimentViewOverview extends React.Component {
     }
 
     render(){
-        var { context, width } = this.props;
-
-        var setsByKey = null;
-        var table = null;
+        var { context, width } = this.props, setsByKey = null, table = null;
 
         if (context && Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0 && object.atIdFromObject(context.experiment_sets[0])) {
             setsByKey = _.object(_.zip(_.map(context.experiment_sets, object.atIdFromObject), context.experiment_sets));
@@ -145,66 +140,30 @@ class ExperimentViewOverview extends React.Component {
             table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
         }
 
-        return (
-            <div>
-                <OverViewBody result={context} schemas={this.props.schemas} />
-                { table }
-            </div>
-        );
-
+        return table;
     }
 
 }
 
-class OverViewBody extends React.Component {
-
-
+class OverviewHeading extends React.Component {
     render(){
-        var exp = this.props.result;
+        var exp = this.props.context;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp);
         var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
-        var biosources = OverViewBodyItem.createList(exp, 'biosample.biosource');
+        var commonProps = { 'tips' : tips, 'result' : exp, 'wrapInColumn' : "col-xs-6 col-md-3" };
+        var commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
         return (
-            <div className="row">
-                <div className="col-md-12 col-xs-12">
-                    <div className="row overview-blocks">
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tips} result={exp} property='experiment_type' fallbackTitle="Experiment Type" />
-                        </div>
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tips} result={exp} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
-                        </div>
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tips} result={exp} property='biosample' fallbackTitle="Biosample" />
-                        </div>
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tips} result={exp} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
-                        </div>
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tipsForBiosample} result={exp.biosample} property='modifications_summary' fallbackTitle="Biosample Modifications" />
-                        </div>
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tipsForBiosample} result={exp.biosample} property='treatments_summary' fallbackTitle="Biosample Treatments" />
-                        </div>
-
-                        <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem tips={tipsForBiosample} result={exp.biosample} property='biosource' fallbackTitle="Biosample Biosource" />
-                        </div>
-
-
-                    </div>
-
-                </div>
-            </div>
+            <OverviewHeadingContainer>
+                <OverViewBodyItem {...commonProps} property='experiment_type' fallbackTitle="Experiment Type" />
+                <OverViewBodyItem {...commonProps} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
+                <OverViewBodyItem {...commonProps} property='biosample' fallbackTitle="Biosample" />
+                <OverViewBodyItem {...commonProps} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
+                <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
+                <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
+                <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
+            </OverviewHeadingContainer>
         );
-
     }
 }
 

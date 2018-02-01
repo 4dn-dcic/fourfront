@@ -10,10 +10,17 @@ def _type_length():
     import codecs
     import json
     utf8 = codecs.getreader("utf-8")
-    type_length_dict = {
-        name: len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
-        for name in ORDER
-    }
+    type_length_dict = {}
+    for name in ORDER:
+        try:
+            type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/master-inserts/%s.json' % name))))
+        except Exception:
+            type_length_dict[name] = 0
+        try:
+            type_length_dict[name] += len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
+        except Exception:
+            type_length_dict[name] += 0
+
     # hot fix for Inherited Non-Abstract Collections
     # list of parent object and children (nested list)
     inherited_list = [

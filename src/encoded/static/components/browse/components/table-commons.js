@@ -29,13 +29,21 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
  * @returns {string|null} String value or null. Your function may return a React element, as well.
  */
 export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Object, props: Object, width: number){
+
+    function filterAndUniq(vals){
+        return _.uniq(_.filter(vals, function(v){
+            return v !== null && typeof v !== 'undefined';
+        }));
+    }
+
     var value = object.getNestedProperty(result, columnDefinition.field);
     if (!value) value = null;
     if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
-        value = _.uniq(value.map(function(v){
+        value = filterAndUniq(_.map(value, function(v){
             if (Array.isArray(v)){
-                v = _.uniq(v);
+                v = filterAndUniq(v);
                 if (v.length === 1) v = v[0];
+                if (v.length === 0) v = null;
             }
             return Schemas.Term.toName(columnDefinition.field, v);
         })).join(', ');

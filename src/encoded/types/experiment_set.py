@@ -85,6 +85,7 @@ class ExperimentSet(Item):
 
                 "experiments_in_set.experiment_type",
                 "experiments_in_set.accession",
+                "experiments_in_set.status",
 
                 "experiments_in_set.biosample.accession",
                 "experiments_in_set.biosample.modifications_summary",

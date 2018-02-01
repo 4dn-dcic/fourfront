@@ -574,33 +574,33 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
-                #'workflow.*',
-                'workflow.title',
-                'workflow.steps.name',
-                'workflow.steps.meta.software_used.name',
-                'workflow.steps.meta.software_used.title',
-                'workflow.steps.meta.software_used.version',
-                'workflow.steps.meta.software_used.source_url',
-                'workflow.workflow_type',
-                'input_files.workflow_argument_name',
-                'input_files.value.filename',
-                'input_files.value.display_title',
-                'input_files.value.file_format',
-                'input_files.value.uuid',
-                'input_files.value.accession',
-                'input_files.value.@type',
-                'input_files.value.file_size',
-                'output_files.workflow_argument_name',
-                'output_files.*',
-                'output_files.value.file_format',
-                'output_files.value.uuid',
-                'output_files.value.accession',
-                'output_files.value.@type',
-                'output_files.value.file_size',
-                'output_quality_metrics.name',
-                'output_quality_metrics.value.uuid',
-                'output_quality_metrics.value.@type'
-                ]
+        #'workflow.*',
+        'workflow.title',
+        'workflow.steps.name',
+        'workflow.steps.meta.software_used.name',
+        'workflow.steps.meta.software_used.title',
+        'workflow.steps.meta.software_used.version',
+        'workflow.steps.meta.software_used.source_url',
+        'workflow.workflow_type',
+        'input_files.workflow_argument_name',
+        'input_files.value.filename',
+        'input_files.value.display_title',
+        'input_files.value.file_format',
+        'input_files.value.uuid',
+        'input_files.value.accession',
+        'input_files.value.@type',
+        'input_files.value.file_size',
+        'output_files.workflow_argument_name',
+        'output_files.*',
+        'output_files.value.file_format',
+        'output_files.value.uuid',
+        'output_files.value.accession',
+        'output_files.value.@type',
+        'output_files.value.file_size',
+        'output_quality_metrics.name',
+        'output_quality_metrics.value.uuid',
+        'output_quality_metrics.value.@type'
+    ]
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
     def steps(self, request):
@@ -645,23 +645,21 @@ class WorkflowRun(Item):
             #if not is_global_arg:
             #    return False # Skip. We only care about global arguments.
 
+            value_field_name = 'value' if io_type == 'parameter' else 'file'
+            
             global_pointing_source_target = get_global_source_or_target(step_io_arg.get('source', step_io_arg.get('target', [])))
             if not global_pointing_source_target:
                 return False
 
             matched_runtime_io_data = [
                 io_object for io_object in wfr_runtime_inputs
-                if global_pointing_source_target['name'] == io_object.get('workflow_argument_name')
+                if global_pointing_source_target['name'] == io_object.get('workflow_argument_name') and io_object.get('value') is not None
             ]
-
-            value_field_name = 'value' if io_type == 'parameter' else 'file'
 
             if len(matched_runtime_io_data) > 0:
                 matched_runtime_io_data = sorted(matched_runtime_io_data, key=lambda io_object: io_object.get('ordinal', 1))
                 step_io_arg['run_data'] = {
-                    value_field_name : [
-                        io_object.get('value', io_object.get('value_qc')) for io_object in matched_runtime_io_data # List of file UUIDs.
-                    ],
+                    value_field_name : [ io_object['value'] for io_object in matched_runtime_io_data ], # List of file UUIDs.
                     "type" : io_type,
                     "meta" : [ # Aligned-to-file-list list of file metadata
                         {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
