@@ -1,11 +1,9 @@
 """The type file for the workflow related items.
 """
-from itertools import chain
 from collections import OrderedDict
 from inspect import signature
 import copy
-from encoded.schema_formats import is_uuid
-#import gevent
+from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import (
     calculated_property,
@@ -17,8 +15,9 @@ from snovault import (
 from .base import (
     Item
 )
-
-import cProfile, pstats, io
+import cProfile
+import pstats
+import io
 
 steps_run_data_schema = {
     "type" : "object",
@@ -61,13 +60,12 @@ workflow_run_steps_property_schema['items']['properties']['inputs']['items']['pr
 workflow_run_steps_property_schema['items']['properties']['outputs']['items']['properties']['run_data'] = steps_run_data_schema
 
 
-
-
 def get_unique_key_from_at_id(at_id):
     if not at_id:
         return None
     at_id_parts = at_id.split('/')
     return at_id_parts[2]
+
 
 DEFAULT_TRACING_OPTIONS = {
     'max_depth_history' : 9,
@@ -76,6 +74,7 @@ DEFAULT_TRACING_OPTIONS = {
     "track_performance" : False,
     "trace_direction" : ["history"]
 }
+
 
 class WorkflowRunTracingException(Exception):
     pass
@@ -122,7 +121,6 @@ def item_model_to_object(model, request):
         dict_repr['workflow_run_inputs'] = [ str(uuid) for uuid in request.registry[CONNECTION].storage.write.get_rev_links(model, item_instance.rev['workflow_run_inputs'][1]) ]
 
     return dict_repr
-
 
 
 def get_step_io_for_argument_name(argument_name, workflow_model_obj):
@@ -544,23 +542,6 @@ class Workflow(Item):
                 'arguments.workflow_argument_name'
             ]
 
-    #rev = {
-    #    'workflow_runs': ('WorkflowRun', 'workflow'),
-    #}
-    #
-    #@calculated_property(schema={
-    #    "title": "Workflow Runs",
-    #    "description": "All runs of this workflow definition.",
-    #    "type": "array",
-    #    "items": {
-    #        "title": "Workflow Run",
-    #        "type": ["string", "object"],
-    #        "linkTo": "WorkflowRun"
-    #    }
-    #})
-    #def workflow_runs(self, request):
-    #    return self.rev_link_atids(request, "workflow_runs")
-
 
 @collection(
     name='workflow-runs',
@@ -756,3 +737,22 @@ class WorkflowMapping(Item):
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
     embedded_list = []
+
+
+WF_RUNNER_ARN = 'arn:aws:states:us-east-1:643366669028:stateMachine:run_awsem_new_pony-dev-1'
+
+
+def validate_input_json(context, request):
+    input_json = request.json
+    if input_json.get('workflow_uuid') != str(context.uuid):
+        request.errors.add('body', None, 'input_json must use same workflow as context')
+    if not input_json.get('metadata_only'):
+        request.errors.add('body', None, 'metadata_only must be set to true in input_json')
+
+
+@view_config(name='pseudo-run', context=Workflow, request_method='POST',
+             permission='edit', validators=[validate_input_json])
+def pseudo_run(context, request):
+    properties = context.upgrade_properties()
+
+    return properties
