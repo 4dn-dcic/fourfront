@@ -18,6 +18,8 @@ from .base import (
 import cProfile
 import pstats
 import io
+import boto3
+import json
 
 steps_run_data_schema = {
     "type" : "object",
@@ -753,6 +755,12 @@ def validate_input_json(context, request):
 @view_config(name='pseudo-run', context=Workflow, request_method='POST',
              permission='edit', validators=[validate_input_json])
 def pseudo_run(context, request):
-    properties = context.upgrade_properties()
-
-    return properties
+    # properties = context.upgrade_properties()
+    input_json = request.json
+    env = request.registry.settings.get('env.name')
+    input_json['env_name'] = env
+    # boto3 call lamda
+    aws_lambda = boto3.client('lambda')
+    res = aws_lambda.invoke(FunctionName='run_workflow',
+                            Payload=json.dumps(input_json))
+    return res
