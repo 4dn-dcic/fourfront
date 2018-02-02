@@ -173,17 +173,12 @@ export class FileViewDownloadButtonContainer extends React.Component {
     }
 
     render(){
-        var file = this.props.file || this.props.context;
+        var file = this.props.file || this.props.context || this.props.result;
         return (
             <layout.VerticallyCenteredChild disabled={!this.props.verticallyCentered}>
-            <div className={"file-download-container" + (this.props.className ? ' ' + this.props.className : '')}>
-                <fileUtil.FileDownloadButtonAuto result={file} size={this.props.size} />
-                {/* file.file_size && typeof file.file_size === 'number' ?
-                <h6 className="text-400">
-                    <i className="icon icon-fw icon-hdd-o" data-tip="Size of file on disk" /> { Schemas.Term.toName('file_size', file.file_size) }
-                </h6>
-                : null */}
-            </div>
+                <div className={"file-download-container" + (this.props.className ? ' ' + this.props.className : '')}>
+                    <fileUtil.FileDownloadButtonAuto result={file} size={this.props.size} />
+                </div>
             </layout.VerticallyCenteredChild>
         );
     }

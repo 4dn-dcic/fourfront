@@ -105,7 +105,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
     /**
      * What is to be displayed at top left of page, under title, to the left of accession (if any).
-     * 
+     *
      * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
      */
     typeInfo(){

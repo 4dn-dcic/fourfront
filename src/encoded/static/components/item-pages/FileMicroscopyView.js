@@ -106,7 +106,7 @@ class FileMicOverViewBody extends FileOverViewBody {
         var parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
 
         var parentExperimentWithImagingPaths = _.find(parentExperimentsReversed, function(exp){
-            return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path; 
+            return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path;
         }) || parentExperimentsReversed[0] || null;
 
         return (
@@ -122,7 +122,7 @@ class FileMicOverViewBody extends FileOverViewBody {
 
                 <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn={"col-xs-12 col-sm-" + (file.thumbnail && typeof file.thumbnail === 'string' ? '4' : '6' )} />
 
-                { parentExperimentWithImagingPaths ? 
+                { parentExperimentWithImagingPaths ?
                     <OverViewBodyItem result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(this.props.schemas || Schemas.get(), parentExperimentWithImagingPaths)} wrapInColumn="col-xs-12 col-md-6 pull-right" property='imaging_paths' fallbackTitle="Imaging Paths" listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li')=>{
                         if (!value || typeof value !== 'object') return null;
                         var { channel, path } = value;
