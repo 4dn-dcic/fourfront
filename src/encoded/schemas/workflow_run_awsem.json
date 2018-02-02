@@ -37,6 +37,12 @@
         "awsem_app_name": {
             "title": "AWSEM App Name",
             "type": "string"
+        },
+        "awsem_postrun_json": {
+            "type": "string",
+            "title" : "Link to Postrun Json",
+            "description": "Location of the AWSEM postrun json file",
+            "format": "uri"
         }
     }
 }
