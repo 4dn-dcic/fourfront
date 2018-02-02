@@ -757,18 +757,23 @@ def validate_input_json(context, request):
 def pseudo_run(context, request):
     # properties = context.upgrade_properties()
     input_json = request.json
+
+    # set env_name for awsem runner in tibanna
     env = request.registry.settings.get('env.name')
     # for testing
     if not env:
         env = 'fourfront-webdev'
+
     input_json['env_name'] = env
     input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
 
+    # ideally select bucket from file metadata itself
     for i, nput in enumerate(input_json['input_files']):
         if not nput.get('bucket_name'):
             input_json['input_files'][i]['bucket_name'] = 'elasticbeanstalk-%s-files' % env
-    # boto3 call lamda
-    aws_lambda = boto3.client('lambda', region='us-east-1')
+
+    # hand-off to tibanna for further processing
+    aws_lambda = boto3.client('lambda', region_name='us-east-1')
     res = aws_lambda.invoke(FunctionName='run_workflow',
                             Payload=json.dumps(input_json))
     return res['Payload'].read()
