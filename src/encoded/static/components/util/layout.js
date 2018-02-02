@@ -396,6 +396,12 @@ export class WindowResizeUpdateTrigger extends React.Component {
 
 export class VerticallyCenteredChild extends React.Component {
 
+    static defaultProps = {
+        'calculate' : function(heightParent, heightChild){
+            return Math.floor((heightParent - heightChild) / 2);
+        }
+    }
+
     constructor(props){
         super(props);
         this.state = { 'mounted' : false };
@@ -425,7 +431,7 @@ export class VerticallyCenteredChild extends React.Component {
             var heightChild = domChildBlock.offsetHeight;
             if (heightParent && heightChild && heightChild < heightParent){
                 style = {
-                    'transform' : 'translateY(' + Math.floor((heightParent - heightChild) / 2) + 'px)'
+                    'transform' : 'translateY(' + this.props.calculate(heightParent, heightChild) + 'px)'
                 };
             }
 

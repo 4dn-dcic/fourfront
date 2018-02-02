@@ -340,7 +340,7 @@ export default class SubmissionView extends React.Component{
         var schema = this.props.schemas[type] || null;
         var autoSuggestedAlias = '';
         if (this.state.currentSubmittingUser && Array.isArray(this.state.currentSubmittingUser.submits_for) && this.state.currentSubmittingUser.submits_for[0] && typeof this.state.currentSubmittingUser.submits_for[0].name === 'string'){
-            autoSuggestedAlias = this.state.currentSubmittingUser.submits_for[0].name + ':';
+            autoSuggestedAlias = AliasInputField.getInitialSubmitsForLabName(this.state.currentSubmittingUser) + ':';
         }
         if(schema && schema.properties.aliases){
             this.setState(_.extend({

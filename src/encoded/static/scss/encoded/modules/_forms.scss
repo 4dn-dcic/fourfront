@@ -655,13 +655,15 @@ div.fieldset.editable-fields {
 	.input-group {
 		.dropdown.input-group-btn {
 			width: 20%;
-			> button#aliasFirstPartInput {
+			> button.alias-first-part-input {
 				width: 100%;
 				border-right: none;
 				box-shadow: none;
 				outline: none;
 				padding-left: 24px;
 				padding-right: 8px;
+				padding-top: 5px;
+    			padding-bottom: 5px;
 				span.caret {
 					opacity: 0.33;
 					left: 10px;
