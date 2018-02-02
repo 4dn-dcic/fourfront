@@ -758,9 +758,17 @@ def pseudo_run(context, request):
     # properties = context.upgrade_properties()
     input_json = request.json
     env = request.registry.settings.get('env.name')
+    # for testing
+    if not env:
+        env = 'fourfront-webdev'
     input_json['env_name'] = env
+    input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
+
+    for i, nput in enumerate(input_json['input_files']):
+        if not nput.get('bucket_name'):
+            input_json['input_files'][i]['bucket_name'] = 'elasticbeanstalk-%s-files' % env
     # boto3 call lamda
     aws_lambda = boto3.client('lambda')
     res = aws_lambda.invoke(FunctionName='run_workflow',
                             Payload=json.dumps(input_json))
-    return res
+    return res['Payload'].read()

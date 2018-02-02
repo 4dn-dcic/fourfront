@@ -20,6 +20,7 @@ def input_json(workflow):
                         }
                         ],
         "metadata_only": True,
+        "parameters": {},
         "output_files": [{
                 "workflow_argument_name": "annotated_bam",
                 "uuid": "ecabab05-3738-47fe-8b55-b08334463c43"
