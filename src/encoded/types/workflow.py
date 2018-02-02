@@ -776,4 +776,4 @@ def pseudo_run(context, request):
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
     res = aws_lambda.invoke(FunctionName='run_workflow',
                             Payload=json.dumps(input_json))
-    return res['Payload'].read()
+    return res['Payload'].read().decode()
