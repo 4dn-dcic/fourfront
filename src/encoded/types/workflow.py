@@ -746,14 +746,16 @@ WF_RUNNER_ARN = 'arn:aws:states:us-east-1:643366669028:stateMachine:run_awsem_ne
 
 def validate_input_json(context, request):
     input_json = request.json
-    if input_json.get('workflow_uuid') != str(context.uuid):
-        request.errors.add('body', None, 'input_json must use same workflow as context')
+    wkfl_uuid = input_json.get('workflow_uuid', 'None')
+    # TODO: check this exists in system
+    if not context.get(wkfl_uuid):
+        request.errors.add('body', None, 'workflow_uuid %s not found in the system' % wkfl_uuid)
     if not input_json.get('metadata_only'):
         request.errors.add('body', None, 'metadata_only must be set to true in input_json')
 
 
-@view_config(name='pseudo-run', context=Workflow, request_method='POST',
-             permission='edit', validators=[validate_input_json])
+@view_config(name='pseudo-run', context=WorkflowRun.Collection, request_method='POST',
+             permission='add', validators=[validate_input_json])
 def pseudo_run(context, request):
     # properties = context.upgrade_properties()
     input_json = request.json
