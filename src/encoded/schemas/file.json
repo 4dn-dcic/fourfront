@@ -29,6 +29,7 @@
         },
         "file_format": {
             "title": "File Format",
+            "description": "Format or extension of this file.",
             "type": "string"
         },
         "file_type": {
@@ -80,6 +81,7 @@
         "file_size": {
             "title": "File Size",
             "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "Size of file on disk.",
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },

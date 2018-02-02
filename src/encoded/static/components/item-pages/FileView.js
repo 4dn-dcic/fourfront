@@ -15,6 +15,7 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import { FileDownloadButton } from '../util/file';
 
 
 export default class FileView extends WorkflowRunTracingView {
@@ -46,7 +47,7 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        return <OverviewHeading context={this.props.context} />;
+        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} /></layout.WindowResizeUpdateTrigger>;
     }
 
 }
@@ -64,7 +65,7 @@ class FileViewOverview extends React.Component {
             'content' : (
                 <div className="overflow-hidden">
                     <h3 className="tab-section-title">
-                        <span>Overview</span>
+                        <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
                     <FileViewOverview context={context} schemas={schemas} width={width} />
@@ -115,44 +116,80 @@ class FileViewOverview extends React.Component {
 
 }
 
-class OverviewHeading extends React.Component {
-    render(){
+export class FileOverviewHeading extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.onTransition = this.onTransition.bind(this);
+        this.overviewBlocks = this.overviewBlocks.bind(this);
+        this.state = {
+            isPropertiesOpen : true,
+            mounted : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ mounted : true });
+    }
+
+    onTransition(isOpen = false){
+        this.setState({ isPropertiesOpen : isOpen });
+    }
+
+    overviewBlocks(){
         var file = this.props.context;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-        var commonProps = {
-            'tips'          : tips,
-            'result'        : file,
-            'wrapInColumn'  : "col-xs-6 col-md-3"
-        };
+        return [
+            <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-3 col-lg-3" />,
+            <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-3 col-lg-3" />,
+            <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-3 col-lg-3" />,
+            <OverViewBodyItem tips={tips} result={file} property='file_size' fallbackTitle="File Size" wrapInColumn="col-sm-3 col-lg-3" titleRenderFxn={(field, size)=>
+                <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName('file_size', size) }</span>
+            } />
+        ];
+    }
 
+    render(){
+        var responsiveSize = layout.responsiveGridState();
+        var isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
         return (
-            <OverviewHeadingContainer>
-                <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-4 col-lg-4" />
+            <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
+                <div className="col-xs-12 col-md-9 col-lg-8">
+                    <OverviewHeadingContainer onStartClose={this.onTransition.bind(this, false)} onFinishOpen={this.onTransition.bind(this, true)} children={this.overviewBlocks()}/>
+                </div>
+                <div className={"col-xs-12 col-md-3 col-lg-4 mt-1" + (this.state.isPropertiesOpen || isSmallerSize ? ' mb-3' : '')}>
+                    <FileViewDownloadButtonContainer file={this.props.context} size="lg" verticallyCentered={!isSmallerSize && this.state.isPropertiesOpen} />
+                </div>
 
-                <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-4 col-lg-4" />
+            </div>
+        );
+    }
+}
 
-                <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-4 col-lg-4" />
-            </OverviewHeadingContainer>
+export class FileViewDownloadButtonContainer extends React.Component {
+
+    static defaultProps = {
+        'size' : null
+    }
+
+    render(){
+        var file = this.props.file || this.props.context;
+        return (
+            <layout.VerticallyCenteredChild disabled={!this.props.verticallyCentered}>
+            <div className={"file-download-container" + (this.props.className ? ' ' + this.props.className : '')}>
+                <fileUtil.FileDownloadButtonAuto result={file} size={this.props.size} />
+                {/* file.file_size && typeof file.file_size === 'number' ?
+                <h6 className="text-400">
+                    <i className="icon icon-fw icon-hdd-o" data-tip="Size of file on disk" /> { Schemas.Term.toName('file_size', file.file_size) }
+                </h6>
+                : null */}
+            </div>
+            </layout.VerticallyCenteredChild>
         );
     }
 }
 
 export class FileOverViewBody extends React.Component {
-
-    downloadButtonColumn(file = this.props.result){
-        return (
-            <div className="col-md-3 col-xs-12">
-                <div className="file-download-container">
-                    <fileUtil.FileDownloadButtonAuto result={file} />
-                    { file.file_size && typeof file.file_size === 'number' ?
-                    <h6 className="text-400">
-                        <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
-                    </h6>
-                    : null }
-                </div>
-            </div>
-        );
-    }
 
     render(){
         var file = this.props.result;
@@ -168,7 +205,6 @@ export class FileOverViewBody extends React.Component {
 
                     </div>
                 </div>
-                { this.downloadButtonColumn() }
             </div>
         );
 

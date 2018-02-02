@@ -406,6 +406,12 @@ export class VerticallyCenteredChild extends React.Component {
     }
 
     render(){
+
+        var childClassName = this.props.children.props.className;
+        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
+
+        if (this.props.disabled) return React.cloneElement(this.props.children, { ref : 'childElement', 'className' : className } );
+
         var style = null;
         //var domParentBlock = (this.state.mounted && this.refs && this.refs.parentBlock) || null;
         var domChildBlock = (this.state.mounted && this.refs && this.refs.childElement) || null;
@@ -428,8 +434,6 @@ export class VerticallyCenteredChild extends React.Component {
             var origStyle = this.props.children.props.style || {};
             style = _.extend(style, origStyle);
         }
-        var childClassName = this.props.children.props.className;
-        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
 
         return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
     }

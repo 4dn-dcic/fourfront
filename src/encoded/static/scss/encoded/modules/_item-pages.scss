@@ -1513,23 +1513,20 @@ $download-button-width : 100px;
 
 .item-page-container.type-File {
 
-	.rc-tabs-content {
 
 		 .file-download-container {
+			transition: transform .4s;
 
-			border-top: 1px solid #eee;
-			margin-top: 20px;
-			padding-top: 20px;
-
-			@media screen and (min-width: $screen-md-min){
-				padding-top: 16px;
-				margin-top: 0;
-				border-top: none;
+			> a.btn-block.btn-lg {
+				font-weight: 400;
+				padding-top: 11px;
+				> i {
+					position: relative;
+    				top: 1px;
+				}
 			}
 
 		}
-
-	}
 
 }
 

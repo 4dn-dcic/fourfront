@@ -43,13 +43,14 @@ export class FileDownloadButton extends React.Component {
 
     static defaultProps = {
         'title' : 'Download',
-        'disabled' : false
+        'disabled' : false,
+        'size' : null
     }
 
     render(){
-        var { href, className, disabled, title, filename } = this.props;
+        var { href, className, disabled, title, filename, size } = this.props;
         return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
+            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '') + (size ? ' btn-' + size : '')} download data-tip={filename || null}>
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
@@ -115,11 +116,12 @@ export class ViewFileButton extends React.Component {
         'href' : null,
         'disabled' : false,
         'title' : null,
-        'mimeType' : null
+        'mimeType' : null,
+        'size' : null
     }
 
     render(){
-        var { filename, href, target, title, mimeType } = this.props;
+        var { filename, href, target, title, mimeType, size } = this.props;
         var action = 'View', extLink = null, preLink = null;
 
         preLink = <i className="icon icon-fw icon-cloud-download" />;
@@ -142,7 +144,7 @@ export class ViewFileButton extends React.Component {
         }
 
         return (
-            <Button download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
+            <Button bsSize={size} download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
                 <span className={title ? null : "text-400"}>
                     { preLink } { action } { title || (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
                 </span>
@@ -251,4 +253,4 @@ export function getLargeMD5(file, cbProgress) {
             }
         });
     });
-};
+}

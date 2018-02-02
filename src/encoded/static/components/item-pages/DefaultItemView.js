@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { panel_views, itemClass, content_views } from './../globals';
 import { Button, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
@@ -137,6 +138,13 @@ content_views.register(DefaultItemView, 'Item');
 
 export class OverviewHeadingContainer extends React.Component {
 
+    static propTypes = {
+        'onFinishOpen' : PropTypes.func,
+        'onStartOpen' : PropTypes.func,
+        'onFinishClose' : PropTypes.func,
+        'onStartClose' : PropTypes.func
+    }
+
     static defaultProps = {
         'className'     : 'with-background mb-3 mt-1',
         'defaultOpen'   : true,
@@ -146,8 +154,12 @@ export class OverviewHeadingContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.toggle = _.throttle(function(){ this.setState({ 'open' : !this.state.open }); }.bind(this), 500);
+        this.toggle = _.throttle(this.toggle.bind(this), 500);
         this.state = { 'open' : props.defaultOpen };
+    }
+
+    toggle(){
+        this.setState({ 'open' : !this.state.open });
     }
 
     renderTitle(){
@@ -158,7 +170,7 @@ export class OverviewHeadingContainer extends React.Component {
         return (
             <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
                 { this.props.headingTitleElement ? React.createElement(this.props.headingTitleElement, { 'className' : 'tab-section-title clickable with-accent', 'onClick' : this.toggle }, this.renderTitle()) : null }
-                <Collapse in={this.state.open}>
+                <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
                         <hr className="tab-section-title-horiz-divider"/>
                         <div className="row overview-blocks">{ this.props.children }</div>
