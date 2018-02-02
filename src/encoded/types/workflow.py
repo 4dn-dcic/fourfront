@@ -768,7 +768,7 @@ def pseudo_run(context, request):
         if not nput.get('bucket_name'):
             input_json['input_files'][i]['bucket_name'] = 'elasticbeanstalk-%s-files' % env
     # boto3 call lamda
-    aws_lambda = boto3.client('lambda')
+    aws_lambda = boto3.client('lambda', region='us-east-1')
     res = aws_lambda.invoke(FunctionName='run_workflow',
                             Payload=json.dumps(input_json))
     return res['Payload'].read()

@@ -4,6 +4,7 @@ pytestmark = [pytest.mark.working]
 
 @pytest.fixture()
 def input_json(workflow):
+    # TODO: add object key to input_files
     item = {
         "wfr_alias": ['dekker:hic_run_180101_0001'],
         "workflow_uuid": workflow['uuid'],
