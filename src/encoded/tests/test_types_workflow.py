@@ -51,7 +51,5 @@ def workflow(testapp, software, award, lab):
 
 def test_pseudo_run(testapp, workflow, input_json):
     res = testapp.post_json(workflow['@id'] + 'pseudo-run', input_json)
-    import pdb
-    pdb.set_trace()
     print(res)
     assert(res)
