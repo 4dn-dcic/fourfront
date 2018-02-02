@@ -138,6 +138,25 @@
         }
     },
     {
+        "name": "help/data-processing-pipelines",
+        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
+        "title": "Data processing pipelines",
+        "content": [
+            "9a0afb37-2605-4c0c-9a12-4a28882583a8"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 3,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
         "name": "error/login-failed",
         "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",
         "title": "Login Failed",
