@@ -106,7 +106,7 @@ class FileViewOverview extends React.Component {
 
         return (
             <div>
-                <OverViewBody result={context} schemas={this.props.schemas} />
+                <FileOverViewBody result={context} schemas={this.props.schemas} />
                 { table }
             </div>
         );
@@ -137,23 +137,21 @@ class OverviewHeading extends React.Component {
     }
 }
 
-class OverViewBody extends React.Component {
+export class FileOverViewBody extends React.Component {
 
-    relatedFiles(){
-        var file = this.props.result;
-        if (!Array.isArray(file.related_files) || file.related_files.length === 0){
-            return null;
-        }
-
-        return _.map(file.related_files, function(rf){
-
-            return (
-                <li className="related-file">
-                    { rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }
-                </li>
-            );
-        });
-
+    downloadButtonColumn(file = this.props.result){
+        return (
+            <div className="col-md-3 col-xs-12">
+                <div className="file-download-container">
+                    <fileUtil.FileDownloadButtonAuto result={file} />
+                    { file.file_size && typeof file.file_size === 'number' ?
+                    <h6 className="text-400">
+                        <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
+                    </h6>
+                    : null }
+                </div>
+            </div>
+        );
     }
 
     render(){
@@ -162,25 +160,15 @@ class OverViewBody extends React.Component {
 
         return (
             <div className="row">
+
                 <div className="col-md-9 col-xs-12">
                     <div className="row overview-blocks">
 
-                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn hideIfNoValue />
+                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn />
 
                     </div>
                 </div>
-
-                <div className="col-md-3 col-xs-12">
-                    <div className="file-download-container">
-                        <fileUtil.FileDownloadButtonAuto result={file} />
-                        { file.file_size && typeof file.file_size === 'number' ?
-                        <h6 className="text-400">
-                            <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
-                        </h6>
-                        : null }
-                    </div>
-                </div>
-
+                { this.downloadButtonColumn() }
             </div>
         );
 
@@ -200,15 +188,17 @@ export class RelatedFilesOverViewBlock extends React.Component {
     relatedFiles(){
         var { file, related_files, property } = this.props;
         var relatedFiles;
-        if (typeof related_files === 'undefined' || related_files === null){
-            relatedFiles = file[property] || file.related_files;
-        } else {
+        if (Array.isArray(related_files) && related_files.length > 0){
             relatedFiles = related_files;
+        } else {
+            relatedFiles = file[property] || file.related_files;
         }
 
         if (!Array.isArray(relatedFiles) || relatedFiles.length === 0){
             return null;
         }
+
+        console.log('RFFFF', relatedFiles);
 
         return _.map(relatedFiles, function(rf, i){
             return (<li className="related-file" key={object.itemUtil.atId(rf.file) || i}>{ rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }</li>);
@@ -218,25 +208,19 @@ export class RelatedFilesOverViewBlock extends React.Component {
 
     render(){
         var { file, related_files, property, hideIfNoValue, tips, wrapInColumn } = this.props;
-        var relatedFiles;
-        if (typeof related_files === 'undefined' || related_files === null){
-            relatedFiles = file[property] || file.related_files;
-        } else {
-            relatedFiles = related_files;
-        }
 
-        var vals = this.relatedFiles();
+        var relatedFiles = this.relatedFiles();
 
-        if (hideIfNoValue && !vals){
+        if (hideIfNoValue && !relatedFiles){
             return null;
-        } else {
-            vals = <li className="related-file"><em>None</em></li>;
+        } else if (!relatedFiles) {
+            relatedFiles = <li className="related-file"><em>None</em></li>;
         }
 
         var elem = (
             <div className="inner">
                 <object.TooltipInfoIconContainerAuto result={file} property={property || "related_files"} tips={tips} elementType="h5" fallbackTitle="Related Files" />
-                <ul className="overview-list-elements-container">{ vals }</ul>
+                <ul className="overview-list-elements-container">{ relatedFiles }</ul>
             </div>
         );
 
