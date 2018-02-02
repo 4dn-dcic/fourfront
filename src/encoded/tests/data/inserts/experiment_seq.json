@@ -14,7 +14,8 @@
         "follows_sop": "Yes",
         "status": "in review by lab",
         "targeted_factor": "dcic:test_targ4",
-        "antibody": "ENCAB000AAA",
+        "antibody": "4d44d12c-b37c-478b-9bc7-d843cba4ba99",
+        "antibody_lot_id": "11111111",
         "average_fragment_size": 100,
         "fragmentation_method": "chemical",
         "library_preparation_date": "2017-01-01"
@@ -34,7 +35,8 @@
         "follows_sop": "Yes",
         "status": "in review by lab",
         "targeted_factor": "dcic:test_targ4",
-        "antibody": "ENCAB000AAA",
+        "antibody": "4d44d12c-b37c-478b-9bc7-d843cba4ba99",
+        "antibody_lot_id": "11111111",
         "average_fragment_size": 100,
         "fragmentation_method": "chemical",
         "library_preparation_date": "2017-01-05"
