@@ -7,7 +7,7 @@ import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
-import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
+import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -15,7 +15,6 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-
 
 
 export default class FileView extends WorkflowRunTracingView {
@@ -44,6 +43,10 @@ export default class FileView extends WorkflowRunTracingView {
         }
 
         return initTabs.concat(this.getCommonTabs());
+    }
+
+    itemMidSection(){
+        return <OverviewHeading context={this.props.context} />;
     }
 
 }
@@ -112,6 +115,28 @@ class FileViewOverview extends React.Component {
 
 }
 
+class OverviewHeading extends React.Component {
+    render(){
+        var file = this.props.context;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+        var commonProps = {
+            'tips'          : tips,
+            'result'        : file,
+            'wrapInColumn'  : "col-xs-6 col-md-3"
+        };
+
+        return (
+            <OverviewHeadingContainer>
+                <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-4 col-lg-4" />
+
+                <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-4 col-lg-4" />
+
+                <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-4 col-lg-4" />
+            </OverviewHeadingContainer>
+        );
+    }
+}
+
 class OverViewBody extends React.Component {
 
     relatedFiles(){
@@ -139,12 +164,6 @@ class OverViewBody extends React.Component {
             <div className="row">
                 <div className="col-md-9 col-xs-12">
                     <div className="row overview-blocks">
-
-                        <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-4 col-lg-4" />
-
-                        <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-4 col-lg-4" />
-
-                        <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-4 col-lg-4" />
 
                         <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn hideIfNoValue />
 

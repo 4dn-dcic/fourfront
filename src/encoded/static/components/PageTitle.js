@@ -208,7 +208,7 @@ export default class PageTitle extends React.Component {
     }
 
     static getStyles(context, href, mounted){
-        var style = { marginTop : 45 };
+        var style = { marginTop : 55 };
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
             var gridSize = mounted && layout.responsiveGridState();

@@ -10,12 +10,12 @@ import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTable
 import { ItemBaseView } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 import FileView from './FileView';
 
 
 
-export default class FileMicroscopyView extends WorkflowRunTracingView {
+export default class FileMicroscopyView extends FileView {
 
     getTabViewContents(){
 
