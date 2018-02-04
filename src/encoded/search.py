@@ -7,6 +7,7 @@ from snovault import (
     TYPES,
     COLLECTIONS
 )
+from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.resource_views import collection_view_listing_db
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
@@ -904,6 +905,28 @@ def find_index_by_doc_types(request, doc_types, ignore):
     indexes = list(set(indexes))
     index_string = ','.join(indexes)
     return index_string
+
+
+def do_subreq(request, path):
+    subreq = make_subrequest(request, path)
+    subreq._stats = request._stats
+    subreq.headers['Accept'] = 'application/json'
+    return request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
+
+def get_chunked_search_results_iterable(request, search_path='/search/', param_lists={"type":["ExperimentSetReplicate"],"experimentset_type":["replicate"]}, search_results_chunk_row_size = 100):
+    '''
+    Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain_from_iterable to get one big iterable of results.
+    '''
+    param_lists['limit'] = [search_results_chunk_row_size]
+    param_lists['from'] = [0]
+    initial_result = do_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)))
+    search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
+    yield initial_result.get('@graph', [])
+    while search_result_rows_count_remaining > 0:
+        param_lists['from'] = [param_lists.get('from', [0])[0] + search_results_chunk_row_size]
+        param_lists['limit'] = search_results_chunk_row_size
+        search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
+        yield do_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True))).get('@graph', [])
 
 
 ### stupid things to remove; had to add because of other fxns importing

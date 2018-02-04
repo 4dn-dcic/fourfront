@@ -5,15 +5,18 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
 from snovault.util import simple_path_ids
-from snovault.embed import make_subrequest
 from itertools import chain
 
 from urllib.parse import (
     parse_qs,
     urlencode,
 )
-from .search import iter_search_results
-from .search import list_visible_columns_for_schemas
+from .search import (
+    iter_search_results,
+    list_visible_columns_for_schemas,
+    get_chunked_search_results_iterable,
+    do_subreq
+)
 
 import csv
 import io
@@ -253,30 +256,6 @@ def metadata_tsv(context, request):
     #    param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
     #    param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
 
-    initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
-
-    def do_subreq(path):
-        nonlocal request
-        if not endpoints_initialized['metadata']:
-            endpoints_initialized['metadata'] = True
-            do_subreq(path) # Do an extra time because for some reason (we get incomplete results from /search/ on first request after bootup/deploy).
-        subreq = make_subrequest(request, path)
-        subreq._stats = request._stats
-        subreq.headers['Accept'] = 'application/json'
-        return request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
-
-    def get_search_results():
-        '''Loops through search results, 100 (search_results_chunk_row_size) at a time.'''
-        nonlocal request
-        nonlocal initial_path
-        initial_result = do_subreq(initial_path)
-        search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
-        yield initial_result.get('@graph', [])
-        while search_result_rows_count_remaining > 0:
-            param_list['from'] = [param_list.get('from', 0) + search_results_chunk_row_size]
-            search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
-            yield do_subreq('{}?{}'.format(search_path, urlencode(param_list, True))).get('@graph', [])
-
 
     def get_value_for_column(item, col, columnKeyStart = 0):
         temp = []
@@ -387,11 +366,16 @@ def metadata_tsv(context, request):
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
 
+    if not endpoints_initialized['metadata']:
+        initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
+        endpoints_initialized['metadata'] = True
+        do_subreq(request, initial_path) # Do an extra time because for some reason (we get incomplete results from /search/ on first request after bootup/deploy).
+
     return Response(
         content_type='text/tsv',
         app_iter = stream_tsv_output(
             format_graph_of_experiment_sets(
-                chain.from_iterable(get_search_results())
+                chain.from_iterable(get_chunked_search_results_iterable(request, search_path, param_list, search_results_chunk_row_size))
             )
         ),
         content_disposition='attachment;filename="%s"' % filename_to_suggest
