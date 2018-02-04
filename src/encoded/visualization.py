@@ -30,6 +30,7 @@ def includeme(config):
     config.add_route('batch_hub', '/batch_hub/{search_params}/{txt}')
     config.add_route('batch_hub:trackdb', '/batch_hub/{search_params}/{assembly}/{txt}')
     config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
+    config.add_route('bar_plot_chart', '/bar_plot_aggregations/{search_params}/')
     config.scan(__name__)
 
 
@@ -464,3 +465,60 @@ def trace_workflow_runs(context, request):
         return trace_workflows(processed_files_to_trace, request, options)
     except WorkflowRunTracingException as e:
         raise HTTPBadRequest(detail=e.args[0])
+
+
+
+
+
+
+@view_config(route_name='bar_plot_chart', request_method='GET', permission='view')
+def bar_plot_chart(request):
+
+    def gen_zero_counts_dict():
+        return {
+            'experiments' : 0,
+            'experiment_sets' : 0,
+            'files' : 0
+        }
+
+    search_results_chunk_row_size = 100
+    param_lists = parse_qs(request.matchdict['search_params'])
+    search_path = '/browse/'
+
+    fields_to_aggregate_for = None
+
+    if isinstance(request.params.get('field'), list):
+        fields_to_aggregate_for = request.params['field']
+    elif isinstance(request.params.get('field'), str):
+        fields_to_aggregate_for = [request.params['field']]
+    else:
+        raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
+
+    # Convert to list of dicts.
+    fields_to_aggregate_for = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
+
+    # Set each subsequent field as child of previous one
+    if len(fields_to_aggregate_for) > 1:
+        for index in range(1, len(fields_to_aggregate_for) - 1):
+            fields_to_aggregate_for[index - 1]['child_field'] = fields_to_aggregate_for[index]
+
+
+    def add_count_to_field_term(field, term, update_total = True, type = 'experiments', count_increase = 1):
+        if not term:
+            term = 'None'
+        if isinstance(term, list):
+            print('\nBar Plot Aggregator: Found multiple values for field ' + field['field'], term)
+            term = term[0]
+        if field['terms'].get(term) is None:
+            field['terms'][term] = gen_zero_counts_dict()
+        field['terms'][term][type] += count_increase
+
+        if update_total:
+            field['total'][type] += count_increase
+
+    def aggregegate(experiment_sets, fields=['experiments_in_set.experiment_type', 'award.project']):
+        pass
+
+
+    pass
+

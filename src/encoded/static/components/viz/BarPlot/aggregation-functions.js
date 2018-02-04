@@ -38,7 +38,7 @@ import { console, object, expFxn } from './../../util';
  */
 export function genChartData(
     experiment_sets = [],
-    fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
+    fields = [{ 'name' : 'Biosample' , 'field' : 'experiments_in_set.biosample.biosource_summary' }],
     useOnlyPopulatedFields = false
 ){
 
