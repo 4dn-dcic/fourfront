@@ -127,7 +127,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     if size not in (None, 'all') and size < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
-        result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
+        if context:
+            result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
 
     # add actions (namely 'add')
     result['actions'] = get_collection_actions(request, types[doc_types[0]])
@@ -907,33 +908,35 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-def do_subreq(request, path):
+def make_search_subreq(request, path):
     subreq = make_subrequest(request, path)
     subreq._stats = request._stats
+    subreq.registry = request.registry
+    subreq.context = request.context
     subreq.headers['Accept'] = 'application/json'
-    return request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
+    return subreq
 
-def get_chunked_search_results_iterable(request, search_path='/search/', param_lists={"type":["ExperimentSetReplicate"],"experimentset_type":["replicate"]}, search_results_chunk_row_size = 100):
+def get_iterable_search_results(request, search_path='/search/', param_lists={"type":["ExperimentSetReplicate"],"experimentset_type":["replicate"]}):
     '''
-    Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain_from_iterable to get one big iterable of results.
+    Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain.from_iterable to get one big iterable of results.
+    TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
+
+    :param request: Only needed to pass to do_subreq to make a subrequest with.
+    :param search_path: Root path to call, defaults to /search/ (can also use /browse/).
+    :param param_lists: Dictionary of param:lists_of_vals which is converted to URL query.
+    :param search_results_chunk_row_size: Amount of results to get per chunk. Default should be fine.
     '''
-    param_lists['limit'] = [search_results_chunk_row_size]
+    param_lists['limit'] = ['all']
     param_lists['from'] = [0]
-    initial_result = do_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)))
-    search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
-    yield initial_result.get('@graph', [])
-    while search_result_rows_count_remaining > 0:
-        param_lists['from'] = [param_lists.get('from', [0])[0] + search_results_chunk_row_size]
-        param_lists['limit'] = search_results_chunk_row_size
-        search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
-        yield do_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True))).get('@graph', [])
+    subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
+    return iter_search_results(None, subreq)
 
-
-### stupid things to remove; had to add because of other fxns importing
 
 # Update? used in ./batch_download.py
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
+
+### stupid things to remove; had to add because of other fxns importing
 
 # DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):

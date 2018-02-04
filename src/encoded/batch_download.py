@@ -14,8 +14,8 @@ from urllib.parse import (
 from .search import (
     iter_search_results,
     list_visible_columns_for_schemas,
-    get_chunked_search_results_iterable,
-    do_subreq
+    get_iterable_search_results,
+    make_search_subreq
 )
 
 import csv
@@ -204,7 +204,6 @@ endpoints_initialized = {
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
 
-    search_results_chunk_row_size = 100
     param_list = parse_qs(request.matchdict['search_params'])
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
@@ -247,7 +246,6 @@ def metadata_tsv(context, request):
             if 'experiments_in_set.files.' in param_field:
                 param_list['field'].append(param_field.replace('experiments_in_set.files.', 'experiments_in_set.processed_files.'))
                 param_list['field'].append(param_field.replace('experiments_in_set.files.', 'processed_files.'))
-    param_list['limit'] = [search_results_chunk_row_size]
 
     # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
@@ -366,16 +364,16 @@ def metadata_tsv(context, request):
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
 
-    if not endpoints_initialized['metadata']:
-        initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
+    if not endpoints_initialized['metadata']: # For some reason first result after bootup returns empty, so we do once extra for first request.
+        initial_path = '{}?{}'.format(search_path, urlencode(dict(param_list, limit=10), True))
         endpoints_initialized['metadata'] = True
-        do_subreq(request, initial_path) # Do an extra time because for some reason (we get incomplete results from /search/ on first request after bootup/deploy).
+        request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
 
     return Response(
         content_type='text/tsv',
         app_iter = stream_tsv_output(
             format_graph_of_experiment_sets(
-                chain.from_iterable(get_chunked_search_results_iterable(request, search_path, param_list, search_results_chunk_row_size))
+                get_iterable_search_results(request, search_path, param_list)
             )
         ),
         content_disposition='attachment;filename="%s"' % filename_to_suggest
