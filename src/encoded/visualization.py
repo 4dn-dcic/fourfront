@@ -14,8 +14,10 @@ from urllib.parse import (
     parse_qs,
     urlencode,
 )
-
-from .search import _ASSEMBLY_MAPPER
+from .search import (
+    _ASSEMBLY_MAPPER,
+    get_iterable_search_results
+)
 #from .types.file import File
 from .types.base import Item
 from .types.workflow import (
@@ -481,44 +483,107 @@ def bar_plot_chart(request):
             'files' : 0
         }
 
-    search_results_chunk_row_size = 100
+    TERM_NAME_FOR_NO_VALUE = "None"
     param_lists = parse_qs(request.matchdict['search_params'])
     search_path = '/browse/'
 
-    fields_to_aggregate_for = None
-
-    if isinstance(request.params.get('field'), list):
-        fields_to_aggregate_for = request.params['field']
-    elif isinstance(request.params.get('field'), str):
-        fields_to_aggregate_for = [request.params['field']]
-    else:
+    fields_to_aggregate_for = request.params.getall('field')
+    if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
+
     # Convert to list of dicts.
-    fields_to_aggregate_for = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
+    return_fields = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
 
-    # Set each subsequent field as child of previous one
-    if len(fields_to_aggregate_for) > 1:
-        for index in range(1, len(fields_to_aggregate_for) - 1):
-            fields_to_aggregate_for[index - 1]['child_field'] = fields_to_aggregate_for[index]
+    def lookup_value(obj_to_find_val_in, field_string):
+        '''TODO: Move somewhere more re-usable, snovault.embed maybe?'''
+        field_parts = field_string.split('.')
+        def lookup(obj, depth = 0):
+            if len(field_parts) <= depth or obj is None:
+                return obj or None
+            field_part = field_parts[depth]
+            if isinstance(obj, dict):
+                return lookup(obj.get(field_part), depth + 1)
+            elif isinstance(obj, list):
+                if len(obj) > 0:
+                    if isinstance(obj[0], dict):
+                        return [ lookup(o, depth) for o in obj  ]
+                    else:
+                        return obj
+                else:
+                    return None
+            else:
+                return obj
+        result = lookup(obj_to_find_val_in, 0)
+        if isinstance(result, list):
+            result = list(set([r for r in result if r])) # Filter+Uniqify
+            if len(result) == 1:
+                result = result[0]
+            elif len(result) == 0:
+                result = None
+        if result is None:
+            result = TERM_NAME_FOR_NO_VALUE
+        return result
+
+    def get_counts_of_links_from_experiment_set(experiment_set, totals = None):
+        if totals is None:
+            totals = gen_zero_counts_dict()
+        # TODO (?): Filter down by if exp, files itself matches term_found itself, if terms_found item is list
+        totals['experiment_sets'] += 1
+        totals['experiments'] += len(experiment_set.get('experiments_in_set', []))
+        totals['files'] += len(experiment_set.get('processed_files', []))
+        for exp in experiment_set.get('experiments_in_set', []):
+            totals['files'] += len(exp.get('files', []))
+            totals['files'] += len(exp.get('processed_files', []))
+        return totals
 
 
-    def add_count_to_field_term(field, term, update_total = True, type = 'experiments', count_increase = 1):
-        if not term:
-            term = 'None'
-        if isinstance(term, list):
-            print('\nBar Plot Aggregator: Found multiple values for field ' + field['field'], term)
-            term = term[0]
-        if field['terms'].get(term) is None:
-            field['terms'][term] = gen_zero_counts_dict()
-        field['terms'][term][type] += count_increase
+    def aggregegate_term_counts_for_fields_from_experiment_set(experiment_set, field_objects): 
+        '''
+        :param experiment_set: Experiment set to aggregate field values for.
+        :param fields: List of field object, e.g. [{ 'field': 'experiments_in_set.experiment_type', 'terms' : {}, "total" : {} },...]
+        '''
 
-        if update_total:
-            field['total'][type] += count_increase
+        field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
+        terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
 
-    def aggregegate(experiment_sets, fields=['experiments_in_set.experiment_type', 'award.project']):
-        pass
+        def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = gen_zero_counts_dict()):
+            for type in totals_by_type.keys():
+                field_obj['terms'][term][type] += totals_by_type[type]
+                if update_total:
+                    field_obj['total'][type] += totals_by_type[type]
 
+        def recur_add_count(field_obj, depth=0):
+            if depth >= len(terms_found):
+                return
+            is_leaf_field = depth + 1 == len(terms_found)
+            term = terms_found[depth]
+            if isinstance(term, list):
+                print('\nBar Plot Aggregator: Found multiple values for field ' + field['field'] + ', using first of:', term)
+                term = term[0]
+            if not is_leaf_field:
+                # Generate child field as term
+                if field_obj['terms'].get(term) is None:
+                    field_obj['terms'][term] = {
+                        "field" : field_names[depth + 1],
+                        "total" : gen_zero_counts_dict(),
+                        "term"  : term,
+                        "terms" : {}
+                    }
 
-    pass
+                get_counts_of_links_from_experiment_set(experiment_set, field_obj['total'])
+                recur_add_count(field_obj['terms'][term], depth + 1)
+            else:
+                if field_obj['terms'].get(term) is None:
+                    field_obj['terms'][term] = gen_zero_counts_dict()
+                counts_by_type = get_counts_of_links_from_experiment_set(experiment_set)
+                add_counts_to_field_term_types(field_obj, term, True, counts_by_type)
 
+        recur_add_count(field_objects[0], 0)
+        return experiment_set
+
+    # Aggregate/add counts to each field.terms.total+./child-field.terms.total+./../child-field.total+.terms bucket from each exp_set matching search query
+    for exp_set in get_iterable_search_results(request, search_path, param_lists):
+        aggregegate_term_counts_for_fields_from_experiment_set(exp_set, return_fields)
+
+    return return_fields[0]
