@@ -282,6 +282,7 @@ export class UIControlsWrapper extends React.Component {
                 <DropdownButton
                     id="select-barplot-field-1"
                     onSelect={this.handleFieldSelect.bind(this, 1)}
+                    disabled={this.props.isLoadingNewFields}
                     title={(()=>{
                         //if (this.state.openDropdown === 'subdivisionField'){
                         //    return <em className="dropdown-open-title">Color Bars by</em>;
@@ -394,6 +395,7 @@ export class UIControlsWrapper extends React.Component {
                                     <DropdownButton
                                         id="select-barplot-field-0"
                                         onSelect={this.handleFieldSelect.bind(this, 0)}
+                                        disabled={this.props.isLoadingNewFields}
                                         title={(()=>{
                                             //if (this.state.openDropdown === 'xAxisField'){
                                             //    return <em className="dropdown-open-title">X-Axis Field</em>;
