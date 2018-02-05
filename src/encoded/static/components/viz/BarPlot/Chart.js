@@ -155,11 +155,11 @@ export class Chart extends React.Component {
         //return false;
         return !!(
             pastProps.showType !== nextProps.showType ||
-            !_.isEqual(pastProps.experiment_sets, nextProps.experiment_sets) ||
-            (pastProps.experiment_sets && nextProps.experiment_sets && pastProps.experiment_sets.length !== nextProps.experiment_sets.length) ||
+            pastProps.barplot_data_unfiltered !== nextProps.barplot_data_unfiltered ||
+            !_.isEqual(pastProps.barplot_data_unfiltered, nextProps.barplot_data_unfiltered) ||
             pastProps.height !== nextProps.height ||
-            !_.isEqual(pastProps.filtered_experiment_sets, nextProps.filtered_experiment_sets) ||
-            (pastProps.filtered_experiment_sets && nextProps.filtered_experiment_sets && pastProps.filtered_experiment_sets.length !== nextProps.filtered_experiment_sets.length)
+            pastProps.barplot_data_filtered !== nextProps.barplot_data_filtered ||
+            !_.isEqual(pastProps.barplot_data_filtered, nextProps.barplot_data_filtered)
         );
     }
 
@@ -181,8 +181,8 @@ export class Chart extends React.Component {
     }
 
     static propTypes = {
-        'experiment_sets'   : PropTypes.array,
-        'filtered_experiment_sets' : PropTypes.array,
+        'barplot_data_unfiltered'   : PropTypes.object,
+        'barplot_data_filtered' : PropTypes.object,
         'fields'        : PropTypes.array,
         'styleOptions'  : PropTypes.shape({
             'gap'           : PropTypes.number,
@@ -419,20 +419,9 @@ export class Chart extends React.Component {
             availWidth = this.width(),
             styleOpts = this.styleOptions();
 
-        /* For showing FILTERED vs ALL
-        var allExpsBarDataContainer = null;
-        if (
-            this.props.filteredExperiments && this.props.showType === 'both'
-        ){
-            allExpsBarDataContainer = this.renderAllExperimentsSilhouette(availWidth, availHeight, styleOpts);
-        }
-        */
-
         var topLevelField = (
             (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
         );
-
-        console.log('CHARDDD', topLevelField);
 
         var barData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             topLevelField,
@@ -440,38 +429,8 @@ export class Chart extends React.Component {
             availHeight,
             styleOpts,
             this.props.aggregateType,
-            this.props.useOnlyPopulatedFields,
-            //allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.fullHeightCount
+            this.props.useOnlyPopulatedFields
         );
-
-        //console.log('BARDATA', this.props.showType, barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
-
-        /*
-        /* For showing FILTERED vs ALL
-        function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
-            barSet.forEach(function(b){
-                var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
-                _.extend(
-                    b.attr,
-                    {
-                        'width' : allExpsBar.attr.width,
-                        'x' : allExpsBar.attr.x + (allExpsBar.attr.width + 2)
-                    }
-                );
-                if (Array.isArray(b.bars)){
-                    overWriteFilteredBarDimsWithAllExpsBarDims(
-                        b.bars, allExpsBar.bars
-                    );
-                }
-            });
-        }
-
-        if (allExpsBarDataContainer){
-            overWriteFilteredBarDimsWithAllExpsBarDims(
-                allBars, allExpsBarDataContainer.data.bars
-            );
-        }
-        */
 
         return (
             <PopoverViewContainer

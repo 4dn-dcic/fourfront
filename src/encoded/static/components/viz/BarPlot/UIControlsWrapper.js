@@ -151,7 +151,6 @@ export class UIControlsWrapper extends React.Component {
         if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
             newFields = this.props.barplot_data_fields.slice(0,1);
             this.props.updateBarPlotFields(newFields);
-            //this.setState({ fields : newFields });
             return;
         }
 
@@ -175,7 +174,6 @@ export class UIControlsWrapper extends React.Component {
         }
         setTimeout(()=>{
             this.props.updateBarPlotFields(_.pluck(newFields, 'field'));
-            //this.setState({ fields : newFields });
         }, 0);
     }
 
@@ -324,6 +322,8 @@ export class UIControlsWrapper extends React.Component {
 
         var legendContainerHeight = windowGridSize === 'xs' ? null :
             this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50;
+
+        vizUtil.unhighlightTerms();
 
         return (
             <div className="bar-plot-chart-controls-wrapper">

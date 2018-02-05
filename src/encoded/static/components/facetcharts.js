@@ -159,7 +159,7 @@ export class FacetCharts extends React.Component {
 
         if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
 
-        vizUtil.unhighlightTerms();
+        //vizUtil.unhighlightTerms();
 
         if (!this.state.mounted){
             return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
