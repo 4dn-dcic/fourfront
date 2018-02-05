@@ -356,7 +356,7 @@ export class Chart extends React.Component {
                         labelClassName="y-axis-label no-highlight-color"
                         y={5}
                         extraHeight={5}
-                        placementWidth={currentBars[0].attr.width}
+                        placementWidth={(currentBars[0] && currentBars[0].attr.width) || styleOpts.maxBarWidth || Chart.getDefaultStyleOpts().maxBarWidth}
                         placementHeight={styleOpts.offset.bottom}
                         angle={styleOpts.labelRotation}
                         maxLabelWidth={styleOpts.maxLabelWidth || 1000}

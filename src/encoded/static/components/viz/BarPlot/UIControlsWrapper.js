@@ -18,6 +18,16 @@ import { boundActions } from './ViewContainer';
  */
 export class UIControlsWrapper extends React.Component {
 
+    static canShowChart(chartData){
+        if (!chartData) return false;
+        if (!chartData.total) return false;
+        if (chartData.total && chartData.total.experiment_sets === 0) return false;
+        if (typeof chartData.field !== 'string') return false;
+        if (typeof chartData.terms !== 'object') return false;
+        if (_.keys(chartData.terms).length === 0) return false;
+        return true;
+    }
+
     static defaultProps = {
         'titleMap' : {
             // Aggr type
@@ -318,7 +328,7 @@ export class UIControlsWrapper extends React.Component {
 
     render(){
 
-        if (!this.props.barplot_data_unfiltered) return null;
+        if (!UIControlsWrapper.canShowChart(this.props.barplot_data_unfiltered)) return null;
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
@@ -436,9 +446,10 @@ export class UIControlsWrapper extends React.Component {
 
 class AggregatedLegend extends React.Component {
 
-    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
+    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets', origChildField = {}){
         if (!rootField) return null;
         var retField = {
+            'field' : origChildField.field,
             'terms' : {},
             'total' : {
                 'experiment_sets' : 0,
@@ -448,7 +459,7 @@ class AggregatedLegend extends React.Component {
         };
         _.forEach(_.keys(rootField.terms), function(term){
             var childField = rootField.terms[term];
-            if (typeof retField.field === 'undefined') retField.field = childField.field || "None";
+            if (typeof retField.field === 'undefined') retField.field = childField.field;
 
             _.forEach(_.keys(childField.terms), function(t){
                 if (typeof retField.terms[t] === 'undefined'){
@@ -519,12 +530,11 @@ class AggregatedLegend extends React.Component {
     }
 
     render(){
-
         if (!this.props.field) return null;
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             (!this.props.barplot_data_unfiltered || !this.props.field ? null :
-                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets')
+                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets', this.props.field)
             ),
             term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
         );

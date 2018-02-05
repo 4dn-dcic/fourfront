@@ -483,7 +483,7 @@ def bar_plot_chart(request):
             'files' : 0
         }
 
-    TERM_NAME_FOR_NO_VALUE = "None"
+    TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
     param_lists = parse_qs(request.matchdict['search_params'])
     search_path = '/browse/'
 
