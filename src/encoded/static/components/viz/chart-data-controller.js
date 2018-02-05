@@ -49,6 +49,7 @@ var state = {
     barplot_data_filtered   : null,
     barplot_data_unfiltered : null,
     barplot_data_fields     : null,
+    isLoadingNewFields      : false,
 
     chartFieldsHierarchy: [
         //{ 
@@ -288,6 +289,7 @@ class Provider extends React.Component {
         childChartProps.barplot_data_unfiltered = state.barplot_data_unfiltered;
         childChartProps.updateBarPlotFields = ChartDataController.updateBarPlotFields;
         childChartProps.barplot_data_fields = state.barplot_data_fields;
+        childChartProps.isLoadingNewFields = state.isLoadingNewFields;
         childChartProps.providerId = this.id;
 
         return React.cloneElement(this.props.children, childChartProps);
@@ -492,7 +494,7 @@ export const ChartDataController = {
         delete providerLoadStartCallbacks[uniqueID];
     },
 
-    updateBarPlotFields : function(fields){
+    updateBarPlotFields : function(fields, callback = null){
         if (Array.isArray(fields) && Array.isArray(state.barplot_data_fields)){
             if (fields.length === state.barplot_data_fields.length){
                 
@@ -501,9 +503,11 @@ export const ChartDataController = {
                 })) return;
             }
         }
-        state.barplot_data_fields = fields;
+        //state.barplot_data_fields = fields;
+        ChartDataController.setState({ 'barplot_data_fields' : fields, 'isLoadingNewFields' : true }, callback);
         ChartDataController.sync(function(){
             ChartDetailCursor.reset(true);
+            //if (typeof callback === 'function') callback();
         });
     },
 
@@ -630,7 +634,8 @@ export const ChartDataController = {
         var cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
                 'barplot_data_filtered' : barplot_data_filtered,
-                'barplot_data_unfiltered' : barplot_data_unfiltered
+                'barplot_data_unfiltered' : barplot_data_unfiltered,
+                'isLoadingNewFields' : false
             }, callback, opts);
 
         });
@@ -701,14 +706,16 @@ export const ChartDataController = {
             refs.baseSearchPath + queryString.stringify(refs.baseSearchParams) + '&' + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery,
             function(filteredContext){
                 ChartDataController.setState({
-                    'barplot_data_filtered' : filteredContext
+                    'barplot_data_filtered' : filteredContext,
+                    'isLoadingNewFields' : false
                 }, callback, opts);
             },
             'GET',
             function(){
                 // Fallback (no results or lost connection)
                 ChartDataController.setState({
-                    'barplot_data_filtered' : null
+                    'barplot_data_filtered' : null,
+                    'isLoadingNewFields' : false
                 }, callback, opts);
                 if (typeof callback === 'function') callback();
             }

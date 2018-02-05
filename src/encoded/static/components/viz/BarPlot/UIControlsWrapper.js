@@ -286,6 +286,9 @@ export class UIControlsWrapper extends React.Component {
                         //if (this.state.openDropdown === 'subdivisionField'){
                         //    return <em className="dropdown-open-title">Color Bars by</em>;
                         //}
+                        if (this.props.isLoadingNewFields){
+                            return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
+                        }
                         var field = this.getFieldAtIndex(1);
                         if (!field) return "None";
                         return field.title || Schemas.Field.toName(field.field);
@@ -395,6 +398,9 @@ export class UIControlsWrapper extends React.Component {
                                             //if (this.state.openDropdown === 'xAxisField'){
                                             //    return <em className="dropdown-open-title">X-Axis Field</em>;
                                             //}
+                                            if (this.props.isLoadingNewFields){
+                                                return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
+                                            }
                                             var field = this.getFieldAtIndex(0);
                                             return <span>{(field.title || Schemas.Field.toName(field.field))}</span>;
                                         })()}
@@ -428,7 +434,7 @@ export class UIControlsWrapper extends React.Component {
 
 class AggregatedLegend extends React.Component {
 
-    static collectSubDivisionFieldTermCounts(rootField){
+    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
         if (!rootField) return null;
         var retField = {
             'terms' : {},
@@ -457,8 +463,10 @@ class AggregatedLegend extends React.Component {
                 retField.total.experiments += childField.terms[t].experiments;
                 retField.total.files += childField.terms[t].files;
             });
-
         });
+
+        retField.terms = _.object(_.sortBy(_.pairs(retField.terms), function(termPair){ return termPair[1][aggregateType]; }));
+
         return retField;
     }
 
@@ -512,7 +520,7 @@ class AggregatedLegend extends React.Component {
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             (!this.props.barplot_data_unfiltered || !this.props.field ? null :
-                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered)
+                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets')
             ),
             term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
         );
