@@ -295,7 +295,7 @@ export class UIControlsWrapper extends React.Component {
                     })()}
                     onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
                     children={this.renderDropDownMenuItems(
-                        this.props.availableFields_Subdivision.concat([{
+                        this.props.availableFields_Subdivision.slice(0).concat([{
                             title : <em>None</em>,
                             field : "none"
                         }]).map((field)=>{
@@ -446,7 +446,7 @@ class AggregatedLegend extends React.Component {
         };
         _.forEach(_.keys(rootField.terms), function(term){
             var childField = rootField.terms[term];
-            if (typeof retField.field === 'undefined') retField.field = childField.field;
+            if (typeof retField.field === 'undefined') retField.field = childField.field || "None";
 
             _.forEach(_.keys(childField.terms), function(t){
                 if (typeof retField.terms[t] === 'undefined'){
@@ -518,6 +518,8 @@ class AggregatedLegend extends React.Component {
 
     render(){
 
+        if (!this.props.field) return null;
+
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             (!this.props.barplot_data_unfiltered || !this.props.field ? null :
                 AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets')
@@ -535,7 +537,7 @@ class AggregatedLegend extends React.Component {
         return (
             <div className="legend-container-inner" ref="container">
                 <Legend
-                    fields={[fieldForLegend]}
+                    fields={(fieldForLegend && [fieldForLegend]) || null}
                     includeFieldTitles={false}
                     schemas={this.props.schemas}
                     width={this.width()}
