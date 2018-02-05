@@ -498,6 +498,20 @@ def bar_plot_chart(request):
     def lookup_value(obj_to_find_val_in, field_string):
         '''TODO: Move somewhere more re-usable, snovault.embed maybe?'''
         field_parts = field_string.split('.')
+
+        def flatten(return_list):
+            if isinstance(return_list, list):
+                if len(return_list) > 0 and isinstance(return_list[0], list):
+                    l = []
+                    for rl in return_list:
+                        l = l + flatten(rl)
+                    return l
+                if len(return_list) == 0:
+                    return [None]
+                return return_list
+            else:
+                return [return_list]
+
         def lookup(obj, depth = 0):
             if len(field_parts) <= depth or obj is None:
                 return obj or None
@@ -516,7 +530,7 @@ def bar_plot_chart(request):
                 return obj
         result = lookup(obj_to_find_val_in, 0)
         if isinstance(result, list):
-            result = list(set([r for r in result if r])) # Filter+Uniqify
+            result = list(set(flatten([r for r in result if r]))) # Filter+Uniqify
             if len(result) == 1:
                 result = result[0]
             elif len(result) == 0:
@@ -559,7 +573,7 @@ def bar_plot_chart(request):
             is_leaf_field = depth + 1 == len(terms_found)
             term = terms_found[depth]
             if isinstance(term, list):
-                print('\nBar Plot Aggregator: Found multiple values for field ' + field['field'] + ', using first of:', term)
+                print('\nBar Plot Aggregator: Found multiple values for field ' + field_obj['field'] + ', using first of:', term)
                 term = term[0]
             if not is_leaf_field:
                 # Generate child field as term

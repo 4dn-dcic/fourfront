@@ -69,11 +69,6 @@ export class UIControlsWrapper extends React.Component {
         this.render = this.render.bind(this);
 
         this.state = {
-            'fields' : [
-                props.availableFields_XAxis[0],
-                props.availableFields_Subdivision[0],
-                //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
-            ],
             'aggregateType' : 'experiment_sets',
             'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) ? 'all' : 'filtered',
             'openDropdown' : null
@@ -132,9 +127,11 @@ export class UIControlsWrapper extends React.Component {
                     'titleMap', 'availableFields_XAxis', 'availableFields_Subdivision', 'legend', 'chartHeight', 'children'
                 ),
                 {
-                    'fields' : this.state.fields,
+                    'fields' : this.props.barplot_data_fields,
                     'showType' : this.state.showState,
                     'aggregateType' : this.state.aggregateType,
+                    "aggregatedData" : this.props.barplot_data_unfiltered,
+                    "aggregatedFilteredData" : this.props.barplot_data_filtered
                 }
             )
         );
@@ -152,8 +149,9 @@ export class UIControlsWrapper extends React.Component {
     handleFieldSelect(fieldIndex, newFieldKey, event){
         var newFields;
         if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
-            newFields = this.state.fields.slice(0,1);
-            this.setState({ fields : newFields });
+            newFields = this.props.barplot_data_fields.slice(0,1);
+            this.props.updateBarPlotFields(newFields);
+            //this.setState({ fields : newFields });
             return;
         }
 
@@ -162,23 +160,36 @@ export class UIControlsWrapper extends React.Component {
             { field : newFieldKey }
         );
         var otherFieldIndex = fieldIndex === 0 ? 1 : 0;
-        if (fieldIndex === 0 && this.state.fields.length === 1){
+        if (fieldIndex === 0 && this.props.barplot_data_fields.length === 1){
             newFields = [null];
         } else {
             newFields = [null, null];
         }
         newFields[fieldIndex] = newField;
-        if (newFields.length > 1) newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
+        if (newFields.length > 1){
+            var foundFieldFromProps = _.findWhere(this.props.availableFields_Subdivision.slice(0).concat(this.props.availableFields_XAxis.slice(0)), { 'field' : this.props.barplot_data_fields[otherFieldIndex] });
+            newFields[otherFieldIndex] = foundFieldFromProps || {
+                'title' : this.props.barplot_data_fields[otherFieldIndex],
+                'field' : this.props.barplot_data_fields[otherFieldIndex]
+            };
+        }
         setTimeout(()=>{
-            this.setState({ fields : newFields });
-        });
+            this.props.updateBarPlotFields(_.pluck(newFields, 'field'));
+            //this.setState({ fields : newFields });
+        }, 0);
     }
 
     getFieldAtIndex(fieldIndex){
-        if (!this.state.fields) return null;
-        if (!Array.isArray(this.state.fields)) return null;
-        if (this.state.fields.length < fieldIndex + 1) return null;
-        return this.state.fields[fieldIndex];
+        if (!this.props.barplot_data_fields) return null;
+        if (!Array.isArray(this.props.barplot_data_fields)) return null;
+        if (this.props.barplot_data_fields.length < fieldIndex + 1) return null;
+        
+        return (
+            _.findWhere(this.props.availableFields_Subdivision.slice(0).concat(this.props.availableFields_XAxis.slice(0)), { 'field' : this.props.barplot_data_fields[fieldIndex] })
+        ) || {
+            'title' : this.props.barplot_data_fields[fieldIndex],
+            'field' : this.props.barplot_data_fields[fieldIndex]
+        };
     }
 
     contextualView(){
@@ -287,7 +298,7 @@ export class UIControlsWrapper extends React.Component {
                             title : <em>None</em>,
                             field : "none"
                         }]).map((field)=>{
-                            var isDisabled = this.state.fields[0] && this.state.fields[0].field === field.field;
+                            var isDisabled = this.props.barplot_data_fields[0] === field.field;
                             return [
                                 field.field,                                        // Field
                                 field.title || Schemas.Field.toName(field.field),   // Title
@@ -296,7 +307,7 @@ export class UIControlsWrapper extends React.Component {
                                 //isDisabled ? "Field already selected for X-Axis" : null
                             ]; // key, title, subtitle, disabled
                         }),
-                        (this.state.fields[1] && this.state.fields[1].field) || "none"
+                        this.props.barplot_data_fields[1] || "none"
                     )}
                 />
             </div>
@@ -305,7 +316,7 @@ export class UIControlsWrapper extends React.Component {
 
     render(){
 
-        if (!this.props.experiment_sets) return null;
+        if (!this.props.barplot_data_unfiltered) return null;
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
@@ -362,10 +373,10 @@ export class UIControlsWrapper extends React.Component {
                         { this.renderGroupByFieldDropdown(contextualView) }
                         <div className="legend-container" style={{ height : legendContainerHeight }}>
                             <AggregatedLegend
-                                experiment_sets={this.props.experiment_sets}
-                                filtered_experiment_sets={this.props.filtered_experiment_sets}
+                                barplot_data_filtered={this.props.barplot_data_filtered}
+                                barplot_data_unfiltered={this.props.barplot_data_unfiltered}
                                 height={legendContainerHeight}
-                                fields={this.state.fields}
+                                field={_.findWhere(this.props.availableFields_Subdivision, { 'field' : this.props.barplot_data_fields[1] }) || null}
                                 showType={this.state.showState}
                                 aggregateType={this.state.aggregateType}
                                 schemas={this.props.schemas}
@@ -390,7 +401,7 @@ export class UIControlsWrapper extends React.Component {
                                         onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
                                         children={this.renderDropDownMenuItems(
                                             this.props.availableFields_XAxis.map((field)=>{
-                                                var isDisabled = this.state.fields[1] && this.state.fields[1].field === field.field;
+                                                var isDisabled = this.props.barplot_data_fields[1] && this.props.barplot_data_fields[1] === field.field;
                                                 return [
                                                     field.field,
                                                     field.title || Schemas.Field.toName(field.field),
@@ -399,7 +410,7 @@ export class UIControlsWrapper extends React.Component {
                                                     //isDisabled ? 'Field is already selected for "Group By"' : null
                                                 ]; // key, title, subtitle
                                             }),
-                                            this.state.fields[0].field
+                                            this.props.barplot_data_fields[0]
                                         )}
                                     />
                                 </div>
@@ -416,6 +427,40 @@ export class UIControlsWrapper extends React.Component {
 }
 
 class AggregatedLegend extends React.Component {
+
+    static collectSubDivisionFieldTermCounts(rootField){
+        if (!rootField) return null;
+        var retField = {
+            'terms' : {},
+            'total' : {
+                'experiment_sets' : 0,
+                'experiments' : 0,
+                'files' : 0
+            }
+        };
+        _.forEach(_.keys(rootField.terms), function(term){
+            var childField = rootField.terms[term];
+            if (typeof retField.field === 'undefined') retField.field = childField.field;
+
+            _.forEach(_.keys(childField.terms), function(t){
+                if (typeof retField.terms[t] === 'undefined'){
+                    retField.terms[t] = {
+                        'experiment_sets' : 0,
+                        'experiments' : 0,
+                        'files' : 0
+                    };
+                }
+                retField.terms[t].experiment_sets += childField.terms[t].experiment_sets;
+                retField.terms[t].experiments += childField.terms[t].experiments;
+                retField.terms[t].files += childField.terms[t].files;
+                retField.total.experiment_sets += childField.terms[t].experiment_sets;
+                retField.total.experiments += childField.terms[t].experiments;
+                retField.total.files += childField.terms[t].files;
+            });
+
+        });
+        return retField;
+    }
 
     constructor(props){
         super(props);
@@ -465,27 +510,24 @@ class AggregatedLegend extends React.Component {
 
     render(){
 
-        var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            (!this.props.experiment_sets || !this.props.fields[1] ? null :
-                Legend.aggregegateBarPlotData(
-                    this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets,
-                    [this.props.fields[1]]
-                )
+        var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
+            (!this.props.barplot_data_unfiltered || !this.props.field ? null :
+                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered)
             ),
             term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
         );
 
         this.shouldUpdate = false;
-        if (fieldsForLegend && fieldsForLegend.length > 0 && fieldsForLegend[0] &&
-            fieldsForLegend[0].terms && fieldsForLegend[0].terms.length > 0 &&
-            fieldsForLegend[0].terms[0] && fieldsForLegend[0].terms[0].color === null){
+        if (fieldForLegend &&
+            fieldForLegend.terms && fieldForLegend.terms.length > 0 &&
+            fieldForLegend.terms[0] && fieldForLegend.terms[0].color === null){
             this.shouldUpdate = true;
         }
 
         return (
             <div className="legend-container-inner" ref="container">
                 <Legend
-                    fields={fieldsForLegend}
+                    fields={[fieldForLegend]}
                     includeFieldTitles={false}
                     schemas={this.props.schemas}
                     width={this.width()}

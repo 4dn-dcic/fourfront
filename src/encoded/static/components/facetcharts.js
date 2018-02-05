@@ -39,6 +39,8 @@ export class FacetCharts extends React.Component {
         },
         'views' : ['small', 'large'],
         'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0&sort=experiments_in_set.accession',
+        'baseSearchPath' : '/bar_plot_aggregations/',
+        'baseSearchParams' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
         'colWidthPerScreenSize' : {
             'small' : [
                 //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
@@ -50,14 +52,15 @@ export class FacetCharts extends React.Component {
                 {'xs' : 12, 'sm' : 9, 'md' : 9, 'lg' : 9},
                 {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
             ]
-        }
+        },
+        'initialFields' : ['experiments_in_set.experiment_type',"award.project"]
     }
 
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.show = this.show.bind(this);
         this.width = this.width.bind(this);
@@ -77,7 +80,9 @@ export class FacetCharts extends React.Component {
 
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
-                this.props.requestURLBase,
+                this.props.baseSearchPath,
+                this.props.baseSearchParams,
+                this.props.initialFields,
                 this.props.updateStats,
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
@@ -97,24 +102,6 @@ export class FacetCharts extends React.Component {
             window.removeEventListener('resize', this.debouncedResizeHandler);
             delete this.debouncedResizeHandler;
         }
-    }
-
-    shouldComponentUpdate(nextProps, nextState){
-        if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
-
-        if (
-            this.props.href !== nextProps.href || // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-            this.props.schemas !== nextProps.schemas ||
-            !_.isEqual(this.props.schemas, nextProps.schemas) ||
-            this.show(nextProps) !== this.show(this.props) ||
-            (nextState.mounted !== this.state.mounted) ||
-            nextProps.session !== this.props.session
-        ){
-            if (this.props.debug) console.log('Will Update FacetCharts');
-            return true;
-        }
-        if (this.props.debug) console.log('Will Not Update FacetCharts');
-        return false;
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -188,14 +175,12 @@ export class FacetCharts extends React.Component {
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
                     <BarPlot.UIControlsWrapper legend chartHeight={height} href={this.props.href}>
-                        <BarPlot.Aggregator>
-                            <BarPlot.Chart
-                                width={this.width(1) - 20}
-                                height={height}
-                                schemas={this.props.schemas}
-                                ref="barplotChart"
-                            />
-                        </BarPlot.Aggregator>
+                        <BarPlot.Chart
+                            width={this.width(1) - 20}
+                            height={height}
+                            schemas={this.props.schemas}
+                            ref="barplotChart"
+                        />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
             </div>

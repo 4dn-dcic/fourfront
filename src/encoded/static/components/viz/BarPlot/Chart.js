@@ -8,7 +8,6 @@ import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { RotatedLabel } from './../components';
 import { console, object, isServerSide, expFxn, Schemas, layout, navigate } from './../../util';
-import { firstPopulatedFieldIndex, genChartData } from './aggregation-functions';
 import { PopoverViewContainer } from './ViewContainer';
 
 
@@ -27,7 +26,7 @@ import { PopoverViewContainer } from './ViewContainer';
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
 export function genChartBarDims(
-    fields,
+    rootField,
     availWidth              = 400,
     availHeight             = 400,
     styleOpts               = Chart.getDefaultStyleOpts(),
@@ -38,14 +37,11 @@ export function genChartBarDims(
     
     var topIndex = 0;
 
-    if (useOnlyPopulatedFields) {
-        topIndex = firstPopulatedFieldIndex(fields);
-    }
     
-    var numberOfTerms = _.keys(fields[topIndex].terms).length;
+    var numberOfTerms = _.keys(rootField.terms).length;
     var largestExpCountForATerm = typeof fullHeightCount === 'number' ?
         fullHeightCount
-        : _.reduce(fields[topIndex].terms, function(m,t){
+        : _.reduce(rootField.terms, function(m,t){
             return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
         }, 0);
 
@@ -99,9 +95,8 @@ export function genChartBarDims(
     }
 
     var barData = {
-        'fieldIndex'      : topIndex,
-        'bars'            : genBarData(fields[topIndex], insetDims),
-        'fields'          : fields,
+        'bars'            : genBarData(rootField, insetDims),
+        'field'           : rootField,
         'fullHeightCount' : largestExpCountForATerm
     };
 
@@ -227,8 +222,6 @@ export class Chart extends React.Component {
         this.height = this.height.bind(this);
         this.getLegendData = this.getLegendData.bind(this);
         this.getTopLevelField = this.getTopLevelField.bind(this);
-        this.renderAllExperimentsSilhouette = this.renderAllExperimentsSilhouette.bind(this);
-        this.genChartData = this.genChartData.bind(this);
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
         this.renderParts.leftAxis = this.renderParts.leftAxis.bind(this);
         this.render = this.render.bind(this);
@@ -320,65 +313,6 @@ export class Chart extends React.Component {
     getTopLevelField(){
         if (!this.barData) return null;
         return this.barData.fields[this.barData.fieldIndex].field;
-    }
-
-    /**
-     * DEPRECATED!!
-     * Used to help generate "highlighted" selected bars against the output of this: the "all experiments" bars silhoutte.
-     * Used conditionally in BarPlotChart.render to render clones of the BarChart behind the primary bars,
-     * using 'all experiments' data instead of the 'filtered' or 'selected' experiments.
-     * 
-     * @instance
-     * @deprecated
-     * @param {number} width - Width of available chart drawing area.
-     * @param {number} height - Height of available chart drawing area.
-     * @param {Object} [styleOpts] - Style options for the chart, including gap between bars, maximum bar width, etc.
-     * @returns {Object} "All Experiments" bars silhouttes, wrapped in an object also containing barData for all experiments.
-     * @see module:viz/BarPlot.Chart.render
-     * @see module:viz/BarPlot.Chart.genChartData
-     */
-    renderAllExperimentsSilhouette(width, height, styleOpts = null){
-        if (!this.props.filteredExperiments) return null;
-        if (!styleOpts) styleOpts = this.styleOptions();
-
-        var allExperimentsBarData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-            genChartData( // Get counts by term per field.
-                this.props.experiments,
-                this.props.fields,
-                this.props.useOnlyPopulatedFields
-            ),
-            width,
-            height,
-            styleOpts,
-            this.props.aggregateType,
-            this.props.useOnlyPopulatedFields
-        );
-
-        return {
-            'component' : (
-                <div className="silhouette" style={{ 'width' : width, 'height' : height }}>
-                    {
-                        allExperimentsBarData.bars
-                        .map(function(b){
-                            b.attr.width = b.attr.width / 2 - 2;
-
-                            return b;
-                        })
-                        .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
-                        .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
-                    }
-                </div>
-            ),
-            'data' : allExperimentsBarData
-        };   
-    }
-
-    genChartData(){
-        return genChartData( // Get counts by term per field.
-            this.props.showType === 'all' ? this.props.experiment_sets : this.props.filtered_experiment_sets || this.props.experiment_sets,
-            this.props.fields,
-            this.props.useOnlyPopulatedFields
-        );
     }
 
     /* TODO: Own components */
@@ -494,12 +428,14 @@ export class Chart extends React.Component {
         }
         */
 
-        var chartData = (
+        var topLevelField = (
             (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
-        ) || this.genChartData();
+        );
+
+        console.log('CHARDDD', topLevelField);
 
         var barData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-            chartData,
+            topLevelField,
             availWidth,
             availHeight,
             styleOpts,
@@ -541,7 +477,7 @@ export class Chart extends React.Component {
             <PopoverViewContainer
                 leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
                 bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
-                topLevelField={this.props.fields[barData.fieldIndex].field}
+                topLevelField={barData.field}
                 width={availWidth}
                 height={availHeight}
                 styleOptions={styleOpts}
