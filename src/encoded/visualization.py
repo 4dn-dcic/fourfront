@@ -473,7 +473,7 @@ def trace_workflow_runs(context, request):
 
 
 
-@view_config(route_name='bar_plot_chart', request_method='GET', permission='view')
+@view_config(route_name='bar_plot_chart', request_method='GET')
 def bar_plot_chart(request):
 
     def gen_zero_counts_dict():
