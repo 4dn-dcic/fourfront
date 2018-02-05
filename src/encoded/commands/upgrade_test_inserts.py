@@ -8,12 +8,11 @@ from pkg_resources import resource_filename
 logger = logging.getLogger(__name__)
 EPILOG = __doc__
 
+def get_inserts(inserts_folder_name = 'inserts', inserts_file_name = 'workflow'):
+    for insert_item in read_single_sheet(resource_filename('encoded', 'tests/data/' + inserts_folder_name + '/'), inserts_file_name):
+        yield insert_item
 
 def main():
-
-    def get_inserts(inserts_folder_name = 'inserts', inserts_file_name = 'workflow'):
-        for insert_item in read_single_sheet(resource_filename('encoded', 'tests/data/' + inserts_folder_name + '/'), inserts_file_name):
-            yield insert_item
 
     logging.basicConfig()
     # Loading app will have configured from config file. Reconfigure here:

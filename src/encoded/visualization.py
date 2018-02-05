@@ -552,7 +552,7 @@ def bar_plot_chart(request):
         return totals
 
 
-    def aggregegate_term_counts_for_fields_from_experiment_set(experiment_set, field_objects): 
+    def aggregegate_term_counts_for_fields_from_experiment_set(experiment_set, field_objects):
         '''
         :param experiment_set: Experiment set to aggregate field values for.
         :param fields: List of field object, e.g. [{ 'field': 'experiments_in_set.experiment_type', 'terms' : {}, "total" : {} },...]
@@ -561,11 +561,13 @@ def bar_plot_chart(request):
         field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
         terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
 
-        def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = gen_zero_counts_dict()):
-            for type in totals_by_type.keys():
-                field_obj['terms'][term][type] += totals_by_type[type]
+        def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = None):
+            if not totals_by_type:
+                totals_by_type = gen_zero_counts_dict()
+            for counts_type in totals_by_type.keys():
+                field_obj['terms'][term][counts_type] += totals_by_type[counts_type]
                 if update_total:
-                    field_obj['total'][type] += totals_by_type[type]
+                    field_obj['total'][counts_type] += totals_by_type[counts_type]
 
         def recur_add_count(field_obj, depth=0):
             if depth >= len(terms_found):

@@ -541,7 +541,8 @@ export const ChartDataController = {
                 updatedState.barplot_data_unfiltered.total.experiment_sets !== state.barplot_data_unfiltered.total.experiment_sets ||
                 updatedState.barplot_data_unfiltered.total.experiments !== state.barplot_data_unfiltered.total.experiments ||
                 updatedState.barplot_data_unfiltered.total.files !== state.barplot_data_unfiltered.total.files
-        ));
+            )
+        );
 
         _.extend(state, updatedState);
 
