@@ -167,6 +167,12 @@
     },
 
 
+    {
+        "name" : "help.data-processing-pipelines",
+        "uuid" : "9a0afb37-2605-4c0c-9a12-4a28882583a8",
+        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/data_processing_pipelines.md"
+    },
+
 
 
     {

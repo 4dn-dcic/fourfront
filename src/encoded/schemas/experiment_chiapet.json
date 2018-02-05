@@ -23,6 +23,7 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "experiment.json#/properties" },
         { "$ref": "experiment_hi_c.json#/properties" }
     ],
@@ -37,7 +38,7 @@
     },
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
@@ -50,11 +51,6 @@
             "description": "Information about the target of the Antibody in the IP",
             "type": "string",
             "linkTo": "Target"
-        },
-        "antibody": {
-            "title": "Antibody",
-            "description": "The encode accession of the antibody used for the IP",
-            "type": "string"
         },
         "pcr_cycles": {
             "title": "PCR cycles for final amplification",
