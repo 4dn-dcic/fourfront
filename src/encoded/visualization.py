@@ -528,9 +528,11 @@ def bar_plot_chart(request):
                     return None
             else:
                 return obj
+
         result = lookup(obj_to_find_val_in, 0)
         if isinstance(result, list):
-            result = list(set(flatten([r for r in result if r]))) # Filter+Uniqify
+            result_set = set(flatten([r for r in result if r])) # Filter+Uniqify
+            result = [ r for r in result if r in result_set ] # Maintain order
             if len(result) == 1:
                 result = result[0]
             elif len(result) == 0:
@@ -560,6 +562,8 @@ def bar_plot_chart(request):
 
         field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
         terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
+
+        if 'Item' in terms_found: print('\n\n\n\n\n\n\n\n', experiment_set)
 
         def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = None):
             if not totals_by_type:
