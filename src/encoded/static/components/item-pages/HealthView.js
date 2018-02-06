@@ -244,7 +244,7 @@ class HealthChart extends React.Component {
             .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items<br/>Status: ' + d.data.name; })
             .attr("data-html", function(d){ return true; })
             .on("click", function(d) {
-                navigate('/search/?type=' + d.parent.data.name);
+                navigate('/search/?type=' + d.parent.data.name + '&status=' + d.data.name);
             })
             .attr("data-effect", function(d){ return 'float'; });
 
