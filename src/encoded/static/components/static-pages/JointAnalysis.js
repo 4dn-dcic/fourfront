@@ -19,7 +19,8 @@ const TITLE_MAP = {
     '_common_name' : ' ',
     'experiment_type' : "Experiment Type",
     'data_source' : 'Available through',
-    'lab_name' : 'Lab'
+    'lab_name' : 'Lab',
+    'experiment_category' : "Category"
 };
 
 
@@ -28,8 +29,14 @@ export default class JointAnalysisPlansPage extends React.Component {
     static standardizeEncodeResult(result){
         var cellType = result.biosample_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
         var experimentType = result.assay_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
+        var experimentCategory = _.uniq(result.assay_slims || []);
+        if (experimentCategory.length > 1){
+            console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
+        }
+        experimentCategory = experimentCategory[0] || experimentCategory;
         return _.extend({}, result, {
             'cell_type' : cellType,
+            'experiment_category' : experimentCategory,
             'experiment_type' : experimentType,
             'data_source' : 'ENCODE',
             'short_description' : result.description || null,
@@ -64,6 +71,7 @@ export default class JointAnalysisPlansPage extends React.Component {
         return _.extend({}, result, {
             'cell_type' : cellType,
             'experiment_type' : experimentType,
+            'experiment_category' : experimentType,
             'data_source' : '4DN',
             'short_description' : experiment_titles[0] || null,
             'lab_name' : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
@@ -73,7 +81,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
     static defaultProps = {
         'self_results_url'          : 'https://data.4dnucleome.org/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&limit=all',
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&limit=all',
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab',
         'self_planned_results_url'  : null
     }
 
@@ -131,26 +139,47 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         var isLoading = _.any(_.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')), (pair)=>   pair[1] === null && this.props[pair[0] + '_url'] !== null   );
 
+        if (isLoading){
+            return (
+                <StaticPage.Wrapper>
+                     <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-o-notch"/></div>
+                </StaticPage.Wrapper>
+            );
+        }
+
         console.log('RESULTS', this.state);
 
-        var resultList = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
-            ((Array.isArray(this.state.encode_results) && this.state.encode_results) || []).concat(
-                ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
-            )
+        var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
+            ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
         );
+
+        var resultListEncode = this.state.encode_results;
 
         return ( 
             <StaticPage.Wrapper>
-                {
-                    isLoading ? <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-o-notch"/></div> :
-                    <VisualBody
-                        groupingProperties={['_common_name', 'experiment_type', 'data_source']}
-                        columnGrouping='cell_type'
-                        columnSubGrouping='cell_type'
-                        results={resultList}
-                        //keysToInclude={[]}
-                    />
-                }
+                <div className="row">
+                    <div className="col-xs-12 col-md-6">
+                        <VisualBody
+                            groupingProperties={['experiment_category', 'experiment_type', 'data_source']}
+                            columnGrouping='cell_type'
+                            //columnSubGrouping='data_source'
+                            results={resultList4DN}
+                            defaultDepthsOpen={[true, false, false]}
+                            //keysToInclude={[]}
+                        />
+                        
+                    </div>
+                    <div className="col-xs-12 col-md-6">
+                        <VisualBody
+                            groupingProperties={['experiment_category', 'experiment_type', 'data_source']}
+                            columnGrouping='cell_type'
+                            //columnSubGrouping='data_source'
+                            results={resultListEncode}
+                            defaultDepthsOpen={[false, false, false]}
+                            //keysToInclude={[]}
+                        />
+                    </div>
+                </div>
             </StaticPage.Wrapper>
         );
     }
@@ -163,7 +192,7 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysis-plansPage
 class VisualBody extends React.Component {
     render(){
 
-        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude } = this.props;
+        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen } = this.props;
 
         var headerColumnsOrder = [
             'Hi-C',
@@ -197,7 +226,7 @@ class VisualBody extends React.Component {
                 columnGrouping={columnGrouping}
                 headerColumnsOrder={headerColumnsOrder}
                 columnSubGrouping={columnSubGrouping}
-                defaultDepthsOpen={[true, false, false]}
+                defaultDepthsOpen={defaultDepthsOpen}
                 blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
 
                     var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];

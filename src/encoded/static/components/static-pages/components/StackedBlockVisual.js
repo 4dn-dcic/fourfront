@@ -345,11 +345,14 @@ export class StackedBlockGroupedRow extends React.Component {
             allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
         }
         
-        if (typeof props.columnSubGrouping !== 'string') {
+        if (typeof props.columnSubGrouping !== 'string' && props.depth < ((props.groupingProperties || []).length - 1) ) {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
             });
+            console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
         }
+
+        console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
         
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
@@ -365,7 +368,7 @@ export class StackedBlockGroupedRow extends React.Component {
                 );
             });
         } else */
-        if (groupedDataIndicesPairs.length > 1){ // If columns exist, distribute these blocks by column! Otherwise (else statement @ end) we'll probably just stack em left-to-right.
+        if (groupedDataIndicesPairs.length > 0){ // If columns exist, distribute these blocks by column! Otherwise (else statement @ end) we'll probably just stack em left-to-right.
 
             var blocksByColumnGroup, columnKeys, widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
 
@@ -484,7 +487,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
     constructor(props){
         super(props);
-        console.log('BOOTUIP', props);
+        //console.log('BOOTUIP', props);
         this.toggleOpen = this.toggleOpen.bind(this);
         var initOpen = (Array.isArray(props.defaultDepthsOpen) && props.defaultDepthsOpen[props.depth]) || false;
         this.state = { 'open' : initOpen };
