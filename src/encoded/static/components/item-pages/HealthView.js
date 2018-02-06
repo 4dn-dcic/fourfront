@@ -172,7 +172,7 @@ class HealthChart extends React.Component {
     }
 
     load(){
-        ajax.load('/bar_plot_aggregations/type=Item&field=@type&type!=OntologyTerm/?field=@type', (r)=>{ // Exclude ontology terms
+        ajax.load('/bar_plot_aggregations/type=Item&field=@type&field=status&type!=OntologyTerm/?field=@type&field=status', (r)=>{ // Exclude ontology terms
             this.setState({
                 data : r,
                 loaded : true
@@ -196,8 +196,20 @@ class HealthChart extends React.Component {
         var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
 
         var fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); };
-        var color = d3.scaleOrdinal(d3.schemeCategory20.map(fader));
-
+        var colorFallback = d3.scaleOrdinal(d3.schemeCategory20.map(fader));
+        /*
+        function color(status){
+            if (status === 'deleted') return 'rgb(255, 173, 171)';
+            if (status === 'upload failed') return 'rgb(222, 82, 83)';
+            if (status === 'released to project') return 'rgb(120, 179, 90)';
+            if (status === 'released') return 'rgb(80, 180, 80)';
+            if (status === 'published') return 'rgb(85, 190, 85)';
+            if (status === 'current') return 'rgb(76, 146, 195)';
+            if (status === 'uploaded') return 'rgb(173, 229, 161)';
+            if (status === 'in review by lab') return 'rgb(255, 153, 62)';
+            return colorFallback(status);
+        }
+        */
 
         var d3Data = vizUtil.transformBarPlotAggregationsToD3CompatibleHierarchy(this.state.data);
 
@@ -219,10 +231,10 @@ class HealthChart extends React.Component {
             .enter().append("g")
             .attr('class', 'treemap-rect-elem')
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
-            .attr("data-tip", function(d){ return '<span class="text-500">' + d.data.name + "</span><br/>" + d.data.size + ' Items'; })
+            .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items<br/>Status: ' + d.data.name; })
             .attr("data-html", function(d){ return true; })
-            .on("click", function(d) { //return function(evt){
-                navigate('/search/?type=' + d.data.name);
+            .on("click", function(d) {
+                navigate('/search/?type=' + d.parent.data.name);
             })
             .attr("data-effect", function(d){ return 'float'; });
 
@@ -230,7 +242,7 @@ class HealthChart extends React.Component {
             .attr("id", function(d) { return d.data.id; })
             .attr("width", function(d) { return d.x1 - d.x0; })
             .attr("height", function(d) { return d.y1 - d.y0; })
-            .attr("fill", function(d) { return color(d.data.id); });
+            .attr("fill", function(d) { return colorFallback(d.parent.data.name); });
 
         cell.append("clipPath")
             .attr("id", function(d) { return "clip-" + d.data.id; })
@@ -240,12 +252,11 @@ class HealthChart extends React.Component {
         cell.append("text")
             .attr("clip-path", function(d) { return "url(#clip-" + d.data.id + ")"; })
             .attr('class', 'title-text')
-            //.attr('fill', 'rgba(255,255,255,0.75)')
             .selectAll("tspan")
-            .data(function(d) { return d.data.name.split(/(?=[A-Z][^A-Z])/g); })
+            .data(function(d) { return d.parent.data.name.split(/(?=[A-Z][^A-Z])/g); })
             .enter().append("tspan")
             .attr("x", 4)
-            .attr("y", function(d, i) { return 15 + i * 15; })
+            .attr("y", function(d, i) { return 13 + i * 10; })
             .text(function(d) { return d; });
 
         ReactTooltip.rebuild();
@@ -259,12 +270,12 @@ class HealthChart extends React.Component {
         return (
             <div>
                 <h5 className="text-400 mt-2 pull-right mb-0"><em>Excluding OntologyTerm</em></h5>
-                <h3 className="text-400 mb-2 mt-3">Types by Count in ElasticSearch</h3>
+                <h3 className="text-400 mb-2 mt-3">Types in ElasticSearch</h3>
                 <style dangerouslySetInnerHTML={{
                     __html : (
                         '.treemap-rect-elem { cursor: pointer; }' +
-                        '.treemap-rect-elem .title-text { fill: rgba(0,0,0,0.5); }' +
-                        '.treemap-rect-elem:hover .title-text { fill: #000; }'
+                        '.treemap-rect-elem .title-text { fill: rgba(0,0,0,0.5); font-size: 0.75rem; }' +
+                        '.treemap-rect-elem:hover .title-text { fill: #000; transform: scale(1.2); }'
                     )
                 }}/>
                 <svg width={width} height={height} ref="svg"/>
