@@ -201,6 +201,7 @@ class HealthChart extends React.Component {
         var cell = svg.selectAll("g")
             .data(root.leaves())
             .enter().append("g")
+            .attr('class', 'treemap-rect-elem')
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
             .attr("data-tip", function(d){ return '<span class="text-500">' + d.data.name + "</span><br/>" + d.data.size + ' Items'; })
             .attr("data-html", function(d){ return true; })
@@ -219,6 +220,8 @@ class HealthChart extends React.Component {
 
         cell.append("text")
             .attr("clip-path", function(d) { return "url(#clip-" + d.data.id + ")"; })
+            .attr('class', 'title-text')
+            //.attr('fill', 'rgba(255,255,255,0.75)')
             .selectAll("tspan")
             .data(function(d) { return d.data.name.split(/(?=[A-Z][^A-Z])/g); })
             .enter().append("tspan")
@@ -238,7 +241,12 @@ class HealthChart extends React.Component {
             <div>
                 <h5 className="text-400 mt-2 pull-right mb-0"><em>Excluding OntologyTerm</em></h5>
                 <h3 className="text-400 mb-2 mt-3">Types by Count in ElasticSearch</h3>
-
+                <style dangerouslySetInnerHTML={{
+                    __html : (
+                        '.treemap-rect-elem .title-text { fill: rgba(0,0,0,0.5); }' +
+                        '.treemap-rect-elem:hover .title-text { fill: #000; }'
+                    )
+                }}/>
                 <svg width={width} height={height} ref="svg"/>
             </div>
         );
