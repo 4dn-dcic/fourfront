@@ -134,7 +134,6 @@ export class HealthView extends React.Component {
                     }
                 }} />
 
-                <h3 className="text-400 mb-2 mt-3">ES Contents</h3>
                 <HealthChart mounted={this.state.mounted} width={width} height={400} />
 
             </div>
@@ -186,6 +185,9 @@ class HealthChart extends React.Component {
 
         var d3Data = vizUtil.transformBarPlotAggregationsToD3CompatibleHierarchy(this.state.data);
 
+        // Exclude ontology terms -
+        d3Data.children = _.filter(d3Data.children, function(typeAggregation){ return typeAggregation.name !== 'OntologyTerm'; });
+
         var treemap = d3.treemap()
             .tile(d3.treemapResquarify)
             .size([width, height])
@@ -235,7 +237,13 @@ class HealthChart extends React.Component {
         if (!mounted || !this.state.loaded || !this.state.data) return null;
 
         return (
-            <svg width={width} height={height} ref="svg"/>
+            <div>
+                <h5 className="text-400 mt-2 pull-right mb-0"><em>Excluding OntologyTerm</em></h5>
+                <h3 className="text-400 mb-2 mt-3">ES Types by Count</h3>
+                
+
+                <svg width={width} height={height} ref="svg"/>
+            </div>
         );
 
     }
