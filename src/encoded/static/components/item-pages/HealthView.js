@@ -64,10 +64,6 @@ export class HealthView extends React.Component {
         var context = this.props.context;
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
 
-        var width = null;
-        if (this.state.mounted){
-            width = layout.gridContainerWidth();
-        }
 
         return (
             <div className="view-item">
@@ -134,7 +130,11 @@ export class HealthView extends React.Component {
                     }
                 }} />
 
-                <HealthChart mounted={this.state.mounted} width={width} height={400} />
+                <layout.WindowResizeUpdateTrigger>
+                    <layout.WidthProvider>
+                        <HealthChart mounted={this.state.mounted} height={400} />
+                    </layout.WidthProvider>
+                </layout.WindowResizeUpdateTrigger>
 
             </div>
         );
@@ -161,8 +161,14 @@ class HealthChart extends React.Component {
         this.load();
     }
 
-    componentDidUpdate(){
-        if (this.state.loaded) this.drawTreeMap();
+    componentDidUpdate(pastProps, pastState){
+        if (this.state.loaded) {
+            this.drawTreeMap();
+            if (pastProps.width && this.props.width && this.props.width !== pastProps.width){
+                this.transitionSize();
+            }
+        }
+        
     }
 
     load(){
@@ -172,6 +178,16 @@ class HealthChart extends React.Component {
                 loaded : true
             });
         });
+    }
+
+    transitionSize(){
+        var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
+        svg.selectAll('g').transition()
+            .duration(750)
+            .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
+            .select("rect")
+                .attr("width", function(d) { return d.x1 - d.x0; })
+                .attr("height", function(d) { return d.y1 - d.y0; });
     }
 
     drawTreeMap(){
