@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import { Button } from 'react-bootstrap';
 import { content_views } from './../globals';
-import { ajax, console, object, Filters, JWT, DateUtility, layout } from './../util';
+import { ajax, console, object, Filters, JWT, DateUtility, layout, navigate } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 import ReactTooltip from 'react-tooltip';
 import * as vizUtil from './../viz/utilities';
@@ -205,6 +205,9 @@ class HealthChart extends React.Component {
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
             .attr("data-tip", function(d){ return '<span class="text-500">' + d.data.name + "</span><br/>" + d.data.size + ' Items'; })
             .attr("data-html", function(d){ return true; })
+            .on("click", function(d) { //return function(evt){
+                navigate('/search/?type=' + d.data.name);
+            })
             .attr("data-effect", function(d){ return 'float'; });
 
         cell.append("rect")
@@ -243,6 +246,7 @@ class HealthChart extends React.Component {
                 <h3 className="text-400 mb-2 mt-3">Types by Count in ElasticSearch</h3>
                 <style dangerouslySetInnerHTML={{
                     __html : (
+                        '.treemap-rect-elem { cursor: pointer; }' +
                         '.treemap-rect-elem .title-text { fill: rgba(0,0,0,0.5); }' +
                         '.treemap-rect-elem:hover .title-text { fill: #000; }'
                     )
