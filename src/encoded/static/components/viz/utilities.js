@@ -275,11 +275,7 @@ export function extendStyleOptions(propsStyleOpts, defaultStyleOpts){
     }
 }
 
-/**
- * Not yet used, but working.
- * @param {*} rootField 
- * @param {*} aggregateType 
- */
+
 export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, aggregateType = 'experiment_sets'){
 
     function genChildren(currField){
@@ -292,18 +288,16 @@ export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, a
                     'name' : termName,
                     'size' : termObj[aggregateType]
                 };
+            } else if (typeof termObj.terms === 'object' && termObj.terms) { // Double check that not leaf (have sub-terms)
+                return {
+                    'name' : termName,
+                    'children' : genChildren(termObj)
+                };
             } else {
-                if (typeof termObj.terms === 'object' && termObj.terms){ // Double check that not leaf (have sub-terms)
-                    return {
-                        'name' : termName,
-                        'children' : genChildren(termObj)
-                    };
-                } else {
-                    return {
-                        'name' : termName,
-                        'size' : termObj.total && typeof termObj.total[aggregateType] === 'number' ? termObj.total[aggregateType] : 1
-                    };
-                }
+                return {
+                    'name' : termName,
+                    'size' : termObj.total && typeof termObj.total[aggregateType] === 'number' ? termObj.total[aggregateType] : 1
+                };
             }
     
         });

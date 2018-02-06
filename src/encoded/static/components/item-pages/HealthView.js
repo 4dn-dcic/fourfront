@@ -207,13 +207,13 @@ class HealthChart extends React.Component {
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
             .attr("data-tip", function(d){ return d.data.name + " - \n" + d.data.size + ' Items'; })
             .attr("data-effect", function(d){ return 'float'; });
-        
+
         cell.append("rect")
             .attr("id", function(d) { return d.data.id; })
             .attr("width", function(d) { return d.x1 - d.x0; })
             .attr("height", function(d) { return d.y1 - d.y0; })
             .attr("fill", function(d) { return color(d.data.id); });
-        
+
         cell.append("clipPath")
             .attr("id", function(d) { return "clip-" + d.data.id; })
             .append("use")
@@ -240,7 +240,6 @@ class HealthChart extends React.Component {
             <div>
                 <h5 className="text-400 mt-2 pull-right mb-0"><em>Excluding OntologyTerm</em></h5>
                 <h3 className="text-400 mb-2 mt-3">ES Types by Count</h3>
-                
 
                 <svg width={width} height={height} ref="svg"/>
             </div>
