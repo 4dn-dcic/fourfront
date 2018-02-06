@@ -530,8 +530,10 @@ def bar_plot_chart(request):
                 return obj
 
         result = lookup(obj_to_find_val_in, 0)
+
         if isinstance(result, list):
-            result_set = set(flatten([r for r in result if r])) # Filter+Uniqify
+            result = flatten([r for r in result if r]) # Filter + Flatten into single list of vals.
+            result_set = set(result) # Uniqify
             result = [ r for r in result if r in result_set ] # Maintain order
             if len(result) == 1:
                 result = result[0]
