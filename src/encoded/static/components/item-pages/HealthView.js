@@ -45,17 +45,21 @@ export class HealthView extends React.Component {
     }
 
     getCounts(){
-
-        ajax.load('/counts?format=json', (resp)=>{
-            this.setState({
-                'db_es_total' : resp.db_es_total,
-                'db_es_compare': resp.db_es_compare,
-            });
-        }, 'GET', (resp)=>{
-            this.setState({
-                'error' : resp.error || resp.message,
-                'db_es_total' : null,
-                'db_es_compare': null
+        this.setState({
+            'db_es_total' : "loading...",
+            'db_es_compare' : "loading...",
+        }, ()=>{
+            ajax.load('/counts?format=json', (resp)=>{
+                this.setState({
+                    'db_es_total' : resp.db_es_total,
+                    'db_es_compare': resp.db_es_compare,
+                });
+            }, 'GET', (resp)=>{
+                this.setState({
+                    'error' : resp.error || resp.message,
+                    'db_es_total' : null,
+                    'db_es_compare': null
+                });
             });
         });
     }
@@ -132,7 +136,7 @@ export class HealthView extends React.Component {
 
                 <layout.WindowResizeUpdateTrigger>
                     <layout.WidthProvider>
-                        <HealthChart mounted={this.state.mounted} height={400} />
+                        <HealthChart mounted={this.state.mounted} height={600} />
                     </layout.WidthProvider>
                 </layout.WindowResizeUpdateTrigger>
 
@@ -168,7 +172,6 @@ class HealthChart extends React.Component {
                 this.transitionSize();
             }
         }
-        
     }
 
     load(){
@@ -186,8 +189,8 @@ class HealthChart extends React.Component {
             .duration(750)
             .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
             .select("rect")
-                .attr("width", function(d) { return d.x1 - d.x0; })
-                .attr("height", function(d) { return d.y1 - d.y0; });
+            .attr("width", function(d) { return d.x1 - d.x0; })
+            .attr("height", function(d) { return d.y1 - d.y0; });
     }
 
     drawTreeMap(){
@@ -197,19 +200,26 @@ class HealthChart extends React.Component {
 
         var fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); };
         var colorFallback = d3.scaleOrdinal(d3.schemeCategory20.map(fader));
-        /*
-        function color(status){
-            if (status === 'deleted') return 'rgb(255, 173, 171)';
-            if (status === 'upload failed') return 'rgb(222, 82, 83)';
-            if (status === 'released to project') return 'rgb(120, 179, 90)';
-            if (status === 'released') return 'rgb(80, 180, 80)';
-            if (status === 'published') return 'rgb(85, 190, 85)';
-            if (status === 'current') return 'rgb(76, 146, 195)';
-            if (status === 'uploaded') return 'rgb(173, 229, 161)';
-            if (status === 'in review by lab') return 'rgb(255, 153, 62)';
-            return colorFallback(status);
+
+        function colorStatus(origColor, status){
+            var d3Color;
+            if (['deleted'].indexOf(status) > -1){
+                d3Color = d3.color(origColor);
+                return d3Color.darker(1);
+            }
+            if (['upload failed'].indexOf(status) > -1){
+                return d3.interpolateRgb(origColor, "rgb(222, 82, 83)")(0.6);
+            }
+            if (['released to lab', 'released to project', 'in review by lab', 'in review by project'].indexOf(status) > -1){
+                d3Color = d3.color(origColor);
+                return d3Color.darker(0.5);
+            }
+            if (['uploaded', 'released', 'current'].indexOf(status) > -1){
+                d3Color = d3.color(origColor);
+                return d3Color.brighter(0.25);
+            }
+            return origColor;
         }
-        */
 
         var d3Data = vizUtil.transformBarPlotAggregationsToD3CompatibleHierarchy(this.state.data);
 
@@ -242,7 +252,7 @@ class HealthChart extends React.Component {
             .attr("id", function(d) { return d.data.id; })
             .attr("width", function(d) { return d.x1 - d.x0; })
             .attr("height", function(d) { return d.y1 - d.y0; })
-            .attr("fill", function(d) { return colorFallback(d.parent.data.name); });
+            .attr("fill", function(d) { return colorStatus(colorFallback(d.parent.data.name), d.data.name); });
 
         cell.append("clipPath")
             .attr("id", function(d) { return "clip-" + d.data.id; })
