@@ -166,7 +166,7 @@ class HealthChart extends React.Component {
     }
 
     load(){
-        ajax.load('/bar_plot_aggregations/type=Item&field=@type/?field=@type', (r)=>{
+        ajax.load('/bar_plot_aggregations/type=Item&field=@type&type!=OntologyTerm/?field=@type', (r)=>{ // Exclude ontology terms
             this.setState({
                 data : r,
                 loaded : true
@@ -185,9 +185,6 @@ class HealthChart extends React.Component {
 
         var d3Data = vizUtil.transformBarPlotAggregationsToD3CompatibleHierarchy(this.state.data);
 
-        // Exclude ontology terms -
-        d3Data.children = _.filter(d3Data.children, function(typeAggregation){ return typeAggregation.name !== 'OntologyTerm'; });
-
         var treemap = d3.treemap()
             .tile(d3.treemapResquarify)
             .size([width, height])
@@ -205,7 +202,8 @@ class HealthChart extends React.Component {
             .data(root.leaves())
             .enter().append("g")
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
-            .attr("data-tip", function(d){ return d.data.name + " - \n" + d.data.size + ' Items'; })
+            .attr("data-tip", function(d){ return '<span class="text-500">' + d.data.name + "</span><br/>" + d.data.size + ' Items'; })
+            .attr("data-html", function(d){ return true; })
             .attr("data-effect", function(d){ return 'float'; });
 
         cell.append("rect")
@@ -225,7 +223,7 @@ class HealthChart extends React.Component {
             .data(function(d) { return d.data.name.split(/(?=[A-Z][^A-Z])/g); })
             .enter().append("tspan")
             .attr("x", 4)
-            .attr("y", function(d, i) { return 13 + i * 10; })
+            .attr("y", function(d, i) { return 15 + i * 15; })
             .text(function(d) { return d; });
 
         ReactTooltip.rebuild();
@@ -239,7 +237,7 @@ class HealthChart extends React.Component {
         return (
             <div>
                 <h5 className="text-400 mt-2 pull-right mb-0"><em>Excluding OntologyTerm</em></h5>
-                <h3 className="text-400 mb-2 mt-3">ES Types by Count</h3>
+                <h3 className="text-400 mb-2 mt-3">Types by Count in ElasticSearch</h3>
 
                 <svg width={width} height={height} ref="svg"/>
             </div>
