@@ -421,15 +421,34 @@ h5.fourDN-header {
 		padding-left: 15px;
 	}
 
-	body[data-path="/joint-analysis-data-plans"]{
-		#content.container > .static-page.row #nofic-matrix-2,
-		#content.container > .static-page.row #nofic-matrix-3,
-		#content.container > .static-page.row #nofic-matrix-4 {
-			float: right;
+	body[data-path="/joint-analysis-data-plans"],
+	body[data-path="/joint-analysis-data-plans/dev"],
+	body[data-path="/joint-analysis-data-plans/jan2018"],
+	body[data-path="/joint-analysis-data-plans/jan2018/dev"],
+	body[data-path="/joint-analysis-data-plans/july2018"],
+	body[data-path="/joint-analysis-data-plans/july2018/dev"]{
+
+		#content.container > .static-page.row #matrix-1,
+		#content.container > .static-page.row #matrix-2,
+		#content.container > .static-page.row #matrix-3,
+		#content.container > .static-page.row #matrix-4 {
+			position: relative;
+			float: left;
+			width: 50%;
+			margin-top: 0px;
+			margin-bottom: 20px;
+			padding-right: 15px;
 		}
 
-		#content.container > .static-page.row #nofic-matrix-2,
-		#content.container > .static-page.row #nofic-matrix-3 {
+		#content.container > .static-page.row #matrix-2,
+		#content.container > .static-page.row #matrix-3,
+		#content.container > .static-page.row #matrix-4 {
+			float: right;
+			padding-left: 15px;
+		}
+
+		#content.container > .static-page.row #matrix-2,
+		#content.container > .static-page.row #matrix-3 {
 			> div:first-child {
 				border-bottom: 1px solid #bbb;
 			}
