@@ -156,10 +156,8 @@ export class Chart extends React.Component {
         return !!(
             pastProps.showType !== nextProps.showType ||
             pastProps.barplot_data_unfiltered !== nextProps.barplot_data_unfiltered ||
-            !_.isEqual(pastProps.barplot_data_unfiltered, nextProps.barplot_data_unfiltered) ||
             pastProps.height !== nextProps.height ||
-            pastProps.barplot_data_filtered !== nextProps.barplot_data_filtered ||
-            !_.isEqual(pastProps.barplot_data_filtered, nextProps.barplot_data_filtered)
+            pastProps.barplot_data_filtered !== nextProps.barplot_data_filtered
         );
     }
 

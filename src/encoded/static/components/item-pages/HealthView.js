@@ -136,7 +136,7 @@ export class HealthView extends React.Component {
 
                 <layout.WindowResizeUpdateTrigger>
                     <layout.WidthProvider>
-                        <HealthChart mounted={this.state.mounted} height={600} />
+                        <HealthChart mounted={this.state.mounted} session={this.props.session} height={600} />
                     </layout.WidthProvider>
                 </layout.WindowResizeUpdateTrigger>
 
@@ -166,9 +166,12 @@ class HealthChart extends React.Component {
     }
 
     componentDidUpdate(pastProps, pastState){
-        if (this.state.loaded) {
+
+        if (this.props.session !== pastProps.session){
+            this.load();
+        } else if (this.state.loaded) {
             this.drawTreeMap();
-            if (pastProps.width && this.props.width && this.props.width !== pastProps.width){
+            if ((pastProps.width && this.props.width && this.props.width !== pastProps.width) || this.state.data !== pastState.data){
                 this.transitionSize();
             }
         }
@@ -185,7 +188,8 @@ class HealthChart extends React.Component {
 
     transitionSize(){
         var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
-        svg.selectAll('g').transition()
+        svg.selectAll('g')
+            .transition()
             .duration(750)
             .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
             .select("rect")
@@ -248,6 +252,8 @@ class HealthChart extends React.Component {
             })
             .attr("data-effect", function(d){ return 'float'; });
 
+        //cell.data(root.leaves()).exit().remove();
+
         cell.append("rect")
             .attr("id", function(d) { return d.data.id; })
             .attr("width", function(d) { return d.x1 - d.x0; })
@@ -268,6 +274,8 @@ class HealthChart extends React.Component {
             .attr("x", 4)
             .attr("y", function(d, i) { return 13 + i * 10; })
             .text(function(d) { return d; });
+
+        svg.selectAll("g").data(root.leaves()).exit().remove();
 
         ReactTooltip.rebuild();
     }
