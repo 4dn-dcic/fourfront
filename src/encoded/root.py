@@ -24,6 +24,7 @@ from collections import OrderedDict
 
 def includeme(config):
     config.include(health_check)
+    config.include(run_workflow)
     config.include(item_counts)
     config.include(submissions_page)
     config.scan(__name__)
@@ -68,6 +69,28 @@ def item_counts(config):
         return responseDict
 
     config.add_view(counts_view, route_name='item-counts')
+
+
+def run_workflow(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'run-workflow',
+        '/runworkflow'
+    )
+
+    def run_workflow_view(request):
+
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+        settings = request.registry.settings
+        print(settings)
+
+        responseDict = {'msg': "thanks"}
+        return responseDict
+
+    config.add_view(run_workflow_view, route_name='run-workflow', permission='add')
 
 
 def health_check(config):
@@ -228,13 +251,16 @@ class EncodedRoot(Root):
         "type": "object",
     })
     def content(self):
+        '''Returns -object- with pre-named sections'''
+        return_obj = {}
         try:
             contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
             contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+            return_obj = { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
         except FileNotFoundError as e:
             print("No content files found for Root object (aka Home, '/').")
-            return {}
+        # Maybe TODO: fetch announcements and add to return_obj. No request to make subrequest from?
+        return return_obj
 
     @calculated_property(schema={
         "title": "Application version",

@@ -147,6 +147,8 @@ if __name__ == "__main__":
             print("got the following expection but we will ignore it")
             print(e)
         print("now let's deploy, but first make sure we are still on the correct branch")
+        subprocess.check_output(
+            ['git', 'checkout', branch])
         deploy(deploy_to)
     if args.prod:
         print("args production")

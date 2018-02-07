@@ -159,6 +159,13 @@ export default class PageTitle extends React.Component {
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
+            if (itemTypeTitle === 'Publication'){ // Long title string
+                if (context.title && context.short_attribution){
+                    return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
+                }
+                return { 'title' : itemTypeTitle, 'subtitle' : context.title || title, 'subtitleEllipsis' : true };
+            }
+
             if (object.itemUtil.isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
 
                 // But show rest of title if it is in form 'Something - ACCESSION'
@@ -204,9 +211,7 @@ export default class PageTitle extends React.Component {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = {
-            'mounted' : false
-        };
+        this.state = { 'mounted' : false };
     }
 
     componentDidMount(){
@@ -224,31 +229,19 @@ export default class PageTitle extends React.Component {
             );
         }
 
-        var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
+        var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
         
 
         if (title) {
-            title = (
-                <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>
-                    { title }
-                </span>
-            );
+            title = <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>{ title }</span>;
         }
 
         if (calloutTitle){
-            calloutTitle = (
-                <span className="subtitle prominent">
-                    { calloutTitle }
-                </span>
-            );
+            calloutTitle = <span className="subtitle prominent">{ calloutTitle }</span>;
         }
 
         if (subtitle){
-            subtitle = (
-                <div className="page-subtitle smaller">
-                    { subtitle }
-                </div>
-            );
+            subtitle = <div className={"page-subtitle smaller" + (subtitleEllipsis ? ' text-ellipsis-container' : '')}>{ subtitlePrepend }{ subtitle }{ subtitleAppend }</div>;
         }
 
         return (
@@ -260,8 +253,16 @@ export default class PageTitle extends React.Component {
 
 }
 
-
+/**
+ * Used for most page titles.
+ *
+ * @prop {JSX.Element|string} title - Shown @ top left, 300 font weight.
+ * @prop {JSX.Element|string} calloutTitle - Shown @ right of title in similar size, 400 font weight.
+ * @prop {JSX.Element|string} subtitle - Shown @ bottom title in small size, 400 font weight.
+ * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
+ */
 class PageTitleElement extends React.Component {
+
     render(){
         var { title, calloutTitle, subtitle, context, href, mounted } = this.props;
 
@@ -272,6 +273,7 @@ class PageTitleElement extends React.Component {
         )) || <br/>;
     }
 }
+
 
 class HomePageTitleElement extends React.Component {
     render(){

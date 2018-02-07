@@ -448,20 +448,18 @@ export default class ChartDetailCursor extends React.Component {
             containDims = this.props.cursorContainmentDimensions;
             if (this.state.mounted && !isServerSide()){
                 containDims = {
-                    containingWidth : window.innerWidth,
-                    containingHeight : window.innerHeight,
-                    offsetTop : 80,
-                    offsetLeft : 0
+                    'containingWidth'   : window.innerWidth,
+                    'containingHeight'  : window.innerHeight,
+                    'offsetTop'         : 80,
+                    'offsetLeft'        : 0
                 };
             }
         }
 
         var isVisible = this.state.sticky || (Array.isArray(this.state.path) && this.state.path.length > 0);
 
-        if (!isVisible){
-            return null;
-        }
-        return (
+        if (!isVisible) return null;
+        else return (
             <CursorComponent
                 {...containDims}
                 containingElement={this.props.containingElement}

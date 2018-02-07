@@ -7,6 +7,7 @@ from snovault import (
     TYPES,
     COLLECTIONS
 )
+from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.resource_views import collection_view_listing_db
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
@@ -126,7 +127,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     if size not in (None, 'all') and size < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
-        result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
+        if context:
+            result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
 
     # add actions (namely 'add')
     result['actions'] = get_collection_actions(request, types[doc_types[0]])
@@ -906,11 +908,35 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-### stupid things to remove; had to add because of other fxns importing
+def make_search_subreq(request, path):
+    subreq = make_subrequest(request, path)
+    subreq._stats = request._stats
+    subreq.registry = request.registry
+    subreq.context = request.context
+    subreq.headers['Accept'] = 'application/json'
+    return subreq
+
+def get_iterable_search_results(request, search_path='/search/', param_lists={"type":["ExperimentSetReplicate"],"experimentset_type":["replicate"]}):
+    '''
+    Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain.from_iterable to get one big iterable of results.
+    TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
+
+    :param request: Only needed to pass to do_subreq to make a subrequest with.
+    :param search_path: Root path to call, defaults to /search/ (can also use /browse/).
+    :param param_lists: Dictionary of param:lists_of_vals which is converted to URL query.
+    :param search_results_chunk_row_size: Amount of results to get per chunk. Default should be fine.
+    '''
+    param_lists['limit'] = ['all']
+    param_lists['from'] = [0]
+    subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
+    return iter_search_results(None, subreq)
+
 
 # Update? used in ./batch_download.py
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
+
+### stupid things to remove; had to add because of other fxns importing
 
 # DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):

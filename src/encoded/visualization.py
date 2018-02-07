@@ -14,15 +14,17 @@ from urllib.parse import (
     parse_qs,
     urlencode,
 )
-
-from .search import _ASSEMBLY_MAPPER
+from .search import (
+    _ASSEMBLY_MAPPER,
+    get_iterable_search_results
+)
 #from .types.file import File
 from .types.base import Item
 from .types.workflow import (
     trace_workflows,
-    get_unique_key_from_at_id,
     DEFAULT_TRACING_OPTIONS,
-    WorkflowRunTracingException
+    WorkflowRunTracingException,
+    item_model_to_object
 )
 
 
@@ -30,6 +32,7 @@ def includeme(config):
     config.add_route('batch_hub', '/batch_hub/{search_params}/{txt}')
     config.add_route('batch_hub:trackdb', '/batch_hub/{search_params}/{assembly}/{txt}')
     config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
+    config.add_route('bar_plot_chart', '/bar_plot_aggregations/{search_params}/')
     config.scan(__name__)
 
 
@@ -423,12 +426,7 @@ def trace_workflow_runs(context, request):
         options['track_performance'] = True
 
     itemTypes = context.jsonld_type()
-    item_model = context.model
-
-    if not hasattr(item_model, 'source') or item_model.source.get('object') is None:
-        raise HTTPBadRequest(detail="Item not yet finished indexing.")
-
-    item_model_obj = item_model.source.get('object', {})
+    item_model_obj = item_model_to_object(context.model, request)
 
     processed_files_to_trace = []
 
@@ -436,32 +434,30 @@ def trace_workflow_runs(context, request):
         processed_files_to_trace.append(item_model_obj)
     elif 'ExperimentSet' in itemTypes:
 
-        processed_file_atids_to_trace_from_experiments = []
-        for exp_atid in item_model_obj.get('experiments_in_set', []):
-            experiment_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(exp_atid))
-            if not hasattr(experiment_model, 'source') or experiment_model.source.get('object') is None:
-                raise HTTPBadRequest(detail="Item not yet finished indexing.")
-            processed_file_atids_to_trace_from_experiments = processed_file_atids_to_trace_from_experiments + experiment_model.source.get('object', {}).get('processed_files', [])
+        processed_file_uuids_to_trace_from_experiments = []
+
+        for exp_uuid in item_model_obj.get('experiments_in_set', []):
+            experiment_model = request.registry[CONNECTION].storage.get_by_uuid(exp_uuid)
+            experiment_obj = item_model_to_object(experiment_model, request)
+            processed_file_uuids_to_trace_from_experiments = processed_file_uuids_to_trace_from_experiments + experiment_obj.get('processed_files', [])
 
 
-        processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files', []) # @ids
+        processed_file_uuids_to_trace_from_experiment_set = item_model_obj.get('processed_files', [])
 
-        for file_at_id in processed_file_atids_to_trace_from_experiments + processed_file_atids_to_trace_from_experiment_set:
-            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
-            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
-                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
-            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        for file_uuid in processed_file_uuids_to_trace_from_experiments + processed_file_uuids_to_trace_from_experiment_set:
+            file_model = request.registry[CONNECTION].storage.get_by_uuid(file_uuid)
+            file_obj = item_model_to_object(file_model, request)
+            processed_files_to_trace.append(file_obj)
         processed_files_to_trace.reverse()
 
     elif 'Experiment' in itemTypes:
 
-        processed_file_atids_to_trace_from_experiment = item_model_obj.get('processed_files', []) # @ids
+        processed_file_uuids_to_trace_from_experiment = item_model_obj.get('processed_files', []) # @ids
 
-        for file_at_id in processed_file_atids_to_trace_from_experiment:
-            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
-            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
-                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
-            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        for file_uuid in processed_file_uuids_to_trace_from_experiment:
+            file_model = request.registry[CONNECTION].storage.get_by_uuid(file_uuid)
+            file_obj = item_model_to_object(file_model, request)
+            processed_files_to_trace.append(file_obj)
         processed_files_to_trace.reverse()
 
     else:
@@ -471,3 +467,145 @@ def trace_workflow_runs(context, request):
         return trace_workflows(processed_files_to_trace, request, options)
     except WorkflowRunTracingException as e:
         raise HTTPBadRequest(detail=e.args[0])
+
+
+
+
+
+
+@view_config(route_name='bar_plot_chart', request_method='GET')
+def bar_plot_chart(request):
+
+    def gen_zero_counts_dict():
+        return {
+            'experiments' : 0,
+            'experiment_sets' : 0,
+            'files' : 0
+        }
+
+    TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
+    param_lists = parse_qs(request.matchdict['search_params'])
+    search_path = '/browse/'
+
+    fields_to_aggregate_for = request.params.getall('field')
+    if len(fields_to_aggregate_for) == 0:
+        raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
+
+
+    # Convert to list of dicts.
+    return_fields = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
+
+    def lookup_value(obj_to_find_val_in, field_string):
+        '''TODO: Move somewhere more re-usable, snovault.embed maybe?'''
+        field_parts = field_string.split('.')
+
+        def flatten(return_list):
+            if isinstance(return_list, list):
+                if len(return_list) > 0 and isinstance(return_list[0], list):
+                    l = []
+                    for rl in return_list:
+                        l = l + flatten(rl)
+                    return l
+                if len(return_list) == 0:
+                    return [None]
+                return return_list
+            else:
+                return [return_list]
+
+        def lookup(obj, depth = 0):
+            if len(field_parts) <= depth or obj is None:
+                return obj or None
+            field_part = field_parts[depth]
+            if isinstance(obj, dict):
+                return lookup(obj.get(field_part), depth + 1)
+            elif isinstance(obj, list):
+                if len(obj) > 0:
+                    if isinstance(obj[0], dict):
+                        return [ lookup(o, depth) for o in obj  ]
+                    else:
+                        return obj
+                else:
+                    return None
+            else:
+                return obj
+
+        result = lookup(obj_to_find_val_in, 0)
+
+        if isinstance(result, list):
+            result = flatten([r for r in result if r]) # Filter + Flatten into single list of vals.
+            result_set = set(result) # Uniqify
+            result = [ r for r in result if r in result_set ] # Maintain order
+            if len(result) == 1:
+                result = result[0]
+            elif len(result) == 0:
+                result = None
+        if result is None:
+            result = TERM_NAME_FOR_NO_VALUE
+        return result
+
+    def get_counts_of_links_from_experiment_set(experiment_set, totals = None):
+        if totals is None:
+            totals = gen_zero_counts_dict()
+        # TODO (?): Filter down by if exp, files itself matches term_found itself, if terms_found item is list
+        totals['experiment_sets'] += 1
+        totals['experiments'] += len(experiment_set.get('experiments_in_set', []))
+        totals['files'] += len(experiment_set.get('processed_files', []))
+        for exp in experiment_set.get('experiments_in_set', []):
+            totals['files'] += len(exp.get('files', []))
+            totals['files'] += len(exp.get('processed_files', []))
+        return totals
+
+
+    def aggregegate_term_counts_for_fields_from_experiment_set(experiment_set, field_objects):
+        '''
+        :param experiment_set: Experiment set to aggregate field values for.
+        :param fields: List of field object, e.g. [{ 'field': 'experiments_in_set.experiment_type', 'terms' : {}, "total" : {} },...]
+        '''
+
+        field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
+        terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
+
+        if 'Item' in terms_found: print('\n\n\n\n\n\n\n\n', experiment_set)
+
+        def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = None):
+            if not totals_by_type:
+                totals_by_type = gen_zero_counts_dict()
+            for counts_type in totals_by_type.keys():
+                field_obj['terms'][term][counts_type] += totals_by_type[counts_type]
+                if update_total:
+                    field_obj['total'][counts_type] += totals_by_type[counts_type]
+
+        def recur_add_count(field_obj, depth=0):
+            if depth >= len(terms_found):
+                return
+            is_leaf_field = depth + 1 == len(terms_found)
+            term = terms_found[depth]
+            if isinstance(term, list):
+                print('\nBar Plot Aggregator: Found multiple values for field ' + field_obj['field'] + ', using first of:', term)
+                term = term[0]
+            if not is_leaf_field:
+                # Generate child field as term
+                if field_obj['terms'].get(term) is None:
+                    field_obj['terms'][term] = {
+                        "field" : field_names[depth + 1],
+                        "total" : gen_zero_counts_dict(),
+                        "term"  : term,
+                        "terms" : {}
+                    }
+
+                get_counts_of_links_from_experiment_set(experiment_set, field_obj['total'])
+                recur_add_count(field_obj['terms'][term], depth + 1)
+            else:
+                if field_obj['terms'].get(term) is None:
+                    field_obj['terms'][term] = gen_zero_counts_dict()
+                counts_by_type = get_counts_of_links_from_experiment_set(experiment_set)
+                add_counts_to_field_term_types(field_obj, term, True, counts_by_type)
+
+        recur_add_count(field_objects[0], 0)
+        return experiment_set
+
+    # Aggregate/add counts to each field.terms.total+./child-field.terms.total+./../child-field.total+.terms bucket from each exp_set matching search query
+    for exp_set in get_iterable_search_results(request, search_path, param_lists):
+        aggregegate_term_counts_for_fields_from_experiment_set(exp_set, return_fields)
+
+    return return_fields[0]

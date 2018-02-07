@@ -23,7 +23,7 @@ describe('Testing help.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HelpPage = require('../static-pages/help').default;
+        HelpPage = require('../static-pages/HelpPage').default;
         context = require('../testdata/static/helppage');
         Wrapper = createReactClass({
             render: function() {
