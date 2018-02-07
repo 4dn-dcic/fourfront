@@ -587,7 +587,7 @@ export const ChartDataController = {
     handleUpdatedFilters : function(expSetFilters, callback, opts){
 
         // Reset or re-fetch 'filtered-in' data.
-        if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiment_sets) && (!opts || !opts.searchQuery)){
+        if (_.keys(expSetFilters).length === 0 && state.barplot_data_unfiltered && (!opts || !opts.searchQuery)){
             ChartDataController.setState({ 'barplot_data_filtered' : null }, callback);
         } else {
             ChartDataController.fetchAndSetFilteredBarPlotData(callback, opts);
@@ -608,7 +608,7 @@ export const ChartDataController = {
             throw Error("Not initialized with updateStats callback.");
         }
 
-        var current = (state.barplot_data_filtered && state.barplot_data_filtered.total) || { 'experiment_sets' : 0, 'experiments' : 0, 'files' : 0 },
+        var current = (state.barplot_data_filtered && state.barplot_data_filtered.total) || { 'experiment_sets' : null, 'experiments' : null, 'files' : null },
             total = (state.barplot_data_unfiltered && state.barplot_data_unfiltered.total) || null;
 
         refs.updateStats(current, total);

@@ -1111,16 +1111,16 @@ export default class App extends React.Component {
         // Object of common props passed to all content_views.
 
         let commonContentViewProps = {
-            context : context,
-            schemas : this.state.schemas,
-            session : this.state.session,
-            href : this.props.href,
-            navigate : this.navigate,
-            key : key,
-            uploads : this.state.uploads,
-            updateUploads : this.updateUploads,
-            listActionsFor : this.listActionsFor,
-            updateUserInfo : this.updateUserInfo
+            'context'           : context,
+            'schemas'           : this.state.schemas,
+            'session'           : this.state.session,
+            'href'              : this.props.href,
+            'navigate'          : this.navigate,
+            'key'               : key,
+            'uploads'           : this.state.uploads,
+            'updateUploads'     : this.updateUploads,
+            'listActionsFor'    : this.listActionsFor,
+            'updateUserInfo'    : this.updateUserInfo
         };
 
         // first case is fallback
