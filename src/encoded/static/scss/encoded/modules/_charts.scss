@@ -1998,10 +1998,25 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
 
             }
-            &.open > .row > .list-section,
-            &:first-child > .row > .list-section {
+
+            &.open > .row > .list-section.has-header,
+            &:first-child > .row > .list-section.has-header {
                 padding-top: 80px;
             }
+
+            &.row-index-0:not(.with-duplicated-headers),
+            &.row-index-0.with-duplicated-headers,
+            &.with-duplicated-headers.open {
+                > .row > .label-section {
+                    padding-top: 87px;
+                }
+            }
+
+            &.open + :not(.open),
+            &.open + :not(.with-duplicated-headers) {
+                margin-top: 10px;
+            }
+
         }
         
         &:not(.depth-0) {

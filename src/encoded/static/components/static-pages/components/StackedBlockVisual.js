@@ -79,6 +79,8 @@ export class StackedBlockVisual extends React.Component {
         'blockHeight' : 35,
         'blockVerticalSpacing' : 5,
         'blockHorizontalSpacing' : 5,
+        'duplicateHeaders' : true,
+        'collapseToMatrix' : false,
         // @param data may be either Array (if multiple grouped into 1) or object.
         'blockClassName' : function(data){
 
@@ -270,7 +272,7 @@ export class StackedBlockVisual extends React.Component {
     render(){
         
         return (
-            <div className="stacked-block-viz-container" ref="container">
+            <div className={"stacked-block-viz-container" + (this.props.duplicateHeaders ? ' with-duplicated-headers' : '')} ref="container">
                 { this.renderContents(this.refs && this.refs.container && this.refs.container.offsetWidth) }
             </div>
         );
@@ -345,7 +347,7 @@ export class StackedBlockGroupedRow extends React.Component {
             allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
         }
         
-        if (typeof props.columnSubGrouping !== 'string' && props.depth < ((props.groupingProperties || []).length - 1) ) {
+        if (typeof props.columnSubGrouping !== 'string' && !Array.isArray(data)) {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
             });
@@ -361,16 +363,12 @@ export class StackedBlockGroupedRow extends React.Component {
         var inner = null;
         var groupedDataIndicesPairs = (props.groupedDataIndices && _.pairs(props.groupedDataIndices)) || [];
 
-        /*if (Array.isArray(data)){
-            inner = allChildBlocksPerChildGroup.map(function(pair){
-                return (
-                    <StackedBlock {...commonProps} data={pair[1]} title={pair[0]} />
-                );
-            });
-        } else */
+
         if (groupedDataIndicesPairs.length > 0){ // If columns exist, distribute these blocks by column! Otherwise (else statement @ end) we'll probably just stack em left-to-right.
 
             var blocksByColumnGroup, columnKeys, widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
+
+            console.log('TEsT',allChildBlocksPerChildGroup);
 
             if (allChildBlocksPerChildGroup){
                 // Generate block per each child or child group when nothing else to regroup by.
@@ -393,6 +391,8 @@ export class StackedBlockGroupedRow extends React.Component {
                             }
                         }), function(block){ return block !== null; })];
                 }));
+
+                console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
 
                 columnKeys = _.keys(blocksByColumnGroup);
                 if (Array.isArray(props.headerColumnsOrder)){
@@ -417,6 +417,7 @@ export class StackedBlockGroupedRow extends React.Component {
                         </div>
                     );
                 });
+
             } else {
 
                 blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function(pair){
@@ -439,11 +440,15 @@ export class StackedBlockGroupedRow extends React.Component {
 
                 inner = columnKeys.map(function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
+
+                    console.log('BFG-1', blocksForGroup);
                     
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
-                    if (typeof props.columnSubGrouping === 'string' && props.depth < (props.groupingProperties.length - 1)){
+                    if (typeof props.columnSubGrouping === 'string' && props.depth <= (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
                     }
+
+                    console.log('BFG-2', blocksForGroup);
                     return (
                         <div
                             className="block-container-group"
@@ -506,14 +511,14 @@ export class StackedBlockGroupedRow extends React.Component {
     }
 
     render(){
-        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index } = this.props;
+        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders } = this.props;
         var groupingPropertyTitle = null;
         if (Array.isArray(groupingProperties) && groupingProperties[depth]){
             groupingPropertyTitle = titleMap[groupingProperties[depth]] || groupingProperties[depth];
         }
 
         var isOpen = this.state.open;
-        var className = "grouping depth-" + depth + (depth === 0 ? ' mb-1' : '') + (isOpen ? ' open' : '');
+        var className = "grouping depth-" + depth + (isOpen ? ' open' : '') + (duplicateHeaders && depth === 0 ? ' with-duplicated-headers' : '') + (' row-index-' + index);
         var toggleIcon = null;
         if (!Array.isArray(data)) toggleIcon = <i className={"icon icon-fw icon-" + (isOpen ? 'minus' : 'plus')} />;
         if (toggleIcon){
@@ -535,7 +540,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
 
         var header = null;
-        if (depth === 0 && groupedDataIndices){
+        if (depth === 0 && groupedDataIndices && ((isOpen && duplicateHeaders) || index === 0)){
             var minColumnWidth = StackedBlockVisual.minColumnWidth(this.props);
             var headerItemStyle = { 'width' : minColumnWidth };
 
@@ -557,6 +562,11 @@ export class StackedBlockGroupedRow extends React.Component {
                 </div>
             );
         }
+
+        var h4TitleProps = { 
+            'className' : "text-500 text-ellipsis-container",
+            'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
+        };
         
 
         return (
@@ -565,16 +575,12 @@ export class StackedBlockGroupedRow extends React.Component {
                 <div className="row">
                     <div className="col col-sm-4 label-section" style={{ minHeight : blockHeight + blockVerticalSpacing }}>
                         { groupingPropertyTitle ? <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small> : null }
-                        <h4 className="text-500">
-                            <span onClick={toggleIcon ? this.toggleOpen : null}>{ toggleIcon } { group }</span>
-                        </h4>
+                        <h4 {...h4TitleProps}><span onClick={toggleIcon ? this.toggleOpen : null}>{ toggleIcon } { group }</span></h4>
                         {/* this.childLabels() */}
                     </div>
-                    <div className="col col-sm-8 list-section" ref="listSection">
-                        { !isOpen && index === 0 ? header : null }
-                        {
-                            !isOpen ? this.childBlocksCollapsed(widthAvailable) : header /*<div className="group-value" style={{ lineHeight : blockHeight + 'px' }}>{ totalCount }</div>*/
-                        }
+                    <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')} ref="listSection">
+                        { header }
+                        { !isOpen ? this.childBlocksCollapsed(widthAvailable) : null }
                     </div>
                 </div>
 
@@ -648,3 +654,6 @@ export class StackedBlock extends React.Component {
     }
 
 }
+
+
+StackedBlockVisual.Row = StackedBlockGroupedRow;

@@ -7,7 +7,7 @@ import { console, object, ajax } from'./../util';
 import * as plansData from './../testdata/stacked-block-matrix-list';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
-import { StackedBlockVisual } from './components';
+import { StackedBlockVisual, sumPropertyFromList } from './components';
 
 
 
@@ -160,9 +160,10 @@ export default class JointAnalysisPlansPage extends React.Component {
                 <div className="row">
                     <div className="col-xs-12 col-md-6">
                         <VisualBody
-                            groupingProperties={['experiment_category', 'experiment_type', 'data_source']}
+                            groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
-                            //columnSubGrouping='data_source'
+                            duplicateHeaders={false}
+                            columnSubGrouping='data_source'
                             results={resultList4DN}
                             defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
@@ -171,12 +172,13 @@ export default class JointAnalysisPlansPage extends React.Component {
                     </div>
                     <div className="col-xs-12 col-md-6">
                         <VisualBody
-                            groupingProperties={['experiment_category', 'experiment_type', 'data_source']}
+                            groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
-                            //columnSubGrouping='data_source'
+                            columnSubGrouping='data_source'
                             results={resultListEncode}
                             defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
+                            collapseToMatrix
                         />
                     </div>
                 </div>
@@ -192,7 +194,7 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysis-plansPage
 class VisualBody extends React.Component {
     render(){
 
-        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen } = this.props;
+        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen, duplicateHeaders } = this.props;
 
         var headerColumnsOrder = [
             'Hi-C',
@@ -227,6 +229,33 @@ class VisualBody extends React.Component {
                 headerColumnsOrder={headerColumnsOrder}
                 columnSubGrouping={columnSubGrouping}
                 defaultDepthsOpen={defaultDepthsOpen}
+                duplicateHeaders={duplicateHeaders}
+                groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
+                    console.log('DATA', data, StackedBlockVisual.Row.flattenChildBlocks(data).length)
+                    return StackedBlockVisual.Row.flattenChildBlocks(data).length;
+                }}
+                blockRenderedContents={(data, title, groupingPropertyTitle, blockProps)=>{
+                    var defaultOutput = <span>&nbsp;</span>;
+                    var experimentsCountExpected = 0;
+
+                    function getCount(num){
+                        try {
+                            var n = parseInt(num);
+                            if (isNaN(n)) return 0;
+                            return n;
+                        } catch (e){
+                            return 0;
+                        }
+                    }
+
+                    if (Array.isArray(data)) {
+                        return data.length;
+                    } else if (data) {
+                        return 1;
+                    }
+
+                    return experimentsCountExpected || defaultOutput;
+                }}
                 blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
 
                     var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];
