@@ -141,6 +141,9 @@ after_success:
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        echo "cleanup build artifacts"
+        rm elasticsearch-5.4.1.deb
+        rm .to_export_back
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
         git config --global user.email "travis@builder.com"
