@@ -15,10 +15,11 @@ def merge(source, merge_to):
     res1 = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
 
     print("status on master is: " + res1)
+    subprocess.check_output(['git', 'stash'])
+
     subprocess.check_output(
         ['git', 'checkout', merge_to])
 
-    subprocess.check_output(['git', 'stash'])
     res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
     print("status on prod is: " + res)
 
@@ -146,9 +147,11 @@ if __name__ == "__main__":
             # or what not, in which case we just won't update the tag / merge
             print("got the following expection but we will ignore it")
             print(e)
-        print("now let's deploy, but first make sure we are still on the correct branch")
-        subprocess.check_output(
-            ['git', 'checkout', branch])
+            print("switching back to source branch")
+            subprocess.check_output(
+                ['git', 'checkout', branch])
+
+        print("now let's deploy")
         deploy(deploy_to)
     if args.prod:
         print("args production")
