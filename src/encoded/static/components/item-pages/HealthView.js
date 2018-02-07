@@ -314,18 +314,18 @@ class HealthChart extends React.Component {
             .attr("data-effect", function(d){ return 'float'; });
 
         enteringCellGroups.append("rect")
-            .attr("id", function(d) { return d.data.id; })
+            .attr("id", function(d) { return d.data.id.replace(/ /g, '_'); })
             .attr("width", function(d) { return d.x1 - d.x0; })
             .attr("height", function(d) { return d.y1 - d.y0; })
             .attr("fill", function(d) { return colorStatus(colorFallback(d.parent.data.name), d.data.name); });
 
         enteringCellGroups.append("clipPath")
-            .attr("id", function(d) { return "clip-" + d.data.id; })
+            .attr("id", function(d) { return "clip-" + d.data.id.replace(/ /g, '_'); })
             .append("use")
-            .attr("xlink:href", function(d) { return "#" + d.data.id; });
+            .attr("xlink:href", function(d) { return "#" + d.data.id.replace(/ /g, '_'); });
 
         enteringCellGroups.append("text")
-            .attr("clip-path", function(d) { return "url(#clip-" + d.data.id + ")"; })
+            .attr("clip-path", function(d) { return "url(#clip-" + d.data.id.replace(/ /g, '_') + ")"; })
             .attr('class', 'title-text')
             .selectAll("tspan")
             .data(function(d) { return d.parent.data.name.split(/(?=[A-Z][^A-Z])/g); })
@@ -350,7 +350,7 @@ class HealthChart extends React.Component {
                     __html : (
                         '.treemap-rect-elem { cursor: pointer; }' +
                         '.treemap-rect-elem .title-text { fill: rgba(0,0,0,0.5); font-size: 0.75rem; }' +
-                        '.treemap-rect-elem:hover .title-text { fill: #000; transform: scale(1.2); }'
+                        '.treemap-rect-elem:hover .title-text { fill: #000; }'
                     )
                 }}/>
                 <svg width={width} height={height} ref="svg"/>
