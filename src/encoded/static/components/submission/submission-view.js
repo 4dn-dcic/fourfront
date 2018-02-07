@@ -2295,23 +2295,26 @@ function sortPropFields(fields){
 
     /** Compare by schema property 'lookup' meta-property, if available. */
     function sortSchemaLookupFunc(a,b){
-        if (a.props.schema && b.props.schema){
-            var aLookup = a.props.schema.lookup || 750, bLookup = b.props.schema.lookup || 750;
-            if (typeof aLookup === 'number' && typeof bLookup === 'number') {
-                return aLookup - bLookup;
-            }
-        } else {
-            if (a.props.schema && !b.props.schema) return -1;
-            if (b.props.schema && !a.props.schema) return 1;
+        var aLookup = (a.props.schema && a.props.schema.lookup) || 750,
+            bLookup = (b.props.schema && b.props.schema.lookup) || 750,
+            res;
+
+        if (typeof aLookup === 'number' && typeof bLookup === 'number') {
+            //if (a.props.field === 'ch02_power_output' || b.props.field === 'ch02_power_output') console.log('X', aLookup - bLookup, a.props.field, b.props.field);
+            res = aLookup - bLookup;
         }
-        return 0;
+
+        if (res !== 0) return res;
+        else {
+            return sortTitle(a,b);
+        }
     }
 
     /** Compare by property title, alphabetically. */
     function sortTitle(a,b){
-        if (typeof a.props.title === 'string' && typeof b.props.title === 'string'){
-            if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
-            if(a.props.title.toUpperCase() > b.props.title.toUpperCase()) return 1;
+        if (typeof a.props.field === 'string' && typeof b.props.field === 'string'){
+            if(a.props.field.toLowerCase() < b.props.field.toLowerCase()) return -1;
+            if(a.props.field.toLowerCase() > b.props.field.toLowerCase()) return 1;
         }
         return 0;
     }
@@ -2325,9 +2328,9 @@ function sortPropFields(fields){
         }
     });
 
-    // Do the sorting magic - title then by schema.
-    reqFields.sort(sortTitle).sort(sortSchemaLookupFunc);
-    optFields.sort(sortTitle).sort(sortSchemaLookupFunc);
+    reqFields.sort(sortSchemaLookupFunc);
+    optFields.sort(sortSchemaLookupFunc);
+
     return reqFields.concat(optFields);
 }
 

@@ -129,7 +129,7 @@ class FileMicOverViewBody extends FileOverViewBody {
 
                         function getLightSourceCenterMicroscopeSettingFromFile(fileItem){
                             if (typeof channel !== 'string' || channel.slice(0,2) !== 'ch' || !fileItem) return null;
-                            return fileItem.microscope_settings && (fileItem.microscope_settings[channel + '_light_source_center_wl'] || fileItem.microscope_settings[channel + '_lasers_diodes']);
+                            return fileItem.microscope_settings && fileItem.microscope_settings[channel + '_light_source_center_wl'];
                         }
 
                         var matchingFile = _.find(parentExperimentWithImagingPaths.files || [], getLightSourceCenterMicroscopeSettingFromFile);
@@ -138,7 +138,7 @@ class FileMicOverViewBody extends FileOverViewBody {
                             <div className="imaging-path-item-wrapper row">
                                 <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
                                 <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
-                                { matchingFile ? <div className="microscope-setting col-xs-3 text-right">{ getLightSourceCenterMicroscopeSettingFromFile(matchingFile) }</div> : null }
+                                { matchingFile ? <div className="microscope-setting col-xs-3 text-right">{ getLightSourceCenterMicroscopeSettingFromFile(matchingFile) }nm</div> : null }
                             </div>
                         );
 
