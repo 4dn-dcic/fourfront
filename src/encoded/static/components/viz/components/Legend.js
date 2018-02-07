@@ -3,7 +3,6 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
-var barAggrFxn = require('./../BarPlot/aggregation-functions');
 var { console, isServerSide, Schemas, object } = require('./../../util');
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
@@ -212,14 +211,6 @@ export class Legend extends React.Component {
 
     static Term = Term
     static Field = Field
-
-    static aggregegateBarPlotData(experiment_sets, fields){
-        return barAggrFxn.genChartData(
-            experiment_sets,
-            fields,
-            false
-        );
-    }
 
     static barPlotFieldDataToLegendFieldsData(field, sortBy = null){
         if (Array.isArray(field) && field.length > 0 && field[0] && typeof field[0] === 'object'){

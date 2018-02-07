@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
+import queryString from 'query-string';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
@@ -158,6 +159,20 @@ class SelectAllFilesButton extends React.Component {
         'bsSize' : 'small'
     }
 
+    static fieldsToRequest = [
+        'experiments_in_set.files.accession',
+        'experiments_in_set.files.file_type_detailed',
+        'experiments_in_set.files.paired_end',
+        'experiments_in_set.files.uuid',
+        'experiments_in_set.files.related_files.file.uuid',
+        'experiments_in_set.processed_files.accession',
+        'experiments_in_set.processed_files.file_type_detailed',
+        'processed_files.accession',
+        'processed_files.file_type_detailed',
+        'accession',
+        'experiments_in_set.accession'
+    ];
+
     constructor(props){
         super(props);
         this.handleSelect = this.handleSelect.bind(this);
@@ -175,32 +190,38 @@ class SelectAllFilesButton extends React.Component {
     }
 
     handleSelect(isAllSelected = false){
-        if (typeof this.props.selectFile !== 'function'){
-            throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
+        if (typeof this.props.selectFile !== 'function' || typeof this.props.resetSelectedFiles !== 'function'){
+            throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
-
-        var allFiles = this.props.allFiles.slice(0);
-        // Some processed files may not have a 'from_experiment' property (redundant check temp), so we put in a dummy one to be able to generate a unique selector.
-        allFiles = _.map(allFiles, function(file){
-            if (typeof file.from_experiment === 'undefined'){
-                return _.extend({}, file, {
-                    'from_experiment' : {
-                        'accession' : "NONE",
-                        'from_experiment_set' : file.from_experiment_set
-                    }
-                });
-            }
-            return file;
-        });
 
         this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
             if (!isAllSelected){
-                this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles));
+                var currentHrefParts = url.parse(this.props.href, true);
+                var currentHrefQuery = _.extend({}, currentHrefParts.query);
+                currentHrefQuery.field = SelectAllFilesButton.fieldsToRequest;
+                currentHrefQuery.limit = 'all';
+                var reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
+                ajax.load(reqHref, (resp)=>{
+                    var allFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(expFxn.allFilesFromExperimentSet(v, this.props.includeProcessedFiles)), []);
+                    // Some processed files may not have a 'from_experiment' property (redundant check temp), so we put in a dummy one to be able to generate a unique selector.
+                    allFiles = _.map(allFiles, function(file){
+                        if (typeof file.from_experiment === 'undefined'){
+                            return _.extend({}, file, {
+                                'from_experiment' : {
+                                    'accession' : "NONE",
+                                    'from_experiment_set' : file.from_experiment_set
+                                }
+                            });
+                        }
+                        return file;
+                    });
+                    this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles));
+                    this.setState({ 'selecting' : false });
+                });
             } else {
-                this.props.unselectFile(expFxn.filesToAccessionTriples(allFiles, true));
+                this.props.resetSelectedFiles();
+                this.setState({ 'selecting' : false });
             }
-
-            this.setState({ 'selecting' : false });
         }));
     }
 
@@ -269,7 +290,7 @@ class SelectedFilesFilterByContent extends React.Component {
     static renderBucketCheckbox(fileType, title, clickHandler, files, button_text_prefix, fileTypeFilters){
         var selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
         return (
-            <Checkbox checked={selected} onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}>
+            <Checkbox key={fileType} checked={selected} onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null} className="text-ellipsis-container">
                 { button_text_prefix }{ title } <sub>({ files.length })</sub>
             </Checkbox>
         );
@@ -318,7 +339,7 @@ class SelectedFilesFilterByContent extends React.Component {
             <div className="row">
             {
                 _.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
-                    return <div className="col-sm-6 col-lg-3 file-type-checkbox">{ jsxButton }</div>;
+                    return <div className="col-sm-6 col-lg-3 file-type-checkbox" key={jsxButton.key || i}>{ jsxButton }</div>;
                 })
             }
             </div>,
@@ -368,13 +389,8 @@ class SelectedFilesControls extends React.Component {
     }
 
     render(){
-        //var exps = this.props.filteredExperiments || this.props.experiments;
-        var exp_sets = this.props.filtered_experiment_sets || this.props.experiment_sets;
-        var totalFilesCount = exp_sets ? _.reduce(exp_sets, (m,v) => expFxn.fileCountFromExperimentSet(v, this.props.includeProcessedFiles, this.props.includeFileSets) + m, 0) : 0;
-        var allFiles = [];
-        if (exp_sets){
-            allFiles = _.reduce(exp_sets, (m,v) => m.concat(expFxn.allFilesFromExperimentSet(v, this.props.includeProcessedFiles)), []);
-        }
+        var barPlotData = (this.props.barplot_data_filtered || this.props.barplot_data_unfiltered);
+        var totalFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
 
         // TODO:
         // var subSelectedFiles = SelectedFilesControls.filterSelectedFilesByFileTypeFilters(this.props.selectedFiles, this.state.fileTypeFilters);
@@ -382,18 +398,19 @@ class SelectedFilesControls extends React.Component {
         return (
             <div>
                 <SelectAllFilesButton
-                    allFiles={allFiles}
+                    href={this.props.href}
                     totalFilesCount={totalFilesCount}
                     selectedFiles={this.props.selectedFiles}
                     selectFile={this.props.selectFile}
                     unselectFile={this.props.unselectFile}
                     resetSelectedFiles={this.props.resetSelectedFiles}
+                    includeProcessedFiles={this.props.includeProcessedFiles}
                 />
 
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
                         <SelectedFilesFilterByButton
-                            files={allFiles}
+                            //files={allFiles}
                             setFileTypeFilters={this.props.setFileTypeFilters}
                             currentFileTypeFilters={this.props.currentFileTypeFilters}
                             totalFilesCount={totalFilesCount}
@@ -619,10 +636,12 @@ export class AboveTableControls extends React.Component {
             return (
                 <ChartDataController.Provider>
                     <SelectedFilesControls
+                        href={this.props.href}
                         selectedFiles={this.props.selectedFiles}
                         subSelectedFiles={selectedFiles}
                         selectFile={this.props.selectFile}
                         unselectFile={this.props.unselectFile}
+                        resetSelectedFiles={this.props.resetSelectedFiles}
                         onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')}
                         currentFileTypeFilters={this.state.fileTypeFilters}
                         setFileTypeFilters={this.setFileTypeFilters}
