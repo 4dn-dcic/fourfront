@@ -1,0 +1,15 @@
+[
+    {
+        "antibody_name": "anti-PolIIA",
+        "aliases": ["dcic:ab_to_polII"],
+        "description": "A test anti-PolII antibody",
+        "antibody_product_no": "ACME12345",
+        "antibody_vendor": "b31106bc-8535-4448-903e-854af460b21d",
+        "antibody_encode_accession": "ENCAB127BKP",
+        "antibody_target": "d1115d5e-40aa-43bc-b81c-32c70c9afb21",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "uuid": "4d44d12c-b37c-478b-9bc7-d843cba4ba99"
+    }
+]

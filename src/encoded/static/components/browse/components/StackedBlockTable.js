@@ -305,7 +305,7 @@ export class StackedBlockListViewMoreButton extends React.Component {
         return (
             <div className="view-more-button" onClick={this.props.handleCollapseToggle}>
                 <i className={"icon icon-" + (collapsedMsg ? 'plus': 'minus')}></i>
-                &nbsp; { collapseTitle.call(this) }
+                { collapseTitle.call(this) }
             </div>
         );
     }
@@ -329,8 +329,7 @@ export class StackedBlockList extends React.Component {
 
     static defaultProps = {
         collapseLimit : 4,
-        collapseShow : 3,
-        collapseLongLists : false
+        collapseShow : 3
     }
 
     constructor(props){
@@ -338,7 +337,7 @@ export class StackedBlockList extends React.Component {
         this.render = this.render.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
-        if (this.props.collapseLongLists && Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
+        if (props.collapseLongLists && Array.isArray(props.children) && props.children.length > props.collapseLimit){
             this.state = { 'collapsed' : true };
         }
     }
