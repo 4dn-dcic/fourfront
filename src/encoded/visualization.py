@@ -14,6 +14,7 @@ from urllib.parse import (
     parse_qs,
     urlencode,
 )
+from datetime import datetime
 from .search import (
     _ASSEMBLY_MAPPER,
     get_iterable_search_results
@@ -565,8 +566,6 @@ def bar_plot_chart(request):
         field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
         terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
 
-        if 'Item' in terms_found: print('\n\n\n\n\n\n\n\n', experiment_set)
-
         def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = None):
             if not totals_by_type:
                 totals_by_type = gen_zero_counts_dict()
@@ -581,7 +580,7 @@ def bar_plot_chart(request):
             is_leaf_field = depth + 1 == len(terms_found)
             term = terms_found[depth]
             if isinstance(term, list):
-                print('\nBar Plot Aggregator: Found multiple values for field ' + field_obj['field'] + ', using first of:', term)
+                print('Bar Plot Aggregator: Found multiple values for field ' + field_obj['field'] + ', using first of:', term)
                 term = term[0]
             if not is_leaf_field:
                 # Generate child field as term
@@ -607,5 +606,8 @@ def bar_plot_chart(request):
     # Aggregate/add counts to each field.terms.total+./child-field.terms.total+./../child-field.total+.terms bucket from each exp_set matching search query
     for exp_set in get_iterable_search_results(request, search_path, param_lists):
         aggregegate_term_counts_for_fields_from_experiment_set(exp_set, return_fields)
+
+    # Add time fetched so we can use this to compare/detect if new data (currently unused)
+    return_fields[0]['time_generated'] = str(datetime.utcnow())
 
     return return_fields[0]
