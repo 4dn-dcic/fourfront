@@ -10,3 +10,4 @@
 export { CSVMatrixView, CSVParsingUtilities } from './CSVMatrixView';
 export { Announcements } from './Announcements';
 export { TableOfContents } from './TableOfContents';
+export { StackedBlockVisual, sumPropertyFromList, groupByMultiple, cartesian } from './StackedBlockVisual';
