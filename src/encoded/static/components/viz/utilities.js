@@ -276,6 +276,41 @@ export function extendStyleOptions(propsStyleOpts, defaultStyleOpts){
 }
 
 
+export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, aggregateType = 'experiment_sets'){
+
+    function genChildren(currField){
+        return _.map(_.pairs(currField.terms), function(term_pair){
+            var termName = term_pair[0];
+            var termObj = term_pair[1];
+            var isLeafTerm = typeof termObj.experiment_sets === 'number' && typeof termObj.field === 'undefined';
+            if (isLeafTerm){
+                return {
+                    'name' : termName,
+                    'size' : termObj[aggregateType]
+                };
+            } else if (typeof termObj.terms === 'object' && termObj.terms) { // Double check that not leaf (have sub-terms)
+                return {
+                    'name' : termName,
+                    'children' : genChildren(termObj)
+                };
+            } else {
+                return {
+                    'name' : termName,
+                    'size' : termObj.total && typeof termObj.total[aggregateType] === 'number' ? termObj.total[aggregateType] : 1
+                };
+            }
+    
+        });
+    }
+
+    return {
+        'name' : rootField.field,
+        'children' : genChildren(rootField)
+    };
+
+}
+
+
 export const style = {
     
     translate3d : function(x=0, y=0, z=0, append = 'px'){
