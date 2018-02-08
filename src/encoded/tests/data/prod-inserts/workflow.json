@@ -1529,7 +1529,7 @@
                     },
                     {
                         "meta": {
-                            "cardinality": "array",
+                            "cardinality": "single",
                             "file_format": "pairs",
                             "global": true,
                             "type": "reference file"
@@ -1864,7 +1864,7 @@
                 "inputs": [
                     {
                         "meta": {
-                            "cardinality": "array",
+                            "cardinality": "single",
                             "file_format": "pairs_px2",
                             "global": true,
                             "type": "reference file"
@@ -2542,7 +2542,7 @@
                     },
                     {
                         "meta": {
-                            "cardinality": "array",
+                            "cardinality": "single",
                             "file_format": "pairs",
                             "global": true,
                             "type": "reference file"
@@ -3176,7 +3176,6 @@
                     },
                     {
                         "meta": {
-                            "cardinality": "single",
                             "global": true,
                             "type": "parameter"
                         },
@@ -4712,6 +4711,1058 @@
         ],
         "title": "Hi-C Post-alignment Processing",
         "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
+        "workflow_type": "Hi-C data analysis"
+    },
+    {
+        "app_name": "repliseq-parta",
+        "arguments": [
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "fastq"
+            },
+            {
+                "argument_format": "bwaIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bwaIndex"
+            },
+            {
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsizes"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "memperthread"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "winsize"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "bam"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "filtered_sorted_bam"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "filtered_sorted_deduped_bam"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "dedup_qc_report"
+            },
+            {
+                "argument_format": "bg",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "count_bg"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "align + filter + count",
+        "cwl_child_filenames": [
+            "clip.cwl",
+            "align.cwl",
+            "filtersort.cwl",
+            "dedup.cwl",
+            "count.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_main_filename": "repliseq-parta.cwl",
+        "data_types": [
+            "Repli-seq"
+        ],
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "lab": "4dn-dcic-lab",
+        "name": "repliseq-parta",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "input_fastq",
+                        "source": [
+                            {
+                                "name": "fastq"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "adapter removal"
+                    ],
+                    "description": "Adapter removal according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/97ffd707-b673-4184-a0f6-ca1dfc324067/",
+                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                    ]
+                },
+                "name": "clip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "out_clipped_fastq",
+                        "target": [
+                            {
+                                "name": "fastq1",
+                                "step": "align"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "fastq1",
+                        "source": [
+                            {
+                                "name": "out_clipped_fastq",
+                                "step": "clip"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "bwa_index",
+                        "source": [
+                            {
+                                "name": "bwaIndex"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "nThreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "alignment"
+                    ],
+                    "description": "Alignment according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/5befdeda-66a8-43bc-a469-5a5e7248198e/",
+                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                    ]
+                },
+                "name": "align",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_bam",
+                        "target": [
+                            {
+                                "name": "bam"
+                            },
+                            {
+                                "name": "input_bam",
+                                "step": "filtersort"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_bam",
+                                "step": "align"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "nthreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "memperthread",
+                        "source": [
+                            {
+                                "name": "memperthread"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "filtering",
+                        "sorting"
+                    ],
+                    "description": "Filtering and sorting according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
+                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                    ]
+                },
+                "name": "filtersort",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_filtered_sorted_bam",
+                        "target": [
+                            {
+                                "name": "filtered_sorted_bam"
+                            },
+                            {
+                                "name": "input_bam",
+                                "step": "dedup"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_filtered_sorted_bam",
+                                "step": "filtersort"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "duplicate removal"
+                    ],
+                    "description": "PCR Duplicate removal according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
+                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                    ]
+                },
+                "name": "dedup",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_deduped_bam",
+                        "target": [
+                            {
+                                "name": "filtered_sorted_deduped_bam"
+                            },
+                            {
+                                "name": "input_bam",
+                                "step": "count"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_deduped_bam",
+                                "step": "dedup"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chrsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "winsize",
+                        "source": [
+                            {
+                                "name": "winsize"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "binning",
+                        "aggregation"
+                    ],
+                    "description": "Read aggregation according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
+                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                    ]
+                },
+                "name": "count",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_count_bg",
+                        "target": [
+                            {
+                                "name": "count_bg"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
+        "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364",
+        "workflow_type": "Repli-seq data processing"
+    },
+    {
+        "app_name": "hi-c-processing-pairs",
+        "arguments": [
+            {
+                "argument_format": "pairs",
+                "argument_type": "Input file",
+                "workflow_argument_name": "input_pairs"
+            },
+            {
+                "argument_format": "chromsize",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsizes"
+            },
+            {
+                "argument_format": "juicer_format_restriction_site_file",
+                "argument_type": "Input file",
+                "workflow_argument_name": "restriction_file"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads_cooler"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "min_res"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "maxmem"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "higlass"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "juicer_res"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "custom_res"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nres"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads_juicebox"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chunksize"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "mapqfilter_juicer"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "max_split_cooler"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nofrag"
+            },
+            {
+                "argument_format": "pairs",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "merged_pairs"
+            },
+            {
+                "argument_format": "hic",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "hic"
+            },
+            {
+                "argument_format": "mcool",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "mcool"
+            },
+            {
+                "argument_format": "normvector_juicerformat",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "cooler_normvector"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "merging + aggregation + normalization",
+        "cwl_child_filenames": [
+            "merge-pairs.cwl",
+            "addfragtopairs.cwl",
+            "cooler.cwl",
+            "pairs2hic.cwl",
+            "cool2mcool.cwl",
+            "add-hic-normvector-to-mcool.cwl",
+            "extract-mcool-normvector-for-juicebox.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_main_filename": "hi-c-processing-pairs.cwl",
+        "data_types": [
+            "Hi-C"
+        ],
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "lab": "4dn-dcic-lab",
+        "name": "hi-c-processing-pairs",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_pairs",
+                        "source": [
+                            {
+                                "name": "input_pairs"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "merging"
+                    ],
+                    "description": "Merging pair files",
+                    "software_used": [
+                        "/software/9baf9f73-2d59-4eca-a326-340007b2a8b8/"
+                    ]
+                },
+                "name": "merge-pairs",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_format": "pairs",
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "merged_pairs",
+                        "target": [
+                            {
+                                "name": "merged_pairs"
+                            },
+                            {
+                                "name": "input_pairs",
+                                "step": "addfragtopairs"
+                            },
+                            {
+                                "name": "pairs",
+                                "step": "cooler"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_pairs",
+                        "source": [
+                            {
+                                "name": "merged_pairs",
+                                "step": "merge-pairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "restriction_file",
+                        "source": [
+                            {
+                                "name": "restriction_file"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "donothing",
+                        "source": [
+                            {
+                                "name": "nofrag"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "annotation"
+                    ],
+                    "description": "Adding restriction enzyme site information to the pairs file",
+                    "software_used": [
+                        "/software/9baf9f73-2d59-4eca-a326-340007b2a8b8/"
+                    ]
+                },
+                "name": "addfragtopairs",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "pairs_with_frags",
+                        "target": [
+                            {
+                                "name": "input_pairs",
+                                "step": "pairs2hic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "pairs",
+                        "source": [
+                            {
+                                "name": "merged_pairs",
+                                "step": "merge-pairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "chrsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "binsize",
+                        "source": [
+                            {
+                                "name": "min_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "ncores",
+                        "source": [
+                            {
+                                "name": "nthreads_cooler"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "max_split",
+                        "source": [
+                            {
+                                "name": "max_split_cooler"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "aggregation"
+                    ],
+                    "description": "Merged Pairs file is processed using Cooler",
+                    "software_used": [
+                        "/software/b43e5d6d-f1a6-4713-9b48-8f5c060dad6c/"
+                    ]
+                },
+                "name": "cooler",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_format": "cool",
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "cool",
+                        "target": [
+                            {
+                                "name": "input_cool",
+                                "step": "cool2mcool"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_format": "pairs",
+                            "argument_type": "Input file",
+                            "cardinality": "array"
+                        },
+                        "name": "input_pairs",
+                        "source": [
+                            {
+                                "name": "pairs_with_frags",
+                                "step": "addfragtopairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "chromsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "min_res",
+                        "source": [
+                            {
+                                "name": "min_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "higlass",
+                        "source": [
+                            {
+                                "name": "higlass"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "custom_res",
+                        "source": [
+                            {
+                                "name": "custom_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "maxmem",
+                        "source": [
+                            {
+                                "name": "maxmem"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "mapqfilter",
+                        "source": [
+                            {
+                                "name": "mapqfilter_juicer"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "aggregation",
+                        "normalization"
+                    ],
+                    "description": "Merged Pairs file is processed using Juicebox",
+                    "software_used": [
+                        "/software/b0c823f7-ca1e-44fb-b0f6-3eefb19eae46/"
+                    ]
+                },
+                "name": "pairs2hic",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "hic",
+                        "target": [
+                            {
+                                "name": "hic"
+                            },
+                            {
+                                "name": "input_hic",
+                                "step": "add_hic_normvector_to_mcool"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_cool",
+                        "source": [
+                            {
+                                "name": "cool",
+                                "step": "cooler"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "ncores",
+                        "source": [
+                            {
+                                "name": "nthreads_juicebox"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "chunksize",
+                        "source": [
+                            {
+                                "name": "chunksize"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "juicer_res",
+                        "source": [
+                            {
+                                "name": "juicer_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "custom_res",
+                        "source": [
+                            {
+                                "name": "custom_res"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "aggregation",
+                        "normalization",
+                        "file format conversion"
+                    ],
+                    "description": "Cooler file is converted to mcool",
+                    "software_used": [
+                        "/software/b43e5d6d-f1a6-4713-9b48-8f5c060dad6c/"
+                    ]
+                },
+                "name": "cool2mcool",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_format": "mcool",
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "mcool",
+                        "target": [
+                            {
+                                "name": "input_mcool",
+                                "step": "add_hic_normvector_to_mcool"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_mcool",
+                        "source": [
+                            {
+                                "name": "mcool",
+                                "step": "cool2mcool"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_hic",
+                        "source": [
+                            {
+                                "name": "hic",
+                                "step": "pairs2hic"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "description": "HiC normalization vector is added to mcooler",
+                    "software_used": [
+                        "/software/c1c772a8-5d1c-4481-8ab7-30729f3f6cb2/"
+                    ]
+                },
+                "name": "add_hic_normvector_to_mcool",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_format": "mcool",
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "mcool_with_hicnorm",
+                        "target": [
+                            {
+                                "name": "mcool"
+                            },
+                            {
+                                "name": "input_mcool",
+                                "step": "extract_mcool_normvector_for_juicebox"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "custom_res",
+                        "source": [
+                            {
+                                "name": "custom_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "chromsize",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "argument_type": "Input file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_mcool",
+                        "source": [
+                            {
+                                "name": "mcool_with_hicnorm",
+                                "step": "add_hic_normvector_to_mcool"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "description": "Extracting HiC normalization vector",
+                    "software_used": [
+                        "/software/f3907ef2-a9fe-4324-bc54-253a4cd53e3c/"
+                    ]
+                },
+                "name": "extract-mcool-normvector-for-juicebox",
+                "outputs": [
+                    {
+                        "meta": {
+                            "argument_format": "normvector_juicerformat",
+                            "argument_type": "Output processed file",
+                            "cardinality": "single"
+                        },
+                        "name": "cooler_normvector"
+                    }
+                ]
+            }
+        ],
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
+        "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
         "workflow_type": "Hi-C data analysis"
     }
 ]

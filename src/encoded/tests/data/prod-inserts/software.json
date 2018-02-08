@@ -2,6 +2,7 @@
     {
         "award": "1U01CA200059-01",
         "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "lab": "4dn-dcic-lab",
         "name": "STAR",
         "purpose": [
@@ -14,7 +15,6 @@
             "aligner"
         ],
         "source_url": "https://github.com/alexdobin/STAR/releases",
-        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
         "title": "STAR_2.5.1b",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66",
         "version": "2.5.1b"
@@ -22,6 +22,7 @@
     {
         "award": "1U01CA200059-01",
         "description": "Docker container for star",
+        "documentation_url": "https://docs.docker.com",
         "lab": "4dn-dcic-lab",
         "name": "DOCKER STAR",
         "references": [
@@ -30,7 +31,6 @@
         "software_type": [
             "docker container"
         ],
-        "documentation_url": "https://docs.docker.com",
         "title": "DOCKER STAR_1",
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a67",
         "version": "1"
@@ -409,5 +409,42 @@
         "title": "samtools_1.4",
         "uuid": "752e712f-4ebe-4335-a95e-53cd55a8a42f",
         "version": "1.4"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "pairsqc",
+        "software_type": [
+            "quality metric generator"
+        ],
+        "source_url": "https://github.com/4dn-dcic/pairsqc",
+        "title": "pairsqc_0.2.3",
+        "uuid": "ffa560e7-ad78-4857-bc4a-25b10234ccb0",
+        "version": "0.2.3"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "juicer_tools",
+        "software_type": [
+            "aggregator",
+            "normalizer"
+        ],
+        "source_url": "https://github.com/theaidenlab/juicebox",
+        "title": "juicer_tools_1.8.9-cuda8",
+        "uuid": "b0c823f7-ca1e-44fb-b0f6-3eefb19eae46",
+        "version": "1.8.9-cuda8"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "87a912c",
+        "lab": "4dn-dcic-lab",
+        "name": "mcool2hic",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "https://github.com/SooLee/mcool2hic",
+        "title": "mcool2hic_87a912",
+        "uuid": "f3907ef2-a9fe-4324-bc54-253a4cd53e3c"
     }
 ]
