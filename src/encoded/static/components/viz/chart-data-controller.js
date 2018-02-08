@@ -430,6 +430,10 @@ export const ChartDataController = {
         return isInitialized;
     },
 
+    isWindowActive : function(){
+        return isWindowActive;
+    },
+
     /** 
      * For React components to register an "update me" function, i.e. forceUpdate,
      * to be called when new experiments/filteredExperiments has finished loading from back-end.
