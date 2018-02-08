@@ -74,6 +74,31 @@ export default class PlannedSubmissionsPage extends React.Component {
                     columnGrouping={columnGrouping}
                     headerColumnsOrder={headerColumnsOrder}
                     columnSubGrouping={columnSubGrouping}
+                    blockClassName={function(data){
+
+                        // Figure out if we are submitted, planned, or N/A.
+                        function checkDataObjForProduction(d){
+                            if (typeof d.in_production_stage_standardized_protocol === 'string'){
+                                var checkStr = d.in_production_stage_standardized_protocol.toLowerCase();
+                                if (checkStr === 'yes' || checkStr === 'true'){
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+
+                        var origClassName = StackedBlockVisual.defaultProps.blockClassName(data);
+
+                        var statusClass = null;
+
+                        if (Array.isArray(data)) {
+                            if (_.any(data, checkDataObjForProduction)) statusClass = 'production';
+                        } else if (data && checkDataObjForProduction(data)) {
+                            statusClass = 'production';
+                        }
+
+                        return origClassName + (statusClass ? ' ' + statusClass : '');
+                    }}
                     blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
 
                         var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];

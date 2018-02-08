@@ -253,7 +253,9 @@
         "name": "joint-analysis-plans",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b1",
         "title": "Joint Analysis Matrix",
-        "content": []
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025"
+        ]
     },
     {
         "name": "privacy-policy",

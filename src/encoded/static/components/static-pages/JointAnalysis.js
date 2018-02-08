@@ -20,8 +20,17 @@ const TITLE_MAP = {
     'experiment_type' : "Experiment Type",
     'data_source' : 'Available through',
     'lab_name' : 'Lab',
-    'experiment_category' : "Category"
+    'experiment_category' : "Category",
+    'state' : 'Submission Status'
 };
+
+const STATUS_STATE_TITLE_MAP = {
+    'Submitted'     : ['released', 'current'],
+    'In Submission' : ['in review by lab', 'in review by project', 'released to project', 'released to lab', 'submission in progress'],
+    //'planned'       : ['to be uploaded by workflow', 'planned'],
+    'Out of date'   : ['archived', 'revoked'],
+    'Deleted'       : ['deleted']
+}
 
 
 export default class JointAnalysisPlansPage extends React.Component {
@@ -34,14 +43,16 @@ export default class JointAnalysisPlansPage extends React.Component {
             console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
         }
         experimentCategory = experimentCategory[0] || experimentCategory;
+
+        console.log('X', result.status);
         return _.extend({}, result, {
-            'cell_type' : cellType,
-            'experiment_category' : experimentCategory,
-            'experiment_type' : experimentType,
-            'data_source' : 'ENCODE',
-            'short_description' : result.description || null,
-            'lab_name' : (result.lab && result.lab.title) || FALLBACK_NAME_FOR_UNDEFINED,
-            '_common_name' : 'All Results'
+            'cell_type'             : cellType,
+            'experiment_category'   : experimentCategory,
+            'experiment_type'       : experimentType,
+            'data_source'           : 'ENCODE',
+            'short_description'     : result.description || null,
+            'lab_name'              : (result.lab && result.lab.title) || FALLBACK_NAME_FOR_UNDEFINED,
+            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
         });
     }
 
@@ -69,19 +80,19 @@ export default class JointAnalysisPlansPage extends React.Component {
         }
 
         return _.extend({}, result, {
-            'cell_type' : cellType,
-            'experiment_type' : experimentType,
-            'experiment_category' : experimentType,
-            'data_source' : '4DN',
-            'short_description' : experiment_titles[0] || null,
-            'lab_name' : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
-            '_common_name' : 'All Results'
+            'cell_type'             : cellType,
+            'experiment_type'       : experimentType,
+            'experiment_category'   : experimentType,
+            'data_source'           : '4DN',
+            'short_description'     : experiment_titles[0] || null,
+            'lab_name'              : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
+            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
         });
     }
 
     static defaultProps = {
-        'self_results_url'          : 'https://data.4dnucleome.org/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&limit=all',
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab',
+        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&status!=deleted&limit=all',
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
         'self_planned_results_url'  : null
     }
 
@@ -123,7 +134,12 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         _.forEach(['self_planned_results', 'self_results', 'encode_results'], (source_name)=>{
             var req_url = this.props[source_name + '_url'];
+
             if (typeof req_url !== 'string' || !req_url) return;
+
+            if (req_url.charAt(0) === '/' && this.props.href.indexOf('localhost:8000') > -1){
+                req_url = 'https://data.4dnucleome.org' + req_url;
+            } 
 
             if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
@@ -133,6 +149,22 @@ export default class JointAnalysisPlansPage extends React.Component {
             }
 
         });
+    }
+
+    legend(){
+        var context = this.props.context;
+        if (Array.isArray(context.content) && context.content.length > 0 && context.content[0].name === 'joint-analysis-data-plans#legend'){
+            // We expect first Item, if any, to be Legend.
+            var legendSection = context.content[0];
+            console.log('TTT', legendSection);
+            return (
+                <div className="col-xs-12">
+                    <div className="static-section-entry" id="legend">
+                        <div className="fourDN-content" dangerouslySetInnerHTML={{__html: legendSection.content }}/>
+                    </div>
+                </div>
+            );
+        }
     }
 
     render() {
@@ -153,17 +185,21 @@ export default class JointAnalysisPlansPage extends React.Component {
             ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
         );
 
+        console.log(resultList4DN);
+
         var resultListEncode = this.state.encode_results;
 
         return ( 
             <StaticPage.Wrapper>
                 <div className="row">
+                    { this.legend() }
                     <div className="col-xs-12 col-md-6">
+                        <h4 className="mt-2 mb-0 text-300">4DN</h4>
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
                             duplicateHeaders={false}
-                            columnSubGrouping='data_source'
+                            columnSubGrouping='experiment_category'
                             results={resultList4DN}
                             defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
@@ -171,10 +207,11 @@ export default class JointAnalysisPlansPage extends React.Component {
                         
                     </div>
                     <div className="col-xs-12 col-md-6">
+                    <h4 className="mt-2 mb-0 text-300">ENCODE</h4>
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
-                            columnSubGrouping='data_source'
+                            columnSubGrouping='experiment_category'
                             results={resultListEncode}
                             defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
@@ -231,8 +268,28 @@ class VisualBody extends React.Component {
                 defaultDepthsOpen={defaultDepthsOpen}
                 duplicateHeaders={duplicateHeaders}
                 groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
-                    console.log('DATA', data, StackedBlockVisual.Row.flattenChildBlocks(data).length)
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
+                }}
+                blockClassName={(data) => {
+                    var origClassName = StackedBlockVisual.defaultProps.blockClassName(data);
+                    // TODO: Add classname for submission-state.
+
+                    var submissionState = null;
+
+                    if (Array.isArray(data)){
+                             if (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
+                        else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
+                        else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
+                        else if (_.any(data, { 'state' : 'Deleted'          })) submissionState = 'Deleted';
+                        else if (_.any(data, { 'state' : 'None'             })) submissionState = 'None';
+                    } else {
+                        submissionState = data.state;
+                    }
+
+                    var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
+
+                    return origClassName + ' ' + submissionStateClassName;
+                    
                 }}
                 blockRenderedContents={(data, title, groupingPropertyTitle, blockProps)=>{
                     var defaultOutput = <span>&nbsp;</span>;
@@ -258,7 +315,7 @@ class VisualBody extends React.Component {
                 }}
                 blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
 
-                    var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];
+                    var keysToShow = _.keys(TITLE_MAP);
 
                     var filteredData = data;
                     if (!Array.isArray(data)){

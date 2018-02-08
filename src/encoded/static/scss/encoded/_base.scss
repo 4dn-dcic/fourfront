@@ -73,7 +73,10 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
 	}
 	&.cellType-none {
 		background-color: transparent !important;
-	}
+    }
+    &.cellType-out-of-date {
+        background-color: rgba(162, 145, 55, 0.75) !important;
+    }
 }
 
 

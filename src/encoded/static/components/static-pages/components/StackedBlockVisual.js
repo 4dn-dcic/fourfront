@@ -84,19 +84,7 @@ export class StackedBlockVisual extends React.Component {
         // @param data may be either Array (if multiple grouped into 1) or object.
         'blockClassName' : function(data){
 
-            // Figure out if we are submitted, planned, or N/A.
-            function checkDataObjForProduction(d){
-                if (typeof d.in_production_stage_standardized_protocol === 'string'){
-                    var checkStr = d.in_production_stage_standardized_protocol.toLowerCase();
-                    if (checkStr === 'yes' || checkStr === 'true'){
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            var statusClass = '';
-            var isMultipleClass = '';
+            var isMultipleClass = 'single-set';
 
             if (Array.isArray(data)) {
                 if (data.length > 1) { 
@@ -104,13 +92,9 @@ export class StackedBlockVisual extends React.Component {
                 } else {
                     isMultipleClass = 'single-set';
                 }
-                if (_.any(data, checkDataObjForProduction)) statusClass = 'production';
-            } else if (data && checkDataObjForProduction(data)) {
-                isMultipleClass = 'single-set';
-                statusClass = 'production';
             }
 
-            return [statusClass, isMultipleClass].join(' ');
+            return isMultipleClass;
         },
         'blockTooltipContents' : function(data, groupingTitle, groupingPropertyTitle, props){
 
@@ -351,10 +335,10 @@ export class StackedBlockGroupedRow extends React.Component {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
             });
-            console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
+            //console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
         }
 
-        console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
+        //console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
         
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
@@ -368,7 +352,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
             var blocksByColumnGroup, columnKeys, widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
 
-            console.log('TEsT',allChildBlocksPerChildGroup);
+            //console.log('TEsT',allChildBlocksPerChildGroup);
 
             if (allChildBlocksPerChildGroup){
                 // Generate block per each child or child group when nothing else to regroup by.
@@ -392,7 +376,7 @@ export class StackedBlockGroupedRow extends React.Component {
                         }), function(block){ return block !== null; })];
                 }));
 
-                console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
+                //console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
 
                 columnKeys = _.keys(blocksByColumnGroup);
                 if (Array.isArray(props.headerColumnsOrder)){
@@ -441,14 +425,14 @@ export class StackedBlockGroupedRow extends React.Component {
                 inner = columnKeys.map(function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
 
-                    console.log('BFG-1', blocksForGroup);
+                    //console.log('BFG-1', blocksForGroup);
                     
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string' && props.depth <= (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
                     }
 
-                    console.log('BFG-2', blocksForGroup);
+                    //console.log('BFG-2', blocksForGroup);
                     return (
                         <div
                             className="block-container-group"
