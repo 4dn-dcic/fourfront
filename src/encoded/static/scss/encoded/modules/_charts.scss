@@ -2010,6 +2010,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 > .row > .label-section {
                     padding-top: 87px;
                 }
+                &.open {
+                    > .row > .label-section {
+                        padding-top: 54px;
+                    }
+                }
             }
 
             &.open + :not(.open),
