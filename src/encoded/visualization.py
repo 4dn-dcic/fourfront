@@ -505,10 +505,15 @@ def bar_plot_chart(request):
 
         def flatten(return_list):
             if isinstance(return_list, list):
-                if len(return_list) > 0 and isinstance(return_list[0], list):
+                if len(return_list) > 0:
                     l = []
                     for rl in return_list:
-                        l = l + flatten(rl)
+                        if isinstance(rl, list):
+                            l = l + flatten(rl)
+                        elif rl is not None:
+                            l.append(rl)
+                    if len(l) == 0:
+                        return [None]
                     return l
                 if len(return_list) == 0:
                     return [None]
@@ -543,7 +548,7 @@ def bar_plot_chart(request):
                 result = result[0]
             elif len(result) == 0:
                 result = None
-        if result is None:
+        if not result:
             result = TERM_NAME_FOR_NO_VALUE
         return result
 
