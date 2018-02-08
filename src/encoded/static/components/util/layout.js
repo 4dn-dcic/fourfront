@@ -394,6 +394,48 @@ export class WindowResizeUpdateTrigger extends React.Component {
 
 }
 
+/**
+ * Wrap inside a WindowResizeUpdateTrigger for responsiveness.
+ */
+export class WidthProvider extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = {
+            'mounted' : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
+    render(){
+       
+        var domWrapperBlock = (this.state.mounted && this.refs && this.refs.wrapper) || null;
+        var width = null;
+        if (domWrapperBlock){
+            width = domWrapperBlock.offsetWidth;
+        }
+
+        var passProps = {
+            'ref' : 'childElement'
+        };
+
+        if (width) {
+            passProps.width = width;
+        } else if (this.props.fallbackWidth){
+            passProps.width = this.props.fallbackWidth;
+        }
+
+        return (
+            <div ref="wrapper">
+                { React.cloneElement(this.props.children, passProps) }
+            </div>
+        );
+    }
+}
+
 export class VerticallyCenteredChild extends React.Component {
 
     constructor(props){

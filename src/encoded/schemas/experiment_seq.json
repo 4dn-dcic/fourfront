@@ -26,6 +26,10 @@
         { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "experiment.json#/properties" }
     ],
+    "dependencies": {
+      "3p_adenylation_time": ["3p_adenylation_temperature"],
+      "3p_adenylation_temperature": ["3p_adenylation_time"]
+    },
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
@@ -56,6 +60,18 @@
             "title": "Reaction Time (min)",
             "description": "Time of a reaction eg. Digestion time in CUT&RUN experiments",
             "type": "number"
+        },
+        "3p_adenylation_time": {
+            "title": "Time of 3'Adenylation (mins)",
+            "description": "Time of the 3' Adenylation Reaction in minutes",
+            "type": "number",
+            "use_for": ["CUT&RUN"]
+        },
+        "3p_adenylation_temperature": {
+            "title": "Temperature for 3'Adenylation",
+            "description": "Temperature of the 3' Adenylation Reaction in degrees Celsius",
+            "type": "number",
+            "use_for": ["CUT&RUN"]
         }
     },
     "facets": {

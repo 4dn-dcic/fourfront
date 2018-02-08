@@ -278,8 +278,8 @@ class ResultTableContainer extends React.Component {
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
                     <AboveTableControls
                         {..._.pick(this.props,
-                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile'
+                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href',
+                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles'
                         )}
                         parentForceUpdate={this.forceUpdate.bind(this)}
                         columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
