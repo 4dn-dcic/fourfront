@@ -477,13 +477,6 @@ def trace_workflow_runs(context, request):
 @view_config(route_name='bar_plot_chart', request_method='GET')
 def bar_plot_chart(request):
 
-    def gen_zero_counts_dict():
-        return {
-            'experiments' : 0,
-            'experiment_sets' : 0,
-            'files' : 0
-        }
-
     TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
     param_lists = parse_qs(request.matchdict['search_params'])
     search_path = '/browse/'
@@ -492,6 +485,16 @@ def bar_plot_chart(request):
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
+    collect_value_from = request.params.get('collect_value')
+
+    def gen_zero_counts_dict():
+        if collect_value_from is not None:
+            return { 'value' : 0 }
+        return {
+            'experiments'       : 0,
+            'experiment_sets'   : 0,
+            'files'             : 0
+        }
 
     # Convert to list of dicts.
     return_fields = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
@@ -547,6 +550,12 @@ def bar_plot_chart(request):
     def get_counts_of_links_from_experiment_set(experiment_set, totals = None):
         if totals is None:
             totals = gen_zero_counts_dict()
+        if collect_value_from is not None:
+            val = lookup_value(experiment_set, collect_value_from)
+            if val == TERM_NAME_FOR_NO_VALUE:
+                val = 0
+            totals['value'] += int(val)
+            return totals
         # TODO (?): Filter down by if exp, files itself matches term_found itself, if terms_found item is list
         totals['experiment_sets'] += 1
         totals['experiments'] += len(experiment_set.get('experiments_in_set', []))
@@ -580,7 +589,6 @@ def bar_plot_chart(request):
             is_leaf_field = depth + 1 == len(terms_found)
             term = terms_found[depth]
             if isinstance(term, list):
-                print('Bar Plot Aggregator: Found multiple values for field ' + field_obj['field'] + ', using first of:', term)
                 term = term[0]
             if not is_leaf_field:
                 # Generate child field as term
