@@ -58,7 +58,6 @@ export class HealthView extends React.Component {
         if (!ChartDataController.isWindowActive()) return;
         this.setState({
             'db_es_total' : "loading...",
-            'db_es_compare' : "loading...",
         }, ()=>{
             ajax.load('/counts?format=json', (resp)=>{
                 this.setState({
@@ -95,6 +94,10 @@ export class HealthView extends React.Component {
                         title : "Blob Bucket",
                         description : "Name of S3 bucket used for blob data."
                     },
+                    'beanstalk_env' : {
+                        title : "Beanstalk Environment",
+                        description : "Which Elastic Beanstalk environment this instance running on."
+                    },
                     'content' : {
                         title : "Extra Information"
                     },
@@ -105,14 +108,6 @@ export class HealthView extends React.Component {
                     'elasticsearch' : {
                         title : "ElasticSearch Location",
                         description : "URI used to connect to the back-end ES instance."
-                    },
-                    'db_es_total' : {
-                        title : "DB and ES Counts",
-                        description : "Total counts of items in database and elasticsearch."
-                    },
-                    'db_es_compare' : {
-                        title : "DB and ES Counts by Type",
-                        description : "Counts of items in database and elasticsearch for each doc_type index."
                     },
                     'file_upload_bucket' : {
                         title : "File Upload Bucket",
