@@ -115,7 +115,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
     /**
      * What is to be displayed below Item description and above the TabbedView, if anything. Can return an array or single item.
-     * 
+     *
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
