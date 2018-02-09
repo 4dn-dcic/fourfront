@@ -269,14 +269,14 @@ export class OverViewBodyItem extends React.Component {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
-        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null, wrapperElementType = 'li' ){
+        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null, wrapperElementType = 'li', fullObject = null){
             var calcdName = Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip);
             if (wrapperElementType === 'div' && typeof index === 'number') {
                 return [((index + 1) + '. '), calcdName];
             }
             return calcdName;
         },
-        'biosample_treatments' : function(field, treatment, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
+        'biosample_treatments' : function(field, treatment, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
                 return null;
             }
@@ -294,20 +294,34 @@ export class OverViewBodyItem extends React.Component {
         'local_date' : function(field, timestamp){
             return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : null;
         },
-        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
+        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             return <EmbeddedItemWithAttachment {...{ item, index }} />;
         },
-        'embedded_item_with_image_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
+        'embedded_item_with_image_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             return <EmbeddedItemWithImageAttachment {...{ item, index }} />;
         },
-        'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li'){
+        'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             if (typeof value !== 'string') return null;
             return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
+        },
+        'imaging_paths_from_exp': function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'div', fullObject = null){
+            if (!value || typeof value !== 'object') return null;
+            var { channel, path } = value;
+
+            var matchingFile = _.find(fullObject.files || [], fileUtil.getLightSourceCenterMicroscopeSettingFromFile.bind(this, channel));
+
+            return (
+                <div className="imaging-path-item-wrapper row">
+                    <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
+                    <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    { matchingFile ? <div className="microscope-setting col-xs-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                </div>
+            );
         }
     }
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
-    static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
+    static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null, origResult = null){
 
         // Preprocess / uniqify:
         if (Array.isArray(items)) {
@@ -331,18 +345,18 @@ export class OverViewBodyItem extends React.Component {
         // Item List
         if (Array.isArray(items) && items.length > 1 && items[0].display_title && object.atIdFromObject(items[0])){
             items = _.map(items, function(b,i){
-                return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
+                return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement, origResult) );
             });
         } else if (Array.isArray(items) && items.length === 1 && items[0].display_title && object.atIdFromObject(items[0])) {
-            return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
+            return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div', origResult);
         } else if (Array.isArray(items) && items.length > 1){
             items = _.map(items, function(b,i){
-                return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement)  );
+                return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement, origResult)  );
             });
         } else if (Array.isArray(items) && items.length === 1){
-            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
+            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div', origResult);
         } else if (!Array.isArray(items)){
-            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, 'div');
+            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, null, 'div', origResult);
         }
         return items;
     }
@@ -364,7 +378,7 @@ export class OverViewBodyItem extends React.Component {
 
     /** Feeds params + props into static function */
     createList(valueForProperty, listItemElement, listItemElementProps){
-        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps);
+        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps, this.props.result);
     }
 
     render(){

@@ -33,6 +33,11 @@ export function isFileDataComplete(file){
     return true;
 }
 
+/** For FileMicroscropy files. */
+export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem){
+    if (typeof channel !== 'string' || channel.slice(0,2) !== 'ch' || !fileItem) return null;
+    return fileItem.microscope_settings && fileItem.microscope_settings[channel + '_light_source_center_wl'];
+}
 
 
 

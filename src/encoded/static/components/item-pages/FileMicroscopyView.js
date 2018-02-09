@@ -14,7 +14,6 @@ import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData,
 import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownloadButtonColumn } from './FileView';
 
 
-
 export default class FileMicroscopyView extends FileView {
 
     getTabViewContents(){
@@ -109,6 +108,8 @@ class FileMicOverViewBody extends FileOverViewBody {
             return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path;
         }) || parentExperimentsReversed[0] || null;
 
+        console.log('PP', parentExperimentWithImagingPaths);
+
         return (
 
             <div className="row overview-blocks">
@@ -123,26 +124,11 @@ class FileMicOverViewBody extends FileOverViewBody {
                 <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn={"col-xs-12 col-sm-" + (file.thumbnail && typeof file.thumbnail === 'string' ? '4' : '6' )} />
 
                 { parentExperimentWithImagingPaths ?
-                    <OverViewBodyItem result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(this.props.schemas || Schemas.get(), parentExperimentWithImagingPaths)} wrapInColumn="col-xs-12 col-md-6 pull-right" property='imaging_paths' fallbackTitle="Imaging Paths" listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li')=>{
-                        if (!value || typeof value !== 'object') return null;
-                        var { channel, path } = value;
-
-                        function getLightSourceCenterMicroscopeSettingFromFile(fileItem){
-                            if (typeof channel !== 'string' || channel.slice(0,2) !== 'ch' || !fileItem) return null;
-                            return fileItem.microscope_settings && fileItem.microscope_settings[channel + '_light_source_center_wl'];
-                        }
-
-                        var matchingFile = _.find(parentExperimentWithImagingPaths.files || [], getLightSourceCenterMicroscopeSettingFromFile);
-
-                        return (
-                            <div className="imaging-path-item-wrapper row">
-                                <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
-                                <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
-                                { matchingFile ? <div className="microscope-setting col-xs-3 text-right">{ getLightSourceCenterMicroscopeSettingFromFile(matchingFile) }nm</div> : null }
-                            </div>
-                        );
-
-                    }} />
+                    <OverViewBodyItem
+                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(this.props.schemas || Schemas.get(), parentExperimentWithImagingPaths)}
+                        wrapInColumn="col-xs-12 col-md-6 pull-right" property='imaging_paths' fallbackTitle="Imaging Paths"
+                        listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp}
+                    />
                 : null }
 
             </div>

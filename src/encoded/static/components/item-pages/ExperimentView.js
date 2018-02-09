@@ -16,6 +16,7 @@ import { RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 
+
 export default class ExperimentView extends WorkflowRunTracingView {
 
     getFilesTabs(width){
@@ -244,26 +245,9 @@ class OverviewHeadingMic extends React.Component {
                 <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                 <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
                 
-                <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-12 col-md-6 pull-right" property='imaging_paths' fallbackTitle="Imaging Paths" listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li')=>{
-                    if (!value || typeof value !== 'object') return null;
-                    var { channel, path } = value;
-
-                    function getLightSourceCenterMicroscopeSettingFromFile(fileItem){
-                        if (typeof channel !== 'string' || channel.slice(0,2) !== 'ch' || !fileItem) return null;
-                        return fileItem.microscope_settings && (fileItem.microscope_settings[channel + '_light_source_center_wl'] || fileItem.microscope_settings[channel + '_lasers_diodes']);
-                    }
-
-                    var matchingFile = _.find(exp.files || [], getLightSourceCenterMicroscopeSettingFromFile);
-
-                    return (
-                        <div className="imaging-path-item-wrapper row">
-                            <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
-                            <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
-                            { matchingFile ? <div className="microscope-setting col-xs-3 text-right">{ getLightSourceCenterMicroscopeSettingFromFile(matchingFile) }</div> : null }
-                        </div>
-                    );
-
-                }} />
+                <OverViewBodyItem {...commonProps} property='imaging_paths' fallbackTitle="Imaging Paths"
+                    wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement='div' listWrapperElement='div' singleItemClassName="block"
+                    titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
 
                 <OverViewBodyItem {...commonProps} property='microscopy_technique' fallbackTitle="Microscopy Technique" />
                 <OverViewBodyItem {...commonProps} property='microscope_qc' fallbackTitle="Microscope Quality Control" />
