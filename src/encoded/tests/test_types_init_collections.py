@@ -100,5 +100,5 @@ def test_antibody_display_title_name_only(ab_w_name):
 
 def test_antibody_display_title_name_and_accession(testapp, ab_w_name):
     acc = 'ENCAB111AAA'
-    res = testapp.patch_json(ab_w_name['@id'], {'antibody_encode_accession': acc}).json['@graph'][0]
+    res = testapp.patch_json(ab_w_name['@id'], {'antibody_product_no': acc}).json['@graph'][0]
     assert res['display_title'] == 'testAb (' + acc + ')'

@@ -101,9 +101,9 @@ class Antibody(Item):
         dt = ''
         if self.properties.get('antibody_name'):
             dt = self.properties.get('antibody_name')
-        if self.properties.get('antibody_encode_accession'):
-            acc = self.properties.get('antibody_encode_accession')
-            dt = dt + ' (' + acc + ')'
+        if self.properties.get('antibody_product_no'):
+            prod = self.properties.get('antibody_product_no')
+            dt = dt + ' (' + prod + ')'
         return dt
 
 
