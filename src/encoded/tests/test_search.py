@@ -1,6 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
+from time import sleep
 from encoded.commands.upgrade_test_inserts import get_inserts
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
@@ -348,12 +349,15 @@ def test_search_with_no_value(workbook, testapp):
 def test_barplot_aggregation_endpoint(workbook, testapp):
 
     # run a simple query with type=Organism and q=mouse
-    search_result = testapp.get('/browse/?type=ExperimentSetReplicate').json
+    search_result_1 = testapp.get('/browse/?type=ExperimentSetReplicate').json
+    sleep(2)
+    search_result_2 = testapp.get('/browse/?type=ExperimentSetReplicate').json
 
     # We should get back our test insert expsets here.
     exp_set_test_inserts = list(get_inserts('inserts', 'experiment_set_replicate'))
     count_exp_set_test_inserts = len(exp_set_test_inserts)
-    assert len(search_result['@graph']) == count_exp_set_test_inserts
+
+    assert len(search_result_2['@graph']) == count_exp_set_test_inserts
 
     # Now, test the endpoint after ensuring we have the data correctly loaded into ES.
 
