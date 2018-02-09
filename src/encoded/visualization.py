@@ -478,14 +478,22 @@ def trace_workflow_runs(context, request):
 def bar_plot_chart(request):
 
     TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
-    param_lists = parse_qs(request.matchdict['search_params'])
     search_path = '/browse/'
-
+    param_lists = parse_qs(request.matchdict['search_params'])
     fields_to_aggregate_for = request.params.getall('field')
+    collect_value_from = request.params.get('collect_value')
+
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
-    collect_value_from = request.params.get('collect_value')
+    def gen_zero_counts_dict():
+        if collect_value_from is not None:
+            return { 'value' : 0 }
+        return {
+            'experiments'       : 0,
+            'experiment_sets'   : 0,
+            'files'             : 0
+        }
 
     def gen_zero_counts_dict():
         if collect_value_from is not None:
@@ -503,23 +511,23 @@ def bar_plot_chart(request):
         '''TODO: Move somewhere more re-usable, snovault.embed maybe?'''
         field_parts = field_string.split('.')
 
-        def flatten(return_list):
-            if isinstance(return_list, list):
-                if len(return_list) > 0:
-                    l = []
-                    for rl in return_list:
-                        if isinstance(rl, list):
-                            l = l + flatten(rl)
-                        elif rl is not None:
-                            l.append(rl)
-                    if len(l) == 0:
-                        return [None]
-                    return l
-                if len(return_list) == 0:
-                    return [None]
-                return return_list
+        def flatten(some_list):
+            if isinstance(some_list, list):
+                l = []
+                for rl in some_list:
+                    if isinstance(rl, list):
+                        l = l + flatten(rl)
+                    elif rl is not None:
+                        l.append(rl)
+                return l
             else:
-                return [return_list]
+                return [some_list]
+
+        def uniq(some_list):
+            seen = set() # From https://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-whilst-preserving-order
+            seen_add = seen.add
+            return [x for x in some_list if not (x in seen or seen_add(x))]
+
 
         def lookup(obj, depth = 0):
             if len(field_parts) <= depth or obj is None:
@@ -541,9 +549,7 @@ def bar_plot_chart(request):
         result = lookup(obj_to_find_val_in, 0)
 
         if isinstance(result, list):
-            result = flatten([r for r in result if r]) # Filter + Flatten into single list of vals.
-            result_set = set(result) # Uniqify
-            result = [ r for r in result if r in result_set ] # Maintain order
+            result = uniq([ r for r in flatten(result) if r ]) # Flatten + Filter + Uniq into single list of vals.
             if len(result) == 1:
                 result = result[0]
             elif len(result) == 0:
