@@ -5226,8 +5226,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "array",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -5250,9 +5252,10 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "merged_pairs",
                         "target": [
@@ -5260,12 +5263,10 @@
                                 "name": "merged_pairs"
                             },
                             {
-                                "name": "input_pairs",
-                                "step": "addfragtopairs"
+                                "name": "input_pairs"
                             },
                             {
-                                "name": "pairs",
-                                "step": "cooler"
+                                "name": "pairs"
                             }
                         ]
                     }
@@ -5275,8 +5276,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -5288,8 +5291,10 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "juicer_format_restriction_site_file",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "restriction_file",
                         "source": [
@@ -5300,8 +5305,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "donothing",
                         "source": [
@@ -5324,14 +5330,15 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "pairs_with_frags",
                         "target": [
                             {
-                                "name": "input_pairs",
-                                "step": "pairs2hic"
+                                "name": "input_pairs"
                             }
                         ]
                     }
@@ -5341,8 +5348,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "pairs",
                         "source": [
@@ -5354,8 +5363,10 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chrsizes",
                         "source": [
@@ -5366,8 +5377,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "binsize",
                         "source": [
@@ -5378,8 +5390,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -5390,8 +5403,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "max_split",
                         "source": [
@@ -5414,15 +5428,15 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "cool",
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "cool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "cool",
                         "target": [
                             {
-                                "name": "input_cool",
-                                "step": "cool2mcool"
+                                "name": "input_cool"
                             }
                         ]
                     }
@@ -5432,9 +5446,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_format": "pairs",
-                            "argument_type": "Input file",
-                            "cardinality": "array"
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_pairs",
                         "source": [
@@ -5446,8 +5461,10 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsizes",
                         "source": [
@@ -5458,8 +5475,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "min_res",
                         "source": [
@@ -5470,8 +5488,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "higlass",
                         "source": [
@@ -5482,8 +5501,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "custom_res",
                         "source": [
@@ -5494,8 +5514,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "maxmem",
                         "source": [
@@ -5506,8 +5527,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "mapqfilter",
                         "source": [
@@ -5531,8 +5553,7 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "global": true
                         },
                         "name": "hic",
                         "target": [
@@ -5540,8 +5561,7 @@
                                 "name": "hic"
                             },
                             {
-                                "name": "input_hic",
-                                "step": "add_hic_normvector_to_mcool"
+                                "name": "input_hic"
                             }
                         ]
                     }
@@ -5551,8 +5571,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "cool",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_cool",
                         "source": [
@@ -5564,8 +5586,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "ncores",
                         "source": [
@@ -5576,8 +5599,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "chunksize",
                         "source": [
@@ -5588,8 +5612,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "juicer_res",
                         "source": [
@@ -5600,8 +5625,9 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "custom_res",
                         "source": [
@@ -5626,15 +5652,15 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "mcool",
                         "target": [
                             {
-                                "name": "input_mcool",
-                                "step": "add_hic_normvector_to_mcool"
+                                "name": "input_mcool"
                             }
                         ]
                     }
@@ -5644,8 +5670,10 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "mcool",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_mcool",
                         "source": [
@@ -5657,8 +5685,10 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "hic",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_hic",
                         "source": [
@@ -5678,13 +5708,14 @@
                         "/software/c1c772a8-5d1c-4481-8ab7-30729f3f6cb2/"
                     ]
                 },
-                "name": "add_hic_normvector_to_mcool",
+                "name": "add-hic-normvector-to-mcool",
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "mcool",
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "mcool",
+                            "global": true,
+                            "type": "data file"
                         },
                         "name": "mcool_with_hicnorm",
                         "target": [
@@ -5692,8 +5723,7 @@
                                 "name": "mcool"
                             },
                             {
-                                "name": "input_mcool",
-                                "step": "extract_mcool_normvector_for_juicebox"
+                                "name": "input_mcool"
                             }
                         ]
                     }
@@ -5703,8 +5733,9 @@
                 "inputs": [
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "custom_res",
                         "source": [
@@ -5715,8 +5746,10 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
                         },
                         "name": "chromsize",
                         "source": [
@@ -5727,14 +5760,16 @@
                     },
                     {
                         "meta": {
-                            "argument_type": "Input file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "mcool",
+                            "global": false,
+                            "type": "data file"
                         },
                         "name": "input_mcool",
                         "source": [
                             {
                                 "name": "mcool_with_hicnorm",
-                                "step": "add_hic_normvector_to_mcool"
+                                "step": "add-hic-normvector-to-mcool"
                             }
                         ]
                     }
@@ -5752,11 +5787,17 @@
                 "outputs": [
                     {
                         "meta": {
-                            "argument_format": "normvector_juicerformat",
-                            "argument_type": "Output processed file",
-                            "cardinality": "single"
+                            "cardinality": "single",
+                            "file_format": "normvector_juicerformat",
+                            "global": true,
+                            "type": "data file"
                         },
-                        "name": "cooler_normvector"
+                        "name": "cooler_normvector",
+                        "target": [
+                            {
+                                "name": "cooler_normvector"
+                            }
+                        ]
                     }
                 ]
             }
