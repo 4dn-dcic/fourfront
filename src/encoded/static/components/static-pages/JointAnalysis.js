@@ -137,15 +137,10 @@ export default class JointAnalysisPlansPage extends React.Component {
 
             if (typeof req_url !== 'string' || !req_url) return;
 
-            if (req_url.charAt(0) === '/' && this.props.href.indexOf('localhost:8000') > -1){
-                req_url = 'https://data.4dnucleome.org' + req_url;
-            } 
-
             if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
             } else {
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name));
-                //ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
             }
 
         });
@@ -156,7 +151,6 @@ export default class JointAnalysisPlansPage extends React.Component {
         if (Array.isArray(context.content) && context.content.length > 0 && context.content[0].name === 'joint-analysis-data-plans#legend'){
             // We expect first Item, if any, to be Legend.
             var legendSection = context.content[0];
-            console.log('TTT', legendSection);
             return (
                 <div className="col-xs-12">
                     <div className="static-section-entry" id="legend">
@@ -185,8 +179,6 @@ export default class JointAnalysisPlansPage extends React.Component {
             ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
         );
 
-        console.log(resultList4DN);
-
         var resultListEncode = this.state.encode_results;
 
         return ( 
@@ -201,7 +193,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                             duplicateHeaders={false}
                             columnSubGrouping='experiment_category'
                             results={resultList4DN}
-                            defaultDepthsOpen={[true, false, false]}
+                            //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
                         />
                         
@@ -213,7 +205,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                             columnGrouping='cell_type'
                             columnSubGrouping='experiment_category'
                             results={resultListEncode}
-                            defaultDepthsOpen={[false, false, false]}
+                            //defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
                             collapseToMatrix
                         />
@@ -245,8 +237,6 @@ class VisualBody extends React.Component {
             'other imaging',
             'proteomics'
         ];
-
-        
 
         // Filter out properties from objects which we don't want to be shown in tooltip.
         //var keysToInclude = [
