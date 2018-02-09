@@ -398,85 +398,27 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         // END CREATE/HANDLE GROUP NODEES
 
         return expandRunDataArraysToIndividualNodes(valuesForArgument, isParameterArgument ? 'value' : 'file');
-        
+
     }
 
-    /**
-     * Generate output nodes from step.outputs and create edges between them and stepNode.
-     * 
-     * @param {Step} step - Analysis Step
-     * @param {number} column - Column index (later translated into X coordinate).
-     * @param {Node} stepNode - Analysis Step Node Reference
-     * @returns {Node[]} List of new output nodes.
-     */
-    function generateOutputNodesSimple(step, column, stepNode){
-
-        var outputNodesToCreate = _.flatten(step.outputs.map(function(stepOutput, j){
-            return expandIONodes(stepOutput, column, stepNode, "output", false);
-        }), true);
-
-        // Find __ INPUT __ nodes with same file (checks OUTPUT as well, there just shouldn't be any unless a unique file comes out of 2+ steps)
-        // if any exist, replace them, re-use instead of adding new, and make edge.
-        // also... : move node down in column list somehow
-        var existingMatchedNodes = [];
-        var newOutputNodes = _.filter(outputNodesToCreate, function(oN){
-            for (var i = 0; i < nodes.length; i++){
-                if (nodes[i] && nodes[i].meta && nodes[i].meta.run_data && nodes[i].meta.run_data.file){
-                    if (checkNodeFileForMatch(oN, nodes[i].meta.run_data.file)){
-                        nodes[i].outputOf = stepNode;
-                        
-                        nodes[i].format = oN.format;
-                        nodes[i].nodeType = 'output'; // Convert our found input file to an output file, if not already.
-                        if (nodes[i].meta && oN.meta && oN.meta.type) nodes[i].meta.type = oN.meta.type;
-                        if (nodes[i].meta && oN.meta && oN.meta.file_format) nodes[i].meta.file_format = oN.meta.file_format;
-                        if (nodes[i].meta && oN.meta && oN.meta.global) nodes[i].meta.global = oN.meta.global;
-                        if (nodes[i].meta && oN.meta && oN.meta.argument_type) nodes[i].meta.argument_type = oN.meta.argument_type;
-                        if (!nodes[i]._source && oN._source) nodes[i]._source = oN._source;
-                        if (!nodes[i]._target && oN._target) nodes[i]._source = oN._target;
-                        nodes[i].wasMatchedAsOutputOf = stepNode.name; // For debugging.
-                        edges.push({
-                            'source' : stepNode,
-                            'target' : nodes[i],
-                            'capacity' : 'Output',
-                        });
-                        existingMatchedNodes.push(nodes[i]);
-                        return false;
-                    }
-                }
-            }
-            return true;
-        });
-
-        stepNode.outputNodes = _.sortBy(existingMatchedNodes.concat(newOutputNodes), 'id');
-        
-        newOutputNodes.forEach(function(n){
-            edges.push({
-                'source' : stepNode,
-                'target' : n,
-                'capacity' : 'Output',
-            });
-        });
-
-        nodes = nodes.concat(newOutputNodes);
-        return newOutputNodes;
-    }
-
-    
-
-    
 
     /**
-     * Find existing or generate new input nodes for each input in step.inputs and
+     * Find existing or generate new IO nodes for each input or output argument in step.inputs or step.outputs and
      * create edges between them and stepNode.
      * 
      * @param {Step} step - Analysis Step
      * @param {number} column - Column index (later translated into X coordinate).
      * @param {Node} stepNode - Analysis Step Node Reference
-     * @returns {Object} Object containing two lists - 'created' and 'matched' - containing nodes which were newly created and matched & re-used, respectively, for this step's input arguments.
+     * @param {string} [ioNodeType='input'] - Type of IO, either 'input' or 'output'.
+     * @returns {{ 'created' : Node[], 'matched' : Node[] }} Object containing two lists - 'created' and 'matched' - containing nodes which were newly created and matched & re-used, respectively, for this step's input arguments.
      */
-    function generateInputNodesComplex(step, column, stepNode){
-        var inputNodesMatched = [];
-        var inputNodesCreated = [];
+    function generateIONodesFromStep(step, column, stepNode, ioNodeType = 'input'){
+
+        var stepIOTargetType = ioNodeType === 'input' ? 'source' : 'target';
+        var  oppIOTargetType = ioNodeType === 'input' ? 'target' : 'source';
+
+        var ioNodesMatched = [];
+        var ioNodesCreated = [];
 
         /**
          * Compares an input node and a step input argument to see if they refer to same file or value, independent of matching argument names.
@@ -486,60 +428,60 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
          * @param {StepIOArgument} - Step Input argument whose source.for_file to compare against node run_data file.
          * @returns {boolean} True if both have same file.
          */
-        function areInputRunDataPresentAndEqual(node, stepInput){
+        function areInputRunDataPresentAndEqual(node, stepIO){
             if (!(node.meta && node.meta.run_data)) return false;
-            if (!(stepInput.source.length === 1 && typeof stepInput.source[0].step === 'undefined')) return false;
+            if (!(stepIO[stepIOTargetType].length === 1 && typeof stepIO[stepIOTargetType][0].step === 'undefined')) return false;
             return (
-                (node.meta.run_data.file && node.meta.run_data.file.uuid && typeof stepInput.source[0].for_file === 'string' && node.meta.run_data.file.uuid === stepInput.source[0].for_file) ||
-                (typeof node.meta.run_data.value !== 'undefined' && stepInput.run_data && typeof stepInput.run_data.value !== 'undefined' && node.meta.run_data.value === stepInput.run_data.value)
+                (node.meta.run_data.file && node.meta.run_data.file.uuid && typeof stepIO[stepIOTargetType][0].for_file === 'string' && node.meta.run_data.file.uuid === stepIO[stepIOTargetType][0].for_file) ||
+                (typeof node.meta.run_data.value !== 'undefined' && stepIO.run_data && typeof stepIO.run_data.value !== 'undefined' && node.meta.run_data.value === stepIO.run_data.value)
             );
         }
 
-        step.inputs.forEach(function(fullStepInput){
-            if (!Array.isArray(fullStepInput.source)) return;
+        _.forEach(step[ioNodeType + 's'], function(stepIO){
+            if (!Array.isArray(stepIO[stepIOTargetType])) return;
 
             var inputNodes = []; // All input nodes matched to step input will be in here, e.g. to draw edges from to step.
 
             // Step 1a. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var ioNodeIDsMatched = {  };
 
-            var currentInputNodesMatched = (
-                _.filter(nodes /*allRelatedIONodes*/, function(n){
+            var currentIONodesMatched = (
+                _.filter(nodes, function(n){
                     
                     // Ignore any step nodes
                     if (n.nodeType === 'step') return false;
 
                     // Re-use global inputs nodes if not cardinality:array
-                    if (fullStepInput.source.length === 1 && typeof fullStepInput.source[0].step === 'undefined' && !(fullStepInput.meta && fullStepInput.meta.cardinality === 'array')){ // Is global input file
+                    if (ioNodeType === 'input' && stepIO[stepIOTargetType].length === 1 && typeof stepIO[stepIOTargetType][0].step === 'undefined' && !(stepIO.meta && stepIO.meta.cardinality === 'array')){ // Is global input file
                         if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && (
-                            n._source[0].name === fullStepInput.source[0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, fullStepInput) /* <-- for provenance graphs */
+                            n._source[0].name === stepIO.source[0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, stepIO) /* <-- for provenance graphs */
                         )){
                             // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
-                            if (!(n.meta && n.meta.run_data) || areInputRunDataPresentAndEqual(n, fullStepInput)){
-                                ioNodeIDsMatched[n.id] = ioNodeName(fullStepInput);
+                            if (!(n.meta && n.meta.run_data) || areInputRunDataPresentAndEqual(n, stepIO)){
+                                ioNodeIDsMatched[n.id] = ioNodeName(stepIO);
                                 return true;
                             }
                         }
-                    } else if (_.any(fullStepInput.source, function(s){ // Compare IO nodes against step input arg sources
+                    } else if (_.any(stepIO[stepIOTargetType], function(s){ // Compare IO nodes against step input arg sources
                         
                         // Match nodes by source step & name, check that they target this step.
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n._target) && _.any(n._target, function(t){ return t.step === step.name; })){
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n['_' + oppIOTargetType]) && _.any(n['_' + oppIOTargetType], function(t){ return t.step === step.name; })){
                             return true;
                         }
 
                         // Extra CWL-like check case by existing node target step match
-                        if (Array.isArray(n._target) && _.any(n._target, function(t){
-                            return (t.step === step.name && fullStepInput.name === t.name);
+                        if (Array.isArray(n['_' + oppIOTargetType]) && _.any(n['_' + oppIOTargetType], function(t){
+                            return (t.step === step.name && stepIO.name === t.name);
                         })) return true;
 
                         /**** EXTRA NON-CWL THINGS ****/
 
                         // Match Groups
-                        if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
-                            if (n.meta && Array.isArray(n._source) && _.any(n._source, function(nodeSource){
+                        if (ioNodeType === 'input' && typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
+                            if (n.meta && Array.isArray(n['_' + stepIOTargetType]) && _.any(n['_' + stepIOTargetType], function(nodeSource){
                                 return typeof nodeSource.grouped_by === 'string' && typeof nodeSource[nodeSource.grouped_by] === 'string' && nodeSource[nodeSource.grouped_by] === s[s.grouped_by];
                             })){ // Matched by Workflow (or other grouping type), now lets ensure it's the right group.
-                                var nodeBeingCheckedGroupFiles = _.pluck(_.filter(n._source, function(nS){ return typeof nS.for_file === 'string'; }), 'for_file');
+                                var nodeBeingCheckedGroupFiles = _.pluck(_.filter(n['_' + stepIOTargetType], function(nS){ return typeof nS.for_file === 'string'; }), 'for_file');
                                 return (s.for_file && _.contains(nodeBeingCheckedGroupFiles, s.for_file) && true) || false;
                             }
                         }
@@ -550,9 +492,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         
                         return false;
                     })){
-                        // We save stepIOArgument.name here rather than the fullStepInput ID because ID is generated by us and is just name + ~increment if non-unique name (same arg name on different steps).
+                        // We save stepIOArgument.name here rather than the stepIO ID because ID is generated by us and is just name + ~increment if non-unique name (same arg name on different steps).
                         // IO node name is unique re: unique context of input/output names within a step.
-                        ioNodeIDsMatched[n.id] = ioNodeName(fullStepInput);
+                        ioNodeIDsMatched[n.id] = ioNodeName(stepIO);
                         return true;
                     }
 
@@ -560,20 +502,19 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 })
             );
 
-            //console.log('MATCHED', currentInputNodesMatched, nodes, ioNodeIDsMatched);
+            //console.log('MATCHED', currentIONodesMatched, nodes, ioNodeIDsMatched);
 
             // Step 1b. Create input nodes we need to add, and extend our matched node with its fake-new-node-counterpart's data.
-            var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
-            //console.log('NEED TO FILTER for' + fullStepInput.name, _.pluck(inputNodesToMatch, 'id'));
+            var ioNodesToCreate = expandIONodes(stepIO, column, stepNode, ioNodeType, true);
+            //console.log('NEED TO FILTER for' + stepIO.name, _.pluck(inputNodesToMatch, 'id'));
             //console.log('NEED TO EXTEND FROM', inputNodesToMatch);
 
-            if (currentInputNodesMatched.length > 0){
-                inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
-                inputNodes = inputNodes.concat(currentInputNodesMatched); // Add to inputNodes var to later draw edge for.
+            if (currentIONodesMatched.length > 0){
+                ioNodesMatched = ioNodesMatched.concat(currentIONodesMatched);
 
                 // Extend each existing node `n` that we've matched with data from nodes that would've been newly created otherwise `inNode`.
-                _.forEach(currentInputNodesMatched, function(n){
-                    // Sub-Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentInputNodesMatched`.
+                _.forEach(currentIONodesMatched, function(n){
+                    // Sub-Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentIONodesMatched`.
                     try {
                         //console.log('FIND', n.id, ioNodeIDsMatched[n.id], stepNode);
                         var inNode, inNodes = _.where(inputNodesToMatch, { 'name' : ioNodeIDsMatched[n.id] });
@@ -596,31 +537,39 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
                     // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
                     var combinedMeta = _.extend(n.meta, inNode.meta, {
-                        'global' : n.meta.global || inNode.meta.global || false // Make true if either is true.
+                        'global' : n.meta.global || inNode.meta.global || false, // Make true if either is true.
+                        'type' : (n.meta && n.meta.type) || (inNode.meta && inNode.meta.type),
+                        'file_format' : (n.meta && n.meta.file_format) || (inNode.meta && inNode.meta.file_format)
                     });
                     _.extend(n, {
-                        'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
                         'meta' : combinedMeta,
-                        'name' : ioNodeName(combinedMeta) || n.name,
+                        'name' : ioNodeType === 'output' ? (inNode.name || n.name) : (n.name || inNode.name),
                         'argNamesOnSteps' : _.extend(n.argNamesOnSteps, inNode.argNamesOnSteps),
-                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name), // Used only for debugging.
                         '_source' : n._source || inNode._source,
-                        '_target' : n._target || inNode._target
+                        '_target' : n._target || inNode._target,
+                        'ioType' : n.ioType || inNode.ioType,
+                        'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id')
                     });
+                    if (ioNodeType === 'input'){
+                        n.wasMatchedAsInputOf = (n.wasMatchedAsInputOf || []).concat(stepNode.name); // Used only for debugging.
+                    } else {
+                        n.wasMatchedAsInputOf = stepNode.name; // Used only for debugging.
+                        n.outputOf = stepNode;
+                    }
                 });
             }
 
-            // Step 2. Filter out nodes from inputNodesToMatch which we have matched already, then for any unmatched input nodes, create them (via adding to high-level output 'nodes' list & cementing their ID).
-            if (currentInputNodesMatched.length < inputNodesToMatch.length){
-                var unmatchedInputNodes = _.map(
-                    _.filter(inputNodesToMatch, function(n,idx){
+            // Step 2. Filter out nodes from ioNodesToCreate which we have matched already, then for any unmatched input nodes, create them (via adding to high-level output 'nodes' list & cementing their ID).
+            if (currentIONodesMatched.length < ioNodesToCreate.length){
+                var unmatchedIONodesToCreate = _.map(
+                    _.filter(ioNodesToCreate, function(n,idx){
                         
                         if (typeof ioNodeIDsMatched[n.id] !== 'undefined') return false;
 
                         // Compare new node's file with already-matched files to filter new node out, if have files.
                         if (n.meta && n.meta.run_data && n.meta.run_data.file){
                             var fileToMatch = n.meta.run_data.file;
-                            var filesToCheck = _.filter(_.map(currentInputNodesMatched, function(n2){
+                            var filesToCheck = _.filter(_.map(currentIONodesMatched, function(n2){
                                 return (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
                             }), function(n2){ return n2 !== null; });
 
@@ -632,40 +581,46 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     }),
                     function(n){
                         n.id = preventDuplicateNodeID(n.id, false); // Cement ID in dupe ID cache from previously read-only 'to-check-only' value.
-                        n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.name); // Add reference to stepNode to indicate how/where was drawn from. For debugging only.
+                        if (ioNodeType === 'input'){
+                            n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.name); // Add reference to stepNode to indicate how/where was drawn from. For debugging only.
+                        } else {
+                            n.generatedAsOutputOf = (n.generatedAsOutputOf || []).concat(stepNode.name);
+                        }
                         return n;
                     }
                 );
-                nodes = nodes.concat(unmatchedInputNodes); // <- Add new nodes to list of all nodes.
-                inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
-                inputNodes = inputNodes.concat(unmatchedInputNodes);
-                //console.log('NEW NODES CREATED', unmatchedInputNodes, unmatchedInputNodes[0].column, stepNode.column, stepNode.id);
+                nodes = nodes.concat(unmatchedIONodesToCreate); // <- Add new nodes to list of all nodes.
+                ioNodesCreated = ioNodesCreated.concat(unmatchedIONodesToCreate);
+                //console.log('NEW NODES CREATED', unmatchedIONodesToCreate, unmatchedIONodesToCreate[0].column, stepNode.column, stepNode.id);
             }
 
             //console.log('CREATED', inputNodesCreated, ioNodeIDsMatched);
 
             // Keep references to incoming nodes on our step.
-            stepNode.inputNodes = _.sortBy(  inputNodesCreated.concat(inputNodesMatched)  , 'id'  );
+            //console.log('EXISTINGNODES', stepNode[ioNodeType + 'Nodes'])
+            stepNode[ioNodeType + 'Nodes'] = _.sortBy(  ioNodesCreated.concat(ioNodesMatched)  , 'id'  );
+            //console.log('NEWNODES', stepNode[ioNodeType + 'Nodes']) // We get EXISTINGNODES + 1.
 
             // Finally, attach edge to all input nodes associated to step input.
-            if (inputNodes.length > 0) {
-                _.forEach(inputNodes, function(n){
+            if (stepNode[ioNodeType + 'Nodes'].length > 0) {
+                _.forEach(stepNode[ioNodeType + 'Nodes'], function(n){
                     var existingEdge = _.find(edges, function(e){
-                        if (e.source === n && e.target === stepNode) return true;
+                        if (e[stepIOTargetType] === n && e[oppIOTargetType] === stepNode) return true;
                     });
                     if (existingEdge) return;
-                    edges.push({
-                        'source' : n,
-                        'target' : stepNode,
-                        'capacity' : 'Input'
-                    });
+                    var newEdge = {};
+                    newEdge[stepIOTargetType] = n;
+                    newEdge[oppIOTargetType] = stepNode;
+                    newEdge.capacity = ioNodeType;
+                    edges.push(newEdge);
                 });
             }
 
         });
 
-        return { 'created' : inputNodesCreated, 'matched' : inputNodesMatched };
+        return { 'created' : ioNodesCreated, 'matched' : ioNodesMatched };
     }
+
 
     function findNextStepsFromIONode(ioNodes){
 
@@ -697,29 +652,20 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     function processStepInPath(step, level = 0){
         var stepNode = generateStepNode(step, (level + 1) * 2 - 1);
 
-        var inputNodesUsedOrCreated, outputNodesCreated;
-
         if (parsingMethod === 'output'){
-            inputNodesUsedOrCreated = generateInputNodesComplex(
-                step,                   // Step
-                (level + 1) * 2 - 2,    // (Preliminary) Column
-                stepNode                // Step Node
-            );
-            outputNodesCreated = generateOutputNodesSimple(
-                step,                   // Step
-                (level + 1) * 2,        // (Preliminary) Column
-                stepNode                // Step Node
-            );
+
+            var inputNodes = generateIONodesFromStep(step, (level + 1) * 2 - 2, stepNode, 'input');
+            var outputNodes = generateIONodesFromStep(step, (level + 1) * 2, stepNode, 'output');
 
             nodes.push(stepNode);
 
             processedSteps[stepNode.name] = stepNode;
 
-            findNextStepsFromIONode(outputNodesCreated).forEach(function(nextStep){
+            _.forEach(findNextStepsFromIONode(outputNodes.created), function(nextStep){
                 if (typeof processedSteps[nextStep.name] === 'undefined'){
                     processStepInPath(nextStep, level + 1);
                 } else {
-                    generateInputNodesComplex(nextStep, (level + 2) * 2 - 2, processedSteps[nextStep.name]);
+                    generateIONodesFromStep(nextStep, (level + 2) * 2 - 2, processedSteps[nextStep.name], 'input');
                 }
             });
         } else {
