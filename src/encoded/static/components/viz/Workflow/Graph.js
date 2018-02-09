@@ -319,11 +319,11 @@ export default class Graph extends React.Component {
                     nodesInColumn.splice(firstReferenceIndex, 0, {
                         'nodeType' : 'spacer',
                         'column' : 0,
-                        'id' : 'spacer1' 
+                        'id' : 'spacer1'
                     },{
                         'nodeType' : 'spacer',
                         'column' : 0,
-                        'id' : 'spacer2' 
+                        'id' : 'spacer2'
                     });
                 }
             }
