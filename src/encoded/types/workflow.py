@@ -757,7 +757,6 @@ def validate_input_json(context, request):
 @view_config(name='pseudo-run', context=WorkflowRun.Collection, request_method='POST',
              permission='add', validators=[validate_input_json])
 def pseudo_run(context, request):
-    # properties = context.upgrade_properties()
     input_json = request.json
 
     # set env_name for awsem runner in tibanna
