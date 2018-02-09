@@ -109,7 +109,7 @@ export default class Graph extends React.Component {
             // For any 'global input files', put them in first column (index 0).
             // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
             _.forEach(nodes, function(node){
-                if (node.nodeType === 'input' && node.ioType === 'data file' && node.meta && node.meta.global && !node.outputOf && node.column !== 0){
+                if (node.nodeType === 'input' && node.ioType !== 'parameter' && node.meta && node.meta.global && !node.outputOf && node.column !== 0){
                     node.column = 0;
                 }
             });
@@ -311,6 +311,23 @@ export default class Graph extends React.Component {
                     
                 }
             }
+
+            /* TODO: later
+            if (columnNumber === 0){
+                var firstReferenceIndex = _.findIndex(nodesInColumn, function(n){ return n.ioType === 'reference file'; });
+                if (firstReferenceIndex > -1){
+                    nodesInColumn.splice(firstReferenceIndex, 0, {
+                        'nodeType' : 'spacer',
+                        'column' : 0,
+                        'id' : 'spacer1' 
+                    },{
+                        'nodeType' : 'spacer',
+                        'column' : 0,
+                        'id' : 'spacer2' 
+                    });
+                }
+            }
+            */
             
 
             
@@ -465,8 +482,12 @@ export default class Graph extends React.Component {
             leftOffset += (viewportWidth - contentWidth) / 2;
         }
 
+        nodes = _.reduce(nodesByColumnPairs, function(m,colPair){
+            return m.concat(colPair[1]);
+        }, []);
+
         // Set correct X coordinate on each node depending on column and spacing prop.
-        nodes.forEach((node, i) => {
+        _.forEach(nodes, (node, i) => {
             node.x = (node.column * (this.props.columnWidth + this.props.columnSpacing)) + leftOffset;
         });
 
@@ -509,6 +530,14 @@ export default class Graph extends React.Component {
         );
 
         var edges = this.props.edges;
+
+        /* TODO: later
+        var spacerCount = _.reduce(nodes, function(m,n){ if (n.nodeType === 'spacer'){ return m + 1; } else { return m; }}, 0);
+        if (spacerCount){
+            height += (spacerCount * this.props.columnSpacing);
+            fullHeight += (spacerCount * this.props.columnSpacing);
+        }
+        */
 
         return (
             <div ref="outerContainer" className="worfklow-chart-outer-container">

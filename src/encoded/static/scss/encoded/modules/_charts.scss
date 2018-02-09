@@ -1271,6 +1271,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
         }
     }
 
+    &.node-type-spacer {
+        display: none;
+    }
+
     &.node-type-step {
         margin-top: - ($workflow-step-node-height / 2);
         outline: 2px solid transparent;

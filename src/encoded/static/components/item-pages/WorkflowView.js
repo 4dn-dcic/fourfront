@@ -373,7 +373,7 @@ export class WorkflowGraphSection extends React.Component {
         this.state = {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
-            'showReferenceFiles' : true,
+            'showReferenceFiles' : false,
             'rowSpacingType' : 'compact',
             'fullscreenViewEnabled' : false
         };
