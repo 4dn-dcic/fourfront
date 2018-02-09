@@ -14,6 +14,7 @@ from urllib.parse import (
     parse_qs,
     urlencode,
 )
+from datetime import datetime
 from .search import (
     _ASSEMBLY_MAPPER,
     get_iterable_search_results
@@ -476,21 +477,24 @@ def trace_workflow_runs(context, request):
 @view_config(route_name='bar_plot_chart', request_method='GET')
 def bar_plot_chart(request):
 
-    def gen_zero_counts_dict():
-        return {
-            'experiments' : 0,
-            'experiment_sets' : 0,
-            'files' : 0
-        }
-
     TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
-    param_lists = parse_qs(request.matchdict['search_params'])
     search_path = '/browse/'
-
+    param_lists = parse_qs(request.matchdict['search_params'])
     fields_to_aggregate_for = request.params.getall('field')
+    collect_value_from = request.params.get('collect_value')
+
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
+
+    def gen_zero_counts_dict():
+        if collect_value_from is not None:
+            return { 'value' : 0 }
+        return {
+            'experiments'       : 0,
+            'experiment_sets'   : 0,
+            'files'             : 0
+        }
 
     # Convert to list of dicts.
     return_fields = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
@@ -499,18 +503,23 @@ def bar_plot_chart(request):
         '''TODO: Move somewhere more re-usable, snovault.embed maybe?'''
         field_parts = field_string.split('.')
 
-        def flatten(return_list):
-            if isinstance(return_list, list):
-                if len(return_list) > 0 and isinstance(return_list[0], list):
-                    l = []
-                    for rl in return_list:
+        def flatten(some_list):
+            if isinstance(some_list, list):
+                l = []
+                for rl in some_list:
+                    if isinstance(rl, list):
                         l = l + flatten(rl)
-                    return l
-                if len(return_list) == 0:
-                    return [None]
-                return return_list
+                    elif rl is not None:
+                        l.append(rl)
+                return l
             else:
-                return [return_list]
+                return [some_list]
+
+        def uniq(some_list):
+            seen = set() # From https://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-whilst-preserving-order
+            seen_add = seen.add
+            return [x for x in some_list if not (x in seen or seen_add(x))]
+
 
         def lookup(obj, depth = 0):
             if len(field_parts) <= depth or obj is None:
@@ -532,20 +541,25 @@ def bar_plot_chart(request):
         result = lookup(obj_to_find_val_in, 0)
 
         if isinstance(result, list):
-            result = flatten([r for r in result if r]) # Filter + Flatten into single list of vals.
-            result_set = set(result) # Uniqify
-            result = [ r for r in result if r in result_set ] # Maintain order
+            result = uniq([ r for r in flatten(result) if r ]) # Flatten + Filter + Uniq into single list of vals.
+
             if len(result) == 1:
                 result = result[0]
             elif len(result) == 0:
                 result = None
-        if result is None:
+        if not result:
             result = TERM_NAME_FOR_NO_VALUE
         return result
 
     def get_counts_of_links_from_experiment_set(experiment_set, totals = None):
         if totals is None:
             totals = gen_zero_counts_dict()
+        if collect_value_from is not None:
+            val = lookup_value(experiment_set, collect_value_from)
+            if val == TERM_NAME_FOR_NO_VALUE:
+                val = 0
+            totals['value'] += int(val)
+            return totals
         # TODO (?): Filter down by if exp, files itself matches term_found itself, if terms_found item is list
         totals['experiment_sets'] += 1
         totals['experiments'] += len(experiment_set.get('experiments_in_set', []))
@@ -565,8 +579,6 @@ def bar_plot_chart(request):
         field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
         terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
 
-        if 'Item' in terms_found: print('\n\n\n\n\n\n\n\n', experiment_set)
-
         def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = None):
             if not totals_by_type:
                 totals_by_type = gen_zero_counts_dict()
@@ -581,7 +593,6 @@ def bar_plot_chart(request):
             is_leaf_field = depth + 1 == len(terms_found)
             term = terms_found[depth]
             if isinstance(term, list):
-                print('\nBar Plot Aggregator: Found multiple values for field ' + field_obj['field'] + ', using first of:', term)
                 term = term[0]
             if not is_leaf_field:
                 # Generate child field as term
@@ -607,5 +618,8 @@ def bar_plot_chart(request):
     # Aggregate/add counts to each field.terms.total+./child-field.terms.total+./../child-field.total+.terms bucket from each exp_set matching search query
     for exp_set in get_iterable_search_results(request, search_path, param_lists):
         aggregegate_term_counts_for_fields_from_experiment_set(exp_set, return_fields)
+
+    # Add time fetched so we can use this to compare/detect if new data (currently unused)
+    return_fields[0]['time_generated'] = str(datetime.utcnow())
 
     return return_fields[0]
