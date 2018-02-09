@@ -440,7 +440,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         _.forEach(step[ioNodeType + 's'], function(stepIO){
             if (!Array.isArray(stepIO[stepIOTargetType])) return;
 
-            var inputNodes = []; // All input nodes matched to step input will be in here, e.g. to draw edges from to step.
+            var isGlobalInputArg = stepIO[stepIOTargetType].length === 1 && typeof stepIO[stepIOTargetType][0].step === 'undefined' && !(stepIO.meta && stepIO.meta.cardinality === 'array');
 
             // Step 1a. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var ioNodeIDsMatched = {  };
@@ -452,9 +452,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     if (n.nodeType === 'step') return false;
 
                     // Re-use global inputs nodes if not cardinality:array
-                    if (ioNodeType === 'input' && stepIO[stepIOTargetType].length === 1 && typeof stepIO[stepIOTargetType][0].step === 'undefined' && !(stepIO.meta && stepIO.meta.cardinality === 'array')){ // Is global input file
-                        if (Array.isArray(n._source) && n._source.length === 1 && typeof n._source[0].step === 'undefined' && (
-                            n._source[0].name === stepIO.source[0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, stepIO) /* <-- for provenance graphs */
+                    if (ioNodeType === 'input' && isGlobalInputArg){ // Is global input file
+                        if (Array.isArray(n['_' + stepIOTargetType]) && n['_' + stepIOTargetType].length === 1 && typeof n['_' + stepIOTargetType][0].step === 'undefined' && (
+                            n['_' + stepIOTargetType][0].name === stepIO[stepIOTargetType][0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, stepIO) /* <-- for provenance graphs */
                         )){
                             // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
                             if (!(n.meta && n.meta.run_data) || areInputRunDataPresentAndEqual(n, stepIO)){
@@ -462,7 +462,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                                 return true;
                             }
                         }
-                    } else if (_.any(stepIO[stepIOTargetType], function(s){ // Compare IO nodes against step input arg sources
+                    } else if (!isGlobalInputArg && _.any(stepIO[stepIOTargetType], function(s){ // Compare IO nodes against step input arg sources
                         
                         // Match nodes by source step & name, check that they target this step.
                         if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n['_' + oppIOTargetType]) && _.any(n['_' + oppIOTargetType], function(t){ return t.step === step.name; })){
@@ -517,7 +517,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     // Sub-Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentIONodesMatched`.
                     try {
                         //console.log('FIND', n.id, ioNodeIDsMatched[n.id], stepNode);
-                        var inNode, inNodes = _.where(inputNodesToMatch, { 'name' : ioNodeIDsMatched[n.id] });
+                        var inNode, inNodes = _.where(ioNodesToCreate, { 'name' : ioNodeIDsMatched[n.id] });
                         // Sometimes we may have more than 1 file per argument 'name'. So lets narrow it down.
                         if (inNodes.length === 1){
                             inNode = inNodes[0];
@@ -531,7 +531,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         }
                         if (!inNode) throw new Error(n.id + " new node version not found");
                     } catch (e){
-                        console.warn("Didn't find newly-created temporary node to extend from which was previously matched against node", n, e);
+                        console.warn("Didn't find newly-created temporary node to extend from which was previously matched against node", n, stepIO, stepNode, e);
                         return;
                     }
 
