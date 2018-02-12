@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+import { Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, object } from'./../../util';
 
@@ -205,6 +205,68 @@ export class StackedBlockVisual extends React.Component {
         return out;
     }
 
+    static generatePopoverRowsFromJSON(d, props){
+        var out = [];
+
+        _.forEach(_.keys(d), function(property){
+            var val = d[property];
+            if (!val) return;
+
+            var boldIt = (
+                (props.groupingProperties && props.groupingProperties.indexOf(property) > -1) ||
+                (props.columnGrouping && props.columnGrouping === property)
+            );
+
+            var rowElem = (
+                <div className="row popover-entry mb-07" key={property}>
+                    <div className="col-xs-5">
+                        <div className="text-500 text-ellipsis-container text-right">
+                            { ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') }
+                        </div>
+                    </div>
+                    <div className={"col-xs-7" + (boldIt ? ' text-500' : '')}>{ val }</div>
+                </div>
+            );
+
+            out.push(rowElem);
+        });
+
+        return out;
+    }
+
+    static aggregateObjectFromList(dataList, keysToShow){
+
+        if (!keysToShow) keysToShow = _.keys(dataList[0]);
+    
+        var moreData = _.reduce(dataList, function(m, o){
+            for (var i = 0; i < keysToShow.length; i++){
+                if (m[keysToShow[i]] === null){
+                    m[keysToShow[i]] = new Set();
+                }
+                m[keysToShow[i]].add(o[keysToShow[i]]);
+            }
+            return m;
+        }, _.object(_.zip(keysToShow, [].fill.call({ length : keysToShow.length }, null, 0, keysToShow.length))) );
+
+        _.forEach(_.keys(moreData), function(k){
+            if (k === 'additional_comments'){
+                delete moreData[k]; // Don't show when multiple, too long.
+                return;
+            }
+            moreData[k] = Array.from(moreData[k]);
+            if (moreData[k].length === 0){
+                delete moreData[k];
+            } else if (moreData[k].length > 1){
+                moreData[k] = '(' + moreData[k].length + ') ' + moreData[k].join('; ');
+            } else {
+                moreData[k] = moreData[k][0];
+            }
+        });
+
+        return moreData;
+
+    }
+
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -342,7 +404,7 @@ export class StackedBlockGroupedRow extends React.Component {
         
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
-            'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping');
+            'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover');
 
         var inner = null;
         var groupedDataIndicesPairs = (props.groupedDataIndices && _.pairs(props.groupedDataIndices)) || [];
@@ -448,14 +510,16 @@ export class StackedBlockGroupedRow extends React.Component {
                         >
                             { blocksForGroup.map(function(blockData, i){
                                 var title = k;
+                                var parentGrouping = (props.titleMap && props.titleMap[props.groupingProperties[props.depth - 1]]) || null;
+                                var subGrouping = (props.titleMap && props.titleMap[props.columnSubGrouping]) || null;
                                 if (Array.isArray(blockData)) {
                                     // We have columnSubGrouping so these are -pairs- of (0) columnSubGrouping val, (1) blocks
-                                    title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + blockData[0];
+                                    title = blockData[0];
                                     blockData = blockData[1];
                                 } else if (typeof props.columnSubGrouping === 'string') {
-                                    title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + object.getNestedProperty(blockData, props.columnSubGrouping);
+                                    title = object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <StackedBlock key={i} {...commonProps} data={blockData} title={title} />;
+                                return <StackedBlock key={i} {...commonProps} data={blockData} title={title} parentGrouping={parentGrouping} subGrouping={subGrouping} />;
                             }) }
                         </div>
                     );
@@ -488,10 +552,6 @@ export class StackedBlockGroupedRow extends React.Component {
 
     toggleOpen(){
         this.setState({ open : !this.state.open });
-    }
-
-    wrapper(){
-        
     }
 
     render(){
@@ -589,11 +649,10 @@ export class StackedBlock extends React.Component {
 
     componentDidMount(){
         ReactTooltip.rebuild();
-
     }
 
     render(){
-        var { blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, title, groupingProperties, depth, titleMap, blockClassName, blockRenderedContents, blockTooltipContents } = this.props;
+        var { blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, title, groupingProperties, parentGrouping, depth, titleMap, blockClassName, blockRenderedContents, blockTooltipContents, blockPopover } = this.props;
 
         if (!title && data && !Array.isArray(data)){
             title = data[groupingProperties[depth]];
@@ -615,26 +674,39 @@ export class StackedBlock extends React.Component {
             'marginBottom' : blockVerticalSpacing
         };
 
-        var blockFxnArguments = [data, title, groupingPropertyTitle, this.props];
+        var blockFxnArguments = [data, title, groupingPropertyTitle, this.props, parentGrouping];
 
         var className = "stacked-block";
         if (typeof blockClassName === 'function'){
-            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments);
+            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments.slice(0));
         } else if (typeof blockClassName === 'string'){
             className += ' ' + blockClassName;
         }
 
         var contents = ( <span>&nbsp;</span> );
         if (typeof blockRenderedContents === 'function'){
-            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments);
+            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments.slice(0));
         }
 
         var tip = null;
         if (typeof blockTooltipContents === 'function'){
-            tip = blockTooltipContents.apply(blockTooltipContents, blockFxnArguments);
+            tip = blockTooltipContents.apply(blockTooltipContents, blockFxnArguments.slice(0));
         }
 
-        return <div className={className} style={style} data-tip={tip} data-place="bottom" data-html>{ contents }</div>;
+        var popover = null;
+        if (typeof blockPopover === 'function'){
+            popover = blockPopover.apply(blockPopover, blockFxnArguments.slice(0));
+        }
+
+        var blockElem = <div className={className} style={style} data-tip={tip} data-place="bottom" data-html>{ contents }</div>;
+
+        if (popover){
+            return (
+                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} children={blockElem} rootClose />
+            );
+        }
+
+        return blockElem;
     }
 
 }
