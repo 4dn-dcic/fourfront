@@ -217,6 +217,28 @@ class Experiment(Item):
                                                       for eset in esets])))
         return pubs
 
+    @calculated_property(schema={
+        "title": "Categorizer",
+        "description": "Fields used as an additional level of categorization for an experiment",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "field": {
+                "type": "string",
+                "description": "The name of the field as to be displayed in tables."
+            }
+            "value": {
+                "type": "string",
+                "description": "The value displayed for the field"
+            }
+        }
+    })
+    def experiment_categorizer(self, request):
+        ''' The generalish case for if there is a targeted_factor use that
+            and if not use enzyme - more specific cases in specific schemas
+        '''
+        pass
+
 
 @collection(
     name='experiments-hi-c',
