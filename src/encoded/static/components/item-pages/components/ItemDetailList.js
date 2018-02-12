@@ -14,16 +14,14 @@ import JSONTree from 'react-json-tree';
 
 /**
  * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
- *
- * @class SubItem
- * @extends {React.Component}
  */
-class SubItem extends React.Component {
+class SubItemTitle extends React.Component {
 
     static propTypes = {
         'onToggle' : PropTypes.func,
         'isOpen' : PropTypes.bool,
-        'title' : PropTypes.string
+        'title' : PropTypes.string,
+        'content' : PropTypes.object
     }
 
     componentDidMount(){
@@ -40,16 +38,20 @@ class SubItem extends React.Component {
      * @returns {JSX.Element} React Span element containing expandable link, and maybe open panel below it.
      */
     render() {
-        var { isOpen, title, onToggle, countProperties } = this.props;
+        var { isOpen, title, onToggle, countProperties, content } = this.props;
         var iconType = isOpen ? 'icon-minus' : 'icon-plus';
+        var subtitle = null;
         if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
             title = isOpen ? "Collapse" : "Expand";
+        }
+        if (content && (content.title || content.display_title || content.name)) {
+            subtitle = <span className="text-600">{(content.title || content.display_title || content.name)}</span>;
         }
         return (
             <span className="subitem-toggle">
                 <span className="link" onClick={onToggle}>
                     <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
-                    { title } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
+                    { title } { subtitle } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
                 </span>
             </span>
         );
@@ -607,7 +609,7 @@ class DetailRow extends React.Component {
             );
         }
 
-        if (value.type === SubItem) {
+        if (value.type === SubItemTitle) {
             // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
             value = React.cloneElement(value, { onToggle : this.handleToggle, isOpen : this.state.isOpen });
 
@@ -626,7 +628,7 @@ class DetailRow extends React.Component {
         }
 
         if (value.type === "ol" && value.props.children[0] && value.props.children[0].type === "li" &&
-            value.props.children[0].props.children && value.props.children[0].props.children.type === SubItem) {
+            value.props.children[0].props.children && value.props.children[0].props.children.type === SubItemTitle) {
             // What we have here is a list of embedded objects. Render them out recursively and adjust some styles.
             return (
                 <div className="array-group" data-length={this.props.item.length}>
@@ -732,7 +734,7 @@ export class Detail extends React.Component {
                     _.map(_.filter(_.pairs(columnDefinitions), function(c){ return c[0].indexOf(keyPrefix + '.') === 0; }), function(c){ c[0] = c[0].replace(keyPrefix + '.', ''); return c; })
                 );
                 return (
-                    <SubItem
+                    <SubItemTitle
                         schemas={schemas}
                         content={item}
                         key={keyPrefix}
@@ -776,7 +778,7 @@ export class Detail extends React.Component {
         return(<span>{ item }</span>); // Fallback
     }
 
-    static SubItem = SubItem
+    static SubItemTitle = SubItemTitle
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,

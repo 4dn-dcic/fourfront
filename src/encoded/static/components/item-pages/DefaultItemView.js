@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { panel_views, itemClass, content_views } from './../globals';
 import { Button, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
@@ -32,20 +33,20 @@ export class ItemBaseView extends React.Component {
         this.state = {};
     }
 
-    getCommonTabs(){
-        return [
-            AttributionTabView.getTabObject(this.props.context),
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
-        ];
+    getCommonTabs(context = this.props.context){
+        var returnArr = [];
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
+        returnArr.push(AuditTabView.getTabObject(context));
+        return returnArr;
     }
 
-    getDefaultTabs(){
-        return [
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AttributionTabView.getTabObject(this.props.context),
-            AuditTabView.getTabObject(this.props.context)
-        ];
+    getDefaultTabs(context = this.props.context){
+        var returnArr = [];
+        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
+        returnArr.push(AuditTabView.getTabObject(context));
+        return returnArr;
     }
     
     itemClassName(){
@@ -56,10 +57,17 @@ export class ItemBaseView extends React.Component {
         return this.getDefaultTabs();
     }
 
+    /**
+     * @returns {{ 'title' : string, 'description' : string }} Object with 'title' and 'description' (used for tooltip) to show detailed or base type info at top left of page, under title.
+     */
+    typeInfo(){
+        return null;
+    }
+
     itemHeader(){
         return (
             <ItemHeader.Wrapper context={this.props.context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                <ItemHeader.TopRow />
+                <ItemHeader.TopRow typeInfo={this.typeInfo()} />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>
@@ -79,9 +87,6 @@ export class ItemBaseView extends React.Component {
     }
 
     render() {
-        var schemas = this.props.schemas || {};
-        var context = this.props.context;
-
         return (
             <div className={this.itemClassName()}>
 
@@ -90,9 +95,7 @@ export class ItemBaseView extends React.Component {
 
                 <div className="row">
                     <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer">
-                        <layout.WindowResizeUpdateTrigger>
-                            { this.tabbedView() }
-                        </layout.WindowResizeUpdateTrigger>
+                        <layout.WindowResizeUpdateTrigger children={this.tabbedView()} />
                     </div>
                 </div>
                 <br/>
@@ -135,6 +138,13 @@ content_views.register(DefaultItemView, 'Item');
 
 export class OverviewHeadingContainer extends React.Component {
 
+    static propTypes = {
+        'onFinishOpen' : PropTypes.func,
+        'onStartOpen' : PropTypes.func,
+        'onFinishClose' : PropTypes.func,
+        'onStartClose' : PropTypes.func
+    }
+
     static defaultProps = {
         'className'     : 'with-background mb-3 mt-1',
         'defaultOpen'   : true,
@@ -144,19 +154,23 @@ export class OverviewHeadingContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.toggle = _.throttle(function(){ this.setState({ 'open' : !this.state.open }); }.bind(this), 500);
+        this.toggle = _.throttle(this.toggle.bind(this), 500);
         this.state = { 'open' : props.defaultOpen };
     }
 
+    toggle(){
+        this.setState({ 'open' : !this.state.open });
+    }
+
     renderTitle(){
-        return <span><i className="title-icon icon icon-sticky-note"/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
+        return <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
     }
 
     render(){
         return (
             <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
                 { this.props.headingTitleElement ? React.createElement(this.props.headingTitleElement, { 'className' : 'tab-section-title clickable with-accent', 'onClick' : this.toggle }, this.renderTitle()) : null }
-                <Collapse in={this.state.open}>
+                <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
                         <hr className="tab-section-title-horiz-divider"/>
                         <div className="row overview-blocks">{ this.props.children }</div>
@@ -168,18 +182,101 @@ export class OverviewHeadingContainer extends React.Component {
 }
 
 
+export class EmbeddedItemWithAttachment extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.filename = this.filename.bind(this);
+    }
+
+    filename(){
+        return (this.props.item && this.props.item.attachment && this.props.item.attachment.download) || object.itemUtil.getTitleStringFromContext(this.props.item) || null;
+    }
+    
+    render(){
+        var { item, index } = this.props,
+            linkToItem = object.itemUtil.atId(item),
+            isInArray = typeof index === 'number';
+
+        if (!item || !linkToItem) return null;
+
+        var itemTitle = object.itemUtil.getTitleStringFromContext(item);
+
+        var viewAttachmentButton = null;
+        var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
+        if (haveAttachment){
+            viewAttachmentButton = (
+                <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={this.filename()} href={linkToItem + item.attachment.href} disabled={!haveAttachment} className='text-ellipsis-container btn-block' />
+            );
+        }
+        
+        return (
+            <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToItem}>
+                <div className="row">
+                    <div className={"col-xs-12 col-sm-6 col-md-6 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
+                        <div className="inner">
+                            { isInArray ? <span>{ index + 1 }. </span> : null}{ object.itemUtil.generateLink(item, true) }
+                        </div>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-6 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
+                </div>
+            </div>
+        );
+    }
+}
+
+export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment {
+
+    isAttachmentImage(filename = null){
+        return fileUtil.isFilenameAnImage(this.filename());
+    }
+
+    caption(){
+        var item = this.props.item;
+        var captionText = item.caption || item.description || (item.attachment && item.attachment.caption) || this.filename();
+        //var size = item.attachment && item.attachment.size
+        if (captionText){
+            return <div className="caption">{ captionText }</div>;
+        }
+        return null;
+    }
+
+    render(){
+        var { item, index } = this.props,
+            linkToItem = object.itemUtil.atId(item),
+            isInArray = typeof index === 'number';
+
+        if (!item || !linkToItem) return null;
+
+        var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
+        var isAttachmentImage = this.isAttachmentImage();
+
+        if (!haveAttachment || !isAttachmentImage) return <EmbeddedItemWithAttachment {...this.props} />;
+
+        var imageElem = <a href={linkToItem} className="image-wrapper"><img className="embedded-item-image" src={linkToItem + item.attachment.href} /></a>;
+        var captionText = (item.attachment && item.attachment.caption) || this.filename();
+        
+        return (
+            <div className={"embedded-item-with-attachment is-image" + (isInArray ? ' in-array' : '')} key={linkToItem}>
+                <div className="inner">{ imageElem }{ this.caption() }</div>
+            </div>
+        );
+    }
+}
+
+
 export class OverViewBodyItem extends React.Component {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
-        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null, wrapperElementType = 'li' ){
+        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null, wrapperElementType = 'li', fullObject = null){
             var calcdName = Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip);
             if (wrapperElementType === 'div' && typeof index === 'number') {
                 return [((index + 1) + '. '), calcdName];
             }
             return calcdName;
         },
-        'biosample_treatments' : function(field, treatment, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
+        'biosample_treatments' : function(field, treatment, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
                 return null;
             }
@@ -197,51 +294,34 @@ export class OverViewBodyItem extends React.Component {
         'local_date' : function(field, timestamp){
             return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : null;
         },
-        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
-            if (!item || !object.itemUtil.atId(item)){
-                return null;
-            }
-            var itemTitle = object.itemUtil.getTitleStringFromContext(item);
-            var linkToProtocolItem = object.itemUtil.atId(item);
-
-            var viewAttachmentButton = null;
-            var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
-            if (haveAttachment){
-                var fullProtocolDocumentHref = linkToProtocolItem + item.attachment.href;
-                viewAttachmentButton = (
-                    <Button bsSize="small" bsStyle="primary" href={fullProtocolDocumentHref} target="_blank" className="text-400 text-ellipsis-container btn-block">
-                        View File &nbsp;<i className="icon icon-fw icon-external-link"/>
-                    </Button>
-                );
-                viewAttachmentButton = (
-                    <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={(haveAttachment && item.attachment.type) || null} filename={itemTitle || null} href={fullProtocolDocumentHref} disabled={!haveAttachment} className={'text-ellipsis-container btn-block'} />
-                );
-            }
-
-            var linkToItem = object.itemUtil.generateLink(item, true);
-            var isInArray = typeof index === 'number';
-            
-            return (
-                <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToProtocolItem}>
-                    <div className="row">
-                        <div className={"col-xs-12 col-sm-6 col-md-6 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
-                            <div className="inner">
-                                { isInArray ? <span>{ index + 1 }. </span> : null}{ linkToItem }
-                            </div>
-                        </div>
-                        <div className="col-xs-12 col-sm-6 col-md-6 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
-                    </div>
-                </div>
-            );
+        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+            return <EmbeddedItemWithAttachment {...{ item, index }} />;
         },
-        'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li'){
+        'embedded_item_with_image_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+            return <EmbeddedItemWithImageAttachment {...{ item, index }} />;
+        },
+        'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             if (typeof value !== 'string') return null;
             return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
+        },
+        'imaging_paths_from_exp': function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'div', fullObject = null){
+            if (!value || typeof value !== 'object') return null;
+            var { channel, path } = value;
+
+            var matchingFile = _.find(fullObject.files || [], fileUtil.getLightSourceCenterMicroscopeSettingFromFile.bind(this, channel));
+
+            return (
+                <div className="imaging-path-item-wrapper row">
+                    <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
+                    <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    { matchingFile ? <div className="microscope-setting col-xs-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                </div>
+            );
         }
     }
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
-    static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
+    static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null, origResult = null){
 
         // Preprocess / uniqify:
         if (Array.isArray(items)) {
@@ -265,18 +345,18 @@ export class OverViewBodyItem extends React.Component {
         // Item List
         if (Array.isArray(items) && items.length > 1 && items[0].display_title && object.atIdFromObject(items[0])){
             items = _.map(items, function(b,i){
-                return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
+                return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement, origResult) );
             });
         } else if (Array.isArray(items) && items.length === 1 && items[0].display_title && object.atIdFromObject(items[0])) {
-            return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
+            return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div', origResult);
         } else if (Array.isArray(items) && items.length > 1){
             items = _.map(items, function(b,i){
-                return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement)  );
+                return React.createElement(  listItemElement  ,  _.extend({ 'key' : i }, listItemElementProps || {})  ,  titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement, origResult)  );
             });
         } else if (Array.isArray(items) && items.length === 1){
-            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
+            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div', origResult);
         } else if (!Array.isArray(items)){
-            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, 'div');
+            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, null, 'div', origResult);
         }
         return items;
     }
@@ -298,7 +378,7 @@ export class OverViewBodyItem extends React.Component {
 
     /** Feeds params + props into static function */
     createList(valueForProperty, listItemElement, listItemElementProps){
-        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps);
+        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps, this.props.result);
     }
 
     render(){

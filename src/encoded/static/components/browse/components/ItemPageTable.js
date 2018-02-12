@@ -4,6 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
+import url from 'url';
+import queryString from 'querystring';
 import * as globals from './../../globals';
 import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
 import { RawFilesStackedTable } from './file-tables';
@@ -342,12 +344,63 @@ export class ItemPageTableLoader extends React.Component {
     }
 
     render(){
-        var clonedChild = React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
-        return (
-            <layout.WindowResizeUpdateTrigger>
-                { clonedChild }
-            </layout.WindowResizeUpdateTrigger>
-        );
+        return <layout.WindowResizeUpdateTrigger children={React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) )} />;
+    }
+
+}
+
+
+export class ItemPageTableSearchLoader extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.handleResponse = this.handleResponse.bind(this);
+        this.state = { 'loading' : false, 'results' : null };
+    }
+
+    componentDidMount(){
+        if (this.props.requestHref) this.doRequest();
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.requestHref !== this.props.requestHref){
+            this.doRequest();
+        }
+    }
+
+    doRequest(){
+        this.setState({ 'loading' : true }, ()=>{
+            ajax.load(this.props.requestHref, this.handleResponse, 'GET', this.handleResponse);
+        });
+    }
+
+    handleResponse(resp){
+        var results = (resp && resp['@graph']) || [];
+        this.setState({ 'loading' : false, 'results' : results });
+    }
+
+    render(){
+        var { requestHref } = this.props;
+        if (!requestHref) return null;
+        return <layout.WindowResizeUpdateTrigger children={React.cloneElement(this.props.children, _.extend({}, this.props, this.state) )} />;
+    }
+
+}
+
+export class ItemPageTableSearchLoaderPageController extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = { 'page' : 1 };
+    }
+
+    render(){
+        var requestHref = this.props.requestHref;
+        var hrefParts = url.parse(requestHref, true);
+        hrefParts.query.limit = hrefParts.query.limit || 25;
+        hrefParts.query.from = (hrefParts.query.limit || 25) * (this.state.page - 1);
+        var correctedHref = hrefParts.pathname + '?' + queryString.stringify(hrefParts.query);
+        return <ItemPageTableSearchLoader {...this.props} requestHref={correctedHref} />;
     }
 
 }
