@@ -18,67 +18,6 @@ export class StackedBlockNameLabel extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.copyAccessionButton = this.copyAccessionButton.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = {
-            'mounted' : false
-        };
-    }
-
-    componentDidMount(){
-        this.setState({ mounted : true });
-    }
-
-    copyAccessionButton(){
-        if (!this.props.accession) return null;
-        if (!this.state.mounted || isServerSide() || !document || !document.createElement || !document.execCommand) return null;
-
-        function copy(){
-            var textArea = document.createElement('textarea');
-            textArea.style.top = '-100px';
-            textArea.style.left = '-100px';
-            textArea.style.position = 'absolute';
-            textArea.style.width = '5px';
-            textArea.style.height = '5px';
-            textArea.style.padding = 0;
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-
-            // Avoid flash of white box if rendered for any reason.
-            textArea.style.background = 'transparent';
-            textArea.value = this.props.accession;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                var successful = document.execCommand('copy');
-                var msg = successful ? 'successful' : 'unsuccessful';
-                console.log('Copying text command was ' + msg);
-                this.flashEffect();
-                analytics.event('StackedTable', 'Copy', {
-                    'eventLabel' : 'Accession',
-                    'name' : this.props.accession
-                });
-            } catch (err) {
-                console.error('Oops, unable to copy');
-                analytics.event('StackedTable', 'ERROR', {
-                    'eventLabel' : 'Unable to copy accession',
-                    'name' : this.props.accession
-                });
-            }
-        }
-
-        return (
-            <i className="icon icon-fw icon-copy" title="Copy to clipboard" onClick={copy.bind(this)} />
-        );
-    }
-
-    flashEffect(){
-        if (!this.refs || !this.refs.subtitle) return null;
-        this.refs.subtitle.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
-        setTimeout(()=>{
-            this.refs.subtitle.style.transform = '';
-        }, 100);
     }
 
     render(){
@@ -101,9 +40,7 @@ export class StackedBlockNameLabel extends React.Component {
                     className : "ext" + (accession ? ' is-accession' : ''),
                     ref : 'subtitle'
                 },
-                <span>
-                    { accession || subtitle } { this.copyAccessionButton() }
-                </span>
+                <object.CopyWrapper value={accession} children={accession || subtitle} />
             );
         }
 

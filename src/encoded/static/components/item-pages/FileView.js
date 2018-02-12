@@ -7,7 +7,7 @@ import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
-import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
+import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -15,7 +15,7 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-
+import { FileDownloadButton } from '../util/file';
 
 
 export default class FileView extends WorkflowRunTracingView {
@@ -46,6 +46,10 @@ export default class FileView extends WorkflowRunTracingView {
         return initTabs.concat(this.getCommonTabs());
     }
 
+    itemMidSection(){
+        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} /></layout.WindowResizeUpdateTrigger>;
+    }
+
 }
 
 globals.content_views.register(FileView, 'File');
@@ -61,7 +65,7 @@ class FileViewOverview extends React.Component {
             'content' : (
                 <div className="overflow-hidden">
                     <h3 className="tab-section-title">
-                        <span>Overview</span>
+                        <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
                     <FileViewOverview context={context} schemas={schemas} width={width} />
@@ -103,7 +107,7 @@ class FileViewOverview extends React.Component {
 
         return (
             <div>
-                <OverViewBody result={context} schemas={this.props.schemas} />
+                <FileOverViewBody result={context} schemas={this.props.schemas} />
                 { table }
             </div>
         );
@@ -112,24 +116,75 @@ class FileViewOverview extends React.Component {
 
 }
 
-class OverViewBody extends React.Component {
+export class FileOverviewHeading extends React.Component {
 
-    relatedFiles(){
-        var file = this.props.result;
-        if (!Array.isArray(file.related_files) || file.related_files.length === 0){
-            return null;
-        }
-
-        return _.map(file.related_files, function(rf){
-
-            return (
-                <li className="related-file">
-                    { rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }
-                </li>
-            );
-        });
-
+    constructor(props){
+        super(props);
+        this.onTransition = this.onTransition.bind(this);
+        this.overviewBlocks = this.overviewBlocks.bind(this);
+        this.state = {
+            isPropertiesOpen : true,
+            mounted : false
+        };
     }
+
+    componentDidMount(){
+        this.setState({ mounted : true });
+    }
+
+    onTransition(isOpen = false){
+        this.setState({ isPropertiesOpen : isOpen });
+    }
+
+    overviewBlocks(){
+        var file = this.props.context;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+        return [
+            <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-3 col-lg-3" />,
+            <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-3 col-lg-3" />,
+            <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-3 col-lg-3" />,
+            <OverViewBodyItem tips={tips} result={file} property='file_size' fallbackTitle="File Size" wrapInColumn="col-sm-3 col-lg-3" titleRenderFxn={(field, size)=>
+                <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName('file_size', size) }</span>
+            } />
+        ];
+    }
+
+    render(){
+        var responsiveSize = layout.responsiveGridState();
+        var isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
+        return (
+            <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
+                <div className="col-xs-12 col-md-9 col-lg-8">
+                    <OverviewHeadingContainer onStartClose={this.onTransition.bind(this, false)} onFinishOpen={this.onTransition.bind(this, true)} children={this.overviewBlocks()}/>
+                </div>
+                <div className={"col-xs-12 col-md-3 col-lg-4 mt-1" + (this.state.isPropertiesOpen || isSmallerSize ? ' mb-3' : '')}>
+                    <FileViewDownloadButtonContainer file={this.props.context} size="lg" verticallyCentered={!isSmallerSize && this.state.isPropertiesOpen} />
+                </div>
+
+            </div>
+        );
+    }
+}
+
+export class FileViewDownloadButtonContainer extends React.Component {
+
+    static defaultProps = {
+        'size' : null
+    }
+
+    render(){
+        var file = this.props.file || this.props.context || this.props.result;
+        return (
+            <layout.VerticallyCenteredChild disabled={!this.props.verticallyCentered}>
+                <div className={"file-download-container" + (this.props.className ? ' ' + this.props.className : '')}>
+                    <fileUtil.FileDownloadButtonAuto result={file} size={this.props.size} />
+                </div>
+            </layout.VerticallyCenteredChild>
+        );
+    }
+}
+
+export class FileOverViewBody extends React.Component {
 
     render(){
         var file = this.props.result;
@@ -137,31 +192,14 @@ class OverViewBody extends React.Component {
 
         return (
             <div className="row">
+
                 <div className="col-md-9 col-xs-12">
                     <div className="row overview-blocks">
 
-                        <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-4 col-lg-4" />
-
-                        <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-4 col-lg-4" />
-
-                        <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-4 col-lg-4" />
-
-                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn hideIfNoValue />
+                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn />
 
                     </div>
                 </div>
-
-                <div className="col-md-3 col-xs-12">
-                    <div className="file-download-container">
-                        <fileUtil.FileDownloadButtonAuto result={file} />
-                        { file.file_size && typeof file.file_size === 'number' ?
-                        <h6 className="text-400">
-                            <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
-                        </h6>
-                        : null }
-                    </div>
-                </div>
-
             </div>
         );
 
@@ -181,15 +219,17 @@ export class RelatedFilesOverViewBlock extends React.Component {
     relatedFiles(){
         var { file, related_files, property } = this.props;
         var relatedFiles;
-        if (typeof related_files === 'undefined' || related_files === null){
-            relatedFiles = file[property] || file.related_files;
-        } else {
+        if (Array.isArray(related_files) && related_files.length > 0){
             relatedFiles = related_files;
+        } else {
+            relatedFiles = file[property] || file.related_files;
         }
 
         if (!Array.isArray(relatedFiles) || relatedFiles.length === 0){
             return null;
         }
+
+        console.log('RFFFF', relatedFiles);
 
         return _.map(relatedFiles, function(rf, i){
             return (<li className="related-file" key={object.itemUtil.atId(rf.file) || i}>{ rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }</li>);
@@ -199,25 +239,19 @@ export class RelatedFilesOverViewBlock extends React.Component {
 
     render(){
         var { file, related_files, property, hideIfNoValue, tips, wrapInColumn } = this.props;
-        var relatedFiles;
-        if (typeof related_files === 'undefined' || related_files === null){
-            relatedFiles = file[property] || file.related_files;
-        } else {
-            relatedFiles = related_files;
-        }
 
-        var vals = this.relatedFiles();
+        var relatedFiles = this.relatedFiles();
 
-        if (hideIfNoValue && !vals){
+        if (hideIfNoValue && !relatedFiles){
             return null;
-        } else {
-            vals = <li className="related-file"><em>None</em></li>;
+        } else if (!relatedFiles) {
+            relatedFiles = <li className="related-file"><em>None</em></li>;
         }
 
         var elem = (
             <div className="inner">
                 <object.TooltipInfoIconContainerAuto result={file} property={property || "related_files"} tips={tips} elementType="h5" fallbackTitle="Related Files" />
-                <ul className="overview-list-elements-container">{ vals }</ul>
+                <ul className="overview-list-elements-container">{ relatedFiles }</ul>
             </div>
         );
 

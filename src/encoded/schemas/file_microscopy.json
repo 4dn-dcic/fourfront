@@ -66,8 +66,7 @@
         },
         "microscope_settings": {
             "type": "string",
-            "title": "Microscope settings",
-            "type": "string",
+            "title": "Microscope Settings",
             "linkTo": "MicroscopeSetting"
         },
         "related_files": {

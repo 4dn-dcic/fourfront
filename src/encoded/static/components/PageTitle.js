@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { console, object, Schemas, JWT, layout } from './util';
+import { content_views } from './globals';
+import { console, object, Schemas, JWT, layout, DateUtility } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 
@@ -159,14 +160,16 @@ export default class PageTitle extends React.Component {
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
-            if (itemTypeTitle === 'Publication'){ // Long title string
+            // Handle long title strings by Item type
+            if (itemTypeTitle === 'Publication'){
                 if (context.title && context.short_attribution){
                     return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
                 }
                 return { 'title' : itemTypeTitle, 'subtitle' : context.title || title, 'subtitleEllipsis' : true };
             }
 
-            if (object.itemUtil.isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
+            // Don't show Accessions in titles.
+            if (object.itemUtil.isDisplayTitleAccession(context, title, true)){
 
                 // But show rest of title if it is in form 'Something - ACCESSION'
                 if (typeof context.accession === 'string' && context.accession.length >= 12 && title.indexOf(' - ' + context.accession) > -1){
@@ -180,6 +183,21 @@ export default class PageTitle extends React.Component {
                 // Re-Enable below if want Accessions as Page Subtitles.
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
             } else {
+                if (title.indexOf(context['@type'][0] + ' from ') === 0){ // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
+                    title = (context.date_created && <span>from <DateUtility.LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
+                }
+                // Check if long title & no 'typeInfo' text right under it from Item page -- if so: render it _under_ Type title instead of to the right of it.
+                var viewForItem = content_views.lookup(context, null);
+                var viewReturnsTypeInfo = false;
+                try {
+                    viewReturnsTypeInfo = !!(viewForItem.prototype && viewForItem.prototype.typeInfo && viewForItem.prototype.typeInfo.call({ 'props' : { context, href, schemas } }).title ) || false;
+                } catch (e){
+                    viewReturnsTypeInfo = true; // Assume it failed because trying to access "this", which means typeInfo() most likely does & returns something.
+                    console.warn(e);
+                }
+                if (!context.accession && !Schemas.itemTypeHierarchy[context['@type'][0]] && !viewReturnsTypeInfo && typeof title === 'string' && title.length > 20) {
+                    return { 'title' : itemTypeTitle, 'subtitle' : title };
+                }
                 return { 'title' : itemTypeTitle, 'calloutTitle' : title };
             }
 
@@ -190,7 +208,7 @@ export default class PageTitle extends React.Component {
     }
 
     static getStyles(context, href, mounted){
-        var style = { marginTop : 45 };
+        var style = { marginTop : 55 };
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
             var gridSize = mounted && layout.responsiveGridState();
