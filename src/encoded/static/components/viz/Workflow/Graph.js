@@ -104,235 +104,7 @@ export default class Graph extends React.Component {
             return false;
         },
         'nodeClassName' : function(node){ return ''; },
-        'nodeEdgeLedgeWidths' : [3,5],
-        'nodesPreSortFxn' : function(nodes){
-            // For any 'global input files', put them in first column (index 0).
-            // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
-            _.forEach(nodes, function(node){
-                if (node.nodeType === 'input' && node.ioType !== 'parameter' && node.meta && node.meta.global && !node.outputOf && node.column !== 0){
-                    node.column = 0;
-                }
-            });
-            return nodes;
-        },
-        'skipSortOnColumns' : [1],
-        /**
-         * This function, along with 'nodesInColumnPostSortFxn' & 'nodesPreSortFxn', is _PROTOTYPICAL_ - a R&D work in progress.
-         * It's quick, dirty, hacky. And it will remain this way until we figure out what we want from it, or if we want it at all, and then we'll go back and make it DRY and pretty.
-         */
-        'nodesInColumnSortFxn' : function(node1, node2){
-
-            function isNodeFileReference(n){
-                return typeof n.ioType === 'string' && n.ioType === 'reference file';
-            }
-
-            function isNodeParameter(n){
-                return typeof n.ioType === 'string' && n.ioType === 'parameter';
-                //return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
-            }
-
-            function getNodeFromListForComparison(nodeList, highestColumn = true){
-                if (!Array.isArray(nodeList) || nodeList.length === 0) return null;
-                var sortedList = _.sortBy(nodeList.slice(0), function(n){
-                    return (n.indexInColumn || n.origIndexInColumn);
-                });
-                sortedList = _.sortBy(sortedList, function(n){ return highestColumn ? -n.column : n.column; });
-                return (
-                    _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number' || typeof n.origIndexInColumn === 'number'; })
-                    || sortedList[0]
-                    || null
-                );
-            }
-
-            function compareNodesBySameColumnIndex(n1, n2){
-                if (n1 && !n2) return -1;
-                if (!n1 && n2) return 1;
-                if (n1 && n2){
-                    if (n1.column === n2.column){
-                        if ((n1.indexInColumn || n1.origIndexInColumn) < (n2.indexInColumn || n2.origIndexInColumn)) return -1;
-                        if ((n1.indexInColumn || n1.origIndexInColumn) > (n2.indexInColumn || n2.origIndexInColumn)) return 1;
-                    }
-                }
-                return 0;
-            }
-
-            function compareNodeInputOf(n1, n2){
-                var n1InputOf = getNodeFromListForComparison(n1.nodeType === 'step' ? n1.outputNodes : n1.inputOf, false);
-                var n2InputOf = getNodeFromListForComparison(n2.nodeType === 'step' ? n2.outputNodes : n2.inputOf, false);
-
-                var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
-                if (ioResult !== 0) return ioResult;
-                
-                if (n1.name === n2.name){
-                    return 0;
-                }
-                return (n1.name < n2.name) ? -1 : 1;
-
-            }
-
-            function compareNodeOutputOf(n1, n2){
-                var n1OutputOf = n1.nodeType === 'step' ? (n1.inputNodes && getNodeFromListForComparison(n1.inputNodes)) : n1.outputOf;
-                var n2OutputOf = n2.nodeType === 'step' ? (n2.inputNodes && getNodeFromListForComparison(n2.inputNodes)) : n2.outputOf;
-
-                if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
-                    if (n1OutputOf.column === n2OutputOf.column){
-                        if (n1OutputOf.indexInColumn < n2OutputOf.indexInColumn) return -1;
-                        if (n1OutputOf.indexInColumn > n2OutputOf.indexInColumn) return 1;
-                    }
-                }
-                if ((n1OutputOf && n1OutputOf.name && n2OutputOf && n2OutputOf.name)){
-                    if (n1OutputOf.name === n2OutputOf.name){
-
-                        if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
-                            return -3;
-                        } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
-                            return 3;
-                        }
-                        if (n1.name < n2.name) return -1;
-                        if (n1.name > n2.name) return 1;
-                        return 0;//compareNodeInputOf(n1, n2);
-
-                    }
-                    return n1OutputOf.name < n2OutputOf.name ? -3 : 3;
-                }
-                return 0;
-            }
-
-            function nonIOStepCompare(n1,n2){ // Fallback
-                return 0; // Use order step was given to us in.
-            }
-
-            var ioResult;
-
-            if (node1.nodeType === 'step' && node2.nodeType === 'step'){
-
-
-                if (node1.inputNodes && !node2.inputNodes) return -1;
-                if (!node1.inputNodes && node2.inputNodes) return 1;
-                if (node1.inputNodes && node2.inputNodes){
-                    ioResult = compareNodesBySameColumnIndex(
-                        getNodeFromListForComparison(node1.inputNodes),
-                        getNodeFromListForComparison(node2.inputNodes)
-                    );
-                    if (ioResult !== 0) return ioResult;
-                }
-                
-                return nonIOStepCompare(node1,node2);
-            }
-            if (node1.nodeType === 'output' && node2.nodeType === 'input'){
-                return -1;
-            } else if (node1.nodeType === 'input' && node2.nodeType === 'output'){
-                return 1;
-            }
-
-            // Groups go to bottom always. For now.
-            if (node1.nodeType === 'input-group' && node2.nodeType !== 'input-group'){
-                return 1;
-            } else if (node1.nodeType !== 'input-group' && node2.nodeType === 'input-group'){
-                return -1;
-            }
-
-            if (node1.nodeType === node2.nodeType){
-
-                if (node1.nodeType === 'output'){
-                    ioResult = compareNodeOutputOf(node1, node2);
-                    return ioResult;
-                }
-
-                
-
-                if (node1.nodeType === 'input'){
-                    if (isNodeParameter(node1) && isNodeParameter(node2)){
-                        return compareNodeInputOf(node1, node2);
-                    }
-                    else if (isNodeParameter(node1)) return 5;
-                    else if (isNodeParameter(node2)) return -5;
-
-                    if (isNodeFileReference(node1)){
-                        if (isNodeFileReference(node2)) {
-                            //return 0;
-                            //...continue
-                        } else {
-                            return 7;
-                        }
-                    } else if (isNodeFileReference(node2)) {
-                        return -7;
-                    }
-
-                    ioResult = compareNodeInputOf(node1, node2);
-                    return ioResult;
-                }
-            }
-
-            return  0;
-        },
-        'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
-            var groupNodes = _.filter(nodesInColumn, { 'nodeType' : 'input-group' });
-            if (groupNodes.length > 0){
-                _.forEach(groupNodes, function(gN){
-                    var relatedFileSource = _.find(gN._source, function(s){ return typeof s.grouped_by === 'undefined' && typeof s.name === 'string' && s.for_file; });
-                    var relatedFileNode = relatedFileSource && _.find(nodesInColumn, function(n){
-                        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && (n.meta.run_data.file.uuid || n.meta.run_data.file) === (relatedFileSource.for_file || 'x') ){
-                            return true;
-                        }
-                        return false;
-                    });
-                    if (relatedFileNode){
-                        // Re-arrange group node to be closer to its relation.
-                        var oldIdx = nodesInColumn.indexOf(gN);
-                        nodesInColumn.splice(oldIdx, 1);
-                        var afterThisIdx = nodesInColumn.indexOf(relatedFileNode);
-                        nodesInColumn.splice(afterThisIdx + 1, 0, gN);
-                    }
-                });
-            }
-            
-            if (_.every(nodesInColumn, function(n){ return n.nodeType === 'step'; })){
-                // If all step nodes, move those with more inputs toward the middle.
-                var nodesByNumberOfInputs = _.groupBy(nodesInColumn.slice(0), function(n){ return n.inputNodes.length; });
-                var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
-                if (inputCounts.length > 1){ // If any step nodes which have more inputs than others.
-                    inputCounts.reverse().pop();
-                    console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
-                    var popped, nodesToCenter, middeIndex;
-                    while (inputCounts.length > 0){ // In low->high # of inputs (after first lowest)
-                        popped = inputCounts.pop();
-                        nodesToCenter = nodesByNumberOfInputs[popped + ''];
-
-                        _.forEach(nodesToCenter, function(nodeToCenter){ // Remove these nodes
-                            var oldIdx = nodesInColumn.indexOf(nodeToCenter);
-                            nodesInColumn.splice(oldIdx, 1);
-                        });
-
-                        middeIndex = Math.floor(nodesInColumn.length / 2); // Re-add them in middle of remaining nodes.
-                        nodesInColumn.splice(middeIndex, 0, ...nodesToCenter);
-                    }
-                    
-                    
-                }
-            }
-
-            /* TODO: later
-            if (columnNumber === 0){
-                var firstReferenceIndex = _.findIndex(nodesInColumn, function(n){ return n.ioType === 'reference file'; });
-                if (firstReferenceIndex > -1){
-                    nodesInColumn.splice(firstReferenceIndex, 0, {
-                        'nodeType' : 'spacer',
-                        'column' : 0,
-                        'id' : 'spacer1'
-                    },{
-                        'nodeType' : 'spacer',
-                        'column' : 0,
-                        'id' : 'spacer2'
-                    });
-                }
-            }
-            */
-            
-
-            
-            return nodesInColumn;
-        }
+        'nodeEdgeLedgeWidths' : [3,5]
     }
 
     constructor(props){
@@ -395,39 +167,7 @@ export default class Graph extends React.Component {
          ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
 
         // Arrange into lists of columns
-        nodes = _.sortBy(nodes, 'column');
         var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
-
-        // Add prelim index for each node, over-written in sorting if any.
-        nodesByColumnPairs = _.map(nodesByColumnPairs, function(columnGroup){
-            _.forEach(columnGroup[1], function(n, i){
-                n.origIndexInColumn = i;
-            });
-            return [ parseInt(columnGroup[0]), columnGroup[1] ];
-        });
-
-        // Sort nodes within columns.
-        if (typeof this.props.nodesInColumnSortFxn === 'function'){
-            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
-                var nodesInColumn;
-                // Sort
-                if (this.props.skipSortOnColumns.indexOf(columnGroup[0]) > -1){
-                    nodesInColumn = columnGroup[1].slice(0);
-                } else {
-                    nodesInColumn = columnGroup[1].sort(this.props.nodesInColumnSortFxn);
-                }
-
-                // Run post-sort fxn, e.g. to manually re-arrange nodes within columns. If avail.
-                if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
-                    nodesInColumn = this.props.nodesInColumnPostSortFxn(nodesInColumn, columnGroup[0]);
-                }
-
-                _.forEach(nodesInColumn, function(n, i){ n.indexInColumn = i; }); // Update w/ new index in column
-
-                return [ columnGroup[0], nodesInColumn ];
-            });
-        }
-
 
         /****** Step 2: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
          ****** Convert column placement and position within columns, along with other chart dimension settings, into X & Y coordinates.
@@ -436,7 +176,7 @@ export default class Graph extends React.Component {
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         nodesByColumnPairs.forEach((columnGroup) => {
 
-            var nodesInColumn = columnGroup[1];
+            var nodesInColumn = _.sortBy(columnGroup[1], 'indexInColumn');
             var countInCol = nodesInColumn.length;
 
             var centerNode = function(n){
@@ -517,13 +257,8 @@ export default class Graph extends React.Component {
             height + this.props.innerMargin.top + this.props.innerMargin.bottom
         );
 
-        var nodes = this.props.nodes.slice(0);
-
-        // Run pre-sort fxn, if any, to manually pre-arrange nodes into different columns.
-        if (typeof this.props.nodesPreSortFxn === 'function') nodes = this.props.nodesPreSortFxn(nodes);
-
-        nodes = this.nodesWithCoordinates(
-            nodes,
+        var nodes = this.nodesWithCoordinates(
+            this.props.nodes.slice(0),
             width,
             contentWidth,
             height
