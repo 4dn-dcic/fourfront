@@ -4,7 +4,7 @@ import React from 'react';
 import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } from './components';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -125,21 +125,16 @@ export class WorkflowRunView extends ItemBaseView {
         });
     }
 
-    itemHeader(){
+    typeInfo(){
+        // TODO: Get rid of this and show a link + maybe more info inside the page body / midsection?
         var context = this.props.context;
-        var topRightTitle = (context.workflow && context.workflow.display_title) || null;
+        var topRightTitle = (context.workflow && (context.workflow.title || context.workflow.display_title)) || null;
         if (topRightTitle && context.workflow.workflow_type){
             topRightTitle = (
-                <span><span className="text-400">{ topRightTitle }</span> | { context.workflow.workflow_type }</span>
+                <span><span className="text-400">{ topRightTitle }</span> ({ context.workflow.workflow_type })</span>
             );
         }
-        return (
-            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                <ItemHeader.TopRow typeInfo={{ title : topRightTitle, description : 'Workflow Type' }} />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
-        );
+        return { 'title' : topRightTitle, 'description' : 'Workflow used for this run' };
     }
 
 }

@@ -438,6 +438,12 @@ export class WidthProvider extends React.Component {
 
 export class VerticallyCenteredChild extends React.Component {
 
+    static defaultProps = {
+        'calculate' : function(heightParent, heightChild){
+            return Math.floor((heightParent - heightChild) / 2);
+        }
+    }
+
     constructor(props){
         super(props);
         this.state = { 'mounted' : false };
@@ -448,6 +454,12 @@ export class VerticallyCenteredChild extends React.Component {
     }
 
     render(){
+
+        var childClassName = this.props.children.props.className;
+        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
+
+        if (this.props.disabled) return React.cloneElement(this.props.children, { ref : 'childElement', 'className' : className } );
+
         var style = null;
         //var domParentBlock = (this.state.mounted && this.refs && this.refs.parentBlock) || null;
         var domChildBlock = (this.state.mounted && this.refs && this.refs.childElement) || null;
@@ -461,7 +473,7 @@ export class VerticallyCenteredChild extends React.Component {
             var heightChild = domChildBlock.offsetHeight;
             if (heightParent && heightChild && heightChild < heightParent){
                 style = {
-                    'transform' : 'translateY(' + Math.floor((heightParent - heightChild) / 2) + 'px)'
+                    'transform' : 'translateY(' + this.props.calculate(heightParent, heightChild) + 'px)'
                 };
             }
 
@@ -470,8 +482,6 @@ export class VerticallyCenteredChild extends React.Component {
             var origStyle = this.props.children.props.style || {};
             style = _.extend(style, origStyle);
         }
-        var childClassName = this.props.children.props.className;
-        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
 
         return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
     }

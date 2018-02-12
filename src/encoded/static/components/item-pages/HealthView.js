@@ -353,5 +353,4 @@ class HealthChart extends React.Component {
         );
 
     }
-
 }

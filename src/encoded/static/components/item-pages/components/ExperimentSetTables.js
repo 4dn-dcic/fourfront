@@ -3,14 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ExperimentSetDetailPane, ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader } from './../../browse/components';
+import { ExperimentSetDetailPane, ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController } from './../../browse/components';
 import { ajax, console, layout, expFxn } from './../../util';
 
 
 export class ExperimentSetTables extends React.Component {
 
     static propTypes = {
-        'experiment_sets' : PropTypes.array.isRequired,
         'loading' : PropTypes.bool,
         'sortFxn' : PropTypes.func
     }
@@ -79,16 +78,29 @@ export class ExperimentSetTablesLoaded extends React.Component {
         return false;
     }
 
+    innerTable(){
+        return (
+            <ExperimentSetTables
+                sortFxn={this.props.sortFxn}
+                width={this.props.width}
+                defaultOpenIndices={this.props.defaultOpenIndices}
+                defaultOpenIds={this.props.defaultOpenIds}
+            />
+        );
+    }
+
     render(){
         return (
-            <ItemPageTableLoader itemsObject={this.props.experimentSetObject} isItemCompleteEnough={ExperimentSetTablesLoaded.isExperimentSetCompleteEnough}>
-                <ExperimentSetTables
-                    sortFxn={this.props.sortFxn}
-                    width={this.props.width}
-                    defaultOpenIndices={this.props.defaultOpenIndices}
-                    defaultOpenIds={this.props.defaultOpenIds}
-                />
-            </ItemPageTableLoader>
+            <ItemPageTableLoader itemsObject={this.props.experimentSetObject} isItemCompleteEnough={ExperimentSetTablesLoaded.isExperimentSetCompleteEnough} children={this.innerTable()} />
+        );
+    }
+}
+
+
+export class ExperimentSetTablesLoadedFromSearch extends ExperimentSetTablesLoaded {
+    render(){
+        return (
+            <ItemPageTableSearchLoaderPageController requestHref={this.props.requestHref} children={this.innerTable()} />
         );
     }
 }

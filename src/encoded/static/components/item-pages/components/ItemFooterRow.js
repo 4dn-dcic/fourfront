@@ -11,7 +11,6 @@ import { console } from './../../util';
  * 
  * @class ItemFooterRow
  * @type {Component}
- * @exports
  * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
  * @prop {Object} schemas - JSON representation of sitewide schemas.
  */
@@ -28,11 +27,8 @@ export class ItemFooterRow extends React.Component {
     /**
      * Render list of aliases for this item, wrapped in a <div>.
      * Only show if (a) any aliases exist AND (b) current user has edit access (e.g. submitter, admin).
-     * 
-     * @memberof module:item-pages/components.ItemFooterRow
-     * @instance
-     * @private
-     * @returns {Element|null} Div React element containing aliases list or null.
+     *
+     * @returns {JSX.Element} Div React element containing aliases list or null.
      */
     aliases(){
         if (
@@ -114,10 +110,9 @@ export class ItemFooterRow extends React.Component {
     }
 
     render() {
-        var schemas = this.props.schemas || {};
-        var context = this.props.context;
+        var { schemas, context } = this.props;
 
-        var externalReferences  = this.externalReferences(schemas),
+        var externalReferences  = this.externalReferences(schemas || {}),
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
 
@@ -126,7 +121,7 @@ export class ItemFooterRow extends React.Component {
         return (
             <div className="row">
 
-                <hr className="mb-08 mt-4"/>
+                <hr className="mb-08 mt-1"/>
 
                 { externalReferences ?
                 <div className="col-xs-12 col-md-6">
