@@ -16,13 +16,8 @@ import { RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 
-export default class ExperimentView extends WorkflowRunTracingView {
 
-    static doesGraphExist(context){
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-        );
-    }
+export default class ExperimentView extends WorkflowRunTracingView {
 
     getFilesTabs(width){
         var context = this.props.context;
@@ -67,6 +62,16 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return tabs;
     }
 
+    /**
+     * This function is called by base class (DefaultItemView) render method to grab list of JS Objects which describe the Tabs and their content.
+     * Properties which should be on the Objects within list are:
+     *   'tab'      - React elements ascribing the 'title' of the tab (and any icons next to it.
+     *   'key'      - Any unique string (among all tabs).
+     *   'disabled' - Whether tab should appear grayed out and unclickable, e.g. for a graph which is still loading.
+     *   'content'  - What is to be displayed in the body of the tab.
+     *
+     * @returns {{ tab : JSX.Element, key: string, disabled: boolean, content: JSX.Element }[]} List of JSON objects representing Tabs and their content.
+     */
     getTabViewContents(){
 
         var initTabs = [];
@@ -74,7 +79,9 @@ export default class ExperimentView extends WorkflowRunTracingView {
         var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
         if (width) width -= 20;
 
-        initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));
+        if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
+            initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));
+        }
         
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
             initTabs.push(FileViewGraphSection.getTabObject(
@@ -97,16 +104,56 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return initTabs.concat(this.getFilesTabs(width)).concat(this.getCommonTabs());
     }
 
+    /**
+     * What is to be displayed at top left of page, under title, to the left of accession (if any).
+     *
+     * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
+     */
+    typeInfo(){
+        return { 'title' : this.props.context.experiment_type || null, 'description' : "Type of Experiment" };
+    }
+
+    /**
+     * What is to be displayed below Item description and above the TabbedView, if anything. Can return an array or single item.
+     *
+     * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
+     */
     itemMidSection(){
-        return [<Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />, <OverviewHeading context={this.props.context} />];
+        return [
+            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
+            <OverviewHeading context={this.props.context} />
+        ];
     }
 
 }
 
-globals.content_views.register(ExperimentView, 'Experiment');
+globals.content_views.register(ExperimentView, 'Experiment'); // This function registers the "ExperimentView" class as the "view" for the "Experiment" @type (and sub-types, unless overriden).
 
 
+export class ExperimentMicView extends ExperimentView {
+    itemMidSection(){
+        return [
+            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
+            <OverviewHeadingMic context={this.props.context} />
+        ];
+    }
+}
+
+globals.content_views.register(ExperimentMicView, 'ExperimentMic'); // This function registers the "ExperimentMicView" class as the "view" for the "ExperimentMic" @type.
+
+
+
+
+
+/**
+ * This is the first Tab of the Experiment Item view and shows what ExperimentSets the Experiment is part of.
+ * @see ExperimentView.getTabViewContents()
+ */
 class ExperimentSetsViewOverview extends React.Component {
+
+    static parentExpSetsExistForExp(exp){
+        return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
+    }
 
     static getTabObject(context, schemas, width){
         return {
@@ -130,27 +177,33 @@ class ExperimentSetsViewOverview extends React.Component {
     }
 
     render(){
-        var { context, width } = this.props, setsByKey = null, table = null;
+        var { context, width } = this.props, setsByKey = null;
 
-        if (context && Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0 && object.atIdFromObject(context.experiment_sets[0])) {
-            setsByKey = _.object(_.zip(_.map(context.experiment_sets, object.atIdFromObject), context.experiment_sets));
-        }
+        setsByKey = _.object(_.zip(_.map(context.experiment_sets, object.atIdFromObject), context.experiment_sets));
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
+            return <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
         }
 
-        return table;
+        return null;
     }
 
 }
 
+/**
+ * This is rendered in middle of ExperimentView, between Item header and TabbedView.
+ * @see ExperimentView.itemMidSection()
+ */
 class OverviewHeading extends React.Component {
     render(){
         var exp = this.props.context;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp);
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
         var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
-        var commonProps = { 'tips' : tips, 'result' : exp, 'wrapInColumn' : "col-xs-6 col-md-3" };
+        var commonProps = {
+            'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
+            'result'        : exp,                  // The Item from which are getting value for 'property'.
+            'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        };
         var commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
         return (
@@ -162,6 +215,42 @@ class OverviewHeading extends React.Component {
                 <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                 <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
                 <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
+            </OverviewHeadingContainer>
+        );
+    }
+}
+
+/**
+ * This is rendered in middle of ExperimentView, between Item header and TabbedView.
+ * @see ExperimentView.itemMidSection()
+ */
+class OverviewHeadingMic extends React.Component {
+    render(){
+        var exp = this.props.context;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+        var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
+        var commonProps = {
+            'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
+            'result'        : exp,                  // The Item from which are getting value for 'property'.
+            'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        };
+        var commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
+
+        return (
+            <OverviewHeadingContainer>
+                <OverViewBodyItem {...commonProps} property='experiment_type' fallbackTitle="Experiment Type" />
+                <OverViewBodyItem {...commonProps} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
+                <OverViewBodyItem {...commonProps} property='biosample' fallbackTitle="Biosample" />
+                <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
+                <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
+                <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
+                
+                <OverViewBodyItem {...commonProps} property='imaging_paths' fallbackTitle="Imaging Paths"
+                    wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement='div' listWrapperElement='div' singleItemClassName="block"
+                    titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+
+                <OverViewBodyItem {...commonProps} property='microscopy_technique' fallbackTitle="Microscopy Technique" />
+                <OverViewBodyItem {...commonProps} property='microscope_qc' fallbackTitle="Microscope Quality Control" />
             </OverviewHeadingContainer>
         );
     }

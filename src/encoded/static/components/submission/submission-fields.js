@@ -894,6 +894,17 @@ class S3FileInput extends React.Component{
  */
 export class AliasInputField extends React.Component {
 
+    static getInitialSubmitsForLabName(submitter){
+        var submits_for_list = (submitter && Array.isArray(submitter.submits_for) && submitter.submits_for.length > 0 && submitter.submits_for) || null;
+        var primaryLab = submitter && submitter.lab;
+        if (_.pluck(submits_for_list, 'uuid').indexOf(primaryLab.uuid) > -1) {
+            return primaryLab.name;
+        } else if (submits_for_list && submits_for_list.length >= 1){
+            return submits_for_list[0].name;
+        }
+        return null;
+    }
+
     static propTypes = {
         'value' : PropTypes.string.isRequired,
         'onAliasChange' : PropTypes.func.isRequired,
@@ -925,16 +936,12 @@ export class AliasInputField extends React.Component {
     }
 
     getInitialSubmitsForPart(){
-        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
-        if (submits_for_list && submits_for_list.length >= 1){
-            return submits_for_list[0].name;
-        }
-        return null;
+        return AliasInputField.getInitialSubmitsForLabName(this.props.currentSubmittingUser);
     }
 
     finalizeAliasPartsChange(aliasParts){
         // Also check to see if need to add first or second part, e.g. if original value passed in was '' or null.
-        if (!aliasParts[0]) {
+        if (!aliasParts[0] || aliasParts[0] === '') {
             aliasParts[0] = this.getInitialSubmitsForPart();
         }
         if (aliasParts.length === 1){
@@ -964,16 +971,16 @@ export class AliasInputField extends React.Component {
         var parts = AliasInputField.splitInTwo(this.props.value);
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ this.getInitialSubmitsForPart() }</InputGroup.Addon>;
         } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
                 <DropdownButton
-                    className="alias-lab-select form-control"
+                    className="alias-lab-select form-control alias-first-part-input"
                     onSelect={this.onAliasFirstPartChange}
                     componentClass={InputGroup.Button}
                     id="aliasFirstPartInput"
                     title={(parts.length > 1 && (
-                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ (parts[0] || this.getInitialSubmitsForPart()) }</span></span>
+                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right text-ellipsis-container" style={{ maxWidth : '80%' }}>{ ((parts[0] !== '' && parts[0]) || this.getInitialSubmitsForPart()) }</span></span>
                     )) || 'Select a Lab'}
                 >
                     { _.map(submits_for_list, function(lab){
