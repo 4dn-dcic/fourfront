@@ -1022,7 +1022,6 @@ export function nodesInColumnSortFxn(node1, node2){
                 getNodeFromListForComparison(node1.inputNodes),
                 getNodeFromListForComparison(node2.inputNodes)
             );
-            console.log('IORES', node1, node2, ioResult, getNodeFromListForComparison(node1.inputNodes), getNodeFromListForComparison(node2.inputNodes));
             if (ioResult !== 0) return ioResult;
         }
         
@@ -1104,7 +1103,7 @@ export function nodesInColumnPostSortFxn(nodesInColumn, columnNumber){
         var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
         if (inputCounts.length > 1){ // If any step nodes which have more inputs than others.
             inputCounts.reverse().pop();
-            console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
+            //console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
             var popped, nodesToCenter, middeIndex;
             while (inputCounts.length > 0){ // In low->high # of inputs (after first lowest)
                 popped = inputCounts.pop();
