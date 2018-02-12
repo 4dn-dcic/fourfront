@@ -23,17 +23,20 @@ const TITLE_MAP = {
     'data_source' : 'Available through',
     'lab_name' : 'Lab',
     'experiment_category' : "Category",
-    'state' : 'Submission Status'
+    'state' : 'Submission Status',
+    'cell_type' : 'Cell Type'
 };
 
 const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
     '4DN' : {
         'experiment_category' : 'experiments_in_set.experiment_type',
-        'experiment_type' : 'experiments_in_set.experiment_type'
+        'experiment_type' : 'experiments_in_set.experiment_type',
+        'cell_type' : 'experiments_in_set.biosample.biosource.cell_line.display_title'
     },
     'ENCODE' : {
         'experiment_category' : 'assay_slims',
-        'experiment_type' : 'assay_term_name'
+        'experiment_type' : 'assay_term_name',
+        'cell_type' : 'biosample_term_name'
     }
 }
 
@@ -57,7 +60,6 @@ export default class JointAnalysisPlansPage extends React.Component {
         }
         experimentCategory = experimentCategory[0] || experimentCategory;
 
-        console.log('X', result.status);
         return _.extend({}, result, {
             'cell_type'             : cellType,
             'experiment_category'   : experimentCategory,
@@ -151,9 +153,9 @@ export default class JointAnalysisPlansPage extends React.Component {
             if (typeof req_url !== 'string' || !req_url) return;
 
             // For testing
-            //if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
-            //    req_url = 'https://data.4dnucleome.org' + req_url;
-            //}
+            if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
+                req_url = 'https://data.4dnucleome.org' + req_url;
+            }
 
             if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
@@ -287,7 +289,6 @@ class VisualBody extends React.Component {
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
                 }}
                 blockPopover={(data, groupingTitle, groupingPropertyTitle, props)=>{
-                    console.log('PROPS fo block', props, TITLE_MAP['experiment_type']);
                     var isGroup = Array.isArray(data);
                     var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
                     var groupingPropertyCurrentTitle = (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
@@ -299,13 +300,18 @@ class VisualBody extends React.Component {
                         </div>
                     );
                     var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
+                    currentFilteringProperties.push(props.columnGrouping);
                     
                     var aggrData;
                     if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP));
                     var data_source = (aggrData || data).data_source;
                     var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
 
-                    var currentFilteringPropertiesVals = _.object(_.map(currentFilteringProperties, function(property){ return [ GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], (aggrData || data)[property]]; }));
+                    var currentFilteringPropertiesVals = _.object(
+                        _.map(currentFilteringProperties, function(property){
+                            return [ GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], (aggrData || data)[property] ];
+                        })
+                    );
                     
 
                     var hrefParts = url.parse(initialHref, true);
@@ -321,10 +327,10 @@ class VisualBody extends React.Component {
                     );
 
                     return (
-                        <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 600 }}>
+                        <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 600, width: '100%' }}>
                             { isGroup ?
                                 <div className="inner">
-                                    { data.length > 1 ? <h5 className="text-400 mt-08 mb-1"><b>{ data.length }</b> Experiment Sets</h5> : null }
+                                    { data.length > 1 ? <h5 className="text-400 mt-1 mb-15"><b>{ data.length }</b> Experiment Sets</h5> : null }
                                     { data.length > 1 ? <hr className="mt-0 mb-1"/> : null }
                                     { StackedBlockVisual.generatePopoverRowsFromJSON(aggrData, props) }
                                     { searchButton }
@@ -332,6 +338,7 @@ class VisualBody extends React.Component {
                                 :
                                 <div className="inner">
                                     { StackedBlockVisual.generatePopoverRowsFromJSON(data, props) }
+                                    { searchButton }
                                 </div>
                             }
                         </Popover>
@@ -355,7 +362,7 @@ class VisualBody extends React.Component {
 
                     var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
 
-                    return origClassName + ' ' + submissionStateClassName;
+                    return origClassName + ' ' + submissionStateClassName + ' hoverable';
                     
                 }}
                 blockRenderedContents={(data, title, groupingPropertyTitle, blockProps)=>{
@@ -380,22 +387,7 @@ class VisualBody extends React.Component {
 
                     return experimentsCountExpected || defaultOutput;
                 }}
-                blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
-
-                    var keysToShow = _.keys(TITLE_MAP);
-
-                    var filteredData = data;
-                    if (!Array.isArray(data)){
-                        filteredData = _.pick(data, ...keysToShow);
-                    } else {
-                        filteredData = _.map(data, function(o){ return _.pick(o, ...keysToShow); });
-                    }
-
-                    var tips = StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
-
-                    return tips;
-
-                }}
+                blockTooltipContents={null}
             />
         );
     }

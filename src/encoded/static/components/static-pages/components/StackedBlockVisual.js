@@ -219,12 +219,12 @@ export class StackedBlockVisual extends React.Component {
 
             var rowElem = (
                 <div className="row popover-entry mb-07" key={property}>
-                    <div className="col-xs-5">
-                        <div className="text-500 text-ellipsis-container text-right">
+                    <div className="col-xs-5 col-md-4">
+                        <div className="text-500 text-ellipsis-continer text-right">
                             { ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') }
                         </div>
                     </div>
-                    <div className={"col-xs-7" + (boldIt ? ' text-500' : '')}>{ val }</div>
+                    <div className={"col-xs-7 col-md-8" + (boldIt ? ' text-600' : '')}>{ val }</div>
                 </div>
             );
 
@@ -344,7 +344,9 @@ export class StackedBlockVisual extends React.Component {
         }
 
         if (!Array.isArray(nestedData) && nestedData) {
-            return _.keys(nestedData).map((k, idx)=>{
+            var leftAxisKeys = _.keys(nestedData);
+            leftAxisKeys.sort();
+            return _.map(leftAxisKeys, (k, idx)=>{
                 return <StackedBlockGroupedRow {...this.props} groupedDataIndices={columnGroups} parentState={this.state} data={nestedData[k]} key={k} group={k} width={width} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} />;
             });
         } else {
@@ -612,6 +614,7 @@ export class StackedBlockGroupedRow extends React.Component {
             'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
         };
         
+        var childRowsKeys = isOpen && !Array.isArray(data) ? _.keys(data).sort() : null;
 
         return (
             <div className={className}>
@@ -629,13 +632,13 @@ export class StackedBlockGroupedRow extends React.Component {
                 </div>
 
                 { isOpen && toggleIcon && depth > 0 ?
-                <div className="close-button" onClick={this.toggleOpen}>
-                    { toggleIcon }
-                </div>
+                    <div className="close-button" onClick={this.toggleOpen} children={toggleIcon}/>
                 : null }
 
                 <div className="child-blocks">
-                    { isOpen && !Array.isArray(data) ? _.keys(data).map((k)=> <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} /> ) : null }
+                    { childRowsKeys && _.map(childRowsKeys, (k)=>
+                        <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} />
+                    ) }
                 </div>
                 
             </div>
