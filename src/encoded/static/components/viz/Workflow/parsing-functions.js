@@ -85,6 +85,16 @@ import { console } from './../../util';
 
 
 
+export const DEFAULT_PARSING_OPTIONS = {
+    'direction'                 : 'output',
+    'skipSortOnColumns'         : [1],
+    'dontCorrectColumns'        : false,
+    'nodesPreSortFxn'           : nodesPreSortFxn,
+    'nodesInColumnSortFxn'      : nodesInColumnSortFxn,
+    'nodesInColumnPostSortFxn'  : nodesInColumnPostSortFxn,
+    'showReferenceFiles'        : true,
+    'showParameters'            : true
+};
 
 
 /**
@@ -92,20 +102,10 @@ import { console } from './../../util';
  * Workflow graph component.
  * 
  * @param {Step[]} analysis_steps                       List of steps from the back-end to generate nodes & edges from.
- * @param {Object} parsingOptions                       Options for parsing and post-processing.
+ * @param {Object} [parsingOptions]                     Options for parsing and post-processing.
  * @returns {{ 'nodes' : Node[], 'edges' : Edge[] }}    Container object for the two lists.
  */
-export function parseAnalysisSteps(
-    analysis_steps,
-    parsingOptions = {
-        'direction'                 : 'output',
-        'skipSortOnColumns'         : [1],
-        'dontCorrectColumns'        : false,
-        'nodesPreSortFxn'           : nodesPreSortFxn,
-        'nodesInColumnSortFxn'      : nodesInColumnSortFxn,
-        'nodesInColumnPostSortFxn'  : nodesInColumnPostSortFxn
-    }
-){
+export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARSING_OPTIONS){
 
     /*************
      ** Outputs **
@@ -478,7 +478,7 @@ export function parseAnalysisSteps(
                             n['_' + stepIOTargetType][0].name === stepIO[stepIOTargetType][0].name /* <-- for workflows, workflow_runs */ || areInputRunDataPresentAndEqual(n, stepIO) /* <-- for provenance graphs */
                         )){
                             // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
-                            if (!(n.meta && n.meta.run_data) || areInputRunDataPresentAndEqual(n, stepIO)){
+                            if (!(n.meta && n.meta.run_data) || !(stepIO.run_data) || areInputRunDataPresentAndEqual(n, stepIO)){
                                 ioNodeIDsMatched[n.id] = ioNodeName(stepIO);
                                 return true;
                             }
@@ -489,7 +489,7 @@ export function parseAnalysisSteps(
                         if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n['_' + oppIOTargetType]) && _.any(n['_' + oppIOTargetType], function(t){ return t.step === step.name; })){
 
                             // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
-                            if (!(n.meta && n.meta.run_data) || areAnyRunDataPresentAndEqual(n, stepIO)){
+                            if (!(n.meta && n.meta.run_data) || !(stepIO.run_data) || areAnyRunDataPresentAndEqual(n, stepIO)){
                                 return true;
                             }
                         }
@@ -499,7 +499,7 @@ export function parseAnalysisSteps(
 
                             if (t.step && t.step === step.name && stepIO.name === t.name){ // Is a match
                                 // Double check that if there is a file, that files are equal as well, to account for provenance graphs with multiple workflows of same type and having same IO arg names, etc.
-                                if (!(n.meta && n.meta.run_data) || areAnyRunDataPresentAndEqual(n, stepIO)){
+                                if (!(n.meta && n.meta.run_data) || !(stepIO.run_data) || areAnyRunDataPresentAndEqual(n, stepIO)){
                                     return true;
                                 }
                             }
@@ -762,14 +762,25 @@ export function parseAnalysisSteps(
      ************************/
 
 
-    var sortedNodes = _.sortBy(correctColumnAssignments(nodes), 'column');
+    
+    var graphData = { nodes, edges };
+
+    if (!parsingOptions.showParameters){
+        graphData = filterOutParametersFromGraphData(graphData);
+    }
+
+    if (!parsingOptions.showReferenceFiles){
+        graphData = filterOutReferenceFilesFromGraphData(graphData);
+    }
+
+    var sortedNodes = _.sortBy(graphData.nodes, 'column');
 
     if (typeof parsingOptions.nodesPreSortFxn === 'function'){
         sortedNodes = parsingOptions.nodesPreSortFxn(sortedNodes);
     }
 
     // Arrange into lists of columns
-    var nodesByColumnPairs = _.pairs(_.groupBy(sortedNodes, 'column'));
+    var nodesByColumnPairs = _.pairs(_.groupBy(correctColumnAssignments(sortedNodes), 'column'));
 
     // Add prelim index for each node, over-written in sorting if any.
     nodesByColumnPairs = _.map(nodesByColumnPairs, function(columnGroup){
@@ -807,10 +818,10 @@ export function parseAnalysisSteps(
     }, []);
 
     if (parsingOptions.dontCorrectColumns){
-        return { 'nodes' : sortedNodes, 'edges' : edges };
+        return { 'nodes' : sortedNodes, 'edges' : graphData.edges };
     }
 
-    return correctColumnAssignments({ 'nodes' : sortedNodes , 'edges' : edges });
+    return correctColumnAssignments({ 'nodes' : sortedNodes , 'edges' : graphData.edges });
 
 }
 
@@ -936,6 +947,54 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem, parsingO
 
 /** Functions for post-processing, used as defaults but may be overriden. */
 
+
+
+/**
+ * For when "Show Parameters" UI setting === false.
+ *
+ * @param {Object}      graphData
+ * @param {Object[]}    graphData.nodes
+ * @param {Object[]}    graphData.edges
+ * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
+ */
+export function filterOutParametersFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+        if (n.nodeType === 'input' && n.ioType && n.ioType === 'parameter') {
+            deleted[n.id] = true;
+            return false;
+        }
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
+    });
+    return { nodes, edges };
+}
+
+
+
+export function filterOutReferenceFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+
+        if (n.ioType === 'reference file'){
+            deleted[n.id] = true;
+            return false;
+        }
+
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
+    });
+    return { nodes, edges };
+}
+
+
+
+
+
 /**
  * Use for changing columns of nodes before sorting/arranging within columns.
  * 
@@ -973,7 +1032,7 @@ export function nodesInColumnSortFxn(node1, node2){
     function getNodeFromListForComparison(nodeList, highestColumn = true){
         if (!Array.isArray(nodeList) || nodeList.length === 0) return null;
         var sortedList = _.sortBy(nodeList.slice(0), function(n){
-            return (n.indexInColumn || n.origIndexInColumn);
+            return (typeof n.indexInColumn === 'number' ? n.indexInColumn : n.origIndexInColumn);
         });
         sortedList = _.sortBy(sortedList, function(n){ return highestColumn ? -n.column : n.column; });
         return (
@@ -988,8 +1047,10 @@ export function nodesInColumnSortFxn(node1, node2){
         if (!n1 && n2) return 1;
         if (n1 && n2){
             if (n1.column === n2.column){
-                if ((n1.indexInColumn || n1.origIndexInColumn) < (n2.indexInColumn || n2.origIndexInColumn)) return -1;
-                if ((n1.indexInColumn || n1.origIndexInColumn) > (n2.indexInColumn || n2.origIndexInColumn)) return 1;
+                var n1idx = typeof n1.indexInColumn === 'number' ? n1.indexInColumn : n1.origIndexInColumn;
+                var n2idx = typeof n2.indexInColumn === 'number' ? n2.indexInColumn : n2.origIndexInColumn;
+                if (n1idx < n2idx) return -1;
+                if (n1idx > n2idx) return 1;
             }
         }
         return 0;
@@ -1045,7 +1106,6 @@ export function nodesInColumnSortFxn(node1, node2){
 
     if (node1.nodeType === 'step' && node2.nodeType === 'step'){
 
-
         if (node1.inputNodes && !node2.inputNodes) return -1;
         if (!node1.inputNodes && node2.inputNodes) return 1;
         if (node1.inputNodes && node2.inputNodes){
@@ -1053,6 +1113,7 @@ export function nodesInColumnSortFxn(node1, node2){
                 getNodeFromListForComparison(node1.inputNodes),
                 getNodeFromListForComparison(node2.inputNodes)
             );
+            console.log(node1, node2, ioResult, _.clone(getNodeFromListForComparison(node1.inputNodes)), _.clone(getNodeFromListForComparison(node2.inputNodes)));
             if (ioResult !== 0) return ioResult;
         }
         
@@ -1126,7 +1187,7 @@ export function nodesInColumnPostSortFxn(nodesInColumn, columnNumber){
         });
     }
     
-    if (_.every(nodesInColumn, function(n){ return n.nodeType === 'step'; })){
+    if (nodesInColumn.length > 2 && _.every(nodesInColumn, function(n){ return n.nodeType === 'step'; })){
         // If all step nodes, move those with more inputs toward the middle.
         var nodesByNumberOfInputs = _.groupBy(nodesInColumn.slice(0), function(n){ return n.inputNodes.length; });
         var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
