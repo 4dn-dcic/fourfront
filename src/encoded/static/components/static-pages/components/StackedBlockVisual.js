@@ -88,7 +88,7 @@ export class StackedBlockVisual extends React.Component {
             var isMultipleClass = 'single-set';
 
             if (Array.isArray(data)) {
-                if (data.length > 1) { 
+                if (data.length > 1) {
                     isMultipleClass = 'multiple-sets';
                 } else {
                     isMultipleClass = 'single-set';
@@ -103,7 +103,7 @@ export class StackedBlockVisual extends React.Component {
             var tip = null;
 
             if (Array.isArray(data) && data.length === 1) data = data[0];
-            
+
             if (props.title){
                 tip = '<h5 style="min-width: 300px;">';
                 tip += props.title;
@@ -354,7 +354,7 @@ export class StackedBlockVisual extends React.Component {
 
         data = extendListObjectsWithIndex(data);
 
-        var nestedData = groupByMultiple( data, groupingProperties ); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } } 
+        var nestedData = groupByMultiple( data, groupingProperties ); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
         var columnGroups = null;
         if (typeof columnGrouping === 'string'){
             columnGroups = _.groupBy(data, columnGrouping);
@@ -475,7 +475,7 @@ export class StackedBlockGroupedRow extends React.Component {
                     return (
                         <div
                             className="block-container-group"
-                            style={{ 
+                            style={{
                                 width : widthPerColumn,
                                 minHeight : props.blockHeight + (props.blockVerticalSpacing),
                                 paddingLeft : props.blockHorizontalSpacing,

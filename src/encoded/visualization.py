@@ -495,15 +495,6 @@ def bar_plot_chart(request):
             'files'             : 0
         }
 
-    def gen_zero_counts_dict():
-        if collect_value_from is not None:
-            return { 'value' : 0 }
-        return {
-            'experiments'       : 0,
-            'experiment_sets'   : 0,
-            'files'             : 0
-        }
-
     # Convert to list of dicts.
     return_fields = [{ "field": field, "terms": {}, "total": gen_zero_counts_dict() } for field in fields_to_aggregate_for ]
 
