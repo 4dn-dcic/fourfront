@@ -2209,3 +2209,29 @@ $workflow-node-color-type-global-context: #ffb3b3;
     }
 
 }
+
+// The popover for matrix is rendered outside of viz container -- 
+
+#jap-popover {
+    h3.popover-title {
+        div.matrix-popover-title {
+            .x-axis-title {
+                width: 40%;
+                text-align: right;
+            }
+            .mid-icon {
+                width: 20%;
+                text-align: center;
+                padding-top: 8px;
+                font-size: 1.5rem;
+                opacity: 0.33;
+            }
+            .y-axis-title {
+                width: 40%;
+                text-align: left;
+                //padding-left: 10px;
+            }
+        }
+    }
+}
+

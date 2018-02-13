@@ -217,6 +217,16 @@ export class StackedBlockVisual extends React.Component {
                 (props.columnGrouping && props.columnGrouping === property)
             );
 
+            if (typeof val === 'object'){
+                if (object.isAnItem(val)) {
+                    val = object.itemUtil.generateLink(val, true, property);
+                } else if (val.props && val.type) {
+                    val = val;
+                } else {
+                    val = <code>{ JSON.stringify(val) }</code>;
+                }
+            }
+
             var rowElem = (
                 <div className="row popover-entry mb-07" key={property}>
                     <div className="col-xs-5 col-md-4">
@@ -253,11 +263,16 @@ export class StackedBlockVisual extends React.Component {
                 delete moreData[k]; // Don't show when multiple, too long.
                 return;
             }
-            moreData[k] = Array.from(moreData[k]);
+            moreData[k] = _.filter(_.uniq(Array.from(moreData[k])), function(d){ return d; });
             if (moreData[k].length === 0){
                 delete moreData[k];
             } else if (moreData[k].length > 1){
-                moreData[k] = '(' + moreData[k].length + ') ' + moreData[k].join('; ');
+                var remainingLength = moreData[k].length - 10;
+                if (_.any(moreData[k], function(md){ return md && typeof md === 'object'; })){
+                    moreData[k] = <span>(<span className="text-500">{ moreData[k].length }</span> Objects)</span>; // Only handle strings, ints.
+                    return;
+                };
+                moreData[k] = <span><span className="text-600">({ moreData[k].length })</span> { moreData[k].slice(0,11).join('; ') }{ (remainingLength > 0 ? '; & ' + remainingLength + ' more...' : null) }</span>
             } else {
                 moreData[k] = moreData[k][0];
             }
@@ -701,11 +716,17 @@ export class StackedBlock extends React.Component {
             popover = blockPopover.apply(blockPopover, blockFxnArguments.slice(0));
         }
 
-        var blockElem = <div className={className} style={style} data-tip={tip} data-place="bottom" data-html>{ contents }</div>;
+        var blockElem = <div className={className} style={style} data-tip={tip} tabIndex={1} data-place="bottom" data-html onKeyUp={(e)=>{
+            if (e.keyCode === 13 && this.refs && this.refs.trigger){
+                console.log(this.refs.trigger, e.target);
+                e.target.dispatchEvent(new MouseEvent('click'), { view : window, bubbles : true });
+                this.refs.trigger.handleToggle();
+            }
+        }} >{ contents }</div>;
 
         if (popover){
             return (
-                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} children={blockElem} rootClose />
+                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} children={blockElem} rootClose ref="trigger" />
             );
         }
 

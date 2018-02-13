@@ -24,7 +24,13 @@ const TITLE_MAP = {
     'lab_name' : 'Lab',
     'experiment_category' : "Category",
     'state' : 'Submission Status',
-    'cell_type' : 'Cell Type'
+    'cell_type' : 'Cell Type',
+    'short_description' : 'Description',
+    'award' : 'Award',
+    'accession' : 'Accession',
+    'number_of_experiments' : '# Experiments in Set',
+    'submitted_by' : "Submitter",
+    'experimentset_type' : "Set Type",
 };
 
 const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
@@ -289,16 +295,40 @@ class VisualBody extends React.Component {
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
                 }}
                 blockPopover={(data, groupingTitle, groupingPropertyTitle, props)=>{
-                    var isGroup = Array.isArray(data);
+
+                    var isGroup = (Array.isArray(data) && data.length > 1) || false;
+                    if (!isGroup && Array.isArray(data) && data.length > 0) {
+                        data = data[0];
+                    }
+
+                    console.log('data', data);
+
                     var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
                     var groupingPropertyCurrentTitle = (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
                     var groupingPropertyCurrentValue = isGroup ? data[0][groupingPropertyCurrent] : data[groupingPropertyCurrent];
+
+                    var yAxisGrouping = props.columnGrouping || null;
+                    var yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null;
+                    var yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null;
+
+                    console.log('PROP', props);
+
                     var popoverTitle = (
-                        <div>
-                            <div className="text-300">{groupingPropertyCurrentTitle}</div>
-                            <div className="text-400">{groupingPropertyCurrentValue}</div>
+                        <div className="clearfix matrix-popover-title">
+                            <div className="x-axis-title pull-left">
+                                <div className="text-300">{groupingPropertyCurrentTitle}</div>
+                                <div className="text-400">{groupingPropertyCurrentValue}</div>
+                            </div>
+                            <div className="mid-icon pull-left">
+                                <i className="icon icon-times"/>
+                            </div>
+                            <div className="y-axis-title pull-left">
+                                <div className="text-300">{yAxisGroupingTitle}</div>
+                                <div className="text-400">{yAxisGroupingValue}</div>
+                            </div>
                         </div>
                     );
+
                     var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
                     currentFilteringProperties.push(props.columnGrouping);
                     
@@ -327,17 +357,20 @@ class VisualBody extends React.Component {
                     );
 
                     return (
-                        <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 600, width: '100%' }}>
+                        <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                             { isGroup ?
                                 <div className="inner">
-                                    { data.length > 1 ? <h5 className="text-400 mt-1 mb-15"><b>{ data.length }</b> Experiment Sets</h5> : null }
-                                    { data.length > 1 ? <hr className="mt-0 mb-1"/> : null }
+                                    <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
+                                    <hr className="mt-0 mb-1"/>
                                     { StackedBlockVisual.generatePopoverRowsFromJSON(aggrData, props) }
                                     { searchButton }
                                 </div>
                                 :
                                 <div className="inner">
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(data, props) }
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(
+                                        _.pick(data, 'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
+                                        'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'), props
+                                    ) }
                                     { searchButton }
                                 </div>
                             }
