@@ -506,3 +506,55 @@ def test_calculated_no_of_expts_in_set_w_no_exps(empty_replicate_set):
 
 def test_calculated_no_of_expts_in_set_w_2_exps(two_experiment_replicate_set):
     assert two_experiment_replicate_set['number_of_experiments'] == 2
+
+
+# tests for category calculated_property
+@pytest.fixture
+def target_w_prot(testapp, lab, award):
+    item = {
+        'description': "Protein target",
+        'targeted_proteins': ['CTCF (ABCD)'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def expt_w_target(testapp, lab, award, human_biosample,
+                  mboI, target_w_prot):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'CHIA-pet',
+        'targeted_factor': target_w_prot['@id']
+    }
+    return testapp.post_json('/experiment_chiapet', item).json['@graph'][0]
+
+
+def test_experiment_categorizer_w_target(testapp, expt_w_target, target_w_prot):
+    # import pdb; pdb.set_trace()
+    assert expt_w_target['experiment_categorizer']['field'] == 'Target'
+    assert expt_w_target['experiment_categorizer']['value'] == target_w_prot['display_title']
+
+
+def test_experiment_categorizer_w_enzyme(testapp, experiment, mboI):
+    assert experiment['experiment_categorizer']['field'] == 'Enzyme'
+    assert experiment['experiment_categorizer']['value'] == mboI['display_title']
+
+
+def test_experiment_categorizer_w_target_and_enzyme(testapp, expt_w_target, target_w_prot, mboI):
+    # import pdb; pdb.set_trace()
+    res = testapp.patch_json(expt_w_target['@id'], {'digestion_enzyme': mboI['@id']}).json['@graph'][0]
+    assert res['digestion_enzyme'] == mboI['@id']
+    assert res['experiment_categorizer']['field'] == 'Target'
+    assert res['experiment_categorizer']['value'] == target_w_prot['display_title']
+
+
+def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
+    del experiment_data['digestion_enzyme']
+    experiment_data['experiment_type'] = 'RNA-seq'
+    expt = testapp.post_json('/experiment_seq', experiment_data).json['@graph'][0]
+    assert expt['experiment_categorizer']['field'] == 'Default'
+    assert expt['experiment_categorizer']['value'] == 'No value'

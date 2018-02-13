@@ -221,23 +221,32 @@ class Experiment(Item):
         "title": "Categorizer",
         "description": "Fields used as an additional level of categorization for an experiment",
         "type": "object",
-        "additionalProperties": false,
         "properties": {
             "field": {
                 "type": "string",
                 "description": "The name of the field as to be displayed in tables."
-            }
+            },
             "value": {
                 "type": "string",
                 "description": "The value displayed for the field"
             }
         }
     })
-    def experiment_categorizer(self, request):
+    def experiment_categorizer(self, request, digestion_enzyme=None, targeted_factor=None):
         ''' The generalish case for if there is a targeted_factor use that
             and if not use enzyme - more specific cases in specific schemas
         '''
-        pass
+        # import pdb; pdb.set_trace()
+        if targeted_factor is not None:
+            obj = request.embed('/', targeted_factor, '@@object')
+            field = 'Target'
+        elif digestion_enzyme is not None:
+            obj = request.embed('/', digestion_enzyme, '@@object')
+            field = 'Enzyme'
+        else:
+            obj = {'display_title': 'No value'}
+            field = 'Default'
+        return {'field': field, 'value': obj['display_title']}
 
 
 @collection(
