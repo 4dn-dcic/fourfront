@@ -75,6 +75,7 @@ ORDER = [
     'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
+    'report',
     'software',
     'analysis_step',
     'workflow',

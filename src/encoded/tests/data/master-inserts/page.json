@@ -268,5 +268,11 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b051"
         ]
+    },
+    {
+        "name": "joint-analysis-reports",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
+        "title": "Joint Analysis Data Reports",
+        "content": []
     }
 ]
