@@ -19,57 +19,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
-	font-weight: 300;
-	height: 36px;
-	/* line-height: 36px; */
-	margin: 0;
-	padding-left: 13px;
 
-	> span:not(:last-child){
-		padding-right: 5px;
-		margin-right: 5px;
-		border-right: 1px solid #ccc;
-	}
 
-	/*
-	.accession-label {
-		font-size: 1rem;
-		font-weight: 400;
-		color: #888;
-	}
-	*/
-
-	.accession {
-		font-weight: 500;
-		font-size: 1.15rem;
-	}
-}
-
-.item-label-extra {
-	font-weight: 300;
-
-	.icon[class*=" ss-"] {
-		margin-bottom: -4px;
-		vertical-align: middle;
-	}
-
-	.icon[class*=" sbt-"] {
-		margin-top: -2px;
-		vertical-align: middle;
-	}
-}
-
-@media screen and (max-width: $screen-xs-max){
-
-	.item-label-extra.text-right {
-		// Hackishly making text left-aligned for collapsed mobile view(s)
-		text-align: left !important;
-	}
-
-}
-
-/******* Item Page Headings *********/
+/*************************
+    Item Page Headings
+**************************/
 
 
 .flexible-description-box {
@@ -102,10 +56,14 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-heading {
     /** Extends .flexible-description-box **/
-	border-radius: 2px;
-	border: 1px solid #eee;
-	min-height: 42px;
-	padding: 10px 15px 8px;
+	border-top:1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	//min-height: 42px;
+	padding: 10px 0px 10px; 
+	transition: height .4s, border-color .4s;
+	text-align: justify;
+
+	h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 20px; }
 
 	h4 {
 		font-weight: 500;
@@ -117,26 +75,130 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 	}
 
+	&.no-description {
+		padding-top: 0;
+		padding-bottom: 0;
+		border-bottom: none;
+		border-top-color: #eee;
+		@media screen and (min-width: $screen-md-min){
+			width: 33%;
+			float: right;
+		}
+		& + div.bottom-row {
+			clear: both;
+		}
+	}
+
+	&.expanded {
+		border-bottom-color: #ddd;
+	}
+
 }
 
-.flexcol-heading, .item-page-heading, .submission-page-heading{
+.item-view-header {
+	.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
+		font-weight: 300;
+		min-height: 30px;
+		/* line-height: 36px; */
+		margin: 0;
+		//padding-top: 10px;
+		padding-left: 12px;
+
+		@media screen and (max-width: $screen-xs-max){
+			min-height: 42px;
+		}
+
+		> div.inner {
+			padding-top: 10px;
+			> span:not(:last-child){
+				padding-right: 8px;
+				margin-right: 7px;
+				border-right: 1px solid #ccc;
+			}
+		}
+	
+		/*
+		.accession-label {
+			font-size: 1rem;
+			font-weight: 400;
+			color: #888;
+		}
+		*/
+	
+		.accession {
+			font-weight: 500;
+			font-size: 1rem;
+		}
+	}
+
+	//&.no-description .item-label-title > div.inner {
+	//	border-top: 1px solid #ddd;
+	//	margin-top: 10px;
+	//}
+	
+	.item-label-extra {
+		font-weight: 300;
+	
+		.icon[class*=" ss-"] {
+			margin-bottom: -4px;
+			vertical-align: middle;
+		}
+	
+		.icon[class*=" sbt-"] {
+			margin-top: -2px;
+			vertical-align: middle;
+		}
+	}
+	
+	@media screen and (max-width: $screen-xs-max){
+	
+		.item-label-extra.text-right {
+			text-align: left !important;
+		}
+	
+	}
+}
+
+.flexcol-heading,
+.submission-page-heading {
     position: relative;
-    //margin-right: -10px;
-    //margin-left: -10px;
     background-color: #f4f4f4;
 
     h1, h2, h3, h4, h5, h6 {
         margin: 0;
     }
 
-    // For the Experiment Summary header
-    &.experiment-heading {
+    
+}
 
-        h1, h2, h3, h4, h5, h6 {
-            line-height: 20px;  // 50px - 20px of vertical padding
-        }
+/*** Submissions ***/
 
-    }
+// For submissions page headers
+h3.submission-subtitle {
+	font-weight: 400;
+	display: inline-block;
+}
+
+.submission-page-heading {
+    /** Extends .flexible-description-box **/
+	border-radius: 2px;
+	border: 1px solid #ddd;
+	min-height: 42px;
+	padding: 10px 15px 8px;
+}
+
+.submission-btn {
+	background-color: #f4f4f4;
+	border-color: #f4f4f4;
+	margin-left: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+	box-shadow: none;
+}
+
+.submission-btn:hover, .submission-btn:focus{
+	background-color: #ddd;
+	border-color: #f4f4f4;
 }
 
 .item-header-indicators {
@@ -144,9 +206,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	margin-top: 8px;
 	margin-bottom: 8px;
 
-	.expset-indicator {
+	> .indicator-item {
 		display: inline-block;
 		box-sizing: border-box;
+		position: relative;
 		/* border: 1px solid rgba(0,0,0,0.125); */
 		/* border-radius: 5px; */
 		line-height: 20px;
@@ -157,51 +220,29 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		text-transform: capitalize;
 		color: #444;
 
-		&.right, .left {
-			max-width: 50%;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			&:after {
-				content : "";
-				display: block;
-				position: absolute;
-				height: 100%;
-				top: 0;
-			}
-		}
+		max-width: 50%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 
-		&.right {
-			padding-left: 21px;
+		padding-right: 21px;
+		padding-left: 0;
+		max-width: 50%;
+		&:after {
+			content : "";
+			display: block;
+			position: absolute;
+			right: 10px;
+			height: 100%;
+			top: 0;
+			border-right: 1px solid rgba(0,0,0,0.125);
+		}
+		&:last-child {
 			padding-right: 0;
-			&:after {
-				margin-left: -11px;
-				border-left: 1px solid rgba(0,0,0,0.125);
-			}
-			&:last-child {
-				padding-left: 0;
-				margin-left: 0;
-			}
-			&:last-child:after {
-				display: none;
-			}
+			margin-right: 0;
 		}
-
-		&.left {
-			padding-right: 21px;
-			padding-left: 0;
-			max-width: 50%;
-			&:after {
-				margin-right: -10px;
-				border-right: 1px solid rgba(0,0,0,0.125);
-			}
-			&:last-child {
-				padding-right: 0;
-				margin-right: 0;
-			}
-			&:last-child:after {
-				display: none;
-			}
+		&:last-child:after {
+			display: none;
 		}
 
 		&.expset-status:before {
@@ -818,7 +859,7 @@ $download-button-width : 100px;
 .formatted-info-panel {
 	padding : 0 10px 12px;
 	/* border-bottom: 1px solid #e2e2e2; */
-	margin-bottom: 5px;
+	margin-bottom: 8px;
 
 	/* Adjustments based on available props, ToDo: .no-title */
 
@@ -894,8 +935,6 @@ $download-button-width : 100px;
 
 	}
 
-	
-
 	@include icon-container-child();
 
 }
@@ -920,54 +959,48 @@ $download-button-width : 100px;
 		transition: opacity .5s;
 	}
 
-}
+	&.formatted-wrapper {
 
-/************** Publications Block ****************/
-
-.publications-block {
-
-	ul {
-		margin-bottom: 0;
-		padding-left: 10px;
-	}
-
-	&.single-item {
 		ul {
-			margin-bottom: 1px;
-    		margin-top: 7px;
+			margin-bottom: 0;
+			padding-left: 18px;
 		}
-	}
-
-	.details {
-		padding-top: 3px;
-		> .details-row {
-			margin-top: 7px;
+	
+		&.single-item {
+			ul {
+				margin-bottom: 1px;
+				margin-top: 7px;
+			}
 		}
-	}
-
-	h6.publication-label {
-		@include small-block-label();
-	}
-
-	.label-col {
-		user-select: none;
-	}
-
-	.label-col span {
-		position: relative;
-		.icon.abstract-toggle {
-			cursor : pointer;
-			color : #888;
-			position: absolute;
-			left: -20px;
-			top: 2px;
+	
+		.details {
+			padding-top: 3px;
+			> .details-row {
+				margin-top: 7px;
+			}
 		}
-
+	
+		.label-col {
+			user-select: none;
+		}
+	
+		.label-col span {
+			position: relative;
+			.icon.abstract-toggle {
+				cursor : pointer;
+				color : #888;
+				position: absolute;
+				left: -20px;
+				top: 2px;
+			}
+	
+		}
+	
+		@include icon-container-child();
 	}
-
-	@include icon-container-child();
 
 }
+
 
 /**********************************************************
 					OverViewBody
@@ -1039,12 +1072,11 @@ $download-button-width : 100px;
 					margin-left: 5px;
 					font-size: 1.125rem;
 				}
+				i.expand-icon,
 				i.title-icon {
 					margin-right: 12px;
 					font-size: 1rem;
-					vertical-align: middle;
 					position: relative;
-					top: -1px;
 				}
 			}
 			&:hover > span {
@@ -1158,6 +1190,25 @@ $download-button-width : 100px;
 
 						}
 					}
+
+					&.is-image {
+						margin-left: -5px;
+						margin-right: -5px;
+						> .inner {
+							> a.image-wrapper {
+								display: block;
+								margin: 0 auto;
+							}
+							> .caption {
+								padding: 10px 0 5px;
+								font-style: italic;
+							}
+						}
+						img.embedded-item-image {
+							max-width: 100%;
+						}
+					}
+
 				}
 
 				> div.overview-single-element {
@@ -1463,23 +1514,20 @@ $download-button-width : 100px;
 
 .item-page-container.type-File {
 
-	.rc-tabs-content {
 
 		 .file-download-container {
+			transition: transform .4s;
 
-			border-top: 1px solid #eee;
-			margin-top: 20px;
-			padding-top: 20px;
-
-			@media screen and (min-width: $screen-md-min){
-				padding-top: 16px;
-				margin-top: 0;
-				border-top: none;
+			> a.btn-block.btn-lg {
+				font-weight: 400;
+				padding-top: 11px;
+				> i {
+					position: relative;
+    				top: 1px;
+				}
 			}
 
 		}
-
-	}
 
 }
 

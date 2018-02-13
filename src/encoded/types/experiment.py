@@ -517,7 +517,16 @@ class ExperimentMic(Experiment):
     """The experiment class for Microscopy experiments."""
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = Experiment.embedded_list + [
+        "files.microscope_settings.ch00_light_source_center_wl",
+        "files.microscope_settings.ch01_light_source_center_wl",
+        "files.microscope_settings.ch02_light_source_center_wl",
+        "files.microscope_settings.ch03_light_source_center_wl",
+        "files.microscope_settings.ch00_lasers_diodes",
+        "files.microscope_settings.ch01_lasers_diodes",
+        "files.microscope_settings.ch02_lasers_diodes",
+        "files.microscope_settings.ch03_lasers_diodes"
+    ]
     name_key = 'accession'
 
     @calculated_property(schema={

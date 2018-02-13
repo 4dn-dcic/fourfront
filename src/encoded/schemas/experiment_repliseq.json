@@ -26,6 +26,9 @@
         { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "experiment.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],

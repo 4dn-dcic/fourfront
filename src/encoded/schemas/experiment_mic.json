@@ -24,6 +24,9 @@
         { "$ref": "mixins.json#/badges" },
         { "$ref": "experiment.json#/properties"}
     ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
@@ -63,7 +66,7 @@
         },
         "imaging_paths": {
             "title": "Imaging Paths",
-            "description": "Target to label connections in each channel",
+            "description": "Target to label connections in each channel.",
             "type":  "array",
             "items": {
                 "title": "Imaging path",

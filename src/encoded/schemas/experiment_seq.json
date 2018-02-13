@@ -30,12 +30,15 @@
       "3p_adenylation_time": ["3p_adenylation_temperature"],
       "3p_adenylation_temperature": ["3p_adenylation_time"]
     },
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
