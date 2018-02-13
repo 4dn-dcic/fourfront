@@ -1,42 +1,6 @@
 [
     {
         "status": "current",
-        "first_name": "4dn",
-        "last_name": "DCIC",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
-        "subscriptions": [
-            {
-                "url": "?submitted_by.link_id=~users~986b362f-4eb6-4a9c-8173-3ab267307e3a~&sort=-date_created",
-                "title": "My submissions"
-            },
-            {
-                "url": "?lab.link_id=~labs~4dn-dcic-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~4dn-dcic-lab~&sort=-date_created",
-                "title": "My lab"
-            }
-        ],
-        "submits_for": [
-            "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
-        ],
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "schema_version": "1",
-        "groups": [
-            "admin"
-        ],
-        "timezone": "US/Pacific",
-        "date_created": "2017-04-07T19:56:09.710360+00:00",
-        "job_title": "Admin",
-        "email": "4dndcic@gmail.com",
-        "viewing_groups": [
-            "4DN"
-        ],
-        "aliases": []
-    },
-    {
-        "status": "current",
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
         "first_name": "Bing",
         "last_name": "Ren",
