@@ -558,3 +558,10 @@ def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
     expt = testapp.post_json('/experiment_seq', experiment_data).json['@graph'][0]
     assert expt['experiment_categorizer']['field'] == 'Default'
     assert expt['experiment_categorizer']['value'] == 'No value'
+
+
+def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI):
+    experiment_data['experiment_type'] = 'capture Hi-C'
+    expt = testapp.post_json('/experiment_capture_c', experiment_data).json['@graph'][0]
+    assert expt['experiment_categorizer']['field'] == 'Enzyme'
+    assert expt['experiment_categorizer']['value'] == mboI['display_title']

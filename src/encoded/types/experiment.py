@@ -332,6 +332,31 @@ class ExperimentCaptureC(Experiment):
     def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
+    @calculated_property(schema={
+        "title": "Categorizer",
+        "description": "Fields used as an additional level of categorization for an experiment",
+        "type": "object",
+        "properties": {
+            "field": {
+                "type": "string",
+                "description": "The name of the field as to be displayed in tables."
+            },
+            "value": {
+                "type": "string",
+                "description": "The value displayed for the field"
+            }
+        }
+    })
+    def experiment_categorizer(self, request, targeted_regions=None, digestion_enzyme=None):
+        ''' Use targeted_regions information for capture-c
+        '''
+        if targeted_regions is not None:
+            regions = [request.embed('/', t, '@@object')['display_title'] for t in targeted_regions]
+            value = ', '.join(sorted(regions))
+            return {'field': 'Target', 'value': value}
+        else:
+            return super(ExperimentCaptureC, self).experiment_categorizer(request, digestion_enzyme)
+
 
 @collection(
     name='experiments-repliseq',
