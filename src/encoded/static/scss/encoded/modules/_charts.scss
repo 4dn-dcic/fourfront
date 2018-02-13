@@ -2,7 +2,8 @@
 .facet-charts {
     transition: opacity 0.75s;
     opacity : 1;
-    margin-top: 45px;
+    margin-top: 50px;
+    margin-bottom: 25px;
     &.loading {
         opacity : 0.125;
         text-align: center;

@@ -26,6 +26,9 @@
         { "$ref": "experiment.json#/properties" },
         { "$ref": "experiment_hi_c.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
