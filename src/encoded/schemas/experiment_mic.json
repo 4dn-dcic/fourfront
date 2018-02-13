@@ -24,6 +24,9 @@
         { "$ref": "mixins.json#/badges" },
         { "$ref": "experiment.json#/properties"}
     ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
