@@ -484,7 +484,7 @@ export class StackedBlockGroupedRow extends React.Component {
                             }}
                             key={k}
                             data-group-key={k}
-                            children={_.map(blocksByColumnGroup[k], (pairs) => <StackedBlock {...commonProps} data={pairs[1]} title={pairs[0]} /> )}
+                            children={_.map(blocksByColumnGroup[k], (pairs,i) => <StackedBlock key={pairs[0] || i} {...commonProps} data={pairs[1]} title={pairs[0]} /> )}
                         />
                     );
                 });
@@ -544,7 +544,7 @@ export class StackedBlockGroupedRow extends React.Component {
                                 } else if (typeof props.columnSubGrouping === 'string') {
                                     title = object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <StackedBlock key={i} {...commonProps} data={blockData} title={title} parentGrouping={parentGrouping} subGrouping={subGrouping} />;
+                                return <StackedBlock key={title || i} {...commonProps} data={blockData} title={title} parentGrouping={parentGrouping} subGrouping={subGrouping} />;
                             }) }
                         </div>
                     );
@@ -552,7 +552,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
             }
         } else {
-            inner = allChildBlocks.map((pair)=> <StackedBlock {...commonProps} data={pair[1]} title={pair[0]} /> );
+            inner = allChildBlocks.map((pair)=> <StackedBlock {...commonProps} key={pair[0]} data={pair[1]} title={pair[0]} /> );
         }
 
 
@@ -617,7 +617,7 @@ export class StackedBlockGroupedRow extends React.Component {
                 <div className="header-for-viz">
                     { columnKeys.map(function(k){
                         return (
-                            <div className="column-group-header" style={headerItemStyle}>
+                            <div key={k} className="column-group-header" style={headerItemStyle}>
                                 <div className="inner">
                                     <span>{ k }</span>
                                 </div>
@@ -628,7 +628,7 @@ export class StackedBlockGroupedRow extends React.Component {
             );
         }
 
-        var h4TitleProps = { 
+        var h4TitleProps = {
             'className' : "text-500 text-ellipsis-container",
             'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
         };

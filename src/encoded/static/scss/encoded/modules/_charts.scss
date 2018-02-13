@@ -1930,13 +1930,16 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 background-color: #5e776b;
                 */
             }
+            /*
             &.multiple-sets {
                 box-shadow: -3px 3px 0px #555;
                 transform: translate(1px, -1px) scale(0.925);
             }
+            */
             @media screen and (max-width: $screen-xs-min){
                 width : 100% !important;
             }
+            border: 1px solid #0003;
             /** Styles for Submitted, In Submission, Planned, Not Yet Planned, etc. **/
         }
 

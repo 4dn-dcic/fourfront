@@ -194,7 +194,7 @@ export default class JointAnalysisPlansPage extends React.Component {
         if (isLoading){
             return (
                 <StaticPage.Wrapper>
-                     <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-o-notch"/></div>
+                    <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-o-notch"/></div>
                 </StaticPage.Wrapper>
             );
         }
@@ -209,7 +209,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         var resultListEncode = this.state.encode_results;
 
-        return ( 
+        return (
             <StaticPage.Wrapper>
                 <div className="row">
                     { this.legend() }
@@ -227,10 +227,9 @@ export default class JointAnalysisPlansPage extends React.Component {
                             //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
                         />
-                        
                     </div>
                     <div className="col-xs-12 col-md-6">
-                    <h4 className="mt-2 mb-0 text-300">ENCODE</h4>
+                        <h4 className="mt-2 mb-0 text-300">ENCODE</h4>
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
@@ -301,8 +300,6 @@ class VisualBody extends React.Component {
                         data = data[0];
                     }
 
-                    console.log('data', data);
-
                     var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
                     var groupingPropertyCurrentTitle = (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
                     var groupingPropertyCurrentValue = isGroup ? data[0][groupingPropertyCurrent] : data[groupingPropertyCurrent];
@@ -310,8 +307,6 @@ class VisualBody extends React.Component {
                     var yAxisGrouping = props.columnGrouping || null;
                     var yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null;
                     var yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null;
-
-                    console.log('PROP', props);
 
                     var popoverTitle = (
                         <div className="clearfix matrix-popover-title">
@@ -369,7 +364,7 @@ class VisualBody extends React.Component {
                                 <div className="inner">
                                     { StackedBlockVisual.generatePopoverRowsFromJSON(
                                         _.pick(data, 'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
-                                        'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'), props
+                                            'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'), props
                                     ) }
                                     { searchButton }
                                 </div>
