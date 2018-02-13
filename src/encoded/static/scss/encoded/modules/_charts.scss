@@ -1990,6 +1990,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
             margin-bottom: 2px;
         }
 
+        &.no-grouping-property-titles {
+            .label-section > h4 {
+                margin-top: 13px;
+            }
+        }
+
         .label-section > small {
             color: #777;
             vertical-align: top;
@@ -2021,10 +2027,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
             }
 
-            &:not(.open):not(.with-duplicate-headers):not(:last-child) {
+            &:not(.open):not(.with-duplicate-headers):not(:first-child) {
                 > .row > .list-section {
                     > .blocks-container {
-                        border-bottom: 1px solid #eee;
+                        border-top: 1px solid #eee;
                     }
                 }
             }
@@ -2047,13 +2053,16 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
 
-            &.open + :not(.open),
-            &.open + :not(.with-duplicated-headers) {
+            &.open + :not(.open):not(.no-grouping-property-titles),
+            &.open + :not(.with-duplicated-headers):not(.no-grouping-property-titles) {
                 margin-top: 15px;
             }
-            &.open.with-duplicated-headers + :not(.open) {
+            &.open.with-duplicated-headers + :not(.open):not(.no-grouping-property-titles) {
                 margin-top: 30px;
             }
+            //&.open.with-duplicated-headers + .no-grouping-property-titles:not(.open) {
+            //    margin-top: 20px;
+            //}
 
         }
         
@@ -2230,6 +2239,19 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 width: 40%;
                 text-align: left;
                 //padding-left: 10px;
+            }
+        }
+    }
+    div.popover-content {
+        .popover-entry {
+            ol {
+                padding-left: 25px;
+                margin-bottom: 0;
+            }
+            .more-items-count {
+                font-style: italic;
+                margin-top: 4px;
+                margin-left: 25px;
             }
         }
     }

@@ -82,6 +82,7 @@ export class StackedBlockVisual extends React.Component {
         'duplicateHeaders' : true,
         'collapseToMatrix' : false,
         // @param data may be either Array (if multiple grouped into 1) or object.
+        'showGroupingPropertyTitles' : false,
         'blockClassName' : function(data){
 
             var isMultipleClass = 'single-set';
@@ -221,7 +222,7 @@ export class StackedBlockVisual extends React.Component {
                 if (object.isAnItem(val)) {
                     val = object.itemUtil.generateLink(val, true, property);
                 } else if (val.props && val.type) {
-                    val = val;
+                    // Do nothing.
                 } else {
                     val = <code>{ JSON.stringify(val) }</code>;
                 }
@@ -267,12 +268,20 @@ export class StackedBlockVisual extends React.Component {
             if (moreData[k].length === 0){
                 delete moreData[k];
             } else if (moreData[k].length > 1){
-                var remainingLength = moreData[k].length - 10;
+                var remainingLength = moreData[k].length - 3;
                 if (_.any(moreData[k], function(md){ return md && typeof md === 'object'; })){
                     moreData[k] = <span>(<span className="text-500">{ moreData[k].length }</span> Objects)</span>; // Only handle strings, ints.
                     return;
-                };
-                moreData[k] = <span><span className="text-600">({ moreData[k].length })</span> { moreData[k].slice(0,11).join('; ') }{ (remainingLength > 0 ? '; & ' + remainingLength + ' more...' : null) }</span>
+                }
+                moreData[k] = (
+                    <div>
+                        <span className="text-600">({ moreData[k].length })</span>
+                        <ol>
+                            { _.map(moreData[k].slice(0,3), (v,i)=> <li key={i}>{ v }</li> ) }
+                        </ol>
+                        { remainingLength > 0 ? <div className="more-items-count"> and { remainingLength } more...</div> : null }
+                    </div>
+                );
             } else {
                 moreData[k] = moreData[k][0];
             }
@@ -475,9 +484,8 @@ export class StackedBlockGroupedRow extends React.Component {
                             }}
                             key={k}
                             data-group-key={k}
-                        >
-                            { blocksByColumnGroup[k].map((pairs)=> <StackedBlock {...commonProps} data={pairs[1]} title={pairs[0]} /> ) }
-                        </div>
+                            children={_.map(blocksByColumnGroup[k], (pairs) => <StackedBlock {...commonProps} data={pairs[1]} title={pairs[0]} /> )}
+                        />
                     );
                 });
 
@@ -548,11 +556,7 @@ export class StackedBlockGroupedRow extends React.Component {
         }
 
 
-        return (
-            <div className="blocks-container" style={{ 'minHeight' : props.blockHeight + props.blockVerticalSpacing }}>
-                { inner }
-            </div>
-        );
+        return <div className="blocks-container" style={{ 'minHeight' : props.blockHeight + props.blockVerticalSpacing }} children={inner}/>;
     }
 
     constructor(props){
@@ -572,14 +576,14 @@ export class StackedBlockGroupedRow extends React.Component {
     }
 
     render(){
-        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders } = this.props;
+        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles } = this.props;
         var groupingPropertyTitle = null;
         if (Array.isArray(groupingProperties) && groupingProperties[depth]){
             groupingPropertyTitle = titleMap[groupingProperties[depth]] || groupingProperties[depth];
         }
 
         var isOpen = this.state.open;
-        var className = "grouping depth-" + depth + (isOpen ? ' open' : '') + (duplicateHeaders && depth === 0 ? ' with-duplicated-headers' : '') + (' row-index-' + index);
+        var className = "grouping depth-" + depth + (isOpen ? ' open' : '') + (duplicateHeaders && depth === 0 ? ' with-duplicated-headers' : '') + (' row-index-' + index) + (!showGroupingPropertyTitles ? ' no-grouping-property-titles' : '');
         var toggleIcon = null;
         if (!Array.isArray(data)) toggleIcon = <i className={"icon icon-fw icon-" + (isOpen ? 'minus' : 'plus')} />;
         if (toggleIcon){
@@ -636,7 +640,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
                 <div className="row">
                     <div className="col col-sm-4 label-section" style={{ minHeight : blockHeight + blockVerticalSpacing }}>
-                        { groupingPropertyTitle ? <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small> : null }
+                        { groupingPropertyTitle && showGroupingPropertyTitles ? <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small> : null }
                         <h4 {...h4TitleProps}><span onClick={toggleIcon ? this.toggleOpen : null}>{ toggleIcon } { group }</span></h4>
                         {/* this.childLabels() */}
                     </div>
