@@ -1910,6 +1910,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 width: 20px;
             }
         }
+        //border-bottom: 1px solid #eee;
     }
 
     .blocks-container {
@@ -1921,6 +1922,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             text-align: center;
             border: 1px solid transparent;
             color: #fff;
+            cursor: pointer;
             &.production {
                 /*
                 border-color: transparent;
@@ -1929,12 +1931,13 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 */
             }
             &.multiple-sets {
-                box-shadow: -3px 3px 0px #444;
+                box-shadow: -3px 3px 0px #555;
                 transform: translate(1px, -1px) scale(0.925);
             }
             @media screen and (max-width: $screen-xs-min){
                 width : 100% !important;
             }
+            /** Styles for Submitted, In Submission, Planned, Not Yet Planned, etc. **/
         }
 
         .block-container-group {
@@ -1987,17 +1990,43 @@ $workflow-node-color-type-global-context: #ffb3b3;
             margin-bottom: 2px;
         }
 
+        .label-section > small {
+            color: #777;
+            vertical-align: top;
+        }
+
+        @media screen and (min-width: $screen-md-min){
+            .label-section > small {
+                color: #ddd;
+                transition: color .33s;
+            }
+            &:hover > .row {
+                > .label-section > small {
+                    color: #333;
+                }
+            }
+        }
+
         &.depth-0 {
             margin-bottom: 0px;
-            > .row > .label-section > h4 {
-                margin-top: 5px;
-            }
+            //> .row > .label-section > h4 {
+            //    margin-top: 3px;
+            //}
+
             > .row > .list-section { 
-                padding-top: 10px;
+                padding-top: 0px;
                 > .group-value {
                     font-size: 1.3rem;
                 }
 
+            }
+
+            &:not(.open):not(.with-duplicate-headers):not(:last-child) {
+                > .row > .list-section {
+                    > .blocks-container {
+                        border-bottom: 1px solid #eee;
+                    }
+                }
             }
 
             &.open > .row > .list-section.has-header,
@@ -2009,18 +2038,21 @@ $workflow-node-color-type-global-context: #ffb3b3;
             &.row-index-0.with-duplicated-headers,
             &.with-duplicated-headers.open {
                 > .row > .label-section {
-                    padding-top: 87px;
+                    padding-top: 100px;
                 }
                 &.open {
                     > .row > .label-section {
-                        padding-top: 54px;
+                        padding-top: 60px;
                     }
                 }
             }
 
             &.open + :not(.open),
             &.open + :not(.with-duplicated-headers) {
-                margin-top: 10px;
+                margin-top: 15px;
+            }
+            &.open.with-duplicated-headers + :not(.open) {
+                margin-top: 30px;
             }
 
         }
@@ -2177,3 +2209,29 @@ $workflow-node-color-type-global-context: #ffb3b3;
     }
 
 }
+
+// The popover for matrix is rendered outside of viz container -- 
+
+#jap-popover {
+    h3.popover-title {
+        div.matrix-popover-title {
+            .x-axis-title {
+                width: 40%;
+                text-align: right;
+            }
+            .mid-icon {
+                width: 20%;
+                text-align: center;
+                padding-top: 8px;
+                font-size: 1.5rem;
+                opacity: 0.33;
+            }
+            .y-axis-title {
+                width: 40%;
+                text-align: left;
+                //padding-left: 10px;
+            }
+        }
+    }
+}
+

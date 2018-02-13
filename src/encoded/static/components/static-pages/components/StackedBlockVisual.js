@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+import { Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, object } from'./../../util';
 
@@ -84,19 +84,7 @@ export class StackedBlockVisual extends React.Component {
         // @param data may be either Array (if multiple grouped into 1) or object.
         'blockClassName' : function(data){
 
-            // Figure out if we are submitted, planned, or N/A.
-            function checkDataObjForProduction(d){
-                if (typeof d.in_production_stage_standardized_protocol === 'string'){
-                    var checkStr = d.in_production_stage_standardized_protocol.toLowerCase();
-                    if (checkStr === 'yes' || checkStr === 'true'){
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            var statusClass = '';
-            var isMultipleClass = '';
+            var isMultipleClass = 'single-set';
 
             if (Array.isArray(data)) {
                 if (data.length > 1) { 
@@ -104,13 +92,9 @@ export class StackedBlockVisual extends React.Component {
                 } else {
                     isMultipleClass = 'single-set';
                 }
-                if (_.any(data, checkDataObjForProduction)) statusClass = 'production';
-            } else if (data && checkDataObjForProduction(data)) {
-                isMultipleClass = 'single-set';
-                statusClass = 'production';
             }
 
-            return [statusClass, isMultipleClass].join(' ');
+            return isMultipleClass;
         },
         'blockTooltipContents' : function(data, groupingTitle, groupingPropertyTitle, props){
 
@@ -221,6 +205,83 @@ export class StackedBlockVisual extends React.Component {
         return out;
     }
 
+    static generatePopoverRowsFromJSON(d, props){
+        var out = [];
+
+        _.forEach(_.keys(d), function(property){
+            var val = d[property];
+            if (!val) return;
+
+            var boldIt = (
+                (props.groupingProperties && props.groupingProperties.indexOf(property) > -1) ||
+                (props.columnGrouping && props.columnGrouping === property)
+            );
+
+            if (typeof val === 'object'){
+                if (object.isAnItem(val)) {
+                    val = object.itemUtil.generateLink(val, true, property);
+                } else if (val.props && val.type) {
+                    val = val;
+                } else {
+                    val = <code>{ JSON.stringify(val) }</code>;
+                }
+            }
+
+            var rowElem = (
+                <div className="row popover-entry mb-07" key={property}>
+                    <div className="col-xs-5 col-md-4">
+                        <div className="text-500 text-ellipsis-continer text-right">
+                            { ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') }
+                        </div>
+                    </div>
+                    <div className={"col-xs-7 col-md-8" + (boldIt ? ' text-600' : '')}>{ val }</div>
+                </div>
+            );
+
+            out.push(rowElem);
+        });
+
+        return out;
+    }
+
+    static aggregateObjectFromList(dataList, keysToShow){
+
+        if (!keysToShow) keysToShow = _.keys(dataList[0]);
+    
+        var moreData = _.reduce(dataList, function(m, o){
+            for (var i = 0; i < keysToShow.length; i++){
+                if (m[keysToShow[i]] === null){
+                    m[keysToShow[i]] = new Set();
+                }
+                m[keysToShow[i]].add(o[keysToShow[i]]);
+            }
+            return m;
+        }, _.object(_.zip(keysToShow, [].fill.call({ length : keysToShow.length }, null, 0, keysToShow.length))) );
+
+        _.forEach(_.keys(moreData), function(k){
+            if (k === 'additional_comments'){
+                delete moreData[k]; // Don't show when multiple, too long.
+                return;
+            }
+            moreData[k] = _.filter(_.uniq(Array.from(moreData[k])), function(d){ return d; });
+            if (moreData[k].length === 0){
+                delete moreData[k];
+            } else if (moreData[k].length > 1){
+                var remainingLength = moreData[k].length - 10;
+                if (_.any(moreData[k], function(md){ return md && typeof md === 'object'; })){
+                    moreData[k] = <span>(<span className="text-500">{ moreData[k].length }</span> Objects)</span>; // Only handle strings, ints.
+                    return;
+                };
+                moreData[k] = <span><span className="text-600">({ moreData[k].length })</span> { moreData[k].slice(0,11).join('; ') }{ (remainingLength > 0 ? '; & ' + remainingLength + ' more...' : null) }</span>
+            } else {
+                moreData[k] = moreData[k][0];
+            }
+        });
+
+        return moreData;
+
+    }
+
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -298,7 +359,9 @@ export class StackedBlockVisual extends React.Component {
         }
 
         if (!Array.isArray(nestedData) && nestedData) {
-            return _.keys(nestedData).map((k, idx)=>{
+            var leftAxisKeys = _.keys(nestedData);
+            leftAxisKeys.sort();
+            return _.map(leftAxisKeys, (k, idx)=>{
                 return <StackedBlockGroupedRow {...this.props} groupedDataIndices={columnGroups} parentState={this.state} data={nestedData[k]} key={k} group={k} width={width} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} />;
             });
         } else {
@@ -351,14 +414,14 @@ export class StackedBlockGroupedRow extends React.Component {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
             });
-            console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
+            //console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
         }
 
-        console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
+        //console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
         
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
-            'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping');
+            'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover');
 
         var inner = null;
         var groupedDataIndicesPairs = (props.groupedDataIndices && _.pairs(props.groupedDataIndices)) || [];
@@ -368,7 +431,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
             var blocksByColumnGroup, columnKeys, widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
 
-            console.log('TEsT',allChildBlocksPerChildGroup);
+            //console.log('TEsT',allChildBlocksPerChildGroup);
 
             if (allChildBlocksPerChildGroup){
                 // Generate block per each child or child group when nothing else to regroup by.
@@ -392,7 +455,7 @@ export class StackedBlockGroupedRow extends React.Component {
                         }), function(block){ return block !== null; })];
                 }));
 
-                console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
+                //console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
 
                 columnKeys = _.keys(blocksByColumnGroup);
                 if (Array.isArray(props.headerColumnsOrder)){
@@ -441,14 +504,14 @@ export class StackedBlockGroupedRow extends React.Component {
                 inner = columnKeys.map(function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
 
-                    console.log('BFG-1', blocksForGroup);
+                    //console.log('BFG-1', blocksForGroup);
                     
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string' && props.depth <= (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
                     }
 
-                    console.log('BFG-2', blocksForGroup);
+                    //console.log('BFG-2', blocksForGroup);
                     return (
                         <div
                             className="block-container-group"
@@ -464,14 +527,16 @@ export class StackedBlockGroupedRow extends React.Component {
                         >
                             { blocksForGroup.map(function(blockData, i){
                                 var title = k;
+                                var parentGrouping = (props.titleMap && props.titleMap[props.groupingProperties[props.depth - 1]]) || null;
+                                var subGrouping = (props.titleMap && props.titleMap[props.columnSubGrouping]) || null;
                                 if (Array.isArray(blockData)) {
                                     // We have columnSubGrouping so these are -pairs- of (0) columnSubGrouping val, (1) blocks
-                                    title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + blockData[0];
+                                    title = blockData[0];
                                     blockData = blockData[1];
                                 } else if (typeof props.columnSubGrouping === 'string') {
-                                    title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + object.getNestedProperty(blockData, props.columnSubGrouping);
+                                    title = object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <StackedBlock key={i} {...commonProps} data={blockData} title={title} />;
+                                return <StackedBlock key={i} {...commonProps} data={blockData} title={title} parentGrouping={parentGrouping} subGrouping={subGrouping} />;
                             }) }
                         </div>
                     );
@@ -504,10 +569,6 @@ export class StackedBlockGroupedRow extends React.Component {
 
     toggleOpen(){
         this.setState({ open : !this.state.open });
-    }
-
-    wrapper(){
-        
     }
 
     render(){
@@ -568,6 +629,7 @@ export class StackedBlockGroupedRow extends React.Component {
             'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
         };
         
+        var childRowsKeys = isOpen && !Array.isArray(data) ? _.keys(data).sort() : null;
 
         return (
             <div className={className}>
@@ -585,13 +647,13 @@ export class StackedBlockGroupedRow extends React.Component {
                 </div>
 
                 { isOpen && toggleIcon && depth > 0 ?
-                <div className="close-button" onClick={this.toggleOpen}>
-                    { toggleIcon }
-                </div>
+                    <div className="close-button" onClick={this.toggleOpen} children={toggleIcon}/>
                 : null }
 
                 <div className="child-blocks">
-                    { isOpen && !Array.isArray(data) ? _.keys(data).map((k)=> <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} /> ) : null }
+                    { childRowsKeys && _.map(childRowsKeys, (k)=>
+                        <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} />
+                    ) }
                 </div>
                 
             </div>
@@ -605,11 +667,10 @@ export class StackedBlock extends React.Component {
 
     componentDidMount(){
         ReactTooltip.rebuild();
-
     }
 
     render(){
-        var { blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, title, groupingProperties, depth, titleMap, blockClassName, blockRenderedContents, blockTooltipContents } = this.props;
+        var { blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, title, groupingProperties, parentGrouping, depth, titleMap, blockClassName, blockRenderedContents, blockTooltipContents, blockPopover } = this.props;
 
         if (!title && data && !Array.isArray(data)){
             title = data[groupingProperties[depth]];
@@ -631,26 +692,45 @@ export class StackedBlock extends React.Component {
             'marginBottom' : blockVerticalSpacing
         };
 
-        var blockFxnArguments = [data, title, groupingPropertyTitle, this.props];
+        var blockFxnArguments = [data, title, groupingPropertyTitle, this.props, parentGrouping];
 
         var className = "stacked-block";
         if (typeof blockClassName === 'function'){
-            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments);
+            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments.slice(0));
         } else if (typeof blockClassName === 'string'){
             className += ' ' + blockClassName;
         }
 
         var contents = ( <span>&nbsp;</span> );
         if (typeof blockRenderedContents === 'function'){
-            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments);
+            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments.slice(0));
         }
 
         var tip = null;
         if (typeof blockTooltipContents === 'function'){
-            tip = blockTooltipContents.apply(blockTooltipContents, blockFxnArguments);
+            tip = blockTooltipContents.apply(blockTooltipContents, blockFxnArguments.slice(0));
         }
 
-        return <div className={className} style={style} data-tip={tip} data-place="bottom" data-html>{ contents }</div>;
+        var popover = null;
+        if (typeof blockPopover === 'function'){
+            popover = blockPopover.apply(blockPopover, blockFxnArguments.slice(0));
+        }
+
+        var blockElem = <div className={className} style={style} data-tip={tip} tabIndex={1} data-place="bottom" data-html onKeyUp={(e)=>{
+            if (e.keyCode === 13 && this.refs && this.refs.trigger){
+                console.log(this.refs.trigger, e.target);
+                e.target.dispatchEvent(new MouseEvent('click'), { view : window, bubbles : true });
+                this.refs.trigger.handleToggle();
+            }
+        }} >{ contents }</div>;
+
+        if (popover){
+            return (
+                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} children={blockElem} rootClose ref="trigger" />
+            );
+        }
+
+        return blockElem;
     }
 
 }

@@ -3,12 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import url from 'url';
+import queryString from 'query-string';
+import { Popover, Button } from 'react-bootstrap';
 import { console, object, ajax } from'./../util';
 import * as plansData from './../testdata/stacked-block-matrix-list';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual, sumPropertyFromList } from './components';
-
 
 
 
@@ -20,8 +22,37 @@ const TITLE_MAP = {
     'experiment_type' : "Experiment Type",
     'data_source' : 'Available through',
     'lab_name' : 'Lab',
-    'experiment_category' : "Category"
+    'experiment_category' : "Category",
+    'state' : 'Submission Status',
+    'cell_type' : 'Cell Type',
+    'short_description' : 'Description',
+    'award' : 'Award',
+    'accession' : 'Accession',
+    'number_of_experiments' : '# Experiments in Set',
+    'submitted_by' : "Submitter",
+    'experimentset_type' : "Set Type",
 };
+
+const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
+    '4DN' : {
+        'experiment_category' : 'experiments_in_set.experiment_type',
+        'experiment_type' : 'experiments_in_set.experiment_type',
+        'cell_type' : 'experiments_in_set.biosample.biosource.cell_line.display_title'
+    },
+    'ENCODE' : {
+        'experiment_category' : 'assay_slims',
+        'experiment_type' : 'assay_term_name',
+        'cell_type' : 'biosample_term_name'
+    }
+}
+
+const STATUS_STATE_TITLE_MAP = {
+    'Submitted'     : ['released', 'current'],
+    'In Submission' : ['in review by lab', 'in review by project', 'released to project', 'released to lab', 'submission in progress'],
+    //'planned'       : ['to be uploaded by workflow', 'planned'],
+    'Out of date'   : ['archived', 'revoked'],
+    'Deleted'       : ['deleted']
+}
 
 
 export default class JointAnalysisPlansPage extends React.Component {
@@ -34,14 +65,15 @@ export default class JointAnalysisPlansPage extends React.Component {
             console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
         }
         experimentCategory = experimentCategory[0] || experimentCategory;
+
         return _.extend({}, result, {
-            'cell_type' : cellType,
-            'experiment_category' : experimentCategory,
-            'experiment_type' : experimentType,
-            'data_source' : 'ENCODE',
-            'short_description' : result.description || null,
-            'lab_name' : (result.lab && result.lab.title) || FALLBACK_NAME_FOR_UNDEFINED,
-            '_common_name' : 'All Results'
+            'cell_type'             : cellType,
+            'experiment_category'   : experimentCategory,
+            'experiment_type'       : experimentType,
+            'data_source'           : 'ENCODE',
+            'short_description'     : result.description || null,
+            'lab_name'              : (result.lab && result.lab.title) || FALLBACK_NAME_FOR_UNDEFINED,
+            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
         });
     }
 
@@ -69,19 +101,19 @@ export default class JointAnalysisPlansPage extends React.Component {
         }
 
         return _.extend({}, result, {
-            'cell_type' : cellType,
-            'experiment_type' : experimentType,
-            'experiment_category' : experimentType,
-            'data_source' : '4DN',
-            'short_description' : experiment_titles[0] || null,
-            'lab_name' : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
-            '_common_name' : 'All Results'
+            'cell_type'             : cellType,
+            'experiment_type'       : experimentType,
+            'experiment_category'   : experimentType,
+            'data_source'           : '4DN',
+            'short_description'     : experiment_titles[0] || null,
+            'lab_name'              : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
+            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
         });
     }
 
     static defaultProps = {
-        'self_results_url'          : 'https://data.4dnucleome.org/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&limit=all',
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab',
+        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&status!=deleted&limit=all',
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
         'self_planned_results_url'  : null
     }
 
@@ -123,16 +155,36 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         _.forEach(['self_planned_results', 'self_results', 'encode_results'], (source_name)=>{
             var req_url = this.props[source_name + '_url'];
+
             if (typeof req_url !== 'string' || !req_url) return;
+
+            // For testing
+            if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
+                req_url = 'https://data.4dnucleome.org' + req_url;
+            }
 
             if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
             } else {
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name));
-                //ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
             }
 
         });
+    }
+
+    legend(){
+        var context = this.props.context;
+        if (Array.isArray(context.content) && context.content.length > 0 && context.content[0].name === 'joint-analysis-data-plans#legend'){
+            // We expect first Item, if any, to be Legend.
+            var legendSection = context.content[0];
+            return (
+                <div className="col-xs-12">
+                    <div className="static-section-entry" id="legend">
+                        <div className="fourDN-content" dangerouslySetInnerHTML={{__html: legendSection.content }}/>
+                    </div>
+                </div>
+            );
+        }
     }
 
     render() {
@@ -149,6 +201,8 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         console.log('RESULTS', this.state);
 
+        var groupingProperties = ['experiment_category', 'experiment_type'];
+
         var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
             ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
         );
@@ -158,25 +212,34 @@ export default class JointAnalysisPlansPage extends React.Component {
         return ( 
             <StaticPage.Wrapper>
                 <div className="row">
+                    { this.legend() }
                     <div className="col-xs-12 col-md-6">
+                        <h4 className="mt-2 mb-0 text-300">4DN</h4>
                         <VisualBody
-                            groupingProperties={['experiment_category', 'experiment_type']}
+                            groupingProperties={groupingProperties}
                             columnGrouping='cell_type'
                             duplicateHeaders={false}
-                            columnSubGrouping='data_source'
+                            columnSubGrouping='experiment_category'
                             results={resultList4DN}
-                            defaultDepthsOpen={[true, false, false]}
+                            encode_results_url={this.props.encode_results_url}
+                            self_results_url={this.props.self_results_url}
+                            self_planned_results_url={this.props.self_planned_results_url}
+                            //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
                         />
                         
                     </div>
                     <div className="col-xs-12 col-md-6">
+                    <h4 className="mt-2 mb-0 text-300">ENCODE</h4>
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
-                            columnSubGrouping='data_source'
+                            columnSubGrouping='experiment_category'
                             results={resultListEncode}
-                            defaultDepthsOpen={[false, false, false]}
+                            encode_results_url={this.props.encode_results_url}
+                            self_results_url={this.props.self_results_url}
+                            self_planned_results_url={this.props.self_planned_results_url}
+                            //defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
                             collapseToMatrix
                         />
@@ -209,8 +272,6 @@ class VisualBody extends React.Component {
             'proteomics'
         ];
 
-        
-
         // Filter out properties from objects which we don't want to be shown in tooltip.
         //var keysToInclude = [
         //    'grant_type','center_name', 'lab_name',
@@ -231,8 +292,111 @@ class VisualBody extends React.Component {
                 defaultDepthsOpen={defaultDepthsOpen}
                 duplicateHeaders={duplicateHeaders}
                 groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
-                    console.log('DATA', data, StackedBlockVisual.Row.flattenChildBlocks(data).length)
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
+                }}
+                blockPopover={(data, groupingTitle, groupingPropertyTitle, props)=>{
+
+                    var isGroup = (Array.isArray(data) && data.length > 1) || false;
+                    if (!isGroup && Array.isArray(data) && data.length > 0) {
+                        data = data[0];
+                    }
+
+                    console.log('data', data);
+
+                    var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
+                    var groupingPropertyCurrentTitle = (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
+                    var groupingPropertyCurrentValue = isGroup ? data[0][groupingPropertyCurrent] : data[groupingPropertyCurrent];
+
+                    var yAxisGrouping = props.columnGrouping || null;
+                    var yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null;
+                    var yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null;
+
+                    console.log('PROP', props);
+
+                    var popoverTitle = (
+                        <div className="clearfix matrix-popover-title">
+                            <div className="x-axis-title pull-left">
+                                <div className="text-300">{groupingPropertyCurrentTitle}</div>
+                                <div className="text-400">{groupingPropertyCurrentValue}</div>
+                            </div>
+                            <div className="mid-icon pull-left">
+                                <i className="icon icon-times"/>
+                            </div>
+                            <div className="y-axis-title pull-left">
+                                <div className="text-300">{yAxisGroupingTitle}</div>
+                                <div className="text-400">{yAxisGroupingValue}</div>
+                            </div>
+                        </div>
+                    );
+
+                    var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
+                    currentFilteringProperties.push(props.columnGrouping);
+                    
+                    var aggrData;
+                    if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP));
+                    var data_source = (aggrData || data).data_source;
+                    var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
+
+                    var currentFilteringPropertiesVals = _.object(
+                        _.map(currentFilteringProperties, function(property){
+                            return [ GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], (aggrData || data)[property] ];
+                        })
+                    );
+                    
+
+                    var hrefParts = url.parse(initialHref, true);
+                    var hrefQuery = _.clone(hrefParts.query);
+                    delete hrefQuery.limit;
+                    delete hrefQuery.field;
+                    _.extend(hrefQuery, currentFilteringPropertiesVals);
+                    hrefParts.search = '?' + queryString.stringify(hrefQuery);
+                    var linkHref = url.format(hrefParts);
+
+                    var searchButton = (
+                        <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                    );
+
+                    return (
+                        <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
+                            { isGroup ?
+                                <div className="inner">
+                                    <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
+                                    <hr className="mt-0 mb-1"/>
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(aggrData, props) }
+                                    { searchButton }
+                                </div>
+                                :
+                                <div className="inner">
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(
+                                        _.pick(data, 'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
+                                        'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'), props
+                                    ) }
+                                    { searchButton }
+                                </div>
+                            }
+                        </Popover>
+                    );
+                }}
+                blockClassName={(data) => {
+                    var origClassName = StackedBlockVisual.defaultProps.blockClassName(data);
+                    // TODO: Add classname for submission-state.
+
+                    var submissionState = null;
+
+                    if (Array.isArray(data)){
+                             if (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
+                        else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
+                        else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
+                        else if (_.any(data, { 'state' : 'Deleted'          })) submissionState = 'Deleted';
+                        else if (_.any(data, { 'state' : 'None'             })) submissionState = 'None';
+                    } else {
+                        submissionState = data.state;
+                    }
+
+                    var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
+
+                    return origClassName + ' ' + submissionStateClassName + ' hoverable';
+                    
                 }}
                 blockRenderedContents={(data, title, groupingPropertyTitle, blockProps)=>{
                     var defaultOutput = <span>&nbsp;</span>;
@@ -256,53 +420,7 @@ class VisualBody extends React.Component {
 
                     return experimentsCountExpected || defaultOutput;
                 }}
-                blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
-
-                    var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];
-
-                    var filteredData = data;
-                    if (!Array.isArray(data)){
-                        filteredData = _.pick(data, ...keysToShow);
-                    } else {
-                        filteredData = _.map(data, function(o){ return _.pick(o, ...keysToShow); });
-                    }
-
-                    var tips = StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
-                    
-                    if (Array.isArray(data) && data.length > 1){
-
-                        var moreData = _.reduce(filteredData, function(m, o){
-                            for (var i = 0; i < keysToShow.length; i++){
-                                if (m[keysToShow[i]] === null){
-                                    m[keysToShow[i]] = new Set();
-                                }
-                                m[keysToShow[i]].add(o[keysToShow[i]]);
-                            }
-                            return m;
-                        }, _.object(_.zip(keysToShow, [].fill.call({ length : keysToShow.length }, null, 0, keysToShow.length))) );
-
-                        _.forEach(_.keys(moreData), function(k){
-                            if (k === 'additional_comments'){
-                                delete moreData[k]; // Don't show when multiple, too long.
-                                return;
-                            }
-                            moreData[k] = Array.from(moreData[k]);
-                            if (moreData[k].length === 0){
-                                delete moreData[k];
-                            } else if (moreData[k].length > 1){
-                                moreData[k] = '<span class="text-300">(' + moreData[k].length + ')</span> ' + moreData[k].join(', ');
-                            } else {
-                                moreData[k] = moreData[k][0];
-                            }
-                        });
-
-                        tips += StackedBlockVisual.writeTipPropertiesFromJSONObject(moreData, props);
-
-                    }
-                    
-                    return tips;
-
-                }}
+                blockTooltipContents={null}
             />
         );
     }

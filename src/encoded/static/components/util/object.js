@@ -173,7 +173,7 @@ export function isAnItem(content){
     return (
         content &&
         typeof content === 'object' &&
-        typeof content.display_title === 'string' &&
+        (typeof content.display_title === 'string' || typeof content.uuid === 'string') &&
         typeof atIdFromObject(content) === 'string'
     );
 }
