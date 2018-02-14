@@ -802,9 +802,6 @@ export default class App extends React.Component {
             }
 
             if (this.props.contextRequest && this.requestCurrent && repeatIfError === true) {
-
-                if (href === this.props.href || href === '') return null; // For low-priority requests (refreshes), cancel them instead of other current request if there is a request already occuring (assuming to different URL).
-
                 // Abort the current request, then remember we've aborted the request so that we
                 // don't render the Network Request Error page.
                 if (this.props.contextRequest && typeof this.props.contextRequest.abort === 'function') this.props.contextRequest.abort();

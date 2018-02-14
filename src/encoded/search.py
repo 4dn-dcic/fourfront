@@ -96,7 +96,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    import pdb; pdb.set_trace()
     search, query_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
     ### Set starting facets
     facets = initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas)
