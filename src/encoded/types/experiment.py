@@ -232,11 +232,12 @@ class Experiment(Item):
             }
         }
     })
-    def experiment_categorizer(self, request, digestion_enzyme=None, targeted_factor=None):
+    def experiment_categorizer(self, request):
         ''' The generalish case for if there is a targeted_factor use that
             and if not use enzyme - more specific cases in specific schemas
         '''
-        # import pdb; pdb.set_trace()
+        digestion_enzyme = self.properties.get('digestion_enzyme')
+        targeted_factor = self.properties.get('targeted_factor')
         if targeted_factor is not None:
             obj = request.embed('/', targeted_factor, '@@object')
             field = 'Target'
@@ -347,9 +348,10 @@ class ExperimentCaptureC(Experiment):
             }
         }
     })
-    def experiment_categorizer(self, request, targeted_regions=None, digestion_enzyme=None):
-        ''' Use targeted_regions information for capture-c
-        '''
+    def experiment_categorizer(self, request):
+        ''' Use targeted_regions information for capture-c'''
+        targeted_regions = self.properties.get('targeted_regions')
+        digestion_enzyme = self.properties.get('digestion_enzyme')
         if targeted_regions is not None:
             regions = []
             for target in targeted_regions:
@@ -360,7 +362,7 @@ class ExperimentCaptureC(Experiment):
                 value = ', '.join(sorted(regions))
                 return {'field': 'Target', 'value': value}
 
-        return super(ExperimentCaptureC, self).experiment_categorizer(request, digestion_enzyme)
+        return super(ExperimentCaptureC, self).experiment_categorizer(request)
 
 
 @collection(
@@ -417,9 +419,10 @@ class ExperimentRepliseq(Experiment):
             }
         }
     })
-    def experiment_categorizer(self, request, stage_fraction=None, total_fractions_in_exp=None):
-        ''' Use combination of fraction and total number of fractions
-        '''
+    def experiment_categorizer(self, request):
+        ''' Use combination of fraction and total number of fractions'''
+        stage_fraction = self.properties.get('stage_fraction')
+        total_fractions_in_exp = self.properties.get('total_fractions_in_exp')
         if stage_fraction is not None:
             value = stage_fraction + ' of '
             if total_fractions_in_exp is None:
@@ -567,9 +570,9 @@ class ExperimentDamid(Experiment):
             }
         }
     })
-    def experiment_categorizer(self, request, fusion=None):
-        ''' Use fusion field
-        '''
+    def experiment_categorizer(self, request):
+        ''' Use fusion field'''
+        fusion = self.properties.get('fusion')
         if fusion is not None:
             return {'field': 'Target', 'value': fusion}
         else:
@@ -678,9 +681,9 @@ class ExperimentMic(Experiment):
             }
         }
     })
-    def experiment_categorizer(self, request, imaging_paths=None):
-        ''' Use the target(s) in the imaging path
-        '''
+    def experiment_categorizer(self, request):
+        ''' Use the target(s) in the imaging path'''
+        imaging_paths = self.properties.get('imaging_paths')
         if imaging_paths is not None:
             path_targets = []
             for pathobj in imaging_paths:

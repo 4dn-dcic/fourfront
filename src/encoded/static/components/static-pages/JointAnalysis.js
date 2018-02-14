@@ -345,7 +345,7 @@ class VisualBody extends React.Component {
 
                     var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
                     currentFilteringProperties.push(props.columnGrouping);
-                    
+
                     var data_source = (aggrData || data).data_source;
                     var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
 
