@@ -38,7 +38,7 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
         'experiment_category' : 'experiments_in_set.experiment_type',
         'experiment_type' : 'experiments_in_set.experiment_type',
         'cell_type' : 'experiments_in_set.biosample.biosource.cell_line.display_title',
-        'sub_cat' : 'category1.value'
+        'sub_cat' : 'experiments_in_set.experiment_categorizer.value'
     },
     'ENCODE' : {
         'experiment_category' : 'assay_slims',
@@ -101,6 +101,19 @@ export default class JointAnalysisPlansPage extends React.Component {
             console.warn('We have 2+ experiment titles (experiments_in_set.display_title, minus accession) for ', result);
         }
 
+        var experiment_categorization_value = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')));
+        var experiment_categorization_title = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field')));
+
+        if (experiment_categorization_value.length > 1){
+            console.warn('We have 2+ experiment_categorizer.value for ', result);
+        }
+        if (experiment_categorization_title.length > 1){
+            console.warn('We have 2+ experiment_categorizer.title for ', result);
+        }
+
+        experiment_categorization_value = experiment_categorization_value[0] || 'No field';
+        experiment_categorization_title = experiment_categorization_title[0] || 'No value';
+
         return _.extend({}, result, {
             'cell_type'             : cellType,
             'experiment_type'       : experimentType,
@@ -109,8 +122,8 @@ export default class JointAnalysisPlansPage extends React.Component {
             'short_description'     : experiment_titles[0] || null,
             'lab_name'              : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
             'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0],
-            'sub_cat'               : (result.category1 && result.category1.value) || "No value",
-            'sub_cat_title'         : (result.category1 && result.category1.field) || "No field"
+            'sub_cat'               : experiment_categorization_value,
+            'sub_cat_title'         : experiment_categorization_title
         });
     }
 
