@@ -20,6 +20,7 @@ import pstats
 import io
 import boto3
 import json
+from time import sleep
 
 steps_run_data_schema = {
     "type" : "object",
@@ -777,4 +778,17 @@ def pseudo_run(context, request):
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
     res = aws_lambda.invoke(FunctionName='run_workflow',
                             Payload=json.dumps(input_json))
-    return res['Payload'].read().decode()
+    res = res['Payload'].read().decode()
+    arn = res['executionArn']
+    # just loop until we get proper status
+    for i in range(10):
+        res = aws_lambda.invoke(FunctionName='status_wfr',
+                                Payload=json.dumps({'executionArn': arn}))
+        res = res['Payload'].read().decode()
+        if res['status'] != 'RUNNING':
+            break
+        sleep(2)
+
+    return res
+
+
