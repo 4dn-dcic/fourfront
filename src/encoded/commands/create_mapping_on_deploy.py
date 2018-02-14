@@ -29,9 +29,9 @@ def main():
     env = app.registry.settings.get('env.name')
     if 'webprod' in env:
         if data_env != env:
-            logging.INFO("looks like we are on staging so run create mapping without check first")
+            logger.info("looks like we are on staging so run create mapping without check first")
             return run_create_mapping(app, check_first=False)
 
 
-    logging.INFO("looks like we are NOT on staging so run create mapping with check first")
+    logger.info("looks like we are NOT on staging so run create mapping with check first")
     return run_create_mapping(app, check_first=True)
