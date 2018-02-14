@@ -753,7 +753,8 @@
         "title": "PairsQC",
         "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
         "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "workflow_type": "Data QC",
+        "status": "released"
     },
     {
         "accession": "4DNWF6DUSPTF",
@@ -3665,7 +3666,8 @@
         "title": "Alignment for Hi-C using bwa-mem",
         "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
         "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "workflow_type": "Hi-C data analysis",
+        "status": "released"
     },
     {
         "accession": "4DNWF84NFOQP",
@@ -4711,7 +4713,8 @@
         ],
         "title": "Hi-C Post-alignment Processing",
         "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
-        "workflow_type": "Hi-C data analysis"
+        "workflow_type": "Hi-C data analysis",
+        "status": "released"
     },
     {
         "app_name": "repliseq-parta",
@@ -5810,6 +5813,7 @@
         ],
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
         "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
-        "workflow_type": "Hi-C data analysis"
+        "workflow_type": "Hi-C data analysis",
+        "status": "released"
     }
 ]
