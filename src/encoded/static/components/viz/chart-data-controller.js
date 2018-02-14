@@ -30,7 +30,6 @@ var refs = {
     contextFilters : {},
     baseSearchPath : null,
     baseSearchParams : {},
-    updateStats : null, // Function to update stats @ top of page.
 };
 
 /**
@@ -238,7 +237,7 @@ class Provider extends React.Component {
      * @this module:viz/chart-data-controller.Provider
      * @returns {void} Nothing
      */
-    componentWillMount(){
+    componentDidMount(){
         ChartDataController.registerUpdateCallback(()=>{
             this.forceUpdate();
         }, this.id);
@@ -268,8 +267,6 @@ class Provider extends React.Component {
     render(){
         var childChartProps = _.extend({}, this.props.children.props);
 
-        childChartProps.experiment_sets = state.experiment_sets;
-        childChartProps.filtered_experiment_sets = state.filtered_experiment_sets;
         childChartProps.expSetFilters = Filters.contextFiltersToExpSetFilters();
         childChartProps.barplot_data_filtered = state.barplot_data_filtered;
         childChartProps.barplot_data_unfiltered = state.barplot_data_unfiltered;
@@ -296,21 +293,14 @@ export const ChartDataController = {
      * This function must be called before this component is used anywhere else.
      * 
      * @public
-     * @static
-     * @param {string} requestURLBase - Where to request 'all experiments' from.
-     * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
      * @param {function} [callback] - Optional callback for after initializing.
-     * @param {number|boolean} [resync=false] - How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
      * @returns {void} Undefined
      */
     initialize : function(
-        //requestURLBase = null,
         baseSearchPath = '/bar_plot_aggregations/',
         baseSearchParams = {},
         fields = null,
-        updateStats = null,
-        callback = null,
-        resync = false
+        callback = null
     ){
         if (!refs.store) refs.store = require('./../../store');
 
@@ -326,9 +316,6 @@ export const ChartDataController = {
         }
         if (Array.isArray(fields) && fields.length > 0){
             state.barplot_data_fields = fields;
-        }
-        if (typeof updateStats === 'function'){
-            refs.updateStats = updateStats;
         }
 
         if (reduxSubscription !== null) {
@@ -501,7 +488,6 @@ export const ChartDataController = {
 
         _.extend(state, updatedState);
 
-        ChartDataController.updateStats();
         notifyUpdateCallbacks();
 
         if (typeof callback === 'function' && callback !== notifyUpdateCallbacks){
@@ -543,29 +529,6 @@ export const ChartDataController = {
             ChartDataController.fetchAndSetFilteredBarPlotData(callback, opts);
         }
     },
-
-    /**
-     * Called internally by setState to update stats in top left corner of page, if updateState param was passed in during initialization.
-     * 
-     * TODO: Get rid of this, instead, have this be done in QuickInfoBar itself and wrap QuickInfoBar in a ChartDataController.Provider.
-     * 
-     * @static
-     * @ignore
-     * @returns {void} Nothing
-     */
-    updateStats : function(){
-        if (typeof refs.updateStats !== 'function'){
-            throw Error("Not initialized with updateStats callback.");
-        }
-
-        var current = (state.barplot_data_filtered && state.barplot_data_filtered.total) || { 'experiment_sets' : null, 'experiments' : null, 'files' : null },
-            total = (state.barplot_data_unfiltered && state.barplot_data_unfiltered.total) || null;
-
-        refs.updateStats(current, total);
-    },
-
-
-
 
     /**
      * Called by ChartDataController.sync() internally.
