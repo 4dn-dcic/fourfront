@@ -9,7 +9,9 @@ from snovault import (
     root,
     COLLECTIONS
 )
-from snovault.elasticsearch.create_mapping import get_db_es_counts_and_db_uuids
+from snovault.elasticsearch.create_mapping import get_collection_uuids_and_count
+from snovault.fourfront_utils import get_jsonld_types_from_collection_type
+from .search import search
 from .schema_formats import is_accession
 from .types.page import get_local_file_contents
 from pyramid.security import (
@@ -46,21 +48,34 @@ def item_counts(config):
         # how much stuff in elasticsearch (among ALL indexes)
         es = request.registry['elasticsearch']
         es_total = 0
-
+        # some collections may need to be adjusted because they also contain child counts
+        to_subtract = {}
         # find db and es counts for each index
+        db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
-        all_collections = list(request.registry[COLLECTIONS].by_item_type.keys())
-        for collection in all_collections:
-            db_count, es_count, _, _ = get_db_es_counts_and_db_uuids(request, es, collection)
-            warn_str = build_warn_string(db_count, es_count)
-            db_total += db_count
-            es_total += es_count
-            db_es_compare[collection] = ("DB: %s   ES: %s %s" %
-                                         (str(db_count), str(es_count), warn_str))
+        for coll_name, collection in request.registry[COLLECTIONS].by_item_type.items():
+            db_count, _ = get_collection_uuids_and_count(request, coll_name)
+            item_name = collection.type_info.name
+            # check to see if this collection contains child collections
+            check_collections = get_jsonld_types_from_collection_type(request, coll_name, [coll_name])
+            to_subtract[coll_name] = [coll for coll in check_collections if coll != coll_name]
+            search_res = request.embed('/search/?type=' + item_name +'&limit=1')
+            es_count = search_res.get('total', 0) if search_res else 0
+            db_es_counts[coll_name] = [db_count, es_count] # order is important
+        for coll in db_es_counts:
+            coll_db_count, coll_es_count = db_es_counts[coll]
+            subtract_colls = to_subtract.get(coll)
+            if subtract_colls and isinstance(subtract_colls, list):
+                for sub_coll in subtract_colls:
+                    coll_es_count -= db_es_counts[sub_coll][1]
+            db_total += coll_db_count
+            es_total += coll_es_count
+            warn_str = build_warn_string(coll_db_count, coll_es_count)
+            db_es_compare[coll] = ("DB: %s   ES: %s %s" %
+                                         (str(coll_db_count), str(coll_es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
                        (str(db_total), str(es_total), warn_str))
-
         responseDict = {
             'db_es_total': db_es_total,
             'db_es_compare': db_es_compare

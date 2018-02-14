@@ -108,6 +108,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         es_results = execute_search_for_all_results(search)
     elif size:
         offset_size = from_ + size
+        print('__limit %s, from %s' % (size, from_))
         size_search = search[from_:offset_size]
         es_results = execute_search(size_search)
     else:
