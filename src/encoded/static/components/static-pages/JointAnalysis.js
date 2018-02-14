@@ -354,7 +354,6 @@ class VisualBody extends React.Component {
                             return [ GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], (aggrData || data)[property] ];
                         })
                     );
-                    
 
                     var hrefParts = url.parse(initialHref, true);
                     var hrefQuery = _.clone(hrefParts.query);

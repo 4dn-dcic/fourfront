@@ -191,7 +191,6 @@ export class StackedBlockVisual extends React.Component {
             out += '</div>';
 
             if (val){
-                
                 out += '<div class="col-xs-6">';
                 out += ' ';
                 if (boldIt) out += '<b>';
@@ -454,13 +453,9 @@ export class StackedBlockGroupedRow extends React.Component {
                                 var res = _.filter(cPair[1], function(cBlock){ return listOfIndicesForGroup.indexOf(cBlock.index) > -1; });
                                 if (res.length > 0) return [cPair[0], res];
                                 if (res.length === 0) return null;
-                            } else {
-                                if (listOfIndicesForGroup.indexOf(cPair[1].index) > -1){
-                                    return [cPair[0], [cPair[1]]];
-                                } else {
-                                    return null;
-                                }
-                            }
+                            } else if (listOfIndicesForGroup.indexOf(cPair[1].index) > -1){
+                                return [cPair[0], [cPair[1]]];
+                            } else return null;
                         }), function(block){ return block !== null; })];
                 }));
 
@@ -523,7 +518,7 @@ export class StackedBlockGroupedRow extends React.Component {
                     return (
                         <div
                             className="block-container-group"
-                            style={{ 
+                            style={{
                                 width : widthPerColumn,
                                 minHeight : props.blockHeight + (props.blockVerticalSpacing),
                                 paddingLeft : props.blockHorizontalSpacing,

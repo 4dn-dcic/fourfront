@@ -351,7 +351,6 @@ class ExperimentCaptureC(Experiment):
     def experiment_categorizer(self, request):
         ''' Use targeted_regions information for capture-c'''
         targeted_regions = self.properties.get('targeted_regions')
-        digestion_enzyme = self.properties.get('digestion_enzyme')
         if targeted_regions is not None:
             regions = []
             for target in targeted_regions:
