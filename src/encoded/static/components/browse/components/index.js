@@ -9,7 +9,7 @@ export { SortController } from './SortController';
 export { SelectedFilesController } from './SelectedFilesController';
 export { CustomColumnController, CustomColumnSelector } from './CustomColumnController';
 export { SearchResultTable } from './SearchResultTable';
-export { ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader } from './ItemPageTable';
+export { ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader } from './ItemPageTable';
 export { AboveTableControls } from './AboveTableControls';
 export { AboveSearchTablePanel } from './AboveSearchTablePanel';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';

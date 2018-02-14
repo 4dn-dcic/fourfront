@@ -6,7 +6,7 @@ import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
-    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane,
+    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
     WorkflowNodeElement
 } from './components';
 import { ItemBaseView } from './DefaultItemView';
@@ -153,15 +153,8 @@ export class WorkflowView extends ItemBaseView {
         });
     }
 
-    itemHeader(){
-        var context = this.props.context;
-        return (
-            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
-        );
+    typeInfo(){
+        return { 'title' : this.props.context.workflow_type, description : 'Type of Workflow' };
     }
 
 }

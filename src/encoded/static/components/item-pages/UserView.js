@@ -503,7 +503,7 @@ class ProfileWorkFields extends React.Component {
         var awardsList = [];
 
         function addAwardToList(award){
-            if (awardsList.indexOf(labDetails[i].awards[j]) === -1){
+            if (_.pluck(awardsList, 'uuid').indexOf(labDetails[i].awards[j].uuid) === -1){
                 awardsList.push(labDetails[i].awards[j]);
             }
         }
