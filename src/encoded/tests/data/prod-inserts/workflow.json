@@ -5135,7 +5135,7 @@
             },
             {
                 "argument_type": "parameter",
-                "workflow_argument_name": "nthreads_cooler"
+                "workflow_argument_name": "nthreads"
             },
             {
                 "argument_type": "parameter",
@@ -5163,10 +5163,6 @@
             },
             {
                 "argument_type": "parameter",
-                "workflow_argument_name": "nthreads_juicebox"
-            },
-            {
-                "argument_type": "parameter",
                 "workflow_argument_name": "chunksize"
             },
             {
@@ -5184,6 +5180,9 @@
             {
                 "argument_format": "pairs",
                 "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "pairs_px2"
+                ],
                 "workflow_argument_name": "merged_pairs"
             },
             {
@@ -5263,10 +5262,12 @@
                                 "name": "merged_pairs"
                             },
                             {
-                                "name": "input_pairs"
+                                "name": "input_pairs",
+                                "step": "addfragtopairs"
                             },
                             {
-                                "name": "pairs"
+                                "name": "pairs",
+                                "step": "cooler"
                             }
                         ]
                     }
@@ -5332,13 +5333,14 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "pairs",
-                            "global": true,
+                            "global": false,
                             "type": "data file"
                         },
                         "name": "pairs_with_frags",
                         "target": [
                             {
-                                "name": "input_pairs"
+                                "name": "input_pairs",
+                                "step": "pairs2hic"
                             }
                         ]
                     }
@@ -5397,7 +5399,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "nthreads_cooler"
+                                "name": "nthreads"
                             }
                         ]
                     },
@@ -5430,13 +5432,14 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "cool",
-                            "global": true,
+                            "global": false,
                             "type": "data file"
                         },
                         "name": "cool",
                         "target": [
                             {
-                                "name": "input_cool"
+                                "name": "input_cool",
+                                "step": "cool2mcool"
                             }
                         ]
                     }
@@ -5561,7 +5564,8 @@
                                 "name": "hic"
                             },
                             {
-                                "name": "input_hic"
+                                "name": "input_hic",
+                                "step": "add-hic-normvector-to-mcool"
                             }
                         ]
                     }
@@ -5593,7 +5597,7 @@
                         "name": "ncores",
                         "source": [
                             {
-                                "name": "nthreads_juicebox"
+                                "name": "nthreads"
                             }
                         ]
                     },
@@ -5654,13 +5658,14 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "mcool",
-                            "global": true,
+                            "global": false,
                             "type": "data file"
                         },
                         "name": "mcool",
                         "target": [
                             {
-                                "name": "input_mcool"
+                                "name": "input_mcool",
+                                "step": "add-hic-normvector-to-mcool"
                             }
                         ]
                     }
@@ -5723,7 +5728,8 @@
                                 "name": "mcool"
                             },
                             {
-                                "name": "input_mcool"
+                                "name": "mcool",
+                                "step": "extract-mcool-normvector-for-juicebox"
                             }
                         ]
                     }
@@ -5765,7 +5771,7 @@
                             "global": false,
                             "type": "data file"
                         },
-                        "name": "input_mcool",
+                        "name": "mcool",
                         "source": [
                             {
                                 "name": "mcool_with_hicnorm",
