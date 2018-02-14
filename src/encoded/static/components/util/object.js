@@ -3,7 +3,10 @@
 import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
+import ReactTooltip from 'react-tooltip';
 import { Field } from './Schemas';
+import * as analytics from './analytics';
+import { isServerSide } from './misc';
 
 
 /**
@@ -281,7 +284,11 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         var schemaProperty = null;
         var tooltip = null;
         if (tips){
-            tooltip = (tips && tips[property] && tips[property].description) || null;
+            if (typeof tips === 'string'){
+                tooltip = tips;
+            } else {
+                tooltip = (tips && tips[property] && tips[property].description) || null;
+            }
             if (!title) title = (tips && tips[property] && tips[property].title) || null;
         }
         if (!title || !tooltip) {
@@ -297,6 +304,105 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         
 
         return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
+    }
+}
+
+/**
+ * Use this Component to generate a 'copy' button.
+ * 
+ * @prop {string} value - What to copy to clipboard upon clicking the button.
+ * @prop {boolean} [flash=true] - Whether to do a 'flash' effect of the button and children wrapper on click.
+ * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
+ * @prop {string|React.Component} [wrapperElement='div'] - Element type to wrap props.children in, if any.
+ */
+export class CopyWrapper extends React.Component {
+
+    static defaultProps = {
+        'wrapperElement' : 'div',
+        'className' : null,
+        'flash' : true,
+        'iconProps' : {}
+    }
+
+    constructor(props){
+        super(props);
+        this.flashEffect = this.flashEffect.bind(this);
+        if (typeof props.mounted !== 'boolean') this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        if (typeof this.props.mounted !== 'boolean') this.setState({ 'mounted' : true });
+        ReactTooltip.rebuild();
+    }
+
+    componentDidUpdate(){
+        ReactTooltip.rebuild();
+    }
+
+    flashEffect(){
+        if (!this.props.flash || !this.refs || !this.refs.wrapper) return null;
+        this.refs.wrapper.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
+        setTimeout(()=>{
+            this.refs.wrapper.style.transform = 'translate3d(0, 0, 0)';
+        }, 100);
+    }
+
+    onCopy(){
+        this.flashEffect();
+        if (typeof this.props.onCopy === 'function') this.props.onCopy();
+    }
+
+    render(){
+        var { value, children, mounted, wrapperElement, iconProps } = this.props;
+        if (!value) return null;
+        var isMounted = (mounted || (this.state && this.state.mounted)) || false;
+
+        function copy(){
+            var textArea = document.createElement('textarea');
+            textArea.style.top = '-100px';
+            textArea.style.left = '-100px';
+            textArea.style.position = 'absolute';
+            textArea.style.width = '5px';
+            textArea.style.height = '5px';
+            textArea.style.padding = 0;
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+
+            // Avoid flash of white box if rendered for any reason.
+            textArea.style.background = 'transparent';
+            textArea.value = value;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Copying text command was ' + msg);
+                this.onCopy();
+                analytics.event('CopyWrapper', 'Copy', {
+                    'eventLabel' : 'Value',
+                    'name' : value
+                });
+            } catch (err) {
+                console.error('Oops, unable to copy',err);
+                analytics.event('CopyWrapper', 'ERROR', {
+                    'eventLabel' : 'Unable to copy value',
+                    'name' : value
+                });
+            }
+        }
+
+        var elemsToWrap = [];
+        if (children)               elemsToWrap.push(children);
+        if (children && isMounted)  elemsToWrap.push(' ');
+        if (isMounted)              elemsToWrap.push(<i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy.bind(this)} />);
+
+        var wrapperProps = _.extend(
+            { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },
+            _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted', 'iconProps')
+        );
+
+        return React.createElement(wrapperElement, wrapperProps, elemsToWrap);
     }
 }
 

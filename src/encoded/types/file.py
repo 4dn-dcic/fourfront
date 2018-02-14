@@ -41,6 +41,7 @@ log = logging.getLogger(__name__)
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 file_workflow_run_embeds = [
+    'workflow_run_inputs.workflow.title',
     'workflow_run_inputs.input_files.workflow_argument_name',
     'workflow_run_inputs.input_files.value.filename',
     'workflow_run_inputs.input_files.value.display_title',
@@ -678,7 +679,19 @@ class FileMicroscopy(ItemWithAttachment, File):
     """Collection for individual microscopy files."""
     item_type = 'file_microscopy'
     schema = load_schema('encoded:schemas/file_microscopy.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list + [
+        "experiments.@type",
+        "experiments.imaging_paths.channel",
+        "experiments.imaging_paths.path",
+        "experiments.files.microscope_settings.ch00_light_source_center_wl",
+        "experiments.files.microscope_settings.ch01_light_source_center_wl",
+        "experiments.files.microscope_settings.ch02_light_source_center_wl",
+        "experiments.files.microscope_settings.ch03_light_source_center_wl",
+        "experiments.files.microscope_settings.ch00_lasers_diodes",
+        "experiments.files.microscope_settings.ch01_lasers_diodes",
+        "experiments.files.microscope_settings.ch02_lasers_diodes",
+        "experiments.files.microscope_settings.ch03_lasers_diodes"
+    ]
     name_key = 'accession'
 
 

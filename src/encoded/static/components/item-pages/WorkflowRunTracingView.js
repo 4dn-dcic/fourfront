@@ -7,9 +7,9 @@ import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout } from './../util';
 import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData } from './WorkflowView';
+import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
@@ -19,6 +19,7 @@ import ReactTooltip from 'react-tooltip';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 //import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
 //import { PARTIALLY_RELEASED_PROCESSED_FILES, PARTIALLY_RELEASED_PROCESSED_FILES_ALL_RUNS } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
+
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -250,12 +251,12 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     commonGraphProps(){
 
         var steps = this.props.steps;
+        var opts = _.extend({}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters'));
 
         var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
-        
-        var graphData = parseAnalysisSteps(this.props.steps);
+
+        var graphData = parseAnalysisSteps(this.props.steps, opts);
         if (!this.state.showParameters){
-            graphData = filterOutParametersFromGraphData(graphData);
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
@@ -269,7 +270,6 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             graphData = filterOutIndirectFilesFromGraphData(graphData);
         }
         if (!this.state.showReferenceFiles){
-            graphData = filterOutReferenceFilesFromGraphData(graphData);
             delete legendItems['Input Reference File'];
         }
         if (!this.anyGroupNodesExist || this.props.all_runs){

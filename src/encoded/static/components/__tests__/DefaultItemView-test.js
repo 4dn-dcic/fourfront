@@ -11,7 +11,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing DefaultItemView.js', function() {
-    var React, ItemView, testItem, TestUtils, FetchContext, context, schemas, _, Wrapper, sinon, server;
+    var React, DefaultItemView, testItem, TestUtils, FetchContext, context, schemas, _, Wrapper, sinon, server;
 
     beforeAll(function(){
         
@@ -47,7 +47,7 @@ describe('Testing DefaultItemView.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ItemView = require('./../item-pages/DefaultItemView').default;
+        DefaultItemView = require('./../item-pages/DefaultItemView').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
         Wrapper = React.createClass({
@@ -59,7 +59,7 @@ describe('Testing DefaultItemView.js', function() {
         });
         testItem = TestUtils.renderIntoDocument(
             <Wrapper>
-                <ItemView schemas={schemas} context={context} />
+                <DefaultItemView schemas={schemas} context={context} />
             </Wrapper>
         );
 
@@ -78,7 +78,7 @@ describe('Testing DefaultItemView.js', function() {
     it('has an accession', function() {
         var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'accession');
         var exptHeading = titleLine;
-        expect(exptHeading.textContent).toEqual('ENCLB055ZZZ');
+        expect(exptHeading.textContent.trim()).toEqual('ENCLB055ZZZ');
     });
 
     /** TODO: FIX TEST */

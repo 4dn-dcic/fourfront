@@ -7,7 +7,6 @@ import { Button } from 'react-bootstrap';
 import { content_views } from './../globals';
 import { ajax, console, object, Filters, JWT, DateUtility, layout, navigate } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
-import { ChartDataController } from './../viz/chart-data-controller';
 import ReactTooltip from 'react-tooltip';
 import * as vizUtil from './../viz/utilities';
 import * as d3 from 'd3';
@@ -50,16 +49,14 @@ export class HealthView extends React.Component {
     }
 
     componentDidMount(){
-        this.setState({ 'mounted' : true });
-        this.getCounts();
+        this.setState({ 'mounted' : true }, this.getCounts.bind(this, true));
     }
 
-    getCounts(){
-        if (!ChartDataController.isWindowActive()) return;
+    getCounts(initialCall = false){
         this.setState({
             'db_es_total' : "loading...",
-            'db_es_compare' : "loading...",
         }, ()=>{
+
             ajax.load('/counts?format=json', (resp)=>{
                 this.setState({
                     'db_es_total' : resp.db_es_total,
@@ -76,6 +73,11 @@ export class HealthView extends React.Component {
                     'db_es_compare': null
                 });
             });
+
+            if (!initialCall && this.refs && this.refs.widthProvider && this.refs.widthProvider.refs && this.refs.widthProvider.refs.childElement && this.refs.widthProvider.refs.childElement.load){
+                this.refs.widthProvider.refs.childElement.load();
+            }
+
         });
     }
 
@@ -95,6 +97,10 @@ export class HealthView extends React.Component {
                         title : "Blob Bucket",
                         description : "Name of S3 bucket used for blob data."
                     },
+                    'beanstalk_env' : {
+                        title : "Beanstalk Environment",
+                        description : "Which Elastic Beanstalk environment this instance running on."
+                    },
                     'content' : {
                         title : "Extra Information"
                     },
@@ -105,14 +111,6 @@ export class HealthView extends React.Component {
                     'elasticsearch' : {
                         title : "ElasticSearch Location",
                         description : "URI used to connect to the back-end ES instance."
-                    },
-                    'db_es_total' : {
-                        title : "DB and ES Counts",
-                        description : "Total counts of items in database and elasticsearch."
-                    },
-                    'db_es_compare' : {
-                        title : "DB and ES Counts by Type",
-                        description : "Counts of items in database and elasticsearch for each doc_type index."
                     },
                     'file_upload_bucket' : {
                         title : "File Upload Bucket",
@@ -136,7 +134,7 @@ export class HealthView extends React.Component {
                     }
                 }} />
 
-                <Button className="refresh-counts-button pull-right mt-2" onClick={this.getCounts}><i className="icon icon-refresh"/>&nbsp; Refresh Counts</Button>
+                <Button className="refresh-counts-button pull-right mt-2" onClick={this.getCounts.bind(this, false)}><i className="icon icon-refresh"/>&nbsp; Refresh Counts</Button>
                 <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
 
                 <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={_.pick(this.state, 'db_es_total', 'db_es_compare')} schemas={this.props.schemas} keyTitleDescriptionMap={{
@@ -151,7 +149,7 @@ export class HealthView extends React.Component {
                 }} />
 
                 <layout.WindowResizeUpdateTrigger>
-                    <layout.WidthProvider>
+                    <layout.WidthProvider ref="widthProvider">
                         <HealthChart mounted={this.state.mounted} session={this.props.session} context={context} height={600} notFinishedIndexing={notFinishedIndexing} pollDataInterval={this.props.pollDataInterval} />
                     </layout.WidthProvider>
                 </layout.WindowResizeUpdateTrigger>
@@ -174,12 +172,14 @@ class HealthChart extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.state = {
             'loaded' : false,
-            'data' : null
+            'data' : null,
+            'loading' : false
         };
     }
 
     componentDidMount(){
-        this.loadContinuously();
+        //this.loadContinuously();
+        this.load();
     }
 
     componentDidUpdate(pastProps, pastState){      
@@ -198,10 +198,8 @@ class HealthChart extends React.Component {
             }
         }
     }
-
+    
     loadContinuously(start = true){
-
-        console.log('STAHT', start);
 
         var doIt = function(){
             this.load(()=>{
@@ -218,16 +216,17 @@ class HealthChart extends React.Component {
     }
 
     load(callback, fallback){
-        if (!ChartDataController.isWindowActive()) return;
-        setTimeout(()=>{
+        this.setState({ 'loading' : true }, ()=>{
+            console.log('ST3', this.state);
             ajax.load('/bar_plot_aggregations/type=Item&field=@type&field=status&type!=OntologyTerm/?field=@type&field=status', (r)=>{ // Exclude ontology terms
                 console.log('loaded', r);
                 this.setState({
-                    data : r,
-                    loaded : true
+                    'data'      : r,
+                    'loaded'    : true,
+                    'loading'   : false
                 }, callback);
-            }, 'GET', fallback);
-        }, 100);
+            }, 'GET', fallback || ((r)=>{ this.setState({ 'loading' : false }); }) );
+        });
     }
 
     transition(d3Selection){
@@ -342,6 +341,8 @@ class HealthChart extends React.Component {
 
         if (!mounted || !this.state.loaded || !this.state.data || !this.state.data.total.experiment_sets) return null;
 
+        console.log('ST', this.state);
+
         return (
             <div>
                 <h5 className="text-400 mt-2 pull-right mb-0"><em>Excluding OntologyTerm</em></h5>
@@ -353,10 +354,9 @@ class HealthChart extends React.Component {
                         '.treemap-rect-elem:hover .title-text { fill: #000; }'
                     )
                 }}/>
-                <svg width={width} height={height} ref="svg"/>
+                <svg width={width} height={height} ref="svg" style={{ 'opacity' : this.state.loading ? 0.5 : 1 }} />
             </div>
         );
 
     }
-
 }

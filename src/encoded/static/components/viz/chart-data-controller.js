@@ -203,20 +203,6 @@ var isInitialLoadComplete = false;
  */
 var lastTimeSyncCalled = 0;
 
-/**
- * @private
- * @ignore
- * @type {?string}
- */
-var resyncInterval = null;
-
-/**
- * @private
- * @ignore
- * @type {boolean}
- */
-var isWindowActive = false;
-
 
 /**
  * Use this React component to wrap individual charts and provide them with source of experiments data via
@@ -331,6 +317,7 @@ export const ChartDataController = {
         var initStoreState = refs.store.getState();
         refs.href = initStoreState.href;
         refs.contextFilters = (initStoreState.context && initStoreState.context.filters) || null;
+
         if (typeof baseSearchPath === 'string'){
             refs.baseSearchPath = baseSearchPath;
         }
@@ -383,35 +370,6 @@ export const ChartDataController = {
             callback(state);
         }, { isInitial : true });
 
-        // Resync periodically if resync interval supplied.
-        if (typeof resync === 'number' && !isServerSide()){
-
-            resync = Math.max(resync, 20000); // 20sec minimum
-
-            window.addEventListener('focus', function(){
-                if (lastTimeSyncCalled + resync < Date.now()){
-                    ChartDataController.sync(function(){
-                        isWindowActive = true;
-                    }, { 'fromSync' : true, 'fromInterval' : true });
-                } else {
-                    isWindowActive = true;
-                }
-            });
-
-            window.addEventListener('blur', function(){
-                isWindowActive = false;
-            });
-
-            resyncInterval = setInterval(function(){
-                if (!isWindowActive) return;
-                console.info('Resyncing experiment_sets & filtered_experiment_sets for ChartDataController.');
-                ChartDataController.sync(null, { 'fromInterval' : true, 'fromSync' : true });
-            }, resync);
-
-            isWindowActive = true;
-
-        }
-
         // For debugging, e.g. embedded properties of fetched experiments.
         if (!isServerSide()){
             window.ChartDataController = ChartDataController;
@@ -428,10 +386,6 @@ export const ChartDataController = {
      */
     isInitialized : function(){
         return isInitialized;
-    },
-
-    isWindowActive : function(){
-        return isWindowActive;
     },
 
     /** 
@@ -536,9 +490,6 @@ export const ChartDataController = {
      */
     setState : function(updatedState = {}, callback = null, opts = {}){
 
-        //var allChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiment_sets, state.experiment_sets);
-        //var allOrFilteredChanged = allChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filtered_experiment_sets, state.filtered_experiment_sets);
-
         var allCountsChanged = (
             updatedState && updatedState.barplot_data_unfiltered && updatedState.barplot_data_unfiltered.total && (
                 !state.barplot_data_unfiltered || !state.barplot_data_unfiltered.total || !state.barplot_data_unfiltered.total.experiment_sets ||
@@ -552,11 +503,6 @@ export const ChartDataController = {
 
         ChartDataController.updateStats();
         notifyUpdateCallbacks();
-
-        if (allCountsChanged && isInitialLoadComplete && opts.fromInterval){
-            // Update browse page results or w/e.
-            reFetchContext();
-        }
 
         if (typeof callback === 'function' && callback !== notifyUpdateCallbacks){
             return callback(state);

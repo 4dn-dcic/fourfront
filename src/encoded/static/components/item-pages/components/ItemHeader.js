@@ -4,8 +4,9 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'querystring';
-import { console, DateUtility, Filters, Schemas } from './../../util';
+import { console, DateUtility, Filters, Schemas, object } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
+import { itemUtil } from '../../util/object';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -51,7 +52,6 @@ export class TopRow extends React.Component {
         this.parsedStatus = this.parsedStatus.bind(this);
         this.viewJSONButton = this.viewJSONButton.bind(this);
         this.itemActions = this.itemActions.bind(this);
-        this.baseItemTypeInfo = this.baseItemTypeInfo.bind(this);
         this.typeInfoLabel = this.typeInfoLabel.bind(this);
         this.wrapChildren = this.wrapChildren.bind(this);
     }
@@ -80,12 +80,11 @@ export class TopRow extends React.Component {
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
             <div
-                className="expset-indicator expset-status right"
+                className="indicator-item expset-status"
                 data-status={ this.props.context.status.toLowerCase() }
                 data-tip="Current Status"
-            >
-                { this.props.context.status }
-            </div>
+                children={this.props.context.status}
+            />
         );
     }
     /**
@@ -103,7 +102,7 @@ export class TopRow extends React.Component {
         urlParts.search = '?' + queryString.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
         var viewUrl = url.format(urlParts);
         return (
-            <div className="expset-indicator right view-ajax-button">
+            <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code-o"/> <a 
                     href={viewUrl}
                     className="inline-block"
@@ -132,38 +131,27 @@ export class TopRow extends React.Component {
         return this.props.context.actions.map(function(action, i){
             var title = action.title;
             return (
-                <div className="expset-indicator right action-button" data-action={action.name || null} key={action.name || i}>
+                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
                     <a href={action.href}>{ title }</a>
                 </div>
             );
         });
     }
 
-    /**
-     * @memberof module:item-pages/components.ItemHeader.TopRow
-     * @private
-     * @instance
-     */
-    baseItemTypeInfo(){
+    typeInfoLabel(){
+        if (this.props.typeInfo){
+            return <span className="type-info inline-block" data-tip={(this.props.typeInfo && this.props.typeInfo.description) || null}>{ this.props.typeInfo && this.props.typeInfo.title }</span>;
+        }
         var baseItemType = Schemas.getBaseItemType(this.props.context);
         var itemType = Schemas.getItemType(this.props.context);
         if (itemType === baseItemType) return null;
 
-        return Schemas.getSchemaForItemType(
-            baseItemType,
-            this.props.schemas || null
-        );
-    }
+        var baseTypeInfo = Schemas.getSchemaForItemType(baseItemType, this.props.schemas || null);
+        var title = (baseTypeInfo && baseTypeInfo.title) || baseItemType;
+        var detailTypeInfo = Schemas.getSchemaForItemType(itemType, this.props.schemas || null);
+        var detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
 
-    typeInfoLabel(typeInfo = null){
-        if (!typeInfo) typeInfo = this.baseItemTypeInfo();
-        if (!typeInfo || !typeInfo.title) return null;
-
-        return (
-            <span className="type-info inline-block" data-tip={typeInfo.description}>
-                { typeInfo.title }
-            </span>
-        );
+        return <span className="type-info inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>{ title }</span>;
     }
 
     /**
@@ -177,12 +165,11 @@ export class TopRow extends React.Component {
         if (!this.props.children) return null;
         return React.Children.map(this.props.children, (child,i) =>
             <div
-                className="expset-indicator expset-type right"
+                className="indicator-item expset-type"
                 title={this.props.title || null}
                 key={i}
-            >
-                { child }
-            </div>
+                children={child}
+            />
         );
     }
 
@@ -207,16 +194,15 @@ export class TopRow extends React.Component {
         return (
             <div className="row clearfix top-row">
                 <h5 className="col-sm-5 item-label-title">
-                    { this.typeInfoLabel(this.props.typeInfo || null) }
-                    { this.props.context.accession ?
-                        <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
-                    : null }
+                    <div className="inner">
+                        { this.typeInfoLabel(this.props.typeInfo || null) }
+                        { this.props.context.accession ?
+                            <object.CopyWrapper value={this.props.context.accession} className="accession inline-block" data-tip={accessionTooltip} children={this.props.context.accession} wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -5 } }} />
+                        : null }
+                    </div>
                 </h5>
                 <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
-                    { this.viewJSONButton() }
-                    { this.itemActions() }
-                    { this.wrapChildren() }
-                    { this.parsedStatus() }
+                    { this.parsedStatus() }{ this.wrapChildren() }{ this.itemActions() }{ this.viewJSONButton() }
                 </h5>
             </div>
         );
@@ -233,28 +219,26 @@ export class TopRow extends React.Component {
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
 export class MiddleRow extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
     render(){
-        var isTextShort = false;
-        if (typeof this.props.context.description === 'string' && this.props.context.description.length <= 120){
-            isTextShort = true;
+        var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
+
+        if (!description){
+            return <div className="item-page-heading no-description"/>;
         }
+
         return (
             <FlexibleDescriptionBox
-                description={ this.props.context.description || <em>No description provided.</em> }
-                className="item-page-heading experiment-heading"
-                textClassName={ isTextShort ? "text-larger" : "text-large" }
+                description={ description || <em>No description provided.</em> }
+                className="item-page-heading"
+                textClassName="text-large"
+                defaultExpanded={description.length < 600}
                 fitTo="grid"
+                lineHeight={24}
                 dimensions={{
-                    paddingWidth : 32,
-                    paddingHeight : 22,
-                    buttonWidth : 30,
-                    initialHeight : 45
+                    'paddingWidth' : 0,
+                    'paddingHeight' : 22, // Padding-top + border-top
+                    'buttonWidth' : 30,
+                    'initialHeight' : 46
                 }}
             />
         );
@@ -318,23 +302,23 @@ export class Wrapper extends React.Component {
     }
 
     adjustChildren(){
-        if (!this.props.context) return this.props.children;
-        return React.Children.map(this.props.children, (child)=>{
+        var { context, href, schemas, children } = this.props;
+        if (!context) return children;
+        return React.Children.map(children, (child)=>{
             if (typeof child.props.context !== 'undefined' && typeof child.props.href === 'string') return child;
             else {
                 return React.cloneElement(child, {
-                    context : this.props.context,
-                    href : this.props.href,
-                    schemas : this.props.schemas || (Schemas.get && Schemas.get()) || null
+                    'context'   : context,
+                    'href'      : href,
+                    'schemas'   : schemas || (Schemas.get && Schemas.get()) || null
                 }, child.props.children);
             }
         });
     }
 
     render(){
-        return (
-            <div className={"item-view-header " + (this.props.className || '')}>{ this.adjustChildren() }</div>
-        );
+        return <div className={"item-view-header " + (this.props.className || '') + (!this.props.context.description ? ' no-description' : '')}>{ this.adjustChildren() }</div>;
     }
 
 }
+

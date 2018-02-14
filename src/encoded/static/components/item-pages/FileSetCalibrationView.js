@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import * as globals from './../globals';
-import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, TabbedView } from './components';
+import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, TabbedView } from './components';
 import { ItemBaseView } from './DefaultItemView';
 
 

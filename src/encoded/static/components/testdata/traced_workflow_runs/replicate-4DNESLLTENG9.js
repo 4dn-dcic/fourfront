@@ -3,12 +3,6 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
     {
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"fastq",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -17,21 +11,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIBFNQAPD",
+                            "filename":"SRR927090_1.fastq.gz",
+                            "uuid":"803e1a6a-f606-4475-91c6-8ee69d686c99",
                             "file_type":"reads",
+                            "@id":"/files-fastq/4DNFIBFNQAPD/",
+                            "display_title":"4DNFIBFNQAPD.fastq.gz",
+                            "file_size":6332984507,
+                            "file_format":"fastq",
                             "@type":[
                                 "FileFastq",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFIBFNQAPD",
-                            "description":null,
-                            "file_size":6332984507,
-                            "filename":"SRR927090_1.fastq.gz",
-                            "@id":"/files-fastq/4DNFIBFNQAPD/",
-                            "uuid":"803e1a6a-f606-4475-91c6-8ee69d686c99",
-                            "status":"released",
-                            "display_title":"4DNFIBFNQAPD.fastq.gz",
-                            "file_format":"fastq"
+                            "description":null
                         }
                     ],
                     "type":"input"
@@ -42,15 +36,15 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"803e1a6a-f606-4475-91c6-8ee69d686c99",
                         "name":"fastq1"
                     }
-                ]
-            },
-            {
+                ],
                 "meta":{
+                    "file_format":"fastq",
                     "type":"data file",
                     "global":true,
-                    "file_format":"fastq",
                     "in_path":true
-                },
+                }
+            },
+            {
                 "run_data":{
                     "meta":[
                         {
@@ -59,21 +53,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFI3B5A5F7",
+                            "filename":"SRR927090_2.fastq.gz",
+                            "uuid":"eb182be7-2ada-4383-ad0b-bf2264c5af5b",
                             "file_type":"reads",
+                            "@id":"/files-fastq/4DNFI3B5A5F7/",
+                            "display_title":"4DNFI3B5A5F7.fastq.gz",
+                            "file_size":6403709616,
+                            "file_format":"fastq",
                             "@type":[
                                 "FileFastq",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI3B5A5F7",
-                            "description":null,
-                            "file_size":6403709616,
-                            "filename":"SRR927090_2.fastq.gz",
-                            "@id":"/files-fastq/4DNFI3B5A5F7/",
-                            "uuid":"eb182be7-2ada-4383-ad0b-bf2264c5af5b",
-                            "status":"released",
-                            "display_title":"4DNFI3B5A5F7.fastq.gz",
-                            "file_format":"fastq"
+                            "description":null
                         }
                     ],
                     "type":"input"
@@ -84,15 +78,15 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"eb182be7-2ada-4383-ad0b-bf2264c5af5b",
                         "name":"fastq2"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"fastq",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
             },
             {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"bwaIndex",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -101,21 +95,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIZQZ39L9",
+                            "filename":"hg38.bwaIndex.tgz",
+                            "uuid":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
                             "file_type":null,
+                            "@id":"/files-reference/4DNFIZQZ39L9/",
+                            "display_title":"4DNFIZQZ39L9.bwaIndex.tgz",
+                            "file_size":3445308903,
+                            "file_format":"bwaIndex",
                             "@type":[
                                 "FileReference",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFIZQZ39L9",
-                            "description":null,
-                            "file_size":3445308903,
-                            "filename":"hg38.bwaIndex.tgz",
-                            "@id":"/files-reference/4DNFIZQZ39L9/",
-                            "uuid":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
-                            "status":"released",
-                            "display_title":"4DNFIZQZ39L9.bwaIndex.tgz",
-                            "file_format":"bwaIndex"
+                            "description":null
                         }
                     ],
                     "type":"input"
@@ -126,37 +120,46 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
                         "name":"bwa_index"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"bwaIndex",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
         "outputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"bam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".bam",
-                            "type":"Output processed file",
-                            "format":"bam",
                             "upload_key":"003edd35-ab95-42cd-930a-1c6c73b2ed33/4DNFIYY9N5TP.bam",
                             "extra_files":[
 
-                            ]
+                            ],
+                            "type":"Output processed file",
+                            "format":"bam",
+                            "extension":".bam"
                         }
                     ],
                     "file":[
                         {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIYY9N5TP",
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIYY9N5TP/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"bam",
+                            "file_size":18401485141,
+                            "filename":null,
+                            "accession":"4DNFIYY9N5TP",
                             "uuid":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
-                            "file_format":"bam"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIYY9N5TP/",
+                            "display_title":"4DNFIYY9N5TP.bam"
                         }
                     ],
                     "type":"input"
@@ -171,107 +174,122 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/"
                     }
                 ],
-                "name":"out_bam"
+                "name":"out_bam",
+                "meta":{
+                    "file_format":"bam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
+        "name":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWFZOGJEI4",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWFZOGJEI4",
-                "display_title":"Alignment for Hi-C using bwa-mem - 4DNWFZOGJEI4",
-                "@id":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
+                "uuid":"0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "alignment"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d82d-4da9-950c-2ca994a13209/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"bam"
-                                },
-                                "name":"out_bam",
                                 "target":[
                                     {
                                         "name":"out_bam"
                                     }
-                                ]
+                                ],
+                                "name":"out_bam",
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"bam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
+                        "name":"bwa-mem",
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"fastq"
-                                },
                                 "name":"fastq1",
                                 "source":[
                                     {
                                         "name":"fastq1"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"fastq",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"fastq"
-                                },
                                 "name":"fastq2",
                                 "source":[
                                     {
                                         "name":"fastq2"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"fastq",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"bwaIndex"
-                                },
                                 "name":"bwa_index",
                                 "source":[
                                     {
                                         "name":"bwa_index"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"bwaIndex",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"nThreads",
                                 "source":[
                                     {
                                         "name":"nThreads"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"bwa-mem"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d82d-4da9-950c-2ca994a13209"
+                            ],
+                            "analysis_step_types":[
+                                "alignment"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"0fbe4db8-0b5f-448e-8b58-3f8c84baabf5"
+                "display_title":"Alignment for Hi-C using bwa-mem - 4DNWFZOGJEI4",
+                "@id":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-13T20:16:25.363841+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -281,140 +299,129 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "Hi-C data analysis"
             ],
             "display_title":"bwa-mem run 2017-09-13 20:16:24.446879",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/",
-            "status":"released",
-            "date_created":"2017-09-13T20:16:25.363841+00:00"
-        },
-        "name":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/"
+            "@id":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/"
+        }
     },
     {
-        "meta":{
-            "workflow":{
-                "workflow_type":"Hi-C data analysis",
-                "@type":[
-                    "Workflow",
-                    "Item"
-                ],
-                "accession":"4DNWF37VHW0F",
-                "display_title":"Parsing and Sorting for Hi-C using pairsamtools - 4DNWF37VHW0F",
-                "@id":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
-                "steps":[
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "sorting"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"out_pairsam",
-                                "target":[
-                                    {
-                                        "name":"out_pairsam"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"bam"
-                                },
-                                "name":"bam",
-                                "source":[
-                                    {
-                                        "name":"bam"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"chromsizes"
-                                },
-                                "name":"chromsize",
-                                "source":[
-                                    {
-                                        "name":"chromsize"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"nThreads",
-                                "source":[
-                                    {
-                                        "name":"nThreads"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"pairsam-parse-sort"
-                    }
-                ],
-                "uuid":"65586d4b-1e3b-4b31-891e-11f48c816545"
-            },
-            "@type":[
-                "WorkflowRunAwsem",
-                "WorkflowRun",
-                "Item"
-            ],
-            "analysis_step_types":[
-                "Hi-C data analysis"
-            ],
-            "display_title":"pairsam-parse-sort run 2017-09-14 17:54:37.332192",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/",
-            "status":"released",
-            "date_created":"2017-09-14T17:54:38.285408+00:00"
-        },
-        "outputs":[
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".sam.pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairsam",
-                            "upload_key":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc/4DNFIUWMF9A1.sam.pairs.gz",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIYY9N5TP",
+                            "filename":null,
+                            "uuid":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
                             "file_type":"intermediate file",
-                            "accession":"4DNFIUWMF9A1",
+                            "@id":"/files-processed/4DNFIYY9N5TP/",
+                            "display_title":"4DNFIYY9N5TP.bam",
+                            "file_size":18401485141,
+                            "file_format":"bam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"bam",
+                "source":[
+                    {
+                        "for_file":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
+                        "name":"out_bam",
+                        "workflow":"0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
+                        "step":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"bam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"chromsize",
+                "source":[
+                    {
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extra_files":[
+
+                            ],
+                            "type":"Output processed file",
+                            "format":"pairsam",
+                            "extension":".sam.pairs.gz",
+                            "upload_key":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc/4DNFIUWMF9A1.sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIUWMF9A1/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairsam",
+                            "file_size":17538271740,
+                            "filename":null,
+                            "accession":"4DNFIUWMF9A1",
                             "uuid":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
-                            "file_format":"pairsam"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIUWMF9A1/",
+                            "display_title":"4DNFIUWMF9A1.sam.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -429,170 +436,107 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/"
                     }
                 ],
-                "name":"out_pairsam"
+                "name":"out_pairsam",
+                "meta":{
+                    "file_format":"pairsam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"bam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIYY9N5TP",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":18401485141,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIYY9N5TP/",
-                            "uuid":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
-                            "status":"released",
-                            "display_title":"4DNFIYY9N5TP.bam",
-                            "file_format":"bam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"bam",
-                "source":[
-                    {
-                        "for_file":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
-                        "workflow":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
-                        "name":"out_bam",
-                        "step":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"chromsize",
-                "source":[
-                    {
-                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chromsize"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/"
-    },
-    {
+        "name":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF37VHW0F",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF3YV81HS",
-                "display_title":"Merging for Hi-C using pairsamtools - 4DNWF3YV81HS",
-                "@id":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/",
+                "uuid":"65586d4b-1e3b-4b31-891e-11f48c816545",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "merging"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
+                        "name":"pairsam-parse-sort",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"merged_pairsam",
                                 "target":[
                                     {
-                                        "name":"merged_pairsam"
+                                        "name":"out_pairsam"
                                     }
-                                ]
+                                ],
+                                "name":"out_pairsam",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"input_pairsams",
+                                "name":"bam",
                                 "source":[
                                     {
-                                        "name":"input_pairsams"
+                                        "name":"bam"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"bam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
+                                "name":"chromsize",
+                                "source":[
+                                    {
+                                        "name":"chromsize"
+                                    }
+                                ],
                                 "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
+                                    "cardinality":"single",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
                                 "name":"nThreads",
                                 "source":[
                                     {
                                         "name":"nThreads"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-merge"
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "sorting"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20"
+                "display_title":"Parsing and Sorting for Hi-C using pairsamtools - 4DNWF37VHW0F",
+                "@id":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-14T17:54:38.285408+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -601,65 +545,13 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-merge run 2017-09-15 17:42:17.814966",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/",
-            "status":"released",
-            "date_created":"2017-09-15T17:42:18.662548+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".sam.pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairsam",
-                            "upload_key":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e/4DNFIEDB5C3N.sam.pairs.gz",
-                            "extra_files":[
-
-                            ]
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIEDB5C3N",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIEDB5C3N/",
-                            "uuid":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
-                            "file_format":"pairsam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"merged_pairsam"
-                    },
-                    {
-                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
-                        "name":"input_pairsam",
-                        "step":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/"
-                    }
-                ],
-                "name":"merged_pairsam"
-            }
-        ],
+            "display_title":"pairsam-parse-sort run 2017-09-14 17:54:37.332192",
+            "@id":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/"
+        }
+    },
+    {
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -677,72 +569,72 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
+                            "status":"released",
                             "accession":"4DNFIUWMF9A1",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":17538271740,
                             "filename":null,
-                            "@id":"/files-processed/4DNFIUWMF9A1/",
                             "uuid":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
-                            "status":"released",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIUWMF9A1/",
                             "display_title":"4DNFIUWMF9A1.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        },
-                        {
-                            "file_type":"intermediate file",
+                            "file_size":17538271740,
+                            "file_format":"pairsam",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        },
+                        {
+                            "status":"released",
                             "accession":"4DNFIYOVMUJU",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":23858469233,
                             "filename":null,
-                            "@id":"/files-processed/4DNFIYOVMUJU/",
                             "uuid":"df45891e-4341-4233-baf2-d296c7e08abe",
-                            "status":"released",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIYOVMUJU/",
                             "display_title":"4DNFIYOVMUJU.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        },
-                        {
-                            "file_type":"intermediate file",
+                            "file_size":23858469233,
+                            "file_format":"pairsam",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        },
+                        {
+                            "status":"released",
                             "accession":"4DNFI4W2MRIY",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":20990013988,
                             "filename":null,
-                            "@id":"/files-processed/4DNFI4W2MRIY/",
                             "uuid":"be6daffe-094d-4758-b138-20f0e8080987",
-                            "status":"released",
-                            "display_title":"4DNFI4W2MRIY.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        },
-                        {
                             "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFI4W2MRIY/",
+                            "display_title":"4DNFI4W2MRIY.sam.pairs.gz",
+                            "file_size":20990013988,
+                            "file_format":"pairsam",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFIOKIESM4",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":21137395644,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIOKIESM4/",
-                            "uuid":"f3310aa9-d947-40f5-8e65-9cbe24386187",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        },
+                        {
                             "status":"released",
+                            "accession":"4DNFIOKIESM4",
+                            "filename":null,
+                            "uuid":"f3310aa9-d947-40f5-8e65-9cbe24386187",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIOKIESM4/",
                             "display_title":"4DNFIOKIESM4.sam.pairs.gz",
-                            "file_format":"pairsam"
+                            "file_size":21137395644,
+                            "file_format":"pairsam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
                         }
                     ],
                     "type":"input"
@@ -751,91 +643,168 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "name":"out_pairsam",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "step":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/"
                     },
                     {
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "for_file":"df45891e-4341-4233-baf2-d296c7e08abe",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "grouped_by":"workflow",
                         "step":"/workflow-runs-awsem/2781b17e-134b-4116-a7e6-f03c2b5afaf0/"
                     },
                     {
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "for_file":"be6daffe-094d-4758-b138-20f0e8080987",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "grouped_by":"workflow",
                         "step":"/workflow-runs-awsem/3d74e9b5-7f47-440a-a511-d07ed2d68d2d/"
                     },
                     {
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "for_file":"f3310aa9-d947-40f5-8e65-9cbe24386187",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "grouped_by":"workflow",
                         "step":"/workflow-runs-awsem/750c5aaa-6aba-4e05-80fe-b765854f531f/"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"pairsam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/"
-    },
-    {
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e/4DNFIEDB5C3N.sam.pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "type":"Output processed file",
+                            "format":"pairsam",
+                            "extension":".sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairsam",
+                            "file_size":78519604603,
+                            "filename":null,
+                            "accession":"4DNFIEDB5C3N",
+                            "uuid":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIEDB5C3N/",
+                            "display_title":"4DNFIEDB5C3N.sam.pairs.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"merged_pairsam"
+                    },
+                    {
+                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                        "name":"input_pairsam",
+                        "step":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/"
+                    }
+                ],
+                "name":"merged_pairsam",
+                "meta":{
+                    "file_format":"pairsam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF3YV81HS",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF1Y7DN3H",
-                "display_title":"Duplicate Marking for Hi-C using pairsamtools - 4DNWF1Y7DN3H",
-                "@id":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/",
+                "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "annotating"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
+                        "name":"pairsam-merge",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"out_markedpairsam",
                                 "target":[
                                     {
-                                        "name":"out_markedpairsam"
+                                        "name":"merged_pairsam"
                                     }
-                                ]
+                                ],
+                                "name":"merged_pairsam",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
                                 "name":"input_pairsams",
                                 "source":[
                                     {
                                         "name":"input_pairsams"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"nThreads",
+                                "source":[
+                                    {
+                                        "name":"nThreads"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-markasdup"
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "merging"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861"
+                "display_title":"Merging for Hi-C using pairsamtools - 4DNWF3YV81HS",
+                "@id":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-15T17:42:18.662548+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -844,40 +813,88 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-markasdup run 2017-09-15 20:30:47.997521",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/",
-            "status":"released",
-            "date_created":"2017-09-15T20:30:48.933917+00:00"
-        },
-        "outputs":[
+            "display_title":"pairsam-merge run 2017-09-15 17:42:17.814966",
+            "@id":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".sam.pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairsam",
-                            "upload_key":"c08b165e-8fc0-46af-8211-d363f7def6dc/4DNFIQAOXKIE.sam.pairs.gz",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIEDB5C3N",
+                            "filename":null,
+                            "uuid":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
                             "file_type":"intermediate file",
-                            "accession":"4DNFIQAOXKIE",
+                            "@id":"/files-processed/4DNFIEDB5C3N/",
+                            "display_title":"4DNFIEDB5C3N.sam.pairs.gz",
+                            "file_size":78519604603,
+                            "file_format":"pairsam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairsam",
+                "source":[
+                    {
+                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                        "name":"merged_pairsam",
+                        "workflow":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
+                        "step":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairsam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"c08b165e-8fc0-46af-8211-d363f7def6dc/4DNFIQAOXKIE.sam.pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "type":"Output processed file",
+                            "format":"pairsam",
+                            "extension":".sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIQAOXKIE/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairsam",
+                            "file_size":86456693319,
+                            "filename":null,
+                            "accession":"4DNFIQAOXKIE",
                             "uuid":"c08b165e-8fc0-46af-8211-d363f7def6dc",
-                            "file_format":"pairsam"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIQAOXKIE/",
+                            "display_title":"4DNFIQAOXKIE.sam.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -892,143 +909,78 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/"
                     }
                 ],
-                "name":"out_markedpairsam"
-            }
-        ],
-        "inputs":[
-            {
+                "name":"out_markedpairsam",
                 "meta":{
-                    "type":"data file",
-                    "global":true,
                     "file_format":"pairsam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIEDB5C3N",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":78519604603,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIEDB5C3N/",
-                            "uuid":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
-                            "status":"released",
-                            "display_title":"4DNFIEDB5C3N.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairsam",
-                "source":[
-                    {
-                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
-                        "workflow":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/",
-                        "name":"merged_pairsam",
-                        "step":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/"
-                    }
-                ]
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/"
-    },
-    {
+        "name":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF1Y7DN3H",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF38VH15",
-                "display_title":"Filtering for Hi-C using pairsamtools - 4DNWF38VH15",
-                "@id":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/",
+                "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "filtering"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs"
-                                },
-                                "name":"dedup_pairs",
+                                "name":"out_markedpairsam",
                                 "target":[
                                     {
-                                        "name":"dedup_pairs"
+                                        "name":"out_markedpairsam"
                                     }
-                                ]
-                            },
-                            {
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"bam"
-                                },
-                                "name":"lossless_bamfile",
-                                "target":[
-                                    {
-                                        "name":"lossless_bamfile"
-                                    }
-                                ]
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
+                        "name":"pairsam-markasdup",
                         "inputs":[
                             {
+                                "name":"input_pairsams",
+                                "source":[
+                                    {
+                                        "name":"input_pairsams"
+                                    }
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"input_pairsam",
-                                "source":[
-                                    {
-                                        "name":"input_pairsam"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"chromsizes"
-                                },
-                                "name":"chromsize",
-                                "source":[
-                                    {
-                                        "name":"chromsize"
-                                    }
-                                ]
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-filter"
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "annotating"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99"
+                "display_title":"Duplicate Marking for Hi-C using pairsamtools - 4DNWF1Y7DN3H",
+                "@id":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-15T20:30:48.933917+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -1037,40 +989,130 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-filter run 2017-09-16 00:10:42.865657",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/",
-            "status":"released",
-            "date_created":"2017-09-16T00:10:43.881118+00:00"
-        },
-        "outputs":[
+            "display_title":"pairsam-markasdup run 2017-09-15 20:30:47.997521",
+            "@id":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairs",
-                            "upload_key":"aa3303ce-b7e4-43ce-b4f2-5262252fc383/4DNFIUYTV61P.pairs.gz",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIQAOXKIE",
+                            "filename":null,
+                            "uuid":"c08b165e-8fc0-46af-8211-d363f7def6dc",
                             "file_type":"intermediate file",
-                            "accession":"4DNFIUYTV61P",
+                            "@id":"/files-processed/4DNFIQAOXKIE/",
+                            "display_title":"4DNFIQAOXKIE.sam.pairs.gz",
+                            "file_size":86456693319,
+                            "file_format":"pairsam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairsam",
+                "source":[
+                    {
+                        "for_file":"c08b165e-8fc0-46af-8211-d363f7def6dc",
+                        "name":"out_markedpairsam",
+                        "workflow":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
+                        "step":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairsam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"chromsize",
+                "source":[
+                    {
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extra_files":[
+
+                            ],
+                            "upload_key":"aa3303ce-b7e4-43ce-b4f2-5262252fc383/4DNFIUYTV61P.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIUYTV61P/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":5802211706,
+                            "filename":null,
+                            "accession":"4DNFIUYTV61P",
                             "uuid":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
-                            "file_format":"pairs"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIUYTV61P/",
+                            "display_title":"4DNFIUYTV61P.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -1083,42 +1125,46 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
                         "name":"input_pairs",
                         "step":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/"
-                    },
-                    {
-                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
-                        "name":"input_pairs",
-                        "step":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/"
                     }
                 ],
-                "name":"dedup_pairs"
+                "name":"dedup_pairs",
+                "meta":{
+                    "file_format":"pairs",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             },
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"bam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".bam",
-                            "type":"Output processed file",
-                            "format":"bam",
-                            "upload_key":"267d5500-3b62-42c2-bb5b-aa29e01f1942/4DNFIVZL95G8.bam",
                             "extra_files":[
 
-                            ]
+                            ],
+                            "upload_key":"267d5500-3b62-42c2-bb5b-aa29e01f1942/4DNFIVZL95G8.bam",
+                            "format":"bam",
+                            "extension":".bam",
+                            "type":"Output processed file"
                         }
                     ],
                     "file":[
                         {
-                            "file_type":"alignment",
-                            "accession":"4DNFIVZL95G8",
                             "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFIVZL95G8/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"bam",
+                            "file_size":76281008966,
+                            "filename":null,
+                            "accession":"4DNFIVZL95G8",
                             "uuid":"267d5500-3b62-42c2-bb5b-aa29e01f1942",
-                            "file_format":"bam"
+                            "file_type":"alignment",
+                            "@id":"/files-processed/4DNFIVZL95G8/",
+                            "display_title":"4DNFIVZL95G8.bam"
                         }
                     ],
                     "type":"input"
@@ -1128,174 +1174,108 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "name":"lossless_bamfile"
                     }
                 ],
-                "name":"lossless_bamfile"
+                "name":"lossless_bamfile",
+                "meta":{
+                    "file_format":"bam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIQAOXKIE",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":86456693319,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIQAOXKIE/",
-                            "uuid":"c08b165e-8fc0-46af-8211-d363f7def6dc",
-                            "status":"released",
-                            "display_title":"4DNFIQAOXKIE.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairsam",
-                "source":[
-                    {
-                        "for_file":"c08b165e-8fc0-46af-8211-d363f7def6dc",
-                        "workflow":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/",
-                        "name":"out_markedpairsam",
-                        "step":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"chromsize",
-                "source":[
-                    {
-                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chromsize"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/"
-    },
-    {
+        "name":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF38VH15",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWZJ2G671",
-                "display_title":"Adding restriction fragment information for Hi-C using pairsamtools - 4DNWZJ2G671",
-                "@id":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/",
+                "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/e17c3e9c-8882-4478-93da-062c5213341d/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
-                                "name":"out_pairs",
                                 "target":[
                                     {
-                                        "name":"out_pairs"
+                                        "name":"dedup_pairs"
                                     }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
+                                ],
+                                "name":"dedup_pairs",
                                 "meta":{
-                                    "type":"data file",
                                     "argument_cardinality":"1",
+                                    "file_format":"pairs",
+                                    "type":"data file",
                                     "global":true,
-                                    "file_format":"pairs"
-                                },
-                                "name":"input_pairs",
-                                "source":[
-                                    {
-                                        "name":"input_pairs"
-                                    }
-                                ]
+                                    "cardinality":"single"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"juicer_format_restriction_site_file"
-                                },
-                                "name":"restriction_file",
-                                "source":[
+                                "target":[
                                     {
-                                        "name":"restriction_file"
+                                        "name":"lossless_bamfile"
                                     }
-                                ]
+                                ],
+                                "name":"lossless_bamfile",
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"bam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
-                        "name":"addfragtopairs"
+                        "name":"pairsam-filter",
+                        "inputs":[
+                            {
+                                "name":"input_pairsam",
+                                "source":[
+                                    {
+                                        "name":"input_pairsam"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            },
+                            {
+                                "name":"chromsize",
+                                "source":[
+                                    {
+                                        "name":"chromsize"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "filtering"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93"
+                "display_title":"Filtering for Hi-C using pairsamtools - 4DNWF38VH15",
+                "@id":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-16T00:10:43.881118+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -1304,54 +1284,144 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"addfragtopairs run 2017-09-16 19:00:35.005961",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/",
-            "status":"released",
-            "date_created":"2017-09-16T19:00:35.851375+00:00"
-        },
-        "outputs":[
+            "display_title":"pairsam-filter run 2017-09-16 00:10:42.865657",
+            "@id":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"7f10fb06-a2bf-4385-9f2b-81c96438b009/4DNFIN4DMXPR.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/7f10fb06-a2bf-4385-9f2b-81c96438b009/@@download/4DNFIN4DMXPR.pairs.gz.px2",
-                                    "accession":"4DNFIN4DMXPR",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFIN4DMXPR",
-                                    "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
-                                    "upload_key":"7f10fb06-a2bf-4385-9f2b-81c96438b009/4DNFIN4DMXPR.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIUYTV61P",
+                            "filename":null,
+                            "uuid":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
                             "file_type":"intermediate file",
-                            "accession":"4DNFIN4DMXPR",
+                            "@id":"/files-processed/4DNFIUYTV61P/",
+                            "display_title":"4DNFIUYTV61P.pairs.gz",
+                            "file_size":5802211706,
+                            "file_format":"pairs",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairs",
+                "source":[
+                    {
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "name":"dedup_pairs",
+                        "workflow":"3758e00c-2035-43c6-b783-bb92afe57c99",
+                        "step":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairs",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823MBKE",
+                            "filename":"GRCh38_HindIII_new.txt",
+                            "uuid":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823MBKE/",
+                            "display_title":"4DNFI823MBKE.txt",
+                            "file_size":7762970,
+                            "file_format":"juicer_format_restriction_site_file",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"restriction_file",
+                "source":[
+                    {
+                        "for_file":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                        "name":"restriction_file"
+                    }
+                ],
+                "meta":{
+                    "file_format":"juicer_format_restriction_site_file",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/7f10fb06-a2bf-4385-9f2b-81c96438b009/@@download/4DNFIN4DMXPR.pairs.gz.px2",
+                                    "file_format":"pairs_px2",
+                                    "filename":"4DNFIN4DMXPR",
+                                    "accession":"4DNFIN4DMXPR",
+                                    "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                                    "upload_key":"7f10fb06-a2bf-4385-9f2b-81c96438b009/4DNFIN4DMXPR.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "format":"pairs",
+                            "upload_key":"7f10fb06-a2bf-4385-9f2b-81c96438b009/4DNFIN4DMXPR.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIN4DMXPR/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":6633179362,
+                            "filename":null,
+                            "accession":"4DNFIN4DMXPR",
                             "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
-                            "file_format":"pairs"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIN4DMXPR/",
+                            "display_title":"4DNFIN4DMXPR.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -1366,160 +1436,96 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/"
                     }
                 ],
-                "name":"out_pairs"
-            }
-        ],
-        "inputs":[
-            {
+                "name":"out_pairs",
                 "meta":{
-                    "type":"data file",
-                    "global":true,
                     "file_format":"pairs",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIUYTV61P",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":5802211706,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIUYTV61P/",
-                            "uuid":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
-                            "status":"released",
-                            "display_title":"4DNFIUYTV61P.pairs.gz",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairs",
-                "source":[
-                    {
-                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
-                        "workflow":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/",
-                        "name":"dedup_pairs",
-                        "step":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
+                    "in_path":true,
                     "global":true,
-                    "file_format":"juicer_format_restriction_site_file",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823MBKE",
-                            "description":null,
-                            "file_size":7762970,
-                            "filename":"GRCh38_HindIII_new.txt",
-                            "@id":"/files-reference/4DNFI823MBKE/",
-                            "uuid":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
-                            "status":"released to project",
-                            "display_title":"4DNFI823MBKE.txt",
-                            "file_format":"juicer_format_restriction_site_file"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"restriction_file",
-                "source":[
-                    {
-                        "for_file":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
-                        "name":"restriction_file"
-                    }
-                ]
+                    "type":"data file"
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/"
-    },
-    {
+        "name":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWZJ2G671",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWZH36VU2",
-                "display_title":"Patching pairs file for Hi-C using pairsamtools - 4DNWZH36VU2",
-                "@id":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/",
+                "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/e17c3e9c-8882-4478-93da-062c5213341d/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
                                 "name":"out_pairs",
                                 "target":[
                                     {
                                         "name":"out_pairs"
                                     }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
+                                ],
                                 "meta":{
                                     "type":"data file",
-                                    "argument_cardinality":"1",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
                                     "global":true,
-                                    "file_format":"pairs"
-                                },
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "name":"addfragtopairs",
+                        "inputs":[
+                            {
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"input_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"pairs",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            },
+                            {
+                                "name":"restriction_file",
+                                "source":[
+                                    {
+                                        "name":"restriction_file"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"juicer_format_restriction_site_file",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
-                        "name":"pairs-patch"
+                        "meta":{
+                            "software_used":[
+                                "e17c3e9c-8882-4478-93da-062c5213341d"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49"
+                "display_title":"Adding restriction fragment information for Hi-C using pairsamtools - 4DNWZJ2G671",
+                "@id":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-16T19:00:35.851375+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -1528,54 +1534,102 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairs-patch run 2017-09-17 16:18:00.793815",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/",
-            "status":"released",
-            "date_created":"2017-09-17T16:18:01.690699+00:00"
-        },
-        "outputs":[
+            "display_title":"addfragtopairs run 2017-09-16 19:00:35.005961",
+            "@id":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"817f3faa-0573-45c0-8230-02ec19de6544/4DNFI1ZLO9D7.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/817f3faa-0573-45c0-8230-02ec19de6544/@@download/4DNFI1ZLO9D7.pairs.gz.px2",
-                                    "accession":"4DNFI1ZLO9D7",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFI1ZLO9D7",
-                                    "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
-                                    "upload_key":"817f3faa-0573-45c0-8230-02ec19de6544/4DNFI1ZLO9D7.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
-                            "file_type":"contact list",
-                            "accession":"4DNFI1ZLO9D7",
+                            "status":"released",
+                            "accession":"4DNFIN4DMXPR",
+                            "filename":null,
+                            "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIN4DMXPR/",
+                            "display_title":"4DNFIN4DMXPR.pairs.gz",
+                            "file_size":6633179362,
+                            "file_format":"pairs",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairs",
+                "source":[
+                    {
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "name":"out_pairs",
+                        "workflow":"ef125750-8df2-418e-a1ee-402285f9dd93",
+                        "step":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairs",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/817f3faa-0573-45c0-8230-02ec19de6544/@@download/4DNFI1ZLO9D7.pairs.gz.px2",
+                                    "file_format":"pairs_px2",
+                                    "filename":"4DNFI1ZLO9D7",
+                                    "accession":"4DNFI1ZLO9D7",
+                                    "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
+                                    "upload_key":"817f3faa-0573-45c0-8230-02ec19de6544/4DNFI1ZLO9D7.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "upload_key":"817f3faa-0573-45c0-8230-02ec19de6544/4DNFI1ZLO9D7.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":6561025451,
+                            "filename":null,
+                            "accession":"4DNFI1ZLO9D7",
                             "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
-                            "file_format":"pairs"
+                            "file_type":"contact list",
+                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "display_title":"4DNFI1ZLO9D7.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -1598,158 +1652,98 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
                         "name":"input_pairs",
                         "step":"/workflow-runs-awsem/d0957be0-eb16-4593-9455-1feed167b3d9/"
+                    },
+                    {
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "name":"input_pairs",
+                        "step":"/workflow-runs-awsem/07c5863c-c626-4215-8719-976bc7d5e6a7/"
+                    },
+                    {
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "name":"input_pairs",
+                        "step":"/workflow-runs-awsem/55548386-2848-4ff3-87bd-1fb7281c088a/"
+                    },
+                    {
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "name":"input_pairs",
+                        "step":"/workflow-runs-awsem/c587f0b9-8d30-4d59-9ee9-294b9ca6c07b/"
                     }
                 ],
-                "name":"out_pairs"
-            }
-        ],
-        "inputs":[
-            {
+                "name":"out_pairs",
                 "meta":{
-                    "type":"data file",
-                    "global":true,
                     "file_format":"pairs",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIN4DMXPR",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":6633179362,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIN4DMXPR/",
-                            "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
-                            "status":"released",
-                            "display_title":"4DNFIN4DMXPR.pairs.gz",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairs",
-                "source":[
-                    {
-                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
-                        "workflow":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/",
-                        "name":"out_pairs",
-                        "step":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/"
-                    }
-                ]
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/"
-    },
-    {
+        "name":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWZH36VU2",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWFZOGJEI4",
-                "display_title":"Alignment for Hi-C using bwa-mem - 4DNWFZOGJEI4",
-                "@id":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
+                "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "alignment"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d82d-4da9-950c-2ca994a13209/"
-                            ]
-                        },
+                        "name":"pairs-patch",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"bam"
-                                },
-                                "name":"out_bam",
                                 "target":[
                                     {
-                                        "name":"out_bam"
+                                        "name":"out_pairs"
                                     }
-                                ]
+                                ],
+                                "name":"out_pairs",
+                                "meta":{
+                                    "type":"data file",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "argument_cardinality":"1",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
                         "inputs":[
                             {
+                                "name":"input_pairs",
+                                "source":[
+                                    {
+                                        "name":"input_pairs"
+                                    }
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairs",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"fastq"
-                                },
-                                "name":"fastq1",
-                                "source":[
-                                    {
-                                        "name":"fastq1"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"fastq"
-                                },
-                                "name":"fastq2",
-                                "source":[
-                                    {
-                                        "name":"fastq2"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"bwaIndex"
-                                },
-                                "name":"bwa_index",
-                                "source":[
-                                    {
-                                        "name":"bwa_index"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"nThreads",
-                                "source":[
-                                    {
-                                        "name":"nThreads"
-                                    }
-                                ]
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"bwa-mem"
+                        "meta":{
+                            "software_used":[
+                                "e17c3e9c-8882-4478-93da-062c5213341d"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"0fbe4db8-0b5f-448e-8b58-3f8c84baabf5"
+                "display_title":"Patching pairs file for Hi-C using pairsamtools - 4DNWZH36VU2",
+                "@id":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-17T16:18:01.690699+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -1758,40 +1752,170 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"bwa-mem run 2017-09-13 20:15:35.454827",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/084497ed-98d5-4bab-a450-27e881f6d2a2/",
-            "status":"released",
-            "date_created":"2017-09-13T20:15:36.265107+00:00"
-        },
-        "outputs":[
+            "display_title":"pairs-patch run 2017-09-17 16:18:00.793815",
+            "@id":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"bam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".bam",
-                            "type":"Output processed file",
-                            "format":"bam",
-                            "upload_key":"db17d86a-d7b6-489a-9a13-ec93f30a8386/4DNFIKL2V1JD.bam",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIKL2V1JD",
+                            "status":"released",
+                            "accession":"4DNFI5VLWJVD",
+                            "filename":"SRR927086_1.fastq.gz",
+                            "uuid":"47426c11-65ab-41d2-b90d-13a3da01eead",
+                            "file_type":"reads",
+                            "@id":"/files-fastq/4DNFI5VLWJVD/",
+                            "display_title":"4DNFI5VLWJVD.fastq.gz",
+                            "file_size":6907360810,
+                            "file_format":"fastq",
+                            "@type":[
+                                "FileFastq",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"fastq1",
+                "source":[
+                    {
+                        "for_file":"47426c11-65ab-41d2-b90d-13a3da01eead",
+                        "name":"fastq1"
+                    }
+                ],
+                "meta":{
+                    "file_format":"fastq",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released",
+                            "accession":"4DNFI9RZ5M46",
+                            "filename":"SRR927086_2.fastq.gz",
+                            "uuid":"1a3da939-0ab4-4d54-ab1f-86736c31c94c",
+                            "file_type":"reads",
+                            "@id":"/files-fastq/4DNFI9RZ5M46/",
+                            "display_title":"4DNFI9RZ5M46.fastq.gz",
+                            "file_size":7000151837,
+                            "file_format":"fastq",
+                            "@type":[
+                                "FileFastq",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"fastq2",
+                "source":[
+                    {
+                        "for_file":"1a3da939-0ab4-4d54-ab1f-86736c31c94c",
+                        "name":"fastq2"
+                    }
+                ],
+                "meta":{
+                    "file_format":"fastq",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released",
+                            "accession":"4DNFIZQZ39L9",
+                            "filename":"hg38.bwaIndex.tgz",
+                            "uuid":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFIZQZ39L9/",
+                            "display_title":"4DNFIZQZ39L9.bwaIndex.tgz",
+                            "file_size":3445308903,
+                            "file_format":"bwaIndex",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"bwa_index",
+                "source":[
+                    {
+                        "for_file":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
+                        "name":"bwa_index"
+                    }
+                ],
+                "meta":{
+                    "file_format":"bwaIndex",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"db17d86a-d7b6-489a-9a13-ec93f30a8386/4DNFIKL2V1JD.bam",
+                            "extra_files":[
+
+                            ],
+                            "extension":".bam",
+                            "format":"bam",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIKL2V1JD/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"bam",
+                            "file_size":20074196942,
+                            "filename":null,
+                            "accession":"4DNFIKL2V1JD",
                             "uuid":"db17d86a-d7b6-489a-9a13-ec93f30a8386",
-                            "file_format":"bam"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIKL2V1JD/",
+                            "display_title":"4DNFIKL2V1JD.bam"
                         }
                     ],
                     "type":"input"
@@ -1806,224 +1930,122 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/ce086d87-7709-4299-9227-7bed68c5419e/"
                     }
                 ],
-                "name":"out_bam"
+                "name":"out_bam",
+                "meta":{
+                    "file_format":"bam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"fastq",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"reads",
-                            "@type":[
-                                "FileFastq",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI5VLWJVD",
-                            "description":null,
-                            "file_size":6907360810,
-                            "filename":"SRR927086_1.fastq.gz",
-                            "@id":"/files-fastq/4DNFI5VLWJVD/",
-                            "uuid":"47426c11-65ab-41d2-b90d-13a3da01eead",
-                            "status":"released",
-                            "display_title":"4DNFI5VLWJVD.fastq.gz",
-                            "file_format":"fastq"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"fastq1",
-                "source":[
-                    {
-                        "for_file":"47426c11-65ab-41d2-b90d-13a3da01eead",
-                        "name":"fastq1"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"fastq",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"reads",
-                            "@type":[
-                                "FileFastq",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI9RZ5M46",
-                            "description":null,
-                            "file_size":7000151837,
-                            "filename":"SRR927086_2.fastq.gz",
-                            "@id":"/files-fastq/4DNFI9RZ5M46/",
-                            "uuid":"1a3da939-0ab4-4d54-ab1f-86736c31c94c",
-                            "status":"released",
-                            "display_title":"4DNFI9RZ5M46.fastq.gz",
-                            "file_format":"fastq"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"fastq2",
-                "source":[
-                    {
-                        "for_file":"1a3da939-0ab4-4d54-ab1f-86736c31c94c",
-                        "name":"fastq2"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"bwaIndex",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIZQZ39L9",
-                            "description":null,
-                            "file_size":3445308903,
-                            "filename":"hg38.bwaIndex.tgz",
-                            "@id":"/files-reference/4DNFIZQZ39L9/",
-                            "uuid":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
-                            "status":"released",
-                            "display_title":"4DNFIZQZ39L9.bwaIndex.tgz",
-                            "file_format":"bwaIndex"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"bwa_index",
-                "source":[
-                    {
-                        "for_file":"1f53df95-4cf3-41cc-971d-81bb16c486dd",
-                        "name":"bwa_index"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/084497ed-98d5-4bab-a450-27e881f6d2a2/"
-    },
-    {
+        "name":"/workflow-runs-awsem/084497ed-98d5-4bab-a450-27e881f6d2a2/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWFZOGJEI4",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF37VHW0F",
-                "display_title":"Parsing and Sorting for Hi-C using pairsamtools - 4DNWF37VHW0F",
-                "@id":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
+                "uuid":"0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "sorting"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"out_pairsam",
                                 "target":[
                                     {
-                                        "name":"out_pairsam"
+                                        "name":"out_bam"
                                     }
-                                ]
+                                ],
+                                "name":"out_bam",
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"bam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
+                        "name":"bwa-mem",
                         "inputs":[
                             {
+                                "name":"fastq1",
+                                "source":[
+                                    {
+                                        "name":"fastq1"
+                                    }
+                                ],
                                 "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"fastq",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"bam"
-                                },
-                                "name":"bam",
-                                "source":[
-                                    {
-                                        "name":"bam"
-                                    }
-                                ]
+                                    "cardinality":"single"
+                                }
                             },
                             {
+                                "name":"fastq2",
+                                "source":[
+                                    {
+                                        "name":"fastq2"
+                                    }
+                                ],
                                 "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"fastq",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            },
+                            {
+                                "name":"bwa_index",
+                                "source":[
+                                    {
+                                        "name":"bwa_index"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"bwaIndex",
                                     "type":"reference file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"chromsizes"
-                                },
-                                "name":"chromsize",
-                                "source":[
-                                    {
-                                        "name":"chromsize"
-                                    }
-                                ]
+                                    "cardinality":"single"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"nThreads",
                                 "source":[
                                     {
                                         "name":"nThreads"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-parse-sort"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d82d-4da9-950c-2ca994a13209"
+                            ],
+                            "analysis_step_types":[
+                                "alignment"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"65586d4b-1e3b-4b31-891e-11f48c816545"
+                "display_title":"Alignment for Hi-C using bwa-mem - 4DNWFZOGJEI4",
+                "@id":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-13T20:15:36.265107+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -2032,40 +2054,130 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-parse-sort run 2017-09-14 16:12:22.571926",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/ce086d87-7709-4299-9227-7bed68c5419e/",
-            "status":"released",
-            "date_created":"2017-09-14T16:12:23.635044+00:00"
-        },
-        "outputs":[
+            "display_title":"bwa-mem run 2017-09-13 20:15:35.454827",
+            "@id":"/workflow-runs-awsem/084497ed-98d5-4bab-a450-27e881f6d2a2/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".sam.pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairsam",
-                            "upload_key":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1/4DNFIXS6FIZF.sam.pairs.gz",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIKL2V1JD",
+                            "filename":null,
+                            "uuid":"db17d86a-d7b6-489a-9a13-ec93f30a8386",
                             "file_type":"intermediate file",
-                            "accession":"4DNFIXS6FIZF",
+                            "@id":"/files-processed/4DNFIKL2V1JD/",
+                            "display_title":"4DNFIKL2V1JD.bam",
+                            "file_size":20074196942,
+                            "file_format":"bam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"bam",
+                "source":[
+                    {
+                        "for_file":"db17d86a-d7b6-489a-9a13-ec93f30a8386",
+                        "name":"out_bam",
+                        "workflow":"0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
+                        "step":"/workflow-runs-awsem/084497ed-98d5-4bab-a450-27e881f6d2a2/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"bam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"chromsize",
+                "source":[
+                    {
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extra_files":[
+
+                            ],
+                            "upload_key":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1/4DNFIXS6FIZF.sam.pairs.gz",
+                            "format":"pairsam",
+                            "extension":".sam.pairs.gz",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIXS6FIZF/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairsam",
+                            "file_size":19207482985,
+                            "filename":null,
+                            "accession":"4DNFIXS6FIZF",
                             "uuid":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1",
-                            "file_format":"pairsam"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIXS6FIZF/",
+                            "display_title":"4DNFIXS6FIZF.sam.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -2080,170 +2192,107 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/"
                     }
                 ],
-                "name":"out_pairsam"
+                "name":"out_pairsam",
+                "meta":{
+                    "file_format":"pairsam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"bam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIKL2V1JD",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":20074196942,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIKL2V1JD/",
-                            "uuid":"db17d86a-d7b6-489a-9a13-ec93f30a8386",
-                            "status":"released",
-                            "display_title":"4DNFIKL2V1JD.bam",
-                            "file_format":"bam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"bam",
-                "source":[
-                    {
-                        "for_file":"db17d86a-d7b6-489a-9a13-ec93f30a8386",
-                        "workflow":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
-                        "name":"out_bam",
-                        "step":"/workflow-runs-awsem/084497ed-98d5-4bab-a450-27e881f6d2a2/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"chromsize",
-                "source":[
-                    {
-                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chromsize"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/ce086d87-7709-4299-9227-7bed68c5419e/"
-    },
-    {
+        "name":"/workflow-runs-awsem/ce086d87-7709-4299-9227-7bed68c5419e/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF37VHW0F",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF3YV81HS",
-                "display_title":"Merging for Hi-C using pairsamtools - 4DNWF3YV81HS",
-                "@id":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/",
+                "uuid":"65586d4b-1e3b-4b31-891e-11f48c816545",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "merging"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
+                        "name":"pairsam-parse-sort",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"merged_pairsam",
                                 "target":[
                                     {
-                                        "name":"merged_pairsam"
+                                        "name":"out_pairsam"
                                     }
-                                ]
+                                ],
+                                "name":"out_pairsam",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"input_pairsams",
+                                "name":"bam",
                                 "source":[
                                     {
-                                        "name":"input_pairsams"
+                                        "name":"bam"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"bam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
+                                "name":"chromsize",
+                                "source":[
+                                    {
+                                        "name":"chromsize"
+                                    }
+                                ],
                                 "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
+                                    "cardinality":"single",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
                                 "name":"nThreads",
                                 "source":[
                                     {
                                         "name":"nThreads"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-merge"
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "sorting"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20"
+                "display_title":"Parsing and Sorting for Hi-C using pairsamtools - 4DNWF37VHW0F",
+                "@id":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-14T16:12:23.635044+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -2252,65 +2301,13 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-merge run 2017-09-15 17:42:11.508423",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/",
-            "status":"released",
-            "date_created":"2017-09-15T17:42:12.419282+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".sam.pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairsam",
-                            "upload_key":"56eeded7-770e-4eae-b385-6cd8591f6fd4/4DNFILGKQ9CG.sam.pairs.gz",
-                            "extra_files":[
-
-                            ]
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFILGKQ9CG",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFILGKQ9CG/",
-                            "uuid":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
-                            "file_format":"pairsam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"merged_pairsam"
-                    },
-                    {
-                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
-                        "name":"input_pairsam",
-                        "step":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/"
-                    }
-                ],
-                "name":"merged_pairsam"
-            }
-        ],
+            "display_title":"pairsam-parse-sort run 2017-09-14 16:12:22.571926",
+            "@id":"/workflow-runs-awsem/ce086d87-7709-4299-9227-7bed68c5419e/"
+        }
+    },
+    {
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -2328,72 +2325,72 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
+                            "status":"released",
                             "accession":"4DNFIXS6FIZF",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":19207482985,
                             "filename":null,
-                            "@id":"/files-processed/4DNFIXS6FIZF/",
                             "uuid":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1",
-                            "status":"released",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIXS6FIZF/",
                             "display_title":"4DNFIXS6FIZF.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        },
-                        {
-                            "file_type":"intermediate file",
+                            "file_size":19207482985,
+                            "file_format":"pairsam",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        },
+                        {
+                            "status":"released",
                             "accession":"4DNFIX43F7DZ",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":25638894213,
                             "filename":null,
-                            "@id":"/files-processed/4DNFIX43F7DZ/",
                             "uuid":"8712ba70-2998-4189-b9f7-fca94560e9c0",
-                            "status":"released",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIX43F7DZ/",
                             "display_title":"4DNFIX43F7DZ.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        },
-                        {
-                            "file_type":"intermediate file",
+                            "file_size":25638894213,
+                            "file_format":"pairsam",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        },
+                        {
+                            "status":"released",
                             "accession":"4DNFIMHJHSET",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":22224223005,
                             "filename":null,
-                            "@id":"/files-processed/4DNFIMHJHSET/",
                             "uuid":"c47230b6-fd44-4c38-85fd-82417353a1bd",
-                            "status":"released",
-                            "display_title":"4DNFIMHJHSET.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        },
-                        {
                             "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIMHJHSET/",
+                            "display_title":"4DNFIMHJHSET.sam.pairs.gz",
+                            "file_size":22224223005,
+                            "file_format":"pairsam",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFILG6ZOD8",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":21760873516,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFILG6ZOD8/",
-                            "uuid":"e3dd6672-88d5-406a-ab7e-40f8d5da5575",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        },
+                        {
                             "status":"released",
+                            "accession":"4DNFILG6ZOD8",
+                            "filename":null,
+                            "uuid":"e3dd6672-88d5-406a-ab7e-40f8d5da5575",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFILG6ZOD8/",
                             "display_title":"4DNFILG6ZOD8.sam.pairs.gz",
-                            "file_format":"pairsam"
+                            "file_size":21760873516,
+                            "file_format":"pairsam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
                         }
                     ],
                     "type":"input"
@@ -2402,91 +2399,168 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1",
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "name":"out_pairsam",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "step":"/workflow-runs-awsem/ce086d87-7709-4299-9227-7bed68c5419e/"
                     },
                     {
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "for_file":"8712ba70-2998-4189-b9f7-fca94560e9c0",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "grouped_by":"workflow",
                         "step":"/workflow-runs-awsem/34764761-83d3-4e40-89df-8fa9bf59642b/"
                     },
                     {
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "for_file":"c47230b6-fd44-4c38-85fd-82417353a1bd",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "grouped_by":"workflow",
                         "step":"/workflow-runs-awsem/0ff15cdb-6d2b-40bd-9fdc-cdf0fc6d0cda/"
                     },
                     {
-                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "for_file":"e3dd6672-88d5-406a-ab7e-40f8d5da5575",
+                        "workflow":"65586d4b-1e3b-4b31-891e-11f48c816545",
                         "grouped_by":"workflow",
                         "step":"/workflow-runs-awsem/b719439f-b57d-47e5-98b4-0a728f123a3a/"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"pairsam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/"
-    },
-    {
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extra_files":[
+
+                            ],
+                            "upload_key":"56eeded7-770e-4eae-b385-6cd8591f6fd4/4DNFILGKQ9CG.sam.pairs.gz",
+                            "format":"pairsam",
+                            "extension":".sam.pairs.gz",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairsam",
+                            "file_size":83471992270,
+                            "filename":null,
+                            "accession":"4DNFILGKQ9CG",
+                            "uuid":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFILGKQ9CG/",
+                            "display_title":"4DNFILGKQ9CG.sam.pairs.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"merged_pairsam"
+                    },
+                    {
+                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                        "name":"input_pairsam",
+                        "step":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/"
+                    }
+                ],
+                "name":"merged_pairsam",
+                "meta":{
+                    "file_format":"pairsam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF3YV81HS",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF1Y7DN3H",
-                "display_title":"Duplicate Marking for Hi-C using pairsamtools - 4DNWF1Y7DN3H",
-                "@id":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/",
+                "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "annotating"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
+                        "name":"pairsam-merge",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"out_markedpairsam",
                                 "target":[
                                     {
-                                        "name":"out_markedpairsam"
+                                        "name":"merged_pairsam"
                                     }
-                                ]
+                                ],
+                                "name":"merged_pairsam",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairsam"
-                                },
                                 "name":"input_pairsams",
                                 "source":[
                                     {
                                         "name":"input_pairsams"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"nThreads",
+                                "source":[
+                                    {
+                                        "name":"nThreads"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-markasdup"
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "merging"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861"
+                "display_title":"Merging for Hi-C using pairsamtools - 4DNWF3YV81HS",
+                "@id":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-15T17:42:12.419282+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -2495,40 +2569,88 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-markasdup run 2017-09-15 20:30:41.338993",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/",
-            "status":"released",
-            "date_created":"2017-09-15T20:30:42.213596+00:00"
-        },
-        "outputs":[
+            "display_title":"pairsam-merge run 2017-09-15 17:42:11.508423",
+            "@id":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".sam.pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairsam",
-                            "upload_key":"8740663b-e8da-410d-a9f8-e8fcca793f95/4DNFIXZW3HLF.sam.pairs.gz",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFILGKQ9CG",
+                            "filename":null,
+                            "uuid":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
                             "file_type":"intermediate file",
-                            "accession":"4DNFIXZW3HLF",
+                            "@id":"/files-processed/4DNFILGKQ9CG/",
+                            "display_title":"4DNFILGKQ9CG.sam.pairs.gz",
+                            "file_size":83471992270,
+                            "file_format":"pairsam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairsam",
+                "source":[
+                    {
+                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                        "name":"merged_pairsam",
+                        "workflow":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
+                        "step":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairsam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extra_files":[
+
+                            ],
+                            "upload_key":"8740663b-e8da-410d-a9f8-e8fcca793f95/4DNFIXZW3HLF.sam.pairs.gz",
+                            "format":"pairsam",
+                            "extension":".sam.pairs.gz",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIXZW3HLF/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairsam",
+                            "file_size":91859125712,
+                            "filename":null,
+                            "accession":"4DNFIXZW3HLF",
                             "uuid":"8740663b-e8da-410d-a9f8-e8fcca793f95",
-                            "file_format":"pairsam"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIXZW3HLF/",
+                            "display_title":"4DNFIXZW3HLF.sam.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -2543,143 +2665,78 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/"
                     }
                 ],
-                "name":"out_markedpairsam"
-            }
-        ],
-        "inputs":[
-            {
+                "name":"out_markedpairsam",
                 "meta":{
-                    "type":"data file",
-                    "global":true,
                     "file_format":"pairsam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFILGKQ9CG",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":83471992270,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFILGKQ9CG/",
-                            "uuid":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
-                            "status":"released",
-                            "display_title":"4DNFILGKQ9CG.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairsam",
-                "source":[
-                    {
-                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
-                        "workflow":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/",
-                        "name":"merged_pairsam",
-                        "step":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/"
-                    }
-                ]
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/"
-    },
-    {
+        "name":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF1Y7DN3H",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF38VH15",
-                "display_title":"Filtering for Hi-C using pairsamtools - 4DNWF38VH15",
-                "@id":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/",
+                "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "filtering"
-                            ],
-                            "software_used":[
-                                "/softwares/c9bf856d-0356-4a8e-8141-2fea6a0ac550/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs"
-                                },
-                                "name":"dedup_pairs",
+                                "name":"out_markedpairsam",
                                 "target":[
                                     {
-                                        "name":"dedup_pairs"
+                                        "name":"out_markedpairsam"
                                     }
-                                ]
-                            },
-                            {
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"bam"
-                                },
-                                "name":"lossless_bamfile",
-                                "target":[
-                                    {
-                                        "name":"lossless_bamfile"
-                                    }
-                                ]
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
+                        "name":"pairsam-markasdup",
                         "inputs":[
                             {
+                                "name":"input_pairsams",
+                                "source":[
+                                    {
+                                        "name":"input_pairsams"
+                                    }
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairsam",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
                                     "global":true,
-                                    "file_format":"pairsam"
-                                },
-                                "name":"input_pairsam",
-                                "source":[
-                                    {
-                                        "name":"input_pairsam"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"chromsizes"
-                                },
-                                "name":"chromsize",
-                                "source":[
-                                    {
-                                        "name":"chromsize"
-                                    }
-                                ]
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairsam-filter"
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "annotating"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99"
+                "display_title":"Duplicate Marking for Hi-C using pairsamtools - 4DNWF1Y7DN3H",
+                "@id":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-15T20:30:42.213596+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -2688,40 +2745,130 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairsam-filter run 2017-09-16 00:10:37.256759",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/",
-            "status":"released",
-            "date_created":"2017-09-16T00:10:38.139452+00:00"
-        },
-        "outputs":[
+            "display_title":"pairsam-markasdup run 2017-09-15 20:30:41.338993",
+            "@id":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "format":"pairs",
-                            "upload_key":"1cb152c4-0e7a-431d-b148-b7e23eabca6e/4DNFICOBX8XY.pairs.gz",
-                            "extra_files":[
-
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIXZW3HLF",
+                            "filename":null,
+                            "uuid":"8740663b-e8da-410d-a9f8-e8fcca793f95",
                             "file_type":"intermediate file",
-                            "accession":"4DNFICOBX8XY",
+                            "@id":"/files-processed/4DNFIXZW3HLF/",
+                            "display_title":"4DNFIXZW3HLF.sam.pairs.gz",
+                            "file_size":91859125712,
+                            "file_format":"pairsam",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairsam",
+                "source":[
+                    {
+                        "for_file":"8740663b-e8da-410d-a9f8-e8fcca793f95",
+                        "name":"out_markedpairsam",
+                        "workflow":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
+                        "step":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairsam",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"chromsize",
+                "source":[
+                    {
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extra_files":[
+
+                            ],
+                            "upload_key":"1cb152c4-0e7a-431d-b148-b7e23eabca6e/4DNFICOBX8XY.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFICOBX8XY/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":6327033069,
+                            "filename":null,
+                            "accession":"4DNFICOBX8XY",
                             "uuid":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
-                            "file_format":"pairs"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFICOBX8XY/",
+                            "display_title":"4DNFICOBX8XY.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -2734,42 +2881,46 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
                         "name":"input_pairs",
                         "step":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/"
-                    },
-                    {
-                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
-                        "name":"input_pairs",
-                        "step":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/"
                     }
                 ],
-                "name":"dedup_pairs"
+                "name":"dedup_pairs",
+                "meta":{
+                    "file_format":"pairs",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             },
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"bam",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "extension":".bam",
-                            "type":"Output processed file",
-                            "format":"bam",
-                            "upload_key":"3e71a0ae-2f61-490a-adc8-25d30bad1a2c/4DNFIBDQQU1B.bam",
                             "extra_files":[
 
-                            ]
+                            ],
+                            "upload_key":"3e71a0ae-2f61-490a-adc8-25d30bad1a2c/4DNFIBDQQU1B.bam",
+                            "format":"bam",
+                            "extension":".bam",
+                            "type":"Output processed file"
                         }
                     ],
                     "file":[
                         {
-                            "file_type":"alignment",
-                            "accession":"4DNFIBDQQU1B",
                             "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFIBDQQU1B/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"bam",
+                            "file_size":80993040303,
+                            "filename":null,
+                            "accession":"4DNFIBDQQU1B",
                             "uuid":"3e71a0ae-2f61-490a-adc8-25d30bad1a2c",
-                            "file_format":"bam"
+                            "file_type":"alignment",
+                            "@id":"/files-processed/4DNFIBDQQU1B/",
+                            "display_title":"4DNFIBDQQU1B.bam"
                         }
                     ],
                     "type":"input"
@@ -2779,174 +2930,108 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "name":"lossless_bamfile"
                     }
                 ],
-                "name":"lossless_bamfile"
+                "name":"lossless_bamfile",
+                "meta":{
+                    "file_format":"bam",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairsam",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFIXZW3HLF",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":91859125712,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIXZW3HLF/",
-                            "uuid":"8740663b-e8da-410d-a9f8-e8fcca793f95",
-                            "status":"released",
-                            "display_title":"4DNFIXZW3HLF.sam.pairs.gz",
-                            "file_format":"pairsam"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairsam",
-                "source":[
-                    {
-                        "for_file":"8740663b-e8da-410d-a9f8-e8fcca793f95",
-                        "workflow":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/",
-                        "name":"out_markedpairsam",
-                        "step":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"chromsize",
-                "source":[
-                    {
-                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chromsize"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/"
-    },
-    {
+        "name":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF38VH15",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWZJ2G671",
-                "display_title":"Adding restriction fragment information for Hi-C using pairsamtools - 4DNWZJ2G671",
-                "@id":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/",
+                "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/e17c3e9c-8882-4478-93da-062c5213341d/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
-                                "name":"out_pairs",
                                 "target":[
                                     {
-                                        "name":"out_pairs"
+                                        "name":"dedup_pairs"
                                     }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
+                                ],
+                                "name":"dedup_pairs",
                                 "meta":{
-                                    "type":"data file",
                                     "argument_cardinality":"1",
+                                    "file_format":"pairs",
+                                    "type":"data file",
                                     "global":true,
-                                    "file_format":"pairs"
-                                },
-                                "name":"input_pairs",
-                                "source":[
-                                    {
-                                        "name":"input_pairs"
-                                    }
-                                ]
+                                    "cardinality":"single"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"juicer_format_restriction_site_file"
-                                },
-                                "name":"restriction_file",
-                                "source":[
+                                "target":[
                                     {
-                                        "name":"restriction_file"
+                                        "name":"lossless_bamfile"
                                     }
-                                ]
+                                ],
+                                "name":"lossless_bamfile",
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"bam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
-                        "name":"addfragtopairs"
+                        "name":"pairsam-filter",
+                        "inputs":[
+                            {
+                                "name":"input_pairsam",
+                                "source":[
+                                    {
+                                        "name":"input_pairsam"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"pairsam",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            },
+                            {
+                                "name":"chromsize",
+                                "source":[
+                                    {
+                                        "name":"chromsize"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "c9bf856d-0356-4a8e-8141-2fea6a0ac550"
+                            ],
+                            "analysis_step_types":[
+                                "filtering"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93"
+                "display_title":"Filtering for Hi-C using pairsamtools - 4DNWF38VH15",
+                "@id":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-16T00:10:38.139452+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -2955,54 +3040,144 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"addfragtopairs run 2017-09-16 18:59:17.399707",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/",
-            "status":"released",
-            "date_created":"2017-09-16T18:59:18.593796+00:00"
-        },
-        "outputs":[
+            "display_title":"pairsam-filter run 2017-09-16 00:10:37.256759",
+            "@id":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"69931af1-44a8-4eeb-bf2a-42a08967b49a/4DNFI6BIN9DA.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/69931af1-44a8-4eeb-bf2a-42a08967b49a/@@download/4DNFI6BIN9DA.pairs.gz.px2",
-                                    "accession":"4DNFI6BIN9DA",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFI6BIN9DA",
-                                    "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
-                                    "upload_key":"69931af1-44a8-4eeb-bf2a-42a08967b49a/4DNFI6BIN9DA.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFICOBX8XY",
+                            "filename":null,
+                            "uuid":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
                             "file_type":"intermediate file",
-                            "accession":"4DNFI6BIN9DA",
+                            "@id":"/files-processed/4DNFICOBX8XY/",
+                            "display_title":"4DNFICOBX8XY.pairs.gz",
+                            "file_size":6327033069,
+                            "file_format":"pairs",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairs",
+                "source":[
+                    {
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "name":"dedup_pairs",
+                        "workflow":"3758e00c-2035-43c6-b783-bb92afe57c99",
+                        "step":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairs",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823MBKE",
+                            "filename":"GRCh38_HindIII_new.txt",
+                            "uuid":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823MBKE/",
+                            "display_title":"4DNFI823MBKE.txt",
+                            "file_size":7762970,
+                            "file_format":"juicer_format_restriction_site_file",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"restriction_file",
+                "source":[
+                    {
+                        "for_file":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                        "name":"restriction_file"
+                    }
+                ],
+                "meta":{
+                    "file_format":"juicer_format_restriction_site_file",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/69931af1-44a8-4eeb-bf2a-42a08967b49a/@@download/4DNFI6BIN9DA.pairs.gz.px2",
+                                    "filename":"4DNFI6BIN9DA",
+                                    "file_format":"pairs_px2",
+                                    "accession":"4DNFI6BIN9DA",
+                                    "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                                    "upload_key":"69931af1-44a8-4eeb-bf2a-42a08967b49a/4DNFI6BIN9DA.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "upload_key":"69931af1-44a8-4eeb-bf2a-42a08967b49a/4DNFI6BIN9DA.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFI6BIN9DA/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":7231363510,
+                            "filename":null,
+                            "accession":"4DNFI6BIN9DA",
                             "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
-                            "file_format":"pairs"
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFI6BIN9DA/",
+                            "display_title":"4DNFI6BIN9DA.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -3017,160 +3192,96 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "step":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/"
                     }
                 ],
-                "name":"out_pairs"
-            }
-        ],
-        "inputs":[
-            {
+                "name":"out_pairs",
                 "meta":{
-                    "type":"data file",
-                    "global":true,
                     "file_format":"pairs",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFICOBX8XY",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":6327033069,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFICOBX8XY/",
-                            "uuid":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
-                            "status":"released",
-                            "display_title":"4DNFICOBX8XY.pairs.gz",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairs",
-                "source":[
-                    {
-                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
-                        "workflow":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/",
-                        "name":"dedup_pairs",
-                        "step":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
+                    "in_path":true,
                     "global":true,
-                    "file_format":"juicer_format_restriction_site_file",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823MBKE",
-                            "description":null,
-                            "file_size":7762970,
-                            "filename":"GRCh38_HindIII_new.txt",
-                            "@id":"/files-reference/4DNFI823MBKE/",
-                            "uuid":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
-                            "status":"released to project",
-                            "display_title":"4DNFI823MBKE.txt",
-                            "file_format":"juicer_format_restriction_site_file"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"restriction_file",
-                "source":[
-                    {
-                        "for_file":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
-                        "name":"restriction_file"
-                    }
-                ]
+                    "type":"data file"
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/"
-    },
-    {
+        "name":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWZJ2G671",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWZH36VU2",
-                "display_title":"Patching pairs file for Hi-C using pairsamtools - 4DNWZH36VU2",
-                "@id":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/",
+                "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/e17c3e9c-8882-4478-93da-062c5213341d/"
-                            ]
-                        },
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
                                 "name":"out_pairs",
                                 "target":[
                                     {
                                         "name":"out_pairs"
                                     }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
+                                ],
                                 "meta":{
                                     "type":"data file",
-                                    "argument_cardinality":"1",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
                                     "global":true,
-                                    "file_format":"pairs"
-                                },
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "name":"addfragtopairs",
+                        "inputs":[
+                            {
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"input_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"pairs",
+                                    "type":"data file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
+                            },
+                            {
+                                "name":"restriction_file",
+                                "source":[
+                                    {
+                                        "name":"restriction_file"
+                                    }
+                                ],
+                                "meta":{
+                                    "argument_cardinality":"1",
+                                    "file_format":"juicer_format_restriction_site_file",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
-                        "name":"pairs-patch"
+                        "meta":{
+                            "software_used":[
+                                "e17c3e9c-8882-4478-93da-062c5213341d"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49"
+                "display_title":"Adding restriction fragment information for Hi-C using pairsamtools - 4DNWZJ2G671",
+                "@id":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-16T18:59:18.593796+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -3179,54 +3290,102 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"pairs-patch run 2017-09-17 16:17:54.117168",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/",
-            "status":"released",
-            "date_created":"2017-09-17T16:17:54.973245+00:00"
-        },
-        "outputs":[
+            "display_title":"addfragtopairs run 2017-09-16 18:59:17.399707",
+            "@id":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/"
+        }
+    },
+    {
+        "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"a9554821-af87-489d-bba6-f58d4286a2a3/4DNFICYJ9FOU.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/a9554821-af87-489d-bba6-f58d4286a2a3/@@download/4DNFICYJ9FOU.pairs.gz.px2",
-                                    "accession":"4DNFICYJ9FOU",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFICYJ9FOU",
-                                    "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
-                                    "upload_key":"a9554821-af87-489d-bba6-f58d4286a2a3/4DNFICYJ9FOU.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
+                            "ordinal":1
                         }
                     ],
                     "file":[
                         {
-                            "file_type":"contact list",
-                            "accession":"4DNFICYJ9FOU",
+                            "status":"released",
+                            "accession":"4DNFI6BIN9DA",
+                            "filename":null,
+                            "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFI6BIN9DA/",
+                            "display_title":"4DNFI6BIN9DA.pairs.gz",
+                            "file_size":7231363510,
+                            "file_format":"pairs",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairs",
+                "source":[
+                    {
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "name":"out_pairs",
+                        "workflow":"ef125750-8df2-418e-a1ee-402285f9dd93",
+                        "step":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairs",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/a9554821-af87-489d-bba6-f58d4286a2a3/@@download/4DNFICYJ9FOU.pairs.gz.px2",
+                                    "file_format":"pairs_px2",
+                                    "filename":"4DNFICYJ9FOU",
+                                    "accession":"4DNFICYJ9FOU",
+                                    "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                                    "upload_key":"a9554821-af87-489d-bba6-f58d4286a2a3/4DNFICYJ9FOU.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "upload_key":"a9554821-af87-489d-bba6-f58d4286a2a3/4DNFICYJ9FOU.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
                             "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":7153224651,
+                            "filename":null,
+                            "accession":"4DNFICYJ9FOU",
                             "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
-                            "file_format":"pairs"
+                            "file_type":"contact list",
+                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "display_title":"4DNFICYJ9FOU.pairs.gz"
                         }
                     ],
                     "type":"input"
@@ -3264,271 +3423,98 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
                         "name":"input_pairs",
                         "step":"/workflow-runs-awsem/c6bd7e3d-d51d-4592-a8e0-e6a8da34d171/"
+                    },
+                    {
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "name":"input_pairs",
+                        "step":"/workflow-runs-awsem/748c5d26-adf3-4d29-8f46-d5e81242b429/"
+                    },
+                    {
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "name":"input_pairs",
+                        "step":"/workflow-runs-awsem/0992945e-06ac-4301-ae2f-9d7c4624ab18/"
+                    },
+                    {
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "name":"input_pairs",
+                        "step":"/workflow-runs-awsem/413562b4-892c-41ec-a0a9-5378348cc0f8/"
                     }
                 ],
-                "name":"out_pairs"
-            }
-        ],
-        "inputs":[
-            {
+                "name":"out_pairs",
                 "meta":{
-                    "type":"data file",
-                    "global":true,
                     "file_format":"pairs",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI6BIN9DA",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":7231363510,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFI6BIN9DA/",
-                            "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
-                            "status":"released",
-                            "display_title":"4DNFI6BIN9DA.pairs.gz",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairs",
-                "source":[
-                    {
-                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
-                        "workflow":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/",
-                        "name":"out_pairs",
-                        "step":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/"
-                    }
-                ]
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/"
-    },
-    {
+        "name":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWZH36VU2",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWFP00U73B",
-                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
-                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
+                "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file merging"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
-                            ]
-                        },
+                        "name":"pairs-patch",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
-                                "name":"output_pairs",
                                 "target":[
                                     {
-                                        "name":"output_pairs"
-                                    },
-                                    {
-                                        "name":"pairs",
-                                        "step":"cooler"
-                                    },
-                                    {
-                                        "name":"input_pairs",
-                                        "step":"pairs2hic"
+                                        "name":"out_pairs"
                                     }
-                                ]
+                                ],
+                                "name":"out_pairs",
+                                "meta":{
+                                    "type":"data file",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "argument_cardinality":"1",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "cardinality":"array",
-                                    "global":true,
-                                    "file_format":"pairs"
-                                },
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"input_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairs",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"merge_pairs"
-                    },
-                    {
                         "meta":{
-                            "analysis_step_types":[
-                                "aggregation",
-                                "normalization"
-                            ],
                             "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"hic"
-                                },
-                                "name":"output_hic",
-                                "target":[
-                                    {
-                                        "name":"output_hic"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"chromsizes"
-                                },
-                                "name":"chrsizes",
-                                "source":[
-                                    {
-                                        "name":"chrsizes"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"min_res",
-                                "source":[
-                                    {
-                                        "name":"min_res"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false,
-                                    "file_format":"pairs"
-                                },
-                                "name":"input_pairs",
-                                "source":[
-                                    {
-                                        "name":"output_pairs",
-                                        "step":"merge_pairs"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"pairs2hic"
-                    },
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation"
+                                "e17c3e9c-8882-4478-93da-062c5213341d"
                             ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            "analysis_step_types":[
+                                "file format conversion"
                             ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"cool"
-                                },
-                                "name":"out_cool",
-                                "target":[
-                                    {
-                                        "name":"out_cool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"ncores",
-                                "source":[
-                                    {
-                                        "name":"ncores"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"binsize",
-                                "source":[
-                                    {
-                                        "name":"binsize"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false,
-                                    "file_format":"pairs"
-                                },
-                                "name":"pairs",
-                                "source":[
-                                    {
-                                        "name":"output_pairs",
-                                        "step":"merge_pairs"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"cooler"
+                        }
                     }
                 ],
-                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417"
+                "display_title":"Patching pairs file for Hi-C using pairsamtools - 4DNWZH36VU2",
+                "@id":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-17T16:17:54.973245+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -3537,159 +3523,13 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
             "analysis_step_types":[
                 "Hi-C data analysis"
             ],
-            "display_title":"hi-c-processing-partb set run 2017-09-17 20:04:23.123639",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/",
-            "status":"released",
-            "date_created":"2017-09-17T20:04:24.035814+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":false
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"4d065df0-0164-4a17-818d-a64d0359cc69/4DNFIJHZGGD6.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/4d065df0-0164-4a17-818d-a64d0359cc69/@@download/4DNFIJHZGGD6.pairs.gz.px2",
-                                    "accession":"4DNFIJHZGGD6",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFIJHZGGD6",
-                                    "uuid":"4d065df0-0164-4a17-818d-a64d0359cc69",
-                                    "upload_key":"4d065df0-0164-4a17-818d-a64d0359cc69/4DNFIJHZGGD6.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIJHZGGD6",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIJHZGGD6/",
-                            "uuid":"4d065df0-0164-4a17-818d-a64d0359cc69",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_pairs"
-                    }
-                ],
-                "name":"output_pairs"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"cool",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".cool",
-                            "type":"Output processed file",
-                            "format":"cool",
-                            "upload_key":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56/4DNFI8HILY6S.cool"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFI8HILY6S",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFI8HILY6S/",
-                            "uuid":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
-                            "file_format":"cool"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"out_cool"
-                    },
-                    {
-                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
-                        "name":"input_cool",
-                        "step":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
-                    },
-                    {
-                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
-                        "name":"input_cool",
-                        "step":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
-                    }
-                ],
-                "name":"out_cool"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"hic",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".hic",
-                            "type":"Output processed file",
-                            "format":"hic",
-                            "upload_key":"63b30fae-880d-4bd0-87b2-7c99262ea4a7/4DNFI2ZSVKS3.hic"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"contact matrix",
-                            "accession":"4DNFI2ZSVKS3",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI2ZSVKS3/",
-                            "uuid":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
-                            "file_format":"hic"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_hic"
-                    },
-                    {
-                        "for_file":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
-                        "name":"input_hic",
-                        "step":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
-                    }
-                ],
-                "name":"output_hic"
-            }
-        ],
+            "display_title":"pairs-patch run 2017-09-17 16:17:54.117168",
+            "@id":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/"
+        }
+    },
+    {
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -3701,38 +3541,38 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFICYJ9FOU",
+                            "filename":null,
+                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
                             "file_type":"contact list",
+                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "display_title":"4DNFICYJ9FOU.pairs.gz",
+                            "file_size":7153224651,
+                            "file_format":"pairs",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFICYJ9FOU",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "file_size":7153224651,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFICYJ9FOU/",
-                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
-                            "status":"released",
-                            "display_title":"4DNFICYJ9FOU.pairs.gz",
-                            "file_format":"pairs"
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
                         },
                         {
+                            "status":"released",
+                            "accession":"4DNFI1ZLO9D7",
+                            "filename":null,
+                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
                             "file_type":"contact list",
+                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "display_title":"4DNFI1ZLO9D7.pairs.gz",
+                            "file_size":6561025451,
+                            "file_format":"pairs",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI1ZLO9D7",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "file_size":6561025451,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFI1ZLO9D7/",
-                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
-                            "status":"released",
-                            "display_title":"4DNFI1ZLO9D7.pairs.gz",
-                            "file_format":"pairs"
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
                         }
                     ],
                     "type":"input"
@@ -3741,25 +3581,25 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
-                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/",
                         "name":"out_pairs",
+                        "workflow":"7e5dcad0-d8da-4286-9253-a779d5310a49",
                         "step":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/"
                     },
                     {
                         "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
-                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/",
                         "name":"out_pairs",
+                        "workflow":"7e5dcad0-d8da-4286-9253-a779d5310a49",
                         "step":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"pairs",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
             },
             {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -3768,21 +3608,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                             "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
                             "@type":[
                                 "FileReference",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
+                            "description":null
                         }
                     ],
                     "type":"input"
@@ -3793,142 +3633,759 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                         "name":"chrsizes"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/"
-    },
-    {
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/4d065df0-0164-4a17-818d-a64d0359cc69/@@download/4DNFIJHZGGD6.pairs.gz.px2",
+                                    "filename":"4DNFIJHZGGD6",
+                                    "file_format":"pairs_px2",
+                                    "accession":"4DNFIJHZGGD6",
+                                    "uuid":"4d065df0-0164-4a17-818d-a64d0359cc69",
+                                    "upload_key":"4d065df0-0164-4a17-818d-a64d0359cc69/4DNFIJHZGGD6.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "upload_key":"4d065df0-0164-4a17-818d-a64d0359cc69/4DNFIJHZGGD6.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":13632489027,
+                            "filename":null,
+                            "accession":"4DNFIJHZGGD6",
+                            "uuid":"4d065df0-0164-4a17-818d-a64d0359cc69",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIJHZGGD6/",
+                            "display_title":"4DNFIJHZGGD6.pairs.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_pairs"
+                    }
+                ],
+                "name":"output_pairs",
+                "meta":{
+                    "file_format":"pairs",
+                    "in_path":false,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56/4DNFI8HILY6S.cool",
+                            "type":"Output processed file",
+                            "format":"cool",
+                            "extension":".cool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"cool",
+                            "file_size":1179838207,
+                            "filename":null,
+                            "accession":"4DNFI8HILY6S",
+                            "uuid":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFI8HILY6S/",
+                            "display_title":"4DNFI8HILY6S.cool"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"out_cool"
+                    },
+                    {
+                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                        "name":"input_cool",
+                        "step":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
+                    }
+                ],
+                "name":"out_cool",
+                "meta":{
+                    "file_format":"cool",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"63b30fae-880d-4bd0-87b2-7c99262ea4a7/4DNFI2ZSVKS3.hic",
+                            "type":"Output processed file",
+                            "format":"hic",
+                            "extension":".hic"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"hic",
+                            "file_size":3973561535,
+                            "filename":null,
+                            "accession":"4DNFI2ZSVKS3",
+                            "uuid":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI2ZSVKS3/",
+                            "display_title":"4DNFI2ZSVKS3.hic"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_hic"
+                    },
+                    {
+                        "for_file":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                        "name":"input_hic",
+                        "step":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
+                    }
+                ],
+                "name":"output_hic",
+                "meta":{
+                    "file_format":"hic",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWFP00U73B",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWF06BPEF2",
-                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
-                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
+                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation",
-                                "normalization",
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
+                        "name":"merge_pairs",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"output_mcool",
                                 "target":[
                                     {
-                                        "name":"input_mcool",
-                                        "step":"add_hic_normvector_to_mcool"
+                                        "name":"output_pairs"
+                                    },
+                                    {
+                                        "name":"pairs",
+                                        "step":"cooler"
+                                    },
+                                    {
+                                        "name":"input_pairs",
+                                        "step":"pairs2hic"
                                     }
-                                ]
+                                ],
+                                "name":"output_pairs",
+                                "meta":{
+                                    "type":"data file",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "argument_cardinality":"1",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"cool"
-                                },
-                                "name":"input_cool",
+                                "name":"input_pairs",
                                 "source":[
                                     {
-                                        "name":"input_cool"
+                                        "name":"input_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairs",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d82d-4da9-950c-2ca994a23547"
+                            ],
+                            "analysis_step_types":[
+                                "file merging"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"pairs2hic",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"output_hic"
+                                    }
+                                ],
+                                "name":"output_hic",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"hic",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"chrsizes",
+                                "source":[
+                                    {
+                                        "name":"chrsizes"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
+                                "name":"min_res",
+                                "source":[
+                                    {
+                                        "name":"min_res"
+                                    }
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
                                     "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"input_pairs",
+                                "source":[
+                                    {
+                                        "name":"output_pairs",
+                                        "step":"merge_pairs"
+                                    }
+                                ],
+                                "meta":{
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d8dd-4da9-950c-2ca994b23576"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation",
+                                "normalization"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"cooler",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"out_cool"
+                                    }
+                                ],
+                                "name":"out_cool",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"cool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
                                 "name":"ncores",
                                 "source":[
                                     {
                                         "name":"ncores"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"binsize",
+                                "source":[
+                                    {
+                                        "name":"binsize"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"pairs",
+                                "source":[
+                                    {
+                                        "name":"output_pairs",
+                                        "step":"merge_pairs"
+                                    }
+                                ],
+                                "meta":{
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"cool2mcool"
-                    },
-                    {
                         "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
                             "software_used":[
-                                "/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
+                                "02d636b9-d8dd-4da9-950c-2ca994b23555"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation"
                             ]
-                        },
+                        }
+                    }
+                ],
+                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
+                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+            },
+            "run_status":"complete",
+            "date_created":"2017-09-17T20:04:24.035814+00:00",
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "analysis_step_types":[
+                "Hi-C data analysis"
+            ],
+            "display_title":"hi-c-processing-partb set run 2017-09-17 20:04:23.123639",
+            "@id":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/"
+        }
+    },
+    {
+        "inputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released",
+                            "accession":"4DNFI8HILY6S",
+                            "filename":null,
+                            "uuid":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFI8HILY6S/",
+                            "display_title":"4DNFI8HILY6S.cool",
+                            "file_size":1179838207,
+                            "file_format":"cool",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_cool",
+                "source":[
+                    {
+                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                        "name":"out_cool",
+                        "workflow":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                        "step":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"cool",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released",
+                            "accession":"4DNFI2ZSVKS3",
+                            "filename":null,
+                            "uuid":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI2ZSVKS3/",
+                            "display_title":"4DNFI2ZSVKS3.hic",
+                            "file_size":3973561535,
+                            "file_format":"hic",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_hic",
+                "source":[
+                    {
+                        "for_file":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                        "name":"output_hic",
+                        "workflow":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                        "step":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"hic",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"chromsize",
+                "source":[
+                    {
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"27284dc8-d38c-483f-b0a1-a13d4f247db9/4DNFI4OBPEAV.mcool",
+                            "extension":".mcool",
+                            "format":"mcool",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"mcool",
+                            "file_size":4965877321,
+                            "filename":null,
+                            "accession":"4DNFI4OBPEAV",
+                            "uuid":"27284dc8-d38c-483f-b0a1-a13d4f247db9",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI4OBPEAV/",
+                            "display_title":"4DNFI4OBPEAV.mcool"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_mcool"
+                    }
+                ],
+                "name":"output_mcool",
+                "meta":{
+                    "file_format":"mcool",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"1a1b2788-28a9-4c5f-bbd7-e419cca21dca/4DNFI75V1UJB.normvector.juicerformat.gz",
+                            "extension":".normvector.juicerformat.gz",
+                            "format":"normvector_juicerformat",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"normvector_juicerformat",
+                            "file_size":8026327,
+                            "filename":null,
+                            "accession":"4DNFI75V1UJB",
+                            "uuid":"1a1b2788-28a9-4c5f-bbd7-e419cca21dca",
+                            "file_type":"juicebox norm vector",
+                            "@id":"/files-processed/4DNFI75V1UJB/",
+                            "display_title":"4DNFI75V1UJB.normvector.juicerformat.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_normvector"
+                    }
+                ],
+                "name":"output_normvector",
+                "meta":{
+                    "file_format":"normvector_juicerformat",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/",
+        "meta":{
+            "status":"released",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF06BPEF2",
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
+                "steps":[
+                    {
+                        "name":"cool2mcool",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"normvector_juicerformat"
-                                },
-                                "name":"output_normvector",
                                 "target":[
                                     {
-                                        "name":"output_normvector"
+                                        "name":"input_mcool",
+                                        "step":"add_hic_normvector_to_mcool"
                                     }
-                                ]
+                                ],
+                                "name":"output_mcool",
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
+                                "name":"input_cool",
+                                "source":[
+                                    {
+                                        "name":"input_cool"
+                                    }
+                                ],
                                 "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"cool",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"ncores",
+                                "source":[
+                                    {
+                                        "name":"ncores"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation",
+                                "normalization",
+                                "file format conversion"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"extract_mcool_normvector_for_juicebox",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"output_normvector"
+                                    }
+                                ],
+                                "name":"output_normvector",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"normvector_juicerformat",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
                                 "name":"input_mcool",
                                 "source":[
                                     {
                                         "name":"output_mcool",
                                         "step":"add_hic_normvector_to_mcool"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"extract_mcool_normvector_for_juicebox"
-                    },
-                    {
                         "meta":{
+                            "software_used":[
+                                "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
+                            ],
                             "analysis_step_types":[
                                 "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
                             ]
-                        },
+                        }
+                    },
+                    {
+                        "name":"add_hic_normvector_to_mcool",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"mcool"
-                                },
-                                "name":"output_mcool",
                                 "target":[
                                     {
                                         "name":"output_mcool"
@@ -3937,44 +4394,65 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                                         "name":"input_mcool",
                                         "step":"extract_mcool_normvector_for_juicebox"
                                     }
-                                ]
+                                ],
+                                "name":"output_mcool",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"mcool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"hic"
-                                },
                                 "name":"input_hic",
                                 "source":[
                                     {
                                         "name":"input_hic"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"hic",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
                                 "name":"input_mcool",
                                 "source":[
                                     {
                                         "name":"output_mcool",
                                         "step":"cool2mcool"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"add_hic_normvector_to_mcool"
+                        "meta":{
+                            "software_used":[
+                                "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3"
+                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-18T04:18:44.781547+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -3984,91 +4462,12 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "Hi-C data analysis"
             ],
             "display_title":"hi-c-processing-partc set run 2017-09-18 04:18:43.908568",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/",
-            "status":"released",
-            "date_created":"2017-09-18T04:18:44.781547+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"mcool",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".mcool",
-                            "type":"Output processed file",
-                            "format":"mcool",
-                            "upload_key":"27284dc8-d38c-483f-b0a1-a13d4f247db9/4DNFI4OBPEAV.mcool"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"contact matrix",
-                            "accession":"4DNFI4OBPEAV",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI4OBPEAV/",
-                            "uuid":"27284dc8-d38c-483f-b0a1-a13d4f247db9",
-                            "file_format":"mcool"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_mcool"
-                    }
-                ],
-                "name":"output_mcool"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"normvector_juicerformat",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".normvector.juicerformat.gz",
-                            "type":"Output processed file",
-                            "format":"normvector_juicerformat",
-                            "upload_key":"1a1b2788-28a9-4c5f-bbd7-e419cca21dca/4DNFI75V1UJB.normvector.juicerformat.gz"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"juicebox norm vector",
-                            "accession":"4DNFI75V1UJB",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI75V1UJB/",
-                            "uuid":"1a1b2788-28a9-4c5f-bbd7-e419cca21dca",
-                            "file_format":"normvector_juicerformat"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_normvector"
-                    }
-                ],
-                "name":"output_normvector"
-            }
-        ],
+            "@id":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
+        }
+    },
+    {
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"cool",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -4077,42 +4476,42 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
-                            "file_type":"intermediate file",
+                            "status":"released",
+                            "accession":"4DNFI1ZLO9D7",
+                            "filename":null,
+                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
+                            "file_type":"contact list",
+                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "display_title":"4DNFI1ZLO9D7.pairs.gz",
+                            "file_size":6561025451,
+                            "file_format":"pairs",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI8HILY6S",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":1179838207,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFI8HILY6S/",
-                            "uuid":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
-                            "status":"released",
-                            "display_title":"4DNFI8HILY6S.cool",
-                            "file_format":"cool"
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
                         }
                     ],
                     "type":"input"
                 },
-                "name":"input_cool",
+                "name":"input_pairs",
                 "source":[
                     {
-                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
-                        "workflow":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
-                        "name":"out_cool",
-                        "step":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/"
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "name":"out_pairs",
+                        "workflow":"7e5dcad0-d8da-4286-9253-a779d5310a49",
+                        "step":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/"
                     }
-                ]
-            },
-            {
+                ],
                 "meta":{
+                    "file_format":"pairs",
                     "type":"data file",
                     "global":true,
-                    "file_format":"hic",
                     "in_path":true
-                },
+                }
+            },
+            {
                 "run_data":{
                     "meta":[
                         {
@@ -4121,111 +4520,217 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
-                            "file_type":"contact matrix",
-                            "@type":[
-                                "FileProcessed",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI2ZSVKS3",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "file_size":3973561535,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFI2ZSVKS3/",
-                            "uuid":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
-                            "status":"released",
-                            "display_title":"4DNFI2ZSVKS3.hic",
-                            "file_format":"hic"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_hic",
-                "source":[
-                    {
-                        "for_file":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
-                        "name":"input_hic"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                             "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
                             "@type":[
                                 "FileReference",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
+                            "description":null
                         }
                     ],
                     "type":"input"
                 },
-                "name":"chromsize",
+                "name":"chrsizes",
                 "source":[
                     {
                         "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chromsize"
+                        "name":"chrsizes"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/"
-    },
-    {
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/aeee6285-0250-498f-bfdf-fd48c44728ed/@@download/4DNFIUJGSOOU.pairs.gz.px2",
+                                    "filename":"4DNFIUJGSOOU",
+                                    "file_format":"pairs_px2",
+                                    "accession":"4DNFIUJGSOOU",
+                                    "uuid":"aeee6285-0250-498f-bfdf-fd48c44728ed",
+                                    "upload_key":"aeee6285-0250-498f-bfdf-fd48c44728ed/4DNFIUJGSOOU.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "upload_key":"aeee6285-0250-498f-bfdf-fd48c44728ed/4DNFIUJGSOOU.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":6561025451,
+                            "filename":null,
+                            "accession":"4DNFIUJGSOOU",
+                            "uuid":"aeee6285-0250-498f-bfdf-fd48c44728ed",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIUJGSOOU/",
+                            "display_title":"4DNFIUJGSOOU.pairs.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_pairs"
+                    }
+                ],
+                "name":"output_pairs",
+                "meta":{
+                    "file_format":"pairs",
+                    "in_path":false,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a/4DNFIV9E8JGV.cool",
+                            "type":"Output processed file",
+                            "format":"cool",
+                            "extension":".cool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"cool",
+                            "file_size":628327100,
+                            "filename":null,
+                            "accession":"4DNFIV9E8JGV",
+                            "uuid":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIV9E8JGV/",
+                            "display_title":"4DNFIV9E8JGV.cool"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"out_cool"
+                    },
+                    {
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "name":"input_cool",
+                        "step":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
+                    }
+                ],
+                "name":"out_cool",
+                "meta":{
+                    "file_format":"cool",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"66d0d60d-1ee4-4564-b625-7188025b85ea/4DNFI95Q7FEU.hic",
+                            "type":"Output processed file",
+                            "format":"hic",
+                            "extension":".hic"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"hic",
+                            "file_size":2300381369,
+                            "filename":null,
+                            "accession":"4DNFI95Q7FEU",
+                            "uuid":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI95Q7FEU/",
+                            "display_title":"4DNFI95Q7FEU.hic"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_hic"
+                    },
+                    {
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "name":"input_hic",
+                        "step":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
+                    }
+                ],
+                "name":"output_hic",
+                "meta":{
+                    "file_format":"hic",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWFP00U73B",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWFP00U73B",
-                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
-                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
+                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file merging"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
-                            ]
-                        },
+                        "name":"merge_pairs",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
-                                "name":"output_pairs",
                                 "target":[
                                     {
                                         "name":"output_pairs"
@@ -4238,173 +4743,202 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                                         "name":"input_pairs",
                                         "step":"pairs2hic"
                                     }
-                                ]
+                                ],
+                                "name":"output_pairs",
+                                "meta":{
+                                    "type":"data file",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "argument_cardinality":"1",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "cardinality":"array",
-                                    "global":true,
-                                    "file_format":"pairs"
-                                },
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"input_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairs",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"merge_pairs"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d82d-4da9-950c-2ca994a23547"
+                            ],
+                            "analysis_step_types":[
+                                "file merging"
+                            ]
+                        }
                     },
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation",
-                                "normalization"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
-                            ]
-                        },
+                        "name":"pairs2hic",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"hic"
-                                },
-                                "name":"output_hic",
                                 "target":[
                                     {
                                         "name":"output_hic"
                                     }
-                                ]
+                                ],
+                                "name":"output_hic",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"hic",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"chromsizes"
-                                },
                                 "name":"chrsizes",
                                 "source":[
                                     {
                                         "name":"chrsizes"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"min_res",
                                 "source":[
                                     {
                                         "name":"min_res"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false,
-                                    "file_format":"pairs"
-                                },
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"output_pairs",
                                         "step":"merge_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairs2hic"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d8dd-4da9-950c-2ca994b23576"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation",
+                                "normalization"
+                            ]
+                        }
                     },
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
+                        "name":"cooler",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"cool"
-                                },
-                                "name":"out_cool",
                                 "target":[
                                     {
                                         "name":"out_cool"
                                     }
-                                ]
+                                ],
+                                "name":"out_cool",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"cool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"ncores",
                                 "source":[
                                     {
                                         "name":"ncores"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"binsize",
                                 "source":[
                                     {
                                         "name":"binsize"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false,
-                                    "file_format":"pairs"
-                                },
                                 "name":"pairs",
                                 "source":[
                                     {
                                         "name":"output_pairs",
                                         "step":"merge_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"cooler"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d8dd-4da9-950c-2ca994b23555"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417"
+                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
+                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-17T18:53:39.403185+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -4414,501 +4948,12 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "Hi-C data analysis"
             ],
             "display_title":"hi-c-processing-partb exp run 2017-09-17 18:53:38.477317",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/",
-            "status":"released",
-            "date_created":"2017-09-17T18:53:39.403185+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":false
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"aeee6285-0250-498f-bfdf-fd48c44728ed/4DNFIUJGSOOU.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/aeee6285-0250-498f-bfdf-fd48c44728ed/@@download/4DNFIUJGSOOU.pairs.gz.px2",
-                                    "accession":"4DNFIUJGSOOU",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFIUJGSOOU",
-                                    "uuid":"aeee6285-0250-498f-bfdf-fd48c44728ed",
-                                    "upload_key":"aeee6285-0250-498f-bfdf-fd48c44728ed/4DNFIUJGSOOU.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIUJGSOOU",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIUJGSOOU/",
-                            "uuid":"aeee6285-0250-498f-bfdf-fd48c44728ed",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_pairs"
-                    }
-                ],
-                "name":"output_pairs"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"cool",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".cool",
-                            "type":"Output processed file",
-                            "format":"cool",
-                            "upload_key":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a/4DNFIV9E8JGV.cool"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIV9E8JGV",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIV9E8JGV/",
-                            "uuid":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
-                            "file_format":"cool"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"out_cool"
-                    },
-                    {
-                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
-                        "name":"input_cool",
-                        "step":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
-                    },
-                    {
-                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
-                        "name":"input_cool",
-                        "step":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
-                    }
-                ],
-                "name":"out_cool"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"hic",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".hic",
-                            "type":"Output processed file",
-                            "format":"hic",
-                            "upload_key":"66d0d60d-1ee4-4564-b625-7188025b85ea/4DNFI95Q7FEU.hic"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"contact matrix",
-                            "accession":"4DNFI95Q7FEU",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI95Q7FEU/",
-                            "uuid":"66d0d60d-1ee4-4564-b625-7188025b85ea",
-                            "file_format":"hic"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_hic"
-                    },
-                    {
-                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
-                        "name":"input_hic",
-                        "step":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
-                    }
-                ],
-                "name":"output_hic"
-            }
-        ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "accession":"4DNFI1ZLO9D7",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI1ZLO9D7/",
-                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairs",
-                "source":[
-                    {
-                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
-                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/",
-                        "name":"out_pairs",
-                        "step":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"chrsizes",
-                "source":[
-                    {
-                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chrsizes"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/"
+            "@id":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/"
+        }
     },
     {
-        "meta":{
-            "workflow":{
-                "workflow_type":"Hi-C data analysis",
-                "@type":[
-                    "Workflow",
-                    "Item"
-                ],
-                "accession":"4DNWF06BPEF2",
-                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
-                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
-                "steps":[
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation",
-                                "normalization",
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"output_mcool",
-                                "target":[
-                                    {
-                                        "name":"input_mcool",
-                                        "step":"add_hic_normvector_to_mcool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"cool"
-                                },
-                                "name":"input_cool",
-                                "source":[
-                                    {
-                                        "name":"input_cool"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"ncores",
-                                "source":[
-                                    {
-                                        "name":"ncores"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"cool2mcool"
-                    },
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"normvector_juicerformat"
-                                },
-                                "name":"output_normvector",
-                                "target":[
-                                    {
-                                        "name":"output_normvector"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"input_mcool",
-                                "source":[
-                                    {
-                                        "name":"output_mcool",
-                                        "step":"add_hic_normvector_to_mcool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"extract_mcool_normvector_for_juicebox"
-                    },
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"mcool"
-                                },
-                                "name":"output_mcool",
-                                "target":[
-                                    {
-                                        "name":"output_mcool"
-                                    },
-                                    {
-                                        "name":"input_mcool",
-                                        "step":"extract_mcool_normvector_for_juicebox"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"hic"
-                                },
-                                "name":"input_hic",
-                                "source":[
-                                    {
-                                        "name":"input_hic"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"input_mcool",
-                                "source":[
-                                    {
-                                        "name":"output_mcool",
-                                        "step":"cool2mcool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"add_hic_normvector_to_mcool"
-                    }
-                ],
-                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3"
-            },
-            "@type":[
-                "WorkflowRunAwsem",
-                "WorkflowRun",
-                "Item"
-            ],
-            "analysis_step_types":[
-                "Hi-C data analysis"
-            ],
-            "display_title":"hi-c-processing-partc exp run 2017-09-18 00:08:39.630886",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/",
-            "status":"released",
-            "date_created":"2017-09-18T00:08:40.558099+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"mcool",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".mcool",
-                            "type":"Output processed file",
-                            "format":"mcool",
-                            "upload_key":"b414e1ec-797f-4225-abb4-9ad5468c3b7d/4DNFIV6HB4VT.mcool"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"contact matrix",
-                            "accession":"4DNFIV6HB4VT",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFIV6HB4VT/",
-                            "uuid":"b414e1ec-797f-4225-abb4-9ad5468c3b7d",
-                            "file_format":"mcool"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_mcool"
-                    }
-                ],
-                "name":"output_mcool"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"normvector_juicerformat",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".normvector.juicerformat.gz",
-                            "type":"Output processed file",
-                            "format":"normvector_juicerformat",
-                            "upload_key":"67eb9c0a-c34d-42d5-ba1b-504f5b90c99f/4DNFIQ1PICV9.normvector.juicerformat.gz"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"juicebox norm vector",
-                            "accession":"4DNFIQ1PICV9",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFIQ1PICV9/",
-                            "uuid":"67eb9c0a-c34d-42d5-ba1b-504f5b90c99f",
-                            "file_format":"normvector_juicerformat"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_normvector"
-                    }
-                ],
-                "name":"output_normvector"
-            }
-        ],
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"cool",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -4917,21 +4962,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIV9E8JGV",
+                            "filename":null,
+                            "uuid":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
                             "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIV9E8JGV/",
+                            "display_title":"4DNFIV9E8JGV.cool",
+                            "file_size":628327100,
+                            "file_format":"cool",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFIV9E8JGV",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":628327100,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIV9E8JGV/",
-                            "uuid":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
-                            "status":"released",
-                            "display_title":"4DNFIV9E8JGV.cool",
-                            "file_format":"cool"
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
                         }
                     ],
                     "type":"input"
@@ -4940,19 +4985,19 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
-                        "workflow":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
                         "name":"out_cool",
+                        "workflow":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
                         "step":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/"
                     }
-                ]
-            },
-            {
+                ],
                 "meta":{
+                    "file_format":"cool",
                     "type":"data file",
                     "global":true,
-                    "file_format":"hic",
                     "in_path":true
-                },
+                }
+            },
+            {
                 "run_data":{
                     "meta":[
                         {
@@ -4961,21 +5006,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFI95Q7FEU",
+                            "filename":null,
+                            "uuid":"66d0d60d-1ee4-4564-b625-7188025b85ea",
                             "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI95Q7FEU/",
+                            "display_title":"4DNFI95Q7FEU.hic",
+                            "file_size":2300381369,
+                            "file_format":"hic",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI95Q7FEU",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "file_size":2300381369,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFI95Q7FEU/",
-                            "uuid":"66d0d60d-1ee4-4564-b625-7188025b85ea",
-                            "status":"released",
-                            "display_title":"4DNFI95Q7FEU.hic",
-                            "file_format":"hic"
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
                         }
                     ],
                     "type":"input"
@@ -4984,17 +5029,19 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
-                        "name":"input_hic"
+                        "name":"output_hic",
+                        "workflow":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                        "step":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/"
                     }
-                ]
-            },
-            {
+                ],
                 "meta":{
+                    "file_format":"hic",
                     "type":"data file",
                     "global":true,
-                    "file_format":"chromsizes",
                     "in_path":true
-                },
+                }
+            },
+            {
                 "run_data":{
                     "meta":[
                         {
@@ -5003,21 +5050,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                             "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
                             "@type":[
                                 "FileReference",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
+                            "description":null
                         }
                     ],
                     "type":"input"
@@ -5028,44 +5075,574 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                         "name":"chromsize"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
-    },
-    {
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extension":".mcool",
+                            "upload_key":"b414e1ec-797f-4225-abb4-9ad5468c3b7d/4DNFIV6HB4VT.mcool",
+                            "format":"mcool",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"mcool",
+                            "file_size":2862049807,
+                            "filename":null,
+                            "accession":"4DNFIV6HB4VT",
+                            "uuid":"b414e1ec-797f-4225-abb4-9ad5468c3b7d",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFIV6HB4VT/",
+                            "display_title":"4DNFIV6HB4VT.mcool"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_mcool"
+                    }
+                ],
+                "name":"output_mcool",
+                "meta":{
+                    "file_format":"mcool",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "extension":".normvector.juicerformat.gz",
+                            "upload_key":"67eb9c0a-c34d-42d5-ba1b-504f5b90c99f/4DNFIQ1PICV9.normvector.juicerformat.gz",
+                            "format":"normvector_juicerformat",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"normvector_juicerformat",
+                            "file_size":7000467,
+                            "filename":null,
+                            "accession":"4DNFIQ1PICV9",
+                            "uuid":"67eb9c0a-c34d-42d5-ba1b-504f5b90c99f",
+                            "file_type":"juicebox norm vector",
+                            "@id":"/files-processed/4DNFIQ1PICV9/",
+                            "display_title":"4DNFIQ1PICV9.normvector.juicerformat.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_normvector"
+                    }
+                ],
+                "name":"output_normvector",
+                "meta":{
+                    "file_format":"normvector_juicerformat",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/",
         "meta":{
+            "status":"released",
             "workflow":{
                 "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF06BPEF2",
                 "@type":[
                     "Workflow",
                     "Item"
                 ],
-                "accession":"4DNWFP00U73B",
-                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
-                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
+                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
                 "steps":[
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file merging"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d82d-4da9-950c-2ca994a23547/"
-                            ]
-                        },
+                        "name":"cool2mcool",
                         "outputs":[
                             {
+                                "target":[
+                                    {
+                                        "name":"input_mcool",
+                                        "step":"add_hic_normvector_to_mcool"
+                                    }
+                                ],
+                                "name":"output_mcool",
                                 "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
                                     "type":"data file",
-                                    "argument_cardinality":"1",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"input_cool",
+                                "source":[
+                                    {
+                                        "name":"input_cool"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"cool",
+                                    "type":"data file",
                                     "global":true,
-                                    "file_format":"pairs",
-                                    "secondary_file_formats":[
-                                        "pairs_px2"
-                                    ]
-                                },
-                                "name":"output_pairs",
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"ncores",
+                                "source":[
+                                    {
+                                        "name":"ncores"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation",
+                                "normalization",
+                                "file format conversion"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"extract_mcool_normvector_for_juicebox",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"output_normvector"
+                                    }
+                                ],
+                                "name":"output_normvector",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"normvector_juicerformat",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"input_mcool",
+                                "source":[
+                                    {
+                                        "name":"output_mcool",
+                                        "step":"add_hic_normvector_to_mcool"
+                                    }
+                                ],
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"add_hic_normvector_to_mcool",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"output_mcool"
+                                    },
+                                    {
+                                        "name":"input_mcool",
+                                        "step":"extract_mcool_normvector_for_juicebox"
+                                    }
+                                ],
+                                "name":"output_mcool",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"mcool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"input_hic",
+                                "source":[
+                                    {
+                                        "name":"input_hic"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"hic",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"input_mcool",
+                                "source":[
+                                    {
+                                        "name":"output_mcool",
+                                        "step":"cool2mcool"
+                                    }
+                                ],
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
+                    }
+                ],
+                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/"
+            },
+            "run_status":"complete",
+            "date_created":"2017-09-18T00:08:40.558099+00:00",
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "analysis_step_types":[
+                "Hi-C data analysis"
+            ],
+            "display_title":"hi-c-processing-partc exp run 2017-09-18 00:08:39.630886",
+            "@id":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/"
+        }
+    },
+    {
+        "inputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released",
+                            "accession":"4DNFICYJ9FOU",
+                            "filename":null,
+                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                            "file_type":"contact list",
+                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "display_title":"4DNFICYJ9FOU.pairs.gz",
+                            "file_size":7153224651,
+                            "file_format":"pairs",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"input_pairs",
+                "source":[
+                    {
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "name":"out_pairs",
+                        "workflow":"7e5dcad0-d8da-4286-9253-a779d5310a49",
+                        "step":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/"
+                    }
+                ],
+                "meta":{
+                    "file_format":"pairs",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "description":null
+                        }
+                    ],
+                    "type":"input"
+                },
+                "name":"chrsizes",
+                "source":[
+                    {
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chrsizes"
+                    }
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"reference file",
+                    "global":true,
+                    "in_path":true
+                }
+            }
+        ],
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "extra_files":[
+                                {
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/76bb4d49-f791-4136-b392-e6a01e58b2c2/@@download/4DNFI7DYQJ7I.pairs.gz.px2",
+                                    "filename":"4DNFI7DYQJ7I",
+                                    "file_format":"pairs_px2",
+                                    "accession":"4DNFI7DYQJ7I",
+                                    "uuid":"76bb4d49-f791-4136-b392-e6a01e58b2c2",
+                                    "upload_key":"76bb4d49-f791-4136-b392-e6a01e58b2c2/4DNFI7DYQJ7I.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "upload_key":"76bb4d49-f791-4136-b392-e6a01e58b2c2/4DNFI7DYQJ7I.pairs.gz",
+                            "format":"pairs",
+                            "extension":".pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"pairs",
+                            "file_size":7153224651,
+                            "filename":null,
+                            "accession":"4DNFI7DYQJ7I",
+                            "uuid":"76bb4d49-f791-4136-b392-e6a01e58b2c2",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFI7DYQJ7I/",
+                            "display_title":"4DNFI7DYQJ7I.pairs.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_pairs"
+                    }
+                ],
+                "name":"output_pairs",
+                "meta":{
+                    "file_format":"pairs",
+                    "in_path":false,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"290ea431-e0d9-408d-be81-a8e585bd4660/4DNFIW8XBC3M.cool",
+                            "type":"Output processed file",
+                            "format":"cool",
+                            "extension":".cool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"cool",
+                            "file_size":681297290,
+                            "filename":null,
+                            "accession":"4DNFIW8XBC3M",
+                            "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                            "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIW8XBC3M/",
+                            "display_title":"4DNFIW8XBC3M.cool"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"out_cool"
+                    },
+                    {
+                        "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                        "name":"input_cool",
+                        "step":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
+                    }
+                ],
+                "name":"out_cool",
+                "meta":{
+                    "file_format":"cool",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"265b3dbe-f1d2-4cae-957f-23f71a2c6638/4DNFI86NV3M3.hic",
+                            "type":"Output processed file",
+                            "format":"hic",
+                            "extension":".hic"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"hic",
+                            "file_size":2463984943,
+                            "filename":null,
+                            "accession":"4DNFI86NV3M3",
+                            "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI86NV3M3/",
+                            "display_title":"4DNFI86NV3M3.hic"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_hic"
+                    },
+                    {
+                        "for_file":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                        "name":"input_hic",
+                        "step":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
+                    }
+                ],
+                "name":"output_hic",
+                "meta":{
+                    "file_format":"hic",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
+        "meta":{
+            "status":"released",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWFP00U73B",
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                "steps":[
+                    {
+                        "name":"merge_pairs",
+                        "outputs":[
+                            {
                                 "target":[
                                     {
                                         "name":"output_pairs"
@@ -5078,173 +5655,202 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                                         "name":"input_pairs",
                                         "step":"pairs2hic"
                                     }
-                                ]
+                                ],
+                                "name":"output_pairs",
+                                "meta":{
+                                    "type":"data file",
+                                    "secondary_file_formats":[
+                                        "pairs_px2"
+                                    ],
+                                    "file_format":"pairs",
+                                    "argument_cardinality":"1",
+                                    "global":true,
+                                    "cardinality":"single"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "cardinality":"array",
-                                    "global":true,
-                                    "file_format":"pairs"
-                                },
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"input_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"pairs",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"merge_pairs"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d82d-4da9-950c-2ca994a23547"
+                            ],
+                            "analysis_step_types":[
+                                "file merging"
+                            ]
+                        }
                     },
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation",
-                                "normalization"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23576/"
-                            ]
-                        },
+                        "name":"pairs2hic",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"hic"
-                                },
-                                "name":"output_hic",
                                 "target":[
                                     {
                                         "name":"output_hic"
                                     }
-                                ]
+                                ],
+                                "name":"output_hic",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"hic",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"reference file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"chromsizes"
-                                },
                                 "name":"chrsizes",
                                 "source":[
                                     {
                                         "name":"chrsizes"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"chromsizes",
+                                    "type":"reference file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"min_res",
                                 "source":[
                                     {
                                         "name":"min_res"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false,
-                                    "file_format":"pairs"
-                                },
                                 "name":"input_pairs",
                                 "source":[
                                     {
                                         "name":"output_pairs",
                                         "step":"merge_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"pairs2hic"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d8dd-4da9-950c-2ca994b23576"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation",
+                                "normalization"
+                            ]
+                        }
                     },
                     {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
+                        "name":"cooler",
                         "outputs":[
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"cool"
-                                },
-                                "name":"out_cool",
                                 "target":[
                                     {
                                         "name":"out_cool"
                                     }
-                                ]
+                                ],
+                                "name":"out_cool",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"cool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
                         "inputs":[
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"ncores",
                                 "source":[
                                     {
                                         "name":"ncores"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
                                 "name":"binsize",
                                 "source":[
                                     {
                                         "name":"binsize"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
                             },
                             {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false,
-                                    "file_format":"pairs"
-                                },
                                 "name":"pairs",
                                 "source":[
                                     {
                                         "name":"output_pairs",
                                         "step":"merge_pairs"
                                     }
-                                ]
+                                ],
+                                "meta":{
+                                    "file_format":"pairs",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
                             }
                         ],
-                        "name":"cooler"
+                        "meta":{
+                            "software_used":[
+                                "02d636b9-d8dd-4da9-950c-2ca994b23555"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation"
+                            ]
+                        }
                     }
                 ],
-                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417"
+                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
+                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
             },
+            "run_status":"complete",
+            "date_created":"2017-09-17T19:27:37.675275+00:00",
             "@type":[
                 "WorkflowRunAwsem",
                 "WorkflowRun",
@@ -5254,501 +5860,12 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "Hi-C data analysis"
             ],
             "display_title":"hi-c-processing-partb exp run 2017-09-17 19:27:36.797149",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
-            "status":"released",
-            "date_created":"2017-09-17T19:27:37.675275+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":false
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "format":"pairs",
-                            "secondary_file_formats":[
-                                "pairs_px2"
-                            ],
-                            "extension":".pairs.gz",
-                            "type":"Output processed file",
-                            "secondary_file_extensions":[
-                                ".pairs.gz.px2"
-                            ],
-                            "upload_key":"76bb4d49-f791-4136-b392-e6a01e58b2c2/4DNFI7DYQJ7I.pairs.gz",
-                            "extra_files":[
-                                {
-                                    "href":"/76bb4d49-f791-4136-b392-e6a01e58b2c2/@@download/4DNFI7DYQJ7I.pairs.gz.px2",
-                                    "accession":"4DNFI7DYQJ7I",
-                                    "status":"to be uploaded by workflow",
-                                    "filename":"4DNFI7DYQJ7I",
-                                    "uuid":"76bb4d49-f791-4136-b392-e6a01e58b2c2",
-                                    "upload_key":"76bb4d49-f791-4136-b392-e6a01e58b2c2/4DNFI7DYQJ7I.pairs.gz.px2",
-                                    "file_format":"pairs_px2"
-                                }
-                            ]
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFI7DYQJ7I",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFI7DYQJ7I/",
-                            "uuid":"76bb4d49-f791-4136-b392-e6a01e58b2c2",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_pairs"
-                    }
-                ],
-                "name":"output_pairs"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"cool",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".cool",
-                            "type":"Output processed file",
-                            "format":"cool",
-                            "upload_key":"290ea431-e0d9-408d-be81-a8e585bd4660/4DNFIW8XBC3M.cool"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"intermediate file",
-                            "accession":"4DNFIW8XBC3M",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "@id":"/files-processed/4DNFIW8XBC3M/",
-                            "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
-                            "file_format":"cool"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"out_cool"
-                    },
-                    {
-                        "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
-                        "name":"input_cool",
-                        "step":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
-                    },
-                    {
-                        "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
-                        "name":"input_cool",
-                        "step":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
-                    }
-                ],
-                "name":"out_cool"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"hic",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".hic",
-                            "type":"Output processed file",
-                            "format":"hic",
-                            "upload_key":"265b3dbe-f1d2-4cae-957f-23f71a2c6638/4DNFI86NV3M3.hic"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"contact matrix",
-                            "accession":"4DNFI86NV3M3",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFI86NV3M3/",
-                            "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
-                            "file_format":"hic"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_hic"
-                    },
-                    {
-                        "for_file":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
-                        "name":"input_hic",
-                        "step":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
-                    }
-                ],
-                "name":"output_hic"
-            }
-        ],
-        "inputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"pairs",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "accession":"4DNFICYJ9FOU",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFICYJ9FOU/",
-                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
-                            "file_format":"pairs"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"input_pairs",
-                "source":[
-                    {
-                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
-                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/",
-                        "name":"out_pairs",
-                        "step":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/"
-                    }
-                ]
-            },
-            {
-                "meta":{
-                    "type":"reference file",
-                    "global":true,
-                    "file_format":"chromsizes",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "ordinal":1
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":null,
-                            "@type":[
-                                "FileReference",
-                                "File",
-                                "Item"
-                            ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "name":"chrsizes",
-                "source":[
-                    {
-                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                        "name":"chrsizes"
-                    }
-                ]
-            }
-        ],
-        "name":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/"
+            "@id":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/"
+        }
     },
     {
-        "meta":{
-            "workflow":{
-                "workflow_type":"Hi-C data analysis",
-                "@type":[
-                    "Workflow",
-                    "Item"
-                ],
-                "accession":"4DNWF06BPEF2",
-                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
-                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/",
-                "steps":[
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "aggregation",
-                                "normalization",
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"output_mcool",
-                                "target":[
-                                    {
-                                        "name":"input_mcool",
-                                        "step":"add_hic_normvector_to_mcool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"cool"
-                                },
-                                "name":"input_cool",
-                                "source":[
-                                    {
-                                        "name":"input_cool"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"parameter",
-                                    "argument_cardinality":"1",
-                                    "global":true
-                                },
-                                "name":"ncores",
-                                "source":[
-                                    {
-                                        "name":"ncores"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"cool2mcool"
-                    },
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"normvector_juicerformat"
-                                },
-                                "name":"output_normvector",
-                                "target":[
-                                    {
-                                        "name":"output_normvector"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"input_mcool",
-                                "source":[
-                                    {
-                                        "name":"output_mcool",
-                                        "step":"add_hic_normvector_to_mcool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"extract_mcool_normvector_for_juicebox"
-                    },
-                    {
-                        "meta":{
-                            "analysis_step_types":[
-                                "file format conversion"
-                            ],
-                            "software_used":[
-                                "/softwares/02d636b9-d8dd-4da9-950c-2ca994b23555/"
-                            ]
-                        },
-                        "outputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"mcool"
-                                },
-                                "name":"output_mcool",
-                                "target":[
-                                    {
-                                        "name":"output_mcool"
-                                    },
-                                    {
-                                        "name":"input_mcool",
-                                        "step":"extract_mcool_normvector_for_juicebox"
-                                    }
-                                ]
-                            }
-                        ],
-                        "inputs":[
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":true,
-                                    "file_format":"hic"
-                                },
-                                "name":"input_hic",
-                                "source":[
-                                    {
-                                        "name":"input_hic"
-                                    }
-                                ]
-                            },
-                            {
-                                "meta":{
-                                    "type":"data file",
-                                    "argument_cardinality":"1",
-                                    "global":false
-                                },
-                                "name":"input_mcool",
-                                "source":[
-                                    {
-                                        "name":"output_mcool",
-                                        "step":"cool2mcool"
-                                    }
-                                ]
-                            }
-                        ],
-                        "name":"add_hic_normvector_to_mcool"
-                    }
-                ],
-                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3"
-            },
-            "@type":[
-                "WorkflowRunAwsem",
-                "WorkflowRun",
-                "Item"
-            ],
-            "analysis_step_types":[
-                "Hi-C data analysis"
-            ],
-            "display_title":"hi-c-processing-partc exp run 2017-09-18 00:08:53.081319",
-            "run_status":"complete",
-            "@id":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
-            "status":"released",
-            "date_created":"2017-09-18T00:08:53.959871+00:00"
-        },
-        "outputs":[
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"mcool",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".mcool",
-                            "type":"Output processed file",
-                            "format":"mcool",
-                            "upload_key":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18/4DNFII7498B3.mcool"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"contact matrix",
-                            "accession":"4DNFII7498B3",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFII7498B3/",
-                            "uuid":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18",
-                            "file_format":"mcool"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_mcool"
-                    }
-                ],
-                "name":"output_mcool"
-            },
-            {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"normvector_juicerformat",
-                    "in_path":true
-                },
-                "run_data":{
-                    "meta":[
-                        {
-                            "extension":".normvector.juicerformat.gz",
-                            "type":"Output processed file",
-                            "format":"normvector_juicerformat",
-                            "upload_key":"f108ebb3-8693-491a-88a0-d3e2163d9966/4DNFIDWULZXP.normvector.juicerformat.gz"
-                        }
-                    ],
-                    "file":[
-                        {
-                            "file_type":"juicebox norm vector",
-                            "accession":"4DNFIDWULZXP",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "@id":"/files-processed/4DNFIDWULZXP/",
-                            "uuid":"f108ebb3-8693-491a-88a0-d3e2163d9966",
-                            "file_format":"normvector_juicerformat"
-                        }
-                    ],
-                    "type":"input"
-                },
-                "target":[
-                    {
-                        "name":"output_normvector"
-                    }
-                ],
-                "name":"output_normvector"
-            }
-        ],
         "inputs":[
             {
-                "meta":{
-                    "type":"data file",
-                    "global":true,
-                    "file_format":"cool",
-                    "in_path":true
-                },
                 "run_data":{
                     "meta":[
                         {
@@ -5757,21 +5874,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFIW8XBC3M",
+                            "filename":null,
+                            "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
                             "file_type":"intermediate file",
+                            "@id":"/files-processed/4DNFIW8XBC3M/",
+                            "display_title":"4DNFIW8XBC3M.cool",
+                            "file_size":681297290,
+                            "file_format":"cool",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFIW8XBC3M",
-                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
-                            "file_size":681297290,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFIW8XBC3M/",
-                            "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
-                            "status":"released",
-                            "display_title":"4DNFIW8XBC3M.cool",
-                            "file_format":"cool"
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
                         }
                     ],
                     "type":"input"
@@ -5780,19 +5897,19 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
-                        "workflow":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/",
                         "name":"out_cool",
+                        "workflow":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
                         "step":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/"
                     }
-                ]
-            },
-            {
+                ],
                 "meta":{
+                    "file_format":"cool",
                     "type":"data file",
                     "global":true,
-                    "file_format":"hic",
                     "in_path":true
-                },
+                }
+            },
+            {
                 "run_data":{
                     "meta":[
                         {
@@ -5801,21 +5918,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released",
+                            "accession":"4DNFI86NV3M3",
+                            "filename":null,
+                            "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
                             "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFI86NV3M3/",
+                            "display_title":"4DNFI86NV3M3.hic",
+                            "file_size":2463984943,
+                            "file_format":"hic",
                             "@type":[
                                 "FileProcessed",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI86NV3M3",
-                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
-                            "file_size":2463984943,
-                            "filename":null,
-                            "@id":"/files-processed/4DNFI86NV3M3/",
-                            "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
-                            "status":"released",
-                            "display_title":"4DNFI86NV3M3.hic",
-                            "file_format":"hic"
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
                         }
                     ],
                     "type":"input"
@@ -5824,17 +5941,19 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                 "source":[
                     {
                         "for_file":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
-                        "name":"input_hic"
+                        "name":"output_hic",
+                        "workflow":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                        "step":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/"
                     }
-                ]
-            },
-            {
+                ],
                 "meta":{
+                    "file_format":"hic",
                     "type":"data file",
                     "global":true,
-                    "file_format":"chromsizes",
                     "in_path":true
-                },
+                }
+            },
+            {
                 "run_data":{
                     "meta":[
                         {
@@ -5843,21 +5962,21 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                     ],
                     "file":[
                         {
+                            "status":"released to project",
+                            "accession":"4DNFI823LSII",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                             "file_type":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "display_title":"4DNFI823LSII.chrom.sizes",
+                            "file_size":365,
+                            "file_format":"chromsizes",
                             "@type":[
                                 "FileReference",
                                 "File",
                                 "Item"
                             ],
-                            "accession":"4DNFI823LSII",
-                            "description":null,
-                            "file_size":365,
-                            "filename":"hg38.mainonly.chrom.sizes",
-                            "@id":"/files-reference/4DNFI823LSII/",
-                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
-                            "status":"released to project",
-                            "display_title":"4DNFI823LSII.chrom.sizes",
-                            "file_format":"chromsizes"
+                            "description":null
                         }
                     ],
                     "type":"input"
@@ -5868,9 +5987,306 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
                         "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
                         "name":"chromsize"
                     }
-                ]
+                ],
+                "meta":{
+                    "file_format":"chromsizes",
+                    "type":"data file",
+                    "global":true,
+                    "in_path":true
+                }
             }
         ],
-        "name":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
+        "outputs":[
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18/4DNFII7498B3.mcool",
+                            "extension":".mcool",
+                            "format":"mcool",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"mcool",
+                            "file_size":3069890050,
+                            "filename":null,
+                            "accession":"4DNFII7498B3",
+                            "uuid":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18",
+                            "file_type":"contact matrix",
+                            "@id":"/files-processed/4DNFII7498B3/",
+                            "display_title":"4DNFII7498B3.mcool"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_mcool"
+                    }
+                ],
+                "name":"output_mcool",
+                "meta":{
+                    "file_format":"mcool",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            },
+            {
+                "run_data":{
+                    "meta":[
+                        {
+                            "upload_key":"f108ebb3-8693-491a-88a0-d3e2163d9966/4DNFIDWULZXP.normvector.juicerformat.gz",
+                            "extension":".normvector.juicerformat.gz",
+                            "format":"normvector_juicerformat",
+                            "type":"Output processed file"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "status":"released",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_format":"normvector_juicerformat",
+                            "file_size":7482067,
+                            "filename":null,
+                            "accession":"4DNFIDWULZXP",
+                            "uuid":"f108ebb3-8693-491a-88a0-d3e2163d9966",
+                            "file_type":"juicebox norm vector",
+                            "@id":"/files-processed/4DNFIDWULZXP/",
+                            "display_title":"4DNFIDWULZXP.normvector.juicerformat.gz"
+                        }
+                    ],
+                    "type":"input"
+                },
+                "target":[
+                    {
+                        "name":"output_normvector"
+                    }
+                ],
+                "name":"output_normvector",
+                "meta":{
+                    "file_format":"normvector_juicerformat",
+                    "in_path":true,
+                    "global":true,
+                    "type":"data file"
+                }
+            }
+        ],
+        "name":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
+        "meta":{
+            "status":"released",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "accession":"4DNWF06BPEF2",
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
+                "steps":[
+                    {
+                        "name":"cool2mcool",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"input_mcool",
+                                        "step":"add_hic_normvector_to_mcool"
+                                    }
+                                ],
+                                "name":"output_mcool",
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"input_cool",
+                                "source":[
+                                    {
+                                        "name":"input_cool"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"cool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"ncores",
+                                "source":[
+                                    {
+                                        "name":"ncores"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "type":"parameter",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            ],
+                            "analysis_step_types":[
+                                "aggregation",
+                                "normalization",
+                                "file format conversion"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"extract_mcool_normvector_for_juicebox",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"output_normvector"
+                                    }
+                                ],
+                                "name":"output_normvector",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"normvector_juicerformat",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"input_mcool",
+                                "source":[
+                                    {
+                                        "name":"output_mcool",
+                                        "step":"add_hic_normvector_to_mcool"
+                                    }
+                                ],
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
+                    },
+                    {
+                        "name":"add_hic_normvector_to_mcool",
+                        "outputs":[
+                            {
+                                "target":[
+                                    {
+                                        "name":"output_mcool"
+                                    },
+                                    {
+                                        "name":"input_mcool",
+                                        "step":"extract_mcool_normvector_for_juicebox"
+                                    }
+                                ],
+                                "name":"output_mcool",
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"mcool",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "inputs":[
+                            {
+                                "name":"input_hic",
+                                "source":[
+                                    {
+                                        "name":"input_hic"
+                                    }
+                                ],
+                                "meta":{
+                                    "cardinality":"single",
+                                    "file_format":"hic",
+                                    "type":"data file",
+                                    "global":true,
+                                    "argument_cardinality":"1"
+                                }
+                            },
+                            {
+                                "name":"input_mcool",
+                                "source":[
+                                    {
+                                        "name":"output_mcool",
+                                        "step":"cool2mcool"
+                                    }
+                                ],
+                                "meta":{
+                                    "file_format":"mcool",
+                                    "cardinality":"single",
+                                    "type":"data file",
+                                    "global":false,
+                                    "argument_cardinality":"1"
+                                }
+                            }
+                        ],
+                        "meta":{
+                            "software_used":[
+                                "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/"
+                            ],
+                            "analysis_step_types":[
+                                "file format conversion"
+                            ]
+                        }
+                    }
+                ],
+                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/"
+            },
+            "run_status":"complete",
+            "date_created":"2017-09-18T00:08:53.959871+00:00",
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "analysis_step_types":[
+                "Hi-C data analysis"
+            ],
+            "display_title":"hi-c-processing-partc exp run 2017-09-18 00:08:53.081319",
+            "@id":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/"
+        }
     }
 ]

@@ -10,6 +10,10 @@ $navbar-transition-easing: ease-out;
     margin-bottom: 0;
     transform: translate3d(0,0,0);
 
+    @media screen and (min-width: $navbar-fixed-breakpoint){
+        background-color: rgba(255,255,255,0.933);
+    }
+
     > nav.navbar-main {
         /* React-Bootstrap Navbar itself */
         //border-width: 0 0 1px;
@@ -231,11 +235,13 @@ $navbar-transition-easing: ease-out;
         //border-bottom: 1px solid #ddd;
         opacity : 1;
         transition: opacity .5s;
+        border-top: 1px solid #eee;
         &.invisible {
             visibility: visible;
             opacity : 0;
             z-index: -1;
             border-bottom-width: 0;
+            border-top-width: 0;
             .inner.container {
                 height: 0px;
             }
@@ -243,7 +249,7 @@ $navbar-transition-easing: ease-out;
         .inner.container {
             text-align: left;
             display: block;
-            height : 38px;
+            height : 37px;
             transition: height .3s;
             overflow: hidden;
             &.showing {
@@ -263,7 +269,7 @@ $navbar-transition-easing: ease-out;
                 text-align: center;
                 position: relative;
                 padding-top: 10px;
-                height: 38px;
+                height: 37px;
                 border-right: 1px solid #f4f4f4;
             }
             .bottom-side {
@@ -289,8 +295,8 @@ $navbar-transition-easing: ease-out;
             .stat {
                 //display: inline-block;
                 float: left;
-                padding: 5px 12px 5px 12px;
-                height: 38px;
+                padding: 5px 12px 4px 12px;
+                height: 37px;
                 border-right: 1px solid #f4f4f4;
                 min-width: 125px;
                 text-align: right;
@@ -331,7 +337,7 @@ $navbar-transition-easing: ease-out;
     position: relative;
     top: 0;
     border: none;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #dadada;
     box-shadow: 0 0 3px rgba(0,0,0,0);
     transition: border-color $navbar-transition-length, box-shadow $navbar-transition-length;
 
