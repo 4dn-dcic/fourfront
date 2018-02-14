@@ -156,7 +156,7 @@ class GraphSection extends WorkflowGraphSection {
         this.state = {
             'showChart' : 'detail',
             'showParameters' : false,
-            'showReferenceFiles' : true,
+            'showReferenceFiles' : false,
             'rowSpacingType' : 'compact',
             'fullscreenViewEnabled' : false
         };
