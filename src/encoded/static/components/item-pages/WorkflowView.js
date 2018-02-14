@@ -11,7 +11,7 @@ import {
 } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox, Button, Collapse } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -64,46 +64,6 @@ export function doValidAnalysisStepsExist(steps){
         return false;
     }
     return true;
-}
-
-/**
- * For when "Show Parameters" UI setting === false.
- *
- * @param {Object}      graphData
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
- */
-export function filterOutParametersFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.nodeType === 'input' && n.ioType && n.ioType === 'parameter') {
-            deleted[n.id] = true;
-            return false;
-        }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
-    });
-    return { nodes, edges };
-}
-
-export function filterOutReferenceFilesFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-
-        if (n.ioType === 'reference file'){
-            deleted[n.id] = true;
-            return false;
-        }
-
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
-    });
-    return { nodes, edges };
 }
 
 
@@ -366,7 +326,7 @@ export class WorkflowGraphSection extends React.Component {
         this.state = {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
-            'showReferenceFiles' : true,
+            'showReferenceFiles' : false,
             'rowSpacingType' : 'compact',
             'fullscreenViewEnabled' : false
         };
@@ -379,20 +339,13 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     parseAnalysisSteps(context = this.props.context){
-        var graphData = (
+        var opts = _.extend({}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters'));
+        return (
             this.state.showChart === 'basic' ?
-                parseBasicIOAnalysisSteps(context.steps, context)
+                parseBasicIOAnalysisSteps(context.steps, context, opts)
                 :
-                parseAnalysisSteps(context.steps)
+                parseAnalysisSteps(context.steps, opts)
         );
-        if (!this.state.showParameters) {
-            graphData = filterOutParametersFromGraphData(graphData);
-        }
-        if (!this.state.showReferenceFiles){
-            graphData = filterOutReferenceFilesFromGraphData(graphData);
-        }
-
-        return graphData;
     }
 
     commonGraphProps(){

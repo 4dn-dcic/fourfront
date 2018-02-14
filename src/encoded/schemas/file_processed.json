@@ -87,5 +87,13 @@
         "normvector_juicerformat": ".normvector.juicerformat.gz",
         "zip": ".zip",
         "other": ""
+    },
+    "facets" : {
+        "workflow_run_inputs.workflow.title" : {
+            "title" : "Input of Workflow"
+        },
+        "workflow_run_outputs.workflow.title" : {
+            "title" : "Output of Workflow"
+        }
     }
 }
