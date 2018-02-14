@@ -37,7 +37,8 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
     '4DN' : {
         'experiment_category' : 'experiments_in_set.experiment_type',
         'experiment_type' : 'experiments_in_set.experiment_type',
-        'cell_type' : 'experiments_in_set.biosample.biosource.cell_line.display_title'
+        'cell_type' : 'experiments_in_set.biosample.biosource.cell_line.display_title',
+        'sub_cat' : 'category1.value'
     },
     'ENCODE' : {
         'experiment_category' : 'assay_slims',
@@ -49,7 +50,7 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
 const STATUS_STATE_TITLE_MAP = {
     'Submitted'     : ['released', 'current'],
     'In Submission' : ['in review by lab', 'in review by project', 'released to project', 'released to lab', 'submission in progress'],
-    //'planned'       : ['to be uploaded by workflow', 'planned'],
+    'Planned'       : ['to be uploaded by workflow', 'planned'],
     'Out of date'   : ['archived', 'revoked'],
     'Deleted'       : ['deleted']
 };
@@ -57,7 +58,7 @@ const STATUS_STATE_TITLE_MAP = {
 
 export default class JointAnalysisPlansPage extends React.Component {
 
-    static standardizeEncodeResult(result){
+    static standardizeEncodeResult(result, idx){
         var cellType = result.biosample_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
         var experimentType = result.assay_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
         var experimentCategory = _.uniq(result.assay_slims || []);
@@ -77,7 +78,7 @@ export default class JointAnalysisPlansPage extends React.Component {
         });
     }
 
-    static standardize4DNResult(result){
+    static standardize4DNResult(result, idx){
         var cellType = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.biosample.biosource.cell_line.display_title')));
         if (cellType.length > 1){
             console.warn('We have 2+ cellTypes (experiments_in_set.biosample.biosource.cell_line.display_title) for ', result);
@@ -107,7 +108,9 @@ export default class JointAnalysisPlansPage extends React.Component {
             'data_source'           : '4DN',
             'short_description'     : experiment_titles[0] || null,
             'lab_name'              : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
-            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
+            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0],
+            'sub_cat'               : (result.category1 && result.category1.value) || "No value",
+            'sub_cat_title'         : (result.category1 && result.category1.field) || "No field"
         });
     }
 
@@ -159,9 +162,9 @@ export default class JointAnalysisPlansPage extends React.Component {
             if (typeof req_url !== 'string' || !req_url) return;
 
             // For testing
-            if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
-                req_url = 'https://data.4dnucleome.org' + req_url;
-            }
+            //if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
+            //    req_url = 'https://data.4dnucleome.org' + req_url;
+            //}
 
             if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
                 ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
@@ -201,7 +204,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         console.log('RESULTS', this.state);
 
-        var groupingProperties = ['experiment_category', 'experiment_type'];
+        var groupingProperties = ['experiment_category', 'experiment_type', 'sub_cat'];
 
         var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
             ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
@@ -300,9 +303,12 @@ class VisualBody extends React.Component {
                         data = data[0];
                     }
 
+                    var aggrData;
+                    if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP));
+
                     var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
-                    var groupingPropertyCurrentTitle = (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
-                    var groupingPropertyCurrentValue = isGroup ? data[0][groupingPropertyCurrent] : data[groupingPropertyCurrent];
+                    var groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
+                    var groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
 
                     var yAxisGrouping = props.columnGrouping || null;
                     var yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null;
@@ -327,8 +333,6 @@ class VisualBody extends React.Component {
                     var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
                     currentFilteringProperties.push(props.columnGrouping);
                     
-                    var aggrData;
-                    if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP));
                     var data_source = (aggrData || data).data_source;
                     var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
 
@@ -381,6 +385,7 @@ class VisualBody extends React.Component {
                     if (Array.isArray(data)){
                         if      (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
                         else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
+                        else if (_.any(data, { 'state' : 'Planned'          })) submissionState = 'Planned';
                         else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
                         else if (_.any(data, { 'state' : 'Deleted'          })) submissionState = 'Deleted';
                         else if (_.any(data, { 'state' : 'None'             })) submissionState = 'None';
