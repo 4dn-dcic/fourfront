@@ -41,6 +41,7 @@ log = logging.getLogger(__name__)
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 file_workflow_run_embeds = [
+    'workflow_run_inputs.workflow.title',
     'workflow_run_inputs.input_files.workflow_argument_name',
     'workflow_run_inputs.input_files.value.filename',
     'workflow_run_inputs.input_files.value.display_title',
