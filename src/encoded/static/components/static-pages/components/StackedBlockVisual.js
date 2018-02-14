@@ -247,7 +247,7 @@ export class StackedBlockVisual extends React.Component {
     static aggregateObjectFromList(dataList, keysToShow){
 
         if (!keysToShow) keysToShow = _.keys(dataList[0]);
-    
+
         var moreData = _.reduce(dataList, function(m, o){
             for (var i = 0; i < keysToShow.length; i++){
                 if (m[keysToShow[i]] === null){

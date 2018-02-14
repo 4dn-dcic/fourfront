@@ -408,7 +408,6 @@ class VisualBody extends React.Component {
                     var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
 
                     return origClassName + ' ' + submissionStateClassName + ' hoverable';
-                    
                 }}
                 blockRenderedContents={(data, title, groupingPropertyTitle, blockProps)=>{
                     var defaultOutput = <span>&nbsp;</span>;

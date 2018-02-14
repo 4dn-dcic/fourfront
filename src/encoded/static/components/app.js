@@ -62,9 +62,9 @@ const portal = {
         }
     ],
     user_section: [
-            {id: 'login-menu-item', title: 'Log in', url: '/'},
-            {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
-            // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
+        {id: 'login-menu-item', title: 'Log in', url: '/'},
+        {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
+        // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
 
