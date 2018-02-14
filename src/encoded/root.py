@@ -52,14 +52,20 @@ def item_counts(config):
         # find db and es counts for each index
         db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
+        es_counts = {} # keyed by uppercase Item name, such as "ExperimentHic"
+        search_res = request.embed('/search/?type=Item&limit=1') # get the facets from here
+        es_count_facets = [facet for facet in search_res.get('facets', []) if facet.get('field') == 'type']
+        if len(es_count_facets) > 0:
+            es_count_facets = es_count_facets[0]
+            for term in es_count_facets.get('terms'):
+                es_counts[term['key']] = term['doc_count']
         for coll_name, collection in request.registry[COLLECTIONS].by_item_type.items():
             db_count, _ = get_collection_uuids_and_count(request, coll_name)
             item_name = collection.type_info.name
             # check to see if this collection contains child collections
             check_collections = get_jsonld_types_from_collection_type(request, coll_name, [coll_name])
             to_subtract[coll_name] = [coll for coll in check_collections if coll != coll_name]
-            search_res = request.embed('/search/?type=' + item_name +'&limit=1')
-            es_count = search_res.get('total', 0) if search_res else 0
+            es_count = es_counts.get(item_name, 0)
             db_es_counts[coll_name] = [db_count, es_count] # order is important
         for coll in db_es_counts:
             coll_db_count, coll_es_count = db_es_counts[coll]
