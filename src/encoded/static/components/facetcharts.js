@@ -82,7 +82,6 @@ export class FacetCharts extends React.Component {
                 this.props.baseSearchPath,
                 this.props.baseSearchParams,
                 this.props.initialFields,
-                this.props.updateStats,
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     setTimeout(() => this.setState({ 'mounted' : true }), 100);
