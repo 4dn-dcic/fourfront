@@ -11,7 +11,6 @@ from snovault import (
 )
 from snovault.elasticsearch.create_mapping import get_collection_uuids_and_count
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
-from .search import search
 from .schema_formats import is_accession
 from .types.page import get_local_file_contents
 from pyramid.security import (
