@@ -38,7 +38,6 @@ export class FacetCharts extends React.Component {
             return false;
         },
         'views' : ['small', 'large'],
-        'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0&sort=experiments_in_set.accession',
         'baseSearchPath' : '/bar_plot_aggregations/',
         'baseSearchParams' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
         'colWidthPerScreenSize' : {
@@ -87,8 +86,7 @@ export class FacetCharts extends React.Component {
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     setTimeout(() => this.setState({ 'mounted' : true }), 100);
-                },
-                60 * 1000, // 1min auto-refresh
+                }
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');
