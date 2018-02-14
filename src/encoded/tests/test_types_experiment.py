@@ -667,7 +667,7 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
     len2chk = len(vals2chk[0]) + len(vals2chk[1]) + 2
     assert microscopy_w_multipath['experiment_categorizer']['field'] == 'Target'
     value = microscopy_w_multipath['experiment_categorizer']['value']
-    assert len(value) == len2check
+    assert len(value) == len2chk
     for v in vals2chk:
         assert v in value
 

@@ -675,14 +675,11 @@ class ExperimentMic(Experiment):
         if imaging_paths is not None:
             path_targets = []
             for pathobj in imaging_paths:
-                if pathobj['path']:
-                    for path in pathobj['path']:
-                        pathitem = request.embed('/', path, '@@object')
-                        import pdb; pdb.set_trace()
-                        if pathitem['target']:
-                            for target in pathitem['target']:
-                                summ = request.embed('/', target, '@@object')['target_summary']
-                                path_targets.append(summ)
+                path = request.embed('/', pathobj['path'], '@@object')
+                if path['target']:
+                    for target in path['target']:
+                        summ = request.embed('/', target, '@@object')['target_summary']
+                        path_targets.append(summ)
             if path_targets:
                 value = ', '.join(list(set(path_targets)))
                 return {'field': 'Target', 'value': value}
