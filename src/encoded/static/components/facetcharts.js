@@ -3,7 +3,6 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-//var MosaicChart = require('./viz/MosaicChart');
 import { expFxn, Filters, ajax, console, layout, isServerSide } from './util';
 import * as vizUtil from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';

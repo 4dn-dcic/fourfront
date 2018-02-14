@@ -1,17 +1,16 @@
 'use strict';
 
-/** @ignore */
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var d3 = require('d3');
-var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } = require('../util');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import url from 'url';
+import * as d3 from 'd3';
+import * as vizUtil from './utilities';
+import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
-var MosaicChart = require('./MosaicChart');
 import { ChartDataController } from './chart-data-controller';
-var ReactTooltip = require('react-tooltip');
+import ReactTooltip from 'react-tooltip';
 
 
 
@@ -220,33 +219,8 @@ export default class QuickInfoBar extends React.Component {
                         schemas={this.props.schemas}
                         context={this.props.context}
                     />
-                    <div className="graph-icon" onMouseEnter={_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)}>
+                    <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
                         <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
-                    </div>
-                </div>
-            );
-        } else if (this.state.show === 'mosaicCharts') {
-            var chartDataState = ChartDataController.getState();
-            return (
-                <div className="bottom-side">
-                    <div className="row">
-                        <div className="col-xs-12 col-sm-6">
-                            <ChartDataController.Provider id="mosaic1">
-                                    <MosaicChart
-                                        fields={chartDataState.chartFieldsHierarchyRight}
-                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
-
-                                        height={200}
-                                        width={ layout.gridContainerWidth() }
-
-
-                                        href={this.props.href}
-                                        key="sunburst"
-                                        schemas={this.props.schemas}
-                                        debug
-                                    />
-                                </ChartDataController.Provider>
-                        </div>
                     </div>
                 </div>
             );
