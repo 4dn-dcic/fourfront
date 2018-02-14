@@ -687,10 +687,9 @@ class ExperimentMic(Experiment):
             path_targets = []
             for pathobj in imaging_paths:
                 path = request.embed('/', pathobj['path'], '@@object')
-                if path['target']:
-                    for target in path['target']:
-                        summ = request.embed('/', target, '@@object')['target_summary']
-                        path_targets.append(summ)
+                for target in path.get('target', []):
+                    summ = request.embed('/', target, '@@object')['target_summary']
+                    path_targets.append(summ)
             if path_targets:
                 value = ', '.join(list(set(path_targets)))
                 return {'field': 'Target', 'value': value}
