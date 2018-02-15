@@ -54,26 +54,43 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
 
 @mixin planned-submitted-cell-styles {
 	&.cellType-submitted {
-		background-color: #53a74e !important;
+        background-color: #53a74e !important;
+        &.hoverable:hover {
+            background-color: darken($color: #53a74e, $amount: 10) !important;
+        }
 	}
 	&.cellType-planned {
-		background-color: rgba(191, 191, 191, 0.5) !important;
+        background-color: rgb(190, 190, 190) !important;
+        &.hoverable:hover {
+            background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
+        }
 	}
 	&.cellType-in-submission {
-		background-color: rgba(191, 191, 191, 0.5) !important;
-		overflow: hidden;
-		&:before {
-			content: '';
-			display: block;
-			width: 150%;
-			height: 150%;
-			background-color: #53a74e;
-			transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
-		}
+		background-color: rgb(190, 190, 190) !important;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#53a74e; stroke: none;"/></svg>');
+        background-size: 108%;
+        background-repeat: no-repeat;
+        &.hoverable:hover {
+            background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
+        }
+        //&:before {
+		//	content: '';
+		//	display: block;
+		//	width: 150%;
+		//	height: 150%;
+		//	background-color: #53a74e;
+		//	transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
+		//}
 	}
 	&.cellType-none {
 		background-color: transparent !important;
-	}
+    }
+    &.cellType-out-of-date {
+        background-color: rgba(162, 145, 55, 0.75) !important;
+        &.hoverable:hover {
+            background-color: darken($color: rgba(162, 145, 55, 0.75), $amount: 10) !important;
+        }
+    }
 }
 
 

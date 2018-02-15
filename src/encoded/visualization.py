@@ -486,7 +486,6 @@ def bar_plot_chart(request):
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
-
     def gen_zero_counts_dict():
         if collect_value_from is not None:
             return { 'value' : 0 }
@@ -542,7 +541,6 @@ def bar_plot_chart(request):
 
         if isinstance(result, list):
             result = uniq([ r for r in flatten(result) if r ]) # Flatten + Filter + Uniq into single list of vals.
-
             if len(result) == 1:
                 result = result[0]
             elif len(result) == 0:
