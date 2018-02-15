@@ -253,7 +253,7 @@ def get_all_subsequent_results(initial_search_result, search, extra_requests_nee
             yield hit
 
 def execute_search_for_all_results(search):
-    size_increment = 1000 # Decrease this to like 5 or 10 to test.
+    size_increment = 100 # Decrease this to like 5 or 10 to test.
 
     first_search = search[0:size_increment] # get aggregations from here
     es_result = execute_search(first_search)
