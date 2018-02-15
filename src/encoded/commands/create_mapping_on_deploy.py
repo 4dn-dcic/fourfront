@@ -10,7 +10,6 @@ EPILOG = __doc__
 
 
 def main():
-    return True
     parser = argparse.ArgumentParser(
         description="Create Elasticsearch mapping on deployment", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
