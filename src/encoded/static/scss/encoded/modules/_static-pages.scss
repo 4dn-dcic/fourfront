@@ -464,6 +464,7 @@ h5.fourDN-header {
 	div.rm-cell, div.color-patch {
 		@include planned-submitted-cell-styles;
 	}
+
 }
 
 #legend.static-section-entry {
@@ -476,10 +477,14 @@ h5.fourDN-header {
 			text-align: center;
 		}
 		.color-patch {
-			height: 10px;
-			width: 10px;
+			height: 20px;
+			width: 20px;
 			display: inline-block;
 			margin-right: 5px;
+			vertical-align: text-bottom;
+		}
+		span.legend-label {
+			vertical-align: top;
 		}
 	}
 }

@@ -62,9 +62,9 @@ const portal = {
         }
     ],
     user_section: [
-            {id: 'login-menu-item', title: 'Log in', url: '/'},
-            {id: 'accountactions-menu-item', title: 'Register', url: '/help'}
-            // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
+        {id: 'login-menu-item', title: 'Log in', url: '/'},
+        {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
+        // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
 
@@ -179,8 +179,6 @@ export default class App extends React.Component {
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
-        this.getStatsComponent = this.getStatsComponent.bind(this);
-        this.updateStats = this.updateStats.bind(this);
 
         // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
         this.handleDropdownChange = this.handleDropdownChange.bind(this);
@@ -430,25 +428,6 @@ export default class App extends React.Component {
                 });
             }
         });
-    }
-
-    getStatsComponent(){
-        if (!this.refs || !this.refs.navigation) return null;
-        if (!this.refs.navigation.refs) return null;
-        if (!this.refs.navigation.refs.stats) return null;
-        return this.refs.navigation.refs.stats;
-    }
-
-    updateStats(currentCounts, totalCounts = null, callback = null){
-        var statsComponent = this.getStatsComponent();
-        if (statsComponent){
-            if (totalCounts === null){
-                return statsComponent.updateCurrentCounts(currentCounts, callback);
-            } else {
-                return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
-            }
-        }
-        return null;
     }
 
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
@@ -1248,7 +1227,6 @@ export default class App extends React.Component {
                                         href={this.props.href}
                                         context={this.props.context}
                                         navigate={navigate}
-                                        updateStats={this.updateStats}
                                         schemas={this.state.schemas}
                                         session={this.state.session}
                                     />

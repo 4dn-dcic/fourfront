@@ -1,17 +1,16 @@
 'use strict';
 
-/** @ignore */
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var d3 = require('d3');
-var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } = require('../util');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import url from 'url';
+import * as d3 from 'd3';
+import * as vizUtil from './utilities';
+import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
-var MosaicChart = require('./MosaicChart');
 import { ChartDataController } from './chart-data-controller';
-var ReactTooltip = require('react-tooltip');
+import ReactTooltip from 'react-tooltip';
 
 
 
@@ -41,6 +40,13 @@ export default class QuickInfoBar extends React.Component {
         return true;
     }
 
+    static getCountsFromProps(props){
+        var defaultNullCounts = { 'experiment_sets' : null, 'experiments' : null, 'files' : null };
+        var current = (props.barplot_data_filtered && props.barplot_data_filtered.total) || defaultNullCounts,
+            total = (props.barplot_data_unfiltered && props.barplot_data_unfiltered.total) || defaultNullCounts;
+        return { current, total };
+    }
+
     static defaultProps = {
         'offset' : {},
         'id' : 'stats',
@@ -66,9 +72,6 @@ export default class QuickInfoBar extends React.Component {
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.updateCurrentAndTotalCounts = this.updateCurrentAndTotalCounts.bind(this);
-        this.updateCurrentCounts = this.updateCurrentCounts.bind(this);
-        this.updateTotalCounts = this.updateTotalCounts.bind(this);
         this.isInvisible = this.isInvisible.bind(this);
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
@@ -77,12 +80,6 @@ export default class QuickInfoBar extends React.Component {
         this.renderStats = this.renderStats.bind(this);
         this.renderHoverBar = this.renderHoverBar.bind(this);
         this.state = {
-            'count_experiments'     : null,
-            'count_experiment_sets' : null,
-            'count_files'           : null,
-            'count_experiments_total'     : null,
-            'count_experiment_sets_total' : null,
-            'count_files_total'           : null,
             'mounted'               : false,
             'show'                  : false,
             'reallyShow'            : false
@@ -113,68 +110,6 @@ export default class QuickInfoBar extends React.Component {
     }
 
     /**
-     * Publically accessible when QuickInfoBar Component instance has a 'ref' prop set by parent component.
-     * Use to update stats when expSetFilters change.
-     *
-     * Currently this is done through ChartDataController, to which an 'updateStats' callback,
-     * itself defined in app Component, is provided on initialization.
-     *
-     * @public
-     * @instance
-     * @param {Object} current - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
-     * @param {Object} total - Same as 'current' param, but containing total counts.
-     * @param {function} [callback] Optional callback function.
-     * @returns {boolean} true
-     */
-    updateCurrentAndTotalCounts(current, total, callback = null){
-        this.setState({
-            'count_experiments' : current.experiments,
-            'count_experiment_sets' : current.experiment_sets,
-            'count_files' : current.files,
-            'count_experiments_total' : total.experiments,
-            'count_experiment_sets_total' : total.experiment_sets,
-            'count_files_total' : total.files
-        }, typeof callback === 'function' ? callback() : null);
-        return true;
-    }
-
-    /**
-     * Same as updateCurrentAndTotalCounts(), but only for current counts.
-     *
-     * @public
-     * @instance
-     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
-     * @param {function} [callback] Optional callback function.
-     * @returns {boolean} true
-     */
-    updateCurrentCounts(newCounts, callback){
-        this.setState({
-            'count_experiments' : newCounts.experiments,
-            'count_experiment_sets' : newCounts.experiment_sets,
-            'count_files' : newCounts.files
-        }, typeof callback === 'function' ? callback() : null);
-        return true;
-    }
-
-    /**
-     * Same as updateCurrentAndTotalCounts(), but only for total counts.
-     *
-     * @public
-     * @instance
-     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
-     * @param {function} [callback] Optional callback function.
-     * @returns {boolean} true
-     */
-    updateTotalCounts(newCounts, callback){
-        this.setState({
-            'count_experiments_total' : newCounts.experiments,
-            'count_experiment_sets_total' : newCounts.experiment_sets,
-            'count_files_total' : newCounts.files
-        }, typeof callback === 'function' ? callback() : null);
-        return true;
-    }
-
-    /**
      * Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.
      *
      * @public
@@ -182,13 +117,15 @@ export default class QuickInfoBar extends React.Component {
      * @returns {boolean} True if counts are null or on a 'href' is not of a page for which searching or summary is applicable.
      */
     isInvisible(props = this.props, state = this.state){
+        var { total, current } = QuickInfoBar.getCountsFromProps(props);
         if (
             !state.mounted ||
             props.invisible ||
+            total === null ||
             (
-                (state.count_experiment_sets === null && state.count_experiment_sets_total === null) &&
-                (state.count_experiments === null     && state.count_experiments_total === null) &&
-                (state.count_files === null           && state.count_files_total === null)
+                (current.experiment_sets === null && total.experiment_sets === null) &&
+                (current.experiments === null     && total.experiments === null) &&
+                (current.files === null           && total.files === null)
             )
         ) return true;
 
@@ -228,20 +165,23 @@ export default class QuickInfoBar extends React.Component {
     }
 
     renderStats(){
+        if (!this.state.mounted) return null;
         var areAnyFiltersSet = this.anyFiltersSet();
-        var { count_experiment_sets, count_experiments, count_files, count_experiment_sets_total, count_experiments_total, count_files_total, show } = this.state;
+        var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
+        var { show } = this.state;
+
         var stats;
-        if (count_experiment_sets || count_experiments || count_files) {
+        if (current && (current.experiment_sets || current.experiments || current.files)) {
             stats = {
-                'experiment_sets'   : <span>{ count_experiment_sets }<small> / { count_experiment_sets_total || 0 }</small></span>,
-                'experiments'       : <span>{ count_experiments }<small> / {count_experiments_total || 0}</small></span>,
-                'files'             : <span>{ count_files }<small> / {count_files_total || 0}</small></span>
+                'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
+                'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
+                'files'             : <span>{ current.files }<small> / {total.files || 0}</small></span>
             };
         } else {
             stats = {
-                'experiment_sets'   : count_experiment_sets_total || 0,
-                'experiments'       : count_experiments_total || 0,
-                'files'             : count_files_total || 0
+                'experiment_sets'   : total.experiment_sets || 0,
+                'experiments'       : total.experiments || 0,
+                'files'             : total.files || 0
             };
         }
         var statProps = { 'id' : this.props.id, 'expSetFilters' : this.props.expSetFilters, 'href' : this.props.href };
@@ -279,33 +219,8 @@ export default class QuickInfoBar extends React.Component {
                         schemas={this.props.schemas}
                         context={this.props.context}
                     />
-                    <div className="graph-icon" onMouseEnter={_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)}>
+                    <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
                         <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
-                    </div>
-                </div>
-            );
-        } else if (this.state.show === 'mosaicCharts') {
-            var chartDataState = ChartDataController.getState();
-            return (
-                <div className="bottom-side">
-                    <div className="row">
-                        <div className="col-xs-12 col-sm-6">
-                            <ChartDataController.Provider id="mosaic1">
-                                    <MosaicChart
-                                        fields={chartDataState.chartFieldsHierarchyRight}
-                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
-
-                                        height={200}
-                                        width={ layout.gridContainerWidth() }
-
-
-                                        href={this.props.href}
-                                        key="sunburst"
-                                        schemas={this.props.schemas}
-                                        debug
-                                    />
-                                </ChartDataController.Provider>
-                        </div>
                     </div>
                 </div>
             );

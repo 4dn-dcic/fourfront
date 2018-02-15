@@ -155,9 +155,9 @@ export class Chart extends React.Component {
         //return false;
         return !!(
             pastProps.showType !== nextProps.showType ||
-            pastProps.barplot_data_unfiltered !== nextProps.barplot_data_unfiltered ||
             pastProps.height !== nextProps.height ||
-            pastProps.barplot_data_filtered !== nextProps.barplot_data_filtered
+            (pastProps.barplot_data_unfiltered && nextProps.barplot_data_unfiltered && pastProps.barplot_data_unfiltered.field !== nextProps.barplot_data_unfiltered.field) ||
+            (pastProps.barplot_data_filtered && nextProps.barplot_data_filtered && pastProps.barplot_data_filtered.field !== nextProps.barplot_data_filtered.field)
         );
     }
 
@@ -417,9 +417,7 @@ export class Chart extends React.Component {
             availWidth = this.width(),
             styleOpts = this.styleOptions();
 
-        var topLevelField = (
-            (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
-        );
+        var topLevelField = (this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered) || this.props.barplot_data_unfiltered;
 
         var barData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             topLevelField,

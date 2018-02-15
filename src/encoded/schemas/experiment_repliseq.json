@@ -67,6 +67,11 @@
             "comment": "Repliseq experiments can be 2-phase, 6-phase, 8-phase ... This field is used to further describe the fraction represented in this experiment",
             "type": "string"
         },
+        "total_fractions_in_exp": {
+            "title": "Total number of fractions in the dataset that this experiment is part of.",
+            "comment": "If standard 2-stage early/late experiment the value should be 2, for higher res then total number of fractions",
+            "type": "integer"
+        },
         "cell_sorting_protocol": {
             "title": "Sorting Protocol",
             "description": "Protocol with details on cell sorting by FACS",
