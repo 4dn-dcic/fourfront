@@ -30,7 +30,7 @@ def main():
     if 'webprod' in env:
         if data_env != env:
             logger.info("looks like we are on staging so run create mapping without check first")
-            return run_create_mapping(app, check_first=False)
+            return run_create_mapping(app, check_first=True)
 
 
     logger.info("looks like we are NOT on staging so run create mapping with check first")
