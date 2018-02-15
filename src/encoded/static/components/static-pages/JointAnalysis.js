@@ -111,8 +111,8 @@ export default class JointAnalysisPlansPage extends React.Component {
             console.warn('We have 2+ experiment_categorizer.title for ', result);
         }
 
-        experiment_categorization_value = experiment_categorization_value[0] || 'No field';
-        experiment_categorization_title = experiment_categorization_title[0] || 'No value';
+        experiment_categorization_value = experiment_categorization_value[0] || 'No value';
+        experiment_categorization_title = experiment_categorization_title[0] || 'No field';
 
         return _.extend({}, result, {
             'cell_type'             : cellType,
@@ -217,7 +217,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         console.log('RESULTS', this.state);
 
-        var groupingProperties = ['experiment_category', 'experiment_type', 'sub_cat'];
+        var groupingProperties = ['experiment_type', 'sub_cat'];
 
         var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
             ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
