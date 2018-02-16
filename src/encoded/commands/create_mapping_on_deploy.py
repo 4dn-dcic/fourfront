@@ -31,11 +31,11 @@ def main():
         if 'webprod' in env:
             if data_env != env:
                 logger.info("looks like we are on staging, run create mapping without check first")
-                return run_create_mapping(app, check_first=False)
+                run_create_mapping(app, check_first=False)
     except Exception:
         import traceback
         logger.warn("error checking whodaman: %s " % traceback.format_exc())
         logger.warn("couldn't get wodaman, so assuming NOT Stagging")
 
     logger.info("looks like we are NOT on staging so run create mapping with check first")
-    return run_create_mapping(app, check_first=True)
+    run_create_mapping(app, check_first=True)
