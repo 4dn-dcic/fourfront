@@ -44,8 +44,15 @@ class SubItemTitle extends React.Component {
         if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
             title = isOpen ? "Collapse" : "Expand";
         }
-        if (content && (content.title || content.display_title || content.name)) {
-            subtitle = <span className="text-600">{(content.title || content.display_title || content.name)}</span>;
+        if (content && _.any([content.title, content.display_title, content.name], function(p){ return typeof p === 'string'; })) {
+            subtitle = (
+                <span className="text-600">
+                    {
+                        typeof content.title === 'string' ? content.title :
+                            typeof content.display_title === 'string' ? content.display_title : content.name
+                    }
+                </span>
+            );
         }
         return (
             <span className="subitem-toggle">
