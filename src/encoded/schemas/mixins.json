@@ -60,9 +60,9 @@
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
-                "description": "A lab specific identifier to reference an object.",
+                "description": "A lab specific identifier to reference an object (e.g. dcic_lab:my_biosample).",
                 "type":  "string",
-                "pattern": "^\\S+:\\S+"
+                "pattern": "^[^\\s\\\\]+:[^\\s\\\\]+"
             }
         }
     },
