@@ -496,7 +496,7 @@ class ExperimentChiapet(Experiment):
 
         if target:
             target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary_short']
+            target_summary = target_props['target_summary']
             sum_str += ('against ' + target_summary)
 
         if biosample:
@@ -603,7 +603,7 @@ class ExperimentSeq(Experiment):
 
         if target:
             target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary_short']
+            target_summary = target_props['target_summary']
             sum_str += ('against ' + target_summary)
 
         if biosample:
