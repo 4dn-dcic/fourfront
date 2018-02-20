@@ -83,7 +83,6 @@ def force_beanstalk_env(profile_name, config_file=None):
 
         conn = boto.connect_sts(aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
                                 aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
-        print("on beanstalk so adding environment variables")
     else:
         conn = boto.connect_sts(profile_name=profile_name)
 
