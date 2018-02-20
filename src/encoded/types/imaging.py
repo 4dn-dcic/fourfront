@@ -26,17 +26,21 @@ class ImagingPath(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, target=None, labeled_probe=None, mediators=None, labels=None):
+    def display_title(self, request):
         # create a summary for the imaging paths
         # example Chromosomes targeted by DAPI
         # example Protein:Actin_Human targeted by Atto647N labeled phalloidin
         # example Protein:Myoglobin_Human targeted by GFP labeleled Goat Secondary Antibody (with Human Globin Antibody)
         # example GRCH38-1-1000000 targeted by RFP labelled BAC
+        target = self.properties.get('target')
+        labeled_probe = self.properties.get('labeled_probe')
+        mediators = self.properties.get('other_probes')
+        labels = self.properties.get('labels')
         title = ""
         if target:
             targets = []
             for a_target in target:
-                target_title = request.embed(a_target, '@@object')['display_title']
+                target_title = request.embed(a_target, '@@object').get('display_title')
                 targets.append(target_title)
             targets_title = ",".join(targets)
             title = targets_title

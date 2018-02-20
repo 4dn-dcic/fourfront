@@ -35,7 +35,7 @@ def test_calculated_target_summaries(testapp, targets):
     for name in targets:
         summary = targets[name]['target_summary']
         if name == 'target_w_genes':
-            assert summary == 'Gene:eeny, meeny'
+            assert summary == 'Gene:eeny,meeny'
         if name == 'target_w_regions' in targets:
             assert summary == 'GRCh38:X:1-3'
         if name == 'target_w_desc':

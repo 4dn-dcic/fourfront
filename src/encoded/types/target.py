@@ -73,4 +73,4 @@ class Target(Item):
                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
         return self.target_summary(request, targeted_genes, targeted_genome_regions,
-                                    targeted_proteins, targeted_rnas, targeted_structure)
+                                   targeted_proteins, targeted_rnas, targeted_structure)
