@@ -270,7 +270,26 @@ export class StackedBlockVisual extends React.Component {
             } else if (moreData[k].length > 1){
                 var remainingLength = moreData[k].length - 3;
                 if (_.any(moreData[k], function(md){ return md && typeof md === 'object'; })){
-                    moreData[k] = <span>(<span className="text-500">{ moreData[k].length }</span> Objects)</span>; // Only handle strings, ints.
+                    if (!_.every(moreData[k], object.itemUtil.isAnItem)) {
+                        moreData[k] = <span className="text-600">({ moreData[k].length } <span className="text-400">Objects</span>)</span>;
+                        return;
+                    }
+                    moreData[k] = _.uniq(moreData[k], false, object.itemUtil.atId);
+                    if (moreData[k].length === 1) {
+                        moreData[k] = moreData[k][0];
+                        return;
+                    }
+                    var itemLinks = _.map(_.filter(moreData[k], function(md){ return md && typeof md === 'object' && md.display_title; }), object.itemUtil.generateLink);
+                    if (itemLinks && itemLinks.length > 0) remainingLength = itemLinks.length - 3;
+                    moreData[k] = (
+                        <div>
+                            <span className="text-600">({ itemLinks.length || moreData[k].length } <span className="text-400">Objects</span>)</span>
+                            <ol>
+                                { _.map(itemLinks.slice(0,3), (v,i)=> <li key={i}>{ v }</li> ) }
+                            </ol>
+                            { remainingLength > 0 ? <div className="more-items-count"> and { remainingLength } more...</div> : null }
+                        </div>
+                    );
                     return;
                 }
                 moreData[k] = (
