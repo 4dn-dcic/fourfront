@@ -1950,10 +1950,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
         .block-container-group {
             //flex-grow: 1;
             text-align: center;
+            border-left: 1px solid transparent;
             &:not(:first-child){
-                border-left: 1px solid #eee;
+                border-left-color: #eee;
             }
-            //border-top: 1px solid #eee;
         }
     }
 
