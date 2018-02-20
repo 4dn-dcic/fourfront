@@ -30,13 +30,15 @@ class Antibody(Item):
 
     def _update(self, properties, sheets=None):
         # set antibody_id based on values of antibody_name and product_no
-        exclude = set(string.punctuation)
+        exclude = re.escape(string.punctuation)
+        regex = r"[" + exclude + r"\s]+"
         abid = properties['antibody_name']
         if properties.get('antibody_product_no'):
             abid = abid + ' ' + properties['antibody_product_no']
-        abid = re.sub('-', ' ', abid)
-        abid = ''.join(ch for ch in abid if ch not in exclude)
-        abid = re.sub(r"\s+", '-', abid)
+        abid = re.sub(regex, "-", abid)
+        #abid = re.sub('-', ' ', abid)
+        #abid = ''.join(ch for ch in abid if ch not in exclude)
+        #abid = re.sub(r"\s+", '-', abid)
         properties['antibody_id'] = abid
         super(Antibody, self)._update(properties, sheets)
 
