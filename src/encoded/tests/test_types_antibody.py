@@ -28,7 +28,7 @@ def test_antibody_update_name_and_prodno(testapp, ab_w_name):
 
 
 def test_antibody_display_title_name_only(ab_w_name):
-    assert ab_w_name['display_title'] == 'testAb'
+    assert ab_w_name['display_title'] == 'test-Ab'
 
 
 def test_antibody_display_title_name_and_prodno(testapp, ab_w_name):
