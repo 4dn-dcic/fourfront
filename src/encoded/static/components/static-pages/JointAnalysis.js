@@ -49,7 +49,8 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
 
 const STATUS_STATE_TITLE_MAP = {
     'Submitted'     : ['released', 'current'],
-    'In Submission' : ['in review by lab', 'in review by project', 'released to project', 'released to lab', 'submission in progress'],
+    'Internal Release' : ['released to project'],
+    'In Submission' : ['in review by lab', 'in review by project', 'submission in progress', 'released to lab'],
     'Planned'       : ['to be uploaded by workflow', 'planned'],
     'Out of date'   : ['archived', 'revoked'],
     'Deleted'       : ['deleted']
@@ -235,7 +236,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                             groupingProperties={groupingProperties}
                             columnGrouping='cell_type'
                             duplicateHeaders={false}
-                            columnSubGrouping='experiment_category'
+                            columnSubGrouping='state'
                             results={resultList4DN}
                             encode_results_url={this.props.encode_results_url}
                             self_results_url={this.props.self_results_url}
@@ -249,8 +250,9 @@ export default class JointAnalysisPlansPage extends React.Component {
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
-                            columnSubGrouping='experiment_category'
+                            columnSubGrouping='state'
                             results={resultListEncode}
+                            duplicateHeaders={false}
                             encode_results_url={this.props.encode_results_url}
                             self_results_url={this.props.self_results_url}
                             self_planned_results_url={this.props.self_planned_results_url}
@@ -302,10 +304,12 @@ class VisualBody extends React.Component {
                 titleMap={TITLE_MAP}
                 groupingProperties={groupingProperties}
                 columnGrouping={columnGrouping}
+                columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
                 headerColumnsOrder={headerColumnsOrder}
                 columnSubGrouping={columnSubGrouping}
                 defaultDepthsOpen={defaultDepthsOpen}
                 duplicateHeaders={duplicateHeaders}
+                checkCollapsibility
                 groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
                 }}
@@ -317,11 +321,13 @@ class VisualBody extends React.Component {
                     }
 
                     var aggrData;
-                    if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP));
+                    if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']));
 
                     var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
                     var groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
                     var groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
+
+                    //console.log('TTT', groupingPropertyCurrent, aggrData, groupingPropertyCurrentTitle, groupingPropertyCurrentValue);
 
                     var yAxisGrouping = props.columnGrouping || null;
                     var yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null;
@@ -355,17 +361,36 @@ class VisualBody extends React.Component {
                         })
                     );
 
-                    var hrefParts = url.parse(initialHref, true);
-                    var hrefQuery = _.clone(hrefParts.query);
-                    delete hrefQuery.limit;
-                    delete hrefQuery.field;
-                    _.extend(hrefQuery, currentFilteringPropertiesVals);
-                    hrefParts.search = '?' + queryString.stringify(hrefQuery);
-                    var linkHref = url.format(hrefParts);
+                    function makeSearchButton(){
+                        var hrefParts = url.parse(initialHref, true);
+                        var hrefQuery = _.clone(hrefParts.query);
+                        delete hrefQuery.limit;
+                        delete hrefQuery.field;
+                        _.extend(hrefQuery, currentFilteringPropertiesVals);
+                        hrefParts.search = '?' + queryString.stringify(hrefQuery);
+                        var linkHref = url.format(hrefParts);
 
-                    var searchButton = (
-                        <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                        return (
+                            <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                        );
+                    }
+
+                    function makeSingleItemButton(){
+                        var path = object.itemUtil.atId(data);
+                        if (data.data_source === 'ENCODE') path = 'https://encodeproject.org' + path;
+                        return (
+                            <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                        );
+                    }
+
+                    var keyValsToShow = _.pick(aggrData || data,
+                        'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
+                        'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
                     );
+
+                    if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat_title ) {
+                        keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
+                    }
 
                     return (
                         <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
@@ -373,16 +398,13 @@ class VisualBody extends React.Component {
                                 <div className="inner">
                                     <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
                                     <hr className="mt-0 mb-1"/>
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(aggrData, props) }
-                                    { searchButton }
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
+                                    { makeSearchButton() }
                                 </div>
                                 :
                                 <div className="inner">
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(
-                                        _.pick(data, 'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
-                                            'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'), props
-                                    ) }
-                                    { searchButton }
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
+                                    { makeSingleItemButton() }
                                 </div>
                             }
                         </Popover>
@@ -396,6 +418,7 @@ class VisualBody extends React.Component {
 
                     if (Array.isArray(data)){
                         if      (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
+                        else if (_.any(data, { 'state' : 'Internal Release' })) submissionState = 'Internal Release';
                         else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
                         else if (_.any(data, { 'state' : 'Planned'          })) submissionState = 'Planned';
                         else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';

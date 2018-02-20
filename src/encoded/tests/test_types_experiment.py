@@ -654,7 +654,7 @@ def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_
 
 def test_experiment_categorizer_4_mic_no_path(testapp, microscopy_no_path):
     assert microscopy_no_path['experiment_categorizer']['field'] == 'Default'
-    assert microscopy_no_path['experiment_categorizer']['value'] == 'No value'
+    assert microscopy_no_path['experiment_categorizer'].get('value') == None
 
 
 def test_experiment_categorizer_4_mic_w_path(testapp, microscopy_w_path, target_w_region):
@@ -674,7 +674,7 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
 
 def test_experiment_categorizer_4_damid_no_fusion(testapp, damid_no_fusion):
     assert damid_no_fusion['experiment_categorizer']['field'] == 'Default'
-    assert damid_no_fusion['experiment_categorizer']['value'] == 'No value'
+    assert damid_no_fusion['experiment_categorizer'].get('value') == None
 
 
 def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion):
@@ -685,7 +685,7 @@ def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion):
 def test_experiment_categorizer_4_repliseq_no_fraction_info(testapp, repliseq_1):
     # import pdb; pdb.set_trace()
     assert repliseq_1['experiment_categorizer']['field'] == 'Default'
-    assert repliseq_1['experiment_categorizer']['value'] == 'No value'
+    assert repliseq_1['experiment_categorizer'].get('value') == None
 
 
 def test_experiment_categorizer_4_repliseq_only_fraction(testapp, repliseq_2):
@@ -723,7 +723,7 @@ def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
     experiment_data['experiment_type'] = 'RNA-seq'
     expt = testapp.post_json('/experiment_seq', experiment_data).json['@graph'][0]
     assert expt['experiment_categorizer']['field'] == 'Default'
-    assert expt['experiment_categorizer']['value'] == 'No value'
+    assert expt['experiment_categorizer'].get('value') == None
 
 
 def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI):
