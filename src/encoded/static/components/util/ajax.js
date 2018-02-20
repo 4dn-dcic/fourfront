@@ -20,12 +20,15 @@ const defaultHeaders = {
  * @param {Object} [headers={}] - Headers object.
  * @returns {XMLHttpRequest} XHR object with set headers.
  */
-function setHeaders(xhr, headers = {}) {
+function setHeaders(xhr, headers = {}, deleteHeaders = []) {
     headers = JWT.addToHeaders(_.extend({}, defaultHeaders, headers)); // Set defaults, add JWT if set
 
     // Put everything in the header
-    var headerKeys = Object.keys(headers);
+    var headerKeys = _.keys(headers);
     for (var i=0; i < headerKeys.length; i++){
+        if (deleteHeaders.indexOf(headerKeys[i]) > -1){
+            continue;
+        }
         xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
     }
 
@@ -33,7 +36,7 @@ function setHeaders(xhr, headers = {}) {
 }
 
 
-export function load(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
+export function load(url, callback, method = 'GET', fallback = null, data = null, headers = {}, deleteHeaders = []){
     if (typeof window === 'undefined') return null;
 
     var xhr = new XMLHttpRequest();
@@ -58,7 +61,7 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
     };
 
     xhr.open(method, url, true);
-    xhr = setHeaders(xhr, headers);
+    xhr = setHeaders(xhr, headers, deleteHeaders || []);
 
     if (data){
         xhr.send(data);

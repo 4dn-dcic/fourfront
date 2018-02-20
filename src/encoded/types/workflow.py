@@ -5,6 +5,9 @@ from inspect import signature
 import copy
 from pyramid.view import view_config
 from pyramid.response import Response
+from pyramid.httpexceptions import (
+    HTTPUnprocessableEntity,
+)
 from snovault import (
     calculated_property,
     collection,
@@ -20,6 +23,8 @@ import pstats
 import io
 import boto3
 import json
+from time import sleep
+
 
 steps_run_data_schema = {
     "type" : "object",
@@ -757,7 +762,6 @@ def validate_input_json(context, request):
 @view_config(name='pseudo-run', context=WorkflowRun.Collection, request_method='POST',
              permission='add', validators=[validate_input_json])
 def pseudo_run(context, request):
-    # properties = context.upgrade_properties()
     input_json = request.json
 
     # set env_name for awsem runner in tibanna
@@ -778,4 +782,27 @@ def pseudo_run(context, request):
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
     res = aws_lambda.invoke(FunctionName='run_workflow',
                             Payload=json.dumps(input_json))
-    return res['Payload'].read().decode()
+    res_decode = res['Payload'].read().decode()
+    res_dict = json.loads(res_decode)
+    arn = res_dict['_tibanna']['response']['executionArn']
+    # just loop until we get proper status
+    for i in range(10):
+        res = aws_lambda.invoke(FunctionName='status_wfr',
+                                Payload=json.dumps({'executionArn': arn}))
+        res_decode = res['Payload'].read().decode()
+        res_dict = json.loads(res_decode)
+        if res_dict['status'] != 'RUNNING':
+            break
+        sleep(2)
+    else:
+        res_dict['status'] = 'FOURFRONT-TIMEOUT'
+
+    if res_dict['status'] == 'FAILED':
+        # get error from execution and sent a 422 response
+        sfn = boto3.client('stepfunctions', region_name='us-east-1')
+        hist = sfn.get_execution_history(executionArn=res_dict['executionArn'], reverseOrder=True)
+        for event in hist['events']:
+            if event.get('type') == 'ExecutionFailed':
+                raise HTTPUnprocessableEntity(str(event['executionFailedEventDetails']))
+
+    return res_dict

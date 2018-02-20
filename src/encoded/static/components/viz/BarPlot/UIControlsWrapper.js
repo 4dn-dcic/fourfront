@@ -139,9 +139,7 @@ export class UIControlsWrapper extends React.Component {
                 {
                     'fields' : this.props.barplot_data_fields,
                     'showType' : this.state.showState,
-                    'aggregateType' : this.state.aggregateType,
-                    "aggregatedData" : this.props.barplot_data_unfiltered,
-                    "aggregatedFilteredData" : this.props.barplot_data_filtered
+                    'aggregateType' : this.state.aggregateType
                 }
             )
         );

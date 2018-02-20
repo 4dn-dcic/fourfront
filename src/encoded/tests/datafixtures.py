@@ -625,8 +625,8 @@ def basic_genomic_region(testapp, lab, award):
 
 
 @pytest.fixture
-def genomic_region_w_chrloc(testapp, lab, award):
-    item = {
+def genome_info(lab, award):
+    return {
         "genome_assembly": "GRCh38",
         "chromosome": "X",
         "start_coordinate": 1,
@@ -634,7 +634,19 @@ def genomic_region_w_chrloc(testapp, lab, award):
         'award': award['@id'],
         'lab': lab['@id']
     }
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_w_chrloc(testapp, genome_info):
+    return testapp.post_json('/genomic_region', genome_info).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_2(testapp, genome_info):
+    genome_info['chromosome'] = '9'
+    genome_info['start_coordinate'] = 50
+    genome_info['start_coordinate'] = 300
+    return testapp.post_json('/genomic_region', genome_info).json['@graph'][0]
 
 
 @pytest.fixture
@@ -651,6 +663,16 @@ def target_w_genes(testapp, lab, award):
 def target_w_region(testapp, genomic_region_w_chrloc, lab, award):
     item = {
         "targeted_genome_regions": [genomic_region_w_chrloc['@id']],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def another_target_w_region(testapp, genomic_region_2, lab, award):
+    item = {
+        "targeted_genome_regions": [genomic_region_2['@id']],
         'award': award['@id'],
         'lab': lab['@id'],
     }

@@ -132,7 +132,6 @@ class LoginDenied(HTTPForbidden):
 _fake_user = object()
 
 
-
 class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
     login_path = '/login'
@@ -143,8 +142,6 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         So basically this is used to do a login, instead of the actual
         login view... not sure why, but yeah..
         '''
-
-
         # we will cache it for the life of this request, cause pyramids does traversal
         cached = getattr(request, '_auth0_authenticated', _fake_user)
         if cached is not _fake_user:
@@ -154,7 +151,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         id_token = get_jwt(request)
         if not id_token:
             # can I thrown an 403 here?
-            #print('Missing assertion.', 'unauthenticated_userid', request)
+            # print('Missing assertion.', 'unauthenticated_userid', request)
             return None
 
         user_info = self.get_token_info(id_token, request)
@@ -163,21 +160,35 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
         email = request._auth0_authenticated = user_info['email'].lower()
 
-        # Allow us to access basic user credentials from request obj after authenticating & saving request....authenticated above
+        # Allow access basic user credentials from request obj after authenticating & saving request
         def getUserInfo(request):
             user_props = request.embed('/session-properties', as_user=email)
-            user_details = request.embed('/me', as_user=email)
-            includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status']
+            user_details = self.get_user_details(request)
+
+            includedDetailFields = ['email', 'first_name', 'last_name', 'groups',
+                                    'timezone', 'status']
             user_props.update({
                 # Only include certain fields from profile
-                "details" : { p:v for p,v in user_details.items() if p in includedDetailFields},
-                "id_token" : id_token
+                "details": {p: v for p, v in user_details.items() if p in includedDetailFields},
+                "id_token": id_token
             })
             return user_props
 
         request.set_property(getUserInfo, "user_info", True)
         return email
 
+    def get_user_details(self, request):
+        for principal in request.effective_principals:
+            if principal.startswith('userid.'):
+                break
+        else:
+            raise HTTPForbidden(title="Not logged in.")
+
+        namespace, userid = principal.split('.', 1)
+        # Prevent from creating 301 redirects which are then cached permanently by browser
+        request.response.status_code = 307
+        properties = request.embed('/', userid, '@@object')
+        return properties
 
     def get_token_info(self, token, request):
         '''
