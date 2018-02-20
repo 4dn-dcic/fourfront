@@ -83,6 +83,7 @@ export class StackedBlockVisual extends React.Component {
         'collapseToMatrix' : false,
         // @param data may be either Array (if multiple grouped into 1) or object.
         'showGroupingPropertyTitles' : false,
+        'checkCollapsibility' : false,
         'blockClassName' : function(data){
 
             var isMultipleClass = 'single-set';
@@ -577,7 +578,7 @@ export class StackedBlockGroupedRow extends React.Component {
     }
 
     render(){
-        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles } = this.props;
+        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility } = this.props;
         var groupingPropertyTitle = null;
         if (Array.isArray(groupingProperties) && groupingProperties[depth]){
             groupingPropertyTitle = titleMap[groupingProperties[depth]] || groupingProperties[depth];
@@ -586,9 +587,16 @@ export class StackedBlockGroupedRow extends React.Component {
         var isOpen = this.state.open;
         var className = "grouping depth-" + depth + (isOpen ? ' open' : '') + (duplicateHeaders && depth === 0 ? ' with-duplicated-headers' : '') + (' row-index-' + index) + (!showGroupingPropertyTitles ? ' no-grouping-property-titles' : '');
         var toggleIcon = null;
-        if (!Array.isArray(data)) toggleIcon = <i className={"icon icon-fw icon-" + (isOpen ? 'minus' : 'plus')} />;
-        if (toggleIcon){
+
+        var childRowsKeys = !Array.isArray(data) ? _.keys(data).sort() : null;
+
+        var hasIdentifiableChildren = !checkCollapsibility ? true : (depth + 2 >= groupingProperties.length) && childRowsKeys && childRowsKeys.length > 0 && !(childRowsKeys.length === 1 && childRowsKeys[0] === 'No value');
+
+        if (!Array.isArray(data) && data && hasIdentifiableChildren){
+            toggleIcon = <i className={"icon icon-fw icon-" + (isOpen ? 'minus' : 'plus')} />;
             className += ' may-collapse';
+        } else {
+            toggleIcon = <i className={"icon icon-fw"} />;
         }
         
         var totalCount = null;
@@ -633,8 +641,6 @@ export class StackedBlockGroupedRow extends React.Component {
             'className' : "text-500 text-ellipsis-container",
             'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
         };
-        
-        var childRowsKeys = isOpen && !Array.isArray(data) ? _.keys(data).sort() : null;
 
         var childBlocks = !isOpen ? this.childBlocksCollapsed(widthAvailable) : null;
 
@@ -646,7 +652,7 @@ export class StackedBlockGroupedRow extends React.Component {
                 <div className="row">
                     <div className="col col-sm-4 label-section" style={{ minHeight : blockHeight + blockVerticalSpacing }}>
                         { groupingPropertyTitle && showGroupingPropertyTitles ? <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small> : null }
-                        <h4 {...h4TitleProps}><span onClick={toggleIcon ? this.toggleOpen : null}>{ toggleIcon } { group }</span></h4>
+                        <h4 {...h4TitleProps}><span onClick={toggleIcon && hasIdentifiableChildren ? this.toggleOpen : null}>{ toggleIcon } { group }</span></h4>
                         {/* this.childLabels() */}
                     </div>
                     <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')} ref="listSection">
@@ -660,7 +666,7 @@ export class StackedBlockGroupedRow extends React.Component {
                 : null }
 
                 <div className="child-blocks">
-                    { childRowsKeys && _.map(childRowsKeys, (k)=>
+                    { isOpen && childRowsKeys && _.map(childRowsKeys, (k)=>
                         <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} />
                     ) }
                 </div>
