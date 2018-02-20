@@ -508,10 +508,15 @@ export class StackedBlockGroupedRow extends React.Component {
                     var blocksForGroup = blocksByColumnGroup[k];
 
                     //console.log('BFG-1', blocksForGroup);
-                    
+
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string' && props.depth <= (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
+                        if (Array.isArray(props.columnSubGroupingOrder)){
+                            var blocksForGroupObj = _.object(blocksForGroup);
+                            var blocksForGroupObjKeys = StackedBlockGroupedRow.sortByArray(_.keys(blocksForGroupObj), props.columnSubGroupingOrder);
+                            blocksForGroup = _.map(blocksForGroupObjKeys, function(bk){ return [bk, blocksForGroupObj[bk]]; });
+                        }
                     }
 
                     //console.log('BFG-2', blocksForGroup);
@@ -526,6 +531,7 @@ export class StackedBlockGroupedRow extends React.Component {
                                 paddingTop : props.blockVerticalSpacing
                             }}
                             key={k}
+                            data-block-count={blocksForGroup.length}
                             data-group-key={k}
                         >
                             { blocksForGroup.map(function(blockData, i){
@@ -630,8 +636,12 @@ export class StackedBlockGroupedRow extends React.Component {
         
         var childRowsKeys = isOpen && !Array.isArray(data) ? _.keys(data).sort() : null;
 
+        var childBlocks = !isOpen ? this.childBlocksCollapsed(widthAvailable) : null;
+
+        var maxBlocksInRow = Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count'));
+
         return (
-            <div className={className}>
+            <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
 
                 <div className="row">
                     <div className="col col-sm-4 label-section" style={{ minHeight : blockHeight + blockVerticalSpacing }}>
@@ -641,7 +651,7 @@ export class StackedBlockGroupedRow extends React.Component {
                     </div>
                     <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')} ref="listSection">
                         { header }
-                        { !isOpen ? this.childBlocksCollapsed(widthAvailable) : null }
+                        { childBlocks }
                     </div>
                 </div>
 
