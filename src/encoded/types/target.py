@@ -64,6 +64,11 @@ class Target(Item):
             return ",".join(filter(None, values))
         return "no target"
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
     def display_title(self, request, targeted_genes=None, targeted_genome_regions=None,
                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
