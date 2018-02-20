@@ -5,6 +5,9 @@ from inspect import signature
 import copy
 from pyramid.view import view_config
 from pyramid.response import Response
+from pyramid.httpexceptions import (
+    HTTPUnprocessableEntity,
+)
 from snovault import (
     calculated_property,
     collection,
@@ -21,6 +24,7 @@ import io
 import boto3
 import json
 from time import sleep
+
 
 steps_run_data_schema = {
     "type" : "object",
@@ -793,6 +797,12 @@ def pseudo_run(context, request):
     else:
         res_dict['status'] = 'FOURFRONT-TIMEOUT'
 
+    if res_dict['status'] == 'FAILED':
+        # get error from execution and sent a 422 response
+        sfn = boto3.client('stepfunctions', region_name='us-east-1')
+        hist = sfn.get_execution_history(executionArn=res_dict['executionArn'], reverseOrder=True)
+        for event in hist['events']:
+            if event.get('type') == 'ExecutionFailed':
+                raise HTTPUnprocessableEntity(str(event['executionFailedEventDetails']))
+
     return res_dict
-
-

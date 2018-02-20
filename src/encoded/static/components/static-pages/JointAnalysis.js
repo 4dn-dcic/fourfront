@@ -49,7 +49,8 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
 
 const STATUS_STATE_TITLE_MAP = {
     'Submitted'     : ['released', 'current'],
-    'In Submission' : ['in review by lab', 'in review by project', 'released to project', 'released to lab', 'submission in progress'],
+    'Internal Release' : ['released to project'],
+    'In Submission' : ['in review by lab', 'in review by project', 'submission in progress', 'released to lab'],
     'Planned'       : ['to be uploaded by workflow', 'planned'],
     'Out of date'   : ['archived', 'revoked'],
     'Deleted'       : ['deleted']
@@ -410,6 +411,7 @@ class VisualBody extends React.Component {
 
                     if (Array.isArray(data)){
                         if      (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
+                        else if (_.any(data, { 'state' : 'Internal Release' })) submissionState = 'Internal Release';
                         else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
                         else if (_.any(data, { 'state' : 'Planned'          })) submissionState = 'Planned';
                         else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
