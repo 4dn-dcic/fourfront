@@ -215,7 +215,7 @@ export function transformExpSetFiltersToFileFilters(expSetFilters){
  * @param {string}  [hrefPath]       Override the /path/ in URL returned, e.g. to /browse/.
  * @returns {string} URL which can be used to request filtered results from back-end, e.g. http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&from=0&limit=50&field.name=term1&field2.something=term2[...]
  */
-export function filtersToHref(expSetFilters, currentHref, page = null, sortColumn = null, sortReverse = false, hrefPath = null){
+export function filtersToHref(expSetFilters, currentHref, sortColumn = null, sortReverse = false, hrefPath = null){
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
@@ -226,8 +226,6 @@ export function filtersToHref(expSetFilters, currentHref, page = null, sortColum
         );
 
     var filterQuery = expSetFiltersToURLQuery(expSetFilters);
-
-    if (!page)   page = getPage();
 
     var urlString = (
         baseHref +
@@ -286,8 +284,11 @@ export function contextFiltersToExpSetFilters(contextFilters = null){
         return {};
     }
     if (contextFilters.length === 0) return {};
+
+    var browseBaseParams = navigate.getBrowseBaseParams();
+
     return _.reduce(contextFilters, function(memo, filterObj){
-        if (filterObj.field === 'type' || filterObj.field === 'experimentset_type') return memo; // continue/skip.
+        if (typeof browseBaseParams[filterObj.field] !== 'undefined') return memo; // continue/skip.
         if (typeof memo[filterObj.field] === 'undefined'){
             memo[filterObj.field] = new Set([filterObj.term]);
         } else {
@@ -398,24 +399,29 @@ function getBaseHref(currentHref = '/browse/', hrefPath = null){
     if (!hrefPath){
         hrefPath = urlParts.pathname;
     }
-    var baseHref = urlParts.protocol + '//' + urlParts.host + hrefPath;
-    var baseQuery = [];
-    if (hrefPath.indexOf('/browse/') > -1){
-        if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','ExperimentSetReplicate']);
-        else baseQuery.push(['type', urlParts.query.type]);
-        if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
-        else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
+
+    var baseHref = (urlParts.protocol && urlParts.host) ? urlParts.protocol + '//' + urlParts.host + hrefPath : hrefPath;
+    var hrefQuery = {};
+    var hrefQueryKeys = [];
+
+    if (navigate.isBrowseHref(hrefPath)){
+        hrefQuery = navigate.getBrowseBaseParams();
     } else if (hrefPath.indexOf('/search/') > -1){
-        if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','Item']);
-        else baseQuery.push(['type', urlParts.query.type]);
+        if (typeof urlParts.query.type !== 'string'){
+            hrefQuery.type = 'Item';
+        } else {
+            hrefQuery.type = urlParts.query.type;
+        }
     }
 
     var searchQuery = searchQueryStringFromHref(currentHref);
     if (searchQuery) {
-        baseQuery.push([ 'q', searchQuery ]);
+        hrefQuery.q = searchQuery;
     }
 
-    return baseHref + (baseQuery.length > 0 ? '?' + baseQuery.map(function(queryPair){ return queryPair[0] + '=' + queryPair[1]; }).join('&') : '');
+    hrefQueryKeys = _.keys(hrefQuery);
+
+    return baseHref + (hrefQueryKeys.length > 0 ? '?' + queryString.stringify(hrefQuery) : '');
 }
 
 export function searchQueryStringFromHref(href){

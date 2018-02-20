@@ -1,13 +1,14 @@
 'use strict';
 
 import url from 'url';
+import queryString from 'query-string';
 import _ from 'underscore';
 import { filtersToHref } from './experiments-filters';
-
+let store = null;
 
 let cachedNavFunction = null;
 let callbackFunctions = [];
-let store = null;
+
 
 /**
  * Navigation function, defined globally to act as alias of App.navigate.
@@ -42,34 +43,33 @@ var navigate = function(href, options = {}, callback = null, fallbackCallback = 
 /** This must be called in app initialization to alias app.navigate into this global module/function. */
 navigate.setNavigateFunction = function(navFxn){
     if (typeof navFxn !== 'function') throw new Error("Not a function.");
-    store = require('../store');
+    store = require('../../store');
+    //if (typeof window !== 'undefined') window.store2 = store;
     cachedNavFunction = navFxn;
 };
 
 
-navigate.browseBaseHref = function(stateName = 'all'){
-    //console.log(e);
-    console.log(this);
-    return '/browse/';
+navigate.getBrowseBaseParams = function(){
+    if (store === null){
+        store = require('../../store');
+    }
+    var storeState = store.getState();
+    return _.clone(navigate.getBrowseBaseParams.mappings[storeState.browseBaseState].parameters);
 };
 
-navigate.browseBaseHref.mappings = {
+
+navigate.getBrowseBaseParams.mappings = {
     'all' : {
-        'query' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
+        'parameters' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
     },
     'only_4dn' : {
-        'query' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate', 'award.project' : '4DN' },
+        'parameters' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate', 'award.project' : '4DN' },
     }
 };
 
 
-/** Utility function to get root path of browse page. */
-navigate.getBrowseHrefRoot = function(href){
-    var hrefParts = url.parse(href);
-    if (!navigate.isBrowseHref(hrefParts)){
-        return hrefParts.protocol + '//' + (hrefParts.auth || '') + hrefParts.host + '/browse/';
-    }
-    return href;
+navigate.getBrowseBaseHref = function(){
+    return '/browse/?' + queryString.stringify(navigate.getBrowseBaseParams());
 };
 
 
