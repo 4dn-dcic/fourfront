@@ -799,7 +799,7 @@ def pseudo_run(context, request):
 
     if res_dict['status'] == 'FAILED':
         # get error from execution and sent a 422 response
-        sfn = boto3.client('stepfunctions')
+        sfn = boto3.client('stepfunctions', region_name='us-east-1')
         hist = sfn.get_execution_history(executionArn=res_dict['executionArn'], reverseOrder=True)
         for event in hist['events']:
             if event.get('type') == 'ExecutionFailed':
