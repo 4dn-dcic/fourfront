@@ -51,16 +51,16 @@
     "aliases": {
         "aliases": {
             "title": "Aliases",
-            "description": "Lab specific identifiers to reference an object.",
+            "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
             "type": "array",
-            "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
+            "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
             "ff_flag": "clear clone",
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
-                "description": "A lab specific identifier to reference an object (e.g. dcic_lab:my_biosample).",
+                "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
                 "type":  "string",
                 "pattern": "^[^\\s\\\\]+:[^\\s\\\\]+"
             }
