@@ -34,4 +34,4 @@ def test_antibody_display_title_name_only(ab_w_name):
 def test_antibody_display_title_name_and_prodno(testapp, ab_w_name):
     acc = 'ENCAB11/ ?$--1_AAA'
     res = testapp.patch_json(ab_w_name['@id'], {'antibody_product_no': acc}).json['@graph'][0]
-    assert res['display_title'] == 'testAb (' + acc + ')'
+    assert res['display_title'] == 'test-Ab (' + acc + ')'
