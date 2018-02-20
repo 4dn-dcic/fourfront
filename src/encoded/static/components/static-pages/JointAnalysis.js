@@ -309,6 +309,7 @@ class VisualBody extends React.Component {
                 columnSubGrouping={columnSubGrouping}
                 defaultDepthsOpen={defaultDepthsOpen}
                 duplicateHeaders={duplicateHeaders}
+                checkCollapsibility
                 groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
                 }}
