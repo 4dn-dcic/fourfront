@@ -49,9 +49,7 @@
                         "title": "Experiment",
                         "type": "string",
                         "description": "linkTo for the primary object of the report.",
-                        "anyOf": [
-                            {"linkTo": "ExperimentSetReplicate"}
-                        ]
+                        "linkTo": "ExperimentSetReplicate"
                     },
                     "secondary_id":{
                         "title": "Biological replicate number",
@@ -86,8 +84,7 @@
         "timestamp": {
             "title": "Timestamp",
             "type": "string",
-            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
-            "description": "Time the report was created; if from Foursight, will equal to uuid of the check that generated it.",
+            "comment": "Time the report was created; if from Foursight, will equal to uuid of the check that generated it. Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -95,10 +92,9 @@
             ]
         },
         "new_data_bound": {
-            "title": "Timestamp",
+            "title": "New Data Bound",
             "type": "string",
-            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
-            "description": "Upper/newer timestamp of data used to create the report.",
+            "comment": "Upper/newer timestamp of data used to create the report. Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -106,10 +102,9 @@
             ]
         },
         "old_data_bound": {
-            "title": "Timestamp",
+            "title": "Old Data Bound",
             "type": "string",
-            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
-            "description": "Lower/older timestamp of data used to create the report.",
+            "comment": "Lower/older timestamp of data used to create the report. Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
