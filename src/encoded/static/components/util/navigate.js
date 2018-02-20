@@ -7,6 +7,7 @@ import { filtersToHref } from './experiments-filters';
 
 let cachedNavFunction = null;
 let callbackFunctions = [];
+let store = null;
 
 /**
  * Navigation function, defined globally to act as alias of App.navigate.
@@ -41,8 +42,26 @@ var navigate = function(href, options = {}, callback = null, fallbackCallback = 
 /** This must be called in app initialization to alias app.navigate into this global module/function. */
 navigate.setNavigateFunction = function(navFxn){
     if (typeof navFxn !== 'function') throw new Error("Not a function.");
+    store = require('../store');
     cachedNavFunction = navFxn;
 };
+
+
+navigate.browseBaseHref = function(stateName = 'all'){
+    //console.log(e);
+    console.log(this);
+    return '/browse/';
+};
+
+navigate.browseBaseHref.mappings = {
+    'all' : {
+        'query' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
+    },
+    'only_4dn' : {
+        'query' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate', 'award.project' : '4DN' },
+    }
+};
+
 
 /** Utility function to get root path of browse page. */
 navigate.getBrowseHrefRoot = function(href){
@@ -53,12 +72,14 @@ navigate.getBrowseHrefRoot = function(href){
     return href;
 };
 
+
 /** Utility function to check if we are on a browse page. */
 navigate.isBrowseHref = function(href){
     if (typeof href === 'string') href = url.parse(href);
     if (href.pathname.slice(0,8) === '/browse/') return true;
     return false;
 };
+
 
 /** Utility function to check if we are on a search page. */
 navigate.isSearchHref = function(href){
@@ -67,13 +88,16 @@ navigate.isSearchHref = function(href){
     return false;
 };
 
+
 /** Register a function to be called on each navigate response. */
 navigate.registerCallbackFunction = function(fxn){
     callbackFunctions.push(fxn);
 };
 
+
 navigate.deregisterCallbackFunction = function(fxn){
     callbackFunctions = _.without(callbackFunctions, fxn);
 };
+
 
 export { navigate };
