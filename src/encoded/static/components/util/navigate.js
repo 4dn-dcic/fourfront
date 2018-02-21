@@ -11,6 +11,18 @@ let callbackFunctions = [];
 
 
 /**
+ * Options to pass to App.navigate function.
+ * @typedef {Object} NavigateOpts
+ * @property {boolean} inPlace              Don't cancel out if loading same HREF/URL (e.g. allow refresh).
+ * @property {boolean} replace              Replace Browser History entry with new HREF/URL instead of adding.
+ * @property {boolean} skipConfirmCheck
+ * @property {boolean} skipRequest          Don't perform request, just change URL.
+ * @property {boolean} skipUpdateHref       Fetch/request new context, but don't update URL.
+ * @property {boolean} cache                Set to false to explicitly not cache response. Shouldn't be necessary (browser does this by default).
+ * @property {boolean} dontScrollToTop      Don't scroll to top of page after completion.
+ */
+
+/**
  * Navigation function, defined globally to act as alias of App.navigate.
  * Is set in App constructor via navigate.setNavigateFunction.
  * 
@@ -19,11 +31,11 @@ let callbackFunctions = [];
  * 
  * Use by importing and calling in the same way app.navigate might be used.
  * 
- * @param {string}      href                        Where to navigate to.
- * @param {Object}      [options={}]                Additional options, examine App.navigate for details.
- * @param {function}    [callback]                  Optional callback, accepts the response object.
- * @param {function}    [fallbackCallback]          Optional callback called if any error with response, including 404 error. Accepts response object -or- error object, if AJAX request failed.
- * @param {Object}      [includeReduxDispatch={}]   Optional state to save to Redux store, in addition to the 'href' and 'context' set by navigate function.
+ * @param {string}       href                        Where to navigate to.
+ * @param {NavigateOpts} [options={}]                Additional options, examine App.navigate for details.
+ * @param {function}     [callback]                  Optional callback, accepts the response object.
+ * @param {function}     [fallbackCallback]          Optional callback called if any error with response, including 404 error. Accepts response object -or- error object, if AJAX request failed.
+ * @param {Object}       [includeReduxDispatch={}]   Optional state to save to Redux store, in addition to the 'href' and 'context' set by navigate function.
  * 
  * @example
  * var { navigate } = require('./util');
@@ -70,9 +82,47 @@ navigate.getBrowseBaseParams.mappings = {
     }
 };
 
+navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
+
+    if (!browseBaseParams || typeof browseBaseParams !== 'object') browseBaseParams = navigate.getBrowseBaseParams(typeof browseBaseParams === 'string' ? browseBaseParams : null);
+    if (typeof hrefQuery === 'string'){
+        hrefQuery = url.parse(hrefQuery, true).query;
+    }
+
+    return _.every(_.pairs(browseBaseParams), function(p){
+        if (typeof hrefQuery[p[0]] === 'undefined') return false;
+        if (Array.isArray(hrefQuery[p[0]])){
+            if (Array.isArray(p[1])){
+                return _.every(p[1], function(arrItem){
+                    return hrefQuery[p[0]].indexOf(arrItem) > -1;
+                });
+            } else {
+                return hrefQuery[p[0]].indexOf(p[1]) > -1;
+            }
+        } else {
+            if (Array.isArray(p[1])){
+                return false;
+            } else {
+                return hrefQuery[p[0]] === p[1];
+            }
+        }
+    });
+};
+
 
 navigate.getBrowseBaseHref = function(browseBaseState = null){
     return '/browse/?' + queryString.stringify(navigate.getBrowseBaseParams(browseBaseState));
+};
+
+
+navigate.determineSeparatorChar = function(href){
+    return (
+        ['?','&'].indexOf(href.charAt(href.length - 1)) > -1 ? // Is last character a '&' or '?' ?
+        '' : (
+            href.match(/\?./) ?
+            '&' : '?'
+        )
+    );
 };
 
 

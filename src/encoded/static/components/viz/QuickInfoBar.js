@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import queryString from 'query-string';
 import * as d3 from 'd3';
 import * as vizUtil from './utilities';
 import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
@@ -109,11 +110,6 @@ export default class QuickInfoBar extends React.Component {
 
     componentDidUpdate(pastProps, pastState){
         if (this.anyFiltersSet() !== this.anyFiltersSet(pastProps)) ReactTooltip.rebuild();
-        if (this.props.browseBaseState && pastProps.browseBaseState && this.props.browseBaseState !== pastProps.browseBaseState){
-            if (!this.anyFiltersSet(pastProps)) {
-                navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true });
-            }
-        }
     }
 
     /**
@@ -189,7 +185,7 @@ export default class QuickInfoBar extends React.Component {
                 'files'             : total.files || 0
             };
         }
-        var statProps = { 'id' : this.props.id, 'expSetFilters' : this.props.expSetFilters, 'href' : this.props.href };
+        var statProps = _.pick(this.props, 'id', 'expSetFilters', 'href', 'isLoadingChartData');
         return (
             <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
                 <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
@@ -204,20 +200,34 @@ export default class QuickInfoBar extends React.Component {
 
     onBrowseStateToggle(){
         var newBrowseBaseState = this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn';
-        store.dispatch({
-            'type': {
-                'browseBaseState' : newBrowseBaseState
+        if (navigate.isBrowseHref(this.props.href)){
+            var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((this.props.context && this.props.context.filters || null));
+            var nextBrowseHref = navigate.getBrowseBaseHref(newBrowseBaseState);
+            if (_.keys(currentExpSetFilters).length > 0){
+                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(currentExpSetFilters);
             }
-        });
+            // Refresh page THEN change update browse state b/c ChartDataController grabs 'expSetFilters' (to grab filtered aggregations) from context.filters so we want that in place before updating charts.
+            navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true }, null, null, {
+                'browseBaseState' : newBrowseBaseState
+            });
+        } else {
+            // Change Redux store state but don't refresh page.
+            store.dispatch({
+                'type' : {
+                    'browseBaseState' : newBrowseBaseState
+                }
+            });
+        }
+        
     }
 
     renderBrowseStateToggle(){
-        var checked = this.props.browseBaseState === 'only_4dn';
+        var checked = this.props.browseBaseState === 'all';
         return (
             <div className="col-xs-4 text-right browse-base-state-toggle-container">
                 <div className="inner-more">
                     <Toggle checked={checked} onChange={this.onBrowseStateToggle} />
-                    <small>Only 4DN Data</small>
+                    <small>Include Legacy Data</small>
                 </div>
             </div>
         );
@@ -324,10 +334,11 @@ class Stat extends React.Component {
     }
 
     render(){
+        var { classNameID, longLabel, value, id, isLoadingChartData } = this.props;
         return (
-            <div className={"stat stat-" + this.props.classNameID} title={this.props.longLabel}>
-                <div id={this.props.id + '-stat-' + this.props.classNameID} className="stat-value">
-                    { this.props.value }
+            <div className={"stat stat-" + classNameID} title={longLabel}>
+                <div id={id + '-stat-' + classNameID} className="stat-value">
+                    { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-o-notch" style={{ opacity : 0.25 }}/> : value }
                 </div>
                 <div className="stat-label">
                     { this.label() }

@@ -52,7 +52,7 @@ var state = {
     barplot_data_filtered   : null,
     barplot_data_unfiltered : null,
     barplot_data_fields     : null,
-    isLoadingNewFields      : false,
+    isLoadingChartData      : false,
 
     chartFieldsHierarchy: [
         //{ 
@@ -276,7 +276,7 @@ class Provider extends React.Component {
         childChartProps.barplot_data_unfiltered = state.barplot_data_unfiltered;
         childChartProps.updateBarPlotFields = ChartDataController.updateBarPlotFields;
         childChartProps.barplot_data_fields = state.barplot_data_fields;
-        childChartProps.isLoadingNewFields = state.isLoadingNewFields;
+        childChartProps.isLoadingChartData = state.isLoadingChartData;
         childChartProps.providerId = this.id;
 
         return React.cloneElement(this.props.children, childChartProps);
@@ -346,7 +346,9 @@ export const ChartDataController = {
             // Step 1. Check if need to refetch both unfiltered & filtered data.
 
             if (refs.browseBaseState !== prevBrowseBaseState){
-                ChartDataController.sync(null, { searchQuery });
+                setTimeout(function(){
+                    ChartDataController.sync(null, { 'searchQuery' : searchQuery });
+                }, 0);
                 return;
             }
 
@@ -468,7 +470,7 @@ export const ChartDataController = {
             }
         }
         //state.barplot_data_fields = fields;
-        ChartDataController.setState({ 'barplot_data_fields' : fields, 'isLoadingNewFields' : true }, callback);
+        ChartDataController.setState({ 'barplot_data_fields' : fields, 'isLoadingChartData' : true }, callback);
         ChartDataController.sync(function(){
             ChartDetailCursor.reset(true);
             //if (typeof callback === 'function') callback();
@@ -526,7 +528,9 @@ export const ChartDataController = {
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
         if (!syncOpts.fromSync) syncOpts.fromSync = true;
-        ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, syncOpts);
+        ChartDataController.setState({'isLoadingChartData' : true }, function(){
+            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, syncOpts);
+        });
     },
 
     /**
@@ -559,7 +563,10 @@ export const ChartDataController = {
             reduxStoreState = refs.store.getState();
         }
 
-        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
+        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters(
+            (reduxStoreState.context && reduxStoreState.context.filters) || null,
+            opts.browseBaseState || null
+        );
 
         var filtersSet = (_.keys(currentExpSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
         
@@ -570,14 +577,14 @@ export const ChartDataController = {
             ChartDataController.setState({
                 'barplot_data_filtered' : barplot_data_filtered,
                 'barplot_data_unfiltered' : barplot_data_unfiltered,
-                'isLoadingNewFields' : false
+                'isLoadingChartData' : false
             }, callback, opts);
 
         });
 
         var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
 
-        var baseSearchParams = typeof refs.baseSearchParams === 'function' ? refs.baseSearchParams() : refs.baseSearchParams;
+        var baseSearchParams = typeof refs.baseSearchParams === 'function' ? refs.baseSearchParams(opts.browseBaseState || null) : refs.baseSearchParams;
         if (opts.searchQuery) baseSearchParams['q'] = opts.searchQuery;
 
         var unfilteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '/' + fieldsQuery;
@@ -650,7 +657,7 @@ export const ChartDataController = {
             function(filteredContext){
                 ChartDataController.setState({
                     'barplot_data_filtered' : filteredContext,
-                    'isLoadingNewFields' : false
+                    'isLoadingChartData' : false
                 }, callback, opts);
             },
             'GET',
@@ -658,7 +665,7 @@ export const ChartDataController = {
                 // Fallback (no results or lost connection)
                 ChartDataController.setState({
                     'barplot_data_filtered' : null,
-                    'isLoadingNewFields' : false
+                    'isLoadingChartData' : false
                 }, callback, opts);
                 if (typeof callback === 'function') callback();
             }

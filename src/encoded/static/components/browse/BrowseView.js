@@ -349,6 +349,25 @@ export default class BrowseView extends React.Component {
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
+    componentDidMount(){
+        var hrefParts = url.parse(this.props.href, true);
+
+        var isValidQuery = navigate.isValidBrowseQuery(hrefParts.query);
+
+        if (!isValidQuery) {
+            var nextBrowseHref = navigate.getBrowseBaseHref();
+            var expSetFilters = Filters.contextFiltersToExpSetFilters();
+            if (_.keys(expSetFilters).length > 0){
+                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
+            }
+            if (typeof hrefParts.query.q === 'string'){
+                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + hrefParts.query.q;
+            }
+
+            navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
+        }
+    }
+
     render() {
         var context = this.props.context;
         //var fileFormats = findFormats(context['@graph']);
@@ -376,10 +395,11 @@ export default class BrowseView extends React.Component {
         if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page text-center">
-                    <h4>
-                        <a href='/browse/?type=ExperimentSetReplicate'>
-                            Only experiment sets may be browsed.
-                        </a>
+                    <h3 className="text-300">
+                        Only experiment sets may currently be browsed.
+                    </h3>
+                    <h4 className="text-400">
+                        Please wait to be redirected.
                     </h4>
                 </div>
             );

@@ -219,11 +219,7 @@ export function filtersToHref(expSetFilters, currentHref, sortColumn = null, sor
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
-    var sep = ['?','&'].indexOf(baseHref.charAt(baseHref.length - 1)) > -1 ? // Is last character a '&' or '?' ?
-        '' : (
-            baseHref.match(/\?./) ?
-            '&' : '?'
-        );
+    var sep = navigate.determineSeparatorChar(baseHref);
 
     var filterQuery = expSetFiltersToURLQuery(expSetFilters);
 
