@@ -235,7 +235,7 @@ export default class Navigation extends React.Component {
 
     render() {
         var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted } = this.state;
-        var { href, context, listActionsFor, session, updateUserInfo, schemas } = this.props;
+        var { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState } = this.props;
         var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top");
 
         return (
@@ -263,7 +263,7 @@ export default class Navigation extends React.Component {
                         </Navbar.Collapse>
                     </Navbar>
                     <ChartDataController.Provider id="quick_info_bar1">
-                        <QuickInfoBar href={href} schemas={schemas} context={context} />
+                        <QuickInfoBar href={href} schemas={schemas} context={context} browseBaseState={browseBaseState} />
                     </ChartDataController.Provider>
                 </div>
             </div>

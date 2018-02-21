@@ -273,7 +273,7 @@ export const NON_FILTER_URL_PARAMS = [
  * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
  * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
-export function contextFiltersToExpSetFilters(contextFilters = null){
+export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseState = null){
     if (!contextFilters){ // Grab context.filters from Redux store if not supplied.
         if (!store) store = require('./../../store');
         var storeState = store.getState();
@@ -285,7 +285,7 @@ export function contextFiltersToExpSetFilters(contextFilters = null){
     }
     if (contextFilters.length === 0) return {};
 
-    var browseBaseParams = navigate.getBrowseBaseParams();
+    var browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
 
     return _.reduce(contextFilters, function(memo, filterObj){
         if (typeof browseBaseParams[filterObj.field] !== 'undefined') return memo; // continue/skip.

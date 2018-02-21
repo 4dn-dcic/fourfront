@@ -1219,6 +1219,7 @@ export default class App extends React.Component {
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                     context={context}
+                                    browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
                                 <div id="page-title-container" className="container">

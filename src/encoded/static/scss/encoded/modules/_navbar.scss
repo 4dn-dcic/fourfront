@@ -263,6 +263,20 @@ $navbar-transition-easing: ease-out;
                     opacity: 1;
                 }
             }
+            .browse-base-state-toggle-container {
+                
+                > .inner-more {
+                    float: right;
+                    line-height: 37px;
+                    > .onoffswitch {
+                        margin-top: -1px;
+                        display: inline-block;
+                        vertical-align: middle;
+                        margin-right: 10px;
+                    }
+                }
+                
+            }
             .glance-label {
                 display: inline-block;
                 width: 32px;

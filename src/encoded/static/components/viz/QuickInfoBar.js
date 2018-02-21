@@ -7,6 +7,7 @@ import url from 'url';
 import * as d3 from 'd3';
 import * as vizUtil from './utilities';
 import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
+import { Toggle } from '../inputs';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 import { ChartDataController } from './chart-data-controller';
@@ -76,6 +77,7 @@ export default class QuickInfoBar extends React.Component {
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
         this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
+        this.onBrowseStateToggle = this.onBrowseStateToggle.bind(this);
         this.onPanelAreaMouseLeave = this.onPanelAreaMouseLeave.bind(this);
         this.renderStats = this.renderStats.bind(this);
         this.renderHoverBar = this.renderHoverBar.bind(this);
@@ -107,6 +109,11 @@ export default class QuickInfoBar extends React.Component {
 
     componentDidUpdate(pastProps, pastState){
         if (this.anyFiltersSet() !== this.anyFiltersSet(pastProps)) ReactTooltip.rebuild();
+        if (this.props.browseBaseState && pastProps.browseBaseState && this.props.browseBaseState !== pastProps.browseBaseState){
+            if (!this.anyFiltersSet(pastProps)) {
+                navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true });
+            }
+        }
     }
 
     /**
@@ -164,11 +171,9 @@ export default class QuickInfoBar extends React.Component {
         });
     }
 
-    renderStats(){
-        if (!this.state.mounted) return null;
+    renderStats(extraClassName = null){
         var areAnyFiltersSet = this.anyFiltersSet();
         var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
-        var { show } = this.state;
 
         var stats;
         if (current && (current.experiment_sets || current.experiments || current.files)) {
@@ -185,21 +190,35 @@ export default class QuickInfoBar extends React.Component {
             };
         }
         var statProps = { 'id' : this.props.id, 'expSetFilters' : this.props.expSetFilters, 'href' : this.props.href };
-        var className = "inner container";
-        if (show !== false) className += ' showing';
-        if (show === 'activeFilters') className += ' showing-filters';
-        if (show === 'mosaicCharts') className += ' showing-charts';
         return (
-            <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
-                <div className="left-side clearfix">
-                    <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
-                    <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
-                    <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
-                    <div className="any-filters glance-label" data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"} onMouseEnter={this.onIconMouseEnter}>
-                        <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
-                    </div>
+            <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
+                <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
+                <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
+                <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
+                <div className="any-filters glance-label" data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"} onMouseEnter={this.onIconMouseEnter}>
+                    <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                 </div>
-                { this.renderHoverBar() }
+            </div>
+        );
+    }
+
+    onBrowseStateToggle(){
+        var newBrowseBaseState = this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn';
+        store.dispatch({
+            'type': {
+                'browseBaseState' : newBrowseBaseState
+            }
+        });
+    }
+
+    renderBrowseStateToggle(){
+        var checked = this.props.browseBaseState === 'only_4dn';
+        return (
+            <div className="col-xs-4 text-right browse-base-state-toggle-container">
+                <div className="inner-more">
+                    <Toggle checked={checked} onChange={this.onBrowseStateToggle} />
+                    <small>Only 4DN Data</small>
+                </div>
             </div>
         );
     }
@@ -227,8 +246,28 @@ export default class QuickInfoBar extends React.Component {
         } else return null;
     }
 
+    renderBar(){
+        var { show, mounted } = this.state;
+        if (!mounted) return null;
+
+        var className = "inner container";
+        if (show !== false) className += ' showing';
+        if (show === 'activeFilters') className += ' showing-filters';
+        if (show === 'mosaicCharts') className += ' showing-charts';
+
+        return (
+            <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
+                <div className="row">
+                    { this.renderStats('col-xs-8') }
+                    { this.renderBrowseStateToggle() }
+                </div>
+                { this.renderHoverBar() }
+            </div>
+        );
+    }
+
     render(){
-        return <div id={this.props.id} className={this.className()}>{ this.renderStats() }</div>;
+        return <div id={this.props.id} className={this.className()}>{ this.renderBar() }</div>;
     }
 
 }

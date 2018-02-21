@@ -290,12 +290,12 @@ export class UIControlsWrapper extends React.Component {
                 <DropdownButton
                     id="select-barplot-field-1"
                     onSelect={this.handleFieldSelect.bind(this, 1)}
-                    disabled={this.props.isLoadingNewFields}
+                    disabled={this.props.isLoadingChartData}
                     title={(()=>{
                         //if (this.state.openDropdown === 'subdivisionField'){
                         //    return <em className="dropdown-open-title">Color Bars by</em>;
                         //}
-                        if (this.props.isLoadingNewFields){
+                        if (this.props.isLoadingChartData){
                             return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
                         }
                         var field = this.getFieldAtIndex(1);
@@ -403,12 +403,12 @@ export class UIControlsWrapper extends React.Component {
                                     <DropdownButton
                                         id="select-barplot-field-0"
                                         onSelect={this.handleFieldSelect.bind(this, 0)}
-                                        disabled={this.props.isLoadingNewFields}
+                                        disabled={this.props.isLoadingChartData}
                                         title={(()=>{
                                             //if (this.state.openDropdown === 'xAxisField'){
                                             //    return <em className="dropdown-open-title">X-Axis Field</em>;
                                             //}
-                                            if (this.props.isLoadingNewFields){
+                                            if (this.props.isLoadingChartData){
                                                 return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
                                             }
                                             var field = this.getFieldAtIndex(0);

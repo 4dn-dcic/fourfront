@@ -49,12 +49,15 @@ navigate.setNavigateFunction = function(navFxn){
 };
 
 
-navigate.getBrowseBaseParams = function(){
-    if (store === null){
-        store = require('../../store');
+navigate.getBrowseBaseParams = function(browseBaseState = null){
+    if (!browseBaseState){
+        if (store === null){
+            store = require('../../store');
+        }
+        var storeState = store.getState();
+        browseBaseState = storeState.browseBaseState;
     }
-    var storeState = store.getState();
-    return _.clone(navigate.getBrowseBaseParams.mappings[storeState.browseBaseState].parameters);
+    return _.clone(navigate.getBrowseBaseParams.mappings[browseBaseState].parameters);
 };
 
 
@@ -68,8 +71,8 @@ navigate.getBrowseBaseParams.mappings = {
 };
 
 
-navigate.getBrowseBaseHref = function(){
-    return '/browse/?' + queryString.stringify(navigate.getBrowseBaseParams());
+navigate.getBrowseBaseHref = function(browseBaseState = null){
+    return '/browse/?' + queryString.stringify(navigate.getBrowseBaseParams(browseBaseState));
 };
 
 
