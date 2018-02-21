@@ -632,6 +632,9 @@
             {
                 "argument_format": "pairs",
                 "argument_type": "Input file",
+                "secondary_file_formats": [
+                    "pairs_px2"
+                ],
                 "workflow_argument_name": "input_pairs"
             },
             {
