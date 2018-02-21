@@ -396,7 +396,7 @@ def test_calculated_expt_produced_in_pub_for_expt_w_ref(
     repset = testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data, status=201).json['@graph'][0]
     # post single rep_exp_set to single pub
     pub2_data['exp_sets_prod_in_pub'] = [repset['@id']]
-    pub = testapp.post_json('/publication', pub2_data, status=201).json['@graph'][0]
+    testapp.post_json('/publication', pub2_data, status=201).json['@graph'][0]
     expinset = testapp.get(repset['replicate_exps'][0]['replicate_exp']).json
     assert 'produced_in_pub' in expinset
     assert publication['@id'] == expinset['produced_in_pub']['@id']
