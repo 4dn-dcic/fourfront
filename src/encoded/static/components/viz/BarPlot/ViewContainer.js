@@ -365,15 +365,16 @@ export const barPlotCursorActions = [
             return "Browse";
         },
         'function' : function(showType = 'all', cursorProps, mouseEvt){
-            var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-            var href = navigate.getBrowseBaseHref();
+            //var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
+            var baseParams = navigate.getBrowseBaseParams();
+            var href = navigate.getBrowseBaseHref(baseParams);
 
             // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
             var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
 
             var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
                 // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                if (expSetFilters && expSetFilters[node.field] &&  expSetFilters[node.field].has(node.term)){
+                if (expSetFilters && expSetFilters[node.field] && expSetFilters[node.field].has(node.term)){
                     return expSetFilters;
                 }
                 return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE

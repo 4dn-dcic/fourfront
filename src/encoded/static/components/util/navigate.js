@@ -82,6 +82,14 @@ navigate.getBrowseBaseParams.mappings = {
     }
 };
 
+
+navigate.getBrowseBaseHref = function(browseBaseParams = null){
+    if (!browseBaseParams) browseBaseParams = navigate.getBrowseBaseParams();
+    else if (typeof browseBaseParams === 'string') browseBaseParams = navigate.getBrowseBaseParams(browseBaseParams);
+    return '/browse/?' + queryString.stringify(browseBaseParams);
+};
+
+
 navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
 
     if (!browseBaseParams || typeof browseBaseParams !== 'object') browseBaseParams = navigate.getBrowseBaseParams(typeof browseBaseParams === 'string' ? browseBaseParams : null);
@@ -107,11 +115,6 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
             }
         }
     });
-};
-
-
-navigate.getBrowseBaseHref = function(browseBaseState = null){
-    return '/browse/?' + queryString.stringify(navigate.getBrowseBaseParams(browseBaseState));
 };
 
 

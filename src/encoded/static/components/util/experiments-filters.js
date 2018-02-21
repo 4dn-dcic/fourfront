@@ -73,7 +73,6 @@ export function buildSearchHref(unselectHref, field, term, searchBase){
  *
  * @param {string}  field               Field, in object dot notation.
  * @param {string}  term                Term to add/remove from active filters.
- * @param {string}  [experimentsOrSets='experiments'] - Informs whether we're standardizing field to experiments_in_set or not. Defaults to 'experiments'.
  * @param {Object}  [expSetFilters]     The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
  * @param {function}[callback]          Callback function to call after updating redux store.
  * @param {boolean} [returnInsteadOfSave=false]  - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
@@ -89,31 +88,37 @@ export function changeFilter(
 ){
     // If no expSetFilters are supplied, grab current ones from Redux store.
     if (!expSetFilters) expSetFilters = currentExpSetFilters();
+    var browseBaseParams = navigate.getBrowseBaseParams();
 
-    // store currently selected filters as a dict of sets
-    var tempObj = {};
-    var newObj = {};
+    if (typeof browseBaseParams[field] === 'undefined'){
 
-    var expSet = expSetFilters[field] ? new Set(expSetFilters[field]) : new Set();
-    if (expSet.has(term)) {
-        // term is already present, so delete it
-        expSet.delete(term);
+        // store currently selected filters as a dict of sets
+        var tempObj = {};
+        var newObj = {};
+
+        var expSet = expSetFilters[field] ? new Set(expSetFilters[field]) : new Set();
+        if (expSet.has(term)) {
+            // term is already present, so delete it
+            expSet.delete(term);
+        } else {
+            expSet.add(term);
+        }
+        if(expSet.size > 0){
+            tempObj[field] = expSet;
+            newObj = _.extend({}, expSetFilters, tempObj);
+        }else{ //remove key if set is empty
+            newObj = _.extend({}, expSetFilters);
+            delete newObj[field];
+        }
+
+        if (returnInsteadOfSave){
+            return newObj;
+        } else {
+            console.info("Saving new filters:", newObj);
+            return saveChangedFilters(newObj, href, callback);
+        }
     } else {
-        expSet.add(term);
-    }
-    if(expSet.size > 0){
-        tempObj[field] = expSet;
-        newObj = _.extend({}, expSetFilters, tempObj);
-    }else{ //remove key if set is empty
-        newObj = _.extend({}, expSetFilters);
-        delete newObj[field];
-    }
-
-    if (returnInsteadOfSave){
-        return newObj;
-    } else {
-        console.info("Saving new filters:", newObj);
-        return saveChangedFilters(newObj, href, callback);
+        return expSetFilters;
     }
 }
 

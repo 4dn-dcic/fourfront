@@ -78,7 +78,7 @@ export class FacetCharts extends React.Component {
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
                 this.props.baseSearchPath,
-                navigate.getBrowseBaseParams,
+                this.props.browseBaseState,
                 this.props.initialFields,
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
