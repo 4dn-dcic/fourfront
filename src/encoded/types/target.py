@@ -32,7 +32,7 @@ class Target(Item):
         value = ""
         for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
             try:
-                add = name + ':' + ', '.join(target_info)
+                add = name + ':' + ','.join(target_info)
                 # if there are multiple species of targets combine them with &
                 if value and add:
                     value += " & "
@@ -61,36 +61,7 @@ class Target(Item):
                 if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
                     value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
                 values.append(value)
-            return ", ".join(filter(None, values))
-        return "no target"
-
-    @calculated_property(schema={
-        "title": "Target summary short",
-        "description": "Shortened version of target summary.",
-        "type": "string",
-    })
-    def target_summary_short(self, request, targeted_genes=None, description=None,
-                             targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
-        value = ""
-        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
-            try:
-                add = name + ':' + ', '.join(target_info)
-                # if there are multiple species of targets combine them with &
-                if value and add:
-                    value += " & "
-                if add:
-                    value += add
-            except:
-                pass
-        if targeted_structure:
-            if value:
-                value += " & "
-            value += targeted_structure
-
-        if value:
-            return value
-        elif description:
-            return description
+            return ",".join(filter(None, values))
         return "no target"
 
     @calculated_property(schema={
@@ -98,8 +69,8 @@ class Target(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, targeted_genes=None, description=None,
+    def display_title(self, request, targeted_genes=None, targeted_genome_regions=None,
                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.target_summary_short(request, targeted_genes, description,
-                                         targeted_proteins, targeted_rnas, targeted_structure)
+        return self.target_summary(request, targeted_genes, targeted_genome_regions,
+                                   targeted_proteins, targeted_rnas, targeted_structure)

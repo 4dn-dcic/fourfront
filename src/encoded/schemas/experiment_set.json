@@ -31,7 +31,7 @@
         },
         "orig_proposed_submission_date": {
             "title": "Original proposed submission date",
-            "description": "The original proposed date of submission of the dataset",
+            "description": "YYYY-MM-DD formatted original proposed date of submission",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -40,7 +40,7 @@
         },
         "curr_proposed_submission_date": {
             "title": "Current proposed submission date",
-            "description": "The currently proposed date of submission of the dataset",
+            "description": "YYYY-MM-DD formatted currently proposed date of submission",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
