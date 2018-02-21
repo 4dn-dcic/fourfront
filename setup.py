@@ -112,6 +112,7 @@ setup(
         verify-item = encoded.commands.verify_item:main
         clone-beanstalk = encoded.commands.clone_beanstalk_env:main
         rm-beanstalk = encoded.commands.rm_beanstalk_env:main
+        create-mapping-on-deploy = encoded.commands.create_mapping_on_deploy:main
 
         upgrade-test-inserts = encoded.commands.upgrade_test_inserts:main
 

@@ -22,6 +22,6 @@ def test_calculated_modification_name(testapp, modifications):
         if name == 'mod_w_gen_chg':
             assert modname == 'Crispr deletion'
         if name == 'mod_w_target':
-            assert modname == 'Crispr for Gene:eeny, meeny'
+            assert modname == 'Crispr for Gene:eeny,meeny'
         if name == 'mod_w_both':
-            assert modname == 'Crispr deletion for Gene:eeny, meeny'
+            assert modname == 'Crispr deletion for Gene:eeny,meeny'

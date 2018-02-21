@@ -61,7 +61,7 @@
         },
         "me_pcr_library_date":{
             "title": "Methy-PCR Library Preparation Date",
-            "description": "The date that the methy-PCR library was prepared - submitted as YYYY-MM-DD.",
+            "description": "YYYY-MM-DD formatted date of the methy-PCR library preparation.",
             "type": "string",
             "format": "date"
         },
@@ -77,7 +77,7 @@
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
-            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "description": "YYYY-MM-DD formatted date of library preparation.",
             "type": "string",
             "format": "date"
         }

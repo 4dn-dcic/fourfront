@@ -67,16 +67,16 @@ export class RawFilesStackedTable extends React.Component {
     }
 
     static defaultProps = {
-        keepCounts : false,
-        fadeIn : true,
-        width: null,
-        columnHeaders : [
+        'keepCounts'    : false,
+        'fadeIn'        : true,
+        'width'         : null,
+        'columnHeaders'     : [
             { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ],
-        collapseLongLists : false
+        'collapseLongLists' : true
     }
 
     constructor(props){
@@ -208,8 +208,8 @@ export class RawFilesStackedTable extends React.Component {
                 </StackedBlockName>
                 <StackedBlockList
                     className={contentsClassName}
-                    collapseLimit={3}
-                    collapseShow={2}
+                    collapseLimit={this.props.collapseLimit || 3}
+                    collapseShow={this.props.collapseShow || 2}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                     children={contents}
                 />

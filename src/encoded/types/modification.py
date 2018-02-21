@@ -59,7 +59,7 @@ class Modification(Item):
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
             target = request.embed(target_of_mod, '@@object')
-            mod_name = mod_name + " for " + target['target_summary_short']
+            mod_name = mod_name + " for " + target['target_summary']
         return mod_name
 
     @calculated_property(schema={

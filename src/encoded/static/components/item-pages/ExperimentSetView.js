@@ -216,6 +216,9 @@ export class RawFilesStackedTableSection extends React.Component {
                         replicateExpsArray={this.props.context.replicate_exps}
                         keepCounts={false}
                         columnHeaders={expTableColumnHeaders}
+                        collapseLongLists={true}
+                        collapseLimit={10}
+                        collapseShow={7}
                     />
                 </div>
             </div>

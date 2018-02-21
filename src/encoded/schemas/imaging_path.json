@@ -54,7 +54,8 @@
                 "Aptamer",
                 "RNA",
                 "DNA primer",
-                "Small chemical"
+                "Small chemical",
+                "BAC"
             ]
         },
         "labels": {
