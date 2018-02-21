@@ -10,7 +10,7 @@ cache:
 addons:
   apt:
     packages:
-    - oracle-java8-set-default
+    - oracle-java9-set-default
     - bsdtar
     - build-essential
     - make
