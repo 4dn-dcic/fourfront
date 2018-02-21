@@ -453,7 +453,7 @@ class File(Item):
     })
     def visualization_link(self, request, file_format, upload_key=None):
         if file_format is 'hic':
-            baseurl = 'http://aidenlab.org/juicebox?state=1,1,11,11252.8211,11272.8211,1,KR&colorScale=5.598433134008094&hicUrl=https://s3.amazonaws.com/elasticbeanstalk-fourfront-webdev-wfoutput/7766c2f8-273d-4842-a1ed-474f18ef8d3d/4DNFI6YW92J5.hic&normVectorFiles=https://s3.amazonaws.com/' 
+            baseurl = 'http://aidenlab.org/juicebox?state=1,1,11,11252.8211,11272.8211,1,KR&colorScale=5.598433134008094&hicUrl=https://s3.amazonaws.com/'
             bucketname = 'elasticbeanstalk-fourfront-webdev-wfoutput' 
             normvectorbase = '&normVectorFiles=https://s3.amazonaws.com/'
 
