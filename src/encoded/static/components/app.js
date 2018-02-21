@@ -1098,7 +1098,8 @@ export default class App extends React.Component {
             'uploads'           : this.state.uploads,
             'updateUploads'     : this.updateUploads,
             'listActionsFor'    : this.listActionsFor,
-            'updateUserInfo'    : this.updateUserInfo
+            'updateUserInfo'    : this.updateUserInfo,
+            'browseBaseState'   : this.props.browseBaseState
         };
 
         // first case is fallback

@@ -248,18 +248,9 @@ class ResultTableContainer extends React.Component {
                             itemTypeForSchemas="ExperimentSetReplicates"
                             session={this.props.session}
                             href={this.props.href || this.props.searchBase}
+                            browseBaseState={this.props.browseBaseState}
                             schemas={this.props.schemas}
-                            showClearFiltersButton={(()=>{
-                                var urlParts = url.parse(this.props.href, true);
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                var urlPartQueryCorrectedForType = _.clone(urlParts.query);
-                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
-                                var urlPartsForClearURLQuery = url.parse(clearFiltersURL, true).query;
-                                // Exclude 'experimentset_type' for now
-                                delete urlPartsForClearURLQuery.experimentset_type;
-                                delete urlPartQueryCorrectedForType.experimentset_type;
-                                return !object.isEqual(urlPartsForClearURLQuery, urlPartQueryCorrectedForType);
-                            })()}
+                            showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
                                 evt.stopPropagation();
@@ -268,7 +259,7 @@ class ResultTableContainer extends React.Component {
                                     console.error("No Clear Filters URL");
                                     return;
                                 }
-                                this.props.navigate(clearFiltersURL, {});
+                                this.props.navigate(clearFiltersURL, { 'inPlace' : true, 'dontScrollToTop' : true });
                             }}
                         />
                     </div>
@@ -419,6 +410,7 @@ export default class BrowseView extends React.Component {
                     <CustomColumnController defaultHiddenColumns={this.props.defaultHiddenColumns}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer
+                                browseBaseState={this.props.browseBaseState}
                                 session={this.props.session}
                                 schemas={this.props.schemas}
                             />

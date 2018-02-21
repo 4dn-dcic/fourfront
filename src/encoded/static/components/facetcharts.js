@@ -50,7 +50,7 @@ export class FacetCharts extends React.Component {
                 {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
             ]
         },
-        'initialFields' : ['experiments_in_set.experiment_type',"award.project"]
+        'initialFields' : ['experiments_in_set.experiment_type',"experiments_in_set.biosample.biosource.biosource_type"]
     }
 
     constructor(props){

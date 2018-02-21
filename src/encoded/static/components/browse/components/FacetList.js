@@ -521,6 +521,12 @@ export class FacetList extends React.Component {
 
 
     static filterFacetsForBrowse(facet, props, state){
+        
+        if (props.browseBaseState){
+            var browseBaseParams = navigate.getBrowseBaseParams(props.browseBaseState);
+            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
+        }
+
         if (facet.field.substring(0, 6) === 'audit.'){
             if (props.session && FacetList.isLoggedInAsAdmin()) return true;
             return false; // Ignore audit facets temporarily, if not logged in as admin.

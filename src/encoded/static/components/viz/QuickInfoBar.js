@@ -227,7 +227,7 @@ export default class QuickInfoBar extends React.Component {
             <div className="col-xs-4 text-right browse-base-state-toggle-container">
                 <div className="inner-more">
                     <Toggle checked={checked} onChange={this.onBrowseStateToggle} />
-                    <small>Include Legacy Data</small>
+                    <small>Include External Data</small>
                 </div>
             </div>
         );
