@@ -13,7 +13,7 @@ def drug_treatment(testapp, lab, award):
 
 
 def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     assert drug_treatment['display_title'] == 'Drug treatment'
     res = testapp.patch_json(
         drug_treatment['@id'],
@@ -28,7 +28,7 @@ def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
 
 
 def test_calculated_rnai_treatment_display_title(testapp, rnai, target_w_genes):
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     assert rnai['display_title'] == 'shRNA treatment'
     res = testapp.patch_json(rnai['@id'], {'target': target_w_genes['@id']})
-    assert res.json['@graph'][0]['display_title'] == 'shRNA treatment for Gene:eeny, meeny'
+    assert res.json['@graph'][0]['display_title'] == 'shRNA treatment for Gene:eeny,meeny'

@@ -383,21 +383,27 @@ class VisualBody extends React.Component {
                         );
                     }
 
+                    var keyValsToShow = _.pick(aggrData || data,
+                        'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
+                        'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
+                    );
+
+                    if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat_title ) {
+                        keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
+                    }
+
                     return (
                         <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                             { isGroup ?
                                 <div className="inner">
                                     <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
                                     <hr className="mt-0 mb-1"/>
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(aggrData, props) }
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
                                     { makeSearchButton() }
                                 </div>
                                 :
                                 <div className="inner">
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(
-                                        _.pick(data, 'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
-                                            'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'), props
-                                    ) }
+                                    { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
                                     { makeSingleItemButton() }
                                 </div>
                             }
