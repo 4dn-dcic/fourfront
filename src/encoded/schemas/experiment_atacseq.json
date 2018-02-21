@@ -64,7 +64,7 @@
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
-            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "description":  "YYYY-MM-DD formatted date of library preparation.",
             "type": "string",
             "format": "date"
         },

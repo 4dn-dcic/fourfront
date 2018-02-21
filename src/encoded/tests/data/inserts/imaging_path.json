@@ -9,7 +9,34 @@
         "submitted_by": "4dndcic@gmail.com",
         "target":["d1115d5e-40aa-43bc-b81c-32c70c9afb21"],
         "type_labeled_probe": "Antibody",
-        "labeled_probe":"Some Antibody",
+        "labeled_probe":"Frog Secondary Antibody",
+        "other_probes":["Human Gelsolin Monoclonal Primary Antibody"],
         "labels": ["GFP"]
+    },
+    {
+        "status": "in review by lab",
+        "lab": "4dn-dcic-lab",
+        "aliases": ["test:imagepath002"],
+        "description": "Test Imaging Path 02",
+        "award": "1U01CA200059-01",
+        "uuid": "40041e2f-3e43-4388-8bbb-e861f209d122",
+        "submitted_by": "4dndcic@gmail.com",
+        "target":["d1115d5e-40aa-43bc-b81c-32c70c9afb55"],
+        "type_labeled_probe": "BAC",
+        "labeled_probe":"BAC",
+        "labels": ["Atto647N"]
+    },
+    {
+        "status": "in review by lab",
+        "lab": "4dn-dcic-lab",
+        "aliases": ["test:imagepath003"],
+        "description": "Test Imaging Path 03",
+        "award": "1U01CA200059-01",
+        "uuid": "40041e2f-3e43-4388-8bbb-e861f209d133",
+        "submitted_by": "4dndcic@gmail.com",
+        "target":["d1115d5e-40aa-43bc-b81c-32c70c9afb78"],
+        "type_labeled_probe": "BAC",
+        "labeled_probe":"BAC",
+        "labels": ["Atto647N"]
     }
 ]
