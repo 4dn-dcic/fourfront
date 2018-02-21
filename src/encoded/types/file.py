@@ -454,7 +454,7 @@ class File(Item):
     def visualization_link(self, request, file_format, upload_key=None):
         if file_format is 'hic':
             baseurl = 'http://aidenlab.org/juicebox?hicUrl=https://s3.amazonaws.com/'
-            bucketname = 'elasticbeanstalk-fourfront-webdev-wfoutput' 
+            bucketname = 'elasticbeanstalk-fourfront-webdev-wfoutput'
             normvectorbase = '&normVectorFiles=https://s3.amazonaws.com/'
 
             # upload key of an associated normvector file
