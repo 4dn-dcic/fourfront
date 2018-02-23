@@ -356,12 +356,7 @@ export class UIControlsWrapper extends React.Component {
                                     id="select-barplot-aggregate-type"
                                     bsSize="xsmall"
                                     onSelect={this.handleAggregateTypeSelect}
-                                    title={(() => {
-                                        //if (this.state.openDropdown === 'yAxis'){
-                                        //    return 'Y-Axis Aggregation';
-                                        //}
-                                        return this.titleMap(this.state.aggregateType);
-                                    })()}
+                                    title={this.titleMap(this.state.aggregateType)}
                                     onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
                                     children={this.renderDropDownMenuItems(
                                         ['experiment_sets','experiments','files'],
@@ -530,13 +525,15 @@ class AggregatedLegend extends React.Component {
     }
 
     render(){
-        if (!this.props.field || this.props.isLoadingChartData) return null;
+        if (!this.props.field || !this.props.barplot_data_unfiltered || this.props.isLoadingChartData) return null;
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            (!this.props.barplot_data_unfiltered || !this.props.field ? null :
-                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets', this.props.field)
+            AggregatedLegend.collectSubDivisionFieldTermCounts(
+                this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered || this.props.barplot_data_unfiltered,
+                this.props.aggregateType || 'experiment_sets',
+                this.props.field
             ),
-            term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
+            (term) => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
         );
 
         this.shouldUpdate = false;
