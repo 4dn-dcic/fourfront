@@ -472,6 +472,13 @@ h5.fourDN-header {
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
 	.section-joint-anlysis-data-legend {
+		> .title-col {
+			> h5 {
+				font-weight: 500;
+				padding-bottom: 12px;
+				border-bottom: 1px solid #eee;
+			}
+		}
 		font-size: 1rem;
 		> .col-sm-3 {
 			text-align: center;
