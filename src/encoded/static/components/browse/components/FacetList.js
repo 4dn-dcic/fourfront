@@ -517,7 +517,7 @@ export class FacetList extends React.Component {
 
 
     static filterFacetsForBrowse(facet, props, state){
-        
+
         if (props.browseBaseState){
             var browseBaseParams = navigate.getBrowseBaseParams(props.browseBaseState);
             if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
