@@ -253,20 +253,20 @@ class FacetTermsList extends React.Component {
         if (facet.field === 'type') terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
 
         var indicator = (
-                <Fade in={this.state.facetClosing || !this.state.facetOpen}>
-                    <span className="pull-right closed-terms-count" data-tip={terms.length + " options"}>
-                        { _.range(0, Math.min(Math.ceil(terms.length / 3), 8)).map((c)=>
-                            <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
-                        )}
-                    </span>
-                </Fade>
-            );
+            <Fade in={this.state.facetClosing || !this.state.facetOpen}>
+                <span className="pull-right closed-terms-count" data-tip={terms.length + " options"}>
+                    { _.range(0, Math.min(Math.ceil(terms.length / 3), 8)).map((c)=>
+                        <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
+                    )}
+                </span>
+            </Fade>
+        );
+
         // List of terms
         return (
             <div
                 className={"facet row" + (this.state.facetOpen ? ' open' : ' closed') + (this.state.facetClosing ? ' closing' : '')}
-                hidden={false/*this.isEmpty()*/}
-                data-field={facet.field}
+                hidden={false} data-field={facet.field}
             >
                 <h5 className="facet-title" onClick={this.handleOpenToggleClick}>
                     <span className="expand-toggle">
@@ -278,9 +278,7 @@ class FacetTermsList extends React.Component {
                     <span className="inline-block" data-tip={tooltip} data-place="right">{ facet.title || facet.field }</span>
                     { indicator }
                 </h5>
-                
-                    <Collapse in={this.state.facetOpen && !this.state.facetClosing} children={this.renderTerms(terms)}/>
-                
+                <Collapse in={this.state.facetOpen && !this.state.facetClosing} children={this.renderTerms(terms)}/>
             </div>
         );
     }
@@ -717,7 +715,7 @@ export class FacetList extends React.Component {
                 { staticFacetElements.length > 0 ?
                     <div className="row facet-list-separator">
                         <div className="col-xs-12">
-                           { staticFacetElements.length } Common Properties
+                            { staticFacetElements.length } Common Properties
                         </div>
                     </div>
                 : null }

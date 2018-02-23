@@ -287,7 +287,7 @@ class SearchBar extends React.Component{
             initialQuery = Filters.searchQueryStringFromHref(props.href) || '';
         }
         this.state = {
-            'searchAllItems' : props.href && !navigate.isBrowseHref(props.href),
+            'searchAllItems' : props.href && navigate.isSearchHref(props.href),
             'typedSearchQuery' : initialQuery
         };
     }
