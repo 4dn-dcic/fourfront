@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
-var store = require('./../../../store');
+import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';

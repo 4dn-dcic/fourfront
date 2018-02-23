@@ -1,13 +1,13 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var vizUtil = require('./../utilities');
-var { RotatedLabel, Legend } = require('./../components');
-var { console, object, isServerSide, expFxn, Filters, Schemas, layout } = require('./../../util');
-var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
-var { Toggle } = require('./../../inputs');
+import React from 'react';
+import _ from 'underscore';
+import url from 'url';
+import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import * as vizUtil from './../utilities';
+import { RotatedLabel, Legend } from './../components';
+import { console, object, isServerSide, expFxn, Filters, Schemas, layout } from './../../util';
+import { Toggle } from './../../inputs';
 import { boundActions } from './ViewContainer';
 
 /**
