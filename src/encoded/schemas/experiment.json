@@ -21,12 +21,14 @@
                 "released",
                 "current",
                 "revoked",
+                "archived",
                 "deleted",
                 "replaced",
                 "in review by lab",
                 "planned",
                 "submission in progress",
-                "released to project"
+                "released to project",
+                "archived to project"
             ]
         },
         "accession": {

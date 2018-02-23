@@ -152,8 +152,10 @@
                 "deleted",
                 "replaced",
                 "revoked",
+                "archived",
                 "released",
                 "released to project",
+                "archived to project",
                 "to be uploaded by workflow"
             ]
         },
