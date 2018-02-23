@@ -119,10 +119,10 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
 navigate.determineSeparatorChar = function(href){
     return (
         ['?','&'].indexOf(href.charAt(href.length - 1)) > -1 ? // Is last character a '&' or '?' ?
-            '' : (
-                href.match(/\?./) ?
-                '&' : '?'
-            )
+        '' : (
+            href.match(/\?./) ?
+            '&' : '?'
+        )
     );
 };
 
