@@ -541,7 +541,7 @@ def bar_plot_chart(request):
 
         if isinstance(result, list):
             result = uniq([ r for r in flatten(result) if r ]) # Flatten + Filter + Uniq into single list of vals.
-            if len(result) == 1:
+            if len(result) > 0:
                 result = result[0]
             elif len(result) == 0:
                 result = None
@@ -549,9 +549,8 @@ def bar_plot_chart(request):
             result = TERM_NAME_FOR_NO_VALUE
         return result
 
-    def get_counts_of_links_from_experiment_set(experiment_set, totals = None):
-        if totals is None:
-            totals = gen_zero_counts_dict()
+    def get_counts_of_links_from_experiment_set(experiment_set):
+        totals = gen_zero_counts_dict()
         if collect_value_from is not None:
             val = lookup_value(experiment_set, collect_value_from)
             if val == TERM_NAME_FOR_NO_VALUE:
@@ -577,21 +576,17 @@ def bar_plot_chart(request):
         field_names = [ field_obj['field'] for field_obj in field_objects ] # = e.g. ['experiments_in_set.experiment_type', 'award.project']
         terms_found = [ lookup_value(experiment_set, field_name) for field_name in field_names ]
 
-        def add_counts_to_field_term_types(field_obj, term, update_total = True, totals_by_type = None):
-            if not totals_by_type:
-                totals_by_type = gen_zero_counts_dict()
-            for counts_type in totals_by_type.keys():
-                field_obj['terms'][term][counts_type] += totals_by_type[counts_type]
-                if update_total:
-                    field_obj['total'][counts_type] += totals_by_type[counts_type]
 
         def recur_add_count(field_obj, depth=0):
             if depth >= len(terms_found):
                 return
             is_leaf_field = depth + 1 == len(terms_found)
             term = terms_found[depth]
-            if isinstance(term, list):
-                term = term[0]
+
+            counts_by_type = get_counts_of_links_from_experiment_set(experiment_set)
+            for count_type, count in counts_by_type.items():
+                field_obj['total'][count_type] += count
+
             if not is_leaf_field:
                 # Generate child field as term
                 if field_obj['terms'].get(term) is None:
@@ -602,13 +597,13 @@ def bar_plot_chart(request):
                         "terms" : {}
                     }
 
-                get_counts_of_links_from_experiment_set(experiment_set, field_obj['total'])
                 recur_add_count(field_obj['terms'][term], depth + 1)
             else:
                 if field_obj['terms'].get(term) is None:
                     field_obj['terms'][term] = gen_zero_counts_dict()
-                counts_by_type = get_counts_of_links_from_experiment_set(experiment_set)
-                add_counts_to_field_term_types(field_obj, term, True, counts_by_type)
+
+                for count_type, count in counts_by_type.items():
+                    field_obj['terms'][term][count_type] += count
 
         recur_add_count(field_objects[0], 0)
         return experiment_set
