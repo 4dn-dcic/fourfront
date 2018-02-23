@@ -444,10 +444,11 @@ export class UIControlsWrapper extends React.Component {
 
 class AggregatedLegend extends React.Component {
 
-    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets', origChildField = {}){
+    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
         if (!rootField) return null;
+
         var retField = {
-            'field' : origChildField.field,
+            'field' : null,
             'terms' : {},
             'total' : {
                 'experiment_sets' : 0,
@@ -455,9 +456,10 @@ class AggregatedLegend extends React.Component {
                 'files' : 0
             }
         };
+
         _.forEach(_.keys(rootField.terms), function(term){
             var childField = rootField.terms[term];
-            if (typeof retField.field === 'undefined') retField.field = childField.field;
+            if (typeof retField.field === 'undefined' || !retField.field) retField.field = childField.field;
 
             _.forEach(_.keys(childField.terms), function(t){
                 if (typeof retField.terms[t] === 'undefined'){
@@ -528,7 +530,7 @@ class AggregatedLegend extends React.Component {
     }
 
     render(){
-        if (!this.props.field) return null;
+        if (!this.props.field || this.props.isLoadingChartData) return null;
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             (!this.props.barplot_data_unfiltered || !this.props.field ? null :

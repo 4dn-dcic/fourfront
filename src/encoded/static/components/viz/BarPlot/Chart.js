@@ -6,6 +6,7 @@ import _ from 'underscore';
 import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
 import { console, object, isServerSide, expFxn, Schemas, layout, navigate } from './../../util';
 import { PopoverViewContainer } from './ViewContainer';
@@ -113,9 +114,9 @@ export function genChartBarDims(
             return b.term;
         };
 
-        bar.bars = vizUtil.sortObjectsByColorPalette(
+        bar.bars = barplot_color_cycler.sortObjectsByColorPalette(
             bar.bars.map(function(b){
-                return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
+                return _.extend(b, { 'color' : barplot_color_cycler.colorForNode(b) /*vizUtil.colorForNode(b)*/ });
             })
         );
 
@@ -245,11 +246,12 @@ export class Chart extends React.Component {
         //*/
     }
 
-    /**
-     * @deprecated
-     * @instance
-     * @ignore
-     */
+    /*
+    componentWillUpdate(){
+        //vizUtil.barplot_color_cycler.resetCache();
+    }
+    */
+
     componentDidUpdate(pastProps){
 
         ///*

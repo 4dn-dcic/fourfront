@@ -1,9 +1,10 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var vizUtil = require('./../utilities');
-var { console, isServerSide, Schemas, object } = require('./../../util');
+import React from 'react';
+import _ from 'underscore';
+import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
+import { console, isServerSide, Schemas, object } from './../../util';
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
 
@@ -212,7 +213,7 @@ export class Legend extends React.Component {
     static Term = Term
     static Field = Field
 
-    static barPlotFieldDataToLegendFieldsData(field, sortBy = null){
+    static barPlotFieldDataToLegendFieldsData(field, sortBy = null, colorCycler = barplot_color_cycler){
         if (Array.isArray(field) && field.length > 0 && field[0] && typeof field[0] === 'object'){
             return field.map(function(f){ return Legend.barPlotFieldDataToLegendFieldsData(f, sortBy); });
         }
@@ -222,10 +223,10 @@ export class Legend extends React.Component {
                 'field' : field.field,
                 'name' : Schemas.Term.toName(field.field, p[0]),
                 'term' : p[0],
-                'color' : vizUtil.colorForNode({
+                'color' : barplot_color_cycler.colorForNode({
                     'term' : p[0],
                     'field' : field.field
-                }, true, 'muted', null, true),
+                }),
                 'experiment_sets' : p[1].experiment_sets,
                 'experiments' : p[1].experiments,
                 'files' : p[1].files
@@ -233,7 +234,7 @@ export class Legend extends React.Component {
         });
 
         var adjustedField = _.extend({}, field, { 'terms' : terms });
-        _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField) });
+        _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField, colorCycler) });
 
         if (sortBy){
             adjustedField.terms = _.sortBy(adjustedField.terms, sortBy);
@@ -242,25 +243,22 @@ export class Legend extends React.Component {
         return adjustedField;
     }
 
-    static sortLegendFieldsTermsByColorPalette(fields, palette = 'muted'){
+    static sortLegendFieldsTermsByColorPalette(fields, colorCycler){
         return fields.map(function(f){
-            return _.extend({}, f, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(f, palette) });
+            return _.extend({}, f, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(f, colorCycler) });
         });
     }
 
-    static sortLegendFieldTermsByColorPalette(field, palette = 'muted'){
-        var orderedColorList = vizUtil.colorPalettes[palette];
-        if (!orderedColorList) {
-            console.error("No palette " + palette + ' found.');
+    static sortLegendFieldTermsByColorPalette(field, colorCycler){
+        if (!colorCycler) {
+            console.error("No ColorCycler instance supplied.");
             return field.terms;
         }
         if (field.terms && field.terms[0] && field.terms[0].color === null){
             console.warn("No colors assigned to legend terms, skipping sorting. BarPlot.UIControlsWrapper or w/e should catch lack of color and force update within 1s.");
             return field.terms;
         }
-        
-        return vizUtil.sortObjectsByColorPalette(field.terms, palette);
-
+        return colorCycler.sortObjectsByColorPalette(field.terms);
     }
 
     static totalTermsCount(fields){
