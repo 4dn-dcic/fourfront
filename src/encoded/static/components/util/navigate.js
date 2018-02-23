@@ -107,12 +107,10 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
             } else {
                 return hrefQuery[p[0]].indexOf(p[1]) > -1;
             }
+        } else if (Array.isArray(p[1])){
+            return false; // p[0] is not array as well so no match.
         } else {
-            if (Array.isArray(p[1])){
-                return false;
-            } else {
-                return hrefQuery[p[0]] === p[1];
-            }
+            return hrefQuery[p[0]] === p[1];
         }
     });
 };
@@ -121,10 +119,10 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
 navigate.determineSeparatorChar = function(href){
     return (
         ['?','&'].indexOf(href.charAt(href.length - 1)) > -1 ? // Is last character a '&' or '?' ?
-        '' : (
-            href.match(/\?./) ?
-            '&' : '?'
-        )
+            '' : (
+                href.match(/\?./) ?
+                '&' : '?'
+            )
     );
 };
 
