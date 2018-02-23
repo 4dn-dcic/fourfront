@@ -372,9 +372,7 @@ export class UIControlsWrapper extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-sm-9">
-                        { this.adjustedChildChart() }
-                    </div>
+                    <div className="col-sm-9" children={this.adjustedChildChart()} />
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
                         { this.renderGroupByFieldDropdown(contextualView) }
@@ -437,7 +435,7 @@ export class UIControlsWrapper extends React.Component {
 
 }
 
-class AggregatedLegend extends React.Component {
+export class AggregatedLegend extends React.Component {
 
     static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
         if (!rootField) return null;

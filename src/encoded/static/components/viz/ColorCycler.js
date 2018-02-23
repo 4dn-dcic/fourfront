@@ -96,7 +96,7 @@ export class ColorCycler {
         return result;
     }
 
-    colorForNode(node, nullInsteadOfDefaultColor = false){
+    colorForNode(node, cachedOnly = true, nullInsteadOfDefaultColor = false){
 
         var defaultColor = nullInsteadOfDefaultColor ? null : '#aaaaaa';
         
@@ -114,7 +114,7 @@ export class ColorCycler {
     
         // Grab from existing cache, if set.
         var existingColor = this._getFromColorCacheByField(field,term);
-        if (existingColor !== null) return existingColor;
+        if (existingColor !== null || cachedOnly) return existingColor;
     
         // Set a cycled palette color
         return this._addToColorCacheByField(field, term, null);

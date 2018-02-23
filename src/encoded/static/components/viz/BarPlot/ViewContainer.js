@@ -50,7 +50,7 @@ class BarSection extends React.Component {
      */
     render(){
         var d               = this.props.node;
-        var color           = d.color || barplot_color_cycler.colorForNode(d); //vizUtil.colorForNode(d);
+        var color           = d.color || barplot_color_cycler.colorForNode(d);
         var isSelected      = this.isSelected(),
             isHoveredOver   = this.isHoveredOver();
 

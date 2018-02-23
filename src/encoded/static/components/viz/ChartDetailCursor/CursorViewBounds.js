@@ -214,7 +214,7 @@ export default class CursorViewBounds extends React.Component {
             this.setState(newOwnState, this.registerHoverEvent.bind(this, node));
         }
 
-        if (this.props.highlightTerm && typeof vizUtil.highlightTerm === 'function') vizUtil.highlightTerm(node.field, node.term, node.color || barplot_color_cycler.colorForNode(node)/*vizUtil.colorForNode(node)*/);
+        if (this.props.highlightTerm && typeof vizUtil.highlightTerm === 'function') vizUtil.highlightTerm(node.field, node.term, node.color || barplot_color_cycler.colorForNode(node));
     }
 
     onNodeMouseLeave(node, evt){

@@ -156,7 +156,7 @@ class Body extends React.Component {
                 <h3 className="details-title">
                     <i
                         className="term-color-indicator icon icon-circle"
-                        style={{ color : leafNode.color || barplot_color_cycler.colorForNode(leafNode) /*vizUtil.colorForNode(leafNode)*/ }}
+                        style={{ color : leafNode.color || barplot_color_cycler.colorForNode(leafNode) }}
                     />
                     { this.primaryCount(leafNode) }
                     <span>{ Schemas.Term.toName(leafNode.field, leafNode.term) }</span>
