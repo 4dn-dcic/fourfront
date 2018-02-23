@@ -13,6 +13,8 @@ jest.autoMockOff();
 // Fixes https://github.com/facebook/jest/issues/78
 jest.dontMock('react');
 jest.dontMock('underscore');
+jest.mock('../util/ajax');
+jest.mock('../viz/chart-data-controller');
 
 function mapStateToProps(store) {
    return {
@@ -34,7 +36,7 @@ describe('Testing browse.js for experiment set browser', function() {
         store = require('../../store');
 
         var dispatch_vals = {
-            'href' : "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
+            'href' : "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN",
             'context' : context
         };
 

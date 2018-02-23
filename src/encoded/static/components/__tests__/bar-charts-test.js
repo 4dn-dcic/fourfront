@@ -22,7 +22,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
         //context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
         fieldEndpointResult = require('../testdata/bar_plot_aggregations_1').JSON;
-        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate";
+        href = "http://localhost:8000/browse/?award.project=4DN&type=ExperimentSetReplicate&experimentset_type=replicate";
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
@@ -33,7 +33,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
         // We let ChartDataController request the data and feed it in rather than feeding it directly to the BarPlotChart (via prop 'barplot_data_unfiltered') so as to test ChartDataController.
         var chartRequestHref = (
-            "/bar_plot_aggregations/type=ExperimentSetReplicate&experimentset_type=replicate/" +
+            "/bar_plot_aggregations/type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN/" +
             "?" + _.map(propInitialFields, function(f){ return 'field=' + f; }).join('&')
         );
 
