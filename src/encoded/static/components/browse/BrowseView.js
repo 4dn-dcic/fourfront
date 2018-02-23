@@ -380,7 +380,6 @@ export default class BrowseView extends React.Component {
                 </div>
             );
         }
-        
 
         // browse is only for experiment sets
         if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
