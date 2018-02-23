@@ -205,9 +205,10 @@ class FacetTermsList extends React.Component {
         );
     }
 
-    renderTerms(){
+    renderTerms(terms = null){
         var { facet, persistentCount } = this.props;
-        var terms = facet.terms;
+        if (!terms) terms = facet.terms;
+
         if (terms.length > this.props.persistentCount){
             var persistentTerms = terms.slice(0, persistentCount);
             var collapsibleTerms = terms.slice(persistentCount);
@@ -246,10 +247,15 @@ class FacetTermsList extends React.Component {
     render(){
         var { facet, tooltip } = this.props;
 
+        var terms = facet.terms;
+
+        // Filter out type=Item for now (hardcode)
+        if (facet.field === 'type') terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
+
         var indicator = (
                 <Fade in={this.state.facetClosing || !this.state.facetOpen}>
-                    <span className="pull-right closed-terms-count" data-tip={facet.terms.length + " options"}>
-                        { _.range(0, Math.min(Math.ceil(facet.terms.length / 3), 8)).map((c)=>
+                    <span className="pull-right closed-terms-count" data-tip={terms.length + " options"}>
+                        { _.range(0, Math.min(Math.ceil(terms.length / 3), 8)).map((c)=>
                             <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
                         )}
                     </span>
@@ -273,7 +279,7 @@ class FacetTermsList extends React.Component {
                     { indicator }
                 </h5>
                 
-                    <Collapse in={this.state.facetOpen && !this.state.facetClosing} children={this.renderTerms()}/>
+                    <Collapse in={this.state.facetOpen && !this.state.facetClosing} children={this.renderTerms(terms)}/>
                 
             </div>
         );

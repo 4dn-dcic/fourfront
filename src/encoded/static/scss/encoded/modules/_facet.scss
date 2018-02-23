@@ -389,13 +389,6 @@
             
         }
 
-        // Hide 'Data Type' : 'Item'
-        &[data-field="type"] .facet-list {
-            li[data-key="Item"]{
-                display: none;
-            }
-        }
-
         /* .facet */
         /* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
         &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .term,
