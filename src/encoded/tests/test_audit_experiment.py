@@ -85,3 +85,22 @@ def test_audit_experiments_have_raw_files_w_raw_and_cooked_files(
     res = testapp.get(expt['@id'] + '/@@audit-self')
     errors = res.json['audit']
     assert not any(errors)
+
+
+def test_audit_experiments_have_raw_files_w_file_based_on_file_status(
+        testapp, expt_data, file_data):
+    file_stati = ["uploading", "uploaded", "upload failed", "deleted", "replaced",
+                  "revoked", "released", "released to project", "to be uploaded by workflow"]
+    ok_stati = ['uploaded', 'released', 'submission in progress', 'released to project']
+    for s in file_stati:
+        file_data['status'] = s
+        fq = testapp.post_json('/file_fastq', file_data).json['@graph'][0]
+        expt_data['files'] = [fq['@id']]
+        expt = testapp.post_json('/experiment_hi_c', expt_data).json['@graph'][0]
+        res = testapp.get(expt['@id'] + '/@@audit-self')
+        errors = res.json['audit']
+        if s in ok_stati:
+            assert not any(errors)
+        else:
+                assert any(error['category'] == 'missing data' for error in errors)
+                assert any('Raw files are absent' in error['detail'] for error in errors)
