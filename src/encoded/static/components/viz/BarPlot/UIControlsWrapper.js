@@ -546,7 +546,7 @@ class AggregatedLegend extends React.Component {
         return (
             <div className="legend-container-inner" ref="container">
                 <Legend
-                    fields={(fieldForLegend && [fieldForLegend]) || null}
+                    field={fieldForLegend || null}
                     includeFieldTitles={false}
                     schemas={this.props.schemas}
                     width={this.width()}
