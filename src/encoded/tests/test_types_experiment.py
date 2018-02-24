@@ -356,7 +356,6 @@ def repset_w_exp1(testapp, replicate_experiment_set_data, experiment):
 @pytest.fixture
 def experiment2(testapp, experiment_data):
     experiment_data['experiment_type'] = 'capture Hi-C'
-    print(experiment_data)
     return testapp.post_json('/experiment_capture_c', experiment_data).json['@graph'][0]
 
 
@@ -383,6 +382,24 @@ def test_calculated_expt_produced_in_pub_for_rep_experiment_set(
     # import pdb; pdb.set_trace()
     assert 'produced_in_pub' in expres
     assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expres.json['produced_in_pub']['@id']
+
+
+def test_calculated_expt_produced_in_pub_for_expt_w_ref(
+        testapp, experiment_data, replicate_experiment_set_data, pub2_data, publication):
+    experiment_data['references'] = [publication['@id']]
+    # just check experiment by itself first
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    assert 'produced_in_pub' in expt
+    assert publication['@id'] == '/publications/' + expt['produced_in_pub'] + '/'
+    # post repset with this experiment
+    replicate_experiment_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
+    repset = testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data, status=201).json['@graph'][0]
+    # post single rep_exp_set to single pub
+    pub2_data['exp_sets_prod_in_pub'] = [repset['@id']]
+    testapp.post_json('/publication', pub2_data, status=201)
+    expinset = testapp.get(repset['replicate_exps'][0]['replicate_exp']).json
+    assert 'produced_in_pub' in expinset
+    assert publication['@id'] == expinset['produced_in_pub']['@id']
 
 
 def test_calculated_expt_produced_in_pub_for_cust_experiment_set(
