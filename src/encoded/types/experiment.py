@@ -192,6 +192,11 @@ class Experiment(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
+        # references field is the boss if it exists
+        # in each case selecting the first member if multiple
+        if self.properties.get('references'):
+            return self.properties.get('references')[0]
+
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
                  self.experiment_sets(request)]
         # replicate experiment set is the boss
@@ -245,7 +250,7 @@ class Experiment(Item):
             obj = request.embed('/', digestion_enzyme, '@@object')
             field = 'Enzyme'
         else:
-            obj = {'display_title' : None}
+            obj = {'display_title': None}
             field = 'Default'
         return {'field': field, 'value': obj['display_title']}
 
