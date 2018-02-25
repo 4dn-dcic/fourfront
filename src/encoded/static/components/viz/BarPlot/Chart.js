@@ -349,7 +349,17 @@ export class Chart extends React.Component {
 
             }
 
-            
+            var barLabelsSortedByTerm = _.map(currentBars, function(b){
+                return {
+                    'name'      : b.name || b.term,
+                    'term'      : b.term,
+                    'x'         : b.attr.x,
+                    'opacity'   : 1 //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                }; 
+            }).sort(function(a,b){
+                return a.term < b.term ? -1 : 1;
+            });
+
             return (
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
@@ -358,14 +368,7 @@ export class Chart extends React.Component {
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
                     <RotatedLabel.Axis
-                        labels={currentBars.map(function(b){ 
-                            return {
-                                name : b.name || b.term,
-                                term : b.term,
-                                x: b.attr.x,
-                                opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
-                            }; 
-                        })}
+                        labels={barLabelsSortedByTerm}
                         labelClassName="y-axis-label no-highlight-color"
                         y={5}
                         extraHeight={5}
