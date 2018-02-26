@@ -56,7 +56,7 @@ export class ColorCycler {
     }
 
     sortObjectsByColorPalette(objects){
-        
+
         var orderedColorList = this.props.colorPalette;
 
         if (!orderedColorList) {
