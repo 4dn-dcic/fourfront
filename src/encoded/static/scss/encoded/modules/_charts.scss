@@ -440,8 +440,9 @@
     }
 
     .chart-bar {
-        transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
+        transition: transform .75s ease-out, opacity .5s, width .75s ease-out, height .75s ease-out;
         position: absolute;
+        transform: translate3d(0,0,0);
         //outline-offset: 5px;
         //outline: 2px solid transparent;
 
@@ -449,6 +450,10 @@
             display: block;
             text-align: center;
             width: 100%;
+            position: absolute;
+            padding-bottom: 4px;
+            font-size: 0.875rem;
+            transform: translate3d(0,-20px,0);
         }
 
         &.larger-height .bar-top-label {
@@ -461,11 +466,7 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, -webkit-filter .5s;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, filter .5s;
-            //outline-offset: 5px;
-            //outline: 1px solid transparent;
+            transition: opacity 0.5s, width .75s, border-color .5s ease-out, background-color .5s ease-out;
             box-shadow : none;
             width: 100%;
             transform: translate3d(0,0,0);

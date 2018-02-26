@@ -65,10 +65,9 @@ class BarSection extends React.Component {
             <div
                 className={className}
                 style={{
-                    height : this.props.isNew || this.props.isRemoving ? 0 : d.attr.height,
+                    height : this.props.isNew || this.props.isRemoving ? '0%' : (d.attr.height / d.parent.attr.height) * 100 + '%',
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
-                    backgroundColor : color,
-                    
+                    backgroundColor : color
                 }}
                 ref={(r)=>{
                     if (this.props.isNew || this.props.transitioning) setTimeout(function(){
@@ -77,10 +76,11 @@ class BarSection extends React.Component {
                         });
                     }, 0);
                 }}
+                data-key={this.props['data-key'] || null}
+                data-term={d.parent ? d.term : null}
                 data-color={color}
                 data-target-height={d.attr.height}
                 key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
-                data-term={d.parent ? d.term : null}
                 onMouseEnter={(e)=>{
                     //this.setState({'hover' : true});
                     if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
@@ -125,11 +125,12 @@ class Bar extends React.Component {
         style.left = styleOpts.offset.left;
         style.bottom = styleOpts.offset.bottom;
         style.width = d.attr.width;
+        style.height = d.attr.height;
 
         return style;
     }
 
-    renderBarSection(d,i){
+    renderBarSection(d,i,all){
         var parentBarTerm = (d.parent || d).term;
         cachedBarSections[parentBarTerm][d.term] = d;
         var isNew = false;
@@ -137,9 +138,13 @@ class Bar extends React.Component {
             isNew = true;
         }
 
+        var key = d.term || d.name || i;
+
         return (
             <BarSection
-                key={d.term || i}
+                key={key}
+                data-key={key}
+                //yPos={_.reduce(all.slice(0, i), function(m, sd){  return sd.attr.height + m;  }, 0)}
                 node={d}
                 onClick={this.props.onBarPartClick}
                 onMouseEnter={this.props.onBarPartMouseEnter}
@@ -210,6 +215,20 @@ class Bar extends React.Component {
         if (!this.props.canBeHighlighted) className += ' no-highlight';
         else className += ' no-highlight-color';
 
+        var renderedBarSections = _.map(barSections, this.renderBarSection);
+
+        var topLabel = null;
+        if (this.props.showBarCount){
+            topLabel = <span
+                className="bar-top-label"
+                key="text-label"
+                children={d.count}
+                style={{
+                    //'transform' : vizUtil.style.translate3d(0, -_.reduce(barSections, function(m, sd){  return sd.attr.height + m;  }, 0), 0)
+                }}
+            />;
+        }
+
         return (
             <div
                 className={className}
@@ -228,10 +247,8 @@ class Bar extends React.Component {
                         if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
                     }
                 }}
-            >
-                { this.props.showBarCount ? <span className="bar-top-label" key="text-label">{ d.count }</span> : null }
-                { barSections.map(this.renderBarSection) }
-            </div>
+                children={[topLabel, renderedBarSections]}
+            />
         );
     }
 }
