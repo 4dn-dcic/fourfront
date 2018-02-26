@@ -553,6 +553,7 @@ export class AggregatedLegend extends React.Component {
                     expandable
                     expandableAfter={8}
                     cursorDetailActions={boundActions(this, this.props.showType)}
+                    aggregateType={this.props.aggregateType}
                 />
             </div>
         );

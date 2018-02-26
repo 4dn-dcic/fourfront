@@ -74,12 +74,11 @@ class Term extends React.Component {
         var color = this.props.color;
         if (!color) color = 'transparent';
         return (
-            <div className="term">
+            <div className="term text-ellipsis-container">
                 <span
                     onMouseEnter={this.onMouseEnter}
                     onMouseLeave={this.onMouseLeave}
                     onClick={this.onClick}
-                    className="inline-block"
                 >
                     <div
                         className="color-patch no-highlight-color"
@@ -87,6 +86,7 @@ class Term extends React.Component {
                         style={{ backgroundColor : color }}
                     />
                     { this.props.name || Schemas.Term.toName(this.props.field, this.props.term) }
+                    { this.props.aggregateType && this.props[this.props.aggregateType] ? <span className="text-300"> &nbsp;({ this.props[this.props.aggregateType] })</span> : null }
                 </span>
             </div>
         );
@@ -129,6 +129,7 @@ class Field extends React.Component {
                         selectedTerm={this.props.selectedTerm}
                         hoverTerm={this.props.hoverTerm}
                         position={i}
+                        aggregateType={this.props.aggregateType}
                     />
                 )}
             </div>
@@ -182,6 +183,7 @@ class LegendViewContainer extends React.Component {
                 { this.toggleIcon() }
                 <Legend.Field
                     {...Legend.parseFieldName(this.props.field)}
+                    aggregateType={this.props.aggregateType}
                     includeFieldTitle={this.props.includeFieldTitles}
                     onNodeMouseEnter={this.props.onNodeMouseEnter}
                     onNodeMouseLeave={this.props.onNodeMouseLeave}
@@ -278,6 +280,7 @@ export class Legend extends React.Component {
         'expandable': false,
         'expandableAfter' : 5,
         'defaultExpanded' : false,
+        'aggregateType' : 'experiment_sets',
         'title' : null //<h4 className="text-500">Legend</h4>
     }
 
