@@ -65,16 +65,10 @@ class BarSection extends React.Component {
             <div
                 className={className}
                 style={{
-                    height : this.props.isNew || this.props.isRemoving ? '0%' : (d.attr.height / d.parent.attr.height) * 100 + '%',
+                    height : d.parent ? (d.attr.height / d.parent.attr.height) * 100 + '%' : '100%',
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
-                    backgroundColor : color
-                }}
-                ref={(r)=>{
-                    if (this.props.isNew || this.props.transitioning) setTimeout(function(){
-                        vizUtil.requestAnimationFrame(function(){
-                            if (r && r.style && (r.style.height < d.attr.height)) r.style.height = d.attr.height + 'px';
-                        });
-                    }, 0);
+                    backgroundColor : color,
+                    opacity : this.props.isNew ? 0 : 1
                 }}
                 data-key={this.props['data-key'] || null}
                 data-term={d.parent ? d.term : null}
