@@ -369,14 +369,20 @@ export default class BrowseView extends React.Component {
         // no results found!
         if(context.total === 0 && context.notification){
             var seeSearchResults = null;
-            var strippedQuery = (_.omit(hrefParts.query, 'type', 'experimentset_type'));
+            var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
             if (_.keys(strippedQuery).length > 0){
-                seeSearchResults = <h4 className="text-400 mt-05"><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all items</a> instead</h4>;
+                seeSearchResults = <span> or <a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>search all items</a> instead.</span>;
             }
             return (
-                <div className="error-page text-center">
-                    <h3 className="text-500 mb-0">{context.notification}</h3>
-                    { seeSearchResults }
+                <div className="error-page">
+                    <div className="clearfix">
+                        <hr/>
+                        <h3 className="text-500 mb-0 mt-42">{ context.notification }</h3>
+                        <h4 className="text-400 mt-05 mb-45">
+                            View <a href={navigate.getBrowseBaseHref()}>all</a> Experiment Sets{ seeSearchResults }
+                        </h4>
+                        <hr/>
+                    </div>
                 </div>
             );
         }

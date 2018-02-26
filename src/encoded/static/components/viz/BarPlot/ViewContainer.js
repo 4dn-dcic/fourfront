@@ -113,7 +113,7 @@ class Bar extends React.Component {
 
         // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
         style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
-        if (d.removing && this.props.transitioning) style.opacity = 0; // Fade it out from current (opacity=1) via CSS3.
+        if ((d.removing || d.new) && this.props.transitioning) style.opacity = 0; // Fade it out from current (opacity=1) via CSS3.
         else style.opacity = 1; // 'Default' (no transitioning) style
         style.left = styleOpts.offset.left;
         style.bottom = styleOpts.offset.bottom;
@@ -209,6 +209,10 @@ class Bar extends React.Component {
         if (!this.props.canBeHighlighted) className += ' no-highlight';
         else className += ' no-highlight-color';
 
+        if (transitioning)      className += ' transitioning';
+        if (d.new)              className += ' new-bar';
+        else if (d.existing)    className += ' existing-bar';
+
         var renderedBarSections = _.map(
             barplot_color_cycler.sortObjectsByColorPalette(barSections).reverse(), // Remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
             this.renderBarSection
@@ -235,6 +239,7 @@ class Bar extends React.Component {
                         // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
                         d3.select(r).datum(d);
                         if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
+                        if (d.new && transitioning) r.style.opacity = 1;
                     }
                 }}
                 children={[topLabel, renderedBarSections]}
@@ -285,8 +290,10 @@ export class ViewContainer extends React.Component {
         // Current Bars only (unless transitioning).
         barsToRender = currentBars = this.props.bars.map((d)=>{
             // Determine whether bar existed before.
+            var isExisting = typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null;
             return _.extend(d, { 
-                'existing' : typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null
+                'existing' : isExisting,
+                'new' : !isExisting
             });
         });
 

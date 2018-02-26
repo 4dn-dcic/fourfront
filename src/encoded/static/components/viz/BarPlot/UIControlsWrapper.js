@@ -80,7 +80,7 @@ export class UIControlsWrapper extends React.Component {
 
         this.state = {
             'aggregateType' : 'experiment_sets',
-            'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) ? 'all' : 'filtered',
+            'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) || (props.barplot_data_filtered && props.barplot_data_filtered.total.experiment_sets === 0) ? 'all' : 'filtered',
             'openDropdown' : null
         };
     }
@@ -88,16 +88,22 @@ export class UIControlsWrapper extends React.Component {
     componentWillReceiveProps(nextProps){
         if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) &&
-            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) && (
+            (
+                this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0)
+            ) && (
+                !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets > 0)
+            ) && (
                 this.state.showState === 'all'
             )
         ){
             this.setState({ 'showState' : 'filtered' });
         } else if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) &&
-            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) && (
+            (
+                this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets === 0)
+            ) && (
+                !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets > 0)
+            ) && (
                 this.state.showState === 'filtered'
             )
         ){
@@ -249,7 +255,7 @@ export class UIControlsWrapper extends React.Component {
     renderShowTypeDropdown(contextualView){
         if (contextualView === 'home') return null;
         // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href);
+        var isSelectedDisabled = (this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href)) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0);
         return (
             <div className="show-type-change-section">
                 <h6 className="dropdown-heading">Show</h6>
@@ -523,15 +529,16 @@ export class AggregatedLegend extends React.Component {
     }
 
     render(){
-        if (!this.props.field || !this.props.barplot_data_unfiltered || this.props.isLoadingChartData) return null;
+        var { field, barplot_data_unfiltered, barplot_data_filtered, isLoadingChartData, aggregateType, showType } = this.props;
+        if (!field || !barplot_data_unfiltered || isLoadingChartData || (barplot_data_unfiltered.total && barplot_data_unfiltered.total.experiment_sets === 0)) return null;
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             AggregatedLegend.collectSubDivisionFieldTermCounts(
-                this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered || this.props.barplot_data_unfiltered,
-                this.props.aggregateType || 'experiment_sets',
-                this.props.field
+                showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered || barplot_data_unfiltered,
+                aggregateType || 'experiment_sets',
+                field
             ),
-            (term) => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
+            (term) => typeof term[aggregateType] === 'number' ? -term[aggregateType] : 'term'
         );
 
         this.shouldUpdate = false;
@@ -550,10 +557,10 @@ export class AggregatedLegend extends React.Component {
                     width={this.width()}
                     height={this.height()}
                     hasPopover
-                    expandable
-                    expandableAfter={8}
-                    cursorDetailActions={boundActions(this, this.props.showType)}
-                    aggregateType={this.props.aggregateType}
+                    //expandable
+                    //expandableAfter={8}
+                    cursorDetailActions={boundActions(this, showType)}
+                    aggregateType={aggregateType}
                 />
             </div>
         );
