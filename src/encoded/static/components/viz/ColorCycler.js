@@ -68,10 +68,10 @@ export class ColorCycler {
             console.warn("No colors assigned to objects.");
             return objects;
         }
-    
+
         var groups = _.groupBy(objects, 'color');
         var runs = 0;
-    
+
         function getSortedSection(){
             return _.map(orderedColorList, function(color){
                 var o = groups[color] && groups[color].shift();
@@ -82,40 +82,40 @@ export class ColorCycler {
                 return true;
             });
         }
-    
+
         var result = [];
         while (_.keys(groups).length > 0 && runs < 20){
             result = result.concat(getSortedSection());
             runs++;
         }
-    
+
         if (runs > 1){
             console.warn("sortObjectsByColorPalette took longer than 1 run: " + runs, groups);
         }
-    
+
         return result;
     }
 
     colorForNode(node, cachedOnly = true, nullInsteadOfDefaultColor = false){
 
         var defaultColor = nullInsteadOfDefaultColor ? null : '#aaaaaa';
-        
+
         var nodeDatum = node.data || node, // Handle both pre-D3-ified and post-D3-ified nodes.
             field = nodeDatum.field || null,
             term = (nodeDatum.term && nodeDatum.term.toLowerCase()) || null;
-    
-    
+
+
         // Handle exceptions first
         if (nodeDatum.color){
             return nodeDatum.color;
         } else if (field === 'accession'){ // This is an experiment_set node. We give it a unique color.
             return defaultColor;
         }
-    
+
         // Grab from existing cache, if set.
         var existingColor = this._getFromColorCacheByField(field,term);
         if (existingColor !== null || cachedOnly) return existingColor;
-    
+
         // Set a cycled palette color
         return this._addToColorCacheByField(field, term, null);
     }
