@@ -928,6 +928,7 @@ def get_iterable_search_results(request, search_path='/search/', param_lists={"t
     '''
     param_lists['limit'] = ['all']
     param_lists['from'] = [0]
+    param_lists['sort'] = param_lists.get('sort','uuid')
     subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
     return iter_search_results(None, subreq)
 

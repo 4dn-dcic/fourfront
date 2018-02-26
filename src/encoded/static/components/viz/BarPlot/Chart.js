@@ -6,6 +6,7 @@ import _ from 'underscore';
 import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
 import { console, object, isServerSide, expFxn, Schemas, layout, navigate } from './../../util';
 import { PopoverViewContainer } from './ViewContainer';
@@ -34,8 +35,6 @@ export function genChartBarDims(
     useOnlyPopulatedFields  = false,
     fullHeightCount         = null
 ){
-    
-    var topIndex = 0;
 
     
     var numberOfTerms = _.keys(rootField.terms).length;
@@ -53,6 +52,13 @@ export function genChartBarDims(
     var availWidthPerBar = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap);
     var barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
     var barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
+
+    var sortByAggrCount = function(b){
+        if (typeof b[aggregateType] === 'number'){
+            return b[aggregateType];
+        }
+        return b.term;
+    };
 
     function genBarData(fieldObj, outerDims = insetDims, parent = null){
         return _(fieldObj.terms).chain()
@@ -87,8 +93,12 @@ export function genChartBarDims(
                 }
                 return barNode;
             })
+            .sortBy('term')
             .sortBy(function(d){ return -d.attr.height; })
             .forEach(function(d,i){
+                if (Array.isArray(d.bars)){
+                    d.bars = _.sortBy(_.sortBy(d.bars, 'term'), sortByAggrCount);
+                }
                 d.attr.x = barXCoords[i];
             })
             .value();
@@ -100,27 +110,32 @@ export function genChartBarDims(
         'fullHeightCount' : largestExpCountForATerm
     };
 
-    barData.bars.forEach(function(bar){
 
-        var hasSubSections = Array.isArray(bar.bars);
-
-        if (!hasSubSections) return;
-
-        var sortByAggrCount = function(b){
-            if (typeof b[aggregateType] === 'number'){
-                return -b[aggregateType];
+    // Assign colors based on sub-field total decr. counts
+    var fauxOrderedSubFieldNodesForColorAssignment = _.sortBy(_.sortBy(_.values(_.reduce(barData.bars, function(m,bar){
+        if (!Array.isArray(bar.bars)) return m;
+        _.forEach(bar.bars, function(b){
+            if (typeof m[b.term] === 'undefined'){
+                m[b.term] = {
+                    'count' : 0,
+                    'term' : b.term,
+                    'field' : b.field
+                };
             }
-            return b.term;
-        };
+            m[b.term].count += b[aggregateType] || 0;
+        });
+        return m;
+    }, {})), 'term'), function(n){ return -n.count; });
 
-        bar.bars = vizUtil.sortObjectsByColorPalette(
-            bar.bars.map(function(b){
-                return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
-            })
-        );
+    _.forEach(fauxOrderedSubFieldNodesForColorAssignment, function(n){
+        barplot_color_cycler.colorForNode(n, false);
+    });
 
-        bar.bars = _.sortBy(bar.bars, sortByAggrCount);
-
+    _.forEach(barData.bars, function(bar){
+        if (!Array.isArray(bar.bars)) return;
+        _.forEach(bar.bars, function(b){
+            return _.extend(b, { 'color' : barplot_color_cycler.colorForNode(b) });
+        });
     });
 
 
@@ -245,11 +260,12 @@ export class Chart extends React.Component {
         //*/
     }
 
-    /**
-     * @deprecated
-     * @instance
-     * @ignore
-     */
+
+    componentWillUpdate(){
+        // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
+        barplot_color_cycler.resetCache();
+    }
+
     componentDidUpdate(pastProps){
 
         ///*
@@ -333,7 +349,17 @@ export class Chart extends React.Component {
 
             }
 
-            
+            var barLabelsSortedByTerm = _.map(currentBars, function(b){
+                return {
+                    'name'      : b.name || b.term,
+                    'term'      : b.term,
+                    'x'         : b.attr.x,
+                    'opacity'   : 1 //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                }; 
+            }).sort(function(a,b){
+                return a.term < b.term ? -1 : 1;
+            });
+
             return (
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
@@ -342,15 +368,7 @@ export class Chart extends React.Component {
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
                     <RotatedLabel.Axis
-                        labels={currentBars.map(function(b){ 
-                            return {
-                                name : b.name || b.term,
-                                term : b.term,
-                                x: b.attr.x,
-                                opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
-                                //color : vizUtil.colorForNode(b, true, null, null, true)
-                            }; 
-                        })}
+                        labels={barLabelsSortedByTerm}
                         labelClassName="y-axis-label no-highlight-color"
                         y={5}
                         extraHeight={5}

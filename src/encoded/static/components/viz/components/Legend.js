@@ -1,11 +1,20 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var vizUtil = require('./../utilities');
-var { console, isServerSide, Schemas, object } = require('./../../util');
+import React from 'react';
+import _ from 'underscore';
+import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
+import { console, isServerSide, Schemas, object } from './../../util';
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
+
+
+/**
+ * @typedef {Object} FieldObject
+ * @prop {string} field - Dot-separated field identifier string.
+ * @prop {string} name - Human-readable title or name of field.
+ * @prop {{ term: string, field: string, color: string, experiment_sets: number, experiments: number, files: number }[]} terms - List of terms in field.
+ */
 
 
 /**
@@ -148,7 +157,7 @@ class LegendViewContainer extends React.Component {
         }
     }
 
-    showToggleIcon(){ return this.props.expandable && Legend.totalTermsCount(this.props.fields) > this.props.expandableAfter; }
+    showToggleIcon(){ return this.props.expandable && this.props.field.terms && this.props.field.terms.length > this.props.expandableAfter; }
 
     toggleIcon(){
         if (!this.showToggleIcon()) return null;
@@ -161,34 +170,25 @@ class LegendViewContainer extends React.Component {
     }
 
     /**
-     * @returns {Element} Div element containing props.title and list of {@link module:viz/components.Legend.Field} components.
+     * @returns {JSX.Element} Div element containing props.title and list of {@link Legend.Field} components.
      */
     render(){
-        if (!this.props.fields) return null;
+        if (!this.props.field || !this.props.field.field) return null;
         var className = 'legend ' + this.props.className;
         if (this.props && this.props.expanded) className += ' expanded';
         return (
-            <div className={className} id={this.props.id} style={{
-                opacity : !Array.isArray(this.props.fields) ? 0 : 1,
-                width : this.props.width || null
-            }}>
+            <div className={className} id={this.props.id} style={{ 'width' : this.props.width || null }}>
                 { this.props.title }
                 { this.toggleIcon() }
-                { Array.isArray(this.props.fields) ?
-                    Legend.parseFieldNames(this.props.fields, this.props.schemas || null)
-                    .map((field)=>
-                        <Legend.Field
-                            includeFieldTitle={this.props.includeFieldTitles}
-                            {...field}
-                            onNodeMouseEnter={this.props.onNodeMouseEnter}
-                            onNodeMouseLeave={this.props.onNodeMouseLeave}
-                            onNodeClick={this.props.onNodeClick}
-                            selectedTerm={this.props.selectedTerm}
-                            hoverTerm={this.props.hoverTerm}
-                            key={field.field}
-                        />
-                    ) 
-                : null }
+                <Legend.Field
+                    {...Legend.parseFieldName(this.props.field)}
+                    includeFieldTitle={this.props.includeFieldTitles}
+                    onNodeMouseEnter={this.props.onNodeMouseEnter}
+                    onNodeMouseLeave={this.props.onNodeMouseLeave}
+                    onNodeClick={this.props.onNodeClick}
+                    selectedTerm={this.props.selectedTerm}
+                    hoverTerm={this.props.hoverTerm}
+                />
             </div>
         );
 
@@ -201,18 +201,18 @@ class LegendViewContainer extends React.Component {
  * 
  * @class Legend
  * @type {Component}
- * @prop {Object[]} fields - List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
+ * @prop {FieldObject} field - Object containing at least 'field', in object dot notation, and 'terms'.
  * @prop {boolean} includeFieldTitle - Whether to show field title at top of terms.
  * @prop {string} className - Optional className to add to Legend's outermost div container.
  * @prop {number} width - How wide should the legend container element (<div>) be.
- * @prop {string|Element|Component} title - Optional title to display at top of fields.
+ * @prop {string|Element|Component} title - Optional title to display at top of legend.
  */
 export class Legend extends React.Component {
 
     static Term = Term
     static Field = Field
 
-    static barPlotFieldDataToLegendFieldsData(field, sortBy = null){
+    static barPlotFieldDataToLegendFieldsData(field, sortBy = null, colorCycler = barplot_color_cycler){
         if (Array.isArray(field) && field.length > 0 && field[0] && typeof field[0] === 'object'){
             return field.map(function(f){ return Legend.barPlotFieldDataToLegendFieldsData(f, sortBy); });
         }
@@ -222,10 +222,10 @@ export class Legend extends React.Component {
                 'field' : field.field,
                 'name' : Schemas.Term.toName(field.field, p[0]),
                 'term' : p[0],
-                'color' : vizUtil.colorForNode({
+                'color' : barplot_color_cycler.colorForNode({
                     'term' : p[0],
                     'field' : field.field
-                }, true, 'muted', null, true),
+                }),
                 'experiment_sets' : p[1].experiment_sets,
                 'experiments' : p[1].experiments,
                 'files' : p[1].files
@@ -233,7 +233,7 @@ export class Legend extends React.Component {
         });
 
         var adjustedField = _.extend({}, field, { 'terms' : terms });
-        _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField) });
+        _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField, colorCycler) });
 
         if (sortBy){
             adjustedField.terms = _.sortBy(adjustedField.terms, sortBy);
@@ -242,51 +242,35 @@ export class Legend extends React.Component {
         return adjustedField;
     }
 
-    static sortLegendFieldsTermsByColorPalette(fields, palette = 'muted'){
-        return fields.map(function(f){
-            return _.extend({}, f, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(f, palette) });
-        });
-    }
-
-    static sortLegendFieldTermsByColorPalette(field, palette = 'muted'){
-        var orderedColorList = vizUtil.colorPalettes[palette];
-        if (!orderedColorList) {
-            console.error("No palette " + palette + ' found.');
+    static sortLegendFieldTermsByColorPalette(field, colorCycler){
+        if (!colorCycler) {
+            console.error("No ColorCycler instance supplied.");
             return field.terms;
         }
         if (field.terms && field.terms[0] && field.terms[0].color === null){
             console.warn("No colors assigned to legend terms, skipping sorting. BarPlot.UIControlsWrapper or w/e should catch lack of color and force update within 1s.");
             return field.terms;
         }
-        
-        return vizUtil.sortObjectsByColorPalette(field.terms, palette);
-
-    }
-
-    static totalTermsCount(fields){
-        return _.reduce(fields, function(m,field){ return m + (field.terms || []).length; }, 0);
+        return colorCycler.sortObjectsByColorPalette(field.terms);
     }
 
     /**
-     * @param {Object[]} fields - List of field objects, each containing at least a title, name, or field.
+     * @param {FieldObject} field - Field object containing at least a title, name, or field.
      * @param {{Object}} schemas - Schemas object passed down from app.state. 
-     * @returns {Object[]} Modified field objects.
+     * @returns {FieldObject} Modified field object.
      */
-    static parseFieldNames(fields, schemas){
-        return fields.map(function(field){
-            if (!field.title && !field.name) {
-                return _.extend({} , field, {
-                    'name' : Schemas.Field.toName(field.field, schemas || null)
-                });
-            }
-            return field;
-        });
+    static parseFieldName(field, schemas = null){
+        if (!field.title && !field.name) {
+            return _.extend({} , field, {
+                'name' : Schemas.Field.toName(field.field, schemas)
+            });
+        }
+        return field;
     }
 
     static defaultProps = {
         'hasPopover' : false,
         'position' : 'absolute',
-        'fields' : [],
         'id' : null,
         'className' : 'chart-color-legend',
         'width' : null,
@@ -359,11 +343,7 @@ class LegendExpandContainer extends React.Component {
         } else {
             var className = "legend-expand-container";
             if (this.state.expanded) className += ' expanded';
-            return (
-                <div className={className}>
-                    { this.legendComponent() }
-                </div>
-            );
+            return <div className={className} children={this.legendComponent()} />;
         }
     }
 

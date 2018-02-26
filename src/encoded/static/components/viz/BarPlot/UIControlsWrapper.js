@@ -356,12 +356,7 @@ export class UIControlsWrapper extends React.Component {
                                     id="select-barplot-aggregate-type"
                                     bsSize="xsmall"
                                     onSelect={this.handleAggregateTypeSelect}
-                                    title={(() => {
-                                        //if (this.state.openDropdown === 'yAxis'){
-                                        //    return 'Y-Axis Aggregation';
-                                        //}
-                                        return this.titleMap(this.state.aggregateType);
-                                    })()}
+                                    title={this.titleMap(this.state.aggregateType)}
                                     onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
                                     children={this.renderDropDownMenuItems(
                                         ['experiment_sets','experiments','files'],
@@ -377,9 +372,7 @@ export class UIControlsWrapper extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-sm-9">
-                        { this.adjustedChildChart() }
-                    </div>
+                    <div className="col-sm-9" children={this.adjustedChildChart()} />
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
                         { this.renderGroupByFieldDropdown(contextualView) }
@@ -442,12 +435,13 @@ export class UIControlsWrapper extends React.Component {
 
 }
 
-class AggregatedLegend extends React.Component {
+export class AggregatedLegend extends React.Component {
 
-    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets', origChildField = {}){
+    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
         if (!rootField) return null;
+
         var retField = {
-            'field' : origChildField.field,
+            'field' : null,
             'terms' : {},
             'total' : {
                 'experiment_sets' : 0,
@@ -455,9 +449,10 @@ class AggregatedLegend extends React.Component {
                 'files' : 0
             }
         };
+
         _.forEach(_.keys(rootField.terms), function(term){
             var childField = rootField.terms[term];
-            if (typeof retField.field === 'undefined') retField.field = childField.field;
+            if (typeof retField.field === 'undefined' || !retField.field) retField.field = childField.field;
 
             _.forEach(_.keys(childField.terms), function(t){
                 if (typeof retField.terms[t] === 'undefined'){
@@ -528,13 +523,15 @@ class AggregatedLegend extends React.Component {
     }
 
     render(){
-        if (!this.props.field) return null;
+        if (!this.props.field || !this.props.barplot_data_unfiltered || this.props.isLoadingChartData) return null;
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            (!this.props.barplot_data_unfiltered || !this.props.field ? null :
-                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets', this.props.field)
+            AggregatedLegend.collectSubDivisionFieldTermCounts(
+                this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered || this.props.barplot_data_unfiltered,
+                this.props.aggregateType || 'experiment_sets',
+                this.props.field
             ),
-            term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
+            (term) => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
         );
 
         this.shouldUpdate = false;
@@ -547,7 +544,7 @@ class AggregatedLegend extends React.Component {
         return (
             <div className="legend-container-inner" ref="container">
                 <Legend
-                    fields={(fieldForLegend && [fieldForLegend]) || null}
+                    field={fieldForLegend || null}
                     includeFieldTitles={false}
                     schemas={this.props.schemas}
                     width={this.width()}
