@@ -55,7 +55,7 @@ export class ColorCycler {
         return color;
     }
 
-    sortObjectsByColorPalette(objects){
+    sortObjectsByColorPalette(objects, colorProperty = 'color'){
 
         var orderedColorList = this.props.colorPalette;
 
@@ -69,12 +69,12 @@ export class ColorCycler {
             return objects;
         }
 
-        var groups = _.groupBy(objects, 'color');
+        var groups = _.groupBy(objects, colorProperty);
         var runs = 0;
 
         function getSortedSection(){
             return _.map(orderedColorList, function(color){
-                var o = groups[color] && groups[color].shift();
+                var o = groups[color] && groups[color].pop();
                 if (groups[color] && groups[color].length === 0) delete groups[color];
                 return o;
             }).filter(function(o){

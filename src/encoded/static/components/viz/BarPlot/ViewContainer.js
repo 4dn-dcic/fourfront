@@ -67,8 +67,7 @@ class BarSection extends React.Component {
                 style={{
                     height : d.parent ? (d.attr.height / d.parent.attr.height) * 100 + '%' : '100%',
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
-                    backgroundColor : color,
-                    opacity : this.props.isNew ? 0 : 1
+                    backgroundColor : color
                 }}
                 data-key={this.props['data-key'] || null}
                 data-term={d.parent ? d.term : null}
@@ -125,12 +124,12 @@ class Bar extends React.Component {
     }
 
     renderBarSection(d,i,all){
-        var parentBarTerm = (d.parent || d).term;
-        cachedBarSections[parentBarTerm][d.term] = d;
-        var isNew = false;
-        if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
-            isNew = true;
-        }
+        //var parentBarTerm = (d.parent || d).term;
+        //cachedBarSections[parentBarTerm][d.term] = d;
+        //var isNew = false;
+        //if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
+        //    isNew = true;
+        //}
 
         var key = d.term || d.name || i;
 
@@ -138,7 +137,6 @@ class Bar extends React.Component {
             <BarSection
                 key={key}
                 data-key={key}
-                //yPos={_.reduce(all.slice(0, i), function(m, sd){  return sd.attr.height + m;  }, 0)}
                 node={d}
                 onClick={this.props.onBarPartClick}
                 onMouseEnter={this.props.onBarPartMouseEnter}
@@ -148,7 +146,7 @@ class Bar extends React.Component {
                 selectedTerm={this.props.selectedTerm}
                 hoverParentTerm={this.props.hoverParentTerm}
                 hoverTerm={this.props.hoverTerm}
-                isNew={isNew}
+                //isNew={isNew}
                 isRemoving={d.removing}
                 transitioning={this.props.transitioning}
                 canBeHighlighted={this.props.canBeHighlighted}
@@ -174,6 +172,7 @@ class Bar extends React.Component {
         );
 
         // If transitioning, add existing bar sections to fade out.
+        /* Removed for now as we don't transition barSections currently
         if (transitioning && cachedPastBarSections[d.term]){
             barSections = barSections.concat(
                 _.map(
@@ -204,23 +203,20 @@ class Bar extends React.Component {
                 )
             );
         }
+        */
 
         var className = "chart-bar";
         if (!this.props.canBeHighlighted) className += ' no-highlight';
         else className += ' no-highlight-color';
 
-        var renderedBarSections = _.map(barSections, this.renderBarSection);
+        var renderedBarSections = _.map(
+            barplot_color_cycler.sortObjectsByColorPalette(barSections).reverse(), // Remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
+            this.renderBarSection
+        );
 
         var topLabel = null;
         if (this.props.showBarCount){
-            topLabel = <span
-                className="bar-top-label"
-                key="text-label"
-                children={d.count}
-                style={{
-                    //'transform' : vizUtil.style.translate3d(0, -_.reduce(barSections, function(m, sd){  return sd.attr.height + m;  }, 0), 0)
-                }}
-            />;
+            topLabel = <span className="bar-top-label" key="text-label" children={d.count} />;
         }
 
         return (
