@@ -334,7 +334,7 @@ export class ViewContainer extends React.Component {
         return (
             <div
                 className="bar-plot-chart chart-container no-highlight"
-                data-field={this.props.topLevelField}
+                data-field={this.props.topLevelField.field}
                 style={{ height : this.props.height, width: this.props.width }}
                 ref="container"
                 /*

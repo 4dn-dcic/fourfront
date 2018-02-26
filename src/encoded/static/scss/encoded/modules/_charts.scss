@@ -371,6 +371,7 @@
     display: block;
     position: absolute;
     transition: height .75s ease-out;
+    transform: translate3d(0,0,0);
     //overflow: hidden;
 
     line.y-axis-top {
@@ -469,7 +470,6 @@
             transition: opacity 0.5s, width .75s, border-color .5s ease-out, background-color .5s ease-out;
             box-shadow : none;
             width: 100%;
-            transform: translate3d(0,0,0);
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;

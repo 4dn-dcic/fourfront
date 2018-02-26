@@ -459,8 +459,8 @@ export default class ChartDetailCursor extends React.Component {
 
         var isVisible = this.state.sticky || (Array.isArray(this.state.path) && this.state.path.length > 0);
 
-        if (!isVisible) return null;
-        else return (
+        //if (!isVisible) return null;
+        return (
             <CursorComponent
                 {...containDims}
                 containingElement={this.props.containingElement}
