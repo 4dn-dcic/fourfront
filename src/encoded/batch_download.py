@@ -36,36 +36,39 @@ def includeme(config):
     config.add_route('report_download', '/report.tsv')
     config.scan(__name__)
 
+EXP_SET = 0
+EXP     = 1
+FILE    = 2
 
 # includes concatenated properties
-_tsv_mapping = OrderedDict([
-    ('File Download URL', ['experiments_in_set.files.href']),
-    ('Experiment Set Accession', ['accession']),
-    ('Experiment Accession', ['experiments_in_set.accession']),
-    ('File Accession', ['experiments_in_set.files.accession']),
-    ('Size', ['experiments_in_set.files.file_size']),
-    ('md5sum', ['experiments_in_set.files.md5sum']),
+TSV_MAPPING = OrderedDict([
+    ('File Download URL',           (FILE,       ['href'])),
+    ('Experiment Set Accession',    (EXP_SET,    ['accession'])),
+    ('Experiment Accession',        (EXP,        ['accession'])),
+    ('File Accession',              (FILE,       ['accession'])),
+    ('Size',                        (FILE,       ['file_size'])),
+    ('md5sum',                      (FILE,       ['md5sum'])),
 
-    ('File Format', ['experiments_in_set.files.file_format']),
+    ('File Format',                 (FILE,       ['file_format'])),
     #('Output type', ['output_type']),
-    ('Experiment Title', ['experiments_in_set.display_title']),
-    ('Experiment Type', ['experiments_in_set.experiment_type']),
-    ('Bio Rep No', ['replicate_exps.bio_rep_no']),
-    ('Tech Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
+    ('Experiment Title',            (EXP,        ['display_title'])),
+    ('Experiment Type',             (EXP,        ['experiment_type'])),
+    ('Bio Rep No',                  (EXP_SET,    ['replicate_exps.bio_rep_no'])),
+    ('Tech Rep No',                 (EXP_SET,    ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession'])),
 
     #('Assay', ['assay_term_name']),
     #('Biosample term id', ['biosample_term_id']),
     #('Biosample term name', ['biosample_term_name']),
-    ('Biosource', ['experiments_in_set.biosample.biosource_summary']),
-    ('Biosource Type', ['experiments_in_set.biosample.biosource.biosource_type']),
-    ('Organism', ['experiments_in_set.biosample.biosource.individual.organism.name']),
-    ('Digestion Enzyme', ['experiments_in_set.digestion_enzyme.name']),
-    ('Related File Relationship', ['experiments_in_set.files.related_files.relationship_type']),
-    ('Related File', ['experiments_in_set.files.related_files.file.accession']),
-    ('Paired end', ['experiments_in_set.files.paired_end']),
-    ('Lab', ['lab.title']),
-    ('Project', ['award.project']),
-    ('Status', ['status']),
+    ('Biosource',                   (EXP,        ['biosample.biosource_summary'])),
+    ('Biosource Type',              (EXP,        ['biosample.biosource.biosource_type'])),
+    ('Organism',                    (EXP,        ['biosample.biosource.individual.organism.name'])),
+    ('Digestion Enzyme',            (EXP,        ['digestion_enzyme.name'])),
+    ('Related File Relationship',   (FILE,       ['related_files.relationship_type'])),
+    ('Related File',                (FILE,       ['related_files.file.accession'])),
+    ('Paired end',                  (FILE,       ['paired_end'])),
+    ('Lab',                         (EXP_SET,    ['lab.title'])),
+    ('Project',                     (EXP_SET,    ['award.project'])),
+    ('Status',                      (EXP_SET,    ['status'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
     #('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
@@ -229,7 +232,7 @@ def metadata_tsv(context, request):
             except:
                 pass
         if body is not None and body.get('accession_triples'):
-            accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
+            accession_triples = [ (accDict.get('accession', 'NONE'), accDict.get('experiments_in_set.accession', 'NONE'), accDict.get('experiments_in_set.files.accession', 'NONE') ) for accDict in body['accession_triples'] ]
         if body is not None and body.get('download_file_name'):
             filename_to_suggest = body['download_file_name']
 
@@ -239,13 +242,17 @@ def metadata_tsv(context, request):
         search_path = '/search/'
     param_list['field'] = []
     header = []
-    for prop in _tsv_mapping:
+    for prop in TSV_MAPPING:
         header.append(prop)
-        param_list['field'] = param_list['field'] + _tsv_mapping[prop]
-        for param_field in _tsv_mapping[prop]:
-            if 'experiments_in_set.files.' in param_field:
-                param_list['field'].append(param_field.replace('experiments_in_set.files.', 'experiments_in_set.processed_files.'))
-                param_list['field'].append(param_field.replace('experiments_in_set.files.', 'processed_files.'))
+        for param_field in TSV_MAPPING[prop][1]:
+            if TSV_MAPPING[prop][0] == EXP_SET:
+                param_list['field'].append(param_field)
+            if TSV_MAPPING[prop][0] == EXP:
+                param_list['field'].append('experiments_in_set.' + param_field)
+            if TSV_MAPPING[prop][0] == FILE:
+                param_list['field'].append('experiments_in_set.files.' + param_field)
+                param_list['field'].append('experiments_in_set.processed_files.' + param_field)
+                param_list['field'].append('processed_files.' + param_field)
 
     # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
@@ -257,7 +264,7 @@ def metadata_tsv(context, request):
 
     def get_value_for_column(item, col, columnKeyStart = 0):
         temp = []
-        for c in _tsv_mapping[col]:
+        for c in TSV_MAPPING[col][1]:
             c_value = []
             for value in simple_path_ids(item, c[columnKeyStart:]):
                 if str(value) not in c_value:
@@ -285,20 +292,20 @@ def metadata_tsv(context, request):
         '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
-        for triple in accession_triples:
+        for set_accession, exp_accession, file_accession in accession_triples:
             if (
-                triple[0] == column_vals_dict['Experiment Set Accession'] and
-                (triple[1] == column_vals_dict['Experiment Accession'] or triple[1] == 'NONE') and
-                triple[2] == column_vals_dict['File Accession']
+                (set_accession  == column_vals_dict['Experiment Set Accession'] or set_accession  == 'NONE') and
+                (exp_accession  == column_vals_dict['Experiment Accession']     or exp_accession  == 'NONE') and
+                (file_accession == column_vals_dict['File Accession']           or file_accession == 'NONE')
             ):
                 return True
         return False
 
     def format_experiment_set(exp_set):
         exp_set_row_vals = {}
-        for column in header:
-            if not _tsv_mapping[column][0].startswith('experiments_in_set'):
-                exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
+        exp_set_cols = [ col for col in header if TSV_MAPPING[col][0] == EXP_SET ]
+        for column in exp_set_cols:
+            exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
 
         # Flatten map's child result maps up to self.
         return chain(
@@ -317,22 +324,24 @@ def metadata_tsv(context, request):
 
     def format_experiment(exp, exp_set, exp_set_row_vals):
         exp_row_vals = {}
-        for column in header:
-            if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
-                exp_row_vals[column] = get_value_for_column(exp, column, 19)
+        exp_cols = [ col for col in header if TSV_MAPPING[col][0] == EXP ]
+        for column in exp_cols:
+            exp_row_vals[column] = get_value_for_column(exp, column)
 
         return map(
             lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
-            sorted(exp.get('files', []) + exp.get('processed_files', []), key=lambda d: d.get("accession") )
+            sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
         )
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
         f['href'] = request.host_url + f['href']
         f_row_vals = {}
-        for column in header:
-            if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
-                exp_row_vals[column] = get_value_for_column(f, column, 25)
+        file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE ]
+        for column in file_cols:
+            f_row_vals[column] = get_value_for_column(f, column)
+
+        #print('\n\n\nP1', f_row_vals, '\n', f)
 
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
 
@@ -345,7 +354,7 @@ def metadata_tsv(context, request):
 
     def format_graph_of_experiment_sets(graph):
         return map(
-            lambda file_row_object: [ file_row_object.get(column, 'N/A') for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
+            lambda file_row_object: [ file_row_object.get(column) or 'N/A' for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
             filter(
                 should_file_row_object_be_included,
                 chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
