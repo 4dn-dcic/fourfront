@@ -518,8 +518,10 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         for rs in requested_sorts:
             add_to_sort_dict(rs)
 
+    text_search = search_term.get('q')
+
     # Otherwise we use a default sort only when there's no text search to be ranked
-    if not sort and (search_term == '*' or not any(search_term)):
+    if not sort and (text_search == '*' or not text_search):
         # If searching for a single type, look for sort options in its schema
         if type_schema:
             if 'sort_by' in type_schema:
