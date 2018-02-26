@@ -73,7 +73,6 @@ export function buildSearchHref(unselectHref, field, term, searchBase){
  *
  * @param {string}  field               Field, in object dot notation.
  * @param {string}  term                Term to add/remove from active filters.
- * @param {string}  [experimentsOrSets='experiments'] - Informs whether we're standardizing field to experiments_in_set or not. Defaults to 'experiments'.
  * @param {Object}  [expSetFilters]     The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
  * @param {function}[callback]          Callback function to call after updating redux store.
  * @param {boolean} [returnInsteadOfSave=false]  - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
@@ -89,31 +88,37 @@ export function changeFilter(
 ){
     // If no expSetFilters are supplied, grab current ones from Redux store.
     if (!expSetFilters) expSetFilters = currentExpSetFilters();
+    var browseBaseParams = navigate.getBrowseBaseParams();
 
-    // store currently selected filters as a dict of sets
-    var tempObj = {};
-    var newObj = {};
+    if (typeof browseBaseParams[field] === 'undefined'){
 
-    var expSet = expSetFilters[field] ? new Set(expSetFilters[field]) : new Set();
-    if (expSet.has(term)) {
-        // term is already present, so delete it
-        expSet.delete(term);
+        // store currently selected filters as a dict of sets
+        var tempObj = {};
+        var newObj = {};
+
+        var expSet = expSetFilters[field] ? new Set(expSetFilters[field]) : new Set();
+        if (expSet.has(term)) {
+            // term is already present, so delete it
+            expSet.delete(term);
+        } else {
+            expSet.add(term);
+        }
+        if(expSet.size > 0){
+            tempObj[field] = expSet;
+            newObj = _.extend({}, expSetFilters, tempObj);
+        }else{ //remove key if set is empty
+            newObj = _.extend({}, expSetFilters);
+            delete newObj[field];
+        }
+
+        if (returnInsteadOfSave){
+            return newObj;
+        } else {
+            console.info("Saving new filters:", newObj);
+            return saveChangedFilters(newObj, href, callback);
+        }
     } else {
-        expSet.add(term);
-    }
-    if(expSet.size > 0){
-        tempObj[field] = expSet;
-        newObj = _.extend({}, expSetFilters, tempObj);
-    }else{ //remove key if set is empty
-        newObj = _.extend({}, expSetFilters);
-        delete newObj[field];
-    }
-
-    if (returnInsteadOfSave){
-        return newObj;
-    } else {
-        console.info("Saving new filters:", newObj);
-        return saveChangedFilters(newObj, href, callback);
+        return expSetFilters;
     }
 }
 
@@ -215,19 +220,13 @@ export function transformExpSetFiltersToFileFilters(expSetFilters){
  * @param {string}  [hrefPath]       Override the /path/ in URL returned, e.g. to /browse/.
  * @returns {string} URL which can be used to request filtered results from back-end, e.g. http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&from=0&limit=50&field.name=term1&field2.something=term2[...]
  */
-export function filtersToHref(expSetFilters, currentHref, page = null, sortColumn = null, sortReverse = false, hrefPath = null){
+export function filtersToHref(expSetFilters, currentHref, sortColumn = null, sortReverse = false, hrefPath = null){
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
-    var sep = ['?','&'].indexOf(baseHref.charAt(baseHref.length - 1)) > -1 ? // Is last character a '&' or '?' ?
-        '' : (
-            baseHref.match(/\?./) ?
-            '&' : '?'
-        );
+    var sep = navigate.determineSeparatorChar(baseHref);
 
     var filterQuery = expSetFiltersToURLQuery(expSetFilters);
-
-    if (!page)   page = getPage();
 
     var urlString = (
         baseHref +
@@ -275,7 +274,7 @@ export const NON_FILTER_URL_PARAMS = [
  * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
  * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
-export function contextFiltersToExpSetFilters(contextFilters = null){
+export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseState = null){
     if (!contextFilters){ // Grab context.filters from Redux store if not supplied.
         if (!store) store = require('./../../store');
         var storeState = store.getState();
@@ -286,8 +285,11 @@ export function contextFiltersToExpSetFilters(contextFilters = null){
         return {};
     }
     if (contextFilters.length === 0) return {};
+
+    var browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+
     return _.reduce(contextFilters, function(memo, filterObj){
-        if (filterObj.field === 'type' || filterObj.field === 'experimentset_type') return memo; // continue/skip.
+        if (typeof browseBaseParams[filterObj.field] !== 'undefined') return memo; // continue/skip.
         if (typeof memo[filterObj.field] === 'undefined'){
             memo[filterObj.field] = new Set([filterObj.term]);
         } else {
@@ -398,24 +400,29 @@ function getBaseHref(currentHref = '/browse/', hrefPath = null){
     if (!hrefPath){
         hrefPath = urlParts.pathname;
     }
-    var baseHref = urlParts.protocol + '//' + urlParts.host + hrefPath;
-    var baseQuery = [];
-    if (hrefPath.indexOf('/browse/') > -1){
-        if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','ExperimentSetReplicate']);
-        else baseQuery.push(['type', urlParts.query.type]);
-        if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
-        else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
+
+    var baseHref = (urlParts.protocol && urlParts.host) ? urlParts.protocol + '//' + urlParts.host + hrefPath : hrefPath;
+    var hrefQuery = {};
+    var hrefQueryKeys = [];
+
+    if (navigate.isBrowseHref(hrefPath)){
+        hrefQuery = navigate.getBrowseBaseParams();
     } else if (hrefPath.indexOf('/search/') > -1){
-        if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','Item']);
-        else baseQuery.push(['type', urlParts.query.type]);
+        if (typeof urlParts.query.type !== 'string'){
+            hrefQuery.type = 'Item';
+        } else {
+            hrefQuery.type = urlParts.query.type;
+        }
     }
 
     var searchQuery = searchQueryStringFromHref(currentHref);
     if (searchQuery) {
-        baseQuery.push([ 'q', searchQuery ]);
+        hrefQuery.q = searchQuery;
     }
 
-    return baseHref + (baseQuery.length > 0 ? '?' + baseQuery.map(function(queryPair){ return queryPair[0] + '=' + queryPair[1]; }).join('&') : '');
+    hrefQueryKeys = _.keys(hrefQuery);
+
+    return baseHref + (hrefQueryKeys.length > 0 ? '?' + queryString.stringify(hrefQuery) : '');
 }
 
 export function searchQueryStringFromHref(href){

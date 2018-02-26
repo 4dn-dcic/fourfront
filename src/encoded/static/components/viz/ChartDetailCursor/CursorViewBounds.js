@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
 import ChartDetailCursor from './ChartDetailCursor';
 import { console, isServerSide, Filters, layout, analytics } from './../../util';
 
@@ -213,7 +214,7 @@ export default class CursorViewBounds extends React.Component {
             this.setState(newOwnState, this.registerHoverEvent.bind(this, node));
         }
 
-        if (this.props.highlightTerm && typeof vizUtil.highlightTerm === 'function') vizUtil.highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
+        if (this.props.highlightTerm && typeof vizUtil.highlightTerm === 'function') vizUtil.highlightTerm(node.field, node.term, node.color || barplot_color_cycler.colorForNode(node));
     }
 
     onNodeMouseLeave(node, evt){

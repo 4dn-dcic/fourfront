@@ -71,13 +71,11 @@ class Term extends React.Component {
             'key'               : PropTypes.string.isRequired,
             'doc_count'         : PropTypes.number
         }).isRequired,
-        'experimentsOrSets' : PropTypes.string,
         'isTermSelected'    : PropTypes.func.isRequired
     }
 
 
     static defaultProps = {
-        'experimentsOrSets' : 'sets',
         'getHref' : function(){ return '#'; }
     }
 
@@ -207,12 +205,13 @@ class FacetTermsList extends React.Component {
         );
     }
 
-    renderTerms(){
-        var facet = this.props.facet;
-        var terms = facet.terms;
+    renderTerms(terms = null){
+        var { facet, persistentCount } = this.props;
+        if (!terms) terms = facet.terms;
+
         if (terms.length > this.props.persistentCount){
-            var persistentTerms = terms.slice(0, this.props.persistentCount + 1);
-            var collapsibleTerms = terms.slice(this.props.persistentCount + 1);
+            var persistentTerms = terms.slice(0, persistentCount);
+            var collapsibleTerms = terms.slice(persistentCount);
 
             var remainingTermsCount = !this.state.expanded ? _.reduce(collapsibleTerms, function(m, term){
                 return m + (term.doc_count || 0);
@@ -225,7 +224,7 @@ class FacetTermsList extends React.Component {
                     </span>
                     :
                     <span>
-                        <i className="icon icon-fw icon-plus"/> View {terms.length - this.props.persistentCount} More
+                        <i className="icon icon-fw icon-plus"/> View {terms.length - persistentCount} More
                         <span className="pull-right">{ remainingTermsCount }</span>
                     </span>
             );
@@ -237,38 +236,37 @@ class FacetTermsList extends React.Component {
                         collapsible={collapsibleTerms.map(this.renderIndividualTerm)}
                         open={this.state.expanded}
                     />
-                    <div className="view-more-button" onClick={this.handleExpandListToggleClick}>
-                        { expandButtonTitle }
-                    </div>
+                    <div className="view-more-button" onClick={this.handleExpandListToggleClick} children={expandButtonTitle} />
                 </div>
             );
         } else {
-            return (
-                <div className="facet-list nav">
-                    { facet.terms.map(this.renderIndividualTerm) }
-                </div>
-            );
+            return <div className="facet-list nav" children={_.map(terms, this.renderIndividualTerm)} />;
         }
     }
 
     render(){
         var { facet, tooltip } = this.props;
 
+        var terms = facet.terms;
+
+        // Filter out type=Item for now (hardcode)
+        if (facet.field === 'type') terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
+
         var indicator = (
-                <Fade in={this.state.facetClosing || !this.state.facetOpen}>
-                    <span className="pull-right closed-terms-count" data-tip={facet.terms.length + " options"}>
-                        { _.range(0, Math.min(Math.ceil(facet.terms.length / 3), 8)).map((c)=>
-                            <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
-                        )}
-                    </span>
-                </Fade>
-            );
+            <Fade in={this.state.facetClosing || !this.state.facetOpen}>
+                <span className="pull-right closed-terms-count" data-tip={terms.length + " options"}>
+                    { _.range(0, Math.min(Math.ceil(terms.length / 3), 8)).map((c)=>
+                        <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
+                    )}
+                </span>
+            </Fade>
+        );
+
         // List of terms
         return (
             <div
                 className={"facet row" + (this.state.facetOpen ? ' open' : ' closed') + (this.state.facetClosing ? ' closing' : '')}
-                hidden={false/*this.isEmpty()*/}
-                data-field={facet.field}
+                hidden={false} data-field={facet.field}
             >
                 <h5 className="facet-title" onClick={this.handleOpenToggleClick}>
                     <span className="expand-toggle">
@@ -280,9 +278,7 @@ class FacetTermsList extends React.Component {
                     <span className="inline-block" data-tip={tooltip} data-place="right">{ facet.title || facet.field }</span>
                     { indicator }
                 </h5>
-                { this.state.facetOpen || this.state.facetClosing ?
-                    <Collapse in={this.state.facetOpen && !this.state.facetClosing} transitionAppear children={this.renderTerms()}/>
-                : null }
+                <Collapse in={this.state.facetOpen && !this.state.facetClosing} children={this.renderTerms(terms)}/>
             </div>
         );
     }
@@ -297,6 +293,13 @@ class FacetTermsList extends React.Component {
  */
 class Facet extends React.Component {
 
+    static isStatic(facet){
+        return (
+            facet.terms.length === 1 &&
+            facet.total <= _.reduce(facet.terms, function(m, t){ return m + (t.doc_count || 0); }, 0)
+        );
+    }
+
     static propTypes = {
         'facet'                 : PropTypes.shape({
             'field'                 : PropTypes.string.isRequired,    // Name of nested field property in experiment objects, using dot-notation.
@@ -306,7 +309,6 @@ class Facet extends React.Component {
         }),
         'defaultFacetOpen'      : PropTypes.bool,
         'onFilter'              : PropTypes.func,           // Executed on term click
-        'experimentsOrSets'     : PropTypes.string,         // Defaults to 'sets'
         'width'                 : PropTypes.any,
         'extraClassname'        : PropTypes.string,
         'schemas'               : PropTypes.object,
@@ -328,13 +330,10 @@ class Facet extends React.Component {
         };
     }
 
-
     isStatic(props = this.props){
-        return (
-            props.facet.terms.length === 1 &&
-            props.facet.total <= _.reduce(props.facet.terms, function(m, t){ return m + (t.doc_count || 0); }, 0)
-        );
+        return Facet.isStatic(props.facet);
     }
+
     isEmpty(props = this.props) { return !!(props.facet.terms.length === 0); }
 
     handleStaticClick(e) {
@@ -387,9 +386,7 @@ class Facet extends React.Component {
                             (this.state.filtering ? ' filtering' : '')
                         }>
                             <span onClick={this.handleStaticClick} title={
-                                'All ' +
-                                (this.props.experimentsOrSets === 'sets' ? 'experiment sets' : 'experiments') +
-                                ' have ' +
+                                'All results have ' +
                                 facet.terms[0].key +
                                 ' as their ' +
                                 (facet.title || facet.field ).toLowerCase() + '; ' +
@@ -403,7 +400,7 @@ class Facet extends React.Component {
                                     (this.state.filtering ? 'icon-spin icon-circle-o-notch' :
                                         ( selected ? 'icon-times-circle' : 'icon-circle' )
                                     )
-                                }></i> { termName }
+                                }/>{ termName }
                             </span>
                         </div>
                     </div>
@@ -456,7 +453,7 @@ export function onFilterHandlerMixin(field, term, callback){
         }
     }
 
-    (this.props.navigate || navigate)(targetSearchHref, {});
+    (this.props.navigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true });
     setTimeout(callback, 100);
 }
 
@@ -495,7 +492,6 @@ export class FacetList extends React.Component {
         'schemas' : PropTypes.object,
         // { '<schemaKey : string > (active facet categories)' : Set (active filters within category) }
         'orientation' : PropTypes.string,   // 'vertical' or 'horizontal'
-        'experimentsOrSets' : PropTypes.string,
         'title' : PropTypes.string,         // Title to put atop FacetList
         'className' : PropTypes.string,     // Extra class
         'href' : PropTypes.string,
@@ -521,6 +517,12 @@ export class FacetList extends React.Component {
 
 
     static filterFacetsForBrowse(facet, props, state){
+
+        if (props.browseBaseState){
+            var browseBaseParams = navigate.getBrowseBaseParams(props.browseBaseState);
+            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
+        }
+
         if (facet.field.substring(0, 6) === 'audit.'){
             if (props.session && FacetList.isLoggedInAsAdmin()) return true;
             return false; // Ignore audit facets temporarily, if not logged in as admin.
@@ -563,7 +565,6 @@ export class FacetList extends React.Component {
     static defaultProps = {
         'orientation'       : 'vertical', // Probably unnecessary.
         'facets'            : null,
-        'experimentsOrSets' : 'sets',
         'title'             : "Properties",
         'filterFacetsFxn'   : FacetList.filterFacetsForBrowse, // Filters out 'Item Type', etc.
         'debug'             : false,
@@ -623,9 +624,12 @@ export class FacetList extends React.Component {
         return href && url.parse(href, true).query;
     }
 
-    renderFacets(facets, maxTermsToShow = 12){
+    renderFacets(facets = this.props.facets, maxTermsToShow = 12){
 
-        facets = _.uniq(facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state)), false, function(f){ return f.field; });
+        facets = _.uniq(
+            _.filter(facets, (facet) => this.props.filterFacetsFxn(facet, this.props, this.state)),
+            false, function(f){ return f.field; }
+        );
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m.end) return m;
@@ -638,13 +642,12 @@ export class FacetList extends React.Component {
             return m;
         }, { facetIndex : 0, termCount: 0, end : false }).facetIndex;
 
-        return facets.map((facet, i) =>
+        return _.map(facets, (facet, i) =>
             <Facet
                 onFilter={this.props.onFilter}
                 key={facet.field}
                 facet={facet}
                 width="inherit"
-                experimentsOrSets={this.props.experimentsOrSets}
                 href={this.props.href}
                 schemas={this.props.schemas}
                 defaultFacetOpen={ !this.state.mounted ? false : !!(
@@ -682,6 +685,14 @@ export class FacetList extends React.Component {
         var clearButtonStyle = (this.props.className && this.props.className.indexOf('with-header-bg') > -1) ?
             "btn-outline-white" : "btn-outline-default";
 
+        var facetElements = this.renderFacets(this.props.facets);
+
+        var staticFacetElements = _.filter(facetElements, function(f){
+            return Facet.isStatic(f.props.facet);
+        });
+
+        facetElements = _.difference(facetElements, staticFacetElements);
+
         return (
             <div className={
                 "facets-container facets " +
@@ -700,7 +711,15 @@ export class FacetList extends React.Component {
                         </a>
                     </div>
                 </div>
-                { this.renderFacets(facets) }
+                { facetElements }
+                { staticFacetElements.length > 0 ?
+                    <div className="row facet-list-separator">
+                        <div className="col-xs-12">
+                            { staticFacetElements.length } Common Properties
+                        </div>
+                    </div>
+                : null }
+                { staticFacetElements }
             </div>
         );
     }

@@ -45,7 +45,9 @@ const portal = {
     global_sections: [
         {
             id: 'browse-menu-item', sid:'sBrowse', title: 'Browse',
-            url : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate', // May also be a function which returns URL.
+            url : function(hrefParts){
+                return navigate.getBrowseBaseHref();
+            },
             active : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
         },
         {
@@ -1096,7 +1098,8 @@ export default class App extends React.Component {
             'uploads'           : this.state.uploads,
             'updateUploads'     : this.updateUploads,
             'listActionsFor'    : this.listActionsFor,
-            'updateUserInfo'    : this.updateUserInfo
+            'updateUserInfo'    : this.updateUserInfo,
+            'browseBaseState'   : this.props.browseBaseState
         };
 
         // first case is fallback
@@ -1217,6 +1220,7 @@ export default class App extends React.Component {
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                     context={context}
+                                    browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
                                 <div id="page-title-container" className="container">

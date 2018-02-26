@@ -634,7 +634,7 @@ export class AboveTableControls extends React.Component {
     leftSection(selectedFiles){
         if (this.props.showSelectedFileCount && this.props.selectedFiles){
             return (
-                <ChartDataController.Provider>
+                <ChartDataController.Provider id="selected_files_section">
                     <SelectedFilesControls
                         href={this.props.href}
                         selectedFiles={this.props.selectedFiles}

@@ -1,13 +1,13 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var vizUtil = require('./../utilities');
-var { RotatedLabel, Legend } = require('./../components');
-var { console, object, isServerSide, expFxn, Filters, Schemas, layout } = require('./../../util');
-var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
-var { Toggle } = require('./../../inputs');
+import React from 'react';
+import _ from 'underscore';
+import url from 'url';
+import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import * as vizUtil from './../utilities';
+import { RotatedLabel, Legend } from './../components';
+import { console, object, isServerSide, expFxn, Filters, Schemas, layout } from './../../util';
+import { Toggle } from './../../inputs';
 import { boundActions } from './ViewContainer';
 
 /**
@@ -80,7 +80,7 @@ export class UIControlsWrapper extends React.Component {
 
         this.state = {
             'aggregateType' : 'experiment_sets',
-            'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) ? 'all' : 'filtered',
+            'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) || (props.barplot_data_filtered && props.barplot_data_filtered.total.experiment_sets === 0) ? 'all' : 'filtered',
             'openDropdown' : null
         };
     }
@@ -88,16 +88,22 @@ export class UIControlsWrapper extends React.Component {
     componentWillReceiveProps(nextProps){
         if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) &&
-            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) && (
+            (
+                this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0)
+            ) && (
+                !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets > 0)
+            ) && (
                 this.state.showState === 'all'
             )
         ){
             this.setState({ 'showState' : 'filtered' });
         } else if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) &&
-            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) && (
+            (
+                this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets === 0)
+            ) && (
+                !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets > 0)
+            ) && (
                 this.state.showState === 'filtered'
             )
         ){
@@ -249,7 +255,7 @@ export class UIControlsWrapper extends React.Component {
     renderShowTypeDropdown(contextualView){
         if (contextualView === 'home') return null;
         // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href);
+        var isSelectedDisabled = (this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href)) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0);
         return (
             <div className="show-type-change-section">
                 <h6 className="dropdown-heading">Show</h6>
@@ -290,12 +296,12 @@ export class UIControlsWrapper extends React.Component {
                 <DropdownButton
                     id="select-barplot-field-1"
                     onSelect={this.handleFieldSelect.bind(this, 1)}
-                    disabled={this.props.isLoadingNewFields}
+                    disabled={this.props.isLoadingChartData}
                     title={(()=>{
                         //if (this.state.openDropdown === 'subdivisionField'){
                         //    return <em className="dropdown-open-title">Color Bars by</em>;
                         //}
-                        if (this.props.isLoadingNewFields){
+                        if (this.props.isLoadingChartData){
                             return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
                         }
                         var field = this.getFieldAtIndex(1);
@@ -356,12 +362,7 @@ export class UIControlsWrapper extends React.Component {
                                     id="select-barplot-aggregate-type"
                                     bsSize="xsmall"
                                     onSelect={this.handleAggregateTypeSelect}
-                                    title={(() => {
-                                        //if (this.state.openDropdown === 'yAxis'){
-                                        //    return 'Y-Axis Aggregation';
-                                        //}
-                                        return this.titleMap(this.state.aggregateType);
-                                    })()}
+                                    title={this.titleMap(this.state.aggregateType)}
                                     onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
                                     children={this.renderDropDownMenuItems(
                                         ['experiment_sets','experiments','files'],
@@ -377,9 +378,7 @@ export class UIControlsWrapper extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-sm-9">
-                        { this.adjustedChildChart() }
-                    </div>
+                    <div className="col-sm-9" children={this.adjustedChildChart()} />
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
                         { this.renderGroupByFieldDropdown(contextualView) }
@@ -403,12 +402,12 @@ export class UIControlsWrapper extends React.Component {
                                     <DropdownButton
                                         id="select-barplot-field-0"
                                         onSelect={this.handleFieldSelect.bind(this, 0)}
-                                        disabled={this.props.isLoadingNewFields}
+                                        disabled={this.props.isLoadingChartData}
                                         title={(()=>{
                                             //if (this.state.openDropdown === 'xAxisField'){
                                             //    return <em className="dropdown-open-title">X-Axis Field</em>;
                                             //}
-                                            if (this.props.isLoadingNewFields){
+                                            if (this.props.isLoadingChartData){
                                                 return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
                                             }
                                             var field = this.getFieldAtIndex(0);
@@ -442,12 +441,13 @@ export class UIControlsWrapper extends React.Component {
 
 }
 
-class AggregatedLegend extends React.Component {
+export class AggregatedLegend extends React.Component {
 
-    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets', origChildField = {}){
+    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
         if (!rootField) return null;
+
         var retField = {
-            'field' : origChildField.field,
+            'field' : null,
             'terms' : {},
             'total' : {
                 'experiment_sets' : 0,
@@ -455,9 +455,10 @@ class AggregatedLegend extends React.Component {
                 'files' : 0
             }
         };
+
         _.forEach(_.keys(rootField.terms), function(term){
             var childField = rootField.terms[term];
-            if (typeof retField.field === 'undefined') retField.field = childField.field;
+            if (typeof retField.field === 'undefined' || !retField.field) retField.field = childField.field;
 
             _.forEach(_.keys(childField.terms), function(t){
                 if (typeof retField.terms[t] === 'undefined'){
@@ -528,13 +529,16 @@ class AggregatedLegend extends React.Component {
     }
 
     render(){
-        if (!this.props.field) return null;
+        var { field, barplot_data_unfiltered, barplot_data_filtered, isLoadingChartData, aggregateType, showType } = this.props;
+        if (!field || !barplot_data_unfiltered || isLoadingChartData || (barplot_data_unfiltered.total && barplot_data_unfiltered.total.experiment_sets === 0)) return null;
 
         var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            (!this.props.barplot_data_unfiltered || !this.props.field ? null :
-                AggregatedLegend.collectSubDivisionFieldTermCounts(this.props.barplot_data_filtered || this.props.barplot_data_unfiltered, this.props.aggregateType || 'experiment_sets', this.props.field)
+            AggregatedLegend.collectSubDivisionFieldTermCounts(
+                showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered || barplot_data_unfiltered,
+                aggregateType || 'experiment_sets',
+                field
             ),
-            term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
+            (term) => typeof term[aggregateType] === 'number' ? -term[aggregateType] : 'term'
         );
 
         this.shouldUpdate = false;
@@ -547,15 +551,16 @@ class AggregatedLegend extends React.Component {
         return (
             <div className="legend-container-inner" ref="container">
                 <Legend
-                    fields={(fieldForLegend && [fieldForLegend]) || null}
+                    field={fieldForLegend || null}
                     includeFieldTitles={false}
                     schemas={this.props.schemas}
                     width={this.width()}
                     height={this.height()}
                     hasPopover
-                    expandable
-                    expandableAfter={8}
-                    cursorDetailActions={boundActions(this, this.props.showType)}
+                    //expandable
+                    //expandableAfter={8}
+                    cursorDetailActions={boundActions(this, showType)}
+                    aggregateType={aggregateType}
                 />
             </div>
         );

@@ -4,6 +4,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
 import { expFxn, Schemas, console, object, isServerSide } from './../../util';
 import CursorComponent from './CursorComponent';
 import { Button } from 'react-bootstrap';
@@ -155,7 +156,7 @@ class Body extends React.Component {
                 <h3 className="details-title">
                     <i
                         className="term-color-indicator icon icon-circle"
-                        style={{ color : leafNode.color || vizUtil.colorForNode(leafNode) }}
+                        style={{ color : leafNode.color || barplot_color_cycler.colorForNode(leafNode) }}
                     />
                     { this.primaryCount(leafNode) }
                     <span>{ Schemas.Term.toName(leafNode.field, leafNode.term) }</span>
@@ -458,8 +459,8 @@ export default class ChartDetailCursor extends React.Component {
 
         var isVisible = this.state.sticky || (Array.isArray(this.state.path) && this.state.path.length > 0);
 
-        if (!isVisible) return null;
-        else return (
+        //if (!isVisible) return null;
+        return (
             <CursorComponent
                 {...containDims}
                 containingElement={this.props.containingElement}

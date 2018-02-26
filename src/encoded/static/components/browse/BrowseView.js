@@ -248,18 +248,9 @@ class ResultTableContainer extends React.Component {
                             itemTypeForSchemas="ExperimentSetReplicates"
                             session={this.props.session}
                             href={this.props.href || this.props.searchBase}
+                            browseBaseState={this.props.browseBaseState}
                             schemas={this.props.schemas}
-                            showClearFiltersButton={(()=>{
-                                var urlParts = url.parse(this.props.href, true);
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                var urlPartQueryCorrectedForType = _.clone(urlParts.query);
-                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
-                                var urlPartsForClearURLQuery = url.parse(clearFiltersURL, true).query;
-                                // Exclude 'experimentset_type' for now
-                                delete urlPartsForClearURLQuery.experimentset_type;
-                                delete urlPartQueryCorrectedForType.experimentset_type;
-                                return !object.isEqual(urlPartsForClearURLQuery, urlPartQueryCorrectedForType);
-                            })()}
+                            showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
                                 evt.stopPropagation();
@@ -268,7 +259,7 @@ class ResultTableContainer extends React.Component {
                                     console.error("No Clear Filters URL");
                                     return;
                                 }
-                                this.props.navigate(clearFiltersURL, {});
+                                this.props.navigate(clearFiltersURL, { 'inPlace' : true, 'dontScrollToTop' : true });
                             }}
                         />
                     </div>
@@ -349,6 +340,25 @@ export default class BrowseView extends React.Component {
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
+    componentDidMount(){
+        var hrefParts = url.parse(this.props.href, true);
+
+        var isValidQuery = navigate.isValidBrowseQuery(hrefParts.query);
+
+        if (!isValidQuery) {
+            var nextBrowseHref = navigate.getBrowseBaseHref();
+            var expSetFilters = Filters.contextFiltersToExpSetFilters();
+            if (_.keys(expSetFilters).length > 0){
+                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
+            }
+            if (typeof hrefParts.query.q === 'string'){
+                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + hrefParts.query.q;
+            }
+
+            navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
+        }
+    }
+
     render() {
         var context = this.props.context;
         //var fileFormats = findFormats(context['@graph']);
@@ -359,27 +369,33 @@ export default class BrowseView extends React.Component {
         // no results found!
         if(context.total === 0 && context.notification){
             var seeSearchResults = null;
-            var strippedQuery = (_.omit(hrefParts.query, 'type', 'experimentset_type'));
+            var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
             if (_.keys(strippedQuery).length > 0){
-                seeSearchResults = <h4 className="text-400 mt-05"><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all items</a> instead</h4>;
+                seeSearchResults = <span> or <a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>search all items</a> instead.</span>;
             }
             return (
-                <div className="error-page text-center">
-                    <h3 className="text-500 mb-0">{context.notification}</h3>
-                    { seeSearchResults }
+                <div className="error-page">
+                    <div className="clearfix">
+                        <hr/>
+                        <h3 className="text-500 mb-0 mt-42">{ context.notification }</h3>
+                        <h4 className="text-400 mt-05 mb-45">
+                            View <a href={navigate.getBrowseBaseHref()}>all</a> Experiment Sets{ seeSearchResults }
+                        </h4>
+                        <hr/>
+                    </div>
                 </div>
             );
         }
-        
 
         // browse is only for experiment sets
         if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page text-center">
-                    <h4>
-                        <a href='/browse/?type=ExperimentSetReplicate'>
-                            Only experiment sets may be browsed.
-                        </a>
+                    <h3 className="text-300">
+                        Only experiment sets may currently be browsed.
+                    </h3>
+                    <h4 className="text-400">
+                        Please wait to be redirected.
                     </h4>
                 </div>
             );
@@ -399,6 +415,7 @@ export default class BrowseView extends React.Component {
                     <CustomColumnController defaultHiddenColumns={this.props.defaultHiddenColumns}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer
+                                browseBaseState={this.props.browseBaseState}
                                 session={this.props.session}
                                 schemas={this.props.schemas}
                             />

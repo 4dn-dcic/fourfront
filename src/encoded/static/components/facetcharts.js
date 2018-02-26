@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import { expFxn, Filters, ajax, console, layout, isServerSide } from './util';
+import { expFxn, Filters, ajax, console, layout, isServerSide, navigate } from './util';
 import * as vizUtil from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import * as BarPlot from './viz/BarPlot';
@@ -38,7 +38,6 @@ export class FacetCharts extends React.Component {
         },
         'views' : ['small', 'large'],
         'baseSearchPath' : '/bar_plot_aggregations/',
-        'baseSearchParams' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
         'colWidthPerScreenSize' : {
             'small' : [
                 //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
@@ -51,7 +50,7 @@ export class FacetCharts extends React.Component {
                 {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
             ]
         },
-        'initialFields' : ['experiments_in_set.experiment_type',"award.project"]
+        'initialFields' : ['experiments_in_set.experiment_type',"experiments_in_set.biosample.biosource.biosource_type"]
     }
 
     constructor(props){
@@ -79,7 +78,7 @@ export class FacetCharts extends React.Component {
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
                 this.props.baseSearchPath,
-                this.props.baseSearchParams,
+                this.props.browseBaseState,
                 this.props.initialFields,
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
