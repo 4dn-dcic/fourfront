@@ -214,7 +214,7 @@ class Bar extends React.Component {
         else if (d.existing)    className += ' existing-bar';
 
         var renderedBarSections = _.map(
-            barplot_color_cycler.sortObjectsByColorPalette(barSections).reverse(), // Remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
+            hasSubSections ? barplot_color_cycler.sortObjectsByColorPalette(barSections).reverse() : barSections, // Remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
             this.renderBarSection
         );
 
