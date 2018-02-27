@@ -25,7 +25,8 @@
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
-        { "$ref": "experiment.json#/facets"}
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}

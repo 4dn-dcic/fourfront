@@ -11,6 +11,9 @@
       "biosample_quantity": ["biosample_quantity_units"],
       "biosample_quantity_units": ["biosample_quantity"]
     },
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "status": {
             "title": "Status",
@@ -181,9 +184,6 @@
         "experiment_type" : {
             "title" : "Experiment Type"
         },
-        "award.project": {
-            "title": "Project"
-        },
         "biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
@@ -207,9 +207,6 @@
         }
     },
     "columns": {
-        "award.project": {
-            "title": "Project"
-        },
         "biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },

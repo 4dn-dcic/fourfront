@@ -537,17 +537,18 @@ class Workflow(Item):
     item_type = 'workflow'
     schema = workflow_schema
     embedded_list = [
-                'steps.name',
-                'steps.inputs',
-                'steps.outputs',
-                'steps.meta.software_used.name',
-                'steps.meta.software_used.title',
-                'steps.meta.software_used.version',
-                'steps.meta.software_used.source_url',
-                'arguments.argument_type',
-                'arguments.argument_format',
-                'arguments.workflow_argument_name'
-            ]
+        'award.project',
+        'steps.name',
+        'steps.inputs',
+        'steps.outputs',
+        'steps.meta.software_used.name',
+        'steps.meta.software_used.title',
+        'steps.meta.software_used.version',
+        'steps.meta.software_used.source_url',
+        'arguments.argument_type',
+        'arguments.argument_format',
+        'arguments.workflow_argument_name'
+    ]
 
 
 @collection(
@@ -563,6 +564,7 @@ class WorkflowRun(Item):
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
         #'workflow.*',
+        'award.project',
         'workflow.title',
         'workflow.steps.name',
         'workflow.steps.meta.software_used.name',

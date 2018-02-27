@@ -66,7 +66,7 @@ class User(Item):
 
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
-    embedded_list = ['lab.awards.project', 'lab.name', 'submits_for.name']
+    embedded_list = ['lab.awards.project', 'lab.name', 'submits_for.name', 'lab.display_title', 'submits_for.display_title']
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,

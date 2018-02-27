@@ -18,6 +18,9 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "quality_metric.json#/properties" }
    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"

@@ -17,6 +17,9 @@
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/status" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
