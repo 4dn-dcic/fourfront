@@ -17,11 +17,7 @@ from snovault import (
     COLLECTIONS,
     CONNECTION
 )
-from .base import (
-    Item
-)
-import json
-
+from .base import Item
 from snovault.resource_views import item_view_page
 
 
