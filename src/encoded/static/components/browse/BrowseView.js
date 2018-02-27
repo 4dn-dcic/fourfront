@@ -254,12 +254,7 @@ class ResultTableContainer extends React.Component {
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
                                 evt.stopPropagation();
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                if (!clearFiltersURL) {
-                                    console.error("No Clear Filters URL");
-                                    return;
-                                }
-                                this.props.navigate(clearFiltersURL, { 'inPlace' : true, 'dontScrollToTop' : true });
+                                this.props.navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true, 'dontScrollToTop' : true });
                             }}
                         />
                     </div>
