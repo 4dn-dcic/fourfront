@@ -115,7 +115,7 @@
                     "title" : "Response Code",
                     "description" : "Code returned by response, defaults to 301.",
                     "type" : "integer",
-                    "default" : 301,
+                    "default" : 307,
                     "enum" : [301, 302, 303, 304, 305, 307]
                 }
             }
