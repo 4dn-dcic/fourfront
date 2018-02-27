@@ -2,6 +2,14 @@
 """
 import os
 import requests
+from pyramid.httpexceptions import ( # 301-307 redirect code response
+    HTTPMovedPermanently,
+    HTTPFound,
+    HTTPSeeOther,
+    HTTPNotModified,
+    HTTPUseProxy,
+    HTTPTemporaryRedirect
+)
 from snovault import (
     calculated_property,
     collection,
@@ -12,8 +20,21 @@ from snovault import (
 from .base import (
     Item
 )
+import json
 
 from snovault.resource_views import item_view_page
+
+
+def get_pyramid_http_exception_for_redirect_code(code):
+    code_dict = {
+        301 : HTTPMovedPermanently,
+        302 : HTTPFound,
+        303 : HTTPSeeOther,
+        304 : HTTPNotModified,
+        305 : HTTPUseProxy,
+        307 : HTTPTemporaryRedirect
+    }
+    return code_dict[code]
 
 
 def is_static_page(info, request):
@@ -152,6 +173,13 @@ def static_page(request):
     page_in_db = conn.storage.get_by_unique_key('page:name', page_name)
 
     context = request.registry[COLLECTIONS]['pages'].get(page_in_db.uuid)
+
+    if context.properties.get('redirect') and context.properties['redirect'].get('enabled'): # We have a redirect defined.
+        return get_pyramid_http_exception_for_redirect_code(context.properties['redirect'].get('code', 307))( # Fallback to 307 as is 'safest' (response isn't cached by browsers)
+            location=context.properties['redirect'].get('target', '/'),
+            comment="Redirected from " + page_name
+        )
+
     item = item_view_page(context, request)
     item['@id'] = "/" + page_name
     item['@context'] = "/" + page_name

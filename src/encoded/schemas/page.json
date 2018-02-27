@@ -96,6 +96,29 @@
                 "type": "string",
                 "linkTo" : "StaticSection"
             }
+        },
+        "redirect" : {
+            "title" : "Redirect",
+            "type" : "object",
+            "properties" :{
+                "target" : {
+                    "title" : "Target",
+                    "description": "URL or path to redirect to.",
+                    "type" : "string"
+                },
+                "enabled" : {
+                    "title" : "Redirect Enabled",
+                    "type" : "boolean",
+                    "default" : false
+                },
+                "code" : {
+                    "title" : "Response Code",
+                    "description" : "Code returned by response, defaults to 301.",
+                    "type" : "integer",
+                    "default" : 301,
+                    "enum" : [301, 302, 303, 304, 305, 307]
+                }
+            }
         }
     },
     "columns" : {
