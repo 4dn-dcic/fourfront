@@ -184,7 +184,12 @@
             "442c8aa0-dc6c-43d7-814a-854af460b027",
             "442c8aa0-dc6c-43d7-814a-854af460b028",
             "442c8aa0-dc6c-43d7-814a-854af460b029"
-        ]
+        ],
+        "redirect" : {
+            "target" : "/joint-analysis",
+            "enabled" : true,
+            "code" : 307
+        }
     },
     {
         "name": "joint-analysis-data-plans/dev",
@@ -252,6 +257,19 @@
     {
         "name": "joint-analysis-plans",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b1",
+        "title": "Joint Analysis Matrix",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025"
+        ],
+        "redirect" : {
+            "target" : "/joint-analysis",
+            "enabled" : true,
+            "code" : 307
+        }
+    },
+    {
+        "name": "joint-analysis",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b2",
         "title": "Joint Analysis Matrix",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025"
