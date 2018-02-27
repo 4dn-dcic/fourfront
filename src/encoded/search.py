@@ -203,7 +203,7 @@ def raw_search(context, request, search_frame='embedded', return_generator=False
     search = search.using(es)
     search = search.index('_all')
     es_results = execute_search_for_all_results(search)
-    result['total'] = total = es_results['hits']['total']
+    result['total'] = es_results['hits']['total']
     if not result['total']:
         # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
         request.response.status_code = 404
