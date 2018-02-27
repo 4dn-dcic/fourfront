@@ -2,6 +2,10 @@
     {
         "summary": "(TEST) New Replicate Set has been released.",
         "uuid": "b0b9c607-f8b4-2202-1122-9895b461224b",
+        "award": "Test-4DN",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "test-4dn-lab",
+        "status": "released",
         "severity": 0,
         "parameters": [
             "tags=4DN Joint Analysis 2018"
@@ -24,6 +28,10 @@
     {
         "summary": "(TEST) New Replicate Experiment has been added to a Replicate Set.",
         "uuid": "b0b9c607-1212-2202-1122-9895b461224b",
+        "award": "Test-4DN",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "test-4dn-lab",
+        "status": "released",
         "severity": 1,
         "parameters": [
             "tags=4DN Joint Analysis 2018"
@@ -42,6 +50,10 @@
     {
         "summary": "(TEST) New unreleased Replicate Experiment has been added to a Replicate Set.",
         "uuid": "b0b9c607-1119-2202-1122-9895b461224b",
+        "award": "Test-4DN",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "test-4dn-lab",
+        "status": "released",
         "severity": 2,
         "parameters": [
             "tags=4DN Joint Analysis 2018"
@@ -60,6 +72,10 @@
     {
         "summary": "(TEST) WARNING! New unreleased file has been added to a Replicate Experiment.",
         "uuid": "b0b9c607-8811-2202-1122-9895b461224b",
+        "award": "Test-4DN",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "test-4dn-lab",
+        "status": "released",
         "severity": 3,
         "parameters": [
             "tags=4DN Joint Analysis 2018"

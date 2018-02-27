@@ -233,6 +233,7 @@ class SingleReport extends React.Component {
     }
 
     render(){
+        // check out OverlayTrigger and Popover from React-bootstrap
         return(
             <div>
                 <div>{this.props.reportData.summary}</div>
