@@ -69,7 +69,7 @@ export default class JointAnalysisReportsPage extends React.Component {
     viewReports(){
         if(this.state.reportData === null){
             return(
-                 <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}>
+                <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}>
                     <i className="mt-3 icon icon-spin icon-circle-o-notch"/>
                 </div>
             );
