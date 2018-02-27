@@ -23,6 +23,7 @@ from copy import deepcopy
 def includeme(config):
     config.add_route('search', '/search{slash:/?}')
     config.add_route('browse', '/browse{slash:/?}')
+    config.add_route('raw_search', '/raw_search')
     config.add_route('available_facets', '/facets{slash:/?}')
     config.scan(__name__)
 
@@ -175,6 +176,51 @@ def collection_view(context, request):
     This is a redirect directly to the search page
     """
     return search(context, request, context.type_info.name, False, forced_type='Search')
+
+
+@view_config(route_name='raw_search', request_method='POST', permission='search')
+def raw_search(context, request, search_frame='embedded', return_generator=False):
+    """
+    Input ElasticSearch query JSON directly through a POST request.
+    For advanced use cases only.
+    Will NOT go through the usual search logic that builds your query. As such,
+    this is not meant for the search page. Only '@graph', 'notification',
+    'total', and 'title' are returned in the response dict.
+    """
+    if not request.body or not request.json_body:
+        return {
+            'notification': 'failure',
+            'info': 'You must supply a JSON query body with this request.'
+        }
+    result = {
+        'title': 'raw_search',
+        '@graph': [],
+        'notification': ''
+    }
+    es = request.registry[ELASTIC_SEARCH]
+    # build search from given json and execute. always use all indices
+    search = Search.from_dict(request.json_body)
+    search = search.using(es)
+    search = search.index('_all')
+    es_results = execute_search_for_all_results(search)
+    result['total'] = total = es_results['hits']['total']
+    if not result['total']:
+        # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
+        request.response.status_code = 404
+        result['notification'] = 'No results found'
+        result['@graph'] = []
+        return result if not return_generator else []
+
+    result['notification'] = 'Success'
+
+    ### Format results for JSON-LD
+    graph = format_results(request, es_results['hits']['hits'], search_frame)
+
+    if return_generator:
+        return graph
+
+    result['@graph'] = list(graph)
+    return result
 
 
 @view_config(route_name='available_facets', request_method='GET', permission='search', renderer='json')
