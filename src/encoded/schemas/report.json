@@ -34,6 +34,7 @@
             "description": "Array of objects representing items within the report.",
             "type": "array",
             "default": [],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Report Item",
                 "type": "object",
@@ -49,11 +50,7 @@
                         "title": "Secondary ID",
                         "type": "string",
                         "description": "linkTo of the secondary (explanatory) item of the report. May be the same as the primary",
-                        "anyOf": [
-                            {"linkTo": "ExperimentSetReplicate"},
-                            {"linkTo": "Experiment"},
-                            {"linkTo": "File"}
-                        ]
+                        "linkTo": "Item"
                     }
                 }
             }

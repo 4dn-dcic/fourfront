@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import queryString from 'query-string';
-import { Button } from 'react-bootstrap';
-import { console, object, ajax } from'./../util';
+import { Button, Collapse } from 'react-bootstrap';
+import { console, object, ajax, DateUtility } from'./../util';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import moment from 'moment';
@@ -81,7 +81,7 @@ export default class JointAnalysisReportsPage extends React.Component {
             );
         }else{
             return(
-                <div className="row">
+                <div className="row item-page-container">
                     {this.state.reportData.map((report) => this.buildReport(report))}
                 </div>
             );
@@ -221,23 +221,72 @@ class DateInput extends React.Component {
 }
 
 class SingleReport extends React.Component {
+    static propTypes = {
+        'onFinishOpen' : PropTypes.func,
+        'onStartOpen' : PropTypes.func,
+        'onFinishClose' : PropTypes.func,
+        'onStartClose' : PropTypes.func
+    }
+
     constructor(props){
         super(props);
         this.state = {
-            'comments': this.props.reportData.comments || ''
+            'comments': this.props.reportData.comments || '',
+            'open': false
         };
+        this.toggle = _.throttle(this.toggle.bind(this), 500);
+        this.buildItem = this.buildItem.bind(this);
     }
 
     componentDidMount(){
 
     }
 
-    render(){
-        // check out OverlayTrigger and Popover from React-bootstrap
+    toggle(){
+        this.setState({ 'open' : !this.state.open });
+    }
+
+    buildItem(item){
         return(
-            <div>
-                <div>{this.props.reportData.summary}</div>
-                <div>{this.state.comments}</div>
+            <div className="col-sm-12 row mb-1">
+                <hr className="tab-section-title-horiz-divider"/>
+                <div className="col-sm-12 col-md-6">
+                    <div className="inner">
+                        <h5>Replicate set</h5>
+                        <div>
+                            <a href={item.primary_id['@id']}>{item.primary_id.display_title}</a>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-12 col-md-6">
+                    <div className="inner">
+                        <h5>Item causing report</h5>
+                        <div>
+                            <a href={item.secondary_id['@id']}>{item.secondary_id.display_title}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    render(){
+        return(
+            <div className={"overview-blocks-header with-background mb-2" + (this.state.open ? ' is-open' : ' is-closed')}>
+                <h4 className="tab-section-title clickable with-accent" onClick={this.toggle}>
+                    <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.reportData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
+                </h4>
+                <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
+                    <div className="inner">
+                        <div className="row overview-blocks">
+                            <div className="col-sm-12 col-md-8">{this.props.reportData.comments}</div>
+                            <div className="col-sm-12 col-md-4">
+                                <DateUtility.LocalizedTime timestamp={this.props.reportData.timestamp} formatType='date-time-md' dateTimeSeparator=" at " />
+                            </div>
+                            {this.props.reportData.report_items.map((item) => this.buildItem(item))}
+                        </div>
+                    </div>
+                </Collapse>
             </div>
         );
     }
