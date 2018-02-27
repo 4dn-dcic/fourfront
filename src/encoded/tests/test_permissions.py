@@ -475,7 +475,7 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
 
 
 def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -491,7 +491,7 @@ def test_submitter_cannot_view_ownitem_replaced(ind_human_item, submitter_testap
 
 # Submitter created item and wants to patch
 def test_submitter_cannot_patch_statuses(ind_human_item, submitter_testapp, wrangler_testapp):
-    statuses = ['deleted', 'current', 'released', 'revoked', 'released to project']
+    statuses = ['deleted', 'current', 'released', 'revoked', 'archived', 'archived to project', 'released to project']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -515,7 +515,7 @@ def test_submitter_can_patch_file_statuses(file_item, submitter_testapp, wrangle
 
 
 def test_submitter_cannot_patch_file_statuses(file_item, submitter_testapp, wrangler_testapp):
-    statuses = ['released', 'revoked', 'deleted']
+    statuses = ['released', 'revoked', 'deleted', 'released to project', 'archived to project', 'archived']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -539,7 +539,8 @@ def test_labmember_cannot_view_submitter_item(ind_human_item, submitter_testapp,
 
 
 def test_labmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab',
+                'archived', 'archived to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -547,7 +548,8 @@ def test_labmember_can_view_submitter_item(ind_human_item, submitter_testapp, wr
 
 
 def test_labmember_can_view_submitter_file(file_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['released', 'revoked', 'released to project', 'uploading', 'uploaded', 'upload failed']
+    statuses = ['released', 'revoked', 'released to project', 'uploading', 'uploaded', 'upload failed',
+                'archived', 'archived to project']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -562,7 +564,8 @@ def test_labmember_cannot_view_submitter_item_replaced(ind_human_item, submitter
 
 # Submitter created item and lab member wants to patch
 def test_labmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project',
+                'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -571,7 +574,8 @@ def test_labmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp
 
 # Submitter created item and lab member wants to patch
 def test_labmember_cannot_patch_submitter_file(file_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['released', 'revoked', 'released to project', 'uploading', 'uploaded', 'upload failed']
+    statuses = ['released', 'revoked', 'released to project', 'uploading', 'uploaded', 'upload failed',
+                'archived', 'archived to project']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -589,7 +593,7 @@ def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testap
 
 
 def test_awardmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'in review by lab']
+    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -604,7 +608,8 @@ def test_awardmember_cannot_view_submitter_item_replaced(ind_human_item, submitt
 
 # Submitter created item and lab member wants to patch
 def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review by lab',
+                'submission in progress', 'planned', 'archived to project']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -630,7 +635,8 @@ def test_viewing_group_member_cannot_view_submitter_file(file_item, submitter_te
 
 
 def test_viewing_group_member_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'submission in progress', 'planned',
+                'archived', 'archived to project']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -638,7 +644,7 @@ def test_viewing_group_member_can_view_submitter_item(ind_human_item, submitter_
 
 
 def test_viewing_group_member_can_view_submitter_file(file_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['released', 'revoked', 'released to project']
+    statuses = ['released', 'revoked', 'released to project', 'archived to project']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -653,7 +659,8 @@ def test_viewing_group_member_cannot_view_submitter_item_replaced(ind_human_item
 
 # Submitter created item and viewing group member wants to patch
 def test_viewing_group_member_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review by lab',
+                'archived to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -661,7 +668,8 @@ def test_viewing_group_member_cannot_patch_submitter_item(ind_human_item, submit
 
 
 def test_viewing_group_member_cannot_patch_submitter_file(file_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['released', 'revoked', 'released to project', 'uploading', 'uploaded', 'upload failed']
+    statuses = ['released', 'revoked', 'archived', 'released to project', 'archived to project',
+                'uploading', 'uploaded', 'upload failed']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -669,7 +677,7 @@ def test_viewing_group_member_cannot_patch_submitter_file(file_item, submitter_t
 
 
 def test_non_member_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
-    statuses = ['current', 'released', 'revoked']
+    statuses = ['current', 'released', 'revoked', 'archived']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -677,7 +685,7 @@ def test_non_member_can_view_submitter_item(ind_human_item, submitter_testapp, w
 
 
 def test_non_member_can_view_submitter_file(file_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
-    statuses = ['released', 'revoked']
+    statuses = ['released', 'revoked', 'archived']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -685,7 +693,8 @@ def test_non_member_can_view_submitter_file(file_item, submitter_testapp, wrangl
 
 
 def test_non_member_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
-    statuses = ['released to project', 'submission in progress', 'in review by lab', 'deleted', 'planned']
+    statuses = ['released to project', 'archived to project', 'submission in progress',
+                'in review by lab', 'deleted', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -693,7 +702,7 @@ def test_non_member_cannot_view_submitter_item(ind_human_item, submitter_testapp
 
 
 def test_non_member_cannot_view_submitter_file(file_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
-    statuses = ['released to project', 'uploading', 'uploaded', 'upload failed']
+    statuses = ['released to project', 'archived to project', 'uploading', 'uploaded', 'upload failed']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)

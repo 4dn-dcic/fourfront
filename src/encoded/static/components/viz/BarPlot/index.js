@@ -19,6 +19,6 @@
  * </ChartDataController.Provider>
  */
 
-export { UIControlsWrapper } from './UIControlsWrapper';
+export { UIControlsWrapper, AggregatedLegend } from './UIControlsWrapper';
 export { ViewContainer, PopoverViewContainer, boundActions, barPlotCursorActions } from './ViewContainer';
 export { Chart, genChartBarDims } from './Chart';

@@ -129,7 +129,7 @@ export default class JointAnalysisPlansPage extends React.Component {
     }
 
     static defaultProps = {
-        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&limit=all',
+        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
         'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&status!=archived&status!=revoked&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
         'self_planned_results_url'  : null
     }
@@ -151,6 +151,12 @@ export default class JointAnalysisPlansPage extends React.Component {
         this.loadSearchQueryResults();
     }
 
+    componentDidUpdate(pastProps){
+        if (this.props.session !== pastProps.session){
+            this.loadSearchQueryResults();
+        }
+    }
+
     loadSearchQueryResults(){
 
         function commonCallback(source_name, result){
@@ -170,23 +176,30 @@ export default class JointAnalysisPlansPage extends React.Component {
             this.setState(updatedState);
         }
 
-        _.forEach(['self_planned_results', 'self_results', 'encode_results'], (source_name)=>{
-            var req_url = this.props[source_name + '_url'];
+        var dataSetNames = ['self_planned_results', 'self_results', 'encode_results'];
 
-            if (typeof req_url !== 'string' || !req_url) return;
-
-            // For testing
-            //if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
-            //    req_url = 'https://data.4dnucleome.org' + req_url;
-            //}
-
-            if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
-                ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
-            } else {
-                ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name));
+        this.setState(
+            _.object(_.map(dataSetNames, function(n){ return [n, null]; })), // Reset all result states to 'null'
+            () => {
+                _.forEach(dataSetNames, (source_name)=>{
+                    var req_url = this.props[source_name + '_url'];
+        
+                    if (typeof req_url !== 'string' || !req_url) return;
+        
+                    // For testing
+                    if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
+                        req_url = 'https://data.4dnucleome.org' + req_url;
+                    }
+        
+                    if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
+                        ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
+                    } else {
+                        ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name));
+                    }
+        
+                });
             }
-
-        });
+        );
     }
 
     legend(){
@@ -231,7 +244,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                 <div className="row">
                     { this.legend() }
                     <div className="col-xs-12 col-md-6">
-                        <h4 className="mt-2 mb-0 text-300">4DN</h4>
+                        <h3 className="mt-4 mb-0 text-300">4DN</h3>
                         <VisualBody
                             groupingProperties={groupingProperties}
                             columnGrouping='cell_type'
@@ -246,7 +259,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                     <div className="col-xs-12 col-md-6">
-                        <h4 className="mt-2 mb-0 text-300">ENCODE</h4>
+                        <h3 className="mt-4 mb-0 text-300">ENCODE</h3>
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'

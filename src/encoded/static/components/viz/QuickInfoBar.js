@@ -4,9 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import queryString from 'query-string';
 import * as d3 from 'd3';
 import * as vizUtil from './utilities';
 import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
+import { Toggle } from '../inputs';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 import { ChartDataController } from './chart-data-controller';
@@ -76,6 +78,7 @@ export default class QuickInfoBar extends React.Component {
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
         this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
+        this.onBrowseStateToggle = this.onBrowseStateToggle.bind(this);
         this.onPanelAreaMouseLeave = this.onPanelAreaMouseLeave.bind(this);
         this.renderStats = this.renderStats.bind(this);
         this.renderHoverBar = this.renderHoverBar.bind(this);
@@ -164,11 +167,9 @@ export default class QuickInfoBar extends React.Component {
         });
     }
 
-    renderStats(){
-        if (!this.state.mounted) return null;
+    renderStats(extraClassName = null){
         var areAnyFiltersSet = this.anyFiltersSet();
         var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
-        var { show } = this.state;
 
         var stats;
         if (current && (current.experiment_sets || current.experiments || current.files)) {
@@ -184,22 +185,50 @@ export default class QuickInfoBar extends React.Component {
                 'files'             : total.files || 0
             };
         }
-        var statProps = { 'id' : this.props.id, 'expSetFilters' : this.props.expSetFilters, 'href' : this.props.href };
-        var className = "inner container";
-        if (show !== false) className += ' showing';
-        if (show === 'activeFilters') className += ' showing-filters';
-        if (show === 'mosaicCharts') className += ' showing-charts';
+        var statProps = _.pick(this.props, 'id', 'expSetFilters', 'href', 'isLoadingChartData');
         return (
-            <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
-                <div className="left-side clearfix">
-                    <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
-                    <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
-                    <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
-                    <div className="any-filters glance-label" data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"} onMouseEnter={this.onIconMouseEnter}>
-                        <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
-                    </div>
+            <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
+                <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
+                <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
+                <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
+                <div className="any-filters glance-label" data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"} onMouseEnter={this.onIconMouseEnter}>
+                    <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                 </div>
-                { this.renderHoverBar() }
+            </div>
+        );
+    }
+
+    onBrowseStateToggle(){
+        var newBrowseBaseState = this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn';
+        if (navigate.isBrowseHref(this.props.href)){
+            var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((this.props.context && this.props.context.filters || null));
+            var nextBrowseHref = navigate.getBrowseBaseHref(newBrowseBaseState);
+            if (_.keys(currentExpSetFilters).length > 0){
+                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(currentExpSetFilters);
+            }
+            // Refresh page THEN change update browse state b/c ChartDataController grabs 'expSetFilters' (to grab filtered aggregations) from context.filters so we want that in place before updating charts.
+            navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true }, null, null, {
+                'browseBaseState' : newBrowseBaseState
+            });
+        } else {
+            // Change Redux store state but don't refresh page.
+            store.dispatch({
+                'type' : {
+                    'browseBaseState' : newBrowseBaseState
+                }
+            });
+        }
+        
+    }
+
+    renderBrowseStateToggle(){
+        var checked = this.props.browseBaseState === 'all';
+        return (
+            <div className="col-xs-4 text-right browse-base-state-toggle-container">
+                <div className="inner-more">
+                    <Toggle checked={checked} onChange={this.onBrowseStateToggle} />
+                    <small>Include External Data</small>
+                </div>
             </div>
         );
     }
@@ -227,8 +256,28 @@ export default class QuickInfoBar extends React.Component {
         } else return null;
     }
 
+    renderBar(){
+        var { show, mounted } = this.state;
+        if (!mounted) return null;
+
+        var className = "inner container";
+        if (show !== false) className += ' showing';
+        if (show === 'activeFilters') className += ' showing-filters';
+        if (show === 'mosaicCharts') className += ' showing-charts';
+
+        return (
+            <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
+                <div className="row">
+                    { this.renderStats('col-xs-8') }
+                    { this.renderBrowseStateToggle() }
+                </div>
+                { this.renderHoverBar() }
+            </div>
+        );
+    }
+
     render(){
-        return <div id={this.props.id} className={this.className()}>{ this.renderStats() }</div>;
+        return <div id={this.props.id} className={this.className()}>{ this.renderBar() }</div>;
     }
 
 }
@@ -268,27 +317,26 @@ class Stat extends React.Component {
 
         // Always goto Browse page for now
         var filtersHrefChunk = Filters.expSetFiltersToURLQuery(this.props.expSetFilters); //this.filtersHrefChunk();
-
-        var sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
-
-        var href = Stat.typesPathMap['expsets'/*this.props.classNameID*/] + sep + (filtersHrefChunk || '');
+        var targetHref = navigate.getBrowseBaseHref();
+        targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
 
         if (typeof this.props.href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
             if (navigate.isBrowseHref(this.props.href)) return <span>{ this.props.shortLabel }</span>; 
-            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === href) return <span>{ this.props.shortLabel }</span>;
+            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ this.props.shortLabel }</span>;
         }
         
         return (
-            <a href={href}>{ this.props.shortLabel }</a>
+            <a href={targetHref}>{ this.props.shortLabel }</a>
         );
     }
 
     render(){
+        var { classNameID, longLabel, value, id, isLoadingChartData } = this.props;
         return (
-            <div className={"stat stat-" + this.props.classNameID} title={this.props.longLabel}>
-                <div id={this.props.id + '-stat-' + this.props.classNameID} className="stat-value">
-                    { this.props.value }
+            <div className={"stat stat-" + classNameID} title={longLabel}>
+                <div id={id + '-stat-' + classNameID} className="stat-value">
+                    { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-o-notch" style={{ opacity : 0.25 }}/> : value }
                 </div>
                 <div className="stat-label">
                     { this.label() }
