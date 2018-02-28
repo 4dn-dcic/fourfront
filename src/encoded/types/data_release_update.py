@@ -9,7 +9,7 @@ from .base import (
 )
 
 @collection(
-    name='data_release_updates',
+    name='data-release-updates',
     properties={
         'title': 'Data Release Updates',
         'description': 'Metadata release updates for the Portal',
