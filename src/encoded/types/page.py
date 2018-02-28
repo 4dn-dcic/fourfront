@@ -6,8 +6,6 @@ from pyramid.httpexceptions import ( # 301-307 redirect code response
     HTTPMovedPermanently,
     HTTPFound,
     HTTPSeeOther,
-    HTTPNotModified,
-    HTTPUseProxy,
     HTTPTemporaryRedirect
 )
 from snovault import (
@@ -26,8 +24,6 @@ def get_pyramid_http_exception_for_redirect_code(code):
         301 : HTTPMovedPermanently,
         302 : HTTPFound,
         303 : HTTPSeeOther,
-        304 : HTTPNotModified,
-        305 : HTTPUseProxy,
         307 : HTTPTemporaryRedirect
     }
     return code_dict[code]
