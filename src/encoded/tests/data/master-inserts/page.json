@@ -266,9 +266,9 @@
         ]
     },
     {
-        "name": "joint-analysis-reports",
+        "name": "data-release-updates",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
-        "title": "Joint Analysis Data Reports",
+        "title": "Data Release Updates",
         "content": []
     }
 ]

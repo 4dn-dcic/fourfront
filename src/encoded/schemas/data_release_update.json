@@ -1,9 +1,9 @@
 {
-    "title": "Report",
-    "id": "/profiles/report.json",
+    "title": "Data Release Update",
+    "id": "/profiles/data_release_update.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["timestamp", "award", "lab"],
+    "required": ["update_tag", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "timestamp"],
     "mixinProperties": [
@@ -27,11 +27,11 @@
         "summary": {
             "title": "Summary",
             "type": "string",
-            "description": "String summary for report display."
+            "description": "String summary for update display."
         },
-        "report_items": {
-            "title": "Report Items",
-            "description": "Array of objects representing items within the report.",
+        "update_items": {
+            "title": "Update Items",
+            "description": "Array of objects representing items within the update.",
             "type": "array",
             "default": [],
             "exclude_from": ["submit4dn", "FFedit-create"],
@@ -43,13 +43,13 @@
                     "primary_id":{
                         "title": "Primary ID",
                         "type": "string",
-                        "description": "linkTo for the primary object of the report.",
+                        "description": "linkTo for the primary object of the update.",
                         "linkTo": "ExperimentSetReplicate"
                     },
                     "secondary_id":{
                         "title": "Secondary ID",
                         "type": "string",
-                        "description": "linkTo of the secondary (explanatory) item of the report. May be the same as the primary",
+                        "description": "linkTo of the secondary (explanatory) item of the update. May be the same as the primary",
                         "linkTo": "Item"
                     }
                 }
@@ -57,7 +57,7 @@
         },
         "parameters": {
             "title": "Report Parameters",
-            "description": "Any string parameters used to generate the report",
+            "description": "Any string parameters used to generate the update",
             "type": "array",
             "default": [],
             "uniqueItems": true,
@@ -70,32 +70,40 @@
         "comments": {
             "title": "Comments",
             "type": "string",
-            "description": "Any wrangler comments on the report to be displayed"
+            "description": "Any wrangler comments on the update to be displayed"
         },
-        "timestamp": {
-            "title": "Timestamp",
+        "update_tag": {
+            "title": "Update Tag",
             "type": "string",
-            "comment": "Time the report was created; if from Foursight, will equal to uuid of the check that generated it. Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "description": "Name of the update tag, specified from the Foursight check used to create this. Serves as the primary grouping mechanism for data release updates."
+        },
+        "foursight_uuid": {
+            "title": "Foursight UUID",
+            "type": "string",
+            "description": "Timestamp equivalent to the Foursight UUID of the chekc used to generate this update.",
+            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
             ]
         },
-        "new_data_bound": {
-            "title": "New Data Bound",
+        "start_date": {
+            "title": "Start Date",
             "type": "string",
-            "comment": "Upper/newer timestamp of data used to create the report. Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "description": "Start (earlier) date of the data release update. The update is in form <start_date> to <end_date>",
+            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
             ]
         },
-        "old_data_bound": {
-            "title": "Old Data Bound",
+        "end_date": {
+            "title": "End Date",
             "type": "string",
-            "comment": "Lower/older timestamp of data used to create the report. Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "description": "End (later) date of the data release update. The update is in form <start_date> to <end_date>",
+            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
