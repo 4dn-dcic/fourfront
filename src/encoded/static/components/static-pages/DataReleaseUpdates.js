@@ -3,9 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import queryString from 'query-string';
-import { Button, Collapse } from 'react-bootstrap';
-import { console, object, ajax, DateUtility } from'./../util';
+import {  Collapse } from 'react-bootstrap';
+import { console, object, ajax, JWT } from'./../util';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 
@@ -30,11 +29,16 @@ export default class DataReleaseUpdates extends React.Component {
         var thisUrl = new URL(this.props.href);
         var updateTag = thisUrl.searchParams.get('update_tag');
         var updateParam = thisUrl.searchParams.get('parameters');
+        var isAdmin = false;
+        if(_.contains(JWT.getUserGroups(), 'admin')){
+            isAdmin= true;
+        }
         this.setState({
             'mounted' : true,
             'updateTag': updateTag,
             'updateParam': updateParam,
-            'title': null
+            'title': null,
+            'isAdmin': isAdmin
         });
         this.loadUpdates(updateTag, updateParam);
     }
@@ -96,6 +100,7 @@ export default class DataReleaseUpdates extends React.Component {
             <SingleUpdate
                 {...this.props}
                 id={update.uuid}
+                isAdmin={this.state.isAdmin}
                 updateData={update}
             />
         );
@@ -188,6 +193,10 @@ class SingleUpdate extends React.Component {
     }
 
     render(){
+        var editLink = null;
+        if(this.props.isAdmin){
+            editLink = <a href={this.props.updateData['@id'] + '#!edit'}>Edit</a>;
+        }
         return(
             <div className={"overview-blocks-header with-background mb-2" + (this.state.open ? ' is-open' : ' is-closed')}>
                 <h4 className="tab-section-title clickable with-accent" onClick={this.toggle}>
@@ -196,7 +205,8 @@ class SingleUpdate extends React.Component {
                 <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
                         <div className="row overview-blocks">
-                            <div className="col-sm-12">{this.props.updateData.comments}</div>
+                            <div className="col-sm-10">{this.props.updateData.comments}</div>
+                            <div className="col-sm-2" style={{"textAlign": "right"}}>{editLink}</div>
                             {this.props.updateData.update_items.map((item) => this.buildItem(item))}
                         </div>
                     </div>

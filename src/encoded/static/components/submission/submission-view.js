@@ -936,7 +936,7 @@ export default class SubmissionView extends React.Component{
         // must remove nulls from the orig copy to sync with patchContext
         var origCopy = cloneObj(origContext);
         origCopy = removeNulls(origCopy);
-        var userGroups = getUserGroups();
+        var userGroups = JWT.getUserGroups();
         _.keys(origCopy).forEach(function(field, index){
             // if patchContext already has a value (such as admin edited
             // import_items fields), don't overwrite
@@ -2167,22 +2167,6 @@ class RoundTwoDetailPanel extends React.Component{
 /***** MISC. FUNCIONS *****/
 
 /**
- * Return an array of user groups the current user belongs to
- * Based off of the current JWT
- */
-function getUserGroups(){
-    var userInfo = JWT.getUserInfo();
-    var userGroups = [];
-    if (userInfo){
-        var currGroups = object.getNestedProperty(userInfo, ['details', 'groups'], true);
-        if(currGroups && Array.isArray(currGroups)){
-            userGroups = currGroups;
-        }
-    }
-    return userGroups;
-}
-
-/**
  * Build context based off an object's and populate values from
  * pre-existing context. Empty fields are given null value.
  * All linkTo fields are added to objList.
@@ -2191,7 +2175,7 @@ function getUserGroups(){
  */
 export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
     var built = {};
-    var userGroups = getUserGroups();
+    var userGroups = JWT.getUserGroups();
     var fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
     for (var i=0; i<fields.length; i++){
         if(itemSchema.properties[fields[i]]){
