@@ -127,6 +127,10 @@ def item_model_to_object(model, request):
     if not dict_repr.get('workflow_run_inputs') and hasattr(item_instance, 'workflow_run_inputs') and hasattr(model, 'revs'):
         dict_repr['workflow_run_inputs'] = [ str(uuid) for uuid in request.registry[CONNECTION].storage.write.get_rev_links(model, item_instance.rev['workflow_run_inputs'][1]) ]
 
+    # For files -- include download link/href (if available)
+    if hasattr(item_instance, 'href'):
+        dict_repr['href'] = item_instance.href(request)
+
     return dict_repr
 
 
@@ -155,7 +159,9 @@ def common_props_from_file(file_obj):
         'display_title' : file_obj.get('display_title'),
         'description'   : file_obj.get('description'),
         '@type'         : file_obj.get('@type'),
-        'status'        : file_obj.get('status')
+        'status'        : file_obj.get('status'),
+        'href'          : file_obj.get('href'),
+        'url'           : file_obj.get('url')
     }
 
 
