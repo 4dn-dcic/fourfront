@@ -381,30 +381,28 @@ export default class BrowseView extends React.Component {
         var seeSearchResults = null;
         var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
         if (_.keys(strippedQuery).length > 0){
-            seeSearchResults = <li> or <a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>search all items</a> instead.</li>;
+            seeSearchResults = <li><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all Items</a> (advanced).</li>;
         }
+
         // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
-        var externalExistsView;
         var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
         var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
         var setsExistInExternalData = this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1;
-        if (setsExistInExternalData){
-            var countSets = _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count;
-            externalExistsView = (
-                <h4 className="text-400 mt-3 mb-05">
-                    However, there { countSets > 1 ? 'are ' + countSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
-                </h4>
-            );
-        }
+        var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
+
         return (
             <div className="error-page">
                 <div className="clearfix">
                     <hr/>
                     <h3 className="text-500 mb-0 mt-42">{ context.notification }</h3>
-                    { externalExistsView }
+                    { countExternalSets > 0 ?
+                        <h4 className="text-400 mt-3 mb-05">
+                            However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
+                        </h4>
+                    : null}
                     <ul className="mb-45 mt-1">
                         <li><a href={navigate.getBrowseBaseHref()}>Browse <strong>all 4DN Experiment Sets</strong></a>.</li>
-                        { this.props.browseBaseState !== 'all' ?
+                        { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
                             <li>
                                 <a href="#" onClick={(e)=>{
                                     e.preventDefault();
