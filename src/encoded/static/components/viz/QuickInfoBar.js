@@ -199,26 +199,7 @@ export default class QuickInfoBar extends React.Component {
     }
 
     onBrowseStateToggle(){
-        var newBrowseBaseState = this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn';
-        if (navigate.isBrowseHref(this.props.href)){
-            var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((this.props.context && this.props.context.filters || null));
-            var nextBrowseHref = navigate.getBrowseBaseHref(newBrowseBaseState);
-            if (_.keys(currentExpSetFilters).length > 0){
-                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(currentExpSetFilters);
-            }
-            // Refresh page THEN change update browse state b/c ChartDataController grabs 'expSetFilters' (to grab filtered aggregations) from context.filters so we want that in place before updating charts.
-            navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true }, null, null, {
-                'browseBaseState' : newBrowseBaseState
-            });
-        } else {
-            // Change Redux store state but don't refresh page.
-            store.dispatch({
-                'type' : {
-                    'browseBaseState' : newBrowseBaseState
-                }
-            });
-        }
-        
+        navigate.setBrowseBaseStateAndRefresh(this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', this.props.href, this.props.context);
     }
 
     renderBrowseStateToggle(){

@@ -306,7 +306,7 @@ export function expSetFiltersToURLQuery(expSetFilters){
         var field = filterPair[0];
         var terms = [...filterPair[1]]; // Set to Array
         return terms.map(function(t){
-            return field + '=' + encodeURIComponent(t);
+            return field + '=' + encodeURIComponent(t).replace(/%20/g, "+");
         }).join('&');
     }).join('&');
 }

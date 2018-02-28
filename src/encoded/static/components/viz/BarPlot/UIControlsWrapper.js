@@ -89,9 +89,9 @@ export class UIControlsWrapper extends React.Component {
         if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
             (
-                this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0)
+                !this.props.barplot_data_filtered || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0)
             ) && (
-                !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets > 0)
+                (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets > 0)
             ) && (
                 this.state.showState === 'all'
             )
@@ -100,9 +100,9 @@ export class UIControlsWrapper extends React.Component {
         } else if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
             (
-                this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets === 0)
+                !nextProps.barplot_data_filtered || (nextProps.barplot_data_filtered && nextProps.barplot_data_filtered.total.experiment_sets === 0)
             ) && (
-                !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets > 0)
+                (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets > 0)
             ) && (
                 this.state.showState === 'filtered'
             )
@@ -258,17 +258,20 @@ export class UIControlsWrapper extends React.Component {
         var isSelectedDisabled = (this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href)) || (this.props.barplot_data_filtered && this.props.barplot_data_filtered.total.experiment_sets === 0);
         return (
             <div className="show-type-change-section">
-                <h6 className="dropdown-heading">Show</h6>
+                <h6 className="dropdown-heading">
+                    <span className="inline-block" data-tip={isSelectedDisabled ? "Enable some filters to enable toggling between viewing all and selected items." : null}>Show</span>
+                </h6>
                 <DropdownButton
                     id="select-barplot-show-type"
                     onSelect={this.handleExperimentsShowType}
                     bsSize='xsmall'
+                    disabled={isSelectedDisabled}
                     title={(()=>{
                         //if (this.state.openDropdown === 'subdivisionField'){
                         //    return <em className="dropdown-open-title">Color Bars by</em>;
                         //}
                         var aggrType = this.titleMap(this.state.aggregateType);
-                        var showString = (this.state.showState === 'all' || isSelectedDisabled) ? 'All' : 'Selected';
+                        var showString = this.state.showState === 'all' ? 'All' : 'Selected';
                         return (
                             <span>
                                 <span className="text-600">{ showString }</span> { aggrType }
