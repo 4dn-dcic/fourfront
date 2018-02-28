@@ -88,6 +88,11 @@
                 }
             }
         },
+        "microscope_settings_master": {
+            "type": "string",
+            "title": "Master Microscope Settings",
+            "linkTo": "MicroscopeSetting"
+        },
         "plate_id": {
             "title": "Plate ID",
             "description": "Plate ID for multi-well plate experiments",
@@ -97,6 +102,15 @@
             "title": "Well Position",
             "description": "Well position for experiments on multi-well plates, eg H8, B18",
             "type": "string"
+        },
+        "image_ids":{
+            "title": "Image IDs",
+            "description": "Image IDs as described by BioFormats",
+            "type": "array",
+            "items": {
+                "title": "Image ID",
+                "type": "string"
+            }
         }
     },
     "facets": {
