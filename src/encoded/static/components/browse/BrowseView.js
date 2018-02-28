@@ -392,7 +392,7 @@ export default class BrowseView extends React.Component {
             var countSets = _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count;
             externalExistsView = (
                 <h4 className="text-400 mt-3 mb-05">
-                    However, there { countSets > 1 ? 'are ' + countSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.  
+                    However, there { countSets > 1 ? 'are ' + countSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
                 </h4>
             );
         }
@@ -405,13 +405,13 @@ export default class BrowseView extends React.Component {
                     <ul className="mb-45 mt-1">
                         <li><a href={navigate.getBrowseBaseHref()}>Browse <strong>all 4DN Experiment Sets</strong></a>.</li>
                         { this.props.browseBaseState !== 'all' ?
-                        <li>
-                            <a href="#" onClick={(e)=>{
-                                e.preventDefault();
-                                e.stopPropagation();
-                                navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
-                            }}>Search <strong>all Experiment Sets</strong></a>, including External data.
-                        </li>
+                            <li>
+                                <a href="#" onClick={(e)=>{
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+                                }}>Search <strong>all Experiment Sets</strong></a>, including External data.
+                            </li>
                         : null }
                         { seeSearchResults }
                     </ul>
