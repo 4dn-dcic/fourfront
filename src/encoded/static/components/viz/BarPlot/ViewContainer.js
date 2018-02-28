@@ -168,7 +168,8 @@ class Bar extends React.Component {
         var hasSubSections = Array.isArray(d.bars);
 
         var barSections = (hasSubSections ?
-            d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
+            // If needed, remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
+            barplot_color_cycler.sortObjectsByColorPalette(d.bars).reverse() : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
         );
 
         // If transitioning, add existing bar sections to fade out.
@@ -213,11 +214,6 @@ class Bar extends React.Component {
         if (d.new)              className += ' new-bar';
         else if (d.existing)    className += ' existing-bar';
 
-        var renderedBarSections = _.map(
-            barplot_color_cycler.sortObjectsByColorPalette(barSections).reverse(), // Remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
-            this.renderBarSection
-        );
-
         var topLabel = null;
         if (this.props.showBarCount){
             topLabel = <span className="bar-top-label" key="text-label" children={d.count} />;
@@ -242,7 +238,7 @@ class Bar extends React.Component {
                         if (d.new && transitioning) r.style.opacity = 1;
                     }
                 }}
-                children={[topLabel, renderedBarSections]}
+                children={[ topLabel, _.map(barSections, this.renderBarSection) ]}
             />
         );
     }
