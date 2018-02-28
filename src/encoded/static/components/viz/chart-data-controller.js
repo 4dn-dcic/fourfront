@@ -576,11 +576,11 @@ export const ChartDataController = {
         });
 
         var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
-
         var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-        if (opts.searchQuery) baseSearchParams['q'] = opts.searchQuery;
 
         var unfilteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '/' + fieldsQuery;
+
+        if (opts.searchQuery) baseSearchParams['q'] = opts.searchQuery; // Make sure occurs after setting unfilteredHref.
         var filteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery;
 
         notifyLoadStartCallbacks();
