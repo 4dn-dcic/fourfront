@@ -1,6 +1,6 @@
 {
     "title": "Microscopy Experiments",
-    "description": "Target/Label/Channel information for microscopy experiments.",
+    "description": "Imaging Experiments with channel/label/target information.",
     "id": "/profiles/experiment_mic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
