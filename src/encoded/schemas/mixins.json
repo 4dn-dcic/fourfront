@@ -470,6 +470,9 @@
     "facets_common" : {
         "award.project": {
             "title": "Project"
+        },
+        "lab.display_title": {
+            "title": "Lab"
         }
     }
 
