@@ -130,10 +130,9 @@ navigate.setBrowseBaseStateAndRefresh = function(newBrowseBaseState = 'all', cur
         if (_.keys(currentExpSetFilters).length > 0){
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + expSetFiltersToURLQuery(currentExpSetFilters);
         }
-        console.log('XX', expSetFiltersToURLQuery(currentExpSetFilters), currentExpSetFilters);
         var hrefParts = url.parse(currentHref, true);
         if (hrefParts.query.q) {
-            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + hrefParts.query.q;
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
         }
         // Refresh page THEN change update browse state b/c ChartDataController grabs 'expSetFilters' (to grab filtered aggregations) from context.filters so we want that in place before updating charts.
         navigate(nextBrowseHref, navOptions, null, null, {
