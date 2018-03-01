@@ -167,7 +167,7 @@ export default class QuickInfoBar extends React.Component {
         });
     }
 
-    renderStats(extraClassName = null){        
+    renderStats(extraClassName = null){
         var areAnyFiltersSet = this.anyFiltersSet();
         var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
 
