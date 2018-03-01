@@ -152,6 +152,11 @@ class SingleUpdate extends React.Component {
     }
 
     buildItem(item){
+        // catch errors where there are no experiments in a set
+        // this should not happen, but can occur with test data...
+        if (item.primary_id.experiments_in_set.length == 0){
+            return null;
+        }
         return(
             <div key={item.primary_id.uuid} className="col-sm-12 row mb-1">
                 <hr className="tab-section-title-horiz-divider"/>
