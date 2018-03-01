@@ -51,7 +51,8 @@
             "MARGI",
             "GAM",
             "CUT&RUN",
-            "TrAC-loop"
+            "TrAC-loop",
+            "TSA-seq"
           ]
         },
         "targeted_factor": {
