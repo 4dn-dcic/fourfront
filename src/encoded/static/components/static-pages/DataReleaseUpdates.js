@@ -205,7 +205,7 @@ class SingleUpdate extends React.Component {
                 <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
                         <div className="row overview-blocks">
-                            <div className="col-sm-10">{this.props.updateData.comments}</div>
+                            <div className="col-sm-10">{this.props.updateData.comments || "No comments."}</div>
                             <div className="col-sm-2" style={{"textAlign": "right"}}>{editLink}</div>
                             {this.props.updateData.update_items.map((item) => this.buildItem(item))}
                         </div>
