@@ -581,7 +581,7 @@ export const ChartDataController = {
 
         var unfilteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '/' + fieldsQuery;
 
-        if (searchQuery) baseSearchParams['q'] = searchQuery; // Make sure occurs after setting unfilteredHref.
+        if (searchQuery) baseSearchParams['q'] = encodeURIComponent(searchQuery); // Make sure occurs after setting unfilteredHref.
         var filteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery;
 
         notifyLoadStartCallbacks();
@@ -644,7 +644,7 @@ export const ChartDataController = {
         var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
 
         var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-        if (searchQuery) baseSearchParams['q'] = searchQuery;
+        if (searchQuery) baseSearchParams['q'] = encodeURIComponent(searchQuery);
         
         notifyLoadStartCallbacks();
         ajax.load(
