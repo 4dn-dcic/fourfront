@@ -9,7 +9,7 @@ import * as globals from './../globals';
 import StaticPage from './StaticPage';
 
 
-export default class DataReleaseUpdates extends React.Component {
+export default class ReleaseUpdates extends React.Component {
 
     constructor(props){
         super(props);
@@ -100,6 +100,7 @@ export default class DataReleaseUpdates extends React.Component {
             <SingleUpdate
                 {...this.props}
                 id={update.uuid}
+                key={update.uuid}
                 isAdmin={this.state.isAdmin}
                 updateData={update}
             />
@@ -121,7 +122,7 @@ export default class DataReleaseUpdates extends React.Component {
     }
 
 }
-globals.content_views.register(DataReleaseUpdates, 'Data-release-updatesPage');
+globals.content_views.register(ReleaseUpdates, 'Release-updatesPage');
 
 
 class SingleUpdate extends React.Component {
@@ -152,7 +153,7 @@ class SingleUpdate extends React.Component {
 
     buildItem(item){
         return(
-            <div className="col-sm-12 row mb-1">
+            <div key={item.primary_id.uuid} className="col-sm-12 row mb-1">
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="col-sm-12">
                     <div className="inner">
@@ -197,8 +198,18 @@ class SingleUpdate extends React.Component {
         if(this.props.isAdmin){
             editLink = <a href={this.props.updateData['@id'] + '#!edit'}>Edit</a>;
         }
+        var styleObj = {};
+        if (this.props.updateData.severity === 1){
+            styleObj.backgroundColor = '#fcf8e3';
+        } else if (this.props.updateData.severity === 2){
+            styleObj.backgroundColor = '#f2dede';
+        } else if (this.props.updateData.severity === 3){
+            styleObj.backgroundColor = '#f5a894';
+        } else {
+            styleObj.backgroundColor = "#dff0d8";
+        }
         return(
-            <div className={"overview-blocks-header with-background mb-2" + (this.state.open ? ' is-open' : ' is-closed')}>
+            <div className={"overview-blocks-header with-background mb-2" + (this.state.open ? ' is-open' : ' is-closed')} style={styleObj}>
                 <h4 className="tab-section-title clickable with-accent" onClick={this.toggle}>
                     <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
                 </h4>

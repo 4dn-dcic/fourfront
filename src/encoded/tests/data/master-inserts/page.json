@@ -266,9 +266,9 @@
         ]
     },
     {
-        "name": "data-release-updates",
+        "name": "release-updates",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
-        "title": "Data Release Updates",
+        "title": "Release Updates",
         "content": []
     }
 ]
