@@ -254,12 +254,7 @@ class ResultTableContainer extends React.Component {
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
                                 evt.stopPropagation();
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                if (!clearFiltersURL) {
-                                    console.error("No Clear Filters URL");
-                                    return;
-                                }
-                                this.props.navigate(clearFiltersURL, { 'inPlace' : true, 'dontScrollToTop' : true });
+                                this.props.navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true, 'dontScrollToTop' : true });
                             }}
                         />
                     </div>
@@ -342,60 +337,108 @@ export default class BrowseView extends React.Component {
 
     componentDidMount(){
         var hrefParts = url.parse(this.props.href, true);
-
-        var isValidQuery = navigate.isValidBrowseQuery(hrefParts.query);
-
-        if (!isValidQuery) {
-            var nextBrowseHref = navigate.getBrowseBaseHref();
-            var expSetFilters = Filters.contextFiltersToExpSetFilters();
-            if (_.keys(expSetFilters).length > 0){
-                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
-            }
-            if (typeof hrefParts.query.q === 'string'){
-                nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + hrefParts.query.q;
-            }
-
-            navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
+        if (!navigate.isValidBrowseQuery(hrefParts.query)){
+            this.redirectToCorrectBrowseView(hrefParts);
         }
     }
 
-    render() {
+    componentDidUpdate(pastProps){
+        if (pastProps.href !== this.props.href){
+            var hrefParts = url.parse(this.props.href, true);
+            if (!navigate.isValidBrowseQuery(hrefParts.query)){
+                this.redirectToCorrectBrowseView(hrefParts);
+            }
+        }
+    }
+
+    redirectToCorrectBrowseView(hrefParts = null){
+        if (!hrefParts) hrefParts = url.parse(this.props.href, true);
+
         var context = this.props.context;
+
+        // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
+        //var availableProjectsInResults = Array.isArray(context.facets) ? _.uniq(_.pluck(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key')) : [];
+        //if (this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1){
+        //    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+        //    return;
+        //}
+
+        var nextBrowseHref = navigate.getBrowseBaseHref();
+        var expSetFilters = Filters.contextFiltersToExpSetFilters();
+        if (_.keys(expSetFilters).length > 0){
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
+        }
+        if (typeof hrefParts.query.q === 'string'){
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
+        }
+        navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
+    }
+
+    renderNoResultsView(currentHrefQuery = null){
+        if (!currentHrefQuery) currentHrefQuery = url.parse(this.props.href, true).query;
+        var context = this.props.context;
+        var hrefParts = url.parse(this.props.href, true);
+        var seeSearchResults = null;
+        var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
+        if (_.keys(strippedQuery).length > 0){
+            seeSearchResults = <li><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all Items</a> (advanced).</li>;
+        }
+
+        // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
+        var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
+        var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
+        var setsExistInExternalData = this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1;
+        var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
+
+        return (
+            <div className="error-page mt-4">
+                <div className="clearfix">
+                    <hr/>
+                    <h3 className="text-500 mb-15 mt-42">{ context.notification }</h3>
+                    { countExternalSets > 0 ?
+                        <h4 className="text-400 mt-2 mb-05">
+                            However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
+                        </h4>
+                    : null}
+                    <h4 className="mt-1 mb-05 text-400">Suggestions:</h4>
+                    <ul className="mb-45 mt-1">
+                        { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
+                            <li>
+                                Keep filters and <a href="#" onClick={(e)=>{
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+                                }}>browse <strong>all Experiment Sets</strong></a>, including External data.
+                            </li>
+                        : null }
+                        <li>Unset filters and <a href={navigate.getBrowseBaseHref()}>browse <strong>all 4DN Experiment Sets</strong></a>.</li>
+                        { seeSearchResults }
+                    </ul>
+                    <hr/>
+                </div>
+            </div>
+        );
+    }
+
+    render() {
+        var { context, href, session, defaultHiddenColumns, browseBaseState, schemas } = this.props;
         //var fileFormats = findFormats(context['@graph']);
         var results = context['@graph'];
-        var hrefParts = url.parse(this.props.href, true);
+        var hrefParts = url.parse(href, true);
         var searchBase = hrefParts.search || '';
 
         // no results found!
-        if(context.total === 0 && context.notification){
-            var seeSearchResults = null;
-            var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
-            if (_.keys(strippedQuery).length > 0){
-                seeSearchResults = <span> or <a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>search all items</a> instead.</span>;
-            }
-            return (
-                <div className="error-page">
-                    <div className="clearfix">
-                        <hr/>
-                        <h3 className="text-500 mb-0 mt-42">{ context.notification }</h3>
-                        <h4 className="text-400 mt-05 mb-45">
-                            View <a href={navigate.getBrowseBaseHref()}>all</a> Experiment Sets{ seeSearchResults }
-                        </h4>
-                        <hr/>
-                    </div>
-                </div>
-            );
-        }
+        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts.query);
 
         // browse is only for experiment sets
-        if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
+        if(!navigate.isValidBrowseQuery(hrefParts.query)){
             return(
                 <div className="error-page text-center">
                     <h3 className="text-300">
-                        Only experiment sets may currently be browsed.
+                        Redirecting
                     </h3>
                     <h4 className="text-400">
-                        Please wait to be redirected.
+                        Please wait...
                     </h4>
                 </div>
             );
@@ -411,14 +454,10 @@ export default class BrowseView extends React.Component {
                     schemas={this.props.schemas}
                 />
                 */}
-                <SelectedFilesController href={this.props.href}>
-                    <CustomColumnController defaultHiddenColumns={this.props.defaultHiddenColumns}>
-                        <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer
-                                browseBaseState={this.props.browseBaseState}
-                                session={this.props.session}
-                                schemas={this.props.schemas}
-                            />
+                <SelectedFilesController href={href}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
+                        <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
+                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} />
                         </SortController>
                     </CustomColumnController>
                 </SelectedFilesController>

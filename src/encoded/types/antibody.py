@@ -27,6 +27,7 @@ class Antibody(Item):
     item_type = 'antibody'
     schema = load_schema('encoded:schemas/antibody.json')
     name_key = 'antibody_id'
+    embedded_list = ['award.project']
 
     def _update(self, properties, sheets=None):
         # set antibody_id based on values of antibody_name and product_no

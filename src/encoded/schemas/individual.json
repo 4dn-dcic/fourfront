@@ -9,6 +9,9 @@
     "dependencies": {
       "age": [ "age_units"]
     },
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "accession": {
             "accessionType": "IN"

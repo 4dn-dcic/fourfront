@@ -408,6 +408,14 @@
         &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
             text-transform: capitalize;
         }
+
+        &[data-field="status"] .term[data-term="deleted"][data-selected="false"] > .facet-item {
+            &:after {
+                content: ' (not shown)';
+                font-weight: 300;
+                opacity: 0.75;
+            }
+        }
     }
 
 }

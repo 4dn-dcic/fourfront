@@ -23,7 +23,7 @@ class MicroscopeSetting(Item):
     """the base class for microscope settings collection."""
     base_types = ['MicroscopeSetting'] + Item.base_types
     schema = load_schema('encoded:schemas/microscope_setting.json')
-    embedded_list = []
+    embedded_list = ['award.project']
 
 
 @collection(

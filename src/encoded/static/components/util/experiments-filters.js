@@ -306,7 +306,7 @@ export function expSetFiltersToURLQuery(expSetFilters){
         var field = filterPair[0];
         var terms = [...filterPair[1]]; // Set to Array
         return terms.map(function(t){
-            return field + '=' + encodeURIComponent(t);
+            return field + '=' + encodeURIComponent(t).replace(/%20/g, "+");
         }).join('&');
     }).join('&');
 }
@@ -429,7 +429,7 @@ export function searchQueryStringFromHref(href){
     if (!href) return null;
     if (typeof href !== 'string') return null;
     var searchQueryString = null;
-    var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s\+\-\%]+/);
+    var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s\+\-\%\.\*\!\(\)]+/);
     if (searchQueryMatch){
         searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '').replace(/\+/g, ' ');
         if (decodeURIComponent){
