@@ -22,7 +22,7 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded_list = ['quality_metrics.overall_quality_status']
+    embedded_list = ['award.project', 'quality_metrics.overall_quality_status']
 
 
 @abstract_collection(
@@ -38,7 +38,7 @@ class QualityMetric(Item):
     base_types = ['QualityMetric'] + Item.base_types
     item_type = 'quality_metric'
     schema = load_schema('encoded:schemas/quality_metric.json')
-    embedded_list = []
+    embedded_list = ['award.project']
 
 
 @collection(

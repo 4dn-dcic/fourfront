@@ -51,7 +51,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
-        'biosample_protocols.description'
+        'biosample_protocols.description',
+        'award.project'
     ]
     name_key = 'accession'
 

@@ -20,7 +20,8 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded_list = ['constructs.construct_type',
+    embedded_list = ['award.project',
+                     'constructs.construct_type',
                      'constructs.tags',
                      'constructs.designed_to_target',
                      'modified_regions.aliases',

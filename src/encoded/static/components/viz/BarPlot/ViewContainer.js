@@ -31,6 +31,12 @@ class BarSection extends React.Component {
         this.isHoveredOver = this.isHoveredOver.bind(this);
     }
 
+    componentWillUnmount(){
+        if (this.refs.element && (this.isSelected() || this.isHoveredOver())){
+            this.props.onMouseLeave(this.props.node, { 'relatedTarget' : this.refs.element });
+        }
+    }
+
     /**
      * Check if component (aka props.node) is selected.
      * Calls CursorViewBounds.isSelected(..) internally.
@@ -69,6 +75,7 @@ class BarSection extends React.Component {
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
                     backgroundColor : color
                 }}
+                ref="element"
                 data-key={this.props['data-key'] || null}
                 data-term={d.parent ? d.term : null}
                 data-color={color}

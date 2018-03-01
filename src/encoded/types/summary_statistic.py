@@ -22,7 +22,7 @@ class SummaryStatistic(Item):
 
     item_type = 'summary_statistic'
     schema = load_schema('encoded:schemas/summary_statistic.json')
-    embedded_list = []
+    embedded_list = ['award.project']
 
 
 @collection(

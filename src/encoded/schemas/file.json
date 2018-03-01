@@ -8,6 +8,9 @@
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "accession": {
             "accessionType": "FI"
@@ -191,9 +194,6 @@
         "experiments.digestion_enzyme.name" : {
             "title" : "Enzyme"
         },
-        "award.project": {
-            "title": "Project"
-        },
         "lab.display_title": {
             "title": "Lab"
         }
@@ -204,9 +204,6 @@
         },
         "file_format": {
             "title" : "File Format"
-        },
-        "award.project": {
-            "title": "Project"
         },
         "experiments.display_title": {
             "title": "Experiments"

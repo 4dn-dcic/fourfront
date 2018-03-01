@@ -138,5 +138,13 @@
     },
     "boost_values": {
         "title": 1.0
+    },
+    "facets" : {
+        "lab.display_title" : {
+            "title" : "Affiliation"
+        },
+        "submits_for.display_title" : {
+            "title" : "Submits for Lab"
+        }
     }
 }

@@ -21,6 +21,9 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "dependencies": {
       "age": [ "age_units"]
     },

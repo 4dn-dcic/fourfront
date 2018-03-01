@@ -20,6 +20,9 @@
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/notes" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -65,9 +68,6 @@
         },
         "protocol_classification" : {
             "title" : "Protocol Sub-type"
-        },
-        "award.project": {
-            "title": "Project"
         },
         "lab.display_title": {
             "title": "Lab"

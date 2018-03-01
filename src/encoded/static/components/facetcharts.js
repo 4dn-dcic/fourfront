@@ -50,7 +50,7 @@ export class FacetCharts extends React.Component {
                 {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
             ]
         },
-        'initialFields' : ['experiments_in_set.experiment_type',"experiments_in_set.biosample.biosource.biosource_type"]
+        'initialFields' : ['experiments_in_set.experiment_type',"experiments_in_set.biosample.biosource.individual.organism.name"]
     }
 
     constructor(props){
@@ -141,6 +141,7 @@ export class FacetCharts extends React.Component {
 
         var show = this.show();
         if (!show) return null; // We don't show section at all.
+        if (this.props.context && this.props.context.total === 0) return null;
         if (this.props.debug) console.log('WILL SHOW FACETCHARTS', show, this.props.href);
 
         var colWidthPerScreenSize = this.props.colWidthPerScreenSize;

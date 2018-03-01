@@ -14,6 +14,9 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/status" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "type": "object",
     "required": [ "antibody_name", "award", "lab"],
     "identifyingProperties": ["uuid","aliases","antibody_id"],

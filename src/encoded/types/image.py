@@ -27,7 +27,7 @@ class Image(ItemWithAttachment, Item):
         'image/jpeg',
         'image/gif',
     ]
-    embedded_list = []
+    embedded_list = ['award.project']
 
     def unique_keys(self, properties):
         """smth."""

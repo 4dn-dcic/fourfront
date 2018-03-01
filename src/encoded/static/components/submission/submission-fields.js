@@ -71,7 +71,8 @@ export default class BuildField extends React.Component {
             'value' : (typeof this.props.value === 'number' ? this.props.value || 0 : this.props.value || ''),
             'onChange' : this.handleChange,
             'name' : this.props.field,
-            'placeholder': "No value"
+            'placeholder': "No value",
+            'data-field-type' : field_case
         };
         switch(field_case){
             case 'text' :
@@ -81,13 +82,13 @@ export default class BuildField extends React.Component {
                 return <FormControl type="text" inputMode="latin" {...inputProps} />;
             case 'integer'          : return <FormControl type="number" {...inputProps} step={1} />;
             case 'number'           : return <FormControl type="number" {...inputProps} />;
-            /*
-            case 'boolean' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <Checkbox id="boolInput" {...inputProps} />
-                </div>
+            case 'boolean'          : return (
+                <Checkbox {..._.omit(inputProps, 'value', 'placeholder')} checked={!!(this.props.value)} className="mb-07 mt-07">
+                    <span style={{ 'verticalAlign' : 'middle', 'text-transform' : 'capitalize' }}>
+                        { typeof this.props.value === 'boolean' ? this.props.value + '' : null }
+                    </span>
+                </Checkbox>
             );
-            */
             case 'enum'             : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
                     <DropdownButton title={this.props.value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
@@ -121,7 +122,9 @@ export default class BuildField extends React.Component {
     handleChange = (e) => {
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
-        if (this.props.fieldType === 'integer'){
+        if (this.props.fieldType === 'boolean'){
+            currValue = inputElement.checked;
+        } else if (this.props.fieldType === 'integer'){
             currValue = parseInt(currValue);
             if (isNaN(currValue)){
                 currValue = null;

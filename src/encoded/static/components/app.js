@@ -533,9 +533,15 @@ export default class App extends React.Component {
         options.replace = action_url.pathname == url.parse(this.props.href).pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
-            search = search.split('&').filter(function (item) {
-                return item.slice(-1) != '=';
-            }).join('&');
+            search = _.map(
+                _.filter(search.split('&'), function (item) {
+                    return item.slice(-1) != '=';
+                }),
+                function(item){
+                    var split = item.split('=');
+                    return split[0] + '=' + encodeURIComponent(split[1]).replace(/(')/g, "%27");
+                }
+            ).join('&');
         }
         var href = action_url.pathname;
         if (search) {
