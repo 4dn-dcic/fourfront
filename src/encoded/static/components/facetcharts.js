@@ -141,6 +141,7 @@ export class FacetCharts extends React.Component {
 
         var show = this.show();
         if (!show) return null; // We don't show section at all.
+        if (this.props.context && this.props.context.total === 0) return null;
         if (this.props.debug) console.log('WILL SHOW FACETCHARTS', show, this.props.href);
 
         var colWidthPerScreenSize = this.props.colWidthPerScreenSize;

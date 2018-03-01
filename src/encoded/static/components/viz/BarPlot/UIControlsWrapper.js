@@ -334,10 +334,11 @@ export class UIControlsWrapper extends React.Component {
     }
 
     render(){
+        var { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight } = this.props;
+        var { aggregateType, showState } = this.state;
 
-        if (!UIControlsWrapper.canShowChart(this.props.barplot_data_unfiltered)) return null;
-        
-        var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
+        if (!UIControlsWrapper.canShowChart(barplot_data_unfiltered)) return null;
+
         var windowGridSize = layout.responsiveGridState();
         var contextualView = this.contextualView();
 
@@ -353,24 +354,21 @@ export class UIControlsWrapper extends React.Component {
                 }}>
 
                     <div className="y-axis-top-label" style={{
-                        width : this.props.chartHeight,
-                        top: this.props.chartHeight - 4
+                        width : chartHeight,
+                        top: chartHeight - 4
                     }}>
-                        <div className="row" style={{ maxWidth : 210, float: 'right' }}>
-                            <div className="col-xs-3" style={{ width : 51 }}>
+                        <div className="row" style={{ 'maxWidth' : 210, 'float': 'right' }}>
+                            <div className="col-xs-3" style={{ 'width' : 51 }}>
                                 <h6 className="dropdown-heading">Y Axis</h6>
                             </div>
-                            <div className="col-xs-9" style={{ width : 159, textAlign : 'left' }}>
+                            <div className="col-xs-9" style={{ 'width' : 159, 'textAlign' : 'left' }}>
                                 <DropdownButton
                                     id="select-barplot-aggregate-type"
                                     bsSize="xsmall"
                                     onSelect={this.handleAggregateTypeSelect}
-                                    title={this.titleMap(this.state.aggregateType)}
+                                    title={this.titleMap(aggregateType)}
                                     onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
-                                    children={this.renderDropDownMenuItems(
-                                        ['experiment_sets','experiments','files'],
-                                        this.state.aggregateType
-                                    )}
+                                    children={this.renderDropDownMenuItems(['experiment_sets','experiments','files'], aggregateType)}
                                 />
                             </div>
                         </div>
@@ -382,18 +380,18 @@ export class UIControlsWrapper extends React.Component {
 
                 <div className="row">
                     <div className="col-sm-9" children={this.adjustedChildChart()} />
-                    <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
+                    <div className="col-sm-3 chart-aside" style={{ 'height' : chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
                         { this.renderGroupByFieldDropdown(contextualView) }
-                        <div className="legend-container" style={{ height : legendContainerHeight }}>
+                        <div className="legend-container" style={{ 'height' : legendContainerHeight }}>
                             <AggregatedLegend
-                                barplot_data_filtered={this.props.barplot_data_filtered}
-                                barplot_data_unfiltered={this.props.barplot_data_unfiltered}
+                                barplot_data_filtered={barplot_data_filtered}
+                                barplot_data_unfiltered={barplot_data_unfiltered}
                                 height={legendContainerHeight}
-                                field={_.findWhere(this.props.availableFields_Subdivision, { 'field' : this.props.barplot_data_fields[1] }) || null}
-                                showType={this.state.showState}
-                                aggregateType={this.state.aggregateType}
-                                schemas={this.props.schemas}
+                                field={_.findWhere(availableFields_Subdivision, { 'field' : barplot_data_fields[1] }) || null}
+                                showType={showState}
+                                aggregateType={aggregateType}
+                                schemas={schemas}
                             />
                         </div>
                         <div className="x-axis-right-label">
@@ -405,12 +403,12 @@ export class UIControlsWrapper extends React.Component {
                                     <DropdownButton
                                         id="select-barplot-field-0"
                                         onSelect={this.handleFieldSelect.bind(this, 0)}
-                                        disabled={this.props.isLoadingChartData}
+                                        disabled={isLoadingChartData}
                                         title={(()=>{
                                             //if (this.state.openDropdown === 'xAxisField'){
                                             //    return <em className="dropdown-open-title">X-Axis Field</em>;
                                             //}
-                                            if (this.props.isLoadingChartData){
+                                            if (isLoadingChartData){
                                                 return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
                                             }
                                             var field = this.getFieldAtIndex(0);
@@ -418,8 +416,8 @@ export class UIControlsWrapper extends React.Component {
                                         })()}
                                         onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
                                         children={this.renderDropDownMenuItems(
-                                            this.props.availableFields_XAxis.map((field)=>{
-                                                var isDisabled = this.props.barplot_data_fields[1] && this.props.barplot_data_fields[1] === field.field;
+                                            availableFields_XAxis.map((field)=>{
+                                                var isDisabled = barplot_data_fields[1] && barplot_data_fields[1] === field.field;
                                                 return [
                                                     field.field,
                                                     field.title || Schemas.Field.toName(field.field),
@@ -428,7 +426,7 @@ export class UIControlsWrapper extends React.Component {
                                                     //isDisabled ? 'Field is already selected for "Group By"' : null
                                                 ]; // key, title, subtitle
                                             }),
-                                            this.props.barplot_data_fields[0]
+                                            barplot_data_fields[0]
                                         )}
                                     />
                                 </div>

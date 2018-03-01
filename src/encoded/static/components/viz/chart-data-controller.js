@@ -561,8 +561,9 @@ export const ChartDataController = {
             opts.browseBaseState || null
         );
 
-        var filtersSet = (_.keys(currentExpSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
-        
+        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
+        var filtersSet = (_.keys(currentExpSetFilters).length > 0) || searchQuery;
+
         var barplot_data_filtered = null,
             barplot_data_unfiltered = null;
 
@@ -580,7 +581,7 @@ export const ChartDataController = {
 
         var unfilteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '/' + fieldsQuery;
 
-        if (opts.searchQuery) baseSearchParams['q'] = opts.searchQuery; // Make sure occurs after setting unfilteredHref.
+        if (searchQuery) baseSearchParams['q'] = searchQuery; // Make sure occurs after setting unfilteredHref.
         var filteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery;
 
         notifyLoadStartCallbacks();
@@ -640,9 +641,10 @@ export const ChartDataController = {
         var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
 
         var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
+        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
 
         var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-        if (opts.searchQuery) baseSearchParams['q'] = opts.searchQuery;
+        if (searchQuery) baseSearchParams['q'] = searchQuery;
         
         notifyLoadStartCallbacks();
         ajax.load(

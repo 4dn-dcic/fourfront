@@ -167,12 +167,12 @@ export default class QuickInfoBar extends React.Component {
         });
     }
 
-    renderStats(extraClassName = null){
+    renderStats(extraClassName = null){        
         var areAnyFiltersSet = this.anyFiltersSet();
         var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
 
         var stats;
-        if (current && (current.experiment_sets || current.experiments || current.files)) {
+        if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
             stats = {
                 'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
                 'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,

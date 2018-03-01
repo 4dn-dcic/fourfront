@@ -391,26 +391,27 @@ export default class BrowseView extends React.Component {
         var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
 
         return (
-            <div className="error-page">
+            <div className="error-page mt-4">
                 <div className="clearfix">
                     <hr/>
-                    <h3 className="text-500 mb-0 mt-42">{ context.notification }</h3>
+                    <h3 className="text-500 mb-15 mt-42">{ context.notification }</h3>
                     { countExternalSets > 0 ?
-                        <h4 className="text-400 mt-3 mb-05">
+                        <h4 className="text-400 mt-2 mb-05">
                             However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
                         </h4>
                     : null}
+                    <h4 className="mt-1 mb-05 text-400">Suggestions:</h4>
                     <ul className="mb-45 mt-1">
-                        <li><a href={navigate.getBrowseBaseHref()}>Browse <strong>all 4DN Experiment Sets</strong></a>.</li>
                         { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
                             <li>
-                                <a href="#" onClick={(e)=>{
+                                Keep filters and <a href="#" onClick={(e)=>{
                                     e.preventDefault();
                                     e.stopPropagation();
                                     navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
-                                }}>Search <strong>all Experiment Sets</strong></a>, including External data.
+                                }}>browse <strong>all Experiment Sets</strong></a>, including External data.
                             </li>
                         : null }
+                        <li>Unset filters and <a href={navigate.getBrowseBaseHref()}>browse <strong>all 4DN Experiment Sets</strong></a>.</li>
                         { seeSearchResults }
                     </ul>
                     <hr/>
