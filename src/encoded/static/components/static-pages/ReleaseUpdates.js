@@ -213,10 +213,11 @@ class SingleUpdate extends React.Component {
         } else {
             styleObj.backgroundColor = "#dff0d8";
         }
+        var summaryStr = '(' + this.props.updateData.update_items.length + ') ' + this.props.updateData.summary;
         return(
             <div className={"overview-blocks-header with-background mb-2" + (this.state.open ? ' is-open' : ' is-closed')} style={styleObj}>
                 <h4 className="tab-section-title clickable with-accent" onClick={this.toggle}>
-                    <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
+                    <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ summaryStr } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
                 </h4>
                 <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
