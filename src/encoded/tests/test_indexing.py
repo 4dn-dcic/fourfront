@@ -161,6 +161,14 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch, teard
         assert item_record == meta_record
 
 
+def test_counts(testapp):
+    counts_res = testapp.get('/counts').json
+    counts_totals = counts_res['db_es_total']
+    db_int = int(counts_totals.split()[1])
+    es_int = int(counts_totals.split()[3])
+    assert db_int == es_int
+
+
 @pytest.mark.slow
 def test_listening(testapp, listening_conn):
     import time
