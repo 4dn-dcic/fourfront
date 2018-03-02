@@ -377,12 +377,6 @@
               "n/a"
             ]
         },
-        "library_preparation_date":{
-            "title": "Library Preparation Date",
-            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
-            "type": "string",
-            "format": "date"
-        },
         "fragment_size_selection_method": {
             "title": "Size selection method",
             "description": "A short description or reference of the size selection protocol used in library preparation, if applicable.",
@@ -390,8 +384,20 @@
             "enum": [
               "gel",
               "see document",
-              "SPRI beads"
+              "SPRI beads",
+              "none"
           ]
+        },
+        "library_preparation_date":{
+            "title": "Library Preparation Date",
+            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
+            "type": "string",
+            "format": "date"
+        },
+        "pcr_cycles": {
+            "title": "Library amplification PCR cycles",
+            "description": "The number of PCR cycles used for final library amplification prior to sequencing",
+            "type": "integer"
         }
     },
     "antibody_info": {

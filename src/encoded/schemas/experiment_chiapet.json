@@ -47,7 +47,8 @@
         "experiment_type": {
             "enum": [
             "CHIA-pet",
-            "PLAC-seq"
+            "PLAC-seq",
+            "HiCHIP"
           ]
         },
         "targeted_factor": {
@@ -55,11 +56,6 @@
             "description": "Information about the target of the Antibody in the IP",
             "type": "string",
             "linkTo": "Target"
-        },
-        "pcr_cycles": {
-            "title": "PCR cycles for final amplification",
-            "description": "The number of PCR cycles used for final library amplification",
-            "type": "integer"
         }
     },
     "columns": {

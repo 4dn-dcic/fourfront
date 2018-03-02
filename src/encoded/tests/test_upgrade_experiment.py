@@ -46,6 +46,25 @@ def experiment_repliseq_2(award, lab):
     }
 
 
+@pytest.fixture
+def experiment_damid_1(award, lab):
+    return{
+        "schema_version": '1',
+        "award": award['@id'],
+        "lab": lab['@id'],
+        "experiment_type": "DAM-ID seq",
+        "index_pcr_cycles": 5
+    }
+
+
+def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
+    migrator = app.registry['upgrader']
+    value = migrator.upgrade('experiment_damid', experiment_damid_1, current_version='1', target_version='2')
+    assert value['schema_version'] == '2'
+    assert value['pcr_cycles'] == 5
+    assert 'index_pcr_cycles' not in value
+
+
 def test_experiment_repliseq_update_type(app, experiment_repliseq_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_repliseq', experiment_repliseq_1, current_version='1', target_version='2')

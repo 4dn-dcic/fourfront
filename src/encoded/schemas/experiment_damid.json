@@ -33,7 +33,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "title" : "Experiment Type",
@@ -71,7 +71,7 @@
             "description": "Amount of DNA (units ng) input to the Y-adaptor ligation step",
             "type": "number"
         },
-        "index_pcr_cycles": {
+        "pcr_cycles": {
             "title": "Index PCR cycles",
             "description": "Number of PCR cycles performed with the indexed primers prior to sequencing",
             "type": "integer"

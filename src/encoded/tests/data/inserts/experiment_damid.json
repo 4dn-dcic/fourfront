@@ -7,7 +7,7 @@
         "sap_treatment": "No",
         "me_pcr_cycles": 8,
         "y_ligation_dna_input": 250,
-        "index_pcr_cycles": 12,
+        "pcr_cycles": 12,
         "library_preparation_date": "2017-07-17",
         "lab": "test-4dn-lab",
         "aliases": ["dcic:damid_alias"],

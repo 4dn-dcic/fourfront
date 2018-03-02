@@ -32,6 +32,13 @@ def experiment_chiapet_1_2(value, system):
         del value['antibody']
 
 
+@upgrade_step('experiment_damid', '1', '2')
+def experiment_damid_1_2(value, system):
+    if value.get('index_pcr_cycles'):
+        value['pcr_cycles'] = value['index_pcr_cycles']
+        del value['index_pcr_cycles']
+
+
 @upgrade_step('experiment_seq', '1', '2')
 def experiment_seq_1_2(value, system):
     # sticking the string in antibody field into Notes
