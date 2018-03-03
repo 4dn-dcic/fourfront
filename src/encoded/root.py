@@ -71,7 +71,10 @@ def item_counts(config):
             if len(es_count_facets) > 0:
                 es_count_facets = es_count_facets[0]
                 for term in es_count_facets.get('terms'):
-                    es_counts[term['key']] += term['doc_count']
+                    if term['key'] if es_counts:
+                        es_counts[term['key']] += term['doc_count']
+                    else:
+                        es_counts[term['key']] = term['doc_count']
         for coll_name, collection in request.registry[COLLECTIONS].by_item_type.items():
             db_count = request.registry[STORAGE].write.__len__(coll_name)
             item_name = collection.type_info.name
