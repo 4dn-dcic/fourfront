@@ -71,7 +71,7 @@ def item_counts(config):
             if len(es_count_facets) > 0:
                 es_count_facets = es_count_facets[0]
                 for term in es_count_facets.get('terms'):
-                    if term['key'] if es_counts:
+                    if term['key'] in es_counts:
                         es_counts[term['key']] += term['doc_count']
                     else:
                         es_counts[term['key']] = term['doc_count']
