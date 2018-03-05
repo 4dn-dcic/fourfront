@@ -178,8 +178,8 @@ def collection_view(context, request):
     return search(context, request, context.type_info.name, False, forced_type='Search')
 
 
-@view_config(route_name='raw_search', request_method='POST', permission='search')
-def raw_search(context, request):
+@view_config(route_name='raw_search', request_method='POST', permission='admin')
+def raw_search(context, request, search_frame='embedded', return_generator=False):
     """
     Input ElasticSearch query JSON directly through a POST request.
     For advanced use cases only.
@@ -189,7 +189,7 @@ def raw_search(context, request):
     """
     if not request.body or not request.json_body:
         return {
-            'notification': 'failure',
+            'notification': 'Failure',
             'info': 'You must supply a JSON query body with this request.'
         }
     result = {
@@ -203,16 +203,15 @@ def raw_search(context, request):
     search = search.using(es)
     search = search.index('_all')
     es_results = execute_search_for_all_results(search)
+    # grab aggregations
+    result['aggregations'] = es_results.get('aggregations', {})
     result['total'] = es_results['hits']['total']
-    if not result['total']:
-        # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
-        request.response.status_code = 404
-        result['notification'] = 'No results found'
-        result['result'] = {}
-        return result
-
     result['notification'] = 'Success'
-    result['result'] = es_results
+    # just return the hits in a generator
+    formatted_hits = format_results(request, es_results['hits']['hits'], search_frame)
+    if return_generator:
+        return formatted_hits
+    result['@graph'] = list(formatted_hits)
     return result
 
 
@@ -926,7 +925,9 @@ def format_results(request, hits, search_frame):
         if frame == 'raw':
             frame = 'properties'
         for hit in hits:
-            frame_result = hit['_source'][frame]
+            frame_result = hit['_source'].get(frame)
+            if not frame_result:
+                continue
             if 'audit' in hit['_source'] and 'audit' not in frame_result:
                 frame_result['audit'] = hit['_source']['audit']
             yield frame_result

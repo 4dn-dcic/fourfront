@@ -41,11 +41,11 @@ def _award_viewing_group(award_uuid, root):
 
 # Item acls
 ONLY_ADMIN_VIEW = [
-    (Allow, 'group.admin', ['view', 'edit']),
-    (Allow, 'group.read-only-admin', ['view']),
-    (Allow, 'remoteuser.INDEXER', ['view']),
-    (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit'])
+    (Allow, 'group.admin', ['view', 'edit', 'admin']),
+    (Allow, 'group.read-only-admin', ['view', 'admin']),
+    (Allow, 'remoteuser.INDEXER', ['view', 'admin']),
+    (Allow, 'remoteuser.EMBED', ['view', 'admin']),
+    (Deny, Everyone, ['view', 'edit', 'admin'])
 ]
 
 # This acl allows item creation; it is easily overwritten in lab and user,
