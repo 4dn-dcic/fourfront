@@ -50,7 +50,8 @@
         },
         "description": {
             "title": "Description",
-            "type": "string"
+            "type": "string",
+            "formInput" : "textarea"
         },
         "options": {
             "title": "Options",
@@ -67,7 +68,8 @@
             "title": "Raw Body",
             "type": "string",
             "comment" : "There should be no 'file' if this is set.",
-            "description": "Plain html or text content of this section."
+            "description": "Plain html or text content of this section.",
+            "formInput": "html"
         }
     },
     "facets" : {

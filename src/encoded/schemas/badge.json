@@ -29,7 +29,8 @@
         },
         "description": {
             "title": "Description",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "badge_icon": {
             "title": "Badge Icon",

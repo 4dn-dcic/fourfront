@@ -42,7 +42,8 @@
         "description": {
             "title": "Description",
             "description": "A short text description of the workflow.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "data_types": {
             "title": "Data types",

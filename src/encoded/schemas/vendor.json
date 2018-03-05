@@ -29,7 +29,8 @@
             "title": "Description",
             "description": "A plain text description of the source.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "title": {
             "title": "Name",
