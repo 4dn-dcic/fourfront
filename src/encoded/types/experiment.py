@@ -559,28 +559,28 @@ class ExperimentDamid(Experiment):
     def display_title(self, request, experiment_type='Undefined', biosample=None, fusion=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, fusion))
 
-    @calculated_property(schema={
-        "title": "Categorizer",
-        "description": "Fields used as an additional level of categorization for an experiment",
-        "type": "object",
-        "properties": {
-            "field": {
-                "type": "string",
-                "description": "The name of the field as to be displayed in tables."
-            },
-            "value": {
-                "type": "string",
-                "description": "The value displayed for the field"
-            }
-        }
-    })
-    def experiment_categorizer(self, request):
-        ''' Use fusion field'''
-        fusion = self.properties.get('fusion')
-        if fusion is not None:
-            return {'field': 'Target', 'value': fusion}
-        else:
-            return super(ExperimentDamid, self).experiment_categorizer(request)
+    #@calculated_property(schema={
+    #    "title": "Categorizer",
+    #    "description": "Fields used as an additional level of categorization for an experiment",
+    #    "type": "object",
+    #    "properties": {
+    #        "field": {
+    #            "type": "string",
+    #            "description": "The name of the field as to be displayed in tables."
+    #        },
+    #        "value": {
+    #            "type": "string",
+    #            "description": "The value displayed for the field"
+    #        }
+    #    }
+    #})
+    #def experiment_categorizer(self, request):
+    #    ''' Use fusion field'''
+    #    fusion = self.properties.get('fusion')
+    #    if fusion is not None:
+    #        return {'field': 'Target', 'value': fusion}
+    #    else:
+    #        return super(ExperimentDamid, self).experiment_categorizer(request)
 
 
 @collection(

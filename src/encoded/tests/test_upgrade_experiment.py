@@ -53,7 +53,8 @@ def experiment_damid_1(award, lab):
         "award": award['@id'],
         "lab": lab['@id'],
         "experiment_type": "DAM-ID seq",
-        "index_pcr_cycles": 5
+        "index_pcr_cycles": 5,
+        "fusion": 'LaminB'
     }
 
 
@@ -63,6 +64,8 @@ def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
     assert value['schema_version'] == '2'
     assert value['pcr_cycles'] == 5
     assert 'index_pcr_cycles' not in value
+    assert 'fusion' not in value
+    assert 'LaminB' in value['notes']
 
 
 def test_experiment_repliseq_update_type(app, experiment_repliseq_1):

@@ -42,12 +42,11 @@
                 "DAM-ID seq"
             ]
         },
-        "fusion": {
-            "title": "Fusion Protein",
+        "targeted_factor": {
+            "title": "Target Fusion Protein",
             "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",
-            "comment": "Want a reproducible and recognizable format for the designation of the fusion/target",
-            "type": "string"
-
+            "type": "string",
+            "linkTo": "Target"
         },
         "sap_treatment": {
             "title": "SAP Treatment",
