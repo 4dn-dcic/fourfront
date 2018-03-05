@@ -179,12 +179,12 @@ def collection_view(context, request):
 
 
 @view_config(route_name='raw_search', request_method='POST', permission='search')
-def raw_search(context, request, search_frame='embedded', return_generator=False):
+def raw_search(context, request):
     """
     Input ElasticSearch query JSON directly through a POST request.
     For advanced use cases only.
     Will NOT go through the usual search logic that builds your query. As such,
-    this is not meant for the search page. Only '@graph', 'notification',
+    this is not meant for the search page. Only 'result', 'notification',
     'total', and 'title' are returned in the response dict.
     """
     if not request.body or not request.json_body:
@@ -208,18 +208,11 @@ def raw_search(context, request, search_frame='embedded', return_generator=False
         # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
         request.response.status_code = 404
         result['notification'] = 'No results found'
-        result['@graph'] = []
-        return result if not return_generator else []
+        result['result'] = {}
+        return result
 
     result['notification'] = 'Success'
-
-    ### Format results for JSON-LD
-    graph = format_results(request, es_results['hits']['hits'], search_frame)
-
-    if return_generator:
-        return graph
-
-    result['@graph'] = list(graph)
+    result['result'] = es_results
     return result
 
 
