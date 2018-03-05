@@ -48,7 +48,7 @@
             "enum": [
             "CHIA-pet",
             "PLAC-seq",
-            "HiCHIP"
+            "Hi-ChIP"
           ]
         },
         "targeted_factor": {
