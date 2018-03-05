@@ -85,7 +85,7 @@ export default class ReleaseUpdates extends React.Component {
         }else{
             return(
                 <div className="item-page-container">
-                    {this.state.updateData.map((update) => 
+                    {this.state.updateData.map((update) =>
                         <SingleUpdate
                             {...this.props}
                             id={update.uuid}
