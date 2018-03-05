@@ -9,7 +9,7 @@ from snovault import (
     root,
     COLLECTIONS
 )
-from snovault.elasticsearch.create_mapping import get_collection_uuids_and_count
+from snovault.interfaces import STORAGE
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from .schema_formats import is_accession
 from .types.page import get_local_file_contents
@@ -54,7 +54,9 @@ def item_counts(config):
         db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
         es_counts = {} # keyed by uppercase Item name, such as "ExperimentHic"
-        search_req = make_search_subreq(request, '/search/?type=Item&limit=1')
+        # need to search both status=deleted and status!=deleted (which is now
+        # done by default) to get real totals.
+        search_req = make_search_subreq(request, '/search/?type=Item&limit=1&status!=deleted')
         search_resp = request.invoke_subrequest(search_req, True)
         if search_resp.status_int < 400: # catch errors
             es_count_facets = [facet for facet in search_resp.json.get('facets', []) if facet.get('field') == 'type']
@@ -62,8 +64,19 @@ def item_counts(config):
                 es_count_facets = es_count_facets[0]
                 for term in es_count_facets.get('terms'):
                     es_counts[term['key']] = term['doc_count']
+        search_req_del = make_search_subreq(request, '/search/?type=Item&limit=1&status=deleted')
+        search_resp_del = request.invoke_subrequest(search_req_del, True)
+        if search_resp_del.status_int < 400: # catch errors
+            es_count_facets = [facet for facet in search_resp_del.json.get('facets', []) if facet.get('field') == 'type']
+            if len(es_count_facets) > 0:
+                es_count_facets = es_count_facets[0]
+                for term in es_count_facets.get('terms'):
+                    if term['key'] in es_counts:
+                        es_counts[term['key']] += term['doc_count']
+                    else:
+                        es_counts[term['key']] = term['doc_count']
         for coll_name, collection in request.registry[COLLECTIONS].by_item_type.items():
-            db_count, _ = get_collection_uuids_and_count(request, coll_name)
+            db_count = request.registry[STORAGE].write.__len__(coll_name)
             item_name = collection.type_info.name
             # check to see if this collection contains child collections
             check_collections = get_jsonld_types_from_collection_type(request, coll_name, [coll_name])

@@ -20,6 +20,9 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/dbxrefs" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"

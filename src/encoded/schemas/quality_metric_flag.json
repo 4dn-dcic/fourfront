@@ -16,6 +16,9 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/attachment" }
    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"

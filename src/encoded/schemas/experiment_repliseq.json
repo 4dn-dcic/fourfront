@@ -27,7 +27,8 @@
         { "$ref": "experiment.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "experiment.json#/facets"}
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
@@ -77,29 +78,6 @@
             "description": "Protocol with details on cell sorting by FACS",
             "type": "string",
             "linkTo": "Protocol"
-        }
-    },
-    "facets": {
-        "award.project": {
-            "title": "Project"
-        },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.display_title": {
-            "title": "Lab"
         }
     }
 }
