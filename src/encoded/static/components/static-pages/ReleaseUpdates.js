@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import url from 'url';
 import {  Collapse } from 'react-bootstrap';
 import { console, object, ajax, JWT } from'./../util';
 import * as globals from './../globals';
@@ -22,17 +23,13 @@ export default class ReleaseUpdates extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.loadUpdates = this.loadUpdates.bind(this);
         this.viewUpdates = this.viewUpdates.bind(this);
-        this.buildUpdate = this.buildUpdate.bind(this);
     }
 
     componentDidMount(){
-        var thisUrl = new URL(this.props.href);
-        var updateTag = thisUrl.searchParams.get('update_tag');
-        var updateParam = thisUrl.searchParams.get('parameters');
-        var isAdmin = false;
-        if(_.contains(JWT.getUserGroups(), 'admin')){
-            isAdmin= true;
-        }
+        var thisUrl = url.parse(this.props.href, true);
+        var updateTag = thisUrl.query['update_tag'] || null;
+        var updateParam = thisUrl.query['parameters'] || null;
+        var isAdmin = _.contains(JWT.getUserGroups(), 'admin');
         this.setState({
             'mounted' : true,
             'updateTag': updateTag,
@@ -44,7 +41,6 @@ export default class ReleaseUpdates extends React.Component {
     }
 
 
-
     loadUpdates(updateTag = null, updateParam = null){
         var useTag = updateTag || this.state.updateTag || '*';
         var useParam = updateParam || this.state.updateParam;
@@ -53,7 +49,7 @@ export default class ReleaseUpdates extends React.Component {
         if (useParam){
             qString += ' AND parameters:' + useParam;
         }
-        var update_url = '/search/?type=DataReleaseUpdate&sort=-date_created&q=' + qString;
+        var update_url = '/search/?type=DataReleaseUpdate&sort=-date_created&q=' + encodeURIComponent(qString);
         this.setState({'updateData': null});
         ajax.promise(update_url).then(response => {
             if (response['@graph'] && response['facets']){
@@ -82,29 +78,25 @@ export default class ReleaseUpdates extends React.Component {
             );
         }else if(this.state.updateData.length == 0){
             return(
-                <div className="row" style={{'textAlign': 'center'}}>
+                <div style={{'textAlign': 'center'}}>
                     <h5>No results.</h5>
                 </div>
             );
         }else{
             return(
-                <div className="row item-page-container">
-                    {this.state.updateData.map((update) => this.buildUpdate(update))}
+                <div className="item-page-container">
+                    {this.state.updateData.map((update) => 
+                        <SingleUpdate
+                            {...this.props}
+                            id={update.uuid}
+                            key={update.uuid}
+                            isAdmin={this.state.isAdmin}
+                            updateData={update}
+                        />
+                    )}
                 </div>
             );
         }
-    }
-
-    buildUpdate(update){
-        return(
-            <SingleUpdate
-                {...this.props}
-                id={update.uuid}
-                key={update.uuid}
-                isAdmin={this.state.isAdmin}
-                updateData={update}
-            />
-        );
     }
 
     render() {
@@ -114,8 +106,8 @@ export default class ReleaseUpdates extends React.Component {
         }
         return (
             <StaticPage.Wrapper>
-                {title}
-                <div className="row" style={{"paddingBottom":"10px", "borderBottom": "1px solid #ccc", "marginBottom": "10px"}} />
+                { title }
+                <hr/>
                 {this.viewUpdates()}
             </StaticPage.Wrapper>
         );
@@ -143,10 +135,6 @@ class SingleUpdate extends React.Component {
         this.buildItem = this.buildItem.bind(this);
     }
 
-    componentDidMount(){
-
-    }
-
     toggle(){
         this.setState({ 'open' : !this.state.open });
     }
@@ -158,10 +146,9 @@ class SingleUpdate extends React.Component {
             return null;
         }
         return(
-            <div key={item.primary_id.uuid} className="col-sm-12 row mb-1">
-                <hr className="tab-section-title-horiz-divider"/>
+            <div key={item.primary_id.uuid} className="overview-blocks row mb-1">
                 <div className="col-sm-12">
-                    <div className="inner">
+                    <div className="inner" style={{ 'borderTop' : '1px solid rgba(0,0,0,0.15)' }}>
                         <h5>Replicate set</h5>
                         <div>
                             <a href={item.primary_id['@id']}>{item.primary_id.display_title}</a>
@@ -203,7 +190,9 @@ class SingleUpdate extends React.Component {
         if(this.props.isAdmin){
             editLink = <a href={this.props.updateData['@id'] + '#!edit'}>Edit</a>;
         }
-        var styleObj = {};
+        var styleObj = {
+            'borderColor' : 'transparent'
+        };
         if (this.props.updateData.severity === 1){
             styleObj.backgroundColor = '#fcf8e3';
         } else if (this.props.updateData.severity === 2){
@@ -221,9 +210,12 @@ class SingleUpdate extends React.Component {
                 </h4>
                 <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
-                        <div className="row overview-blocks">
-                            <div className="col-sm-10">{this.props.updateData.comments || "No comments."}</div>
-                            <div className="col-sm-2" style={{"textAlign": "right"}}>{editLink}</div>
+                        <hr className="tab-section-title-horiz-divider" style={{ borderColor : 'rgba(0,0,0,0.25)' }}/>
+                        <div>
+                            <div className="row mt-07 mb-07">
+                                <div className="col-sm-10">{this.props.updateData.comments || "No comments."}</div>
+                                <div className="col-sm-2 text-right">{editLink}</div>
+                            </div>
                             {this.props.updateData.update_items.map((item) => this.buildItem(item))}
                         </div>
                     </div>
