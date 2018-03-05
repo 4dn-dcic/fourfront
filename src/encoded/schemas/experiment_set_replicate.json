@@ -27,7 +27,8 @@
         { "$ref": "experiment_set.json#/columns"}
     ],
     "mixinFacets": [
-        { "$ref": "experiment_set.json#/facets"}
+        { "$ref": "experiment_set.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {

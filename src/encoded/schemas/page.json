@@ -96,6 +96,30 @@
                 "type": "string",
                 "linkTo" : "StaticSection"
             }
+        },
+        "redirect" : {
+            "title" : "Redirect",
+            "type" : "object",
+            "properties" :{
+                "target" : {
+                    "title" : "Target",
+                    "description": "URL or path to redirect to.",
+                    "type" : "string"
+                },
+                "enabled" : {
+                    "title" : "Redirect Enabled",
+                    "type" : "boolean",
+                    "default" : false
+                },
+                "code" : {
+                    "title" : "Response Code",
+                    "description" : "Code returned by response.",
+                    "comment" : "See https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection",
+                    "type" : "integer",
+                    "default" : 307,
+                    "enum" : [301, 302, 303, 307]
+                }
+            }
         }
     },
     "columns" : {

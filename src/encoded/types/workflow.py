@@ -127,6 +127,10 @@ def item_model_to_object(model, request):
     if not dict_repr.get('workflow_run_inputs') and hasattr(item_instance, 'workflow_run_inputs') and hasattr(model, 'revs'):
         dict_repr['workflow_run_inputs'] = [ str(uuid) for uuid in request.registry[CONNECTION].storage.write.get_rev_links(model, item_instance.rev['workflow_run_inputs'][1]) ]
 
+    # For files -- include download link/href (if available)
+    if hasattr(item_instance, 'href'):
+        dict_repr['href'] = item_instance.href(request)
+
     return dict_repr
 
 
@@ -155,7 +159,9 @@ def common_props_from_file(file_obj):
         'display_title' : file_obj.get('display_title'),
         'description'   : file_obj.get('description'),
         '@type'         : file_obj.get('@type'),
-        'status'        : file_obj.get('status')
+        'status'        : file_obj.get('status'),
+        'href'          : file_obj.get('href'),
+        'url'           : file_obj.get('url')
     }
 
 
@@ -537,17 +543,18 @@ class Workflow(Item):
     item_type = 'workflow'
     schema = workflow_schema
     embedded_list = [
-                'steps.name',
-                'steps.inputs',
-                'steps.outputs',
-                'steps.meta.software_used.name',
-                'steps.meta.software_used.title',
-                'steps.meta.software_used.version',
-                'steps.meta.software_used.source_url',
-                'arguments.argument_type',
-                'arguments.argument_format',
-                'arguments.workflow_argument_name'
-            ]
+        'award.project',
+        'steps.name',
+        'steps.inputs',
+        'steps.outputs',
+        'steps.meta.software_used.name',
+        'steps.meta.software_used.title',
+        'steps.meta.software_used.version',
+        'steps.meta.software_used.source_url',
+        'arguments.argument_type',
+        'arguments.argument_format',
+        'arguments.workflow_argument_name'
+    ]
 
 
 @collection(
@@ -563,6 +570,7 @@ class WorkflowRun(Item):
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
         #'workflow.*',
+        'award.project',
         'workflow.title',
         'workflow.steps.name',
         'workflow.steps.meta.software_used.name',

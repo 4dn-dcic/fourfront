@@ -396,15 +396,17 @@ class File(Item):
         "type": "string",
         "description": "Accession of this file"
     })
-    def title(self, accession=None, external_accession=None):
-        return accession or external_accession
+    def title(self):
+        return self.properties.get('accession', self.properties.get('external_accession'))
 
     @calculated_property(schema={
         "title": "Download URL",
         "type": "string",
+        "description": "Use this link to download this file."
     })
-    def href(self, request, file_format, accession=None, external_accession=None):
-        accession = accession or external_accession
+    def href(self, request):
+        file_format = self.properties.get('file_format')
+        accession = self.properties.get('accession', self.properties.get('external_accession'))
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename

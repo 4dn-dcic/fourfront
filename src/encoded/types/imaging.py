@@ -19,7 +19,7 @@ class ImagingPath(Item):
     """Imaging Path class."""
     item_type = 'imaging_path'
     schema = load_schema('encoded:schemas/imaging_path.json')
-    embedded_list = []
+    embedded_list = ['award.project']
 
     @calculated_property(schema={
         "title": "Display Title",

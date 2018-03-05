@@ -3,7 +3,7 @@
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
-import { filtersToHref } from './experiments-filters';
+import { filtersToHref, contextFiltersToExpSetFilters, expSetFiltersToURLQuery } from './experiments-filters';
 let store = null;
 
 let cachedNavFunction = null;
@@ -113,6 +113,39 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
             return hrefQuery[p[0]] === p[1];
         }
     });
+};
+
+
+navigate.setBrowseBaseStateAndRefresh = function(newBrowseBaseState = 'all', currentHref = null, context = null, navOptions = { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true }){
+
+    if (!currentHref || !context){
+        var storeState = store.getState();
+        currentHref = storeState.href;
+        context = storeState.context;
+    }
+
+    if (navigate.isBrowseHref(currentHref)){
+        var currentExpSetFilters = contextFiltersToExpSetFilters((context && context.filters || null));
+        var nextBrowseHref = navigate.getBrowseBaseHref(newBrowseBaseState);
+        if (_.keys(currentExpSetFilters).length > 0){
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + expSetFiltersToURLQuery(currentExpSetFilters);
+        }
+        var hrefParts = url.parse(currentHref, true);
+        if (hrefParts.query.q) {
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
+        }
+        // Refresh page THEN change update browse state b/c ChartDataController grabs 'expSetFilters' (to grab filtered aggregations) from context.filters so we want that in place before updating charts.
+        navigate(nextBrowseHref, navOptions, null, null, {
+            'browseBaseState' : newBrowseBaseState
+        });
+    } else {
+        // Change Redux store state but don't refresh page.
+        store.dispatch({
+            'type' : {
+                'browseBaseState' : newBrowseBaseState
+            }
+        });
+    }
 };
 
 

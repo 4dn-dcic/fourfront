@@ -602,6 +602,12 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         'must_not_terms': [],
         'add_no_value': None
     }
+    field_filters['embedded.status.raw'] = { # Exclude status=deleted Items unless explicitly requested/filtered-in.
+        'must_terms': [],
+        'must_not_terms': ['deleted'] if 'deleted' not in request.params.getall('status') else [],
+        'add_no_value': None
+    }
+
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values

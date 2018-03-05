@@ -23,4 +23,4 @@ class PublicationTracking(Item):
 
     item_type = 'publication_tracking'
     schema = load_schema('encoded:schemas/publication_tracking.json')
-    embedded_list = []
+    embedded_list = ['award.project']
