@@ -4,6 +4,7 @@ import _ from 'underscore';
 var cookie = require('react-cookie');
 import { isServerSide } from './misc';
 import patchedConsoleInstance from './patched-console';
+import { getNestedProperty } from './object';
 
 var console = patchedConsoleInstance;
 
@@ -43,10 +44,27 @@ export function storeExists(){
 
 export function maybeValid(jwtToken){
     return (
-        typeof jwtToken === 'string' && jwtToken.length > 0 && 
+        typeof jwtToken === 'string' && jwtToken.length > 0 &&
         jwtToken !== "null" &&
         jwtToken !== "expired"
     ) ? true : false;
+}
+
+
+/**
+ * Return an array of user groups the current user belongs to
+ * Based off of the current JWT
+ */
+export function getUserGroups(){
+    var userInfo = getUserInfo();
+    var userGroups = [];
+    if (userInfo){
+        var currGroups = getNestedProperty(userInfo, ['details', 'groups'], true);
+        if(currGroups && Array.isArray(currGroups)){
+            userGroups = currGroups;
+        }
+    }
+    return userGroups;
 }
 
 
