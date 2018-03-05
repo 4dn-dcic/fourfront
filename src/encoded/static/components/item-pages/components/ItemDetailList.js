@@ -758,7 +758,7 @@ export class Detail extends React.Component {
                 return <a key={item} href={href} target={popLink ? "_blank" : null}>{href}</a>;
             }
 
-            if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
+            if(item.charAt(0) === '/' && item.indexOf('@@download') > -1){
                 // This is a download link. Format appropriately
                 var split_item = item.split('/');
                 var attach_title = decodeURIComponent(split_item[split_item.length-1]);
