@@ -1,0 +1,122 @@
+{
+    "title": "Data Release Update",
+    "id": "/profiles/data_release_update.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["update_tag", "award", "lab"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "timestamp"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/tags" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "severity": {
+            "title": "Severity",
+            "description": "Integer severity from 0 (least severe) to 3 (most severe)",
+            "type": "integer"
+        },
+        "summary": {
+            "title": "Summary",
+            "type": "string",
+            "description": "String summary for update display."
+        },
+        "update_items": {
+            "title": "Update Items",
+            "description": "Array of objects representing items within the update.",
+            "type": "array",
+            "default": [],
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Report Item",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "primary_id":{
+                        "title": "Primary ID",
+                        "type": "string",
+                        "description": "linkTo for the primary object of the update.",
+                        "linkTo": "ExperimentSetReplicate"
+                    },
+                    "secondary_id":{
+                        "title": "Secondary ID",
+                        "type": "string",
+                        "description": "linkTo of the secondary (explanatory) item of the update. May be the same as the primary",
+                        "linkTo": "Item"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "title": "Report Parameters",
+            "description": "Any string parameters used to generate the update",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+                "title": "Parameter",
+                "description": "In form field=value",
+                "type": "string"
+            }
+        },
+        "comments": {
+            "title": "Comments",
+            "type": "string",
+            "description": "Any wrangler comments on the update to be displayed"
+        },
+        "update_tag": {
+            "title": "Update Tag",
+            "type": "string",
+            "description": "Name of the update tag, specified from the Foursight check used to create this. Serves as the primary grouping mechanism for data release updates."
+        },
+        "foursight_uuid": {
+            "title": "Foursight UUID",
+            "type": "string",
+            "description": "Timestamp equivalent to the Foursight UUID of the chekc used to generate this update.",
+            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
+        "start_date": {
+            "title": "Start Date",
+            "type": "string",
+            "description": "Start (earlier) date of the data release update. The update is in form <start_date> to <end_date>",
+            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
+        "end_date": {
+            "title": "End Date",
+            "type": "string",
+            "description": "End (later) date of the data release update. The update is in form <start_date> to <end_date>",
+            "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        }
+    },
+    "facets" : {
+        "parameters" : {
+            "title" : "Report Parameters"
+        },
+        "severity" : {
+            "title" : "Report Severity"
+        }
+    }
+}

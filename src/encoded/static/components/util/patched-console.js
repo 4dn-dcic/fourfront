@@ -6,7 +6,7 @@ import { isServerSide } from './misc';
 /**
  * Custom patched console instance for debugging. Only print out statements if debugging/development environment.
  * Prevent potential issues where console might not be available (earlier IE).
- * 
+ *
  * @example
  * <caption>Usage:</caption>
  * import { console } from './util';
