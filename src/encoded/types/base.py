@@ -63,9 +63,13 @@ ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
+#ALLOW_VIEWING_GROUP_VIEW = [
+#    (Allow, 'role.viewing_group_member', 'view'),
+#] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+] + ALLOW_LAB_MEMBER_VIEW
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -302,8 +306,6 @@ class Item(snovault.Item):
                 roles[award_group_members] = 'role.award_member'
 
                 status = properties.get('status')
-                #if status in ['submission in progress']:
-                #    import pdb; pdb.set_trace()
                 # need to add 4DN viewing_group to NOFIC items that are rel2proj
                 # or are JA and planned or in progress
                 if viewing_group == 'NOFIC':
@@ -314,7 +316,7 @@ class Item(snovault.Item):
                             roles['viewing_group.4DN'] = 'role.viewing_group_member'
                     # else leave the NOFIC viewing group role in place
                 elif status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties):
-                    # view should be restricted to lab members only
+                    # view should be restricted to lab members only so remove viewing_group roles
                     grps = []
                     for group, role in roles.items():
                         if role == 'role.viewing_group_member':

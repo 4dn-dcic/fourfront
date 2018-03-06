@@ -214,15 +214,15 @@ def step_run(testapp, lab, award):
 
 
 @pytest.fixture
-def experiment_in_submission(testapp, lab, award, human_biosample):
-    item = {
+def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample):
+    return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
-        'status': 'submission in progress'
+        'contributing_labs': [remc_lab['@id']]
     }
-    return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
+
 
 
 @pytest.fixture
@@ -375,9 +375,6 @@ def test_viewing_group_member_view(viewing_group_member_testapp, experiment_proj
     return viewing_group_member_testapp.get(experiment_project_release['@id'], status=200)
 
 
-#def test_non_allowed_viewing_group_viewing_in_progress_disallowed(
-#        viewing_group_member_testapp, experiment_in_submission):
-
 def test_lab_viewer_view(lab_viewer_testapp, experiment):
     lab_viewer_testapp.get(experiment['@id'], status=200)
 
@@ -487,6 +484,27 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         submitter_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_testapp,
+                                               remc_member_testapp, wrangler_testapp):
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
+                'archived to project', 'in review by lab', 'submission in progress', 'planned']
+    res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        remc_member_testapp.get(res.json['@graph'][0]['@id'], status=200)
+
+
+# Submitter created item and lab member wants to patch
+def test_contributing_lab_member_cannot_patch(expt_w_cont_lab_item, submitter_testapp,
+                                              remc_member_testapp, wrangler_testapp):
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project',
+                'in review by lab', 'submission in progress', 'planned']
+    res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        remc_member_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
 
 
 def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_testapp):
