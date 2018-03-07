@@ -35,7 +35,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the enzyme.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "enzyme_source": {
             "title": "Enzyme Source",

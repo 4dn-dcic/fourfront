@@ -38,7 +38,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the antibody.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "antibody_product_no": {
             "title": "Antibody Catalog Number",

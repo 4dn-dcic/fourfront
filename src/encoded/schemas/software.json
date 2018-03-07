@@ -76,7 +76,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the software.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "docker_info": {
             "title": "Docker Container Information",

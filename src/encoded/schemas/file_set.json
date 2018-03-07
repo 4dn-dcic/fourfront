@@ -58,7 +58,8 @@
             "title": "Description",
             "description": "A description of what files are part of the set.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         }
     }
 }

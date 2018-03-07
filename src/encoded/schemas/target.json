@@ -30,7 +30,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the target",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "targeted_genes": {
             "title": "Targeted Genes",

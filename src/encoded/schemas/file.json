@@ -18,7 +18,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the task.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "filename": {
             "title": "File Name",

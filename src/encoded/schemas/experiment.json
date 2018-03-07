@@ -40,7 +40,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the experiment",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "experiment_type": {
             "type": "string",

@@ -30,7 +30,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the labeling path",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "target": {
             "title": "Targets of Labelling",

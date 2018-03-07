@@ -60,7 +60,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the SOP and what it's used for.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "sop_protocol": {
             "title": "SOP Protocol",

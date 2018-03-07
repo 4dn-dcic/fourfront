@@ -45,7 +45,8 @@
         "description": {
             "rdfs:subPropertyOf": "dc:description",
             "title": "Description",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "start_date": {
             "title": "Start date",

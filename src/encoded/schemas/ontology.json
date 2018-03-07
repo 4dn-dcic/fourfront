@@ -57,7 +57,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the ontology.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "synonym_terms" : {
             "title": "Synonym Terms",
