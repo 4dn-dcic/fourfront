@@ -117,7 +117,8 @@
             "title": "Abstract",
             "description": "Abstract of the publication or communication.",
             "type": "string",
-            "exclude_from": ["submit4dn", "FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "formInput": "textarea"
         },
         "journal": {
             "title": "Journal",

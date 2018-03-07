@@ -71,7 +71,7 @@
         },
         "pcr_cycles": {
             "title": "PCR Cycles for Final amplification",
-            "description": "Number of PCR Cycles used for additional amplification after qPCR",
+            "description": "Number of PCR Cycles used for additional amplification after qPCR before sequencing",
             "type": "integer"
         },
         "primer_removal_method": {

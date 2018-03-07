@@ -31,7 +31,8 @@
             "title": "Description",
             "description": "A short description of the protocol or document",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "protocol_type": {
             "title": "Protocol Type",

@@ -77,7 +77,8 @@
             "title": "Description",
             "description": "A description of why experiments are part of the set.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "processed_files": {
             "title": "Processed Files",

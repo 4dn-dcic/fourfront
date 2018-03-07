@@ -8,6 +8,7 @@ import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '.
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
+
 var ProgressBar = require('rc-progress').Line;
 
 var makeTitle = object.itemUtil.title;
@@ -28,6 +29,9 @@ export default class BuildField extends React.Component {
         // transform some types...
         if(fieldType === 'string'){
             fieldType = 'text';
+            if (typeof fieldSchema.formInput === 'string'){
+                if (fieldSchema.formInput === 'textarea' || fieldSchema.formInput === 'html') return fieldSchema.formInput;
+            }
         }
         // check if this is an enum
         if(fieldSchema.enum || fieldSchema.suggested_enum){
@@ -64,40 +68,46 @@ export default class BuildField extends React.Component {
     }
 
     displayField = (field_case) => {
+        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo } = this.props;
         var inputProps = {
-            'id' : 'field_for_' + this.props.field,
-            'disabled' : this.props.disabled || false,
+            'id' : 'field_for_' + field,
+            'disabled' : disabled || false,
             'ref' : "inputElement",
-            'value' : (typeof this.props.value === 'number' ? this.props.value || 0 : this.props.value || ''),
+            'value' : (typeof value === 'number' ? value || 0 : value || ''),
             'onChange' : this.handleChange,
-            'name' : this.props.field,
+            'name' : field,
             'placeholder': "No value",
             'data-field-type' : field_case
         };
         switch(field_case){
             case 'text' :
-                if (this.props.field === 'aliases'){
-                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} /></div>;
+                if (field === 'aliases'){
+                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={currentSubmittingUser} /></div>;
                 }
                 return <FormControl type="text" inputMode="latin" {...inputProps} />;
+            case 'textarea':
+                return <FormControl type="text" inputMode="latin" {...inputProps} componentClass="textarea" rows={4} />;
+            case 'html':
+            case 'code':
+                return <FormControl type="text" inputMode="latin" {...inputProps} componentClass="textarea" rows={8} wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />;
             case 'integer'          : return <FormControl type="number" {...inputProps} step={1} />;
             case 'number'           : return <FormControl type="number" {...inputProps} />;
             case 'boolean'          : return (
-                <Checkbox {..._.omit(inputProps, 'value', 'placeholder')} checked={!!(this.props.value)} className="mb-07 mt-07">
+                <Checkbox {..._.omit(inputProps, 'value', 'placeholder')} checked={!!(value)} className="mb-07 mt-07">
                     <span style={{ 'verticalAlign' : 'middle', 'text-transform' : 'capitalize' }}>
-                        { typeof this.props.value === 'boolean' ? this.props.value + '' : null }
+                        { typeof value === 'boolean' ? value + '' : null }
                     </span>
                 </Checkbox>
             );
             case 'enum'             : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
-                    <DropdownButton title={this.props.value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
-                        {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
+                    <DropdownButton title={value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
+                        {_.map(enumValues, (val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
             );
             case 'linked object'    : return <LinkedObj {...this.props}/>;
-            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
+            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={value || null} roundTwo={roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
             case 'file upload'      : return <S3FileInput {...this.props} />;

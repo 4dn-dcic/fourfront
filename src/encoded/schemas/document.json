@@ -42,7 +42,8 @@
                     "not_analyzed",
                     "no"
                 ]
-            }
+            },
+            "formInput": "textarea"
         },
         "urls": {
             "rdfs:subPropertyOf": "rdfs:seeAlso",

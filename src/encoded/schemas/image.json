@@ -28,7 +28,8 @@
         },
         "caption": {
             "title": "Caption",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         }
     },
     "boost_values": {

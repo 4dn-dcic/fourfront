@@ -609,9 +609,9 @@ def damid_no_fusion(testapp, repliseq_info):
 
 
 @pytest.fixture
-def damid_w_fusion(testapp, repliseq_info):
+def damid_w_fusion(testapp, repliseq_info, target_w_prot):
     repliseq_info['experiment_type'] = 'DAM-ID seq'
-    repliseq_info['fusion'] = 'LaminB1'
+    repliseq_info['targeted_factor'] = target_w_prot['@id']
     return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
 
 
@@ -671,7 +671,7 @@ def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_
 
 def test_experiment_categorizer_4_mic_no_path(testapp, microscopy_no_path):
     assert microscopy_no_path['experiment_categorizer']['field'] == 'Default'
-    assert microscopy_no_path['experiment_categorizer'].get('value') == None
+    assert microscopy_no_path['experiment_categorizer'].get('value') is None
 
 
 def test_experiment_categorizer_4_mic_w_path(testapp, microscopy_w_path, target_w_region):
@@ -691,18 +691,18 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
 
 def test_experiment_categorizer_4_damid_no_fusion(testapp, damid_no_fusion):
     assert damid_no_fusion['experiment_categorizer']['field'] == 'Default'
-    assert damid_no_fusion['experiment_categorizer'].get('value') == None
+    assert damid_no_fusion['experiment_categorizer'].get('value') is None
 
 
-def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion):
+def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion, target_w_prot):
     assert damid_w_fusion['experiment_categorizer']['field'] == 'Target'
-    assert damid_w_fusion['experiment_categorizer']['value'] == 'LaminB1'
+    assert damid_w_fusion['experiment_categorizer']['value'] == target_w_prot['display_title']
 
 
 def test_experiment_categorizer_4_repliseq_no_fraction_info(testapp, repliseq_1):
     # import pdb; pdb.set_trace()
     assert repliseq_1['experiment_categorizer']['field'] == 'Default'
-    assert repliseq_1['experiment_categorizer'].get('value') == None
+    assert repliseq_1['experiment_categorizer'].get('value') is None
 
 
 def test_experiment_categorizer_4_repliseq_only_fraction(testapp, repliseq_2):

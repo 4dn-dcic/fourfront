@@ -30,7 +30,8 @@
             "title": "Description",
             "description": "A short description of the cell culture procedure - eg. Details on culturing a preparation of K562 cells",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "culture_start_date": {
             "title": "Culture start date",
