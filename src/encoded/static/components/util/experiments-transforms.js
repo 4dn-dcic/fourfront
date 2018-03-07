@@ -513,22 +513,13 @@ export function allFilesFromExperiment(experiment, includeProcessedFiles = false
 
 export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false){
 
-    function add(memo, file){
-        if (typeof file.accession === 'undefined' || _.pluck(memo, 'accession').indexOf(file.accession) === -1){
-            memo.push(file);
-        }
-    }
-
-    var processedFiles = [];
-    if (includeProcessedFiles){
-        processedFiles = reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet));
-    }
+    var processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
 
     return _.reduce(allPairsSetsAndFilesFromExperimentSet(expSet), function(m, f){
         if (Array.isArray(f)){
-            _.forEach(f, add.bind(add, m));
+            m = m.concat(f);
         } else {
-            add(m, f);
+            m.push(f);
         }
         return m;
     }, processedFiles);

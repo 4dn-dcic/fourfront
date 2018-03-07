@@ -46,19 +46,15 @@ TSV_MAPPING = OrderedDict([
     ('Experiment Set Accession',    (EXP_SET,    ['accession'])),
     ('Experiment Accession',        (EXP,        ['accession'])),
     ('File Accession',              (FILE,       ['accession'])),
+
     ('Size',                        (FILE,       ['file_size'])),
     ('md5sum',                      (FILE,       ['md5sum'])),
-
     ('File Format',                 (FILE,       ['file_format'])),
-    #('Output type', ['output_type']),
     ('Experiment Title',            (EXP,        ['display_title'])),
     ('Experiment Type',             (EXP,        ['experiment_type'])),
     ('Bio Rep No',                  (EXP_SET,    ['replicate_exps.bio_rep_no'])),
     ('Tech Rep No',                 (EXP_SET,    ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession'])),
 
-    #('Assay', ['assay_term_name']),
-    #('Biosample term id', ['biosample_term_id']),
-    #('Biosample term name', ['biosample_term_name']),
     ('Biosource',                   (EXP,        ['biosample.biosource_summary'])),
     ('Biosource Type',              (EXP,        ['biosample.biosource.biosource_type'])),
     ('Organism',                    (EXP,        ['biosample.biosource.individual.organism.name'])),
@@ -69,6 +65,7 @@ TSV_MAPPING = OrderedDict([
     ('Lab',                         (EXP_SET,    ['lab.title'])),
     ('Project',                     (EXP_SET,    ['award.project'])),
     ('Status',                      (EXP_SET,    ['status'])),
+    #('UUID',                        (FILE,       ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
     #('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
@@ -241,6 +238,7 @@ def metadata_tsv(context, request):
     else:
         search_path = '/search/'
     param_list['field'] = []
+    param_list['sort'] = ['accession']
     header = []
     for prop in TSV_MAPPING:
         header.append(prop)
@@ -261,6 +259,7 @@ def metadata_tsv(context, request):
     #    param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
     #    param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
 
+    file_cache = {} # Exclude URLs of prev-encountered file(s).
 
     def get_value_for_column(item, col, columnKeyStart = 0):
         temp = []
@@ -312,7 +311,7 @@ def metadata_tsv(context, request):
             chain.from_iterable(
                 map(
                     lambda exp: format_experiment(exp, exp_set, exp_set_row_vals),
-                    sorted(exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
+                    sorted( exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
                 )
             ),
             map(
@@ -352,22 +351,34 @@ def metadata_tsv(context, request):
 
         return all_row_vals
 
+    def post_process_file_row_dict(file_row_dict_tuple):
+        idx, file_row_dict = file_row_dict_tuple
+        if file_cache.get(file_row_dict['File Download URL']) is not None:
+            file_row_dict['File Download URL'] = '## Duplicate of row ' + str(file_cache[file_row_dict['File Download URL']] + 2)
+        else:
+            file_cache[file_row_dict['File Download URL']] = idx
+        return file_row_dict
+
     def format_graph_of_experiment_sets(graph):
         return map(
-            lambda file_row_object: [ file_row_object.get(column) or 'N/A' for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
-            filter(
+            post_process_file_row_dict,
+            enumerate(filter(
                 should_file_row_object_be_included,
                 chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
-            )
+            ))
         )
 
-    def stream_tsv_output(rows):
+    def stream_tsv_output(file_row_dictionaries):
+        '''
+        Generator which converts file-metatada dictionaries into a TSV stream.
+        :param file_row_dictionaries: Iterable of dictionaries, each containing TSV_MAPPING keys and values from a file in ExperimentSet.
+        '''
         line = DummyFileInterfaceImplementation()
         writer = csv.writer(line, delimiter='\t')
         writer.writerow(header)
         yield line.read().encode('utf-8')
-        for row in rows:
-            writer.writerow(row)
+        for file_row_dict in file_row_dictionaries:
+            writer.writerow([ file_row_dict.get(column) or 'N/A' for column in header ])
             yield line.read().encode('utf-8')
 
     if filename_to_suggest is None:

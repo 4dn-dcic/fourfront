@@ -628,11 +628,12 @@ const fileEntryBlockMixins = {
 
     renderCheckBox : function(){
         if (!this.hasCheckbox()) return null;
+        var isChecked = !!this.isChecked();
         var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
         return (
             <Checkbox
                 validationState='warning'
-                checked={this.isChecked()}
+                checked={isChecked}
                 name="file-checkbox"
                 id={'checkbox-for-' + accessionTriple}
                 className='file-entry-table-checkbox'
