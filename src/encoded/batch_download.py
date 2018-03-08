@@ -100,6 +100,12 @@ TSV_MAPPING = OrderedDict([
     #('Platform', ['files.platform.title'])
 ])
 
+EXTRA_FIELDS = {
+    EXP_SET : [],
+    EXP     : [],
+    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum']
+}
+
 
 def get_file_uuids(result_dict):
     file_uuids = []
@@ -241,17 +247,24 @@ def metadata_tsv(context, request):
     search_params['field'] = []
     search_params['sort'] = ['accession']
     header = []
+
+    def add_field_to_search_params(itemType, field):
+        if itemType == EXP_SET:
+            search_params['field'].append(param_field)
+        if itemType == EXP:
+            search_params['field'].append('experiments_in_set.' + param_field)
+        if itemType == FILE:
+            search_params['field'].append('experiments_in_set.files.' + param_field)
+            search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+            search_params['field'].append('processed_files.' + param_field)
+
     for prop in TSV_MAPPING:
         header.append(prop)
         for param_field in TSV_MAPPING[prop][1]:
-            if TSV_MAPPING[prop][0] == EXP_SET:
-                search_params['field'].append(param_field)
-            if TSV_MAPPING[prop][0] == EXP:
-                search_params['field'].append('experiments_in_set.' + param_field)
-            if TSV_MAPPING[prop][0] == FILE:
-                search_params['field'].append('experiments_in_set.files.' + param_field)
-                search_params['field'].append('experiments_in_set.processed_files.' + param_field)
-                search_params['field'].append('processed_files.' + param_field)
+            add_field_to_search_params(TSV_MAPPING[prop][0], param_field)
+    for itemType in EXTRA_FIELDS:
+        for param_field in EXTRA_FIELDS[itemType]:
+            add_field_to_search_params(itemType, param_field)
 
     # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
@@ -265,10 +278,12 @@ def metadata_tsv(context, request):
     file_cache = {} # Exclude URLs of prev-encountered file(s).
     summary = {
         'counts' : {
+            'Files Selected for Download' : len(accession_triples),
             'Total Files' : 0,
             'Total Unique Files to Download' : 0,
             'Duplicate Files' : 0,
-            'Not Yet Uploaded' : 0
+            'Not Yet Uploaded' : 0,
+            'Extra Files' : 0
         }
     }
 
@@ -332,9 +347,11 @@ def metadata_tsv(context, request):
                     sorted( exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
                 )
             ),
-            map(
-                lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
-                sorted(exp_set.get('processed_files', []), key=lambda d: d.get("accession") )
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
+                    sorted(exp_set.get('processed_files', []), key=lambda d: d.get("accession") )
+                )
             )
         )
 
@@ -345,13 +362,16 @@ def metadata_tsv(context, request):
         for column in exp_cols:
             exp_row_vals[column] = get_value_for_column(exp, column)
 
-        return map(
-            lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
-            sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+        return chain.from_iterable(
+            map(
+                lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
+                sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+            )
         )
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
+        files_returned = []
         f['href'] = request.host_url + f['href']
         f_row_vals = {}
         file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE ]
@@ -367,19 +387,34 @@ def metadata_tsv(context, request):
             all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
             all_row_vals['Bio Rep No'] = get_correct_rep_no('Bio Rep No', all_row_vals, exp_set)
 
+        # If no EXP properties, likely is processed file from an ExpSet, so show all Exps' values.
         if all_row_vals.get('Experiment Type') is None:
             all_row_vals['Experiment Type'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.experiment_type'))
-
         if all_row_vals.get('Biosource Type') is None:
             all_row_vals['Biosource Type'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.biosample.biosource.biosource_type'))
-
         if all_row_vals.get('Digestion Enzyme') is None:
             all_row_vals['Digestion Enzyme'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.digestion_enzyme.name'))
 
-        return all_row_vals
+        files_returned.append(all_row_vals)
+
+        # Add secondary files, if any
+        if f.get('extra_files') and len(f['extra_files']) > 0:
+            for xfile in f['extra_files']:
+                xfile_vals = all_row_vals.copy()
+                xfile_vals['File Download URL'] = request.host_url + xfile['href'] if xfile.get('href') else None
+                xfile_vals['File Format'] = xfile.get('file_format')
+                xfile_vals['md5sum'] = xfile.get('md5sum')
+                xfile_vals['Related File Relationship'] = 'secondary file for'
+                xfile_vals['Related File'] = all_row_vals.get('File Accession')
+                files_returned.append(xfile_vals)
+
+        return files_returned
 
     def post_process_file_row_dict(file_row_dict_tuple):
         idx, file_row_dict = file_row_dict_tuple
+
+        if file_row_dict['Related File Relationship'] == 'secondary file for':
+            summary['counts']['Extra Files'] += 1
 
         if file_cache.get(file_row_dict['File Download URL']) is not None:
             file_row_dict['File Download URL'] = '## Duplicate of row ' + str(file_cache[file_row_dict['File Download URL']] + 3) + ': ' + file_row_dict['File Download URL']
@@ -411,17 +446,21 @@ def metadata_tsv(context, request):
 
     def generate_summary_lines():
         ret_rows = [
-            ['#',   '',         ''],
-            ['#',   'Summary',  ''],
-            ['#',   '',         ''],
-            ['#',   'Files Selected:', '', '',            str(summary['counts']['Total Files']), ''],
-            ['#',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
+            ['',   '',         ''],
+            ['',   'Summary',  ''],
+            ['',   '',         ''],
+            ['',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download']), ''],
+            ['',   'Total File Rows:', '', '',            str(summary['counts']['Total Files']), ''],
+            ['',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
         ]
 
+        if summary['counts']['Extra Files'] > 0:
+            ret_rows.append(['', '- Added {} extra file{} which {} attached to a primary selected file.'.format(str(summary['counts']['Extra Files']), 's' if summary['counts']['Extra Files'] > 1 else '', 'are' if summary['counts']['Extra Files'] > 1 else 'is'), ''])
         if summary['counts']['Duplicate Files'] > 0:
-            ret_rows.append(['#', '- Commented out ' + str(summary['counts']['Duplicate Files']) + ' duplicate files', ''])
+            ret_rows.append(['', '- Commented out {} duplicate file{}.'.format(str(summary['counts']['Duplicate Files']), 's' if summary['counts']['Duplicate Files'] > 1 else ''), ''])
         if summary['counts']['Not Yet Uploaded'] > 0:
-            ret_rows.append(['#', '- Commented out ' + str(summary['counts']['Not Yet Uploaded']) + ' files which are not yet available.', ''])
+            ret_rows.append(['', '- Commented out {} file{} which are not yet available.'.format(str(summary['counts']['Not Yet Uploaded']), 's' if summary['counts']['Not Yet Uploaded'] > 1 else ''), ''])
+        
 
         return ret_rows
 
