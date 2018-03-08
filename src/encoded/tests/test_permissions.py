@@ -214,6 +214,18 @@ def step_run(testapp, lab, award):
 
 
 @pytest.fixture
+def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'micro-C',
+        'contributing_labs': [remc_lab['@id']]
+    }
+
+
+
+@pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, wrangler['uuid'])
 
@@ -359,8 +371,8 @@ def test_users_view_basic_indexer(submitter, indexer_testapp):
     assert 'access_keys' not in res.json
 
 
-def test_viewing_group_member_view(viewing_group_member_testapp, experiment_project_review):
-    viewing_group_member_testapp.get(experiment_project_review['@id'], status=200)
+def test_viewing_group_member_view(viewing_group_member_testapp, experiment_project_release):
+    return viewing_group_member_testapp.get(experiment_project_release['@id'], status=200)
 
 
 def test_lab_viewer_view(lab_viewer_testapp, experiment):
@@ -472,6 +484,27 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         submitter_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_testapp,
+                                               remc_member_testapp, wrangler_testapp):
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
+                'archived to project', 'in review by lab', 'submission in progress', 'planned']
+    res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        remc_member_testapp.get(res.json['@graph'][0]['@id'], status=200)
+
+
+# Submitter created item and lab member wants to patch
+def test_contributing_lab_member_cannot_patch(expt_w_cont_lab_item, submitter_testapp,
+                                              remc_member_testapp, wrangler_testapp):
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project',
+                'in review by lab', 'submission in progress', 'planned']
+    res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        remc_member_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
 
 
 def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_testapp):
@@ -618,7 +651,7 @@ def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testa
 
 # Submitter created item and project member wants to view
 def test_viewing_group_member_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['deleted', 'in review by lab']
+    statuses = ['deleted', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -635,7 +668,7 @@ def test_viewing_group_member_cannot_view_submitter_file(file_item, submitter_te
 
 
 def test_viewing_group_member_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'submission in progress', 'planned',
+    statuses = ['current', 'released', 'revoked', 'released to project',
                 'archived', 'archived to project']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
@@ -783,7 +816,9 @@ def individual_human(human, remc_lab, nofic_award, wrangler_testapp):
 
 def test_multi_viewing_group_viewer_can_view_nofic_when_submission_in_progress(
         wrangler_testapp, multi_viewing_group_member_testapp, individual_human):
+    #import pdb; pdb.set_trace()
     wrangler_testapp.patch_json(individual_human['@id'], {'status': 'submission in progress'}, status=200)
+    res = wrangler_testapp.get(individual_human['@id'], status=200)
     multi_viewing_group_member_testapp.get(individual_human['@id'], status=200)
 
 
