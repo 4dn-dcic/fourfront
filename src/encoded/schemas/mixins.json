@@ -143,32 +143,37 @@
         }
     },
     "modified": {
-      "lastmodified": {
-          "title": "Last Modified",
+      "dates_modified": {
+          "title": "Dates Modified",
           "exclude_from": ["submit4dn", "FFedit-create"],
           "type": "array",
           "lookup": 1000,
           "items": {
-              "date_modified": {
-                  "rdfs:subPropertyOf": "dc:modified",
-                  "title": "Date modified",
-                  "description": "Do not submit, value is assigned by the server. The date the object is modified.",
-                  "type": "string",
-                  "anyOf": [
-                      {"format": "date-time"},
-                      {"format": "date"}
-                  ],
-                  "serverDefault": "now",
-                  "permission": "import_items"
-              },
-              "modified_by": {
-                  "rdfs:subPropertyOf": "dc:modifier",
-                  "title": "Modified by",
-                  "description": "Do not submit, value is assigned by the server. The user that modfied the object.",
-                  "type": "string",
-                  "linkTo": "User",
-                  "serverDefault": "userid",
-                  "permission": "import_items"
+              "title": "Modification Entry",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                  "date_modified": {
+                      "rdfs:subPropertyOf": "dc:modified",
+                      "title": "Date modified",
+                      "description": "Do not submit, value is assigned by the server. The date the object is modified.",
+                      "type": "string",
+                      "anyOf": [
+                          {"format": "date-time"},
+                          {"format": "date"}
+                      ],
+                      "serverDefault": "now",
+                      "permission": "import_items"
+                  },
+                  "modified_by": {
+                      "rdfs:subPropertyOf": "dc:modifier",
+                      "title": "Modified by",
+                      "description": "Do not submit, value is assigned by the server. The user that modfied the object.",
+                      "type": "string",
+                      "linkTo": "User",
+                      "serverDefault": "userid",
+                      "permission": "import_items"
+                  }
               }
           }
       }
