@@ -78,10 +78,11 @@
             "type": "number",
             "use_for": ["CUT&RUN"]
         },
-        "pcr_cycles": {
-            "title": "PCR cycles for final amplification",
-            "description": "The number of PCR cycles used for final library amplification",
-            "type": "integer"
+        "affinity_rounds": {
+            "title": "Number of rounds of affinity purification",
+            "description": "If there are multiple rounds of purification - eg. 2 biotin affinity purifications for TSA-seq",
+            "type": "integer",
+            "use_for": ["TSA-seq"]
         }
     },
     "columns": {
