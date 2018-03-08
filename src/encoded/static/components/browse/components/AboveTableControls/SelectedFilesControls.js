@@ -8,7 +8,7 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import { Modal, ButtonGroup, Checkbox, Button } from 'react-bootstrap';
-import { expFxn, Schemas, DateUtility, ajax } from './../../../util';
+import { expFxn, Schemas, DateUtility, ajax, JWT } from './../../../util';
 import { windowHref } from './../../../globals';
 import * as vizUtil from './../../../viz/utilities';
 import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
@@ -74,6 +74,15 @@ export class SelectedFilesDownloadButton extends React.Component {
         this.setState({ 'modalOpen' : true, 'urls' : urlsString });
     }
 
+    renderModalCodeSnippet(meta_download_filename, isSignedIn){
+        return (
+            <pre className="mb-15">
+                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | grep -v ^$ | xargs -n 1 curl -O -L
+                { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
+            </pre>
+        );
+    }
+
     renderModal(countSelectedFiles){
         if (!this.state.modalOpen) return null;
         var textAreaStyle = {
@@ -81,11 +90,17 @@ export class SelectedFilesDownloadButton extends React.Component {
             'minHeight' : 400,
             'fontFamily' : 'monospace'
         };
+
         var meta_download_filename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
+
+        var userInfo = JWT.getUserInfo();
+        var isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
+        var profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
+
         return (
-            <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
+            <Modal show={true} className="batch-files-download-modal" onHide={()=>{ this.setState({ 'modalOpen' : false }); }} bsSize="large">
                 <Modal.Header closeButton>
-                    <Modal.Title>Download { countSelectedFiles } Files</Modal.Title>
+                    <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
 
@@ -93,10 +108,21 @@ export class SelectedFilesDownloadButton extends React.Component {
 
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
 
-                    <pre>cut -f 1 <b>{ meta_download_filename }</b> | tail -n +2 | grep -v ^# | xargs -n 1 curl -O -L</pre>
+                    { this.renderModalCodeSnippet(meta_download_filename, isSignedIn) }
 
-                    <p><small><strong>N.B.:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</small></p>
-
+                    <h4 className="mt-2 mb-07 text-500">Notes</h4>
+                    <ul className="mb-25">
+                        { isSignedIn ? 
+                            <li className="mb-05">
+                                To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
+                                <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
+                            </li>
+                        : null}
+                        <li className="mb-05">
+                            {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
+                        </li>
+                    </ul>
+                    
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
                         <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
@@ -141,7 +167,7 @@ export class SelectAllFilesButton extends React.Component {
         'experiments_in_set.files.file_type_detailed',
         'experiments_in_set.files.paired_end',
         'experiments_in_set.files.uuid',
-        'experiments_in_set.files.related_files.file.uuid',
+        'experiments_in_set.files.related_files.file.accession',
         'experiments_in_set.processed_files.accession',
         'experiments_in_set.processed_files.file_type_detailed',
         'processed_files.accession',
@@ -192,7 +218,8 @@ export class SelectAllFilesButton extends React.Component {
                         }
                         return file;
                     });
-                    this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles));
+                    var filesToSelect = _.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles);
+                    this.props.selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
                 });
             } else {
@@ -202,18 +229,21 @@ export class SelectAllFilesButton extends React.Component {
         }));
     }
 
+    buttonContent(isAllSelected){
+        if (typeof isAllSelected === 'undefined') isAllSelected = this.isAllSelected();
+        return (
+            <span>
+                <i className={"icon icon-fw icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'))}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span>
+            </span>
+        );
+    }
+
     render(){
         var isAllSelected = this.isAllSelected();
-        var buttonContent = (
-            this.state.selecting ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> :
-            <span><i className={"icon icon-fw icon-" + (isAllSelected ? 'square-o' : 'check-square-o')}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span></span>
-        );
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)}>
-                        { buttonContent }
-                    </Button>
+                    <Button disabled={this.state.selecting} bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)} children={this.buttonContent(isAllSelected)} />
                 </ButtonGroup>
             </div>
         );

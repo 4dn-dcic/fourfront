@@ -417,9 +417,25 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
 }
 
 export function findUnpairedFiles(files_in_experiment){
-    return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, files){
-        if (/*!Array.isArray(file.related_files) || */typeof file.paired_end === 'undefined') {
+    return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, index){
+        if (typeof file.paired_end === 'undefined'){
             unpairedFiles.push(file);
+            return unpairedFiles;
+        }
+        var pairedEnd = parseInt(file.paired_end);
+        if (isNaN(pairedEnd)) {
+            unpairedFiles.push(file);
+            return unpairedFiles;
+        }
+        if (pairedEnd > 1){
+            if (
+                !Array.isArray(file.related_files) || !_.any(file.related_files, function(rf){
+                    return rf.file && rf.file.accession && rf.file.accession !== file.accession && _.pluck(files_in_experiment, 'accession').indexOf(rf.file.accession) > -1;
+                })
+            ){
+                unpairedFiles.push(file);
+                return unpairedFiles;
+            }
         }
         return unpairedFiles;
     }, []);
@@ -543,6 +559,18 @@ export function allPairsSetsAndFilesFromExperimentSet(expSet){
 }
 
 export function groupFilesByPairs(files_in_experiment){
+
+    var allFiles = files_in_experiment.slice(0).concat(_.pluck(_.flatten(_.filter(_.pluck(files_in_experiment, 'related_files'))), 'file'));
+    var uniqueIDField = null;
+
+    if (_.all(allFiles, function(f){ return typeof f.uuid === 'string'; })){
+        uniqueIDField = 'uuid';
+    } else if (_.all(allFiles, function(f){ return typeof f.accession === 'string'; })){
+        uniqueIDField = 'accession';
+    } else {
+        throw new Error('Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+    }
+    
     return _(ensureArray(files_in_experiment)).chain()
         .map(function(file){
             return _.clone(file);
@@ -551,11 +579,11 @@ export function groupFilesByPairs(files_in_experiment){
         .reduce(function(pairsObj, file, files){
             // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
             if (parseInt(file.paired_end) === 1){
-                pairsObj[file.uuid] = { '1' : file };
+                pairsObj[file[uniqueIDField]] = { '1' : file };
             } else if (Array.isArray(file.related_files)) {
                 _.each(file.related_files, function(related){
-                    if (pairsObj[related.file && related.file.uuid]) {
-                        pairsObj[related.file && related.file.uuid][file.paired_end + ''] = file;
+                    if (pairsObj[related.file && related.file[uniqueIDField]]) {
+                        pairsObj[related.file && related.file[uniqueIDField]][file.paired_end + ''] = file;
                     }
                 });
             }
@@ -601,8 +629,6 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
             });
             exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(ensureArray(exp.files)) });
         }
-
-
         return exp;
     });
 }

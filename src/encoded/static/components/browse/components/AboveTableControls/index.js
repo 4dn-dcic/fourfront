@@ -225,18 +225,12 @@ export class AboveTableControls extends React.Component {
             return (
                 <ChartDataController.Provider id="selected_files_section">
                     <SelectedFilesControls
-                        href={this.props.href}
-                        selectedFiles={this.props.selectedFiles}
+                        {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'includeFileSets', 'includeProcessedFiles')}
                         subSelectedFiles={selectedFiles}
-                        selectFile={this.props.selectFile}
-                        unselectFile={this.props.unselectFile}
-                        resetSelectedFiles={this.props.resetSelectedFiles}
                         onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')}
                         currentFileTypeFilters={this.state.fileTypeFilters}
                         setFileTypeFilters={this.setFileTypeFilters}
                         currentOpenPanel={this.state.open}
-                        includeFileSets={this.props.includeFileSets}
-                        includeProcessedFiles={this.props.includeProcessedFiles}
                     />
                 </ChartDataController.Provider>
             );

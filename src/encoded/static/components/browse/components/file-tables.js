@@ -139,16 +139,30 @@ export class RawFilesStackedTable extends React.Component {
 
         if (Array.isArray(exp.file_pairs)){
             contentsClassName = 'file-pairs';
-            contents = contents.concat(exp.file_pairs.map((filePair,j) =>
-                <FilePairBlock
-                    key={j}
-                    files={filePair}
-                    experiment={exp}
-                    label={ exp.file_pairs.length > 1 ?
-                        { title : "Pair " + (j + 1) } : { title : "Pair" }
-                    }
-                />
-            ));
+            contents = contents.concat(exp.file_pairs.map((filePair,j) => {
+                if (filePair.length === 1){
+                    return <FileEntryBlockPairColumn
+                        key={object.atIdFromObject(filePair[0]) || j}
+                        file={filePair[0]}
+                        experiment={exp}
+                        label={ exp.file_pairs.length > 1 ?
+                            { title : "Pair " + (j + 1) } : { title : "Pair" }
+                        }
+                        hideNameOnHover={false}
+                        isSingleItem={_.reduce(exp.file_pairs, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
+                    />;
+                } else {
+                    return <FilePairBlock
+                        key={j}
+                        files={filePair}
+                        experiment={exp}
+                        label={ exp.file_pairs.length > 1 ?
+                            { title : "Pair " + (j + 1) } : { title : "Pair" }
+                        }
+                        isSingleItem={_.reduce(exp.file_pairs, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
+                    />;
+                }
+            }));
         }
 
         // Add in remaining unpaired files, if any.
