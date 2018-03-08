@@ -29,6 +29,7 @@ from snovault.validators import (
 )
 from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
+from snovault.schema_utils import SERVER_DEFAULTS
 
 from datetime import date
 
@@ -321,7 +322,7 @@ class Item(snovault.Item):
 
     def is_update_by_admin_user(self):
         # determine if the submitter in the properties is an admin user
-        userid = snovault.schema_utils.SERVER_DEFAULTS['userid']('blah', 'blah')
+        userid = SERVER_DEFAULTS['userid']('blah', 'blah')
         users = self.registry['collections']['User']
         user = users.get(userid)
         if 'groups' in user.properties:
@@ -330,7 +331,6 @@ class Item(snovault.Item):
         return False
 
     def _update(self, properties, sheets=None):
-        # import pdb; pdb.set_trace()
         props = {}
         try:
             props = self.properties
@@ -341,6 +341,13 @@ class Item(snovault.Item):
             # by a non-admin user then status should be changed to 'submission in progress'
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
+
+        # update dates_modified
+        modification_entry = {
+            'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
+            'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
+        }
+        properties['dates_modified'] = [modification_entry] + properties['dates_modified']
 
         date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
         for datefield, status in date2status.items():
