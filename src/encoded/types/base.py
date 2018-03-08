@@ -1,5 +1,6 @@
 """base class creation for all the schemas that exist."""
 from functools import lru_cache
+from past.builtins import basestring
 from pyramid.view import (
     view_config,
 )
@@ -347,7 +348,8 @@ class Item(snovault.Item):
             'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
             'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
         }
-        properties['dates_modified'] = [modification_entry] + properties['dates_modified']
+        if isinstance(modification_entry['modified_by'], basestring):
+            properties['dates_modified'] = [modification_entry] + properties['dates_modified']
 
         date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
         for datefield, status in date2status.items():
