@@ -416,6 +416,12 @@ def metadata_tsv(context, request):
         if file_row_dict['Related File Relationship'] == 'secondary file for':
             summary['counts']['Extra Files'] += 1
 
+        if file_row_dict['File Download URL'] is None:
+            file_row_dict['File Download URL'] = '## No URL currently available'
+            summary['counts']['Not Yet Uploaded'] += 1
+            summary['counts']['Total Files'] += 1
+            return file_row_dict
+
         if file_cache.get(file_row_dict['File Download URL']) is not None:
             file_row_dict['File Download URL'] = '## Duplicate of row ' + str(file_cache[file_row_dict['File Download URL']] + 3) + ': ' + file_row_dict['File Download URL']
             summary['counts']['Duplicate Files'] += 1

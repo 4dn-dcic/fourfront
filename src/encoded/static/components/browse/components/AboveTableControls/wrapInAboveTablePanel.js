@@ -18,3 +18,4 @@ export function wrapInAboveTablePanel(inner, title, className, closeButtonClickH
         </div>
     );
 }
+
