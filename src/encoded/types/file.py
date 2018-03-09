@@ -33,6 +33,7 @@ import datetime
 import json
 import pytz
 import os
+from pyramid.traversal import resource_path
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
@@ -304,6 +305,10 @@ class File(Item):
 
         # handle extra files
         updated_extra_files = []
+        try:
+            at_id = resource_path(self)
+        except:
+            at_id = "/" + uuid
         for idx, xfile in enumerate(properties.get('extra_files', [])):
             # ensure a file_format (identifier for extra_file) is given and non-null
             if not('file_format' in xfile and bool(xfile['file_format'])):
@@ -321,7 +326,7 @@ class File(Item):
             # build href
             file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
             filename = '{}{}'.format(xfile['accession'], file_extension)
-            xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
+            xfile['href'] = at_id + '/@@download/' + filename
             xfile['upload_key'] = ext['key']
             sheets['external' + xfile['file_format']] = ext
             updated_extra_files.append(xfile)
