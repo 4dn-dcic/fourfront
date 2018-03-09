@@ -245,6 +245,9 @@ export default class JointAnalysisPlansPage extends React.Component {
                     { this.legend() }
                     <div className="col-xs-12 col-md-6">
                         <h3 className="mt-4 mb-0 text-300">4DN</h3>
+                        <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
+                            <a href={this.props.self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
+                        </h5>
                         <VisualBody
                             groupingProperties={groupingProperties}
                             columnGrouping='cell_type'
@@ -402,7 +405,7 @@ class VisualBody extends React.Component {
                         'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
                     );
 
-                    if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat_title ) {
+                    if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
                         keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
                     }
 
