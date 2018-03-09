@@ -325,7 +325,9 @@ class File(Item):
                 xfile['upload_key'] = ext['key']
                 sheets['external' + xfile['file_format']] = ext
                 updated_extra_files.append(xfile)
-            properties['extra_files'] = updated_extra_files
+
+            if properties.get('extra_files', False):
+                properties['extra_files'] = updated_extra_files
 
         if old_creds:
             if old_creds.get('key') != new_creds.get('key'):
