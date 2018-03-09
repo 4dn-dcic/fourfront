@@ -53,17 +53,31 @@ export class HealthView extends React.Component {
     }
 
     getCounts(initialCall = false){
+        var pastState = _.clone(this.state);
         this.setState({
             'db_es_total' : "loading...",
         }, ()=>{
-
             ajax.load('/counts?format=json', (resp)=>{
                 this.setState({
                     'db_es_total' : resp.db_es_total,
                     'db_es_compare': resp.db_es_compare,
                 }, ()=>{
-                    if (HealthView.notFinishedIndexing(resp.db_es_total)){
-                        setTimeout(this.getCounts.bind(this), this.props.pollCountsInterval);
+                    if (pastState.db_es_total !== resp.db_es_total){
+                        if (this.refs && this.refs.widthProvider && this.refs.widthProvider.refs && this.refs.widthProvider.refs.childElement && this.refs.widthProvider.refs.childElement.load){
+                            if (initialCall){
+                                if (HealthView.notFinishedIndexing(resp.db_es_total)){
+                                    setTimeout(this.getCounts, this.props.pollCountsInterval);
+                                }
+                            } else {
+                                this.refs.widthProvider.refs.childElement.load(()=>{
+                                    if (HealthView.notFinishedIndexing(resp.db_es_total)){
+                                        setTimeout(this.getCounts, this.props.pollCountsInterval);
+                                    }
+                                });
+                            }
+                        }
+                    } else if (HealthView.notFinishedIndexing(resp.db_es_total)) {
+                        setTimeout(this.getCounts, this.props.pollCountsInterval);
                     }
                 });
             }, 'GET', (resp)=>{
@@ -73,11 +87,6 @@ export class HealthView extends React.Component {
                     'db_es_compare': null
                 });
             });
-
-            if (!initialCall && this.refs && this.refs.widthProvider && this.refs.widthProvider.refs && this.refs.widthProvider.refs.childElement && this.refs.widthProvider.refs.childElement.load){
-                this.refs.widthProvider.refs.childElement.load();
-            }
-
         });
     }
 
@@ -173,7 +182,8 @@ class HealthChart extends React.Component {
         this.state = {
             'loaded' : false,
             'data' : null,
-            'loading' : false
+            'loading' : false,
+            'loadingContinuously' : false
         };
     }
 
@@ -184,7 +194,7 @@ class HealthChart extends React.Component {
 
     componentDidUpdate(pastProps, pastState){      
 
-        if (!this.state.loadingContinuously && (this.props.session !== pastProps.session || this.props.context !== pastProps.context)){
+        if (!this.state.loadingContinuously && (this.props.session !== pastProps.session)){
             this.load();
         } else if (this.state.loaded) {
 
