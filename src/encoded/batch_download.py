@@ -278,7 +278,7 @@ def metadata_tsv(context, request):
     file_cache = {} # Exclude URLs of prev-encountered file(s).
     summary = {
         'counts' : {
-            'Files Selected for Download' : len(accession_triples),
+            'Files Selected for Download' : len(accession_triples) if accession_triples else None,
             'Total Files' : 0,
             'Total Unique Files to Download' : 0,
             'Duplicate Files' : 0,
@@ -449,7 +449,7 @@ def metadata_tsv(context, request):
             ['',   '',         ''],
             ['',   'Summary',  ''],
             ['',   '',         ''],
-            ['',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download']), ''],
+            ['',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download'] or 'All'), ''],
             ['',   'Total File Rows:', '', '',            str(summary['counts']['Total Files']), ''],
             ['',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
         ]

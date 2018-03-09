@@ -258,7 +258,8 @@ export class RawFilesStackedTable extends React.Component {
                     className="experiments"
                     title="Experiments"
                     children={_.map(expsWithBiosample, this.renderExperimentBlock)}
-                    collapseShow={2}
+                    collapseLimit={this.props.collapseLimit || 3}
+                    collapseShow={this.props.collapseShow || 2}
                     showMoreExtTitle={
                         expsWithBiosample.length > 5 ?
                             'with ' + (

@@ -129,10 +129,18 @@ class SubItemTable extends React.Component {
         if (list.length < 1) return false;
 
         var firstRowItem = list[0];
+        var schemaForType;
 
-        if (!firstRowItem) return false;
-        if (typeof firstRowItem === 'string') return false;
-        if (typeof firstRowItem === 'number') return false;
+        if (_.any(list, function(x){ return typeof x === 'undefined'; })) return false;
+        if (!_.all(list, function(x){ return typeof x === 'object' && x; })) return false;
+        if (_.any(list, function(x){
+            if (!Array.isArray(x['@type'])){
+                return true; // No @type so we can't get 'columns' from schemas.
+            } else {
+                schemaForType = Schemas.getSchemaForItemType(x['@type'][0]);
+                if (!schemaForType || !schemaForType.columns) return true; // No columns on this Item type's schema. Skip.
+            }
+        })) return false;
 
         var objectWithAllItemKeys = _.reduce(list, function(m, v){
             var v2 = _.clone(v);
@@ -149,17 +157,7 @@ class SubItemTable extends React.Component {
             }
             return _.extend(m, v2);
         }, {});
-
-        var schemaForType;
-
-        if (object.isAnItem(objectWithAllItemKeys)){
-            if (!Array.isArray(objectWithAllItemKeys['@type'])){
-                return false; // No @type so we can't get 'columns' from schemas.
-            } else {
-                schemaForType = Schemas.getSchemaForItemType(objectWithAllItemKeys['@type'][0]);
-                if (!schemaForType || !schemaForType.columns) return false; // No columns on this Item type's schema. Skip.
-            }
-        }
+        
 
         var rootKeys = _.keys(objectWithAllItemKeys);
         var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;
@@ -173,8 +171,10 @@ class SubItemTable extends React.Component {
                     if (!v || (v && typeof v === 'object')) return true;
                     return false;
                 });
+
                 if (listObjects.length === 0) continue; // List of strings or values only. Continue.
                 var listNotItems = _.filter(listObjects, function(v){ return !object.isAnItem(v); });
+
                 if (listNotItems.length === 0) continue; // List of Items that can be rendered as links. Continue.
 
                 // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects.
@@ -403,8 +403,8 @@ class SubItemTable extends React.Component {
                         }
                     }
                     if (Array.isArray(value)){
-                        if (typeof value[0] === 'string') return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
-                        if (value[0] && typeof value[0] === 'object' && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
+                        if (_.all(value, function(v){ return typeof v === 'string'; })) return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
+                        if (_.any(value, function(v){ return typeof v === 'object' && v; }) && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
                             var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
                             return {
                                 'value' : value.map((embeddedRow, i)=>{
@@ -417,6 +417,9 @@ class SubItemTable extends React.Component {
                                                     if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render === 'function'){
                                                         renderedSubVal = this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render(embeddedRow[k], embeddedRow, colKeyIndex, value);
                                                     }
+                                                }
+                                                if (!renderedSubVal && embeddedRow[k] && typeof embeddedRow[k] === 'object' && !object.isAnItem(embeddedRow[k])){
+                                                    renderedSubVal = <code>{ JSON.stringify(embeddedRow[k]) }</code>;
                                                 }
                                                 if (!renderedSubVal) {
                                                     renderedSubVal = object.itemUtil.isAnItem(embeddedRow[k]) ?
@@ -549,14 +552,17 @@ class SubItemTable extends React.Component {
                                         if (typeof val === 'boolean'){
                                             val = <code>{ val ? 'True' : 'False' }</code>;
                                         }
+                                        if (typeof val === 'string' && val.length > 50){
+                                            val = val.slice(0,50) + '...';
+                                        }
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
                                         }
                                         if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
                                             val = jsonify(val, columnKeys[j].key);
                                         }
-                                        if (Array.isArray(val) && val.length > 0 && !React.isValidElement(val[0])){
-                                            val = _.map(val, jsonify);
+                                        if (Array.isArray(val) && val.length > 0 && !_.all(val, React.isValidElement) ){
+                                            val = _.map(val, function(v,i){ return jsonify(v, columnKeys[j].key + ':' + i); });
                                         }
                                         return (
                                             <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>

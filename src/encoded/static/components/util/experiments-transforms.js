@@ -427,15 +427,25 @@ export function findUnpairedFiles(files_in_experiment){
             unpairedFiles.push(file);
             return unpairedFiles;
         }
-        if (pairedEnd > 1){
-            if (
-                !Array.isArray(file.related_files) || !_.any(file.related_files, function(rf){
-                    return rf.file && rf.file.accession && rf.file.accession !== file.accession && _.pluck(files_in_experiment, 'accession').indexOf(rf.file.accession) > -1;
-                })
-            ){
+        
+        if (pairedEnd > 1 && Array.isArray(file.related_files) && file.related_files.length > 0){
+            var uniqueIDField = null;
+            if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.uuid === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.uuid === 'string'; })){
+                uniqueIDField = 'uuid';
+            } else if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.accession === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.accession === 'string'; })){
+                uniqueIDField = 'accession';
+            } else {
+                throw new Error('All files & related files must have either a UUID or an Accession.');
+            }
+            if (_.any(file.related_files, function(rf){
+                return rf.file && rf.file[uniqueIDField] && rf.file[uniqueIDField] !== file[uniqueIDField] && _.pluck(files_in_experiment, 'accession').indexOf(rf.file[uniqueIDField]) > -1;
+            })) {
                 unpairedFiles.push(file);
                 return unpairedFiles;
             }
+        } else if (pairedEnd > 1 && !Array.isArray(file.related_files)){
+            unpairedFiles.push(file);
+            return unpairedFiles;
         }
         return unpairedFiles;
     }, []);
