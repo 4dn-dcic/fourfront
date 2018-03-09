@@ -1,6 +1,5 @@
 """base class creation for all the schemas that exist."""
 from functools import lru_cache
-from past.builtins import basestring
 from pyramid.view import (
     view_config,
 )
