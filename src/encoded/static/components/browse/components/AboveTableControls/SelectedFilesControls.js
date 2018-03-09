@@ -112,17 +112,17 @@ export class SelectedFilesDownloadButton extends React.Component {
 
                     <h4 className="mt-2 mb-07 text-500">Notes</h4>
                     <ul className="mb-25">
-                        { isSignedIn ? 
+                        { isSignedIn ?
                             <li className="mb-05">
                                 To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
                                 <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
                             </li>
-                        : null}
+                        : null }
                         <li className="mb-05">
                             {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
                         </li>
                     </ul>
-                    
+
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
                         <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
@@ -343,13 +343,9 @@ export class SelectedFilesFilterByContent extends React.Component {
 
     render(){
         return wrapInAboveTablePanel(
-            <div className="row">
-            {
-                _.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
-                    return <div className="col-sm-6 col-lg-3 file-type-checkbox" key={jsxButton.key || i}>{ jsxButton }</div>;
-                })
-            }
-            </div>,
+            <div className="row" children={_.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
+                return <div className="col-sm-6 col-lg-3 file-type-checkbox" key={jsxButton.key || i}>{ jsxButton }</div>;
+            })}/>,
             <span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>,
             'file-type-selector-panel',
             this.props.closeButtonClickHandler

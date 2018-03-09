@@ -437,8 +437,8 @@ export function findUnpairedFiles(files_in_experiment){
             } else {
                 throw new Error('All files & related files must have either a UUID or an Accession.');
             }
-            if (_.any(file.related_files, function(rf){
-                return rf.file && rf.file[uniqueIDField] && rf.file[uniqueIDField] !== file[uniqueIDField] && _.pluck(files_in_experiment, 'accession').indexOf(rf.file[uniqueIDField]) > -1;
+            if (!_.any(file.related_files, function(rf){
+                return rf.file && rf.file[uniqueIDField] && rf.file[uniqueIDField] !== file[uniqueIDField] && _.pluck(files_in_experiment, uniqueIDField).indexOf(rf.file[uniqueIDField]) > -1;
             })) {
                 unpairedFiles.push(file);
                 return unpairedFiles;
@@ -541,7 +541,7 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
 
     var processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
 
-    return _.reduce(allPairsSetsAndFilesFromExperimentSet(expSet), function(m, f){
+    return _.reduce(allPairsAndFilesFromExperimentSet(expSet), function(m, f){
         if (Array.isArray(f)){
             m = m.concat(f);
         } else {
@@ -559,7 +559,7 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
  * @param {Object} expSet - Experiment Set
  * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */
-export function allPairsSetsAndFilesFromExperimentSet(expSet){
+export function allPairsAndFilesFromExperimentSet(expSet){
     var exps_in_set_with_from_set_property = _.map(ensureArray(expSet.experiments_in_set), function(exp){
         return _.extend({}, exp, { 'from_experiment_set' : expSet });
     });

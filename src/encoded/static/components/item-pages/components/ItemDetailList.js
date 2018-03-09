@@ -157,7 +157,6 @@ class SubItemTable extends React.Component {
             }
             return _.extend(m, v2);
         }, {});
-        
 
         var rootKeys = _.keys(objectWithAllItemKeys);
         var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;

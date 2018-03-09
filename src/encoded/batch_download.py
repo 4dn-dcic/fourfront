@@ -460,7 +460,6 @@ def metadata_tsv(context, request):
             ret_rows.append(['', '- Commented out {} duplicate file{}.'.format(str(summary['counts']['Duplicate Files']), 's' if summary['counts']['Duplicate Files'] > 1 else ''), ''])
         if summary['counts']['Not Yet Uploaded'] > 0:
             ret_rows.append(['', '- Commented out {} file{} which are not yet available.'.format(str(summary['counts']['Not Yet Uploaded']), 's' if summary['counts']['Not Yet Uploaded'] > 1 else ''), ''])
-        
 
         return ret_rows
 
