@@ -31,6 +31,7 @@ from snovault.validators import (
 from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
 from snovault.schema_utils import SERVER_DEFAULTS
+from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date
 
@@ -341,7 +342,7 @@ class Item(snovault.Item):
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
 
-        if 'dates_modified' in props:
+        if 'dates_modified' in properties:
             try:  # update dates_modified. this depends on an available request
                 modification_entry = {
                     'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
@@ -350,8 +351,8 @@ class Item(snovault.Item):
             except AttributeError:
                 pass
             else:
-                # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if user not found
-                if isinstance(modification_entry['modified_by'], basestring):
+                # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if no userid
+                if modification_entry['modified_by'] != NO_DEFAULT:
                     properties['dates_modified'] = [modification_entry] + properties['dates_modified']
 
         date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}

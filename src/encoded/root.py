@@ -157,6 +157,7 @@ def health_check(config):
 
         responseDict = {
             "file_upload_bucket": settings.get('file_upload_bucket'),
+            "processed_file_bucket": settings.get('file_wfout_bucket'),
             "blob_bucket": settings.get('blob_bucket'),
             "system_bucket": settings.get('system_bucket'),
             "elasticsearch": settings.get('elasticsearch.server'),
