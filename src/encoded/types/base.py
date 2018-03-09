@@ -114,7 +114,6 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 def get_item_if_you_can(request, value, itype=None):
-    # import pdb; pdb.set_trace()
     try:
         value.get('uuid')
         return value
@@ -284,7 +283,6 @@ class Item(snovault.Item):
             lab_member = 'lab.%s' % properties['lab']
             roles[lab_member] = 'role.lab_member'
         if 'award' in properties:
-            # import pdb; pdb.set_trace()
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
@@ -343,13 +341,18 @@ class Item(snovault.Item):
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
 
-        # update dates_modified
-        modification_entry = {
-            'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
-            'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
-        }
-        if isinstance(modification_entry['modified_by'], basestring):
-            properties['dates_modified'] = [modification_entry] + properties['dates_modified']
+        if 'dates_modified' in props:
+            try:  # update dates_modified. this depends on an available request
+                modification_entry = {
+                    'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
+                    'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
+                }
+            except AttributeError:
+                pass
+            else:
+                # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if user not found
+                if isinstance(modification_entry['modified_by'], basestring):
+                    properties['dates_modified'] = [modification_entry] + properties['dates_modified']
 
         date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
         for datefield, status in date2status.items():

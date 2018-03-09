@@ -916,7 +916,6 @@ def test_4dn_can_view_nofic_released_to_project(
     eset_item = planned_experiment_set_data
     eset_item['award'] = nofic_award['@id']
     eset_item['status'] = 'released to project'
-    # import pdb; pdb.set_trace()
     res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
     viewing_group_member_testapp.get(res1['@id'], status=200)
 
@@ -929,7 +928,6 @@ def test_4dn_cannot_view_nofic_not_joint_analysis_planned_and_in_progress(
     eset_item['award'] = nofic_award['@id']
     for status in statuses:
         eset_item['status'] = status
-        # import pdb; pdb.set_trace()
         res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
         viewing_group_member_testapp.get(res1['@id'], status=403)
 
@@ -943,6 +941,5 @@ def test_4dn_can_view_nofic_joint_analysis_planned_and_in_progress(
     eset_item['tags'] = ['Joint Analysis']
     for status in statuses:
         eset_item['status'] = status
-        # import pdb; pdb.set_trace()
         res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
         viewing_group_member_testapp.get(res1['@id'], status=200)
