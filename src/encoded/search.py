@@ -953,16 +953,13 @@ def get_iterable_search_results(request, search_path='/search/', param_lists={"t
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
 
-### stupid things to remove; had to add because of other fxns importing
-
-# DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):
     columns = OrderedDict()
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
             for name,obj in schema_columns.items():
-                columns[name] = obj.get('title')
+                columns[name] = obj
     return columns
 
 _ASSEMBLY_MAPPER = {

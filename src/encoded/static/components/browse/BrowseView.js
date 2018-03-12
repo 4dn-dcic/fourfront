@@ -112,6 +112,21 @@ class ResultTableContainer extends React.Component {
                     
                     return <span>{ number_of_files }</span>;
                 }
+            },
+            'experiments_in_set.experiment_categorizer.combined' : {
+                'render' : function(result, columnDefinition, props, width){
+                    var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
+                    var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
+                    if (cat_value === 'No value' || !cat_value){
+                        return null;
+                    }
+                    return (
+                        <div className="exp-categorizer-cell">
+                            <small>{ cat_field }</small>
+                            <div className="text-ellipsis-container">{ cat_value }</div>
+                        </div>
+                    );
+                }
             }
         },
         'constantHiddenColumns' : ['experimentset_type']
@@ -435,6 +450,11 @@ export default class BrowseView extends React.Component {
             );
         }
 
+        var defaultHiddenColumnsFromSchemas = [];
+        if (context.columns){
+            defaultHiddenColumnsFromSchemas = _.map(_.filter(_.pairs(context.columns), function(p){ return p[1].default_hidden; }), function(p){ return p[0]; });
+        }
+
         return (
             <div className="browse-page-container search-page-container" id="browsePageContainer">
                 {/*
@@ -446,7 +466,7 @@ export default class BrowseView extends React.Component {
                 />
                 */}
                 <SelectedFilesController href={href}>
-                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns.concat(defaultHiddenColumnsFromSchemas)}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} />
                         </SortController>

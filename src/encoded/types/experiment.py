@@ -263,7 +263,7 @@ class Experiment(Item):
             out_dict['field'] = 'Enzyme'
             out_dict['value'] = obj['display_title']
         if out_dict['value'] is not None:
-            out_dict['combined'] = out_dict['field'] + ' — ' + out_dict['value']
+            out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
         return out_dict
 
 
@@ -365,7 +365,7 @@ class ExperimentCaptureC(Experiment):
                 return {
                     'field': 'Target',
                     'value': value,
-                    'combined' : 'Target — ' + value
+                    'combined' : 'Target: ' + value
                 }
 
         return super(ExperimentCaptureC, self).experiment_categorizer(request)
@@ -425,7 +425,7 @@ class ExperimentRepliseq(Experiment):
             return {
                 'field': 'Fraction',
                 'value': value,
-                'combined' : 'Fraction — ' + value
+                'combined' : 'Fraction: ' + value
             }
         else:
             return super(ExperimentRepliseq, self).experiment_categorizer(request)
@@ -655,7 +655,7 @@ class ExperimentMic(Experiment):
                 return {
                     'field': 'Target',
                     'value': value,
-                    'combined' : 'Target — ' + value
+                    'combined' : 'Target: ' + value
                 }
         return super(ExperimentMic, self).experiment_categorizer(request)
 
