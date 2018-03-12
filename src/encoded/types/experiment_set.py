@@ -88,6 +88,7 @@ class ExperimentSet(Item):
                      "experiments_in_set.status",
                      "experiments_in_set.experiment_categorizer.field",
                      "experiments_in_set.experiment_categorizer.value",
+                     "experiments_in_set.experiment_categorizer.combined",
 
                      "experiments_in_set.biosample.accession",
                      "experiments_in_set.biosample.modifications_summary",
