@@ -726,15 +726,13 @@ class DimensioningContainer extends React.Component {
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
-        //setTimeout(() => {
-            var openDetailPanes = _.clone(this.state.openDetailPanes);
-            if (openDetailPanes[rowKey]){
-                delete openDetailPanes[rowKey];
-            } else {
-                openDetailPanes[rowKey] = true;
-            }
-            this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
-        //}, 0);
+        var openDetailPanes = _.clone(this.state.openDetailPanes);
+        if (openDetailPanes[rowKey]){
+            delete openDetailPanes[rowKey];
+        } else {
+            openDetailPanes[rowKey] = true;
+        }
+        this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
     }
 
     setDetailHeight(rowKey, height, cb){
