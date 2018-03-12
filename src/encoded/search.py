@@ -540,6 +540,18 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
                 'missing': '_last',
                 'unmapped_type': 'keyword',
             }
+    elif not sort and text_search and text_search != '*':
+        result_sort['date_created'] = { 'order': 'desc', 'unmapped_type': 'keyword' }
+        result_sort['label']        = { 'order': 'asc',  'unmapped_type': 'keyword', 'missing': '_last' }
+        result_sort['uuid']         = { 'order': 'asc' }
+        search = search.sort( # Multi-level sort. See http://www.elastic.co/guide/en/elasticsearch/guide/current/_sorting.html#_multilevel_sorting & https://stackoverflow.com/questions/46458803/python-elasticsearch-dsl-sorting-with-multiple-fields
+            { '_score' : { "order": "desc" } },
+            { 'embedded.date_created.raw' : result_sort['date_created'], 'embedded.label.raw' : result_sort['label'] },
+            { 'embedded.uuid.raw' : result_sort['uuid'] }
+        )
+        result['sort'] = result_sort
+        return search
+
     if sort and result_sort:
         result['sort'] = result_sort
         search = search.sort(sort)
