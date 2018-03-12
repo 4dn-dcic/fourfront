@@ -775,15 +775,12 @@ def test_ac_local_roles_for_lab(registry):
     assert('role.lab_member' in lab_ac_locals.values())
 
 
-def test_dates_modified_works_correctly(ind_human_item, submitter, wrangler, submitter_testapp, wrangler_testapp):
+def test_last_modified_works_correctly(ind_human_item, submitter, wrangler, submitter_testapp, wrangler_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201).json['@graph'][0]
-    assert len(res['dates_modified']) == 1
-    assert res['dates_modified'][0]['modified_by'] == submitter['@id']
+    assert res['last_modified']['modified_by'] == submitter['@id']
     # patch same item using a different user
     res2 = wrangler_testapp.patch_json(res['@id'], {"status": "replaced"}, status=200).json['@graph'][0]
-    assert len(res2['dates_modified']) == 2
-    # first result is most recent
-    assert res2['dates_modified'][0]['modified_by'] == wrangler['@id']
+    assert res2['last_modified']['modified_by'] == wrangler['@id']
 
 
 @pytest.fixture
