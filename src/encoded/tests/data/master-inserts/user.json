@@ -86,6 +86,7 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Reiff",
         "uuid": "e2324f87-0625-4bbc-803b-d47677aebe08",
-        "viewing_groups": ["4DN"]
+        "viewing_groups": ["4DN"],
+        "groups": ["read-only-admin"]
     }
 ]
