@@ -719,10 +719,9 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
                     break
             facets.append((use_field, {'title': title_field}))
 
-    # append status and audit facets automatically
+    # append status and audit facets automatically at the end of facets list
     facets.append(('status', {'title': 'Status'}))
-    for audit_facet in audit_facets:
-        facets.append(audit_facet)
+    facets = facets + audit_facets
 
     return facets
 
@@ -738,10 +737,7 @@ def set_facets(search, facets, final_filters, string_query):
     """
     aggs = OrderedDict()
 
-    facet_fields = [facet[0] for facet in facets]
-    # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
-
-    for field in facet_fields:
+    for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
         if field == 'type':
             query_field = 'embedded.@type.raw'
         elif field.startswith('audit'):
@@ -807,12 +803,16 @@ def set_facets(search, facets, final_filters, string_query):
             # combine statements within 'must' for each
             facet_filters['must'].append(string_query['must'])
 
+        #if facet.get('combine_term_values'):
+        #    aggregation['aggs'] = facet['combine_term_values']
+
         aggs[agg_name] = {
             'aggs': {
                 agg_name : aggregation
             },
             'filter': {'bool': facet_filters},
         }
+
     # to achieve OR behavior within facets, search among GLOBAL results,
     # not just returned ones. to do this, wrap aggs in ['all_items']
     # and add "global": {} to top level aggs query
@@ -860,7 +860,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     aggregations = es_results['aggregations']['all_items']
     used_facets = set()
     for field, facet in facets:
-        resultFacet = {
+        result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
             'total' : 0,
@@ -870,14 +870,22 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         agg_name = field.replace('.', '-')
 
         if agg_name in aggregations:
-            resultFacet['total'] = aggregations[agg_name]['doc_count']
-            resultFacet['terms'] = aggregations[agg_name][agg_name]['buckets']
+            result_facet['total'] = aggregations[agg_name]['doc_count']
+            result_facet['terms'] = aggregations[agg_name][agg_name]['buckets']
 
         # Choosing to show facets with one term for summary info on search it provides
-        if len(resultFacet.get('terms', [])) < 1:
+        if len(result_facet.get('terms', [])) < 1:
             continue
 
-        result.append(resultFacet)
+        #if facet.get('combine_term_values'):
+        #    sub_agg_terms = []
+        #    for sub_agg_name in facet['combine_term_values']:
+        #        for bucket in result_facet['terms']:
+        #            if sub_agg_name in bucket:
+        #                sub_agg_terms = sub_agg_terms + [ dict(sub_bucket, key=bucket['key'] + facet.get("combine_term_values_separator", ", ") + sub_bucket['key']) for sub_bucket in bucket[sub_agg_name]['buckets'] ]
+        #    result_facet['terms'] = sub_agg_terms
+
+        result.append(result_facet)
 
     return result
 
@@ -957,16 +965,13 @@ def get_iterable_search_results(request, search_path='/search/', param_lists={"t
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
 
-### stupid things to remove; had to add because of other fxns importing
-
-# DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):
     columns = OrderedDict()
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
             for name,obj in schema_columns.items():
-                columns[name] = obj.get('title')
+                columns[name] = obj
     return columns
 
 _ASSEMBLY_MAPPER = {

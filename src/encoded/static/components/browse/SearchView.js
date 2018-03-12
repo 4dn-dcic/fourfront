@@ -68,8 +68,14 @@ export class ResultTableHandlersContainer extends React.Component {
     }
 
     render(){
+
+        var defaultHiddenColumnsFromSchemas = [];
+        if (this.props.context.columns){
+            defaultHiddenColumnsFromSchemas = _.map(_.filter(_.pairs(this.props.context.columns), function(p){ return p[1].default_hidden; }), function(p){ return p[0]; });
+        }
+
         return (
-            <CustomColumnController defaultHiddenColumns={['status']}>
+            <CustomColumnController defaultHiddenColumns={['status'].concat(defaultHiddenColumnsFromSchemas)}>
                 <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
                     <ControlsAndResults {...this.props} isTermSelected={this.isTermSelected} onFilter={this.onFilter} />
                 </SortController>

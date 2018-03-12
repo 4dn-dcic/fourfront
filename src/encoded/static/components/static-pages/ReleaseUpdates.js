@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import {  Collapse } from 'react-bootstrap';
+import {  Collapse, Table } from 'react-bootstrap';
 import { console, object, ajax, JWT } from'./../util';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
@@ -52,14 +52,20 @@ export default class ReleaseUpdates extends React.Component {
         var update_url = '/search/?type=DataReleaseUpdate&sort=-date_created&q=' + encodeURIComponent(qString);
         this.setState({'updateData': null});
         ajax.promise(update_url).then(response => {
-            if (response['@graph'] && response['facets']){
+            if (response['@graph'] && response['@graph'].length > 0){
                 var stateToSet = this.state;
                 stateToSet['updateData'] = response['@graph'];
                 if(useTag && useTag !== '*'){
                     // assume all dates are the consistent for updates with the same tag
                     var startDate = response['@graph'][0]['start_date'];
                     var endDate = response['@graph'][0]['end_date'];
-                    var title = 'From   ' + startDate + '   to   ' + endDate;
+                    var params = response['@graph'][0]['parameters'];
+                    var title;
+                    if(_.contains(params, 'tags=4DN Joint Analysis 2018')){
+                        title = 'Joint analysis data from   ' + startDate + '   to   ' + endDate;
+                    }else{
+                        title = 'Data from   ' + startDate + '   to   ' + endDate;
+                    }
                     stateToSet['title'] = title;
                 }
                 this.setState(stateToSet);
@@ -146,42 +152,15 @@ class SingleUpdate extends React.Component {
             return null;
         }
         return(
-            <div key={item.primary_id.uuid} className="overview-blocks row mb-1">
-                <div className="col-sm-12">
-                    <div className="inner" style={{ 'borderTop' : '1px solid rgba(0,0,0,0.15)' }}>
-                        <h5>Replicate set</h5>
-                        <div>
-                            <a href={item.primary_id['@id']}>{item.primary_id.display_title}</a>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-xs-12 col-sm-6 col-md-4">
-                    <div className="inner">
-                        <h5>Experiment type</h5>
-                        <div>{item.primary_id.experiments_in_set[0].experiment_type}</div>
-                    </div>
-                </div>
-                <div className="col-xs-12 col-sm-6 col-md-4">
-                    <div className="inner">
-                        <h5>Biosource</h5>
-                        <div>{item.primary_id.experiments_in_set[0].biosample.biosource_summary}</div>
-                    </div>
-                </div>
-                <div className="col-xs-12 col-sm-6 col-md-4">
-                    <div className="inner">
-                        <h5>Category</h5>
-                        <div>{item.primary_id.experiments_in_set[0].experiment_categorizer.field + ': ' + item.primary_id.experiments_in_set[0].experiment_categorizer.value}</div>
-                    </div>
-                </div>
-                <div className="col-sm-12 ">
-                    <div className="inner">
-                        <h5>Item causing update</h5>
-                        <div>
-                            <a href={item.secondary_id['@id']}>{item.secondary_id.display_title}</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <tr key={item.primary_id.uuid} >
+                <td><a href={item.primary_id['@id']}>{item.primary_id.display_title}</a></td>
+                <td>{item.primary_id.experiments_in_set[0].experiment_type}</td>
+                <td>{item.primary_id.experiments_in_set[0].biosample.biosource_summary}</td>
+                <td>{item.primary_id.experiments_in_set[0].experiment_categorizer.field + ': ' + item.primary_id.experiments_in_set[0].experiment_categorizer.value}</td>
+                <td>
+                    {item.primary_id['@id'] === item.secondary_id['@id'] ? null : <a href={item.secondary_id['@id']}>{item.secondary_id.display_title}</a>}
+                </td>
+            </tr>
         );
     }
 
@@ -204,10 +183,10 @@ class SingleUpdate extends React.Component {
         }
         var summaryStr = '(' + this.props.updateData.update_items.length + ') ' + this.props.updateData.summary;
         return(
-            <div className={"overview-blocks-header with-background mb-2" + (this.state.open ? ' is-open' : ' is-closed')} style={styleObj}>
-                <h4 className="tab-section-title clickable with-accent" onClick={this.toggle}>
+            <div className={"overview-blocks-header with-background mb-1" + (this.state.open ? ' is-open' : ' is-closed')} style={styleObj}>
+                <h5 className="release-section-title clickable with-accent" onClick={this.toggle}>
                     <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ summaryStr } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
-                </h4>
+                </h5>
                 <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
                     <div className="inner">
                         <hr className="tab-section-title-horiz-divider" style={{ borderColor : 'rgba(0,0,0,0.25)' }}/>
@@ -216,7 +195,20 @@ class SingleUpdate extends React.Component {
                                 <div className="col-sm-10">{this.props.updateData.comments || "No comments."}</div>
                                 <div className="col-sm-2 text-right">{editLink}</div>
                             </div>
-                            {this.props.updateData.update_items.map((item) => this.buildItem(item))}
+                            <Table className="mb-1" striped bordered condensed>
+                                <thead>
+                                    <tr>
+                                        <th>Replicate set</th>
+                                        <th>Experiment type</th>
+                                        <th>Biosource</th>
+                                        <th>Assay details</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.props.updateData.update_items.map((item) => this.buildItem(item))}
+                                </tbody>
+                            </Table>
                         </div>
                     </div>
                 </Collapse>

@@ -59,7 +59,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	border-top:1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 	//min-height: 42px;
-	padding: 10px 0px 10px; 
+	padding: 10px 0px 10px;
 	transition: height .4s, border-color .4s;
 	text-align: justify;
 
@@ -116,7 +116,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				border-right: 1px solid #ccc;
 			}
 		}
-	
+
 		/*
 		.accession-label {
 			font-size: 1rem;
@@ -124,7 +124,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			color: #888;
 		}
 		*/
-	
+
 		.accession {
 			font-weight: 500;
 			font-size: 1rem;
@@ -135,27 +135,27 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	//	border-top: 1px solid #ddd;
 	//	margin-top: 10px;
 	//}
-	
+
 	.item-label-extra {
 		font-weight: 300;
-	
+
 		.icon[class*=" ss-"] {
 			margin-bottom: -4px;
 			vertical-align: middle;
 		}
-	
+
 		.icon[class*=" sbt-"] {
 			margin-top: -2px;
 			vertical-align: middle;
 		}
 	}
-	
+
 	@media screen and (max-width: $screen-xs-max){
-	
+
 		.item-label-extra.text-right {
 			text-align: left !important;
 		}
-	
+
 	}
 }
 
@@ -168,7 +168,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
         margin: 0;
     }
 
-    
+
 }
 
 /*** Submissions ***/
@@ -383,9 +383,9 @@ h3.submission-subtitle {
 				min-height: 26px;
 				height: 100%;
 				word-break: break-all;
-				
+
 				padding-top: 8px;
-				
+
 			}
 		}
 		.item-label {
@@ -528,7 +528,7 @@ h3.submission-subtitle {
 							padding-bottom: 7px;
 						}
 					}
-					
+
 					.sub-list-keys-header {
 						margin-left: -4px;
 						margin-right: -4px;
@@ -925,7 +925,7 @@ $download-button-width : 100px;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
-	
+
 			&.error-message {
 				white-space: pre-line;
 				white-space: normal;
@@ -965,25 +965,25 @@ $download-button-width : 100px;
 			margin-bottom: 0;
 			padding-left: 18px;
 		}
-	
+
 		&.single-item {
 			ul {
 				margin-bottom: 1px;
 				margin-top: 7px;
 			}
 		}
-	
+
 		.details {
 			padding-top: 3px;
 			> .details-row {
 				margin-top: 7px;
 			}
 		}
-	
+
 		.label-col {
 			user-select: none;
 		}
-	
+
 		.label-col span {
 			position: relative;
 			.icon.abstract-toggle {
@@ -993,9 +993,9 @@ $download-button-width : 100px;
 				left: -20px;
 				top: 2px;
 			}
-	
+
 		}
-	
+
 		@include icon-container-child();
 	}
 
@@ -1021,7 +1021,7 @@ $download-button-width : 100px;
 			padding-bottom: 2px;
 			border: 1px solid #f4f4f4;
 			transition: background-color .5s, border-radius .5s, box-shadow .5s;
-			
+
 			> .inner > .overview-blocks {
 				padding-bottom: 10px;
 			}
@@ -1033,13 +1033,26 @@ $download-button-width : 100px;
 				box-shadow: 0 4px 4px -4px rgba(0,0,0,0.25);
 			}
 		}
+
 		> h4.tab-section-title:first-child {
 			padding-top: 14px;
 			padding-bottom: 13px;
 			font-weight: 400;
 			user-select: none;
 		}
-		
+
+		> h5.release-section-title:first-child {
+			font-weight: 450;
+			> span {
+				i.expand-icon,
+				i.title-icon {
+					margin-right: 12px;
+					font-size: 0.8rem;
+					position: relative;
+				}
+			}
+		}
+
 		> h3.tab-section-title:first-child {
 			padding-top: 19px;
 		}
@@ -1102,7 +1115,7 @@ $download-button-width : 100px;
 			}
 		}
 	}
-		
+
 	.overview-blocks {
 		> div {
 			> .inner {
@@ -1234,7 +1247,7 @@ $download-button-width : 100px;
 					}
 				}
 
-				
+
 				> div.overview-list-elements-container {
 					margin-top: 10px;
 
@@ -1248,17 +1261,17 @@ $download-button-width : 100px;
 
 					&.embedded-item-with-attachment-container {
 						> div.overview-list-element {
-							
+
 						}
 					}
-					
+
 				}
 
 				> ul.overview-list-elements-container,
 				> ol.overview-list-elements-container {
 					> li {
 						> div {
-							
+
 						}
 					}
 				}
@@ -1392,7 +1405,7 @@ $download-button-width : 100px;
 			margin-top: 12px;
 			padding-top: 0;
 			border-top: 1px solid #ccc;
-			
+
 			> hr {
 				margin-bottom: 0;
 				margin-top: 0;

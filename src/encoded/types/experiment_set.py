@@ -88,6 +88,7 @@ class ExperimentSet(Item):
                      "experiments_in_set.status",
                      "experiments_in_set.experiment_categorizer.field",
                      "experiments_in_set.experiment_categorizer.value",
+                     "experiments_in_set.experiment_categorizer.combined",
 
                      "experiments_in_set.biosample.accession",
                      "experiments_in_set.biosample.modifications_summary",
@@ -114,6 +115,9 @@ class ExperimentSet(Item):
                      "experiments_in_set.files.file_classification",
                      "experiments_in_set.files.paired_end",
                      "experiments_in_set.files.status",
+                     "experiments_in_set.files.extra_files",
+                     "experiments_in_set.files.extra_files.href",
+                     "experiments_in_set.files.extra_files.file_format",
 
                      "experiments_in_set.files.related_files.relationship_type",
                      "experiments_in_set.files.related_files.file.accession",
@@ -135,6 +139,9 @@ class ExperimentSet(Item):
                      "processed_files.file_type_detailed",
                      "processed_files.status",
                      "processed_files.md5sum",
+                     "processed_files.extra_files",
+                     "processed_files.extra_files.href",
+                     "processed_files.extra_files.file_format",
                      #"processed_files.@type",
 
                      "experiments_in_set.processed_files.href",
@@ -148,6 +155,9 @@ class ExperimentSet(Item):
                      "experiments_in_set.processed_files.file_type_detailed",
                      "experiments_in_set.processed_files.status",
                      "experiments_in_set.processed_files.md5sum",
+                     "experiments_in_set.processed_files.extra_files",
+                     "experiments_in_set.processed_files.extra_files.href",
+                     "experiments_in_set.processed_files.extra_files.file_format",
                      #"experiments_in_set.processed_files.@type"
                      ]
 
