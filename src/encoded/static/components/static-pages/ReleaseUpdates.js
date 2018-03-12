@@ -52,7 +52,7 @@ export default class ReleaseUpdates extends React.Component {
         var update_url = '/search/?type=DataReleaseUpdate&sort=-date_created&q=' + encodeURIComponent(qString);
         this.setState({'updateData': null});
         ajax.promise(update_url).then(response => {
-            if (response['@graph'] && response['facets']){
+            if (response['@graph'] && response['@graph'].length > 0){
                 var stateToSet = this.state;
                 stateToSet['updateData'] = response['@graph'];
                 if(useTag && useTag !== '*'){
