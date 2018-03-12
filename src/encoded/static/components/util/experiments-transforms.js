@@ -586,7 +586,7 @@ export function groupFilesByPairs(files_in_experiment){
             return _.clone(file);
         })
         .sortBy(function(file){ return parseInt(file.paired_end); }) // Bring files w/ paired_end == 1 to top of list.
-        .reduce(function(pairsObj, file, files){
+        .reduce(function(pairsObj, file, idx, sortedFiles){
             // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
             if (parseInt(file.paired_end) === 1){
                 pairsObj[file[uniqueIDField]] = { '1' : file };
@@ -639,6 +639,7 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
             });
             exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(ensureArray(exp.files)) });
         }
+        console.log('EXP', exp.accession, exp);
         return exp;
     });
 }
