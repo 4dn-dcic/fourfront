@@ -78,5 +78,14 @@
         "last_name": "Vitzthum",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988",
         "viewing_groups": ["4DN"]
+    },
+    {
+        "email": "sarah_reiff@hms.harvard.edu",
+        "first_name": "Sarah",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Reiff",
+        "uuid": "e2324f87-0625-4bbc-803b-d47677aebe08",
+        "viewing_groups": ["4DN"]
     }
 ]
