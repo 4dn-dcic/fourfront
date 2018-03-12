@@ -341,18 +341,17 @@ class Item(snovault.Item):
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
 
-        if 'dates_modified' in properties:
-            try:  # update dates_modified. this depends on an available request
-                modification_entry = {
-                    'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
-                    'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
-                }
-            except AttributeError:
-                pass
-            else:
-                # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if no userid
-                if modification_entry['modified_by'] != NO_DEFAULT:
-                    properties['dates_modified'] = [modification_entry] + properties['dates_modified']
+        try:  # update last_modified. this depends on an available request
+            last_modified = {
+                'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
+                'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
+            }
+        except AttributeError:
+            pass
+        else:
+            # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if no userid
+            if last_modified['modified_by'] != NO_DEFAULT:
+                properties['last_modified'] = last_modified
 
         date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
         for datefield, status in date2status.items():
