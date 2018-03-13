@@ -90,7 +90,6 @@ before_script:
       --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
-- sleep 15
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
@@ -141,7 +140,7 @@ after_success:
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         echo "cleanup build artifacts"
-        rm elasticsearch-5.6.1.deb
+        rm elasticsearch-5.4.1.deb
         rm .to_export_back
         rm versions.cfg
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
