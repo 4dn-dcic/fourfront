@@ -62,8 +62,8 @@ export class HealthView extends React.Component {
                     'db_es_total' : resp.db_es_total,
                     'db_es_compare': resp.db_es_compare,
                 }, ()=>{
-                    if (HealthView.notFinishedIndexing(resp.db_es_total)) {
-                        setTimeout(this.getCounts, this.props.pollCountsInterval);
+                    if (initialCall && HealthView.notFinishedIndexing(resp.db_es_total)) {
+                        setTimeout(this.getCounts.bind(this, initialCall), this.props.pollCountsInterval);
                     }
                 });
             }, 'GET', (resp)=>{
@@ -180,6 +180,7 @@ class HealthChart extends React.Component {
     componentDidUpdate(pastProps, pastState){      
         this.drawTreeMap();
         this.transitionSize();
+        setTimeout(function(){ ReactTooltip.rebuild(); }, 1000);
     }
 
     transition(d3Selection){
@@ -197,6 +198,9 @@ class HealthChart extends React.Component {
         svg.selectAll('g').transition()
             .duration(750)
             .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
+            .attr("data-html", function(d){ return true; })
+            .attr("data-effect", function(d){ return 'float'; })
+            .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items (' + (parseInt((d.data.size / (d.parent.value || 1)) * 10000) / 100) + '%)<br/>Status: ' + d.data.name; })
             .select("rect")
             .attr("width", function(d) { return d.x1 - d.x0; })
             .attr("height", function(d) { return d.y1 - d.y0; });
@@ -258,10 +262,10 @@ class HealthChart extends React.Component {
         var enteringCellGroups = enteringCells.append("g")
             .attr('class', 'treemap-rect-elem')
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
-            .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items<br/>Status: ' + d.data.name; })
+            .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items (' + (parseInt((d.data.size / (d.parent.value || 1)) * 10000) / 100) + '%)<br/>Status: ' + d.data.name; })
             .attr("data-html", function(d){ return true; })
             .on("click", function(d) {
-                navigate('/search/?type=' + d.parent.data.name + '&status=' + d.data.name);
+                navigate('/search/?type=' + d.parent.data.name);
             })
             .attr("data-effect", function(d){ return 'float'; });
 
@@ -285,8 +289,6 @@ class HealthChart extends React.Component {
             .attr("x", 4)
             .attr("y", function(d, i) { return 13 + i * 10; })
             .text(function(d) { return d; });
-
-        ReactTooltip.rebuild();
     }
 
     render(){

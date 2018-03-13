@@ -1156,18 +1156,17 @@ $small-label-accession-font-size : 0.75rem;
 			text-overflow: none;
 			white-space: normal;
 			div.exp-categorizer-cell {
-				
+				text-align: left;
+
 				> small {
-					position: absolute;
-					left: 7px;
-					top: 6px;
+					position: relative;
+					top: -9px;
 					font-weight: 500;
 				}
 				> div {
 					position: relative;
-					top: 7px;
+					top: -8px;
 					width: 100%;
-					text-align: left;
 				}
 			}
 
