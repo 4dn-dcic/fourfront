@@ -66,6 +66,7 @@ before_install:
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
+- sudo service elasticsearch stop
 - curl -O  ${ES_DOWNLOAD_URL}
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
 - python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
@@ -91,7 +92,6 @@ before_script:
       --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
-- sudo service elasticsearch stop
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
