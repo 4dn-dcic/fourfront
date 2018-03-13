@@ -10,7 +10,7 @@ import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
- 
+
 /**
  * ExperimentSet Item view/page.
  *
@@ -103,7 +103,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             }
         }
 
-        return tabs.concat(this.getCommonTabs()).map((tabObj)=>{
+        return tabs.concat(this.getCommonTabs(context)).map((tabObj)=>{
             return _.extend(tabObj, {
                 'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });

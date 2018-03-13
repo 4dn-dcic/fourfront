@@ -104,16 +104,7 @@ class ResultTableContainer extends React.Component {
                     var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
                     
                     if (isNaN(number_of_files) || !number_of_files){
-                        var number_of_experiments = parseInt(expSet.number_of_experiments);
-                        if (isNaN(number_of_experiments) || !number_of_experiments){
-                            number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
-                        }
-                        if (number_of_experiments || Array.isArray(expSet.processed_files)){
-                            number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, true);
-                        } else {
-                            number_of_files = 0;
-                        }
-                        
+                        number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, false);
                     }
                     if (!number_of_files){
                         number_of_files = 0;

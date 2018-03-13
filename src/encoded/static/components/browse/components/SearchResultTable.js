@@ -345,8 +345,13 @@ class LoadMoreAsYouScroll extends React.Component {
                 // Check if have same result, if so, refresh all results (something has changed on back-end)
                 var oldKeys = _.map(this.props.results, DimensioningContainer.getKeyForGraphResult);
                 var newKeys = _.map(resp['@graph'], DimensioningContainer.getKeyForGraphResult);
-                if (_.any(oldKeys, function(oK){ return _.contains(newKeys, oK); } )){
-                    navigate('', { 'inPlace' : true, 'dontScrollToTop' : true });
+                var keyIntersection = _.intersection(oldKeys.sort(), newKeys.sort());
+                if (keyIntersection.length > 0){
+                    console.warn('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
+                    //this.props.setResults(this.props.results.slice(0).concat(
+                    //    _.filter(resp['@graph'], function(resultItem){ return !_.contains(keyIntersection, DimensioningContainer.getKeyForGraphResult(resultItem)); })
+                    //));
+                    //navigate('', { 'inPlace' : true, 'dontScrollToTop' : true });
                 } else {
                     this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
                 }
@@ -627,7 +632,7 @@ class DimensioningContainer extends React.Component {
     }
 
     static getKeyForGraphResult(graphItem, rowNumber = 0){
-        return graphItem['@id'] || graphItem.link_id || rowNumber;
+        return object.itemUtil.atId(graphItem);
     }
 
     constructor(props){

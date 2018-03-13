@@ -183,7 +183,7 @@ describe('Testing RawFilesStackedTable', function() {
                 return sBlock.className.split(' ').indexOf('file') > -1;
             }).length
         ).toEqual(
-            expFuncs.fileCountFromExperiments(context.experiments_in_set)
+            expFuncs.fileCountFromExperiments(context.experiments_in_set, false, false)
         );
 
     });
@@ -217,9 +217,9 @@ describe('Testing RawFilesStackedTable', function() {
                 return elem.checked === true;
             }).map(function(sBlock){
                 return getFilePairCheckboxElement(sBlock).getAttribute('data-select-files').split(',');//id.split('~').pop();
-            }).map(function(uuidSet){
-                return uuidSet.map(function(uuid){
-                    return [uuid, true];
+            }).map(function(accessionTriple){
+                return _.map(accessionTriple, function(accessionTriple){
+                    return [accessionTriple, true];
                 });
             }), true));
         }
@@ -231,6 +231,7 @@ describe('Testing RawFilesStackedTable', function() {
         function selectedFilesMatchSelectedCheckboxes(stateKeys){
             
             if (!stateKeys) stateKeys = _.keys(testRawFilesStackedTable.refs.controller.state.selectedFiles).sort();
+
             var fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
             if (fileKeys.length !== stateKeys.length) return false;
             for (var i = 0; i < fileKeys.length; i++){

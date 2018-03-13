@@ -46,12 +46,14 @@ export class SortController extends React.Component {
     }
 
     static getSortColumnAndReverseFromContext(context){
-        var sortKey = _.keys(context.sort);
-        if (sortKey.length > 0) sortKey = sortKey[0]; // Use first for now.
-        else if (sortKey.length === 0) return {
+        var defaults = {
             'sortColumn'    : null,
             'sortReverse'   : false
         };
+        if (!context || !context.sort) return defaults;
+        var sortKey = _.keys(context.sort);
+        if (sortKey.length > 0) sortKey = sortKey[0]; // Use first for now.
+        else if (sortKey.length === 0) return defaults;
         var reverse = context.sort[sortKey].order === 'desc';
         return {
             'sortColumn'    : sortKey,
