@@ -18,6 +18,7 @@ from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
+import uuid
 
 
 def includeme(config):
@@ -103,6 +104,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Adding facets to the query
     search = set_facets(search, facets, query_filters, string_query)
 
+    ### Add preference from session, if available
+    search_session_id = request.cookies.get('searchSessionID', 'SESSION-' + str(uuid.uuid1() ))
+    search = search.params(preference=search_session_id)
+
     ### Execute the query
     if size == 'all':
         es_results = execute_search_for_all_results(search)
@@ -157,6 +162,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             return result
 
     result['@graph'] = list(graph)
+    request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
     return result
 
 
