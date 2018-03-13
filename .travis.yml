@@ -20,7 +20,7 @@ env:
   global:
   - JAVA_HOME=/usr/lib/jvm/java-8-oracle
   - BOTO_CONFIG=/bogus
-  - ES_VERSION=5.6.1
+  - ES_VERSION=5.4.1
   - ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
