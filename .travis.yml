@@ -65,10 +65,8 @@ before_install:
 - nvm install 8
 - node --version
 - npm config set python /usr/bin/python2.7
+- curl -O  ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
 install:
-- sudo service elasticsearch stop
-- curl -O  ${ES_DOWNLOAD_URL}
-- sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
 - python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
@@ -92,6 +90,7 @@ before_script:
       --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
+- sleep 15
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
