@@ -162,13 +162,14 @@ class HealthChart extends React.Component {
         if (!es_compare || typeof es_compare !== 'object') return null;
         return {
             'name' : 'Indexing Status',
-            'children' : _.map(_.pairs(es_compare), function(pair){
+            'children' : _.filter(_.map(_.pairs(es_compare), function(pair){
                 var itemType = pair[0];
+                if (itemType === 'ontology_term') return null;
                 var compareString = pair[1];
                 var dbCount = parseInt(compareString.slice(4));
                 var esCount = parseInt(compareString.slice(11 + (dbCount + '').length));
                 return { 'name' : itemType, 'children' : [{ 'name' : 'Indexed', 'size' : esCount }, { 'name' : 'Left to Index', 'size' : dbCount - esCount } ] };
-            })
+            }))
         };
     }
 
