@@ -198,8 +198,6 @@ class HealthChart extends React.Component {
         svg.selectAll('g').transition()
             .duration(750)
             .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
-            .attr("data-html", function(d){ return true; })
-            .attr("data-effect", function(d){ return 'float'; })
             .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items (' + (parseInt((d.data.size / (d.parent.value || 1)) * 10000) / 100) + '%)<br/>Status: ' + d.data.name; })
             .select("rect")
             .attr("width", function(d) { return d.x1 - d.x0; })
