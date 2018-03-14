@@ -215,10 +215,7 @@ export const defaultColumnDefinitionMap = {
  */
 export function columnsToColumnDefinitions(columns, constantDefinitions, defaultWidthMap = DEFAULT_WIDTH_MAP){
     let newColDefs = _.pairs(columns).map(function(p){
-        return {
-            'title' : p[1],
-            'field' : p[0]
-        };
+        return _.extend({ 'field' : p[0] }, p[1]);
     }).filter(function(ncd){
         if (_.findWhere(constantDefinitions, { 'field' : ncd.field })) return false;
         return true;
