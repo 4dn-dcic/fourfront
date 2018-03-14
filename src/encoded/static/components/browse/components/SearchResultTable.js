@@ -900,8 +900,6 @@ class DimensioningContainer extends React.Component {
         var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
             typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
 
-        console.log('S', this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state);
-
         var headerColumnWidthsFilled = this.state.widths.map((w, i)=>{
             if (typeof w === 'number' && w > 0) return w;
             return getColumnWidthFromDefinition(columnDefinitions[i], this.state.mounted);
