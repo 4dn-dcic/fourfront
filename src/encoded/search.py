@@ -791,9 +791,6 @@ def set_facets(search, facets, final_filters, string_query):
             # combine statements within 'must' for each
             facet_filters['must'].append(string_query['must'])
 
-        #if facet.get('combine_term_values'):
-        #    aggregation['aggs'] = facet['combine_term_values']
-
         aggs[agg_name] = {
             'aggs': {
                 agg_name : aggregation
@@ -864,14 +861,6 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         # Choosing to show facets with one term for summary info on search it provides
         if len(result_facet.get('terms', [])) < 1:
             continue
-
-        #if facet.get('combine_term_values'):
-        #    sub_agg_terms = []
-        #    for sub_agg_name in facet['combine_term_values']:
-        #        for bucket in result_facet['terms']:
-        #            if sub_agg_name in bucket:
-        #                sub_agg_terms = sub_agg_terms + [ dict(sub_bucket, key=bucket['key'] + facet.get("combine_term_values_separator", ", ") + sub_bucket['key']) for sub_bucket in bucket[sub_agg_name]['buckets'] ]
-        #    result_facet['terms'] = sub_agg_terms
 
         result.append(result_facet)
 
