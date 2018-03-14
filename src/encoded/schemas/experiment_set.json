@@ -125,17 +125,7 @@
             "title": "Experiment Type"
         },
         "experiments_in_set.experiment_categorizer.combined" : {
-            "title" : "Assay Details",
-            "combine_term_values" : {
-                "experiments_in_set-experiment_categorizer-value" : {
-                    "terms" : {
-                        "size" : 100,
-                        "field" : "embedded.experiments_in_set.experiment_categorizer.value.raw",
-                        "missing" : "No value"
-                    }
-                }
-            },
-            "combine_term_values_separator" : ": "
+            "title" : "Assay Details"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
