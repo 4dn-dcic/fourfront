@@ -495,6 +495,8 @@
         "accession": "4DNWFAW5VTA5",
         "app_name": "fastqc-0-11-4-1",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v32",
         "arguments": [
             {
                 "argument_type": "Input file",
@@ -2778,6 +2780,8 @@
         "accession": "4DNWFP00U73B",
         "app_name": "hi-c-processing-partb",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "chromsizes",
@@ -3539,6 +3543,8 @@
         "accession": "4DNWFZOGJEI4",
         "app_name": "bwa-mem",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3814,6 +3820,8 @@
         "accession": "4DNWF37VHW0F",
         "app_name": "pairsam-parse-sort",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "bam",
@@ -3928,6 +3936,8 @@
         "accession": "4DNWF3YV81HS",
         "app_name": "pairsam-merge",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4023,6 +4033,8 @@
         "accession": "4DNWF1Y7DN3H",
         "app_name": "pairsam-markasdup",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4101,6 +4113,8 @@
         "accession": "4DNWF38VH15",
         "app_name": "pairsam-filter",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4223,6 +4237,8 @@
         "accession": "4DNWZJ2G671",
         "app_name": "addfragtopairs",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -4326,6 +4342,8 @@
         "accession": "4DNWZH36VU2",
         "app_name": "pairs-patch",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairs",
