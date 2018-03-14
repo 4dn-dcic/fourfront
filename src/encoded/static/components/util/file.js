@@ -33,6 +33,11 @@ export function isFileDataComplete(file){
     return true;
 }
 
+/** For FileMicroscropy files. */
+export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem){
+    if (typeof channel !== 'string' || channel.slice(0,2) !== 'ch' || !fileItem) return null;
+    return fileItem.microscope_settings && fileItem.microscope_settings[channel + '_light_source_center_wl'];
+}
 
 
 
@@ -43,13 +48,14 @@ export class FileDownloadButton extends React.Component {
 
     static defaultProps = {
         'title' : 'Download',
-        'disabled' : false
+        'disabled' : false,
+        'size' : null
     }
 
     render(){
-        var { href, className, disabled, title, filename } = this.props;
+        var { href, className, disabled, title, filename, size } = this.props;
         return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
+            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '') + (size ? ' btn-' + size : '')} download data-tip={filename || null}>
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
@@ -57,6 +63,22 @@ export class FileDownloadButton extends React.Component {
 }
 
 export class FileDownloadButtonAuto extends React.Component {
+
+    static canDownload(file, validStatuses = FileDownloadButtonAuto.defaultProps.canDownloadStatuses){
+        if (!file || typeof file !== 'object'){
+            console.error("Incorrect data type");
+            return false;
+        }
+        if (typeof file.status !== 'string'){
+            console.error("No 'status' property on file:", file);
+            return false;
+        }
+
+        if (validStatuses.indexOf(file.status) > -1){
+            return true;
+        }
+        return false;
+    }
 
     static propTypes = {
         'result' : PropTypes.shape({
@@ -75,29 +97,16 @@ export class FileDownloadButtonAuto extends React.Component {
         ]
     }
 
-    canDownload(){
-        var file = this.props.result;
-        if (!file || typeof file !== 'object'){
-            console.error("Incorrect data type");
-            return false;
-        }
-        if (typeof file.status !== 'string'){
-            console.error("No 'status' property on file:", file);
-            return false;
-        }
-
-        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
-            return true;
-        }
-        return false;
-    }
+    canDownload(){ return FileDownloadButtonAuto.canDownload(this.props.result, this.props.canDownloadStatuses); }
 
     render(){
         var file = this.props.result;
+        var isDisabled = !this.canDownload();
         var props = {
             'href' : file.href,
             'filename' : file.filename,
-            'disabled' : !this.canDownload()
+            'disabled' : isDisabled,
+            'title' : isDisabled ? 'Not ready to download' : FileDownloadButton.defaultProps.title
         };
         return <FileDownloadButton {...this.props} {...props} />;
     }
@@ -112,11 +121,12 @@ export class ViewFileButton extends React.Component {
         'href' : null,
         'disabled' : false,
         'title' : null,
-        'mimeType' : null
+        'mimeType' : null,
+        'size' : null
     }
 
     render(){
-        var { filename, href, target, title, mimeType } = this.props;
+        var { filename, href, target, title, mimeType, size } = this.props;
         var action = 'View', extLink = null, preLink = null;
 
         preLink = <i className="icon icon-fw icon-cloud-download" />;
@@ -127,7 +137,7 @@ export class ViewFileButton extends React.Component {
             '4' : fileNameLower.slice(-4),
             '5' : fileNameLower.slice(-5)
         };
-        if (fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['5'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['5'] === '.png' || fileNameLowerEnds['5'] === '.bmp' || fileNameLowerEnds['5'] === '.gif'){
+        if (isFilenameAnImage(fileNameLowerEnds)){
             action = 'View';
             preLink = <i className="icon icon-fw icon-picture-o" />;
         } else if (fileNameLowerEnds['4'] === '.pdf'){
@@ -139,13 +149,32 @@ export class ViewFileButton extends React.Component {
         }
 
         return (
-            <Button download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
+            <Button bsSize={size} download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
                 <span className={title ? null : "text-400"}>
                     { preLink } { action } { title || (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
                 </span>
             </Button>
         );
     }
+}
+
+export function isFilenameAnImage(filename, suppressErrors = false){
+    var fileNameLower, fileNameLowerEnds;
+    if (typeof filename === 'string'){
+        fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
+        fileNameLowerEnds = {
+            '3' : fileNameLower.slice(-3),
+            '4' : fileNameLower.slice(-4),
+            '5' : fileNameLower.slice(-5)
+        };
+    } else if (filename && typeof filename === 'object' && filename['3'] && filename['4']) {
+        fileNameLowerEnds = filename;
+    } else if (!suppressErrors) {
+        throw new Error('Param \'filename\' must be a string or pre-formatted map of last char-lengths to their values.');
+    } else {
+        return false;
+    }
+    return fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['4'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['4'] === '.png' || fileNameLowerEnds['4'] === '.bmp' || fileNameLowerEnds['4'] === '.gif';
 }
 
 
@@ -229,4 +258,4 @@ export function getLargeMD5(file, cbProgress) {
             }
         });
     });
-};
+}

@@ -19,6 +19,9 @@
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/dbxrefs" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -27,11 +30,12 @@
             "title": "Description",
             "description": "A short description of the cell culture procedure - eg. Details on culturing a preparation of K562 cells",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "culture_start_date": {
             "title": "Culture start date",
-            "description": "The date the he cells were most recently thawed and cultured for the submitted experiment.",
+            "description": "YYYY-MM-DD format date for most recently thawed cell culture.",
             "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
@@ -41,7 +45,7 @@
         },
         "culture_harvest_date": {
             "title": "Culture harvest date",
-            "description": "The date the culture was harvested for biosample preparation.",
+            "description": "YYYY-MM-DD format date for the cell culture harvest.",
             "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [

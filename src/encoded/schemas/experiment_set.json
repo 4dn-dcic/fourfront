@@ -22,6 +22,9 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "2"
@@ -31,7 +34,7 @@
         },
         "orig_proposed_submission_date": {
             "title": "Original proposed submission date",
-            "description": "The original proposed date of submission of the dataset",
+            "description": "YYYY-MM-DD formatted original proposed date of submission",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -40,7 +43,7 @@
         },
         "curr_proposed_submission_date": {
             "title": "Current proposed submission date",
-            "description": "The currently proposed date of submission of the dataset",
+            "description": "YYYY-MM-DD formatted currently proposed date of submission",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -74,24 +77,44 @@
             "title": "Description",
             "description": "A description of why experiments are part of the set.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "processed_files": {
             "title": "Processed Files",
             "description": "Processed files that are derived from files in this experiment set.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Processed File",
                 "description": "File metadata.",
                 "type": "string",
                 "linkTo": "FileProcessed"
             }
+        },
+        "archived_processed_files": {
+            "title": "Archived Processed Files",
+            "description": "Archived processed files that are derived from files in this experiment set.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Archived Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
+        "completed_processes": {
+            "title": "Completed data processing",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "type": "array",
+            "items": {
+                "title": "Completed process",
+                "type": "string"
+            }
         }
     },
     "facets": {
-        "award.project": {
-            "title": "Project"
-        },
         "publications_of_set.display_title": {
             "title": "Publication"
         },
@@ -113,14 +136,11 @@
         "experiments_in_set.digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "experiments_in_set.biosample.modifications.modification_type'": {
+        "experiments_in_set.biosample.modifications.modification_type": {
             "title": "Modifications"
         },
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
         }
     },
     "columns": {

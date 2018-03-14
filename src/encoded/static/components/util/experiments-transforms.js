@@ -277,6 +277,8 @@ export function experimentSetsFromFile(file){
 
 
 
+
+
 /**** **** **** **** **** **** **** **** ****
  **** Processed Files -related Functions ****
  **** **** **** **** **** **** **** **** ****/
@@ -386,6 +388,9 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
     );
 }
 
+
+
+
 /*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *
  * Partial Funcs (probably don't use these unless composing a function) *
  *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -412,9 +417,35 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
 }
 
 export function findUnpairedFiles(files_in_experiment){
-    return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, files){
-        if (/*!Array.isArray(file.related_files) || */typeof file.paired_end === 'undefined') {
+    return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, index){
+        if (typeof file.paired_end === 'undefined'){
             unpairedFiles.push(file);
+            return unpairedFiles;
+        }
+        var pairedEnd = parseInt(file.paired_end);
+        if (isNaN(pairedEnd)) {
+            unpairedFiles.push(file);
+            return unpairedFiles;
+        }
+        
+        if (pairedEnd > 1 && Array.isArray(file.related_files) && file.related_files.length > 0){
+            var uniqueIDField = null;
+            if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.uuid === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.uuid === 'string'; })){
+                uniqueIDField = 'uuid';
+            } else if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.accession === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.accession === 'string'; })){
+                uniqueIDField = 'accession';
+            } else {
+                throw new Error('All files & related files must have either a UUID or an Accession.');
+            }
+            if (!_.any(file.related_files, function(rf){
+                return rf.file && rf.file[uniqueIDField] && rf.file[uniqueIDField] !== file[uniqueIDField] && _.pluck(files_in_experiment, uniqueIDField).indexOf(rf.file[uniqueIDField]) > -1;
+            })) {
+                unpairedFiles.push(file);
+                return unpairedFiles;
+            }
+        } else if (pairedEnd > 1 && !Array.isArray(file.related_files)){
+            unpairedFiles.push(file);
+            return unpairedFiles;
         }
         return unpairedFiles;
     }, []);
@@ -508,22 +539,13 @@ export function allFilesFromExperiment(experiment, includeProcessedFiles = false
 
 export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false){
 
-    function add(memo, file){
-        if (typeof file.accession === 'undefined' || _.pluck(memo, 'accession').indexOf(file.accession) === -1){
-            memo.push(file);
-        }
-    }
+    var processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
 
-    var processedFiles = [];
-    if (includeProcessedFiles){
-        processedFiles = reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet));
-    }
-
-    return _.reduce(allPairsSetsAndFilesFromExperimentSet(expSet), function(m, f){
+    return _.reduce(allPairsAndFilesFromExperimentSet(expSet), function(m, f){
         if (Array.isArray(f)){
-            _.forEach(f, add.bind(add, m));
+            m = m.concat(f);
         } else {
-            add(m, f);
+            m.push(f);
         }
         return m;
     }, processedFiles);
@@ -537,7 +559,7 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
  * @param {Object} expSet - Experiment Set
  * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */
-export function allPairsSetsAndFilesFromExperimentSet(expSet){
+export function allPairsAndFilesFromExperimentSet(expSet){
     var exps_in_set_with_from_set_property = _.map(ensureArray(expSet.experiments_in_set), function(exp){
         return _.extend({}, exp, { 'from_experiment_set' : expSet });
     });
@@ -547,19 +569,31 @@ export function allPairsSetsAndFilesFromExperimentSet(expSet){
 }
 
 export function groupFilesByPairs(files_in_experiment){
+
+    var allFiles = files_in_experiment.slice(0).concat(_.pluck(_.flatten(_.filter(_.pluck(files_in_experiment, 'related_files'))), 'file'));
+    var uniqueIDField = null;
+
+    if (_.all(allFiles, function(f){ return typeof f.uuid === 'string'; })){
+        uniqueIDField = 'uuid';
+    } else if (_.all(allFiles, function(f){ return typeof f.accession === 'string'; })){
+        uniqueIDField = 'accession';
+    } else {
+        throw new Error('Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+    }
+    
     return _(ensureArray(files_in_experiment)).chain()
         .map(function(file){
             return _.clone(file);
         })
         .sortBy(function(file){ return parseInt(file.paired_end); }) // Bring files w/ paired_end == 1 to top of list.
-        .reduce(function(pairsObj, file, files){
+        .reduce(function(pairsObj, file, idx, sortedFiles){
             // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
             if (parseInt(file.paired_end) === 1){
-                pairsObj[file.uuid] = { '1' : file };
+                pairsObj[file[uniqueIDField]] = { '1' : file };
             } else if (Array.isArray(file.related_files)) {
                 _.each(file.related_files, function(related){
-                    if (pairsObj[related.file && related.file.uuid]) {
-                        pairsObj[related.file && related.file.uuid][file.paired_end + ''] = file;
+                    if (pairsObj[related.file && related.file[uniqueIDField]]) {
+                        pairsObj[related.file && related.file[uniqueIDField]][file.paired_end + ''] = file;
                     }
                 });
             }
@@ -605,31 +639,9 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
             });
             exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(ensureArray(exp.files)) });
         }
-
-
+        console.log('EXP', exp.accession, exp);
         return exp;
     });
-}
-
-/**
- * @deprecated
- */
-export function getProcessedFilesFromExperiment(experiment){
-    var r = [];
-    if (Array.isArray(experiment.processed_files)){
-        r = experiment.processed_files.slice(0);
-    }
-    if (Array.isArray(experiment.files) && experiment.files.length > 0){
-        _.forEach(ensureArray(experiment.files), function(f){
-            if (
-                (typeof f.file_classification === 'string' && f.file_classification.slice(0,9).toLowerCase() === 'processed') ||
-                (Array.isArray(f['@type']) && f['@type'][0] === 'FileProcessed')
-            ){
-                r.push(f);
-            }
-        });
-    }
-    return _.uniq(r, false, function(f){ return f.link_id; });
 }
 
 export function flattenFileSetsToFilesIfNoFilesOnExperiment(experiment){

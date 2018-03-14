@@ -45,22 +45,19 @@ export class SortController extends React.Component {
         };
     }
 
-    static getSortColumnAndReverseFromURL(href){
-        var urlParts = url.parse(href, true);
-        var sortParam = urlParts.query.sort;
-        var reverse = false;
-        if (typeof sortParam !== 'string') return {
-            sortColumn : null,
-            sortReverse : reverse
+    static getSortColumnAndReverseFromContext(context){
+        var defaults = {
+            'sortColumn'    : null,
+            'sortReverse'   : false
         };
-        if (sortParam.charAt(0) === '-'){
-            reverse = true;
-            sortParam = sortParam.slice(1);
-        }
-        
+        if (!context || !context.sort) return defaults;
+        var sortKey = _.keys(context.sort);
+        if (sortKey.length > 0) sortKey = sortKey[0]; // Use first for now.
+        else if (sortKey.length === 0) return defaults;
+        var reverse = context.sort[sortKey].order === 'desc';
         return {
-            'sortColumn' : sortParam,
-            'sortReverse' : reverse
+            'sortColumn'    : sortKey,
+            'sortReverse'   : reverse
         };
     }
 
@@ -80,7 +77,7 @@ export class SortController extends React.Component {
 
         this.state = _.extend(
             { changingPage : false },
-            SortController.getSortColumnAndReverseFromURL(props.href),
+            SortController.getSortColumnAndReverseFromContext(props.context),
             SortController.getPageAndLimitFromURL(props.href)
         );
     }
@@ -94,7 +91,7 @@ export class SortController extends React.Component {
             if (pageAndLimit.page !== this.state.page) newState.page = pageAndLimit.page;
             if (pageAndLimit.limit !== this.state.limit) newState.limit = pageAndLimit.limit;
 
-            var { sortColumn, sortReverse } = SortController.getSortColumnAndReverseFromURL(newProps.href);
+            var { sortColumn, sortReverse } = SortController.getSortColumnAndReverseFromContext(newProps.context);
             if (sortColumn !== this.state.sortColumn) newState.sortColumn = sortColumn;
             if (sortReverse !== this.state.sortReverse) newState.sortReverse = sortReverse;
         }

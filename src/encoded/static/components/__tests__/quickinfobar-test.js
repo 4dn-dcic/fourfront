@@ -9,26 +9,62 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
+import React from 'react';
+
+
+
 
 describe('Testing viz/QuickInfoBar.js', function() {
-    var React, TestUtils, page, context, filters, _, Wrapper, QuickInfoBar, href, expSetFilters;
+    var TestUtils, page, context, Filters, _, Wrapper, QuickInfoBar, href, expSetFilters, contextFilters, barplot_data_unfiltered, barplot_data_filtered;
 
     beforeEach(function() {
-        React = require('react');
         var { Provider, connect } = require('react-redux');
+        Filters = require('./../util/experiments-filters');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         context = require('../testdata/browse/context');
         QuickInfoBar = require('./../viz/QuickInfoBar').default;
-        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
-        expSetFilters = {
-            "experiments_in_set.biosample.biosource.individual.organism.name" : new Set(["mouse"]),
-            "experiments_in_set.biosample.biosource.biosource_type" : new Set(["immortalized cell line"])
-        };
+        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line";
+        contextFilters = [ // N.B. 'context.filters' in our case is incorrect, and context itself lacks the href defined above, so we use this contextFilters instead for this test. TODO: Change this (use another testData context?)
+            {
+                "field": "type",
+                "term": "ExperimentSetReplicate",
+                "remove": "/browse/?experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line"
+            },
+            {
+                "field": "experimentset_type",
+                "term": "replicate",
+                "remove": "/browse/?type=ExperimentSetReplicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line"
+            },
+            {
+                "field": "experiments_in_set.biosample.biosource.individual.organism.name",
+                "term": "mouse",
+                "remove": "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line"
+            },
+            {
+                "field": "experiments_in_set.biosample.biosource.biosource_type",
+                "term": "immortalized cell line",
+                "remove": "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse"
+            }
+        ];
 
-        page = TestUtils.renderIntoDocument(
-            <QuickInfoBar href={href} expSetFilters={expSetFilters} />
-        );
+        class QuickWrapper extends React.Component {
+
+            constructor(props){
+                super(props);
+                this.state = {
+                    barplot_data_unfiltered : props.barplot_data_unfiltered || null,
+                    barplot_data_filtered : props.barplot_data_filtered || null
+                };
+            }
+        
+            render(){
+                return <QuickInfoBar {...this.props} {...this.state} />;
+            }
+        }
+        
+        expSetFilters = Filters.contextFiltersToExpSetFilters(contextFilters);
+        page = TestUtils.renderIntoDocument(<QuickWrapper href={href} expSetFilters={expSetFilters} />);
     });
 
     it('Has elements for stats (file, exps, expsets)', function() {
@@ -42,16 +78,11 @@ describe('Testing viz/QuickInfoBar.js', function() {
         statValEls.forEach(function(el){ // Ensure all vals == 0
             expect(parseInt(el.innerHTML)).toBe(0);
         });
-        // Change those vals
-        page.updateCurrentAndTotalCounts({
-            experiments: 10,
-            experiment_sets : 10,
-            files : 10
-        },{
-            experiments: 211,
-            experiment_sets : 211,
-            files : 211
-        });
+
+        barplot_data_filtered = { 'total' : { 'experiment_sets' : 10, 'experiments' : 10, 'files' : 10 } };
+        barplot_data_unfiltered = { 'total' : { 'experiment_sets' : 211, 'experiments' : 211, 'files' : 211 } };
+
+        page.setState({ barplot_data_filtered, barplot_data_unfiltered });
 
         // Ensure they're changed
         statValEls.forEach(function(el){

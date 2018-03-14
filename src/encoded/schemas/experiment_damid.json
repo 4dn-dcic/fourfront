@@ -25,14 +25,15 @@
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
-        { "$ref": "experiment.json#/facets"}
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "title" : "Experiment Type",
@@ -41,12 +42,11 @@
                 "DAM-ID seq"
             ]
         },
-        "fusion": {
-            "title": "Fusion Protein",
+        "targeted_factor": {
+            "title": "Target Fusion Protein",
             "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",
-            "comment": "Want a reproducible and recognizable format for the designation of the fusion/target",
-            "type": "string"
-
+            "type": "string",
+            "linkTo": "Target"
         },
         "sap_treatment": {
             "title": "SAP Treatment",
@@ -61,7 +61,7 @@
         },
         "me_pcr_library_date":{
             "title": "Methy-PCR Library Preparation Date",
-            "description": "The date that the methy-PCR library was prepared - submitted as YYYY-MM-DD.",
+            "description": "YYYY-MM-DD formatted date of the methy-PCR library preparation.",
             "type": "string",
             "format": "date"
         },
@@ -70,14 +70,14 @@
             "description": "Amount of DNA (units ng) input to the Y-adaptor ligation step",
             "type": "number"
         },
-        "index_pcr_cycles": {
+        "pcr_cycles": {
             "title": "Index PCR cycles",
             "description": "Number of PCR cycles performed with the indexed primers prior to sequencing",
             "type": "integer"
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
-            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "description": "YYYY-MM-DD formatted date of library preparation.",
             "type": "string",
             "format": "date"
         }

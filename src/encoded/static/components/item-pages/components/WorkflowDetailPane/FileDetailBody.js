@@ -50,12 +50,11 @@ export class FileDetailBody extends React.Component {
         var hrefToRequest = null;
 
         if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
-            if (file === 'Forbidden') {
-                return false;
-            }
-            hrefToRequest = '/files/' + file + '/';
+            if (file === 'Forbidden' || file.length === 0) return false;
+            if (file.charAt(0) === '/') hrefToRequest = file; // Handle @ids just in case.
+            else hrefToRequest = '/' + file + '/';
         } else if (file && typeof file === 'object' && !Array.isArray(file)){ // If we have file object but has little info. TODO: REMOVE
-            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.itemUtil.atId(file);
         } else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){ // If we have a group of files
             hrefToRequest = this.props.node.meta.workflow;
         }
@@ -132,8 +131,8 @@ export class FileDetailBody extends React.Component {
             <div className={colClassName + " file-title box"}>
                 <div className="text-600">
                     {
-                        node.type === 'output' ? 'Generated' :
-                            node.type === 'input' ? 'Used' :
+                        node.nodeType === 'output' ? 'Generated' :
+                            node.nodeType === 'input' ? 'Used' :
                                 null
                     } {
                         Array.isArray(this.props.file) ?
@@ -254,9 +253,7 @@ export class FileDetailBody extends React.Component {
             // Default Case: Single (Pre-)Loaded File
             var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
-            if (
-                this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets))
-            ){
+            if ( this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets)) ){
                 var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
                 if (setsByKey && _.keys(setsByKey).length > 0){
                     table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;

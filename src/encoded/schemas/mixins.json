@@ -51,18 +51,18 @@
     "aliases": {
         "aliases": {
             "title": "Aliases",
-            "description": "Lab specific identifiers to reference an object.",
+            "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
             "type": "array",
-            "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
+            "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
             "ff_flag": "clear clone",
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
-                "description": "A lab specific identifier to reference an object.",
+                "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
                 "type":  "string",
-                "pattern": "^\\S+:\\S+"
+                "pattern": "^[^\\s\\\\/]+:[^\\s\\\\/]+"
             }
         }
     },
@@ -78,12 +78,14 @@
                 "current",
                 "planned",
                 "revoked",
+                "archived",
                 "deleted",
                 "obsolete",
                 "replaced",
                 "in review by lab",
                 "submission in progress",
-                "released to project"
+                "released to project",
+                "archived to project"
             ]
         }
     },
@@ -201,7 +203,7 @@
             "description": "Other labs associated with the submitted data.",
             "type": "array",
             "items": {
-                "title": "Contributin Lab",
+                "title": "Contributing Lab",
                 "description": "A lab that has contributed to the associated data.",
                 "type": "string",
                 "linkTo": "Lab"
@@ -375,12 +377,6 @@
               "n/a"
             ]
         },
-        "library_preparation_date":{
-            "title": "Library Preparation Date",
-            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
-            "type": "string",
-            "format": "date"
-        },
         "fragment_size_selection_method": {
             "title": "Size selection method",
             "description": "A short description or reference of the size selection protocol used in library preparation, if applicable.",
@@ -388,8 +384,38 @@
             "enum": [
               "gel",
               "see document",
-              "SPRI beads"
+              "SPRI beads",
+              "none"
           ]
+        },
+        "library_preparation_date":{
+            "title": "Library Preparation Date",
+            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
+            "type": "string",
+            "format": "date"
+        },
+        "pcr_cycles": {
+            "title": "Library amplification PCR cycles",
+            "description": "The number of PCR cycles used for final library amplification prior to sequencing",
+            "type": "integer"
+        }
+    },
+    "antibody_info": {
+        "antibody": {
+            "title": "Antibody",
+            "description": "Reference to a 4DN antibody object",
+            "type": "string",
+            "linkTo": "Antibody"
+        },
+        "antibody_lot_id": {
+            "title": "Antibody Lot Number",
+            "description": "A lot number or other unique identifier for a particular antibody lot",
+            "type": "string"
+        },
+        "antibody_dilution": {
+            "title": "Antibody Dilution/Concentration",
+            "description": "The working dilution or concentration of the antibody eg. 1:100 or 200 ug/ml",
+            "type": "string"
         }
     },
     "sop_mapping": {
@@ -444,5 +470,16 @@
                 "linkTo": "Badge"
             }
         }
+    },
+
+
+    "facets_common" : {
+        "award.project": {
+            "title": "Project"
+        },
+        "lab.display_title": {
+            "title": "Lab"
+        }
     }
+
 }

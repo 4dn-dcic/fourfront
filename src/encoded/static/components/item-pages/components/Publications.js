@@ -3,11 +3,9 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import { Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, DateUtility, object } from './../../util';
-import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
-import { PartialList } from './PartialList';
+import { FormattedInfoWrapper, WrappedListBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 /*
 var testData = [ // Use this to test list view(s) as none defined in test data.
@@ -20,107 +18,6 @@ var testData = [ // Use this to test list view(s) as none defined in test data.
 ];
 */
 
-
-/**
- * Display list of publications in a FormattedInfoBlock-styled block.
- * 
- * @memberof module:item-pages/components.Publications
- * @type {Component}
- * @class ListBlock
- * @extends {React.Component}
- */
-class ListBlock extends React.Component {
-
-    /**
-     * Default props.
-     * 
-     * @static
-     * @memberof ListBlock
-     */
-    static defaultProps = {
-        'persistentCount' : 3,
-        'publications' : [],
-        'singularTitle' : 'Publication'
-    }
-
-    static Publication = class Publication extends React.Component {
-        render(){
-            var atId = this.props.atId || object.atIdFromObject(this.props);
-            return (
-                <li className="publication" key={atId}>
-                    <a className="text-500" href={atId}>{ this.props.display_title || this.props.title }</a>
-                </li>
-            );
-        }
-    }
-
-    state = {
-        'open' : false
-    }
-
-    constructor(props){
-        super(props);
-        this.publicationListItems = this.publicationListItems.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-    publicationListItems(publications = this.props.publications){
-
-        /**
-         *  Maps an array of publications to ListBlock.Publication React elements.
-         * 
-         * @static
-         * @private
-         * @param {any} pubs - Array of publication objects containing at least link_id and display_title.
-         * @returns {Element[]} List of React <li> elements wrapped.
-         */
-        function pubsToElements(pubs){
-            return pubs.map(function(pub, i){
-                return <ListBlock.Publication {...pub} key={pub.link_id || i} />;
-            });
-        }
-
-
-        if (publications.length <= this.props.persistentCount){
-            return <ul>{ pubsToElements(publications) }</ul>;
-        } else {
-            // Only show first 3, then a 'more' button.
-            return (
-                <PartialList
-                    persistent={pubsToElements(publications.slice(0, this.props.persistentCount))}
-                    collapsible={pubsToElements(publications.slice(this.props.persistentCount)) }
-                    containerType="ul"
-                    open={this.state && this.state.open}
-                />
-            );
-        }
-    }
-
-    render(){
-        var publications = this.props.publications;
-        // publications = testData; // Uncomment to test listview.
-
-        if (!Array.isArray(publications) || publications.length < 1){
-            return null;
-        }
-
-        var isSingleItem = publications.length === 1;
-
-        return (
-            <Publications.FormattedInfoWrapper isSingleItem={isSingleItem} singularTitle={this.props.singularTitle}>
-                <div>
-                    { this.publicationListItems(publications) }
-                    { publications.length > this.props.persistentCount ?
-                        <Button bsStyle="default" bsSize="small" onClick={()=>{
-                            this.setState({ open : !(this.state && this.state.open) });
-                        }}>{ this.state && this.state.open ? "Collapse" : "See " + (publications.length - this.props.persistentCount) + " More" }</Button>
-                    : null }
-                </div>
-            </Publications.FormattedInfoWrapper>
-        );
-    }
-
-}
 
 
 /**
@@ -136,96 +33,20 @@ class ListBlock extends React.Component {
  */
 class DetailBlock extends React.Component {
 
-    /**
-     * @member
-     * @static
-     */
-    static defaultProps = {
+    defaultProps = {
         'singularTitle' : 'Publication'
     }
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
-    /**
-     * @member
-     * @instance
-     */
     render(){
         var publication = this.props.publication;
         if (typeof publication !== 'object' || !publication) return null;
         return (
-            <Publications.FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
+            <FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
                 <h5 className="block-title">
                     <a href={object.atIdFromObject(publication)}>{ publication.display_title }</a>
                 </h5>
-                <div className="details">
-                    { this.props.children }
-                </div>
-            </Publications.FormattedInfoWrapper>
-        );
-    }
-
-}
-
-
-/**
- * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
- * 
- * @memberof module:item-pages/components.Publications
- * @class FormattedInfoWrapper
- * @extends {React.Component}
- * @type {Component}
- * 
- * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
- * @prop {Element[]} children       - React Elements or Components to be wrapped.
- * @prop {string} [singularTitle]   - Optional. Title displayed in top left label. Defaults to 'Publication'.
- * @prop {string} [className]       - Additional className to be added to wrapper element. 
- * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
- */
-class FormattedInfoWrapper extends React.Component {
-
-    /**
-     * @member
-     * @type {Object}
-     * @static
-     */
-    static defaultProps = {
-        isSingleItem : false,
-        singularTitle : 'Publication',
-        iconClass : 'book',
-        className : null
-    }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
-    /**
-     * @member
-     * @method
-     * @instance
-     */
-    render(){
-        return (
-            <div className={
-                "publications-block formatted-info-panel" +
-                (this.props.isSingleItem ? ' single-item' : '') +
-                (this.props.className ? ' ' + this.props.className : '')
-            }>
-                <h6 className="publication-label">{ this.props.singularTitle }{ this.props.isSingleItem ? '' : 's' }</h6>
-                <div className="row">
-                    <div className="icon-container col-xs-2 col-lg-1">
-                        <i className={"icon icon-" + this.props.iconClass} />
-                    </div>
-                    <div className="col-xs-10 col-lg-11">
-                        { this.props.children }
-                    </div>
-                </div>
-            </div>
+                <div className="details">{ this.props.children }</div>
+            </FormattedInfoWrapper>
         );
     }
 
@@ -283,24 +104,15 @@ class ShortAttribution extends React.Component {
 
 class ProducedInPublicationBelowHeaderRow extends React.Component {
     render(){
-        var inner = null;
-        if (!this.props.produced_in_pub){
-            inner = <br/>;
-        } else {
-            inner = (
-                <Publications.DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
-                    <div className="more-details">
-                        <Publications.ShortAttribution publication={this.props.produced_in_pub} />
-                    </div>
-                    <br/>
-                </Publications.DetailBlock>
-            );
-        }
-
+        if (!this.props.produced_in_pub) return null;
         return (
-            <div className="row">
+            <div className="row mb-2">
                 <div className="col-sm-12">
-                    { inner }
+                    <DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
+                        <div className="more-details">
+                            <ShortAttribution publication={this.props.produced_in_pub} />
+                        </div>
+                    </DetailBlock>
                 </div>
             </div>
         );
@@ -317,9 +129,7 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
  */
 export class Publications extends React.Component {
 
-    static ListBlock = ListBlock;
     static DetailBlock = DetailBlock;
-    static FormattedInfoWrapper = FormattedInfoWrapper;
     static ShortAttribution = ShortAttribution;
     static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow
 
@@ -432,18 +242,14 @@ export class Publications extends React.Component {
                         this.detailRows().map(function(d, i){
                             return (
                                 <div className="row details-row" key={ d.key || d.label || i }>
-                                    <div className="col-xs-2 text-600 text-right label-col">
-                                        { d.label }
-                                    </div>
-                                    <div className="col-xs-10">
-                                        { d.content }
-                                    </div>
+                                    <div className="col-xs-2 text-600 text-right label-col">{ d.label }</div>
+                                    <div className="col-xs-10">{ d.content }</div>
                                 </div>
                             );
                         })
                     }
                 </Publications.DetailBlock>
-                <Publications.ListBlock publications={usedInPublications} singularTitle="Used in Publication" />
+                <WrappedCollapsibleList items={usedInPublications} singularTitle="Used in Publication" itemClassName="publication" />
             </div>
         );
     }

@@ -17,6 +17,9 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/notes"}
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -41,7 +44,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the analysis step.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "cwl_pointer": {
             "title": "CWL Path",

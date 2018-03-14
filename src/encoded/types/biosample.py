@@ -37,6 +37,13 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "biosource.tissue.slim_terms",
         "biosource.tissue.synonyms",
         'cell_culture_details.*',
+        'cell_culture_details.morphology_image.caption',
+        'cell_culture_details.morphology_image.attachment.href',
+        'cell_culture_details.morphology_image.attachment.type',
+        'cell_culture_details.morphology_image.attachment.md5sum',
+        'cell_culture_details.morphology_image.attachment.download',
+        'cell_culture_details.morphology_image.attachment.width',
+        'cell_culture_details.morphology_image.attachment.height',
         'modifications.modification_type',
         'modifications.description',
         'treatments.treatment_type',
@@ -44,7 +51,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
-        'biosample_protocols.description'
+        'biosample_protocols.description',
+        'award.project'
     ]
     name_key = 'accession'
 

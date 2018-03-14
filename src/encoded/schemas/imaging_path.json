@@ -20,6 +20,9 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/dbxrefs" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -27,7 +30,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the labeling path",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "target": {
             "title": "Targets of Labelling",
@@ -54,7 +58,8 @@
                 "Aptamer",
                 "RNA",
                 "DNA primer",
-                "Small chemical"
+                "Small chemical",
+                "BAC"
             ]
         },
         "labels": {

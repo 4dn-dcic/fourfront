@@ -2,7 +2,8 @@
 .facet-charts {
     transition: opacity 0.75s;
     opacity : 1;
-    margin-top: 45px;
+    margin-top: 50px;
+    margin-bottom: 25px;
     &.loading {
         opacity : 0.125;
         text-align: center;
@@ -150,10 +151,12 @@
             right: -10px;
             color: #555;
         }
+        
     }
 
     .chart-crumb {
         display: inline-block;
+        font-size: 0.925rem;
         margin-bottom: 2px;
         height: inherit;
         line-height: inherit;
@@ -182,11 +185,29 @@
                 margin-right: 7px;
             }
             &:not(:last-of-type):after {
-                content: "|";
                 position: absolute;
-                font-size: 0.8rem;
-                right: -5px;
-                color: #555;
+                font-size: 0.5rem;
+                right: -4px;
+                content: " ";
+                top: 7px;
+                height: 12px;
+                width: 0px;
+                border-right: 1px solid #777;
+            }
+        }
+    }
+
+    .field-group {
+        > .chart-crumb {
+            &:after {
+                border-color: #777;
+            }
+        }
+        &:hover {
+            > .chart-crumb {
+                &:after {
+                    border-color: #000;
+                }
             }
         }
     }
@@ -350,6 +371,7 @@
     display: block;
     position: absolute;
     transition: height .75s ease-out;
+    transform: translate3d(0,0,0);
     //overflow: hidden;
 
     line.y-axis-top {
@@ -419,8 +441,9 @@
     }
 
     .chart-bar {
-        transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
+        transition: transform .75s ease-out, opacity .5s, width .75s ease-out, height .75s ease-out;
         position: absolute;
+        transform: translate3d(0,0,0);
         //outline-offset: 5px;
         //outline: 2px solid transparent;
 
@@ -428,6 +451,10 @@
             display: block;
             text-align: center;
             width: 100%;
+            position: absolute;
+            padding-bottom: 4px;
+            font-size: 0.875rem;
+            transform: translate3d(0,-20px,0);
         }
 
         &.larger-height .bar-top-label {
@@ -440,14 +467,9 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, -webkit-filter .5s;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, filter .5s;
-            //outline-offset: 5px;
-            //outline: 1px solid transparent;
+            transition: opacity 0.5s, width .75s, border-color .5s ease-out, background-color .5s ease-out;
             box-shadow : none;
             width: 100%;
-            transform: translate3d(0,0,0);
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
@@ -1102,7 +1124,6 @@
 
         .term {
             font-size: 0.85rem;
-            
         }
 
     }
@@ -1246,9 +1267,13 @@ $workflow-node-color-type-global-context: #ffb3b3;
         &.node-type-input,
         &.node-type-output {
             &:before {
-                background-color: $workflow-node-color-disabled !important;
+                background-color: $workflow-node-color-disabled;
             }
         }
+    }
+
+    &.node-type-spacer {
+        display: none;
     }
 
     &.node-type-step {
@@ -1345,9 +1370,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         transform: translateY(-1px);
                         transform: translateY(-0.5px);
                         > i.icon {
-                            transform: translateY(1px);
                             transform: translateY(0.5px);
                         }
+                    }
+                    > i.icon {
+                        transform: translateY(1px);
                     }
                 }
             }
@@ -1437,6 +1464,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             &:before {
                 background-color: $workflow-node-color-type-global-input;
             }
+            &[data-node-type-detail="parameter"],
             &[data-node-type-detail="Workflow Parameter"] {
                 &:before {
                     // background-color: #d1cde2;
@@ -1446,7 +1474,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
             @include pre-node-dot;
             
         }
-        &.node-item-type-file-reference {
+        &.node-item-type-file-reference,
+        &[data-node-type-detail="reference file"] {
             &:before {
                 background-color: $workflow-node-color-type-input-file-reference;
             }
@@ -1636,7 +1665,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         &:not(.constant-panel) {
             > div.inline-block {
 
-                &.show-params-checkbox-container {
+                &.checkbox-container {
                     padding: 8px 12px 6px 0;
                     vertical-align: middle;
                     font-size: 0.9rem;
@@ -1651,7 +1680,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
                 @media screen and (max-width: $screen-md-max){
                     display: block;
-                    &.show-params-checkbox-container {
+                    &.checkbox-container {
                         padding-top: 5px;
                         padding-bottom: 5px;
                         height: auto;
@@ -1885,6 +1914,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 width: 20px;
             }
         }
+        //border-bottom: 1px solid #eee;
     }
 
     .blocks-container {
@@ -1896,6 +1926,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             text-align: center;
             border: 1px solid transparent;
             color: #fff;
+            cursor: pointer;
             &.production {
                 /*
                 border-color: transparent;
@@ -1903,22 +1934,26 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 background-color: #5e776b;
                 */
             }
+            /*
             &.multiple-sets {
-                box-shadow: -3px 3px 0px #444;
+                box-shadow: -3px 3px 0px #555;
                 transform: translate(1px, -1px) scale(0.925);
             }
+            */
             @media screen and (max-width: $screen-xs-min){
                 width : 100% !important;
             }
+            border: 1px solid #0003;
+            /** Styles for Submitted, In Submission, Planned, Not Yet Planned, etc. **/
         }
 
         .block-container-group {
             //flex-grow: 1;
             text-align: center;
+            border-left: 1px solid transparent;
             &:not(:first-child){
-                border-left: 1px solid #eee;
+                border-left-color: #eee;
             }
-            //border-top: 1px solid #eee;
         }
     }
 
@@ -1962,22 +1997,80 @@ $workflow-node-color-type-global-context: #ffb3b3;
             margin-bottom: 2px;
         }
 
+        &.no-grouping-property-titles {
+            .label-section > h4 {
+                margin-top: 13px;
+            }
+        }
+
+        .label-section > small {
+            color: #777;
+            vertical-align: top;
+        }
+
+        @media screen and (min-width: $screen-md-min){
+            .label-section > small {
+                color: #ddd;
+                transition: color .33s;
+            }
+            &:hover > .row {
+                > .label-section > small {
+                    color: #333;
+                }
+            }
+        }
+
         &.depth-0 {
             margin-bottom: 0px;
-            > .row > .label-section > h4 {
-                margin-top: 5px;
-            }
+            //> .row > .label-section > h4 {
+            //    margin-top: 3px;
+            //}
+
             > .row > .list-section { 
-                padding-top: 10px;
+                padding-top: 0px;
                 > .group-value {
                     font-size: 1.3rem;
                 }
 
             }
-            &.open > .row > .list-section,
-            &:first-child > .row > .list-section {
+
+            &:not(.open):not(.with-duplicate-headers):not(:first-child) {
+                > .row > .list-section {
+                    > .blocks-container {
+                        border-top: 1px solid #eee;
+                    }
+                }
+            }
+
+            &.open > .row > .list-section.has-header,
+            &:first-child > .row > .list-section.has-header {
                 padding-top: 80px;
             }
+
+            &.row-index-0:not(.with-duplicated-headers),
+            &.row-index-0.with-duplicated-headers,
+            &.with-duplicated-headers.open {
+                > .row > .label-section {
+                    padding-top: 100px;
+                }
+                &.open {
+                    > .row > .label-section {
+                        padding-top: 60px;
+                    }
+                }
+            }
+
+            &.open + :not(.open):not(.no-grouping-property-titles),
+            &.open + :not(.with-duplicated-headers):not(.no-grouping-property-titles) {
+                margin-top: 15px;
+            }
+            &.open.with-duplicated-headers + :not(.open):not(.no-grouping-property-titles) {
+                margin-top: 30px;
+            }
+            //&.open.with-duplicated-headers + .no-grouping-property-titles:not(.open) {
+            //    margin-top: 20px;
+            //}
+
         }
         
         &:not(.depth-0) {
@@ -2132,3 +2225,42 @@ $workflow-node-color-type-global-context: #ffb3b3;
     }
 
 }
+
+// The popover for matrix is rendered outside of viz container -- 
+
+#jap-popover {
+    h3.popover-title {
+        div.matrix-popover-title {
+            .x-axis-title {
+                width: 40%;
+                text-align: right;
+            }
+            .mid-icon {
+                width: 20%;
+                text-align: center;
+                padding-top: 8px;
+                font-size: 1.5rem;
+                opacity: 0.33;
+            }
+            .y-axis-title {
+                width: 40%;
+                text-align: left;
+                //padding-left: 10px;
+            }
+        }
+    }
+    div.popover-content {
+        .popover-entry {
+            ol {
+                padding-left: 25px;
+                margin-bottom: 0;
+            }
+            .more-items-count {
+                font-style: italic;
+                margin-top: 4px;
+                margin-left: 25px;
+            }
+        }
+    }
+}
+

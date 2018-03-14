@@ -120,7 +120,7 @@ export default class SubmissionView extends React.Component{
      * available.
      */
     componentDidMount(){
-        if(this.props.schemas && Object.keys(this.props.schemas).length > 0){
+        if(this.props.schemas && _.keys(this.props.schemas).length > 0){
             this.initializePrincipal(this.props.context, this.props.schemas);
         }
     }
@@ -234,13 +234,14 @@ export default class SubmissionView extends React.Component{
         var continueInitProcess = function(){
             // if @id cannot be found or we are creating from scratch, start with empty fields
             if(!contextID || this.props.create){
-                initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                // We may not have schema (if Abstract type). If so, leave empty and allow initCreateObj ... -> createObj() to create it.
+                if (schema) initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
                 initBookmarks[0] = bookmarksList;
 
                 this.setState({
                     'keyContext': initContext,
                     'keyValid': initValid,
-                    'keyTypes': initType,
+                    'keyTypes': initType, // Gets updated in submitAmbiguousType
                     'keyDisplay': initDisplay,
                     'currKey': 0,
                     'keyLinkBookmarks': initBookmarks
@@ -335,26 +336,23 @@ export default class SubmissionView extends React.Component{
      * If the current object's schemas does not support aliases, finish out the
      * creation process with createObj using a boilerplate placeholer obj name.
      */
-    initCreateAlias = (type, newIdx, newLink, parentField=null) => {
+    initCreateAlias = (type, newIdx, newLink, parentField=null, extraState={}) => {
         var schema = this.props.schemas[type] || null;
         var autoSuggestedAlias = '';
         if (this.state.currentSubmittingUser && Array.isArray(this.state.currentSubmittingUser.submits_for) && this.state.currentSubmittingUser.submits_for[0] && typeof this.state.currentSubmittingUser.submits_for[0].name === 'string'){
-            autoSuggestedAlias = this.state.currentSubmittingUser.submits_for[0].name + ':';
+            autoSuggestedAlias = AliasInputField.getInitialSubmitsForLabName(this.state.currentSubmittingUser) + ':';
         }
         if(schema && schema.properties.aliases){
-            this.setState({
-                'ambiguousIdx': null,
-                'ambiguousType': null,
-                'ambiguousSelected': null,
+            this.setState(_.extend({
                 'creatingAlias' : autoSuggestedAlias,
                 'creatingIdx': newIdx,
                 'creatingType': type,
                 'creatingLink': newLink,
                 'creatingLinkForField' : parentField
-            });
+            }, extraState));
         }else{ // schema doesn't support aliases
             var fallbackAlias = 'My ' + type + ' ' + newIdx;
-            this.createObj(type, newIdx, newLink, fallbackAlias);
+            this.createObj(type, newIdx, newLink, fallbackAlias, extraState);
         }
     }
 
@@ -369,16 +367,16 @@ export default class SubmissionView extends React.Component{
         var schema = this.props.schemas[type];
         var newIdx = this.state.ambiguousIdx;
         var newLink = this.state.creatingLink;
+        var stateChange = {
+            'ambiguousIdx'      : null,
+            'ambiguousType'     : null,
+            'ambiguousSelected' : null
+        };
         // safety check to ensure schema exists for selected type
         if(schema && type){
-            this.initCreateAlias(type, newIdx, newLink);
+            this.initCreateAlias(type, newIdx, newLink, null, stateChange);
         }else{
-            // abort
-            this.setState({
-                'ambiguousIdx': null,
-                'ambiguousType': null,
-                'ambiguousSelected': null
-            });
+            this.setState(stateChange); // abort
         }
     }
 
@@ -444,27 +442,28 @@ export default class SubmissionView extends React.Component{
             var patt = new RegExp('\\S+:\\S+');
             var regexRes = patt.test(alias);
             if(!regexRes){
-                this.setState({
-                    'creatingAliasMessage': 'ERROR. Aliases must be formatted as: <text>:<text> (e.g. dcic-lab:42).'
-                });
+                this.setState({ 'creatingAliasMessage': 'ERROR. Aliases must be formatted as: <text>:<text> (e.g. dcic-lab:42).' });
                 return false;
             }
             for(var key in this.state.keyDisplay){
                 if(this.state.keyDisplay[key] === alias){
-                    this.setState({
-                        'creatingAliasMessage': 'You have already used this alias.'
-                    });
+                    this.setState({ 'creatingAliasMessage': 'You have already used this alias.' });
                     return false;
                 }
             }
             // see if the input alias is already being used
             ajax.promise('/' + alias).then(data => {
                 if (data && data.title && data.title === "Not Found"){
-                    this.createObj(type, newIdx, newLink, alias);
-                }else{
-                    this.setState({
-                        'creatingAliasMessage': 'ERROR. That alias is already taken.'
+                    this.createObj(type, newIdx, newLink, alias, {
+                        'creatingIdx'           : null,
+                        'creatingType'          : null,
+                        'creatingLink'          : null,
+                        'creatingAlias'         : '',
+                        'creatingAliasMessage'  : null,
+                        'creatingLinkForField'  : null
                     });
+                }else{
+                    this.setState({ 'creatingAliasMessage': 'ERROR. That alias is already taken.' });
                     return false;
                 }
             });
@@ -509,7 +508,7 @@ export default class SubmissionView extends React.Component{
      * the next created object. Sets currKey to the idx of the newly created object
      * so the view changes to it.
      */
-    createObj = (type, newIdx, newLink, alias) => {
+    createObj = (type, newIdx, newLink, alias, extraState={}) => {
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
         var typesCopy = this.state.keyTypes;
@@ -534,8 +533,8 @@ export default class SubmissionView extends React.Component{
             newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
             validCopy[keyIdx] = 1; // new object has no incomplete children yet
             validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
-            typesCopy[keyIdx] = type;
         }
+        typesCopy[keyIdx] = type;
         var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
         if(contextWithAlias.aliases){
             contextWithAlias.aliases.push(alias);
@@ -550,7 +549,7 @@ export default class SubmissionView extends React.Component{
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
         }
-        this.setState({
+        this.setState(_.extend({
             'keyContext': contextCopy,
             'keyValid': validCopy,
             'keyTypes': typesCopy,
@@ -561,17 +560,8 @@ export default class SubmissionView extends React.Component{
             'keyLinkBookmarks': bookmarksCopy,
             'keyLinks': linksCopy,
             'processingFetch': false,
-            'errorCount': 0,
-            'ambiguousIdx': null,
-            'ambiguousType': null,
-            'ambiguousSelected': null,
-            'creatingIdx': null,
-            'creatingType': null,
-            'creatingLink': null,
-            'creatingAlias': '',
-            'creatingAliasMessage': null,
-            'creatingLinkForField' : null
-        });
+            'errorCount': 0
+        }, extraState));
     }
 
     /**
@@ -946,7 +936,7 @@ export default class SubmissionView extends React.Component{
         // must remove nulls from the orig copy to sync with patchContext
         var origCopy = cloneObj(origContext);
         origCopy = removeNulls(origCopy);
-        var userGroups = getUserGroups();
+        var userGroups = JWT.getUserGroups();
         _.keys(origCopy).forEach(function(field, index){
             // if patchContext already has a value (such as admin edited
             // import_items fields), don't overwrite
@@ -1641,7 +1631,7 @@ class AliasSelectModal extends TypeSelectModal {
 class SelectExistingItemModal extends React.Component {
 
     render(){
-        var { onCancel, selectData, navigate  } = this.props;
+        var { onCancel, selectData, navigate, submissionBase  } = this.props;
 
         var selecting = false;
         if(selectData !== null){
@@ -1847,6 +1837,44 @@ class IndividualObjectView extends React.Component{
     checkObjectRemoval = (value, prevValue) => {
         if(value === null){
             this.props.removeObj(prevValue);
+        }
+    }
+
+    /**
+     * Navigation function passed to Search so that faceting can be done in-place
+     * through ajax. If no results are returned from the search, abort.
+     */
+    inPlaceNavigate = (destination, options, callback) => {
+        if(this.state.selectQuery){
+            var dest = destination;
+            // ensure destination is formatted correctly when clearing/removing filters
+            if(destination == '/'){
+                dest = '/search/?type=' + this.state.selectType;
+            }else if(destination.slice(0,8) != '/search/' && destination.slice(0,1) == '?'){
+                dest = '/search/' + destination;
+            }
+            ajax.promise(dest).then(data => {
+                if (data && data['@graph']){
+                    this.setState({
+                        'selectData': data,
+                        'selectQuery': dest
+                    });
+                }else{
+                    this.setState({
+                        'selectType': null,
+                        'selectData': null,
+                        'selectQuery': null,
+                        'selectField': null,
+                        'selectLink': null,
+                        'selectArrayIdx': null
+                    });
+                    this.props.setSubmissionState('fullScreen', false);
+                }
+            }).then(data => {
+                if (typeof callback === 'function'){
+                    callback(data);
+                }
+            });
         }
     }
 
@@ -2139,22 +2167,6 @@ class RoundTwoDetailPanel extends React.Component{
 /***** MISC. FUNCIONS *****/
 
 /**
- * Return an array of user groups the current user belongs to
- * Based off of the current JWT
- */
-function getUserGroups(){
-    var userInfo = JWT.getUserInfo();
-    var userGroups = [];
-    if (userInfo){
-        var currGroups = object.getNestedProperty(userInfo, ['details', 'groups'], true);
-        if(currGroups && Array.isArray(currGroups)){
-            userGroups = currGroups;
-        }
-    }
-    return userGroups;
-}
-
-/**
  * Build context based off an object's and populate values from
  * pre-existing context. Empty fields are given null value.
  * All linkTo fields are added to objList.
@@ -2163,7 +2175,7 @@ function getUserGroups(){
  */
 export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
     var built = {};
-    var userGroups = getUserGroups();
+    var userGroups = JWT.getUserGroups();
     var fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
     for (var i=0; i<fields.length; i++){
         if(itemSchema.properties[fields[i]]){
@@ -2267,23 +2279,26 @@ function sortPropFields(fields){
 
     /** Compare by schema property 'lookup' meta-property, if available. */
     function sortSchemaLookupFunc(a,b){
-        if (a.props.schema && b.props.schema){
-            var aLookup = a.props.schema.lookup || 750, bLookup = b.props.schema.lookup || 750;
-            if (typeof aLookup === 'number' && typeof bLookup === 'number') {
-                return aLookup - bLookup;
-            }
-        } else {
-            if (a.props.schema && !b.props.schema) return -1;
-            if (b.props.schema && !a.props.schema) return 1;
+        var aLookup = (a.props.schema && a.props.schema.lookup) || 750,
+            bLookup = (b.props.schema && b.props.schema.lookup) || 750,
+            res;
+
+        if (typeof aLookup === 'number' && typeof bLookup === 'number') {
+            //if (a.props.field === 'ch02_power_output' || b.props.field === 'ch02_power_output') console.log('X', aLookup - bLookup, a.props.field, b.props.field);
+            res = aLookup - bLookup;
         }
-        return 0;
+
+        if (res !== 0) return res;
+        else {
+            return sortTitle(a,b);
+        }
     }
 
     /** Compare by property title, alphabetically. */
     function sortTitle(a,b){
-        if (typeof a.props.title === 'string' && typeof b.props.title === 'string'){
-            if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
-            if(a.props.title.toUpperCase() > b.props.title.toUpperCase()) return 1;
+        if (typeof a.props.field === 'string' && typeof b.props.field === 'string'){
+            if(a.props.field.toLowerCase() < b.props.field.toLowerCase()) return -1;
+            if(a.props.field.toLowerCase() > b.props.field.toLowerCase()) return 1;
         }
         return 0;
     }
@@ -2297,9 +2312,9 @@ function sortPropFields(fields){
         }
     });
 
-    // Do the sorting magic - title then by schema.
-    reqFields.sort(sortTitle).sort(sortSchemaLookupFunc);
-    optFields.sort(sortTitle).sort(sortSchemaLookupFunc);
+    reqFields.sort(sortSchemaLookupFunc);
+    optFields.sort(sortSchemaLookupFunc);
+
     return reqFields.concat(optFields);
 }
 

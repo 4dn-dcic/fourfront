@@ -19,13 +19,17 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
         },
         "caption": {
             "title": "Caption",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         }
     },
     "boost_values": {

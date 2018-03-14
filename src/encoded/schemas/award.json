@@ -45,10 +45,12 @@
         "description": {
             "rdfs:subPropertyOf": "dc:description",
             "title": "Description",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "start_date": {
             "title": "Start date",
+            "description": "YYYY-MM-DD formatted date.",
             "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
@@ -58,6 +60,7 @@
         },
         "end_date": {
             "title": "End date",
+            "description": "YYYY-MM-DD formatted date.",
              "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [

@@ -8,7 +8,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing FacetCharts with a dummy sinon response returning test @graph', function() {
-    var React, FacetCharts, ChartDataController, testItem, TestUtils, page, store, context, filters, _, Wrapper, href, sinon, server;
+    var React, FacetCharts, ChartDataController, testItem, TestUtils, page, store, context, filters, _, Wrapper, href, sinon, server, fieldEndpointResult, propInitialFields;
 
     beforeAll(function() {
         React = require('react');
@@ -17,22 +17,24 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         _ = require('underscore');
         FacetCharts = require('./../facetcharts').FacetCharts;
         ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
-        context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
-        href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
 
-        var fieldsToFetch = ChartDataController.getRefs().fieldsToFetch;
+        propInitialFields = ['experiments_in_set.experiment_type','experiments_in_set.biosample.biosource.biosource_type'];
+
+        //context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
+        fieldEndpointResult = require('../testdata/bar_plot_aggregations_1').JSON;
+        href = "http://localhost:8000/browse/?award.project=4DN&type=ExperimentSetReplicate&experimentset_type=replicate";
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
 
-        if (typeof context === 'object'){
-            context = JSON.stringify(context);
-        }
+        //if (typeof context === 'object'){
+        //    context = JSON.stringify(context);
+        //}
 
+        // We let ChartDataController request the data and feed it in rather than feeding it directly to the BarPlotChart (via prop 'barplot_data_unfiltered') so as to test ChartDataController.
         var chartRequestHref = (
-            "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" +
-            "&limit=all&from=0&sort=experiments_in_set.accession" +
-            ChartDataController.getFieldsRequiredURLQueryPart()
+            "/bar_plot_aggregations/type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN/" +
+            "?" + _.map(propInitialFields, function(f){ return 'field=' + f; }).join('&')
         );
 
         server.respondWith(
@@ -41,17 +43,17 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
             [
                 200,
                 { "Content-Type" : "application/json" },
-                context /* string */
+                JSON.stringify(fieldEndpointResult)
             ]
         );
 
         page = TestUtils.renderIntoDocument(
             <FacetCharts
-                href={href}
-                expSetFilters={{}}
+                href={href} // We need to be on '/' or '/browse/' for Chart to be visible.
                 updateStats={function(stats){ console.log("CHARTS-TEST: props.updateStats called by FacetCharts (good) with: ", stats); }}
                 schemas={null}
-                fieldsToFetch={fieldsToFetch} />
+                initialFields={propInitialFields}
+            />
         );
         
     });
@@ -59,15 +61,6 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
     afterAll(function(){
         server.restore();
     });
-
-    /*
-    it('Has chart elements such as SVG, bar parts', function() {
-        server.respond();
-        jest.runAllTimers();
-        var svg = TestUtils.scryRenderedDOMComponentsWithClass(page, 'sunburst-svg-chart');
-        expect(svg.length).toBe(1);
-    });
-    */
 
     /*
     it('Has multiple paths that theoretically may be clicked (have field & term related to them)', function() {
@@ -88,6 +81,20 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         bars.forEach(function(b){
             expect(b.children[0].className === 'bar-top-label').toBe(true);
         });
+    });
+
+    it('Has correct counts', function() {
+        server.respond();
+        jest.runAllTimers();
+        var bar_labels = TestUtils.scryRenderedDOMComponentsWithClass(page, 'bar-top-label');
+        var bar_counts = _.map(_.pluck(bar_labels, 'innerHTML'), function(str){ return parseInt(str); }).sort().reverse();
+
+        var bar_counts_total = _.reduce(bar_counts, function(m,v){ return m + v; }, 0);
+
+        expect(bar_counts_total).toEqual(fieldEndpointResult.total.experiment_sets); // Should add up to what we have as the total.
+
+        console.log("CHARTS-TEST: Counts of items per bar - ", bar_counts )
+        
     });
 
 });

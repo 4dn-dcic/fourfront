@@ -26,7 +26,8 @@
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
-        { "$ref": "experiment.json#/facets"}
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
@@ -64,7 +65,8 @@
                 "1.3% Formaldehyde",
                 "2% Formaldehyde",
                 "2.5% Formaldehyde",
-                "3.5% Formaldehyde"
+                "3.5% Formaldehyde",
+                "1% Formaldehyde and 3nM DSG"
             ]
         },
         "crosslinking_time": {

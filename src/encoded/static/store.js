@@ -6,17 +6,17 @@ var { JWT, isServerSide } = require('./components/util');
 
 var reducers = {
 
-    href : function(state='', action) {
-        if (action.type && _.contains(Object.keys(action.type), 'href')){
+    'href' : function(state='', action) {
+        if (action.type && _.contains(_.keys(action.type), 'href')){
             var val = action.type.href ? action.type.href : state;
-            return val
+            return val;
         } else{
-            return state
+            return state;
         }
     },
 
-    context : function(state={}, action){
-        if (action.type && _.contains(Object.keys(action.type), 'context')){
+    'context' : function(state={}, action){
+        if (action.type && _.contains(_.keys(action.type), 'context')){
             var context = action.type.context ? action.type.context : state;
             if (!isServerSide() && context && context['@type'] && context['@type'].indexOf('User') > -1){
                 // If context type is user, and is of current user, update localStorage user_info appropriately.
@@ -29,74 +29,83 @@ var reducers = {
                 }
                 JWT.saveUserInfoLocalStorage(userInfo);
             }
-            return context
+            return context;
         } else {
-            return state
+            return state;
         }
     },
 
-    inline : function(state='', action) {
-        if (action.type && _.contains(Object.keys(action.type), 'inline')){
+    'inline' : function(state='', action) {
+        if (action.type && _.contains(_.keys(action.type), 'inline')){
             var val = action.type.inline ? action.type.inline : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
 
-    lastCSSBuildTime : function(state='', action) {
-        if (action.type && _.contains(Object.keys(action.type), 'lastCSSBuildTime')){
+    'lastCSSBuildTime' : function(state='', action) {
+        if (action.type && _.contains(_.keys(action.type), 'lastCSSBuildTime')){
             var val = action.type.lastCSSBuildTime ? action.type.lastCSSBuildTime : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
 
-    contextRequest : function(state={}, action) {
-        if (action.type && _.contains(Object.keys(action.type), 'contextRequest')){
+    'contextRequest' : function(state={}, action) {
+        if (action.type && _.contains(_.keys(action.type), 'contextRequest')){
             var val = action.type.contextRequest ? action.type.contextRequest : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
 
-    slow : function(state=false, action) {
-        if (action.type && _.contains(Object.keys(action.type), 'slow')){
+    'slow' : function(state=false, action) {
+        if (action.type && _.contains(_.keys(action.type), 'slow')){
             var val = action.type.slow ? action.type.slow : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
 
-    expSetFilters : function(state={}, action) {
-        if (action.type && _.contains(Object.keys(action.type), 'expSetFilters')){
+    'expSetFilters' : function(state={}, action) {
+        if (action.type && _.contains(_.keys(action.type), 'expSetFilters')){
             var val = action.type.expSetFilters ? action.type.expSetFilters : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
 
-    expIncompleteFacets : function(state=null, action) {
-        if (action.type && _.contains(Object.keys(action.type), 'expIncompleteFacets')){
+    'expIncompleteFacets' : function(state=null, action) {
+        if (action.type && _.contains(_.keys(action.type), 'expIncompleteFacets')){
             var val = action.type.expIncompleteFacets ? action.type.expIncompleteFacets : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
 
-    alerts : function(state=[], action) {
-        if (action.type && _.contains(Object.keys(action.type), 'alerts')){
+    'alerts' : function(state=[], action) {
+        if (action.type && _.contains(_.keys(action.type), 'alerts')){
             var val = action.type.alerts ? action.type.alerts : state;
-            return val
+            return val;
         }else{
-            return state
+            return state;
         }
     },
+
+    'browseBaseState' : function(state='only_4dn', action){
+        if (action.type && _.contains(_.keys(action.type), 'browseBaseState')){
+            var val = action.type.browseBaseState ? action.type.browseBaseState : state;
+            return val;
+        }else{
+            return state;
+        }
+    }
 };
 
 
@@ -107,12 +116,12 @@ var store = createStore(combineReducers(reducers));
 store.reducers = reducers;
 
 store.mapStateToProps = function(store){
-    var reduxStoreFields = Object.keys(reducers);
+    var reduxStoreFields = _.keys(reducers);
     var props = {};
     for (var i = 0; i < reduxStoreFields.length; i++){
         props[reduxStoreFields[i]] = store[reduxStoreFields[i]];
     }
     return props;
-}
+};
 
 module.exports = store;

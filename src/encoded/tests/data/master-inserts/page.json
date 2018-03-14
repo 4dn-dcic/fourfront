@@ -1,0 +1,292 @@
+[
+    {
+        "name": "about",
+        "uuid": "c79afee0-7ba5-4dc6-9c1c-684984f85607",
+        "title": "About",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b008",
+            "442c8aa0-dc6c-43d7-814a-854af460b009",
+            "442c8aa0-dc6c-43d7-814a-854af460b010"
+        ],
+        "table-of-contents": {
+            "enabled": false
+        }
+    },
+    {
+        "name": "help",
+        "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
+        "title": "Introduction to 4DN Metadata",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b011",
+            "442c8aa0-dc6c-43d7-814a-854af460b012",
+            "442c8aa0-dc6c-43d7-814a-854af460b013"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "help/account-creation",
+        "uuid": "5153c902-a0d2-4246-9b41-cea7a1c91f52",
+        "title": "Creating an Account",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b014"
+        ]
+    },
+    {
+        "name": "help/getting-started",
+        "uuid": "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
+        "title": "Getting Started with Submissions",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b015"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "help/biosample",
+        "uuid": "3c999ac4-1727-4aac-96f5-61ae701a4006",
+        "title": "Biosample Metadata",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b016"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 2,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "help/web-submission",
+        "uuid": "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
+        "title": "Online Submissions",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b017"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "help/spreadsheet",
+        "uuid": "4f115e02-5291-436d-92e8-617af96355df",
+        "title": "Spreadsheet Submissions",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b018",
+            "442c8aa0-dc6c-43d7-814a-854af460b019"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 3,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "help/rest-api",
+        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb",
+        "title": "The REST-API",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b020"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "help/data-processing-pipelines",
+        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
+        "title": "Data processing pipelines",
+        "content": [
+            "9a0afb37-2605-4c0c-9a12-4a28882583a8"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 3,
+            "list-styles": [
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link": false,
+            "skip-depth": 1
+        }
+    },
+    {
+        "name": "error/login-failed",
+        "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",
+        "title": "Login Failed",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b021"
+        ]
+    },
+    {
+        "name": "nofic-matrix/2017-05",
+        "uuid": "9061346d-bc61-4f59-bbe8-054b83978a0e",
+        "title": "NOFIC Matrix",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b022",
+            "442c8aa0-dc6c-43d7-814a-854af460b023",
+            "442c8aa0-dc6c-43d7-814a-854af460b024"
+        ]
+    },
+    {
+        "name": "joint-analysis-data-plans",
+        "uuid": "e4e0ff82-ac00-4e05-9db3-ac6df59fb3bd",
+        "title": "Joint Analysis Data",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b026",
+            "442c8aa0-dc6c-43d7-814a-854af460b027",
+            "442c8aa0-dc6c-43d7-814a-854af460b028",
+            "442c8aa0-dc6c-43d7-814a-854af460b029"
+        ],
+        "redirect" : {
+            "target" : "/joint-analysis",
+            "enabled" : true,
+            "code" : 307
+        }
+    },
+    {
+        "name": "joint-analysis-data-plans/dev",
+        "uuid": "80706e23-aabf-40e5-85b8-f0e41ceda669",
+        "title": "Joint Analysis Data",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b030",
+            "442c8aa0-dc6c-43d7-814a-854af460b031",
+            "442c8aa0-dc6c-43d7-814a-854af460b032",
+            "442c8aa0-dc6c-43d7-814a-854af460b033"
+        ]
+    },
+    {
+        "name": "joint-analysis-data-plans/jan2018",
+        "uuid": "abf6c6de-a8d4-4610-9cbb-54d8366f535a",
+        "title": "Joint Analysis Data - January 2018",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b034"
+        ]
+    },
+    {
+        "name": "joint-analysis-data-plans/jan2018/dev",
+        "uuid": "766acc78-8a9b-4f83-8d5b-b184654e527c",
+        "title": "Joint Analysis Data - January 2018",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b038"
+        ]
+    },
+    {
+        "name": "joint-analysis-data-plans/july2018",
+        "uuid": "82695325-f27a-4adf-b741-a97287958c8b",
+        "title": "Joint Analysis Data - July 2018",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b042"
+        ]
+    },
+    {
+        "name": "joint-analysis-data-plans/july2018/dev",
+        "uuid": "5ecf54fd-cc7c-459e-b011-1a58cad85ac7",
+        "title": "Joint Analysis Data - July 2018",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b046"
+        ]
+    },
+    {
+        "name": "planned-submissions",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
+        "title": "Planned Data Submission",
+        "content": []
+    },
+    {
+        "name": "planned-submissions-matrix",
+        "uuid": "d013f70e-1ad7-4f3b-ac43-b60cb1bc96f4",
+        "title": "Planned Data Submission",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025",
+            "442c8aa0-dc6c-43d7-814a-854af460b050"
+        ]
+    },
+    {
+        "name": "joint-analysis-plans",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b1",
+        "title": "Joint Analysis Matrix",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025"
+        ],
+        "redirect" : {
+            "target" : "/joint-analysis",
+            "enabled" : true,
+            "code" : 307
+        }
+    },
+    {
+        "name": "joint-analysis",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b2",
+        "title": "4DN Joint Analysis Portal",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b025"
+        ]
+    },
+    {
+        "name": "privacy-policy",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-9991d90560b0",
+        "title": "Privacy Policy",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b051"
+        ]
+    },
+    {
+        "name": "release-updates",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
+        "title": "Release Updates",
+        "content": []
+    }
+]

@@ -44,37 +44,29 @@ const portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
         {
-            id: 'browse-menu-item',
-            sid:'sBrowse',
-            title: 'Browse',
-            //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
-            url : function(currentUrlParts){
-                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
-                return Filters.filtersToHref(
-                    store.getState().expSetFilters,
-                    currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
-                );
+            id: 'browse-menu-item', sid:'sBrowse', title: 'Browse',
+            url : function(hrefParts){
+                return navigate.getBrowseBaseHref();
             },
-            active : function(currentWindowPath){
-                if (currentWindowPath && currentWindowPath.indexOf('/browse/') > -1) return true;
-                return false;
-            }
+            active : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
         },
-
-        {id: 'help-menu-item', sid:'sHelp', title: 'Help', children: [
-            {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
-            {id: 'getting-started-menu-item', title: 'Data Submission - Getting Started', url: '/help/getting-started'},
-            {id: 'cell-culture-menu-item', title: 'Biosample Metadata', url: '/help/biosample'},
-            {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
-            {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
-            {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
-            {id: 'about-menu-item', title: 'About', url: '/about'}
-        ]}
+        {
+            id: 'help-menu-item', sid:'sHelp', title: 'Help',
+            children: [
+                { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
+                { id: 'getting-started-menu-item',  title: 'Data Submission - Getting Started', url: '/help/getting-started' },
+                { id: 'cell-culture-menu-item',     title: 'Biosample Metadata',                url: '/help/biosample' },
+                { id: 'web-submission-menu-item',   title: 'Online Submission',                 url: '/help/web-submission' },
+                { id: 'spreadsheet-menu-item',      title: 'Spreadsheet Submission',            url: '/help/spreadsheet' },
+                { id: 'rest-api-menu-item',         title: 'REST API',                          url: '/help/rest-api' },
+                { id: 'about-menu-item',            title: 'About',                             url: '/about' }
+            ]
+        }
     ],
     user_section: [
-            {id: 'login-menu-item', title: 'Log in', url: '/'},
-            {id: 'accountactions-menu-item', title: 'Register', url: '/help'}
-            // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
+        {id: 'login-menu-item', title: 'Log in', url: '/'},
+        {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
+        // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
 
@@ -189,8 +181,6 @@ export default class App extends React.Component {
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
-        this.getStatsComponent = this.getStatsComponent.bind(this);
-        this.updateStats = this.updateStats.bind(this);
 
         // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
         this.handleDropdownChange = this.handleDropdownChange.bind(this);
@@ -211,7 +201,7 @@ export default class App extends React.Component {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.render = this.render.bind(this);
 
-        console.log('APP FILTERS', Filters.hrefToFilters(props.href, (props.context && Array.isArray(props.context.filters) && props.context.filters) || null));
+        console.log('App Filters on Initial Page Load', Filters.currentExpSetFilters((props.context && props.context.filters) || null));
 
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
@@ -240,8 +230,6 @@ export default class App extends React.Component {
         navigate.setNavigateFunction(this.navigate);
         navigate.registerCallbackFunction(Alerts.updateCurrentAlertsTitleMap.bind(this, null));
 
-        console.log("App Initial State: ", session, user_actions);
-
         if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
 
         this.state = {
@@ -254,6 +242,8 @@ export default class App extends React.Component {
             'isSubmitting': false,
             'mounted' : false
         };
+
+        console.log("App Initial State: ", this.state);
     }
 
     // Once the app component is mounted, bind keydowns to handleKey function
@@ -315,8 +305,7 @@ export default class App extends React.Component {
         // Load up analytics
         analytics.initializeGoogleAnalytics(
             analytics.getTrackingId(this.props.href),
-            this.props.context,
-            this.props.expSetFilters
+            this.props.context
         );
 
         this.setState({ 'mounted' : true });
@@ -335,7 +324,7 @@ export default class App extends React.Component {
             if (this.props.href !== prevProps.href){ // We navigated somewhere else.
 
                 // Register google analytics pageview event.
-                analytics.registerPageView(this.props.href, this.props.context, this.props.expSetFilters);
+                analytics.registerPageView(this.props.href, this.props.context);
 
                 // We need to rebuild tooltips after navigation to a different page.
                 ReactTooltip.rebuild();
@@ -443,25 +432,6 @@ export default class App extends React.Component {
         });
     }
 
-    getStatsComponent(){
-        if (!this.refs || !this.refs.navigation) return null;
-        if (!this.refs.navigation.refs) return null;
-        if (!this.refs.navigation.refs.stats) return null;
-        return this.refs.navigation.refs.stats;
-    }
-
-    updateStats(currentCounts, totalCounts = null, callback = null){
-        var statsComponent = this.getStatsComponent();
-        if (statsComponent){
-            if (totalCounts === null){
-                return statsComponent.updateCurrentCounts(currentCounts, callback);
-            } else {
-                return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
-            }
-        }
-        return null;
-    }
-
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
     handleDropdownChange(componentID) {
         // Use React _rootNodeID to uniquely identify a dropdown menu;
@@ -537,10 +507,6 @@ export default class App extends React.Component {
                     hrefHash = hrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
                 }
-                if (hrefParts.pathname.indexOf('/browse/') > -1){
-                    var filters = Filters.hrefToFilters(href, null, false);
-                    Filters.saveChangedFilters(filters, false);
-                }
             });
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
@@ -567,9 +533,15 @@ export default class App extends React.Component {
         options.replace = action_url.pathname == url.parse(this.props.href).pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
-            search = search.split('&').filter(function (item) {
-                return item.slice(-1) != '=';
-            }).join('&');
+            search = _.map(
+                _.filter(search.split('&'), function (item) {
+                    return item.slice(-1) != '=';
+                }),
+                function(item){
+                    var split = item.split('=');
+                    return split[0] + '=' + encodeURIComponent(split[1]).replace(/(')/g, "%27");
+                }
+            ).join('&');
         }
         var href = action_url.pathname;
         if (search) {
@@ -813,7 +785,7 @@ export default class App extends React.Component {
                         window.location.reload();
                     }
                 }
-                return false;
+                return false; // Unlike 'null', skips callback b.c. leaving page anyway.
             }
 
             if (this.props.contextRequest && this.requestCurrent && repeatIfError === true) {
@@ -1123,17 +1095,17 @@ export default class App extends React.Component {
         // Object of common props passed to all content_views.
 
         let commonContentViewProps = {
-            context : context,
-            schemas : this.state.schemas,
-            session : this.state.session,
-            href : this.props.href,
-            navigate : this.navigate,
-            expSetFilters : this.props.expSetFilters,
-            key : key,
-            uploads : this.state.uploads,
-            updateUploads : this.updateUploads,
-            listActionsFor : this.listActionsFor,
-            updateUserInfo : this.updateUserInfo
+            'context'           : context,
+            'schemas'           : this.state.schemas,
+            'session'           : this.state.session,
+            'href'              : this.props.href,
+            'navigate'          : this.navigate,
+            'key'               : key,
+            'uploads'           : this.state.uploads,
+            'updateUploads'     : this.updateUploads,
+            'listActionsFor'    : this.listActionsFor,
+            'updateUserInfo'    : this.updateUserInfo,
+            'browseBaseState'   : this.props.browseBaseState
         };
 
         // first case is fallback
@@ -1235,9 +1207,6 @@ export default class App extends React.Component {
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
-                    <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(Filters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
-                    }}></script>
                     <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
                         <div className="inner">
                             <i className="icon icon-circle-o-notch"/>
@@ -1252,11 +1221,12 @@ export default class App extends React.Component {
                                     href={this.props.href}
                                     session={this.state.session}
                                     updateUserInfo={this.updateUserInfo}
-                                    expSetFilters={this.props.expSetFilters}
                                     portal={portal}
                                     listActionsFor={this.listActionsFor}
                                     ref="navigation"
                                     schemas={this.state.schemas}
+                                    context={context}
+                                    browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
                                 <div id="page-title-container" className="container">
@@ -1266,9 +1236,7 @@ export default class App extends React.Component {
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
-                                        expSetFilters={this.props.expSetFilters}
                                         navigate={navigate}
-                                        updateStats={this.updateStats}
                                         schemas={this.state.schemas}
                                         session={this.state.session}
                                     />

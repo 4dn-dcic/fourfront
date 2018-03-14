@@ -14,13 +14,17 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/status" }
-   ],
+    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "description": {
             "title": "Description",
             "description": "A short description of the summary statistic",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "attachment": {
             "title": "Summary statistic document metadata",

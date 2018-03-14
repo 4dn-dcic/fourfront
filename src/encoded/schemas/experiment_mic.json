@@ -1,6 +1,6 @@
 {
     "title": "Microscopy Experiments",
-    "description": "Target/Label/Channel information for microscopy experiments.",
+    "description": "Imaging Experiments with channel/label/target information.",
     "id": "/profiles/experiment_mic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -23,6 +23,10 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "experiment.json#/properties"}
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
@@ -50,6 +54,7 @@
                 "Widefield",
                 "SIM",
                 "CLSM",
+                "SDCM",
                 "STED",
                 "STORM",
                 "Light sheet",
@@ -63,7 +68,7 @@
         },
         "imaging_paths": {
             "title": "Imaging Paths",
-            "description": "Target to label connections in each channel",
+            "description": "Target to label connections in each channel.",
             "type":  "array",
             "items": {
                 "title": "Imaging path",
@@ -85,6 +90,11 @@
                 }
             }
         },
+        "microscope_settings_master": {
+            "type": "string",
+            "title": "Master Microscope Settings",
+            "linkTo": "MicroscopeSetting"
+        },
         "plate_id": {
             "title": "Plate ID",
             "description": "Plate ID for multi-well plate experiments",
@@ -94,32 +104,15 @@
             "title": "Well Position",
             "description": "Well position for experiments on multi-well plates, eg H8, B18",
             "type": "string"
-        }
-    },
-    "facets": {
-        "award.project": {
-            "title": "Project"
         },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
+        "image_ids":{
+            "title": "Image IDs",
+            "description": "Image IDs as described by BioFormats",
+            "type": "array",
+            "items": {
+                "title": "Image ID",
+                "type": "string"
+            }
         }
     },
     "columns": {

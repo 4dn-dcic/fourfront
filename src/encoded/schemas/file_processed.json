@@ -20,7 +20,8 @@
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "file.json#/facets"}
+        { "$ref": "file.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "file.json#/columns"}
@@ -44,6 +45,7 @@
                 "mcool",
                 "normvector_juicerformat",
                 "zip",
+                "bg",
                 "other"
             ]
         },
@@ -86,6 +88,15 @@
         "hic": ".hic",
         "normvector_juicerformat": ".normvector.juicerformat.gz",
         "zip": ".zip",
+        "bg": ".bg",
         "other": ""
+    },
+    "facets" : {
+        "workflow_run_inputs.workflow.title" : {
+            "title" : "Input of Workflow"
+        },
+        "workflow_run_outputs.workflow.title" : {
+            "title" : "Output of Workflow"
+        }
     }
 }

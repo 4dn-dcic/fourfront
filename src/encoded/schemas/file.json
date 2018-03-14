@@ -8,6 +8,9 @@
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "accession": {
             "accessionType": "FI"
@@ -15,7 +18,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the task.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "filename": {
             "title": "File Name",
@@ -29,6 +33,7 @@
         },
         "file_format": {
             "title": "File Format",
+            "description": "Format or extension of this file.",
             "type": "string"
         },
         "file_type": {
@@ -80,6 +85,7 @@
         "file_size": {
             "title": "File Size",
             "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "Size of file on disk.",
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },
@@ -95,6 +101,10 @@
                 "properties": {
                     "file_format": {
                         "title": "File Format",
+                        "type": "string"
+                    },
+                    "href": {
+                        "title": "Download URL",
                         "type": "string"
                     }
                 }
@@ -150,8 +160,10 @@
                 "deleted",
                 "replaced",
                 "revoked",
+                "archived",
                 "released",
                 "released to project",
+                "archived to project",
                 "to be uploaded by workflow"
             ]
         },
@@ -187,10 +199,7 @@
         "experiments.digestion_enzyme.name" : {
             "title" : "Enzyme"
         },
-        "award.project": {
-            "title": "Project"
-        },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         }
     },
@@ -200,9 +209,6 @@
         },
         "file_format": {
             "title" : "File Format"
-        },
-        "award.project": {
-            "title": "Project"
         },
         "experiments.display_title": {
             "title": "Experiments"

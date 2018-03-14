@@ -1,0 +1,31 @@
+[
+    {
+        "aliases": ["dcic:testfq1"],
+        "accession":"4DNFIO67APU1",
+        "notes": "Fastq 1 - paired with fastq 2",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa0",
+        "status": "deleted",
+        "filename": "test_file1.fastq.gz",
+        "paired_end": "1",
+        "content_md5sum": "4012ee7a157cd60a9969dcf68d4a5732",
+        "md5sum": "bc80aabb3ad8264da7307185dfe9fab1"
+    },
+    {
+        "aliases": ["dcic:testfq2"],
+        "accession":"4DNFIO67APT1",
+        "notes": "Fastq 2 - paired with fastq1",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa1",
+        "status": "deleted",
+        "filename": "test_file2.fastq.gz",
+        "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq1"}],
+        "paired_end": "2"
+    }
+]

@@ -51,11 +51,13 @@ def audit_item_schema(value, system):
 STATUS_LEVEL = {
     # standard_status
     'released': 3,
+    'archived': 3,
     'current': 3,
     'revoked': 3,
     'planned': 2,
     'released to project': 2,
     'submission in progress': 2,
+    'archived to project': 2,
     'in review by lab': 1,
     'deleted': 0,
     'replaced': 0,

@@ -11,6 +11,9 @@
       "biosample_quantity": ["biosample_quantity_units"],
       "biosample_quantity_units": ["biosample_quantity"]
     },
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "status": {
             "title": "Status",
@@ -21,12 +24,14 @@
                 "released",
                 "current",
                 "revoked",
+                "archived",
                 "deleted",
                 "replaced",
                 "in review by lab",
                 "planned",
                 "submission in progress",
-                "released to project"
+                "released to project",
+                "archived to project"
             ]
         },
         "accession": {
@@ -35,7 +40,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the experiment",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "experiment_type": {
             "type": "string",
@@ -127,8 +133,21 @@
             "title": "Processed Files",
             "description": "Processed files that are derived from files in this experiment.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
+        "archived_processed_files": {
+            "title": "Archived Processed Files",
+            "description": "Archived processed files that are derived from files in this experiment set.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Archived Processed File",
                 "description": "File metadata.",
                 "type": "string",
                 "linkTo": "FileProcessed"
@@ -179,9 +198,6 @@
         "experiment_type" : {
             "title" : "Experiment Type"
         },
-        "award.project": {
-            "title": "Project"
-        },
         "biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
@@ -197,7 +213,7 @@
         "biosample.treatments_summary": {
             "title": "Treatments"
         },
-        "lab.title": {
+        "lab.display_title": {
             "title": "Lab"
         },
         "publications_of_exp.display_title": {
@@ -205,9 +221,6 @@
         }
     },
     "columns": {
-        "award.project": {
-            "title": "Project"
-        },
         "biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },

@@ -29,13 +29,21 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
  * @returns {string|null} String value or null. Your function may return a React element, as well.
  */
 export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Object, props: Object, width: number){
+
+    function filterAndUniq(vals){
+        return _.uniq(_.filter(vals, function(v){
+            return v !== null && typeof v !== 'undefined';
+        }));
+    }
+
     var value = object.getNestedProperty(result, columnDefinition.field);
     if (!value) value = null;
     if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
-        value = _.uniq(value.map(function(v){
+        value = filterAndUniq(_.map(value, function(v){
             if (Array.isArray(v)){
-                v = _.uniq(v);
+                v = filterAndUniq(v);
                 if (v.length === 1) v = v[0];
+                if (v.length === 0) v = null;
             }
             return Schemas.Term.toName(columnDefinition.field, v);
         })).join(', ');
@@ -110,19 +118,21 @@ export const defaultColumnDefinitionMap = {
             var title = object.itemUtil.getTitleStringFromContext(result);
             var link = object.itemUtil.atId(result);
             var tooltip;
+            var hasPhoto = false;
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
-                if (popLink){
-                    title = <a href={link || '#'} target="_blank">{ title }</a>;
-                }else{
-                    title = <a href={link || '#'}>{ title }</a>;
+                var linkProps = { 'href' : link || '#', 'target' : (popLink ? '_blank' : null) };
+                title = <a {...linkProps}>{ title }</a>;
+                if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
+                    hasPhoto = true;
+                    title = <span>{ object.itemUtil.User.gravatar(result.email, 32, { 'className' : 'in-search-table-title-image', 'data-tip' : result.email }, 'mm') }{ title }</span>;
                 }
             }
 
             return (
                 <span>
                     <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
-                    <div className="title-block text-ellipsis-container" data-tip={tooltip}>{ title }</div>
+                    <div className={"title-block" + (hasPhoto ? ' has-photo' : " text-ellipsis-container")} data-tip={tooltip}>{ title }</div>
                 </span>
             );
         }

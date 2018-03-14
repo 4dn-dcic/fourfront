@@ -23,22 +23,36 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "experiment.json#/properties" }
+    ],
+    "dependencies": {
+      "3p_adenylation_time": ["3p_adenylation_temperature"],
+      "3p_adenylation_temperature": ["3p_adenylation_time"]
+    },
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
             "CHIP-seq",
             "RNA-seq",
             "NAD-seq",
-            "SPRITE",
-            "GAM"
+            "DNA SPRITE",
+            "RNA-DNA SPRITE",
+            "MARGI",
+            "GAM",
+            "CUT&RUN",
+            "TrAC-loop",
+            "TSA-seq"
           ]
         },
         "targeted_factor": {
@@ -47,36 +61,22 @@
             "type": "string",
             "linkTo": "Target"
         },
-        "antibody": {
-            "title": "Antibody",
-            "description": "The encode accession of the antibody used for the IP (if available) - otherwise and identifying string",
-            "type": "string"
-        }
-    },
-    "facets": {
-        "award.project": {
-            "title": "Project"
+        "reaction_time": {
+            "title": "Reaction Time (min)",
+            "description": "Time of a reaction eg. Digestion time in CUT&RUN experiments",
+            "type": "number"
         },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
+        "3p_adenylation_time": {
+            "title": "Time of 3'Adenylation (mins)",
+            "description": "Time of the 3' Adenylation Reaction in minutes",
+            "type": "number",
+            "use_for": ["CUT&RUN"]
         },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
+        "3p_adenylation_temperature": {
+            "title": "Temperature for 3'Adenylation",
+            "description": "Temperature of the 3' Adenylation Reaction in degrees Celsius",
+            "type": "number",
+            "use_for": ["CUT&RUN"]
         }
     },
     "columns": {

@@ -6,7 +6,7 @@
  * @module static-pages/components
  */
 
-
 export { CSVMatrixView, CSVParsingUtilities } from './CSVMatrixView';
 export { Announcements } from './Announcements';
-export { BannerEntry } from './BannerEntry';
+export { TableOfContents } from './TableOfContents';
+export { StackedBlockVisual, sumPropertyFromList, groupByMultiple, cartesian } from './StackedBlockVisual';

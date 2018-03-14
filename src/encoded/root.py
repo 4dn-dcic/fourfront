@@ -9,9 +9,11 @@ from snovault import (
     root,
     COLLECTIONS
 )
-from snovault.elasticsearch.create_mapping import get_db_es_counts_and_db_uuids
+from snovault.interfaces import STORAGE
+from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from .schema_formats import is_accession
 from .types.page import get_local_file_contents
+from .search import make_search_subreq
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -24,6 +26,7 @@ from collections import OrderedDict
 
 def includeme(config):
     config.include(health_check)
+    config.include(run_workflow)
     config.include(item_counts)
     config.include(submissions_page)
     config.scan(__name__)
@@ -45,21 +48,55 @@ def item_counts(config):
         # how much stuff in elasticsearch (among ALL indexes)
         es = request.registry['elasticsearch']
         es_total = 0
-
+        # some collections may need to be adjusted because they also contain child counts
+        to_subtract = {}
         # find db and es counts for each index
+        db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
-        all_collections = list(request.registry[COLLECTIONS].by_item_type.keys())
-        for collection in all_collections:
-            db_count, es_count, _, _ = get_db_es_counts_and_db_uuids(request, es, collection)
-            warn_str = build_warn_string(db_count, es_count)
-            db_total += db_count
-            es_total += es_count
-            db_es_compare[collection] = ("DB: %s   ES: %s %s" %
-                                         (str(db_count), str(es_count), warn_str))
+        es_counts = {} # keyed by uppercase Item name, such as "ExperimentHic"
+        # need to search both status=deleted and status!=deleted (which is now
+        # done by default) to get real totals.
+        search_req = make_search_subreq(request, '/search/?type=Item&limit=1&status!=deleted')
+        search_resp = request.invoke_subrequest(search_req, True)
+        if search_resp.status_int < 400: # catch errors
+            es_count_facets = [facet for facet in search_resp.json.get('facets', []) if facet.get('field') == 'type']
+            if len(es_count_facets) > 0:
+                es_count_facets = es_count_facets[0]
+                for term in es_count_facets.get('terms'):
+                    es_counts[term['key']] = term['doc_count']
+        search_req_del = make_search_subreq(request, '/search/?type=Item&limit=1&status=deleted')
+        search_resp_del = request.invoke_subrequest(search_req_del, True)
+        if search_resp_del.status_int < 400: # catch errors
+            es_count_facets = [facet for facet in search_resp_del.json.get('facets', []) if facet.get('field') == 'type']
+            if len(es_count_facets) > 0:
+                es_count_facets = es_count_facets[0]
+                for term in es_count_facets.get('terms'):
+                    if term['key'] in es_counts:
+                        es_counts[term['key']] += term['doc_count']
+                    else:
+                        es_counts[term['key']] = term['doc_count']
+        for coll_name, collection in request.registry[COLLECTIONS].by_item_type.items():
+            db_count = request.registry[STORAGE].write.__len__(coll_name)
+            item_name = collection.type_info.name
+            # check to see if this collection contains child collections
+            check_collections = get_jsonld_types_from_collection_type(request, coll_name, [coll_name])
+            to_subtract[coll_name] = [coll for coll in check_collections if coll != coll_name]
+            es_count = es_counts.get(item_name, 0)
+            db_es_counts[coll_name] = [db_count, es_count] # order is important
+        for coll in db_es_counts:
+            coll_db_count, coll_es_count = db_es_counts[coll]
+            subtract_colls = to_subtract.get(coll)
+            if subtract_colls and isinstance(subtract_colls, list):
+                for sub_coll in subtract_colls:
+                    coll_es_count -= db_es_counts[sub_coll][1]
+            db_total += coll_db_count
+            es_total += coll_es_count
+            warn_str = build_warn_string(coll_db_count, coll_es_count)
+            db_es_compare[coll] = ("DB: %s   ES: %s %s" %
+                                         (str(coll_db_count), str(coll_es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
                        (str(db_total), str(es_total), warn_str))
-
         responseDict = {
             'db_es_total': db_es_total,
             'db_es_compare': db_es_compare
@@ -68,6 +105,28 @@ def item_counts(config):
         return responseDict
 
     config.add_view(counts_view, route_name='item-counts')
+
+
+def run_workflow(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'run-workflow',
+        '/runworkflow'
+    )
+
+    def run_workflow_view(request):
+
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+        settings = request.registry.settings
+        print(settings)
+
+        responseDict = {'msg': "thanks"}
+        return responseDict
+
+    config.add_view(run_workflow_view, route_name='run-workflow', permission='add')
 
 
 def health_check(config):
@@ -228,13 +287,16 @@ class EncodedRoot(Root):
         "type": "object",
     })
     def content(self):
+        '''Returns -object- with pre-named sections'''
+        return_obj = {}
         try:
             contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
             contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+            return_obj = { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
         except FileNotFoundError as e:
             print("No content files found for Root object (aka Home, '/').")
-            return {}
+        # Maybe TODO: fetch announcements and add to return_obj. No request to make subrequest from?
+        return return_obj
 
     @calculated_property(schema={
         "title": "Application version",

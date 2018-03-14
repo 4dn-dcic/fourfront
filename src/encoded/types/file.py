@@ -13,6 +13,7 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
+    ALLOW_SUBMITTER_ADD
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -32,6 +33,7 @@ import datetime
 import json
 import pytz
 import os
+from pyramid.traversal import resource_path
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
@@ -40,6 +42,7 @@ log = logging.getLogger(__name__)
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 file_workflow_run_embeds = [
+    'workflow_run_inputs.workflow.title',
     'workflow_run_inputs.input_files.workflow_argument_name',
     'workflow_run_inputs.input_files.value.filename',
     'workflow_run_inputs.input_files.value.display_title',
@@ -81,7 +84,6 @@ def force_beanstalk_env(profile_name, config_file=None):
 
         conn = boto.connect_sts(aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
                                 aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
-        print("on beanstalk so adding environment variables")
     else:
         conn = boto.connect_sts(profile_name=profile_name)
 
@@ -210,6 +212,7 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
 @abstract_collection(
     name='files',
     unique_key='accession',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': 'Files',
         'description': 'Listing of Files',
@@ -300,29 +303,35 @@ class File(Item):
             sheets['external'] = new_creds
             file_formats = [properties.get('file_format'), ]
 
-            # handle extra files
-            updated_extra_files = []
-            for idx, xfile in enumerate(properties.get('extra_files', [])):
-                # ensure a file_format (identifier for extra_file) is given and non-null
-                if not('file_format' in xfile and bool(xfile['file_format'])):
-                    continue
-                # todo, make sure file_format is unique
-                if xfile['file_format'] in file_formats:
-                    raise Exception("Each file in extra_files must have unique file_format")
-                file_formats.append(xfile['file_format'])
-                xfile['accession'] = properties.get('accession')
-                # just need a filename to trigger creation of credentials
-                xfile['filename'] = xfile['accession']
-                xfile['uuid'] = str(uuid)
-                xfile['status'] = properties.get('status')
-                ext = self.build_external_creds(self.registry, uuid, xfile)
-                # build href
-                file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
-                filename = '{}{}'.format(xfile['accession'], file_extension)
-                xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
-                xfile['upload_key'] = ext['key']
-                sheets['external' + xfile['file_format']] = ext
-                updated_extra_files.append(xfile)
+        # handle extra files
+        updated_extra_files = []
+        try:
+            at_id = resource_path(self)
+        except:
+            at_id = "/" + str(uuid) + "/"
+        for idx, xfile in enumerate(properties.get('extra_files', [])):
+            # ensure a file_format (identifier for extra_file) is given and non-null
+            if not('file_format' in xfile and bool(xfile['file_format'])):
+                continue
+            # todo, make sure file_format is unique
+            if xfile['file_format'] in file_formats:
+                raise Exception("Each file in extra_files must have unique file_format")
+            file_formats.append(xfile['file_format'])
+            xfile['accession'] = properties.get('accession')
+            # just need a filename to trigger creation of credentials
+            xfile['filename'] = xfile['accession']
+            xfile['uuid'] = str(uuid)
+            xfile['status'] = properties.get('status')
+            ext = self.build_external_creds(self.registry, uuid, xfile)
+            # build href
+            file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
+            filename = '{}{}'.format(xfile['accession'], file_extension)
+            xfile['href'] = at_id + '@@download/' + filename
+            xfile['upload_key'] = ext['key']
+            sheets['external' + xfile['file_format']] = ext
+            updated_extra_files.append(xfile)
+
+        if properties.get('extra_files', False):
             properties['extra_files'] = updated_extra_files
 
         if old_creds:
@@ -394,15 +403,17 @@ class File(Item):
         "type": "string",
         "description": "Accession of this file"
     })
-    def title(self, accession=None, external_accession=None):
-        return accession or external_accession
+    def title(self):
+        return self.properties.get('accession', self.properties.get('external_accession'))
 
     @calculated_property(schema={
         "title": "Download URL",
         "type": "string",
+        "description": "Use this link to download this file."
     })
-    def href(self, request, file_format, accession=None, external_accession=None):
-        accession = accession or external_accession
+    def href(self, request):
+        file_format = self.properties.get('file_format')
+        accession = self.properties.get('accession', self.properties.get('external_accession'))
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
@@ -676,7 +687,19 @@ class FileMicroscopy(ItemWithAttachment, File):
     """Collection for individual microscopy files."""
     item_type = 'file_microscopy'
     schema = load_schema('encoded:schemas/file_microscopy.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list + [
+        "experiments.@type",
+        "experiments.imaging_paths.channel",
+        "experiments.imaging_paths.path",
+        "experiments.files.microscope_settings.ch00_light_source_center_wl",
+        "experiments.files.microscope_settings.ch01_light_source_center_wl",
+        "experiments.files.microscope_settings.ch02_light_source_center_wl",
+        "experiments.files.microscope_settings.ch03_light_source_center_wl",
+        "experiments.files.microscope_settings.ch00_lasers_diodes",
+        "experiments.files.microscope_settings.ch01_lasers_diodes",
+        "experiments.files.microscope_settings.ch02_lasers_diodes",
+        "experiments.files.microscope_settings.ch03_lasers_diodes"
+    ]
     name_key = 'accession'
 
 

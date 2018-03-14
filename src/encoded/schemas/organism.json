@@ -27,11 +27,13 @@
                 "released",
                 "current",
                 "revoked",
+                "archived",
                 "deleted",
                 "replaced",
                 "in review by lab",
                 "submission in progress",
-                "released to project"
+                "released to project",
+                "archived to project"
             ]
         },
         "name": {

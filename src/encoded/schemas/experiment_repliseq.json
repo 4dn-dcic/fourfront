@@ -23,14 +23,19 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "experiment.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "experiment_type": {
             "enum": [
@@ -50,18 +55,6 @@
             "description": "Time in minutes of labeling pulse",
             "type": "number"
         },
-        "antibody": {
-            "title": "Antibody",
-            "description": "ENCODE accession for antibody used to pull down the labeled DNA",
-            "type": "string",
-            "internal_comment": "Can we depend on encode having antibody or allow other string?",
-            "pattern": "ENCAB.+"
-        },
-        "antibody_lot_id": {
-            "title": "Antibody Lot ID",
-            "description": "Identifier for the specific lot of antibody used",
-            "type": "string"
-        },
         "cell_cycle_phase": {
             "title": "Cell Cycle Phase",
             "description": "After sorting the cell cycle phase that the cell fraction falls in",
@@ -75,34 +68,16 @@
             "comment": "Repliseq experiments can be 2-phase, 6-phase, 8-phase ... This field is used to further describe the fraction represented in this experiment",
             "type": "string"
         },
+        "total_fractions_in_exp": {
+            "title": "Total number of fractions in the dataset that this experiment is part of.",
+            "comment": "If standard 2-stage early/late experiment the value should be 2, for higher res then total number of fractions",
+            "type": "integer"
+        },
         "cell_sorting_protocol": {
             "title": "Sorting Protocol",
             "description": "Protocol with details on cell sorting by FACS",
             "type": "string",
             "linkTo": "Protocol"
-        }
-    },
-    "facets": {
-        "award.project": {
-            "title": "Project"
-        },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
         }
     }
 }

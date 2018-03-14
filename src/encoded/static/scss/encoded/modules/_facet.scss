@@ -109,281 +109,315 @@
     margin-top: 5px;
 }
 
-.facet {
-    overflow: hidden;
-    padding-top: 9px;
-    padding-bottom: 8px;
 
-    &.row {
-        // .row not for inner columns, used for margin offset
-        padding-left : 10px;
-        padding-right : 10px;
-        &.active-submission-row {
-            position: relative;
-            z-index: 5;
+.facets-container {
+
+    .facet-list-separator {
+        padding: 10px 0;
+        text-align: center;
+        border-top: 1px solid #bbb;
+        border-bottom: 1px solid #eee;
+        font-weight: 300;
+    }
+
+    .facet {
+        overflow: hidden;
+        padding-top: 9px;
+        padding-bottom: 0px;
+
+        &.row {
+            // .row not for inner columns, used for margin offset
+            padding-left : 10px;
+            padding-right : 10px;
+            &.active-submission-row {
+                position: relative;
+                z-index: 5;
+            }
         }
-    }
 
-    &:not(:last-child) {
-        border-bottom: 1px solid #f4f4f4;
-    }
+        &:not(:last-child) {
+            border-bottom: 1px solid #f4f4f4;
+        }
 
-    &:last-child {
-        margin-bottom: 0;
+        &:last-child {
+            margin-bottom: 0;
+            &.static {
+                margin-bottom: -2px;
+            }
+        }
+
+        h5.facet-title {
+            margin: 0 0 3px;
+            font-weight: 500;
+            line-height: inherit;
+            @include font-size(0.925);
+
+            > i.icon-info-circle {
+                margin-left: 6px;
+                opacity: 0.25;
+                transition: opacity .5s;
+                &:hover {
+                    opacity: 0.75;
+                }
+            }
+        }
+
         &.static {
-            margin-bottom: -2px;
+            padding-bottom: 5px; // Extra 2px + account for margin-bottom: 5px in .facet-title/.facet-item
         }
-    }
 
-    h5.facet-title {
-        margin: 0 0 3px;
-        font-weight: 500;
-        line-height: inherit;
-        @include font-size(0.925);
+        &:not(.static) {
+            transition: padding-bottom .35s ease, background-color .35s ease;
+            transform: translate3d(0,0,0);
+            background-color: transparent;
+            h5.facet-title {
+                margin : -1px 0 0;
+                padding: 0 0 8px;
+                border-bottom: 1px solid #f8f8f8;
+                cursor: pointer;
+                > span.expand-toggle > i.icon {
+                    font-size: 0.7rem;
+                    margin-right: 7px;
+                }
 
-        > i.icon-info-circle {
-            margin-left: 6px;
-            opacity: 0.25;
-            transition: opacity .5s;
-            &:hover {
+                .closed-terms-count {
+                    position: relative;
+                    transition: top .35s ease-out, opacity .35s ease;
+                    top: 1px;
+                    font-weight: 300;
+                    color: #707070;
+                    font-size: 0.75rem;
+                    line-height : 1.25rem;
+                    margin-right: 5px;
+                    > i {
+                        margin-right: 2px;
+                        margin-right: 1.5px;
+                    }
+                }
+            }
+            &.open:not(.closing) {
+                h5.facet-title .closed-terms-count {
+                    top : 9px;
+                }
+            }
+            &.closed, &.closing {
+                padding-bottom: 0px;
+                background-color: #fcfcfc;
+                border-bottom-color: #f0f0f0;
+                h5.facet-title {
+                    font-weight: 400;
+                }
+            }
+            &.closed {
+                h5.facet-title {
+                    border-bottom: none;
+                }
+            }
+        }
+
+        // Will have .facet-static-row if only one term -OR- .facet-list if multiple.
+        // Contents have same/similar classes (representing content) but must be styled differently.
+
+        .facet-static-row {
+
+            .facet-title,
+            .facet-item {
+                display: inline-block;
+                margin-bottom: 4px;
+                width: 50%;
+            }
+
+            .facet-title {
+                padding-right: 12px;
+                margin-top: 0;
+                float: left;
+                min-width: 33%;
+                text-align: right;
+
+                &:after{
+                    content : "";
+                }
+            }
+
+            .facet-item {
+                padding-left: 12px;
+                padding-left: 12.5px;
+                vertical-align: top;
+                float: right;
+                text-align: left;
+                @include font-size(0.925);
+                @include no-user-select();
+
+                span {
+                    cursor: pointer;
+                    i.icon {
+                        font-size: .5rem;
+                        vertical-align: text-top;
+                        line-height: 1.15rem;
+                        opacity: 0.05;
+                        width: 25px;
+                        margin-left: -25px;
+                    }
+                }
+
+                span:hover {
+                    text-shadow: 0 0 0;
+                    i.icon {
+                        opacity: 0.5;
+                    }
+                }
+
+                &.selected span i.icon {
+                    opacity: 1 !important;
+                    color : #248bac;
+                    font-size: 0.825rem;
+                }
+
+                &.filtering span i.icon {
+                    opacity: 0.33 !important;
+                    color : #888 !important;
+                    font-size: 0.825rem;
+                }
+
+            }
+        }
+
+        &.all-single-term {
+            .facet-item {
+                text-align: left;
+                width: 50%;
+            }
+        }
+
+        .facet-list {
+            margin: 0;
+
+            li {
+                margin-bottom: 1px;
+                position: relative;
+                @include font-size(0.875);
+                line-height: 1rem;
+
+                &:first-child {
+                    padding-top: 8px;
+                }
+
+                &:last-child {
+                    padding-bottom: 8px;
+                }
+
+                i {
+                    line-height: 14px;
+                }
+
+                > a {
+                    border-radius: 3px;
+                    padding: 4px 3px 2px 21px;
+                    text-decoration: none;
+                    display: block;
+                    position: relative;
+                    color: #888;
+
+                    i.icon.icon-circle-o-notch { opacity: 0.33; }
+
+                    &:hover{
+                        color: #000000;
+                        background-color: #f1f7f9;
+                    }
+                    &.highlight {
+                        color  : #fff !important;
+                        transition : background-color .5s;
+                    }
+
+                    .facet-selector{
+                        margin-left: -17px;
+                        font-size: 90%;
+                    }
+
+                    .facet-count {
+                        position: absolute;
+                        right: 0;
+                        padding-right: inherit;
+                    }
+
+                }
+
+                &.selected > a {
+                    text-decoration: none;
+                    color: #f8f8f8;
+                    background-color: $facetlist-selected-term-color;
+                    &:hover {
+                        color: #fff;
+                        .facet-item, .facet-count {
+                            text-shadow: 0px 0px 0px #fff;
+                        }
+                    }
+                }
+
+                .facet-item {
+                    display:inline-block;
+                    vertical-align: middle;
+                    overflow: hidden;
+                    margin-right: 30px;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    max-width: 85%;
+                }
+
+            }
+
+            > .expandable-list {
+                li:last-child {
+                    padding-bottom: 0;
+                }
+                > .collapse, > .collapsing {
+                    li:first-child {
+                        padding-top: 0;
+                    }
+                }
+            }
+
+            .view-more-button {
+                cursor: pointer;
+                font-size: 0.85rem;
+                border: 1px solid #888;
+                padding: 2px 6px 1px;
+                line-height: 20px;
+                margin-top: 0;
+                margin-bottom: 12px;
+                border-radius: 2px;
+                &:hover {
+                    border-color: #000;
+                }
+
+                i.icon {
+                    font-size: 0.8rem;
+                    position: relative;
+                    top: 1px;
+                    left: -2px;
+                }
+            }
+
+            
+        }
+
+        /* .facet */
+        /* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
+        &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .term,
+        &[data-field="experiments_in_set.biosample.biosource.biosource_type"] .term,
+        &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
+            text-transform: capitalize;
+        }
+
+        &[data-field="status"] .term[data-term="deleted"][data-selected="false"] > .facet-item {
+            &:after {
+                content: ' (not shown)';
+                font-weight: 300;
                 opacity: 0.75;
             }
         }
     }
 
-    &.static {
-        padding-bottom: 5px; // Extra 2px + account for margin-bottom: 5px in .facet-title/.facet-item
-    }
-
-    &:not(.static) {
-        transition: padding-bottom .35s ease, background-color .35s ease;
-        transform: translate3d(0,0,0);
-        background-color: transparent;
-        h5.facet-title {
-            margin : -1px 0 0;
-            padding: 0 0 8px;
-            border-bottom: 1px solid #f8f8f8;
-            cursor: pointer;
-            > span.expand-toggle > i.icon {
-                font-size: 0.7rem;
-                margin-right: 7px;
-            }
-
-            .closed-terms-count {
-                position: relative;
-                transition: top .35s ease-out, opacity .35s ease;
-                top: 1px;
-                font-weight: 300;
-                color: #707070;
-                font-size: 0.75rem;
-                line-height : 1.25rem;
-                margin-right: 5px;
-                > i {
-                    margin-right: 2px;
-                    margin-right: 1.5px;
-                }
-            }
-        }
-        &.open:not(.closing) {
-            h5.facet-title .closed-terms-count {
-                top : 9px;
-            }
-        }
-        &.closed, &.closing {
-            padding-bottom: 0px;
-            background-color: #fcfcfc;
-            border-bottom-color: #f0f0f0;
-            h5.facet-title {
-                font-weight: 400;
-            }
-        }
-        &.closed {
-            h5.facet-title {
-                border-bottom: none;
-            }
-        }
-    }
-
-    // Will have .facet-static-row if only one term -OR- .facet-list if multiple.
-    // Contents have same/similar classes (representing content) but must be styled differently.
-
-    .facet-static-row {
-
-        .facet-title,
-        .facet-item {
-            display: inline-block;
-            margin-bottom: 4px;
-            width: 50%;
-        }
-
-        .facet-title {
-            padding-right: 10px;
-            margin-top: 0;
-            float: left;
-            min-width: 33%;
-
-            &:after{
-                content : "";
-            }
-        }
-
-        .facet-item {
-            padding-left: 12px;
-            padding-left: 12.5px;
-            vertical-align: top;
-            float: right;
-            text-align: right;
-            @include font-size(0.925);
-            @include no-user-select();
-
-            span {
-                cursor: pointer;
-                i.icon {
-                    font-size: .5rem;
-                    vertical-align: text-top;
-                    line-height: 1.15rem;
-                    opacity: 0.05;
-                    width: 25px;
-                    margin-left: -25px;
-                }
-            }
-
-            span:hover {
-                text-shadow: 0 0 0;
-                i.icon {
-                    opacity: 0.5;
-                }
-            }
-
-            &.selected span i.icon {
-                opacity: 1 !important;
-                color : #248bac;
-                font-size: 0.825rem;
-            }
-
-            &.filtering span i.icon {
-                opacity: 0.33 !important;
-                color : #888 !important;
-                font-size: 0.825rem;
-            }
-
-        }
-    }
-
-    &.all-single-term {
-        .facet-item {
-            text-align: left;
-            width: 50%;
-        }
-    }
-
-    .facet-list {
-        margin: 0;
-        padding-top: 8px;
-
-        li {
-            margin-bottom: 1px;
-            position: relative;
-            @include font-size(0.875);
-            line-height: 1rem;
-
-            i {
-                line-height: 14px;
-            }
-
-            > a {
-                border-radius: 3px;
-                padding: 4px 3px 2px 21px;
-                text-decoration: none;
-                display: block;
-                position: relative;
-                color: #888;
-
-                i.icon.icon-circle-o-notch { opacity: 0.33; }
-
-                &:hover{
-                    color: #000000;
-                    background-color: #f1f7f9;
-                }
-                &.highlight {
-                    color  : #fff !important;
-                    transition : background-color .5s;
-                }
-
-                .facet-selector{
-                    margin-left: -17px;
-                    font-size: 90%;
-                }
-
-                .facet-count {
-                    position: absolute;
-                    right: 0;
-                    padding-right: inherit;
-                }
-
-            }
-
-            &.selected > a {
-                text-decoration: none;
-                color: #f8f8f8;
-                background-color: $facetlist-selected-term-color;
-                &:hover {
-                    color: #fff;
-                    .facet-item, .facet-count {
-                        text-shadow: 0px 0px 0px #fff;
-                    }
-                }
-            }
-
-            .facet-item {
-                display:inline-block;
-                vertical-align: middle;
-                overflow: hidden;
-                margin-right: 30px;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                max-width: 85%;
-            }
-
-        }
-
-        .view-more-button {
-            cursor: pointer;
-            font-size: 0.85rem;
-            border: 1px solid #888;
-            padding: 2px 6px 1px;
-            line-height: 20px;
-            margin-top: -5px;
-            border-radius: 2px;
-            &:hover {
-                border-color: #000;
-            }
-
-            i.icon {
-                font-size: 0.8rem;
-                position: relative;
-                top: 1px;
-                left: -2px;
-            }
-        }
-
-        
-    }
-
-    // Hide 'Data Type' : 'Item'
-    &[data-field="type"] .facet-list {
-        li[data-key="Item"]{
-            display: none;
-        }
-    }
-
-    /* .facet */
-    /* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
-    &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .term,
-    &[data-field="experiments_in_set.biosample.biosource.biosource_type"] .term,
-    &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
-        text-transform: capitalize;
-    }
 }
 
 .facet-entry {

@@ -51,7 +51,8 @@ class Biosource(Item):
         'SOP_cell_line.attachment.href',
         'SOP_cell_line.attachment.type',
         'SOP_cell_line.attachment.md5sum',
-        'SOP_cell_line.description'
+        'SOP_cell_line.description',
+        'award.project'
     ]
 
     @calculated_property(schema={
@@ -110,7 +111,8 @@ class Biosource(Item):
     })
     def display_title(self, request, biosource_type, individual=None,
                       cell_line=None, cell_line_tier=None, tissue=None, modifications=None):
-        return self.add_accession_to_title(self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue, modifications))
+        return self.add_accession_to_title(self.biosource_name(request, biosource_type, individual, cell_line,
+                                                               cell_line_tier, tissue, modifications))
 
     class Collection(Item.Collection):
         pass

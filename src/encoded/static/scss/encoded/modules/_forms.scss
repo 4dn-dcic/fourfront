@@ -31,6 +31,11 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	position: relative;
 	margin-top: -1px;
 	float: left;
+	@media (max-width: $screen-xs-max) {
+		width: 100%;
+		display: block;
+		float: none;
+	}
 	#navbar-search {
 		font-size: 1em;
 		width: 140px;
@@ -57,7 +62,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@media (min-width: $screen-sm-min) {
 		margin-left: -20px;
 		#navbar-search {
-			margin-top: 0px;
+			margin-top: -1px;
 			font-size: 1em;
 			margin-left: 5px;
 			border: 1px solid rgba(125,125,125,0.5);
@@ -69,17 +74,24 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			border-color: rgba(125,125,125,1.0);
 			@include transition(width 0.3s ease-out);
 		}
+		@media (max-width: $screen-sm-max) {
+			#navbar-search { width: 200px; }
+			&.has-input #navbar-search, #navbar-search:focus { width: 277px; }
+		}
 	}
 	@media (min-width: $screen-lg-min) {
+		#navbar-search {
+			width: 200px;
+		}
 		&.has-input #navbar-search,
 		#navbar-search:focus {
-			width: 300px;
+			width: 320px;
 		}
 	}
 	i.reset-button {
 		position: absolute;
 		top: 50%;
-		margin-top: -6px;
+		margin-top: -7px;
 		right: 18px;
 		opacity: 0.33;
 		cursor: pointer;
@@ -99,7 +111,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			line-height: 14px;
 			position: absolute;
 			top: 50%;
-			margin-top: -11px;
+			margin-top: -12px;
 			right: 12px;
 			opacity: 0.25;
 			border: none;
@@ -643,13 +655,15 @@ div.fieldset.editable-fields {
 	.input-group {
 		.dropdown.input-group-btn {
 			width: 20%;
-			> button#aliasFirstPartInput {
+			> button.alias-first-part-input {
 				width: 100%;
 				border-right: none;
 				box-shadow: none;
 				outline: none;
 				padding-left: 24px;
 				padding-right: 8px;
+				padding-top: 5px;
+    			padding-bottom: 5px;
 				span.caret {
 					opacity: 0.33;
 					left: 10px;

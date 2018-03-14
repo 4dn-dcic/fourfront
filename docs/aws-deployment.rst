@@ -28,7 +28,7 @@ $ sudo -u postgres nano ~postgres/.aws/credentials
 Create new upload-encode-files access key
 $ sudo -u encoded nano ~encoded/.aws/credentials
 
-# Set these new keys inaactive
+# Set these new keys inactive
 
 # Send email to ENCODE_DEVELOPERS@LIST.NIH.GOV announcing write downtime (currently 15-20 min)
 
@@ -86,5 +86,3 @@ Doing this after bin/batchupgrade on production means no need to do that here to
 ubuntu@ip-172-31-1-25:~$ sudo nano /etc/postgresql/9.3/main/custom.conf   # archive_mode = off
 ubuntu@ip-172-31-1-25:~$ sudo pg_ctlcluster 9.3 main reload
 ubuntu@ip-172-31-1-25:~$ sudo pg_ctlcluster 9.3 main promote
-
-

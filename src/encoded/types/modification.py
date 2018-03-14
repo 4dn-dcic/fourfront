@@ -20,7 +20,8 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded_list = ['constructs.construct_type',
+    embedded_list = ['award.project',
+                     'constructs.construct_type',
                      'constructs.tags',
                      'constructs.designed_to_target',
                      'modified_regions.aliases',
@@ -59,7 +60,7 @@ class Modification(Item):
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
             target = request.embed(target_of_mod, '@@object')
-            mod_name = mod_name + " for " + target['target_summary_short']
+            mod_name = mod_name + " for " + target['target_summary']
         return mod_name
 
     @calculated_property(schema={

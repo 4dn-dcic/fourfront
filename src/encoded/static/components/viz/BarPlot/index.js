@@ -19,9 +19,6 @@
  * </ChartDataController.Provider>
  */
 
-export { UIControlsWrapper } from './UIControlsWrapper';
-export { Aggregator } from './Aggregator';
+export { UIControlsWrapper, AggregatedLegend } from './UIControlsWrapper';
 export { ViewContainer, PopoverViewContainer, boundActions, barPlotCursorActions } from './ViewContainer';
 export { Chart, genChartBarDims } from './Chart';
-import * as aggrFxn from './aggregation-functions';
-export const aggregationFxn = aggrFxn;

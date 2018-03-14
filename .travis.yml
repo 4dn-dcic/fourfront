@@ -10,7 +10,7 @@ cache:
 addons:
   apt:
     packages:
-    - oracle-java8-set-default
+    - oracle-java9-set-default
     - bsdtar
     - build-essential
     - make
@@ -62,7 +62,7 @@ before_install:
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
-- nvm install 4
+- nvm install 8
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
@@ -141,6 +141,10 @@ after_success:
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        echo "cleanup build artifacts"
+        rm elasticsearch-5.4.1.deb
+        rm .to_export_back
+        rm versions.cfg
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
         git config --global user.email "travis@builder.com"

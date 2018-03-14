@@ -6,12 +6,12 @@ import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
-    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane,
+    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
     WorkflowNodeElement
 } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox, Button, Collapse } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -20,7 +20,7 @@ import ReactTooltip from 'react-tooltip';
 
 /**
  * Pass this to props.onNodeClick for Graph.
- * 
+ *
  * @export
  * @param {Object} node - Node clicked on.
  * @param {Object|null} selectedNode - Node currently selected, if any.
@@ -45,20 +45,7 @@ export function commonGraphPropsFromProps(props){
             return <WorkflowNodeElement {...graphProps} schemas={props.schemas} node={node}/>;
         },
         'rowSpacingType' : 'wide',
-        'nodeClassName' : function(node){
-            var file = (
-                node.meta.run_data && node.meta.run_data.file
-                && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
-                && node.meta.run_data.file
-            );
-
-            if (file && Array.isArray(file['@type'])){
-                if (file['@type'].indexOf('FileReference') > -1){
-                    return 'node-item-type-file-reference';
-                }
-            }
-            return '';
-        },
+        'nodeClassName' : null,
         'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : onItemPageNodeClick,
         'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : true,
         'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : true
@@ -77,32 +64,6 @@ export function doValidAnalysisStepsExist(steps){
         return false;
     }
     return true;
-}
-
-/**
- * For when "Show Parameters" UI setting === false.
- * 
- * @param {Object}      graphData 
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
- */
-export function filterOutParametersFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && n.format === 'Workflow Parameter') {
-            deleted[n.id] = true;
-            return false;
-        }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
 }
 
 
@@ -135,7 +96,7 @@ export class WorkflowView extends ItemBaseView {
 
         var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
-                tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
+                tab : <span><i className="icon icon-sitemap icon-fw"/> Graph</span>,
                 key : 'graph',
                 content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
             }
@@ -152,15 +113,8 @@ export class WorkflowView extends ItemBaseView {
         });
     }
 
-    itemHeader(){
-        var context = this.props.context;
-        return (
-            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
-        );
+    typeInfo(){
+        return { 'title' : this.props.context.workflow_type, description : 'Type of Workflow' };
     }
 
 }
@@ -204,7 +158,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
 
         return (
-            <div className="inline-block" key="chart-type-dropdown">
+            <div className="inline-block for-state-showChart" key="chart-type-dropdown">
                 <DropdownButton
                     id="detail-granularity-selector"
                     pullRight
@@ -222,7 +176,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block" key="rowspacing-dropdown-block">
+            <div className="inline-block" key="rowspacing-dropdown-block for-state-rowSpacingType">
                 <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType}/>
             </div>
         );
@@ -232,7 +186,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
         if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <div className="inline-block" key="toggle-fullscreen">
+                <div className="inline-block for-state-fullscreenViewEnabled" key="toggle-fullscreen">
                     <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
                         <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
                     </Button>
@@ -247,9 +201,20 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block show-params-checkbox-container" key="show-params">
+            <div className="inline-block checkbox-container for-state-showParameters" key="show-params">
                 <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}>
                     Show Parameters
+                </Checkbox>
+            </div>
+        );
+    }
+
+    referenceFilesCheckbox(){
+        if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
+        return (
+            <div className="inline-block checkbox-container for-state-showReferenceFiles" key="show-reference-files">
+                <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles}>
+                    Show Reference Files
                 </Checkbox>
             </div>
         );
@@ -285,7 +250,7 @@ export class WorkflowGraphSectionControls extends React.Component {
     }
 
     render(){
-        return this.wrapper(this.parametersCheckbox(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
+        return this.wrapper(this.referenceFilesCheckbox(), this.parametersCheckbox(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
     }
 }
 
@@ -353,6 +318,7 @@ export class WorkflowGraphSection extends React.Component {
         this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
         this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
         this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
         this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
         this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
@@ -360,7 +326,8 @@ export class WorkflowGraphSection extends React.Component {
         this.state = {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
-            'rowSpacingType' : 'wide',
+            'showReferenceFiles' : false,
+            'rowSpacingType' : 'compact',
             'fullscreenViewEnabled' : false
         };
     }
@@ -372,26 +339,28 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     parseAnalysisSteps(context = this.props.context){
-        var graphData = (
+        var opts = _.extend({}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters'));
+        return (
             this.state.showChart === 'basic' ?
-                parseBasicIOAnalysisSteps(context.steps, context)
+                parseBasicIOAnalysisSteps(context.steps, context, opts)
                 :
-                parseAnalysisSteps(context.steps)
+                parseAnalysisSteps(context.steps, opts)
         );
-        if (this.state.showParameters) return graphData;
-        else return filterOutParametersFromGraphData(graphData);
     }
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps();
         
         // Filter out legend items which aren't relevant for this context.
-        var keepItems = ['Input File','Output File'];
+        var keepItems = ['Input File', 'Output File', 'Input Reference File'];
         if (this.state.showParameters){
             keepItems.push('Input Parameter');
         }
+        if (this.state.showReferenceFiles){
+            keepItems.push('Input Reference File');
+        }
         keepItems.push('Intermediate File');
-        var legendItems = _.pick(...[WorkflowDetailPane.Legend.defaultProps.items].concat(keepItems));
+        var legendItems = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems);
         var commonGraphProps = commonGraphPropsFromProps(_.extend({ 'legendItems' : legendItems }, this.props));
 
         return _.extend(commonGraphProps, this.parseAnalysisSteps(), {'rowSpacingType' : this.state.rowSpacingType });
@@ -418,6 +387,10 @@ export class WorkflowGraphSection extends React.Component {
 
     onToggleShowParameters(){
         this.setState({ 'showParameters' : !this.state.showParameters });
+    }
+
+    onToggleReferenceFiles(){
+        this.setState({ 'showReferenceFiles' : !this.state.showReferenceFiles });
     }
 
     onChangeRowSpacingType(eventKey, evt){
@@ -460,14 +433,15 @@ export class WorkflowGraphSection extends React.Component {
                     <WorkflowGraphSectionControls
                         {..._.pick(this.props, 'context', 'href')}
                         showChartType={this.state.showChart}
-                        onChangeShowChartType={this.onChangeShowChartType}
                         rowSpacingType={this.state.rowSpacingType}
-                        onChangeRowSpacingType={this.onChangeRowSpacingType}
                         showParameters={this.state.showParameters}
+                        showReferenceFiles={this.state.showReferenceFiles}
+                        onChangeShowChartType={this.onChangeShowChartType}
+                        onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleShowParameters={this.onToggleShowParameters}
+                        onToggleReferenceFiles={this.onToggleReferenceFiles}
                         fullscreenViewEnabled={this.state.fullscreenViewEnabled}
                         onToggleFullScreenView={this.onToggleFullScreenView}
-
                     />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>

@@ -18,6 +18,9 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes"}
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -31,6 +34,12 @@
             "title": "Description",
             "description": "A plain text description of the task.",
             "type": "string"
+        },
+        "description_only": {
+            "title": "Description Only",
+            "description": "This workflow was not run by the DCC and thus this object is only a description of a run.",
+		    "type": "boolean",
+			"default": false
         },
         "input_files": {
             "title": "Input files",
@@ -138,6 +147,12 @@
                         "title": "Parameter name",
                         "description": "the name or flag of the parameter as passed to the software",
                         "type": "string"
+                    },
+                    "ordinal": {
+                        "title": "Ordinal",
+                        "description": "Ordinal of the parameter in the argument",
+                        "type": "number",
+                        "default": 1
                     }
                 }
             }
@@ -178,6 +193,16 @@
             "type": "string",
             "description": "Url to AWS run info",
             "format": "uri"
+        },
+        "commands": {
+            "title": "Run Commands",
+            "description": "list of commands run for the workflow, simplified",
+            "type": "array",
+            "items": {
+                "title": "Commands",
+                "description": "one of the commands that are run for the workflow run",
+                "type": "string"
+            }
         }
     },
     "facets" : {

@@ -23,8 +23,13 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "experiment.json#/properties" },
         { "$ref": "experiment_hi_c.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
@@ -37,12 +42,13 @@
     },
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
             "CHIA-pet",
-            "PLAC-seq"
+            "PLAC-seq",
+            "Hi-ChIP"
           ]
         },
         "targeted_factor": {
@@ -50,42 +56,6 @@
             "description": "Information about the target of the Antibody in the IP",
             "type": "string",
             "linkTo": "Target"
-        },
-        "antibody": {
-            "title": "Antibody",
-            "description": "The encode accession of the antibody used for the IP",
-            "type": "string"
-        },
-        "pcr_cycles": {
-            "title": "PCR cycles for final amplification",
-            "description": "The number of PCR cycles used for final library amplification",
-            "type": "integer"
-        }
-    },
-    "facets": {
-        "award.project": {
-            "title": "Project"
-        },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
         }
     },
     "columns": {

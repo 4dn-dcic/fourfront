@@ -51,7 +51,8 @@ ONLY_ADMIN_VIEW = [
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
 SUBMITTER_CREATE = [
-    (Allow, 'group.submitter', 'create'),
+    (Allow, 'group.submitter', 'add'),
+    (Allow, 'group.submitter', 'create')
 ]
 
 ALLOW_EVERYONE_VIEW = [
@@ -62,9 +63,13 @@ ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
+#ALLOW_VIEWING_GROUP_VIEW = [
+#    (Allow, 'role.viewing_group_member', 'view'),
+#] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+] + ALLOW_LAB_MEMBER_VIEW
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -92,9 +97,7 @@ DELETED = [
 
 # Collection acls
 
-ALLOW_SUBMITTER_ADD = [
-    (Allow, 'group.submitter', ['add']),
-] + SUBMITTER_CREATE
+ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -232,12 +235,14 @@ class Item(snovault.Item):
         'released': ALLOW_CURRENT,
         'current': ALLOW_CURRENT,
         'revoked': ALLOW_CURRENT,
+        'archived': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
         'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
         'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
+        'archived to project': ALLOW_VIEWING_GROUP_VIEW,
         # for file
         'obsolete': DELETED,
         'uploading': ALLOW_LAB_SUBMITTER_EDIT,
@@ -272,6 +277,13 @@ class Item(snovault.Item):
 
     def __ac_local_roles__(self):
         """this creates roles based on properties of the object being acccessed"""
+
+        def _is_joint_analysis(props):
+            for t in props.get('tags', []):
+                if 'joint analysis' in t.lower():
+                    return True
+            return False
+
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:
@@ -280,6 +292,10 @@ class Item(snovault.Item):
             # add lab_member as well
             lab_member = 'lab.%s' % properties['lab']
             roles[lab_member] = 'role.lab_member'
+        if 'contributing_labs' in properties:
+            for clab in properties['contributing_labs']:
+                clab_member = 'lab.%s' % clab
+                roles[clab_member] = 'role.lab_member'
         if 'award' in properties:
             # import pdb; pdb.set_trace()
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
@@ -289,18 +305,24 @@ class Item(snovault.Item):
                 award_group_members = 'award.%s' % properties['award']
                 roles[award_group_members] = 'role.award_member'
 
-                # special case for NOFIC viewing group - this is so bogus!!!!
-                # how can we generalize??????
+                status = properties.get('status')
+                # need to add 4DN viewing_group to NOFIC items that are rel2proj
+                # or are JA and planned or in progress
                 if viewing_group == 'NOFIC':
-                    status = properties.get('status')
-                    if status:
-                        if status == 'released to project':
+                    if status == 'released to project':
+                        roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                    elif status in ['planned', 'submission in progress']:
+                        if _is_joint_analysis(properties):
                             roles['viewing_group.4DN'] = 'role.viewing_group_member'
-                        elif status in ['planned', 'submission in progress']:
-                            for t in properties.get('tags', []):
-                                if 'joint analysis' in t.lower():
-                                    roles['viewing_group.4DN'] = 'role.viewing_group_member'
-                                    break
+                    # else leave the NOFIC viewing group role in place
+                elif status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties):
+                    # view should be restricted to lab members only so remove viewing_group roles
+                    grps = []
+                    for group, role in roles.items():
+                        if role == 'role.viewing_group_member':
+                            grps.append(group)
+                    for g in grps:
+                        del roles[g]
         return roles
 
     def add_accession_to_title(self, title):
@@ -393,7 +415,7 @@ class Item(snovault.Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     },)
-    def display_title(self):
+    def display_title(self, request=None):
         """create a display_title field."""
         display_title = ""
         look_for = [
@@ -470,10 +492,10 @@ class SharedItem(Item):
         return roles
 
 
-@snovault.calculated_property(context=Item.Collection, category='action')
+@snovault.calculated_property(context=Item.AbstractCollection, category='action')
 def add(context, request):
     """smth."""
-    if request.has_permission('add'):
+    if request.has_permission('add', context):
         return {
             'name': 'add',
             'title': 'Add',

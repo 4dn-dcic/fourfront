@@ -8,6 +8,7 @@ import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '.
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
+
 var ProgressBar = require('rc-progress').Line;
 
 var makeTitle = object.itemUtil.title;
@@ -28,6 +29,9 @@ export default class BuildField extends React.Component {
         // transform some types...
         if(fieldType === 'string'){
             fieldType = 'text';
+            if (typeof fieldSchema.formInput === 'string'){
+                if (fieldSchema.formInput === 'textarea' || fieldSchema.formInput === 'html') return fieldSchema.formInput;
+            }
         }
         // check if this is an enum
         if(fieldSchema.enum || fieldSchema.suggested_enum){
@@ -64,39 +68,46 @@ export default class BuildField extends React.Component {
     }
 
     displayField = (field_case) => {
+        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo } = this.props;
         var inputProps = {
-            'id' : 'field_for_' + this.props.field,
-            'disabled' : this.props.disabled || false,
+            'id' : 'field_for_' + field,
+            'disabled' : disabled || false,
             'ref' : "inputElement",
-            'value' : (typeof this.props.value === 'number' ? this.props.value || 0 : this.props.value || ''),
+            'value' : (typeof value === 'number' ? value || 0 : value || ''),
             'onChange' : this.handleChange,
-            'name' : this.props.field,
-            'placeholder': "No value"
+            'name' : field,
+            'placeholder': "No value",
+            'data-field-type' : field_case
         };
         switch(field_case){
             case 'text' :
-                if (this.props.field === 'aliases'){
-                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} /></div>;
+                if (field === 'aliases'){
+                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={currentSubmittingUser} /></div>;
                 }
                 return <FormControl type="text" inputMode="latin" {...inputProps} />;
+            case 'textarea':
+                return <FormControl type="text" inputMode="latin" {...inputProps} componentClass="textarea" rows={4} />;
+            case 'html':
+            case 'code':
+                return <FormControl type="text" inputMode="latin" {...inputProps} componentClass="textarea" rows={8} wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />;
             case 'integer'          : return <FormControl type="number" {...inputProps} step={1} />;
             case 'number'           : return <FormControl type="number" {...inputProps} />;
-            /*
-            case 'boolean' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <Checkbox id="boolInput" {...inputProps} />
-                </div>
+            case 'boolean'          : return (
+                <Checkbox {..._.omit(inputProps, 'value', 'placeholder')} checked={!!(value)} className="mb-07 mt-07">
+                    <span style={{ 'verticalAlign' : 'middle', 'text-transform' : 'capitalize' }}>
+                        { typeof value === 'boolean' ? value + '' : null }
+                    </span>
+                </Checkbox>
             );
-            */
             case 'enum'             : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
-                    <DropdownButton title={this.props.value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
-                        {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
+                    <DropdownButton title={value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
+                        {_.map(enumValues, (val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
             );
             case 'linked object'    : return <LinkedObj {...this.props}/>;
-            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
+            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={value || null} roundTwo={roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
             case 'file upload'      : return <S3FileInput {...this.props} />;
@@ -121,7 +132,9 @@ export default class BuildField extends React.Component {
     handleChange = (e) => {
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
-        if (this.props.fieldType === 'integer'){
+        if (this.props.fieldType === 'boolean'){
+            currValue = inputElement.checked;
+        } else if (this.props.fieldType === 'integer'){
             currValue = parseInt(currValue);
             if (isNaN(currValue)){
                 currValue = null;
@@ -752,7 +765,7 @@ class S3FileInput extends React.Component{
         var extension = this.getFileExtensionRequired();
         var file = e.target.files[0];
         // file was not chosen
-        if(!file || !extension){
+        if(!file || typeof extension !== 'string'){
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
@@ -894,6 +907,17 @@ class S3FileInput extends React.Component{
  */
 export class AliasInputField extends React.Component {
 
+    static getInitialSubmitsForLabName(submitter){
+        var submits_for_list = (submitter && Array.isArray(submitter.submits_for) && submitter.submits_for.length > 0 && submitter.submits_for) || null;
+        var primaryLab = submitter && submitter.lab;
+        if (_.pluck(submits_for_list, 'uuid').indexOf(primaryLab.uuid) > -1) {
+            return primaryLab.name;
+        } else if (submits_for_list && submits_for_list.length >= 1){
+            return submits_for_list[0].name;
+        }
+        return null;
+    }
+
     static propTypes = {
         'value' : PropTypes.string.isRequired,
         'onAliasChange' : PropTypes.func.isRequired,
@@ -925,16 +949,12 @@ export class AliasInputField extends React.Component {
     }
 
     getInitialSubmitsForPart(){
-        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
-        if (submits_for_list && submits_for_list.length >= 1){
-            return submits_for_list[0].name;
-        }
-        return null;
+        return AliasInputField.getInitialSubmitsForLabName(this.props.currentSubmittingUser);
     }
 
     finalizeAliasPartsChange(aliasParts){
         // Also check to see if need to add first or second part, e.g. if original value passed in was '' or null.
-        if (!aliasParts[0]) {
+        if (!aliasParts[0] || aliasParts[0] === '') {
             aliasParts[0] = this.getInitialSubmitsForPart();
         }
         if (aliasParts.length === 1){
@@ -964,16 +984,16 @@ export class AliasInputField extends React.Component {
         var parts = AliasInputField.splitInTwo(this.props.value);
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
-        } else if (submits_for_list.length > 1){
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ this.getInitialSubmitsForPart() }</InputGroup.Addon>;
+        } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
                 <DropdownButton
-                    className="alias-lab-select form-control"
+                    className="alias-lab-select form-control alias-first-part-input"
                     onSelect={this.onAliasFirstPartChange}
                     componentClass={InputGroup.Button}
                     id="aliasFirstPartInput"
                     title={(parts.length > 1 && (
-                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ (parts[0] || this.getInitialSubmitsForPart()) }</span></span>
+                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right text-ellipsis-container" style={{ maxWidth : '80%' }}>{ ((parts[0] !== '' && parts[0]) || this.getInitialSubmitsForPart()) }</span></span>
                     )) || 'Select a Lab'}
                 >
                     { _.map(submits_for_list, function(lab){

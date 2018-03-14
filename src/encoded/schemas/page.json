@@ -14,7 +14,7 @@
     "type": "object",
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "status": {
             "title": "Status",
@@ -26,10 +26,6 @@
                 "deleted"
             ]
         },
-		"source_uri": {
-            "title": "URI of source file",
-            "type": "string"
-		},
         "name": {
             "title": "Path Name",
             "comment": "Unique route/pathname of this page.",
@@ -43,13 +39,8 @@
         },
         "description": {
             "title": "Description",
-            "type": "string",
-            "default": ""
-        },
-        "notification": {
-            "title": "Notification",
-            "type": "string",
-            "default": ""
+            "description" : "Internal description of page.",
+            "type": "string"
         },
         "table-of-contents": {
             "title": "Table of Contents",
@@ -96,41 +87,45 @@
                 "header-depth" : 4
             }
         },
-        "directory": {
-            "title": "Directory",
-            "description": "location of additional files needed to assemble the static page",
-            "type": "string"
-        },
-        "sections": {
-            "title": "Sections",
-            "description": "sections used to compose the static page",
+        "content": {
+            "title": "Content Sections",
+            "description": "Sections used to compose the static page",
             "type": "array",
+            "default": [],
             "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "id": {
-                        "title": "section id",
-                        "type": "string"
-                    },
-                    "options": {
-                        "title": "Options",
-                        "type": "object"
-                    },
-                    "filename": {
-                        "title": "Filename",
-                        "type": "string"
-                    },
-                    "title": {
-                        "title": "Section Title",
-                        "type": "string"
-                    },
-                    "content":{
-                        "title": "content",
-                        "type": "string"
-                    }
+                "type": "string",
+                "linkTo" : "StaticSection"
+            }
+        },
+        "redirect" : {
+            "title" : "Redirect",
+            "type" : "object",
+            "properties" :{
+                "target" : {
+                    "title" : "Target",
+                    "description": "URL or path to redirect to.",
+                    "type" : "string"
+                },
+                "enabled" : {
+                    "title" : "Redirect Enabled",
+                    "type" : "boolean",
+                    "default" : false
+                },
+                "code" : {
+                    "title" : "Response Code",
+                    "description" : "Code returned by response.",
+                    "comment" : "See https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection",
+                    "type" : "integer",
+                    "default" : 307,
+                    "enum" : [301, 302, 303, 307]
                 }
             }
         }
-    }
+    },
+    "columns" : {
+        "name" : {
+            "title" : "Path Name"
+        }
+    },
+    "excludedColumns" : ["lab.display_title"]
 }

@@ -11,7 +11,8 @@
         "description": {
             "title": "Description",
             "description": "A brief plain text description of the treatment.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "treatment_type": {
             "title": "Treatment Type",

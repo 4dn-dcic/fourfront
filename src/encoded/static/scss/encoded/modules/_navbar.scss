@@ -10,6 +10,10 @@ $navbar-transition-easing: ease-out;
     margin-bottom: 0;
     transform: translate3d(0,0,0);
 
+    @media screen and (min-width: $navbar-fixed-breakpoint){
+        background-color: rgba(255,255,255,0.933);
+    }
+
     > nav.navbar-main {
         /* React-Bootstrap Navbar itself */
         //border-width: 0 0 1px;
@@ -160,6 +164,31 @@ $navbar-transition-easing: ease-out;
             i.icon {
                 font-size: 1.15rem;
             }
+            
+        }
+
+        &.user-account-item
+
+            i.icon.account-icon {
+                margin-right: 8px;
+            }
+
+            &.has-image {
+                > a {
+                    padding-left: 8px;
+                    img.account-icon-image {
+                        margin-right: 8px;
+                        border-radius: 8px;
+                        width: 30px;
+                        height: 30px;
+                    }
+                    @media screen and (min-width: $screen-lg-min){
+                        padding-left: 10px;
+                        img.account-icon-image {
+                            margin-right: 12px;
+                        }
+                    }
+                }
         }
         /*
         &:not(:last-child) > a {
@@ -206,11 +235,13 @@ $navbar-transition-easing: ease-out;
         //border-bottom: 1px solid #ddd;
         opacity : 1;
         transition: opacity .5s;
+        border-top: 1px solid #eee;
         &.invisible {
             visibility: visible;
             opacity : 0;
             z-index: -1;
             border-bottom-width: 0;
+            border-top-width: 0;
             .inner.container {
                 height: 0px;
             }
@@ -218,7 +249,7 @@ $navbar-transition-easing: ease-out;
         .inner.container {
             text-align: left;
             display: block;
-            height : 38px;
+            height : 37px;
             transition: height .3s;
             overflow: hidden;
             &.showing {
@@ -232,13 +263,27 @@ $navbar-transition-easing: ease-out;
                     opacity: 1;
                 }
             }
+            .browse-base-state-toggle-container {
+                
+                > .inner-more {
+                    float: right;
+                    line-height: 37px;
+                    > .onoffswitch {
+                        margin-top: -1px;
+                        display: inline-block;
+                        vertical-align: middle;
+                        margin-right: 10px;
+                    }
+                }
+                
+            }
             .glance-label {
                 display: inline-block;
                 width: 32px;
                 text-align: center;
                 position: relative;
                 padding-top: 10px;
-                height: 38px;
+                height: 37px;
                 border-right: 1px solid #f4f4f4;
             }
             .bottom-side {
@@ -264,8 +309,8 @@ $navbar-transition-easing: ease-out;
             .stat {
                 //display: inline-block;
                 float: left;
-                padding: 5px 12px 5px 12px;
-                height: 38px;
+                padding: 5px 12px 4px 12px;
+                height: 37px;
                 border-right: 1px solid #f4f4f4;
                 min-width: 125px;
                 text-align: right;
@@ -306,7 +351,7 @@ $navbar-transition-easing: ease-out;
     position: relative;
     top: 0;
     border: none;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #dadada;
     box-shadow: 0 0 3px rgba(0,0,0,0);
     transition: border-color $navbar-transition-length, box-shadow $navbar-transition-length;
 
@@ -514,7 +559,7 @@ $navbar-transition-easing: ease-out;
         }
         > a:hover {
             background-color: #5d8a8e !important;
-            color: #fff;
+            color: #fff !important;
         }
         &>div>a {
             font-weight: 300;
@@ -618,7 +663,7 @@ $navbar-transition-easing: ease-out;
                 line-height: $line-height-computed;
                 &:hover,
                 &:focus {
-                    color: #000000 !important;
+                    color: #fff;
                 }
             }
                         
@@ -627,7 +672,7 @@ $navbar-transition-easing: ease-out;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
-                    color: #000000 !important;
+                    color: #fff;
                 }
             }
 
@@ -636,7 +681,7 @@ $navbar-transition-easing: ease-out;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
-                    color: #000000 !important;
+                    color: #fff;
                 }
             }
 
@@ -673,15 +718,20 @@ $navbar-transition-easing: ease-out;
     stroke: #000000;
 }
 
+
+
 // User Actions Dropwdown
 
 .navbar-acct {
-    margin-left: 15px;
-    margin-right: 0px; // Align w/ right-most container edge.
+    @media screen and (min-width: $screen-md-min) {
+        margin-left: 10px;
+        margin-right: 0px; // Align w/ right-most container edge.
+    }
 }
 
 #user_actions_dropdown {
     max-width: 115px;
+    //width: 115px;
     min-width: 65px;
     white-space: nowrap;
     overflow: hidden;
@@ -695,5 +745,14 @@ $navbar-transition-easing: ease-out;
     }
     @media screen and (min-width: $screen-lg-min) {
         max-width: 150px;
+        min-width: 115px;
+    }
+    @media screen and (max-width: $screen-sm-max) {
+        max-width: 150px;
+        //width: 150px;
+    }
+    @media screen and (max-width: $screen-xs-max) {
+        max-width: none;
+        width: auto;
     }
 }

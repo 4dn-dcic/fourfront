@@ -1,21 +1,27 @@
 'use strict';
 
-/** @ignore */
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var d3 = require('d3');
-var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } = require('../util');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import url from 'url';
+import queryString from 'query-string';
+import * as d3 from 'd3';
+import * as vizUtil from './utilities';
+import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
+import { Toggle } from '../inputs';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
-var MosaicChart = require('./MosaicChart');
 import { ChartDataController } from './chart-data-controller';
-var ReactTooltip = require('react-tooltip');
+import ReactTooltip from 'react-tooltip';
+
+
 
 /**
  * Bar shown below header on home and browse pages.
  * Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
+ * 
+ * Possible todo: Remove functions for updating counts, instead wrap in ChartDataController.provider and aggregate, using shouldComponentUpdate
+ * More likely todo: Do chart-stuff aggregation on back-end, display context.charts.aggregations.counts.files, ...experiments, ...experiment_sets, etc. here instead.
  *
  * @module {Component} viz/QuickInfoBar
  * @prop {string} href - Current location/href passed down from Redux store. Used for determining whether to display QuickInfoBar or not.
@@ -34,6 +40,13 @@ export default class QuickInfoBar extends React.Component {
         if (pathParts[0] === 'home') return false;
         if (pathParts.length === 1 && pathParts[0] === "") return false;
         return true;
+    }
+
+    static getCountsFromProps(props){
+        var defaultNullCounts = { 'experiment_sets' : null, 'experiments' : null, 'files' : null };
+        var current = (props.barplot_data_filtered && props.barplot_data_filtered.total) || defaultNullCounts,
+            total = (props.barplot_data_unfiltered && props.barplot_data_unfiltered.total) || defaultNullCounts;
+        return { current, total };
     }
 
     static defaultProps = {
@@ -61,22 +74,15 @@ export default class QuickInfoBar extends React.Component {
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.updateCurrentAndTotalCounts = this.updateCurrentAndTotalCounts.bind(this);
-        this.updateCurrentCounts = this.updateCurrentCounts.bind(this);
-        this.updateTotalCounts = this.updateTotalCounts.bind(this);
         this.isInvisible = this.isInvisible.bind(this);
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
         this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
+        this.onBrowseStateToggle = this.onBrowseStateToggle.bind(this);
+        this.onPanelAreaMouseLeave = this.onPanelAreaMouseLeave.bind(this);
         this.renderStats = this.renderStats.bind(this);
         this.renderHoverBar = this.renderHoverBar.bind(this);
         this.state = {
-            'count_experiments'     : null,
-            'count_experiment_sets' : null,
-            'count_files'           : null,
-            'count_experiments_total'     : null,
-            'count_experiment_sets_total' : null,
-            'count_files_total'           : null,
             'mounted'               : false,
             'show'                  : false,
             'reallyShow'            : false
@@ -107,68 +113,6 @@ export default class QuickInfoBar extends React.Component {
     }
 
     /**
-     * Publically accessible when QuickInfoBar Component instance has a 'ref' prop set by parent component.
-     * Use to update stats when expSetFilters change.
-     *
-     * Currently this is done through ChartDataController, to which an 'updateStats' callback,
-     * itself defined in app Component, is provided on initialization.
-     *
-     * @public
-     * @instance
-     * @param {Object} current - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
-     * @param {Object} total - Same as 'current' param, but containing total counts.
-     * @param {function} [callback] Optional callback function.
-     * @returns {boolean} true
-     */
-    updateCurrentAndTotalCounts(current, total, callback = null){
-        this.setState({
-            'count_experiments' : current.experiments,
-            'count_experiment_sets' : current.experiment_sets,
-            'count_files' : current.files,
-            'count_experiments_total' : total.experiments,
-            'count_experiment_sets_total' : total.experiment_sets,
-            'count_files_total' : total.files
-        }, typeof callback === 'function' ? callback() : null);
-        return true;
-    }
-
-    /**
-     * Same as updateCurrentAndTotalCounts(), but only for current counts.
-     *
-     * @public
-     * @instance
-     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
-     * @param {function} [callback] Optional callback function.
-     * @returns {boolean} true
-     */
-    updateCurrentCounts(newCounts, callback){
-        this.setState({
-            'count_experiments' : newCounts.experiments,
-            'count_experiment_sets' : newCounts.experiment_sets,
-            'count_files' : newCounts.files
-        }, typeof callback === 'function' ? callback() : null);
-        return true;
-    }
-
-    /**
-     * Same as updateCurrentAndTotalCounts(), but only for total counts.
-     *
-     * @public
-     * @instance
-     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
-     * @param {function} [callback] Optional callback function.
-     * @returns {boolean} true
-     */
-    updateTotalCounts(newCounts, callback){
-        this.setState({
-            'count_experiments_total' : newCounts.experiments,
-            'count_experiment_sets_total' : newCounts.experiment_sets,
-            'count_files_total' : newCounts.files
-        }, typeof callback === 'function' ? callback() : null);
-        return true;
-    }
-
-    /**
      * Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.
      *
      * @public
@@ -176,13 +120,15 @@ export default class QuickInfoBar extends React.Component {
      * @returns {boolean} True if counts are null or on a 'href' is not of a page for which searching or summary is applicable.
      */
     isInvisible(props = this.props, state = this.state){
+        var { total, current } = QuickInfoBar.getCountsFromProps(props);
         if (
             !state.mounted ||
             props.invisible ||
+            total === null ||
             (
-                (state.count_experiment_sets === null && state.count_experiment_sets_total === null) &&
-                (state.count_experiments === null     && state.count_experiments_total === null) &&
-                (state.count_files === null           && state.count_files_total === null)
+                (current.experiment_sets === null && total.experiment_sets === null) &&
+                (current.experiments === null     && total.experiments === null) &&
+                (current.files === null           && total.files === null)
             )
         ) return true;
 
@@ -207,96 +153,63 @@ export default class QuickInfoBar extends React.Component {
     onIconMouseEnter(e){
         var areAnyFiltersSet = this.anyFiltersSet();
         if (this.timeout) clearTimeout(this.timeout);
-        if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
+        if (areAnyFiltersSet) this.setState({ 'show' : 'activeFilters', 'reallyShow' : true });
         analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
             'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
             'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
         });
     }
 
-    renderStats(){
+    onPanelAreaMouseLeave(e){
+        e.preventDefault();
+        this.setState({ 'show' : false }, ()=>{
+            this.timeout = setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
+        });
+    }
+
+    renderStats(extraClassName = null){
         var areAnyFiltersSet = this.anyFiltersSet();
+        var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
+
         var stats;
-        //if (this.props.showCurrent || this.state.showCurrent){
-        if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
+        if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
             stats = {
-                'experiment_sets' : (
-                    <span>
-                        { this.state.count_experiment_sets }<small> / { (this.state.count_experiment_sets_total || 0) }</small>
-                    </span>
-                ),
-                'experiments' : (
-                    <span>
-                        { this.state.count_experiments }<small> / {this.state.count_experiments_total || 0}</small>
-                    </span>
-                ),
-                'files' : (
-                    <span>
-                        { this.state.count_files }<small> / {this.state.count_files_total || 0}</small>
-                    </span>
-                ),
+                'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
+                'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
+                'files'             : <span>{ current.files }<small> / {total.files || 0}</small></span>
             };
         } else {
             stats = {
-                'experiment_sets' : this.state.count_experiment_sets_total || 0,
-                'experiments' : this.state.count_experiments_total || 0,
-                'files' : this.state.count_files_total || 0
+                'experiment_sets'   : total.experiment_sets || 0,
+                'experiments'       : total.experiments || 0,
+                'files'             : total.files || 0
             };
         }
-        var className = "inner container";
-        if (this.state.show !== false) className += ' showing';
-        if (this.state.show === 'activeFilters') className += ' showing-filters';
-        if (this.state.show === 'mosaicCharts') className += ' showing-charts';
-        var expSetFilters = this.props.expSetFilters || store.getState().expSetFilters;
-        var expFiltersHrefChunk = Filters.expSetFiltersToURLQuery(store.getState().expSetFilters);
+        var statProps = _.pick(this.props, 'id', 'expSetFilters', 'href', 'isLoadingChartData');
         return (
-            <div className={className} onMouseLeave={()=>{
-                this.setState({ show : false });
-                this.timeout = setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
-            }}>
-                <div className="left-side clearfix">
-                    <Stat
-                        shortLabel="Experiment Sets"
-                        longLabel="Experiment Sets"
-                        id={this.props.id}
-                        classNameID="expsets"
-                        value={stats.experiment_sets}
-                        key={0}
-                        expSetFilters={expSetFilters}
-                        expFiltersHrefChunk={expFiltersHrefChunk}
-                        href={this.props.href}
-                    />
-                    <Stat
-                        shortLabel="Experiments"
-                        longLabel="Experiments"
-                        id={this.props.id}
-                        classNameID="experiments"
-                        value={stats.experiments}
-                        key={1}
-                        expSetFilters={expSetFilters}
-                        expFiltersHrefChunk={expFiltersHrefChunk}
-                        href={this.props.href}
-                    />
-                    <Stat
-                        shortLabel="Files"
-                        longLabel="Files in Experiments"
-                        id={this.props.id}
-                        classNameID="files"
-                        value={stats.files}
-                        key={2}
-                        expSetFilters={expSetFilters}
-                        expFiltersHrefChunk={expFiltersHrefChunk}
-                        href={this.props.href}
-                    />
-                    <div
-                        className="any-filters glance-label"
-                        data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"}
-                        onMouseEnter={this.onIconMouseEnter}
-                    >
-                        <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
-                    </div>
+            <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
+                <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
+                <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
+                <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
+                <div className="any-filters glance-label" data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"} onMouseEnter={this.onIconMouseEnter}>
+                    <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                 </div>
-                { this.renderHoverBar() }
+            </div>
+        );
+    }
+
+    onBrowseStateToggle(){
+        navigate.setBrowseBaseStateAndRefresh(this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', this.props.href, this.props.context);
+    }
+
+    renderBrowseStateToggle(){
+        var checked = this.props.browseBaseState === 'all';
+        return (
+            <div className="col-xs-4 text-right browse-base-state-toggle-container">
+                <div className="inner-more">
+                    <Toggle checked={checked} onChange={this.onBrowseStateToggle} />
+                    <small>Include External Data</small>
+                </div>
             </div>
         );
     }
@@ -314,51 +227,38 @@ export default class QuickInfoBar extends React.Component {
                         href={this.props.href}
                         showTitle={false}
                         schemas={this.props.schemas}
+                        context={this.props.context}
                     />
-                    <div className="graph-icon" onMouseEnter={_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)}>
+                    <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
                         <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
                     </div>
                 </div>
             );
-        } else if (this.state.show === 'mosaicCharts') {
-            var chartDataState = ChartDataController.getState();
-            return (
-                <div className="bottom-side">
-                    <div className="row">
-                        <div className="col-xs-12 col-sm-6">
-                            <ChartDataController.Provider id="mosaic1">
-                                    <MosaicChart
-                                        fields={chartDataState.chartFieldsHierarchyRight}
-                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
+        } else return null;
+    }
 
-                                        height={200}
-                                        width={ layout.gridContainerWidth() }
+    renderBar(){
+        var { show, mounted } = this.state;
+        if (!mounted) return null;
 
+        var className = "inner container";
+        if (show !== false) className += ' showing';
+        if (show === 'activeFilters') className += ' showing-filters';
+        if (show === 'mosaicCharts') className += ' showing-charts';
 
-                                        href={this.props.href}
-                                        key="sunburst"
-                                        schemas={this.props.schemas}
-                                        debug
-                                    />
-                                </ChartDataController.Provider>
-                        </div>
-                    </div>
+        return (
+            <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
+                <div className="row">
+                    { this.renderStats('col-xs-8') }
+                    { this.renderBrowseStateToggle() }
                 </div>
-            );
-        } else {
-            return (
-                <div className="bottom-side">
-                </div>
-            );
-        }
+                { this.renderHoverBar() }
+            </div>
+        );
     }
 
     render(){
-        return(
-            <div id={this.props.id} className={this.className()}>
-                { this.renderStats() }
-            </div>
-        );
+        return <div id={this.props.id} className={this.className()}>{ this.renderBar() }</div>;
     }
 
 }
@@ -398,27 +298,26 @@ class Stat extends React.Component {
 
         // Always goto Browse page for now
         var filtersHrefChunk = Filters.expSetFiltersToURLQuery(this.props.expSetFilters); //this.filtersHrefChunk();
-
-        var sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
-
-        var href = Stat.typesPathMap['expsets'/*this.props.classNameID*/] + sep + (filtersHrefChunk || '');
+        var targetHref = navigate.getBrowseBaseHref();
+        targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
 
         if (typeof this.props.href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
             if (navigate.isBrowseHref(this.props.href)) return <span>{ this.props.shortLabel }</span>; 
-            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === href) return <span>{ this.props.shortLabel }</span>;
+            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ this.props.shortLabel }</span>;
         }
         
         return (
-            <a href={href}>{ this.props.shortLabel }</a>
+            <a href={targetHref}>{ this.props.shortLabel }</a>
         );
     }
 
     render(){
+        var { classNameID, longLabel, value, id, isLoadingChartData } = this.props;
         return (
-            <div className={"stat stat-" + this.props.classNameID} title={this.props.longLabel}>
-                <div id={this.props.id + '-stat-' + this.props.classNameID} className="stat-value">
-                    { this.props.value }
+            <div className={"stat stat-" + classNameID} title={longLabel}>
+                <div id={id + '-stat-' + classNameID} className="stat-value">
+                    { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-o-notch" style={{ opacity : 0.25 }}/> : value }
                 </div>
                 <div className="stat-label">
                     { this.label() }

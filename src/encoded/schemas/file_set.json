@@ -19,6 +19,9 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/accession" }
     ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -55,7 +58,8 @@
             "title": "Description",
             "description": "A description of what files are part of the set.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         }
     }
 }

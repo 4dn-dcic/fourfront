@@ -4,7 +4,9 @@
 var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
+import queryString from 'querystring';
 var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate, object } = require('./../util');
+import ChartDetailCursor from './ChartDetailCursor';
 var vizUtil = require('./utilities');
 
 
@@ -19,40 +21,18 @@ var vizUtil = require('./utilities');
 
 
 /**
+ * These are cached values or references.
+ * Some are used to check against reduxStoreState in the subscription-checking-function to detect if it has changed.
+ *
  * @private
  * @ignore
  */
 var refs = {
     store       : null,
     href        : null, // Cached from redux store updates // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-    requestURLBase : null,//'/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
-    updateStats : null, // Function to update stats @ top of page.
-    fieldsToFetch : [ // What fields we need from /browse/... for this chart.
-        'accession',
-        'experiments_in_set.experiment_summary',
-        'experiments_in_set.experiment_type',
-        'experiments_in_set.accession',
-        //'experiments_in_set.status',
-        //'experiments_in_set.files.file_type',
-        'experiments_in_set.files.accession',
-        'experiments_in_set.files.file_type_detailed',
-        'experiments_in_set.filesets.files_in_set.accession',
-        'experiments_in_set.processed_files.accession',
-        'processed_files.accession',
-        'experiments_in_set.processed_files.file_type_detailed',
-        'processed_files.file_type_detailed',
-        //'experiments_in_set.biosample.description',
-        //'experiments_in_set.biosample.modifications_summary_short',
-        'experiments_in_set.biosample.biosource_summary', // AKA Biosource
-        //'experiments_in_set.biosample.biosource.biosource_name', // AKA Biosource
-        'experiments_in_set.biosample.biosource.biosource_type', // AKA Biosource Type
-        'experiments_in_set.lab.title',
-        'experiments_in_set.biosample.biosource.individual.organism.name',
-        'experiments_in_set.digestion_enzyme.name',
-        'award.project',
-        'lab.title'
-    ],
-    expSetFilters : null,
+    contextFilters : [],
+    baseSearchPath : null,
+    browseBaseState : null
 };
 
 /**
@@ -64,9 +44,14 @@ var refs = {
  * @ignore
  */
 var state = {
-    experiment_sets     : null,
+    experiment_sets         : null,
     filtered_experiment_sets : null,
-    fetching            : false,
+    fetching                : false,
+
+    barplot_data_filtered   : null,
+    barplot_data_unfiltered : null,
+    barplot_data_fields     : null,
+    isLoadingChartData      : false,
 
     chartFieldsHierarchy: [
         //{ 
@@ -220,20 +205,6 @@ var isInitialLoadComplete = false;
  */
 var lastTimeSyncCalled = 0;
 
-/**
- * @private
- * @ignore
- * @type {?string}
- */
-var resyncInterval = null;
-
-/**
- * @private
- * @ignore
- * @type {boolean}
- */
-var isWindowActive = false;
-
 
 /**
  * Use this React component to wrap individual charts and provide them with source of experiments data via
@@ -255,11 +226,8 @@ class Provider extends React.Component {
 
     constructor(props){
         super(props);
-        if (typeof props.id === 'string') {
-            this.id = props.id;
-        } else {
-            this.id = object.randomId();
-        }
+        if (typeof props.id === 'string') this.id = props.id;
+        else this.id = object.randomId();
     }
 
     /**
@@ -272,7 +240,7 @@ class Provider extends React.Component {
      * @this module:viz/chart-data-controller.Provider
      * @returns {void} Nothing
      */
-    componentWillMount(){
+    componentDidMount(){
         ChartDataController.registerUpdateCallback(()=>{
             this.forceUpdate();
         }, this.id);
@@ -302,9 +270,13 @@ class Provider extends React.Component {
     render(){
         var childChartProps = _.extend({}, this.props.children.props);
 
-        childChartProps.experiment_sets = state.experiment_sets;
-        childChartProps.filtered_experiment_sets = state.filtered_experiment_sets;
-        childChartProps.expSetFilters = refs.expSetFilters;
+        childChartProps.expSetFilters = Filters.contextFiltersToExpSetFilters();
+        childChartProps.barplot_data_filtered = state.barplot_data_filtered;
+        childChartProps.barplot_data_unfiltered = state.barplot_data_unfiltered;
+        childChartProps.updateBarPlotFields = ChartDataController.updateBarPlotFields;
+        childChartProps.barplot_data_fields = state.barplot_data_fields;
+        childChartProps.isLoadingChartData = state.isLoadingChartData;
+        childChartProps.providerId = this.id;
 
         return React.cloneElement(this.props.children, childChartProps);
     }
@@ -324,50 +296,71 @@ export const ChartDataController = {
      * This function must be called before this component is used anywhere else.
      * 
      * @public
-     * @static
-     * @param {string} requestURLBase - Where to request 'all experiments' from.
-     * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
      * @param {function} [callback] - Optional callback for after initializing.
-     * @param {number|boolean} [resync=false] - How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
      * @returns {void} Undefined
      */
     initialize : function(
-        requestURLBase = null,
-        updateStats = null,
-        callback = null,
-        resync = false,
-        href = null
+        baseSearchPath = '/bar_plot_aggregations/',
+        browseBaseState = 'only_4dn',
+        fields = null,
+        callback = null
     ){
-        refs.href = href;
-        if (!refs.store) {
-            refs.store = require('./../../store');
+        if (!refs.store) refs.store = require('./../../store');
+
+        var initStoreState = refs.store.getState();
+        refs.href = initStoreState.href;
+        refs.contextFilters = (initStoreState.context && initStoreState.context.filters) || [];
+
+        if (typeof baseSearchPath === 'string'){
+            refs.baseSearchPath = baseSearchPath;
         }
-        if (typeof requestURLBase === 'string'){
-            refs.requestURLBase = requestURLBase;
+        if (typeof browseBaseState === 'string'){
+            refs.browseBaseState = browseBaseState;
         }
-        if (typeof updateStats === 'function'){
-            refs.updateStats = updateStats;
+        if (Array.isArray(fields) && fields.length > 0){
+            state.barplot_data_fields = fields;
         }
 
         if (reduxSubscription !== null) {
             reduxSubscription(); // Unsubscribe current listener.
         }
 
-        // Subscribe to Redux store updates to listen for changed expSetFilters.
+        // Subscribe to Redux store updates to listen for (changed href + context.filters) || browseBaseState.
         reduxSubscription = refs.store.subscribe(function(){
-            var prevExpSetFilters = refs.expSetFilters;
-            var prevHref = refs.href; // TODO: MAYBE REMOVE REFS.HREF WHEN SWITCH SEARCH FROM /BROWSE/
+            var prevHref = refs.href;
             var reduxStoreState = refs.store.getState();
             refs.href = reduxStoreState.href;
-            refs.expSetFilters = reduxStoreState.expSetFilters;
+            var prevBrowseBaseState = refs.browseBaseState;
+            refs.browseBaseState = reduxStoreState.browseBaseState;
+            var prevContextFilters = refs.contextFilters || []; // If falsy, we get current ones instead of 'no filters'
+            refs.contextFilters = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
 
-            // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
-            if ((prevExpSetFilters !== refs.expSetFilters || !_.isEqual(refs.expSetFilters, prevExpSetFilters)) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href))){
-                ChartDataController.handleUpdatedFilters(
-                    refs.expSetFilters,
-                    notifyUpdateCallbacks,
-                    { 'searchQuery' : Filters.searchQueryStringFromHref(refs.href) }
-                );
+            var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters, prevBrowseBaseState);
+            var nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState); // We don't need to pass 'current' params, but we do for clarity of differences.
+
+            var searchQuery = Filters.searchQueryStringFromHref(refs.href);
+
+            var didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery);
+
+            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState && !didFiltersChange) return; // Nothing relevant has changed. Exit.
+
+            // Hide any pop-overs still persisting with old filters or URL.
+            setTimeout(function(){
+                ChartDetailCursor.reset(true);
+            }, 750);
+
+
+            // Step 1. Check if need to refetch both unfiltered & filtered data.
+            if (refs.browseBaseState !== prevBrowseBaseState){
+                setTimeout(function(){
+                    ChartDataController.sync(null, { 'searchQuery' : searchQuery });
+                }, 0);
+                return;
+            }
+
+            // Step 2. Check if need to refresh filtered data only.
+            if (didFiltersChange) {
+                ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { searchQuery });
             }
         });
 
@@ -377,35 +370,6 @@ export const ChartDataController = {
             isInitialLoadComplete = true;
             callback(state);
         }, { isInitial : true });
-
-        // Resync periodically if resync interval supplied.
-        if (typeof resync === 'number' && !isServerSide()){
-
-            resync = Math.max(resync, 20000); // 20sec minimum
-
-            window.addEventListener('focus', function(){
-                if (lastTimeSyncCalled + resync < Date.now()){
-                    ChartDataController.sync(function(){
-                        isWindowActive = true;
-                    }, { 'fromSync' : true, 'fromInterval' : true });
-                } else {
-                    isWindowActive = true;
-                }
-            });
-
-            window.addEventListener('blur', function(){
-                isWindowActive = false;
-            });
-
-            resyncInterval = setInterval(function(){
-                if (!isWindowActive) return;
-                console.info('Resyncing experiment_sets & filtered_experiment_sets for ChartDataController.');
-                ChartDataController.sync(null, { 'fromInterval' : true, 'fromSync' : true });
-            }, resync);
-
-            isWindowActive = true;
-
-        }
 
         // For debugging, e.g. embedded properties of fetched experiments.
         if (!isServerSide()){
@@ -489,6 +453,23 @@ export const ChartDataController = {
         delete providerLoadStartCallbacks[uniqueID];
     },
 
+    updateBarPlotFields : function(fields, callback = null){
+        if (Array.isArray(fields) && Array.isArray(state.barplot_data_fields)){
+            if (fields.length === state.barplot_data_fields.length){
+                
+                if (_.every(fields, function(f,i){
+                    return (f === state.barplot_data_fields[i]);
+                })) return;
+            }
+        }
+        //state.barplot_data_fields = fields;
+        ChartDataController.setState({ 'barplot_data_fields' : fields, 'isLoadingChartData' : true }, callback);
+        ChartDataController.sync(function(){
+            ChartDetailCursor.reset(true);
+            //if (typeof callback === 'function') callback();
+        });
+    },
+
     /** 
      * Get current state. Similar to Redux's store.getState().
      * 
@@ -510,20 +491,18 @@ export const ChartDataController = {
      */
     setState : function(updatedState = {}, callback = null, opts = {}){
 
-        var allChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiment_sets, state.experiment_sets);
-        var allOrFilteredChanged = allChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filtered_experiment_sets, state.filtered_experiment_sets);
+        var allCountsChanged = (
+            updatedState && updatedState.barplot_data_unfiltered && updatedState.barplot_data_unfiltered.total && (
+                !state.barplot_data_unfiltered || !state.barplot_data_unfiltered.total || !state.barplot_data_unfiltered.total.experiment_sets ||
+                updatedState.barplot_data_unfiltered.total.experiment_sets !== state.barplot_data_unfiltered.total.experiment_sets ||
+                updatedState.barplot_data_unfiltered.total.experiments !== state.barplot_data_unfiltered.total.experiments ||
+                updatedState.barplot_data_unfiltered.total.files !== state.barplot_data_unfiltered.total.files
+            )
+        );
 
         _.extend(state, updatedState);
 
-        if (allOrFilteredChanged){
-            ChartDataController.updateStats();
-            notifyUpdateCallbacks();
-        }
-
-        if (allChanged && isInitialLoadComplete && opts.fromInterval){
-            // Update browse page results or w/e.
-            reFetchContext();
-        }
+        notifyUpdateCallbacks();
 
         if (typeof callback === 'function' && callback !== notifyUpdateCallbacks){
             return callback(state);
@@ -538,11 +517,13 @@ export const ChartDataController = {
      * @param {function} [callback] - Function to be called after sync complete.
      * @returns {void} Nothing
      */
-    sync : function(callback, syncOpts = {}){
+    sync : function(callback = null, syncOpts = {}){
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
         if (!syncOpts.fromSync) syncOpts.fromSync = true;
-        ChartDataController.fetchUnfilteredAndFilteredExperimentSets(null, callback, syncOpts);
+        ChartDataController.setState({'isLoadingChartData' : true }, function(){
+            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, syncOpts);
+        });
     },
 
     /**
@@ -556,143 +537,59 @@ export const ChartDataController = {
      * @returns {void} Nothing
      */
     handleUpdatedFilters : function(expSetFilters, callback, opts){
-        if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiment_sets) && (!opts || !opts.searchQuery)){
-            ChartDataController.setState({ filtered_experiment_sets : null }, callback);
+
+        // Reset or re-fetch 'filtered-in' data.
+        if (_.keys(expSetFilters).length === 0 && state.barplot_data_unfiltered && (!opts || !opts.searchQuery)){
+            ChartDataController.setState({ 'barplot_data_filtered' : null }, callback);
+        } else if (state.barplot_data_unfiltered) {
+            ChartDataController.fetchAndSetFilteredBarPlotData(callback, opts);
         } else {
-            ChartDataController.fetchAndSetFilteredExperimentSets(callback, opts);
+            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, opts);
         }
-    },
-
-    checkIfExperimentArraysDiffer : function(exps1, exps2){
-        if (exps1 === null && exps2 === null) return false;
-        if (!Array.isArray(exps1) && !Array.isArray(exps2)) return false;
-        if (
-            (Array.isArray(exps1) && !Array.isArray(exps2)) ||
-            (!Array.isArray(exps1) && Array.isArray(exps2))
-        ) {
-            return true;
-        }
-        var lenExps1 = exps1.length;
-        if (lenExps1!== exps2.length) return true;
-
-
-        for (var i = 0; i < lenExps1; i++){
-
-            if ( exps1[i].accession !== exps2[i].accession ){
-                return true;
-            }
-            /*
-            if (!_.isEqual(exps1[i], exps2[i])){
-                return true;
-            }
-            */
-            
-        }
-
-        return false;
     },
 
     /**
-     * Called internally by setState to update stats in top left corner of page, if updateState param was passed in during initialization.
-     * 
-     * @static
-     * @ignore
-     * @returns {void} Nothing
-     */
-    updateStats : function(){
-        if (typeof refs.updateStats !== 'function'){
-            throw Error("Not initialized with updateStats callback.");
-        }
-
-        var current, total;
-
-        function getCountsFromExps(exps){
-            var expSets = _.reduce(exps, function(m,exp){
-                if (exp.experiment_sets) return new Set([...m, ..._.pluck(exp.experiment_sets, 'accession')]);
-                return m;
-            }, new Set());
-            return {
-                'experiment_sets' : expSets.size,
-                'experiments' : exps.length,
-                'files' : expFxn.fileCountFromExperiments(exps)
-            };
-        }
-
-        function getCountsFromExpSets(expSets){
-            return {
-                'experiment_sets' : expSets.length,
-                'experiments' : _.reduce(expSets, function(m,v){ return m + (v.experiments_in_set || []).length; }, 0),
-                'files' : _.reduce(expSets, function(m,v){ return (expFxn.allFilesFromExperimentSet(v, true) || []).length + m; }, 0)
-            };
-        }
-
-        function genNullCounts(){
-            return {
-                'experiment_sets' : null,
-                'experiments' : null,
-                'files' : null
-            };
-        }
-
-        if (state.filtered_experiment_sets !== null){
-            current = getCountsFromExpSets(state.filtered_experiment_sets);
-        } else {
-            current = genNullCounts();
-        }
-
-        if (state.experiment_sets !== null){
-            total = getCountsFromExpSets(state.experiment_sets);
-        } else {
-            total = genNullCounts();
-        }
-
-        refs.updateStats(current, total);
-    },
-
-
-    /**
-     * Used internally to fetch both all & filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
      * Called by ChartDataController.sync() internally.
-     * 
-     * @private
-     * @static
-     * @param {Object} [reduxStoreState] - Current Redux store state to get expSetFilters and current href from. If not provided, gets it from store.getState().
-     * @param {function} [callback] - Optional callback function to call after setting updated state.
-     * @returns {void} Nothing
      */
-    fetchUnfilteredAndFilteredExperimentSets : function(reduxStoreState = null, callback = null, opts = {}){
-        if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
+    fetchUnfilteredAndFilteredBarPlotData : function(reduxStoreState = null, callback = null, opts = {}){
+        if (!reduxStoreState || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
 
-        // Set refs.expSetFilters if is null (e.g. if called from initialize() and not triggered Redux store filter change).
-        if (refs.expSetFilters === null){
-            refs.expSetFilters = reduxStoreState.expSetFilters;
-        }
+        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters(
+            (reduxStoreState.context && reduxStoreState.context.filters) || null,
+            opts.browseBaseState || null
+        );
 
-        var filtersSet = (_.keys(reduxStoreState.expSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
-        var experiment_sets = null,
-            filtered_experiment_sets = null;
+        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
+        var filtersSet = (_.keys(currentExpSetFilters).length > 0) || searchQuery;
+
+        var barplot_data_filtered = null,
+            barplot_data_unfiltered = null;
 
         var cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
-                'experiment_sets' : experiment_sets,
-                'filtered_experiment_sets' : filtered_experiment_sets
+                'barplot_data_filtered' : barplot_data_filtered,
+                'barplot_data_unfiltered' : barplot_data_unfiltered,
+                'isLoadingChartData' : false
             }, callback, opts);
 
         });
 
-        var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
-        var filteredExpsHref = ChartDataController.getFilteredContextHref(
-            reduxStoreState.expSetFilters, reduxStoreState.href, opts
-        ) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart();
+        var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
+        var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
+
+        var unfilteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '/' + fieldsQuery;
+
+        if (searchQuery) baseSearchParams['q'] = encodeURIComponent(searchQuery); // Make sure occurs after setting unfilteredHref.
+        var filteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery;
 
         notifyLoadStartCallbacks();
 
         ajax.load(
-            allExpsHref,
-            function(allExpsContext){
-                experiment_sets = allExpsContext['@graph'];
+            unfilteredHref,
+            function(unfiltered_result){
+                barplot_data_unfiltered = unfiltered_result;
                 cb();
             }, 'GET', function(errResp){
                 opts.error = true;
@@ -700,8 +597,8 @@ export const ChartDataController = {
                 // If received a 403 or a 404 (no expsets returned) we're likely logged out, so reload current href / context
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
                 if (errResp && typeof errResp === 'object'){
-                    if (typeof errResp.total === 'number' && errResp.total > 0){
-                        experiment_sets = errResp['@graph'];
+                    if (typeof errResp.total === 'object' && errResp.total){
+                        barplot_data_unfiltered = errResp;
                     }
                     //if (errResp.code === 403 || errResp.total === 0){
                     //    console.warn('403 or 404 Error, refetching.');
@@ -715,9 +612,9 @@ export const ChartDataController = {
 
         if (filtersSet){
             ajax.load(
-                filteredExpsHref,
-                function(filteredContext){
-                    filtered_experiment_sets = filteredContext['@graph'];
+                filteredHref,
+                function(filtered_result){
+                    barplot_data_filtered = filtered_result;
                     cb();
                 }, 'GET', function(){
                     cb();
@@ -727,27 +624,6 @@ export const ChartDataController = {
 
     },
 
-    /**
-     * Like ChartDataController.fetchUnfilteredAndFilteredExperimentSets(), but only to get all experiments.
-     * Not actually used, but could be, for something.
-     * 
-     * @memberof module:viz/chart-data-controller
-     * @private
-     * @static
-     * @param {function} [callback] - Optional callback function.
-     * @returns {void} Nothing
-     */
-    fetchAndSetUnfilteredExperimentSets : function(callback = null, opts = {}){
-        notifyLoadStartCallbacks();
-        ajax.load(
-            refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
-            function(allExpsContext){
-                ChartDataController.setState({
-                    'experiment_sets' : allExpsContext['@graph']
-                }, callback, opts);
-            }
-        );
-    },
 
     /**
      * Like ChartDataController.fetchUnfilteredAndFilteredExperimentSets(), but only to get filtered/selected experiments according to expSetFilters from Redux store.
@@ -758,59 +634,40 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function.
      * @returns {void} Nothing
      */
-    fetchAndSetFilteredExperimentSets : function(callback = null, opts = {}){
+    fetchAndSetFilteredBarPlotData : function(callback = null, opts = {}){
+
+        var reduxStoreState = refs.store.getState();
+
+        var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
+
+        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
+        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
+
+        var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
+        if (searchQuery) baseSearchParams['q'] = encodeURIComponent(searchQuery);
+        
         notifyLoadStartCallbacks();
         ajax.load(
-            ChartDataController.getFilteredContextHref(null, null, opts) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart(),
+            refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery,
             function(filteredContext){
                 ChartDataController.setState({
-                    'filtered_experiment_sets' : filteredContext['@graph']
+                    'barplot_data_filtered' : filteredContext,
+                    'isLoadingChartData' : false
                 }, callback, opts);
             },
             'GET',
             function(){
                 // Fallback (no results or lost connection)
                 ChartDataController.setState({
-                    'filtered_experiment_sets' : null
+                    'barplot_data_filtered' : null,
+                    'isLoadingChartData' : false
                 }, callback, opts);
                 if (typeof callback === 'function') callback();
             }
         );
     },
 
-    /**
-     * Internally used to help form query part of URL.
-     * Adds 'field=<field.name.1>&...<field.name.n>' for each field required for chart(s).
-     * 
-     * @static
-     * @param {string[]} [fields] - Fields to fetch from back-end search result(s).
-     * @returns {string} Part of URL query.
-     */
-    getFieldsRequiredURLQueryPart : function(fields = refs.fieldsToFetch){
-        return fields.map(function(fieldToIncludeInResult){
-            return '&field=' + fieldToIncludeInResult;
-        }).join('');
-    },
 
-    /**
-     * Internally used to generate a URL from current href and expSetFilters from Redux store to fetch filtered/selected experiments from back-end.
-     * If no 'search'-compatible href is set in Redux store, '/browse/' is used.
-     * 
-     * @static
-     * @param {Object} [expSetFilters] - Current Experiment Set Filters in Redux store.
-     * @param {string} [href] - Current href from Redux store.
-     * @returns {string} URL for fetching filtered experiments/sets from back-end.
-     */
-    getFilteredContextHref : function(expSetFilters, href, opts){
-        if (!expSetFilters || !href){
-            var storeState = refs.store.getState();
-            if (!expSetFilters) expSetFilters = storeState.expSetFilters;
-            if (!href)          href = storeState.href;
-        }
-        // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
-        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(href);
-        return Filters.filtersToHref(expSetFilters, href, 0, 'experiments_in_set.accession', false, '/browse/') + (searchQuery ? '&q=' + searchQuery : '');
-    },
 
     getRefs : function(){
         return refs;

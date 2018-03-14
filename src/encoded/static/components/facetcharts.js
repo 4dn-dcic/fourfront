@@ -3,10 +3,8 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-//var MosaicChart = require('./viz/MosaicChart');
-import { expFxn, Filters, ajax, console, layout, isServerSide } from './util';
+import { expFxn, Filters, ajax, console, layout, isServerSide, navigate } from './util';
 import * as vizUtil from './viz/utilities';
-import { SVGFilters, FetchingView } from './viz/components';
 import { ChartDataController } from './viz/chart-data-controller';
 import * as BarPlot from './viz/BarPlot';
 
@@ -19,6 +17,8 @@ import * as BarPlot from './viz/BarPlot';
 
 /**
  * Area for displaying Charts rel to browsing.
+ * Originally designed as space for 2 charts, a bigger barplot and a smaller/square/circle pie-like chart, to take up 3/4 and 1/4 width of header respectively (where 1/4 of width ~== height).
+ * Now the 1/4 area for smaller chart is used for legend & ui controls.
  * 
  * Props:
  * 
@@ -37,9 +37,8 @@ export class FacetCharts extends React.Component {
             return false;
         },
         'views' : ['small', 'large'],
-        'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0&sort=experiments_in_set.accession',
+        'baseSearchPath' : '/bar_plot_aggregations/',
         'colWidthPerScreenSize' : {
-            /* Previous, for mosaic: */
             'small' : [
                 //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
                 {'xs' : 12, 'sm' : 9,  'md' : 9, 'lg' : 9},
@@ -50,23 +49,20 @@ export class FacetCharts extends React.Component {
                 {'xs' : 12, 'sm' : 9, 'md' : 9, 'lg' : 9},
                 {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
             ]
-        }
+        },
+        'initialFields' : ['experiments_in_set.experiment_type',"experiments_in_set.biosample.biosource.individual.organism.name"]
     }
 
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.show = this.show.bind(this);
         this.width = this.width.bind(this);
         this.render = this.render.bind(this);
-        this.state = {
-            'mounted'               : false,
-            'selectedNodes'         : [],   // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs,
-            'fetching'              : false,
-        };
+        this.state = { 'mounted' : false };
     }
 
     componentDidMount(){
@@ -79,24 +75,19 @@ export class FacetCharts extends React.Component {
             window.addEventListener('resize', this.debouncedResizeHandler);
         }
 
-        var newState = {
-            mounted : true
-        };
-
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
-                this.props.requestURLBase,
-                this.props.updateStats,
+                this.props.baseSearchPath,
+                this.props.browseBaseState,
+                this.props.initialFields,
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
-                    setTimeout(() => this.setState(newState), 100);
-                },
-                60 * 1000, // 1min auto-refresh,
-                this.props.href // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+                    setTimeout(() => this.setState({ 'mounted' : true }), 100);
+                }
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');
-            setTimeout(() => this.setState(newState), 100);
+            setTimeout(() => this.setState({ 'mounted' : true }), 100);
         }
 
     }
@@ -106,24 +97,6 @@ export class FacetCharts extends React.Component {
             window.removeEventListener('resize', this.debouncedResizeHandler);
             delete this.debouncedResizeHandler;
         }
-    }
-
-    shouldComponentUpdate(nextProps, nextState){
-        if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
-
-        if (
-            this.props.href !== nextProps.href || // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-            this.props.schemas !== nextProps.schemas ||
-            !_.isEqual(this.props.schemas, nextProps.schemas) ||
-            this.show(nextProps) !== this.show(this.props) ||
-            (nextState.mounted !== this.state.mounted) ||
-            nextProps.session !== this.props.session
-        ){
-            if (this.props.debug) console.log('Will Update FacetCharts');
-            return true;
-        }
-        if (this.props.debug) console.log('Will Not Update FacetCharts');
-        return false;
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -168,26 +141,26 @@ export class FacetCharts extends React.Component {
 
         var show = this.show();
         if (!show) return null; // We don't show section at all.
+        if (this.props.context && this.props.context.total === 0) return null;
+        if (this.props.debug) console.log('WILL SHOW FACETCHARTS', show, this.props.href);
 
         var colWidthPerScreenSize = this.props.colWidthPerScreenSize;
         function genChartColClassName(chartNumber = 1){
-            return Object.keys(colWidthPerScreenSize[show][chartNumber - 1]).map(function(size){
+            return _.keys(colWidthPerScreenSize[show][chartNumber - 1]).map(function(size){
                 return 'col-' + size + '-' + colWidthPerScreenSize[show][chartNumber - 1][size];
             }).join(' ');
         }
 
         var height = show === 'small' ? 300 : 450;
+
         if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
 
-        vizUtil.unhighlightTerms();
+        //vizUtil.unhighlightTerms();
 
         if (!this.state.mounted){
             return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
                 <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height }}>
-                    <i
-                        className="icon icon-spin icon-circle-o-notch" 
-                        style={{ 'top' : (height / 2 - 30) + 'px' }}
-                    ></i>
+                    <i className="icon icon-spin icon-circle-o-notch" style={{ 'top' : (height / 2 - 30) + 'px' }} />
                 </div>
             );
         }
@@ -196,21 +169,16 @@ export class FacetCharts extends React.Component {
 
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
-
                 <ChartDataController.Provider id="barplot1">
                     <BarPlot.UIControlsWrapper legend chartHeight={height} href={this.props.href}>
-                        <BarPlot.Aggregator>
-                            <BarPlot.Chart
-                                width={this.width(1) - 20}
-                                height={height}
-                                schemas={this.props.schemas}
-                                ref="barplotChart"
-                            />
-                        </BarPlot.Aggregator>
+                        <BarPlot.Chart
+                            width={this.width(1) - 20}
+                            height={height}
+                            schemas={this.props.schemas}
+                            ref="barplotChart"
+                        />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
-                <FetchingView display={this.state.fetching} />
-
             </div>
         );
     }

@@ -1,11 +1,13 @@
 import re
 import math
+import itertools
 from pyramid.view import view_config
 from snovault import (
     AbstractCollection,
     TYPES,
     COLLECTIONS
 )
+from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.resource_views import collection_view_listing_db
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
@@ -103,7 +105,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Execute the query
     if size == 'all':
-        es_results = get_all_results(search)
+        es_results = execute_search_for_all_results(search)
     elif size:
         offset_size = from_ + size
         size_search = search[from_:offset_size]
@@ -125,7 +127,11 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     if size not in (None, 'all') and size < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
-        result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
+        if context:
+            result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
+
+    # add actions (namely 'add')
+    result['actions'] = get_collection_actions(request, types[doc_types[0]])
 
     if not result['total']:
         # http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html
@@ -149,9 +155,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         else:
             result['@graph'] = list(graph)
             return result
-
-    if types[doc_types[0]].name in request.registry[COLLECTIONS]:
-        result['actions'] = request.registry[COLLECTIONS][types[doc_types[0]].name].actions(request)
 
     result['@graph'] = list(graph)
     return result
@@ -199,6 +202,14 @@ def get_available_facets(context, request, search_type=None):
     return result
 
 
+def get_collection_actions(request, type_info):
+    collection = request.registry[COLLECTIONS].get(type_info.name)
+    if collection and hasattr(collection, 'actions'):
+        return collection.actions(request)
+    else:
+        return None
+
+
 def get_pagination(request):
     """
     Fill from_ and size parameters for search if given in the query string
@@ -230,29 +241,28 @@ def get_date_range(request):
     return before, after
 
 
-def get_all_results(search):
+def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
     from_ = 0
-    sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
-    size = from_ + sizeIncrement
+    while extra_requests_needed_count > 0:
+        #print(str(extra_requests_needed_count) + " requests left to get all results.")
+        from_ = from_ + size_increment
+        subsequent_search = search[from_:from_ + size_increment]
+        subsequent_search_result = execute_search(subsequent_search)
+        extra_requests_needed_count -= 1
+        for hit in subsequent_search_result['hits'].get('hits', []):
+            yield hit
 
-    first_search = search[from_:size] # get aggregations from here
+def execute_search_for_all_results(search):
+    size_increment = 100 # Decrease this to like 5 or 10 to test.
+
+    first_search = search[0:size_increment] # get aggregations from here
     es_result = execute_search(first_search)
 
-    total = es_result['hits'].get('total',0)
-    extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
+    total_results_expected = es_result['hits'].get('total',0)
+    extra_requests_needed_count = int(math.ceil(total_results_expected / size_increment)) - 1 # Decrease by 1 (first es_result already happened)
 
-    if extraRequestsNeeded <= 0:
-        return es_result
-
-    while extraRequestsNeeded > 0:
-        # print(str(extraRequestsNeeded) + " requests left to get all results.")
-        from_ = from_ + sizeIncrement
-        size = from_ + sizeIncrement
-        subsequent_search = search[from_:size]
-        subsequent_es_result = execute_search(subsequent_search)
-        es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
-        extraRequestsNeeded -= 1
-        # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
+    if extra_requests_needed_count > 0:
+        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, size_increment))
     return es_result
 
 
@@ -508,8 +518,10 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         for rs in requested_sorts:
             add_to_sort_dict(rs)
 
+    text_search = search_term.get('q')
+
     # Otherwise we use a default sort only when there's no text search to be ranked
-    if not sort and (search_term == '*' or not any(search_term)):
+    if not sort and (text_search == '*' or not text_search):
         # If searching for a single type, look for sort options in its schema
         if type_schema:
             if 'sort_by' in type_schema:
@@ -551,6 +563,12 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         'must_not_terms': [],
         'add_no_value': None
     }
+    field_filters['embedded.status.raw'] = { # Exclude status=deleted Items unless explicitly requested/filtered-in.
+        'must_terms': [],
+        'must_not_terms': ['deleted'] if 'deleted' not in request.params.getall('status') else [],
+        'add_no_value': None
+    }
+
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
@@ -898,11 +916,36 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-### stupid things to remove; had to add because of other fxns importing
+def make_search_subreq(request, path):
+    subreq = make_subrequest(request, path)
+    subreq._stats = request._stats
+    subreq.registry = request.registry
+    subreq.context = request.context
+    subreq.headers['Accept'] = 'application/json'
+    return subreq
+
+def get_iterable_search_results(request, search_path='/search/', param_lists={"type":["ExperimentSetReplicate"],"experimentset_type":["replicate"]}):
+    '''
+    Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain.from_iterable to get one big iterable of results.
+    TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
+
+    :param request: Only needed to pass to do_subreq to make a subrequest with.
+    :param search_path: Root path to call, defaults to /search/ (can also use /browse/).
+    :param param_lists: Dictionary of param:lists_of_vals which is converted to URL query.
+    :param search_results_chunk_row_size: Amount of results to get per chunk. Default should be fine.
+    '''
+    param_lists['limit'] = ['all']
+    param_lists['from'] = [0]
+    param_lists['sort'] = param_lists.get('sort','uuid')
+    subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
+    return iter_search_results(None, subreq)
+
 
 # Update? used in ./batch_download.py
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
+
+### stupid things to remove; had to add because of other fxns importing
 
 # DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):

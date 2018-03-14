@@ -1,6 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
+from encoded.commands.upgrade_test_inserts import get_inserts
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
@@ -246,6 +247,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     res = htmltestapp.get('/metadata/type=ExperimentSet/metadata.tsv')
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
+    info_row = result_rows.pop(0)
     header_row = result_rows.pop(0)
 
     assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'
@@ -335,3 +337,47 @@ def test_search_with_no_value(workbook, testapp):
     assert(not check_item.get('publications_of_exp'))
     res_ids3 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
     assert(set(res_ids3) <= set(res_ids))
+
+
+
+
+######################################
+## Search-based visualization tests ##
+######################################
+
+
+def test_barplot_aggregation_endpoint(workbook, testapp):
+
+    # Check what we get back -
+    search_result = testapp.get('/browse/?type=ExperimentSetReplicate').json
+    search_result_count = len(search_result['@graph'])
+
+    # We should get back same count as from search results here. But on Travis oftentime we don't, so we compare either against count of inserts --or-- count returned from regular results.
+    exp_set_test_inserts = list(get_inserts('inserts', 'experiment_set_replicate'))
+    count_exp_set_test_inserts = len(exp_set_test_inserts)
+
+    # Now, test the endpoint after ensuring we have the data correctly loaded into ES.
+    # We should get back same count as from search results here.
+
+    res = testapp.get('/bar_plot_aggregations/type=ExperimentSetReplicate/?field=experiments_in_set.experiment_type&field=award.project').json # Default
+
+    # Our total count for experiment_sets should match # of exp_set_replicate inserts.abs
+
+    assert (res['total']['experiment_sets'] == count_exp_set_test_inserts) or (res['total']['experiment_sets'] == search_result_count)
+
+    assert res['field'] == 'experiments_in_set.experiment_type' # top level field
+
+    assert isinstance(res['terms'], dict) is True
+
+    assert len(res["terms"].keys()) > 1
+
+    #assert isinstance(res['terms']["CHIP-seq"], dict) is True # A common term likely to be found.
+
+    #assert res["terms"]["CHIP-seq"]["field"] == "award.project" # Child-field
+
+    # We only have 4DN as single award.project in test inserts so should have values in all buckets, though probably less than total.
+    #assert res["terms"]["CHIP-seq"]["total"]["experiment_sets"] > 0
+    #assert res["terms"]["CHIP-seq"]["total"]["experiment_sets"] < count_exp_set_test_inserts
+
+    #assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] > 0
+    #assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] < count_exp_set_test_inserts

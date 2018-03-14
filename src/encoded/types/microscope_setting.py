@@ -7,13 +7,14 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    ALLOW_SUBMITTER_ADD
 )
 
 
 @abstract_collection(
     name='microscope-settings',
+    acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': "Microscope Settings",
         'description': 'Collection of Metadata for microscope settings.',
@@ -22,7 +23,7 @@ class MicroscopeSetting(Item):
     """the base class for microscope settings collection."""
     base_types = ['MicroscopeSetting'] + Item.base_types
     schema = load_schema('encoded:schemas/microscope_setting.json')
-    embedded_list = []
+    embedded_list = ['award.project']
 
 
 @collection(

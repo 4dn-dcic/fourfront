@@ -5,15 +5,18 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
 from snovault.util import simple_path_ids
-from snovault.embed import make_subrequest
 from itertools import chain
 
 from urllib.parse import (
     parse_qs,
     urlencode,
 )
-from .search import iter_search_results
-from .search import list_visible_columns_for_schemas
+from .search import (
+    iter_search_results,
+    list_visible_columns_for_schemas,
+    get_iterable_search_results,
+    make_search_subreq
+)
 
 import csv
 import io
@@ -33,36 +36,37 @@ def includeme(config):
     config.add_route('report_download', '/report.tsv')
     config.scan(__name__)
 
+EXP_SET = 0
+EXP     = 1
+FILE    = 2
 
 # includes concatenated properties
-_tsv_mapping = OrderedDict([
-    ('File Download URL', ['experiments_in_set.files.href']),
-    ('Experiment Set Accession', ['accession']),
-    ('Experiment Accession', ['experiments_in_set.accession']),
-    ('File Accession', ['experiments_in_set.files.accession']),
-    ('Size', ['experiments_in_set.files.file_size']),
-    ('md5sum', ['experiments_in_set.files.md5sum']),
+TSV_MAPPING = OrderedDict([
+    ('File Download URL',           (FILE,      ['href'])),
+    ('Experiment Set Accession',    (EXP_SET,   ['accession'])),
+    ('Experiment Accession',        (EXP,       ['accession'])),
+    ('File Accession',              (FILE,      ['accession'])),
 
-    ('File Format', ['experiments_in_set.files.file_format']),
-    #('Output type', ['output_type']),
-    ('Experiment Title', ['experiments_in_set.display_title']),
-    ('Experiment Type', ['experiments_in_set.experiment_type']),
-    ('Bio Rep No', ['replicate_exps.bio_rep_no']),
-    ('Tech Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
+    ('Size',                        (FILE,      ['file_size'])),
+    ('md5sum',                      (FILE,      ['md5sum'])),
+    ('File Format',                 (FILE,      ['file_format'])),
+    ('Experiment Title',            (EXP,       ['display_title'])),
+    ('Experiment Type',             (EXP,       ['experiment_type'])),
+    ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
+    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession'])),
 
-    #('Assay', ['assay_term_name']),
-    #('Biosample term id', ['biosample_term_id']),
-    #('Biosample term name', ['biosample_term_name']),
-    ('Biosource', ['experiments_in_set.biosample.biosource_summary']),
-    ('Biosource Type', ['experiments_in_set.biosample.biosource.biosource_type']),
-    ('Organism', ['experiments_in_set.biosample.biosource.individual.organism.name']),
-    ('Digestion Enzyme', ['experiments_in_set.digestion_enzyme.name']),
-    ('Related File Relationship', ['experiments_in_set.files.related_files.relationship_type']),
-    ('Related File', ['experiments_in_set.files.related_files.file.accession']),
-    ('Paired end', ['experiments_in_set.files.paired_end']),
-    ('Lab', ['lab.title']),
-    ('Project', ['award.project']),
-    ('Status', ['status']),
+    ('Biosource',                   (EXP,       ['biosample.biosource_summary'])),
+    ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'])),
+    ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'])),
+    ('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
+    ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
+    ('Related File',                (FILE,      ['related_files.file.accession'])),
+    ('Paired end',                  (FILE,      ['paired_end'])),
+    ('Lab',                         (EXP_SET,   ['lab.title'])),
+    ('Project',                     (EXP_SET,   ['award.project'])),
+    ('Set Status',                  (EXP_SET,   ['status'])),
+    ('File Status',                 (FILE,      ['status'])),
+    #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
     #('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
@@ -95,6 +99,12 @@ _tsv_mapping = OrderedDict([
     #('Assembly', ['files.assembly']),
     #('Platform', ['files.platform.title'])
 ])
+
+EXTRA_FIELDS = {
+    EXP_SET : [],
+    EXP     : [],
+    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum']
+}
 
 
 def get_file_uuids(result_dict):
@@ -201,19 +211,18 @@ endpoints_initialized = {
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
 
-    search_results_chunk_row_size = 100
-    param_list = parse_qs(request.matchdict['search_params'])
+    search_params = parse_qs(request.matchdict['search_params'])
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
     filename_to_suggest = None
     if ( # Check if triples are in URL.
-        param_list.get('accession') is not None and
-        param_list.get('experiments_in_set.accession') is not None and
-        param_list.get('experiments_in_set.files.accession') is not None and
-        len(param_list['accession']) == len(param_list['experiments_in_set.accession']) == len(param_list['experiments_in_set.files.accession'])
+        search_params.get('accession') is not None and
+        search_params.get('experiments_in_set.accession') is not None and
+        search_params.get('experiments_in_set.files.accession') is not None and
+        len(search_params['accession']) == len(search_params['experiments_in_set.accession']) == len(search_params['experiments_in_set.files.accession'])
     ):
-        accession_triples = list(zip(param_list['accession'], param_list['experiments_in_set.accession'], param_list['experiments_in_set.files.accession']))
+        accession_triples = list(zip(search_params['accession'], search_params['experiments_in_set.accession'], search_params['experiments_in_set.files.accession']))
 
     if not accession_triples:
         body = None
@@ -227,64 +236,71 @@ def metadata_tsv(context, request):
             except:
                 pass
         if body is not None and body.get('accession_triples'):
-            accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
+            accession_triples = [ (accDict.get('accession', 'NONE'), accDict.get('experiments_in_set.accession', 'NONE'), accDict.get('experiments_in_set.files.accession', 'NONE') ) for accDict in body['accession_triples'] ]
         if body is not None and body.get('download_file_name'):
             filename_to_suggest = body['download_file_name']
 
-    if 'referrer' in param_list:
-        search_path = '/{}/'.format(param_list.pop('referrer')[0])
+    if 'referrer' in search_params:
+        search_path = '/{}/'.format(search_params.pop('referrer')[0])
     else:
         search_path = '/search/'
-    param_list['field'] = []
+    search_params['field'] = []
+    search_params['sort'] = ['accession']
     header = []
-    for prop in _tsv_mapping:
+
+    def add_field_to_search_params(itemType, field):
+        if itemType == EXP_SET:
+            search_params['field'].append(param_field)
+        if itemType == EXP:
+            search_params['field'].append('experiments_in_set.' + param_field)
+        if itemType == FILE:
+            search_params['field'].append('experiments_in_set.files.' + param_field)
+            search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+            search_params['field'].append('processed_files.' + param_field)
+
+    for prop in TSV_MAPPING:
         header.append(prop)
-        param_list['field'] = param_list['field'] + _tsv_mapping[prop]
-        for param_field in _tsv_mapping[prop]:
-            if 'experiments_in_set.files.' in param_field:
-                param_list['field'].append(param_field.replace('experiments_in_set.files.', 'experiments_in_set.processed_files.'))
-                param_list['field'].append(param_field.replace('experiments_in_set.files.', 'processed_files.'))
-    param_list['limit'] = [search_results_chunk_row_size]
+        for param_field in TSV_MAPPING[prop][1]:
+            add_field_to_search_params(TSV_MAPPING[prop][0], param_field)
+    for itemType in EXTRA_FIELDS:
+        for param_field in EXTRA_FIELDS[itemType]:
+            add_field_to_search_params(itemType, param_field)
 
     # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
     #if accession_triples and len(accession_triples) < 20:
-    #    param_list['accession'] = [ triple[0] for triple in accession_triples ]
-    #    param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
-    #    param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
-
-    initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
-
-    def do_subreq(path):
-        nonlocal request
-        if not endpoints_initialized['metadata']:
-            endpoints_initialized['metadata'] = True
-            do_subreq(path) # Do an extra time because for some reason (we get incomplete results from /search/ on first request after bootup/deploy).
-        subreq = make_subrequest(request, path)
-        subreq._stats = request._stats
-        subreq.headers['Accept'] = 'application/json'
-        return request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
-
-    def get_search_results():
-        '''Loops through search results, 100 (search_results_chunk_row_size) at a time.'''
-        nonlocal request
-        nonlocal initial_path
-        initial_result = do_subreq(initial_path)
-        search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
-        yield initial_result.get('@graph', [])
-        while search_result_rows_count_remaining > 0:
-            param_list['from'] = [param_list.get('from', 0) + search_results_chunk_row_size]
-            search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
-            yield do_subreq('{}?{}'.format(search_path, urlencode(param_list, True))).get('@graph', [])
+    #    search_params['accession'] = [ triple[0] for triple in accession_triples ]
+    #    search_params['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
+    #    search_params['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
 
 
-    def get_value_for_column(item, col, columnKeyStart = 0):
+
+    file_cache = {} # Exclude URLs of prev-encountered file(s).
+    summary = {
+        'counts' : {
+            'Files Selected for Download' : len(accession_triples) if accession_triples else None,
+            'Total Files' : 0,
+            'Total Unique Files to Download' : 0,
+            'Duplicate Files' : 0,
+            'Not Yet Uploaded' : 0,
+            'Extra Files' : 0
+        }
+    }
+
+    if filename_to_suggest is None:
+        filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
+
+    def get_values_for_field(item, field):
+        c_value = []
+        for value in simple_path_ids(item, field):
+            if str(value) not in c_value:
+                c_value.append(str(value))
+        return list(set(c_value))
+
+    def get_value_for_column(item, col):
         temp = []
-        for c in _tsv_mapping[col]:
-            c_value = []
-            for value in simple_path_ids(item, c[columnKeyStart:]):
-                if str(value) not in c_value:
-                    c_value.append(str(value))
+        for c in TSV_MAPPING[col][1]:
+            c_value = get_values_for_field(item, c)
             if len(temp):
                 if len(c_value):
                     temp = [x + ' ' + c_value[0] for x in temp]
@@ -308,54 +324,61 @@ def metadata_tsv(context, request):
         '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
-        for triple in accession_triples:
+        for set_accession, exp_accession, file_accession in accession_triples:
             if (
-                triple[0] == column_vals_dict['Experiment Set Accession'] and
-                (triple[1] == column_vals_dict['Experiment Accession'] or triple[1] == 'NONE') and
-                triple[2] == column_vals_dict['File Accession']
+                (set_accession  == column_vals_dict['Experiment Set Accession'] or set_accession  == 'NONE') and
+                (exp_accession  == column_vals_dict['Experiment Accession']     or exp_accession  == 'NONE') and
+                (file_accession == column_vals_dict['File Accession']           or file_accession == 'NONE')
             ):
                 return True
         return False
 
     def format_experiment_set(exp_set):
         exp_set_row_vals = {}
-        for column in header:
-            if not _tsv_mapping[column][0].startswith('experiments_in_set'):
-                exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
+        exp_set_cols = [ col for col in header if TSV_MAPPING[col][0] == EXP_SET ]
+        for column in exp_set_cols:
+            exp_set_row_vals[column] = get_value_for_column(exp_set, column)
 
         # Flatten map's child result maps up to self.
         return chain(
             chain.from_iterable(
                 map(
                     lambda exp: format_experiment(exp, exp_set, exp_set_row_vals),
-                    sorted(exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
+                    sorted( exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
                 )
             ),
-            map(
-                lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
-                sorted(exp_set.get('processed_files', []), key=lambda d: d.get("accession") )
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
+                    sorted(exp_set.get('processed_files', []), key=lambda d: d.get("accession") )
+                )
             )
         )
 
 
     def format_experiment(exp, exp_set, exp_set_row_vals):
         exp_row_vals = {}
-        for column in header:
-            if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
-                exp_row_vals[column] = get_value_for_column(exp, column, 19)
+        exp_cols = [ col for col in header if TSV_MAPPING[col][0] == EXP ]
+        for column in exp_cols:
+            exp_row_vals[column] = get_value_for_column(exp, column)
 
-        return map(
-            lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
-            sorted(exp.get('files', []) + exp.get('processed_files', []), key=lambda d: d.get("accession") )
+        return chain.from_iterable(
+            map(
+                lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
+                sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+            )
         )
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
+        files_returned = []
         f['href'] = request.host_url + f['href']
         f_row_vals = {}
-        for column in header:
-            if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
-                exp_row_vals[column] = get_value_for_column(f, column, 25)
+        file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE ]
+        for column in file_cols:
+            f_row_vals[column] = get_value_for_column(f, column)
+
+        #print('\n\n\nP1', f_row_vals, '\n', f)
 
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
 
@@ -364,34 +387,124 @@ def metadata_tsv(context, request):
             all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
             all_row_vals['Bio Rep No'] = get_correct_rep_no('Bio Rep No', all_row_vals, exp_set)
 
-        return all_row_vals
+        # If no EXP properties, likely is processed file from an ExpSet, so show all Exps' values.
+        if all_row_vals.get('Experiment Type') is None:
+            all_row_vals['Experiment Type'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.experiment_type'))
+        if all_row_vals.get('Biosource Type') is None:
+            all_row_vals['Biosource Type'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.biosample.biosource.biosource_type'))
+        if all_row_vals.get('Digestion Enzyme') is None:
+            all_row_vals['Digestion Enzyme'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.digestion_enzyme.name'))
+
+        files_returned.append(all_row_vals)
+
+        # Add secondary files, if any
+        if f.get('extra_files') and len(f['extra_files']) > 0:
+            for xfile in f['extra_files']:
+                xfile_vals = all_row_vals.copy()
+                xfile_vals['File Download URL'] = request.host_url + xfile['href'] if xfile.get('href') else None
+                xfile_vals['File Format'] = xfile.get('file_format')
+                xfile_vals['md5sum'] = xfile.get('md5sum')
+                xfile_vals['Related File Relationship'] = 'secondary file for'
+                xfile_vals['Related File'] = all_row_vals.get('File Accession')
+                files_returned.append(xfile_vals)
+
+        return files_returned
+
+    def post_process_file_row_dict(file_row_dict_tuple):
+        idx, file_row_dict = file_row_dict_tuple
+
+        if file_row_dict['Related File Relationship'] == 'secondary file for':
+            summary['counts']['Extra Files'] += 1
+
+        if file_row_dict['File Download URL'] is None:
+            file_row_dict['File Download URL'] = '## No URL currently available'
+            summary['counts']['Not Yet Uploaded'] += 1
+            summary['counts']['Total Files'] += 1
+            return file_row_dict
+
+        if file_cache.get(file_row_dict['File Download URL']) is not None:
+            file_row_dict['File Download URL'] = '## Duplicate of row ' + str(file_cache[file_row_dict['File Download URL']] + 3) + ': ' + file_row_dict['File Download URL']
+            summary['counts']['Duplicate Files'] += 1
+            summary['counts']['Total Files'] += 1
+            return file_row_dict
+
+        file_cache[file_row_dict['File Download URL']] = idx
+
+        if file_row_dict['File Status'] in ['uploading', 'to be uploaded', 'upload failed']:
+            file_row_dict['File Download URL'] = '## Not Yet Uploaded: ' + file_row_dict['File Download URL']
+            summary['counts']['Not Yet Uploaded'] += 1
+            summary['counts']['Total Files'] += 1
+            return file_row_dict
+
+        summary['counts']['Total Unique Files to Download'] += 1
+        summary['counts']['Total Files'] += 1
+
+        return file_row_dict
 
     def format_graph_of_experiment_sets(graph):
         return map(
-            lambda file_row_object: [ file_row_object.get(column, 'N/A') for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
-            filter(
+            post_process_file_row_dict,
+            enumerate(filter(
                 should_file_row_object_be_included,
                 chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
-            )
+            ))
         )
 
-    def stream_tsv_output(rows):
+    def generate_summary_lines():
+        ret_rows = [
+            ['',   '',         ''],
+            ['',   'Summary',  ''],
+            ['',   '',         ''],
+            ['',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download'] or 'All'), ''],
+            ['',   'Total File Rows:', '', '',            str(summary['counts']['Total Files']), ''],
+            ['',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
+        ]
+
+        if summary['counts']['Extra Files'] > 0:
+            ret_rows.append(['', '- Added {} extra file{} which {} attached to a primary selected file.'.format(str(summary['counts']['Extra Files']), 's' if summary['counts']['Extra Files'] > 1 else '', 'are' if summary['counts']['Extra Files'] > 1 else 'is'), ''])
+        if summary['counts']['Duplicate Files'] > 0:
+            ret_rows.append(['', '- Commented out {} duplicate file{}.'.format(str(summary['counts']['Duplicate Files']), 's' if summary['counts']['Duplicate Files'] > 1 else ''), ''])
+        if summary['counts']['Not Yet Uploaded'] > 0:
+            ret_rows.append(['', '- Commented out {} file{} which are not yet available.'.format(str(summary['counts']['Not Yet Uploaded']), 's' if summary['counts']['Not Yet Uploaded'] > 1 else ''), ''])
+
+        return ret_rows
+
+    def stream_tsv_output(file_row_dictionaries):
+        '''
+        Generator which converts file-metatada dictionaries into a TSV stream.
+        :param file_row_dictionaries: Iterable of dictionaries, each containing TSV_MAPPING keys and values from a file in ExperimentSet.
+        '''
         line = DummyFileInterfaceImplementation()
         writer = csv.writer(line, delimiter='\t')
+
+        # Initial 2 lines: Intro, Headers
+        writer.writerow([
+            'File summary located at bottom of TSV file.', '', '', '', '',
+            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | grep -v ^$ | xargs -n 1 curl -O -L [--user <access_key_id>:<access_key_secret>]'.format(filename_to_suggest)
+        ])
+        yield line.read().encode('utf-8')
         writer.writerow(header)
         yield line.read().encode('utf-8')
-        for row in rows:
-            writer.writerow(row)
+
+        for file_row_dict in file_row_dictionaries:
+            writer.writerow([ file_row_dict.get(column) or 'N/A' for column in header ])
             yield line.read().encode('utf-8')
 
-    if filename_to_suggest is None:
-        filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
+        for summary_line in generate_summary_lines():
+            writer.writerow(summary_line)
+            yield line.read().encode('utf-8')
+
+
+    if not endpoints_initialized['metadata']: # For some reason first result after bootup returns empty, so we do once extra for first request.
+        initial_path = '{}?{}'.format(search_path, urlencode(dict(search_params, limit=10), True))
+        endpoints_initialized['metadata'] = True
+        request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
 
     return Response(
         content_type='text/tsv',
         app_iter = stream_tsv_output(
             format_graph_of_experiment_sets(
-                chain.from_iterable(get_search_results())
+                get_iterable_search_results(request, search_path, search_params)
             )
         ),
         content_disposition='attachment;filename="%s"' % filename_to_suggest

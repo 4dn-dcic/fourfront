@@ -14,7 +14,7 @@ import { isServerSide, expFxn, Filters, navigate, object, layout } from './../ut
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
     SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
-    FacetList, ReduxExpSetFiltersInterface
+    FacetList, onFilterHandlerMixin
 } from './components';
 
 
@@ -40,16 +40,11 @@ export class ExperimentSetCheckBox extends React.Component {
     static isIndeterminate(selectedFiles: Array, allFiles){ return selectedFiles.length > 0 && selectedFiles.length < allFiles.length; }
 
     render(){
-        var props = this.props;
+        var { checked, disabled, onChange, indeterminate } = this.props;
         return(
-            <input
-                className="expset-checkbox"
-                checked={props.checked}
-                disabled={props.disabled}
-                onChange={props.onChange}
-                type="checkbox"
-                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}}
-            />
+            <input {...{ checked, disabled, onChange }} type="checkbox" className="expset-checkbox" ref={function(r){
+                if (r) r.indeterminate = (checked ? false : indeterminate);
+            }} />
         );
     }
 }
@@ -109,16 +104,7 @@ class ResultTableContainer extends React.Component {
                     var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
                     
                     if (isNaN(number_of_files) || !number_of_files){
-                        var number_of_experiments = parseInt(expSet.number_of_experiments);
-                        if (isNaN(number_of_experiments) || !number_of_experiments){
-                            number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
-                        }
-                        if (number_of_experiments || Array.isArray(expSet.processed_files)){
-                            number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, true);
-                        } else {
-                            number_of_files = 0;
-                        }
-                        
+                        number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, false);
                     }
                     if (!number_of_files){
                         number_of_files = 0;
@@ -135,6 +121,7 @@ class ResultTableContainer extends React.Component {
         super(props);
         this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
+        this.onFilter = onFilterHandlerMixin.bind(this);
         this.hiddenColumns = this.hiddenColumns.bind(this);
         this.render = this.render.bind(this);
     }
@@ -154,15 +141,8 @@ class ResultTableContainer extends React.Component {
     }
     */
 
-    isTermSelected(termKey, facetField, expsOrSets = 'sets'){
-        var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
-        if (
-            this.props.expSetFilters[standardizedFieldKey] &&
-            this.props.expSetFilters[standardizedFieldKey].has(termKey)
-        ){
-            return true;
-        }
-        return false;
+    isTermSelected(term, facet){
+        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
     }
 
     colDefOverrides(){
@@ -240,32 +220,34 @@ class ResultTableContainer extends React.Component {
     }
 
     render() {
-        var facets = this.props.context.facets;
-        var results = this.props.context['@graph'];
+        var context = this.props.context;
+        var facets = context.facets;
+        var results = context['@graph'];
         
         return (
             <div className="row">
                 { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <ReduxExpSetFiltersInterface
-                            experimentSets={results}
-                            expSetFilters={this.props.expSetFilters}
+                        <FacetList
+                            orientation="vertical"
                             facets={facets}
-                            href={this.props.href}
-                            schemas={this.props.schemas}
+                            filters={context.filters}
+                            className="with-header-bg"
+                            isTermSelected={this.isTermSelected}
+                            onFilter={this.onFilter}
+                            itemTypeForSchemas="ExperimentSetReplicates"
                             session={this.props.session}
-                        >
-                            <FacetList
-                                orientation="vertical"
-                                browseFilters={{
-                                    filters : this.props.context.filters || null,
-                                    clear_filters : this.props.context.clear_filters || null
-                                }}
-                                className="with-header-bg"
-                                isTermSelected={this.isTermSelected}
-                            />
-                        </ReduxExpSetFiltersInterface>
+                            href={this.props.href || this.props.searchBase}
+                            browseBaseState={this.props.browseBaseState}
+                            schemas={this.props.schemas}
+                            showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
+                            onClearFilters={(evt)=>{
+                                evt.preventDefault();
+                                evt.stopPropagation();
+                                this.props.navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true, 'dontScrollToTop' : true });
+                            }}
+                        />
                     </div>
                     :
                     null
@@ -273,8 +255,8 @@ class ResultTableContainer extends React.Component {
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
                     <AboveTableControls
                         {..._.pick(this.props,
-                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile'
+                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href',
+                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles'
                         )}
                         parentForceUpdate={this.forceUpdate.bind(this)}
                         columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
@@ -292,7 +274,7 @@ class ResultTableContainer extends React.Component {
                             <ExperimentSetDetailPane
                                 result={result}
                                 containerWidth={containerWidth}
-                                expSetFilters={this.props.expSetFilters}
+                                href={this.props.href || this.props.searchBase}
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
@@ -321,138 +303,133 @@ class ResultTableContainer extends React.Component {
 
 
 
-class ControlsAndResults extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
-    render(){
-
-        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status', 'number_of_files'];
-        /*
-        var hiddenColumns = [];
-        // Hide columns by default which have same value for all items.
-        if (this.props.context && this.props.context.columns && this.props.context.facets){
-            hiddenColumns = _.pluck(_.filter(this.props.context.facets, (facet)=>{
-                return (facet.terms.length <= 1 && typeof this.props.context.columns[facet.field] !== 'undefined');
-            }), 'field');
-        }
-        */
-
-
-
-        //var fileStats = this.state.fileStats;
-        //var targetFiles = this.state.filesToFind;
-        //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
-        //    var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
-        //    return(
-        //        <FileButton key={format} defaults={targetFiles} fxn={this.selectFiles} format={format} count={count}/>
-        //    );
-        //}.bind(this));
-        // var deselectButton = <Button className="expset-selector-button" bsSize="xsmall">Deselect</Button>;
-        var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
-        return(
-            <div>
-
-                {/*<div className="row">
-                    <div className="box expset-whole-selector col-sm-12 col-md-10 col-lg-9 col-md-push-2 col-lg-push-3">
-                        <div className="col-sm-8 col-md-8 col-lg-8 expset-file-selector">
-                            <div className="row">
-                                <div className="expset-selector-header">
-                                    <h5>For all experiments, display files of type:</h5>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <ButtonToolbar>{selectorButtons}</ButtonToolbar>
-                            </div>
-                        </div>
-                        <div className="col-sm-3 col-md-3 col-lg-3">
-                            <div className="row">
-                                <div className="expset-selector-header">
-                                    <h5>For all selected files:</h5>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <ButtonToolbar>
-                                    {downloadButton}
-                                </ButtonToolbar>
-                            </div>
-                        </div>
-                    </div>
-                </div>*/}
-
-                <SelectedFilesController href={this.props.href}>
-                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
-                        <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer
-                                expSetFilters={this.props.expSetFilters}
-                                session={this.props.session}
-                                schemas={this.props.schemas}
-                            />
-                        </SortController>
-                    </CustomColumnController>
-                </SelectedFilesController>
-            </div>
-
-        );
-    }
-
-}
-
 
 
 export default class BrowseView extends React.Component {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,
-        'expSetFilters' : PropTypes.object,
         'session' : PropTypes.bool,
         'schemas' : PropTypes.object,
         'href' : PropTypes.string.isRequired
     }
 
+    static defaultProps = {
+        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'status', 'number_of_files']
+    }
+
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.context !== nextProps.context) return true;
-        if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
         if (this.props.session !== nextProps.session) return true;
         if (this.props.href !== nextProps.href) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
-    render() {
+    componentDidMount(){
+        var hrefParts = url.parse(this.props.href, true);
+        if (!navigate.isValidBrowseQuery(hrefParts.query)){
+            this.redirectToCorrectBrowseView(hrefParts);
+        }
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.href !== this.props.href){
+            var hrefParts = url.parse(this.props.href, true);
+            if (!navigate.isValidBrowseQuery(hrefParts.query)){
+                this.redirectToCorrectBrowseView(hrefParts);
+            }
+        }
+    }
+
+    redirectToCorrectBrowseView(hrefParts = null){
+        if (!hrefParts) hrefParts = url.parse(this.props.href, true);
+
         var context = this.props.context;
+
+        // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
+        //var availableProjectsInResults = Array.isArray(context.facets) ? _.uniq(_.pluck(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key')) : [];
+        //if (this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1){
+        //    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+        //    return;
+        //}
+
+        var nextBrowseHref = navigate.getBrowseBaseHref();
+        var expSetFilters = Filters.contextFiltersToExpSetFilters();
+        if (_.keys(expSetFilters).length > 0){
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
+        }
+        if (typeof hrefParts.query.q === 'string'){
+            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
+        }
+        navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
+    }
+
+    renderNoResultsView(currentHrefQuery = null){
+        if (!currentHrefQuery) currentHrefQuery = url.parse(this.props.href, true).query;
+        var context = this.props.context;
+        var hrefParts = url.parse(this.props.href, true);
+        var seeSearchResults = null;
+        var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
+        if (_.keys(strippedQuery).length > 0){
+            seeSearchResults = <li><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all Items</a> (advanced).</li>;
+        }
+
+        // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
+        var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
+        var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
+        var setsExistInExternalData = this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1;
+        var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
+
+        return (
+            <div className="error-page mt-4">
+                <div className="clearfix">
+                    <hr/>
+                    <h3 className="text-500 mb-15 mt-42">{ context.notification }</h3>
+                    { countExternalSets > 0 ?
+                        <h4 className="text-400 mt-2 mb-05">
+                            However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
+                        </h4>
+                    : null}
+                    <h4 className="mt-1 mb-05 text-400">Suggestions:</h4>
+                    <ul className="mb-45 mt-1">
+                        { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
+                            <li>
+                                Keep filters and <a href="#" onClick={(e)=>{
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+                                }}>browse <strong>all Experiment Sets</strong></a>, including External data.
+                            </li>
+                        : null }
+                        <li>Unset filters and <a href={navigate.getBrowseBaseHref()}>browse <strong>all 4DN Experiment Sets</strong></a>.</li>
+                        { seeSearchResults }
+                    </ul>
+                    <hr/>
+                </div>
+            </div>
+        );
+    }
+
+    render() {
+        var { context, href, session, defaultHiddenColumns, browseBaseState, schemas } = this.props;
         //var fileFormats = findFormats(context['@graph']);
         var results = context['@graph'];
-        var hrefParts = url.parse(this.props.href, true);
+        var hrefParts = url.parse(href, true);
         var searchBase = hrefParts.search || '';
 
         // no results found!
-        if(context.total === 0 && context.notification){
-            var seeSearchResults = null;
-            var strippedQuery = (_.omit(hrefParts.query, 'type', 'experimentset_type'));
-            if (_.keys(strippedQuery).length > 0){
-                seeSearchResults = <h4 className="text-400 mt-05"><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all items</a> instead</h4>;
-            }
-            return (
-                <div className="error-page text-center">
-                    <h3 className="text-500 mb-0">{context.notification}</h3>
-                    { seeSearchResults }
-                </div>
-            );
-        }
-        
+        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts.query);
 
         // browse is only for experiment sets
-        if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
+        if(!navigate.isValidBrowseQuery(hrefParts.query)){
             return(
                 <div className="error-page text-center">
-                    <h4>
-                        <a href='/browse/?type=ExperimentSetReplicate'>
-                            Only experiment sets may be browsed.
-                        </a>
+                    <h3 className="text-300">
+                        Redirecting
+                    </h3>
+                    <h4 className="text-400">
+                        Please wait...
                     </h4>
                 </div>
             );
@@ -460,12 +437,21 @@ export default class BrowseView extends React.Component {
 
         return (
             <div className="browse-page-container search-page-container" id="browsePageContainer">
+                {/*
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}
                     href={this.props.href}
                     schemas={this.props.schemas}
                 />
+                */}
+                <SelectedFilesController href={href}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
+                        <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
+                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} />
+                        </SortController>
+                    </CustomColumnController>
+                </SelectedFilesController>
             </div>
         );
     }

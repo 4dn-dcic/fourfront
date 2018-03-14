@@ -8,7 +8,7 @@
         "award": "1U01CA200059-01",
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa0",
-        "status": "uploaded",
+        "status": "released",
         "filename": "test_file1.fastq.gz",
         "paired_end": "1",
         "content_md5sum": "4012ee7a157cd60a9969dcf68d4a5732",
@@ -24,7 +24,7 @@
         "award": "1U01CA200059-01",
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa1",
-        "status": "uploaded",
+        "status": "released",
         "filename": "test_file2.fastq.gz",
         "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq1"}],
         "paired_end": "2"

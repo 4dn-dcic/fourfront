@@ -25,7 +25,8 @@
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
-        { "$ref": "experiment.json#/facets"}
+        { "$ref": "experiment.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
@@ -64,13 +65,13 @@
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
-            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "description":  "YYYY-MM-DD formatted date of library preparation.",
             "type": "string",
             "format": "date"
         },
         "pcr_cycles": {
             "title": "PCR Cycles for Final amplification",
-            "description": "Number of PCR Cycles used for additional amplification after qPCR",
+            "description": "Number of PCR Cycles used for additional amplification after qPCR before sequencing",
             "type": "integer"
         },
         "primer_removal_method": {

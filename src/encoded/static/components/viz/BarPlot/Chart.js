@@ -6,9 +6,9 @@ import _ from 'underscore';
 import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
+import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
 import { console, object, isServerSide, expFxn, Schemas, layout, navigate } from './../../util';
-import { firstPopulatedFieldIndex, genChartData } from './aggregation-functions';
 import { PopoverViewContainer } from './ViewContainer';
 
 
@@ -27,7 +27,7 @@ import { PopoverViewContainer } from './ViewContainer';
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
 export function genChartBarDims(
-    fields,
+    rootField,
     availWidth              = 400,
     availHeight             = 400,
     styleOpts               = Chart.getDefaultStyleOpts(),
@@ -35,17 +35,12 @@ export function genChartBarDims(
     useOnlyPopulatedFields  = false,
     fullHeightCount         = null
 ){
-    
-    var topIndex = 0;
 
-    if (useOnlyPopulatedFields) {
-        topIndex = firstPopulatedFieldIndex(fields);
-    }
     
-    var numberOfTerms = _.keys(fields[topIndex].terms).length;
+    var numberOfTerms = _.keys(rootField.terms).length;
     var largestExpCountForATerm = typeof fullHeightCount === 'number' ?
         fullHeightCount
-        : _.reduce(fields[topIndex].terms, function(m,t){
+        : _.reduce(rootField.terms, function(m,t){
             return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
         }, 0);
 
@@ -57,6 +52,13 @@ export function genChartBarDims(
     var availWidthPerBar = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap);
     var barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
     var barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
+
+    var sortByAggrCount = function(b){
+        if (typeof b[aggregateType] === 'number'){
+            return b[aggregateType];
+        }
+        return b.term;
+    };
 
     function genBarData(fieldObj, outerDims = insetDims, parent = null){
         return _(fieldObj.terms).chain()
@@ -91,41 +93,49 @@ export function genChartBarDims(
                 }
                 return barNode;
             })
+            .sortBy('term')
             .sortBy(function(d){ return -d.attr.height; })
             .forEach(function(d,i){
+                if (Array.isArray(d.bars)){
+                    d.bars = _.sortBy(_.sortBy(d.bars, 'term'), sortByAggrCount);
+                }
                 d.attr.x = barXCoords[i];
             })
             .value();
     }
 
     var barData = {
-        'fieldIndex'      : topIndex,
-        'bars'            : genBarData(fields[topIndex], insetDims),
-        'fields'          : fields,
+        'bars'            : genBarData(rootField, insetDims),
+        'field'           : rootField,
         'fullHeightCount' : largestExpCountForATerm
     };
 
-    barData.bars.forEach(function(bar){
 
-        var hasSubSections = Array.isArray(bar.bars);
-
-        if (!hasSubSections) return;
-
-        var sortByAggrCount = function(b){
-            if (typeof b[aggregateType] === 'number'){
-                return -b[aggregateType];
+    // Assign colors based on sub-field total decr. counts
+    var fauxOrderedSubFieldNodesForColorAssignment = _.sortBy(_.sortBy(_.values(_.reduce(barData.bars, function(m,bar){
+        if (!Array.isArray(bar.bars)) return m;
+        _.forEach(bar.bars, function(b){
+            if (typeof m[b.term] === 'undefined'){
+                m[b.term] = {
+                    'count' : 0,
+                    'term' : b.term,
+                    'field' : b.field
+                };
             }
-            return b.term;
-        };
+            m[b.term].count += b[aggregateType] || 0;
+        });
+        return m;
+    }, {})), 'term'), function(n){ return -n.count; });
 
-        bar.bars = vizUtil.sortObjectsByColorPalette(
-            bar.bars.map(function(b){
-                return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
-            })
-        );
+    _.forEach(fauxOrderedSubFieldNodesForColorAssignment, function(n){
+        barplot_color_cycler.colorForNode(n, false);
+    });
 
-        bar.bars = _.sortBy(bar.bars, sortByAggrCount);
-
+    _.forEach(barData.bars, function(bar){
+        if (!Array.isArray(bar.bars)) return;
+        _.forEach(bar.bars, function(b){
+            return _.extend(b, { 'color' : barplot_color_cycler.colorForNode(b) });
+        });
     });
 
 
@@ -160,9 +170,9 @@ export class Chart extends React.Component {
         //return false;
         return !!(
             pastProps.showType !== nextProps.showType ||
-            !_.isEqual(pastProps.experiment_sets, nextProps.experiment_sets) ||
             pastProps.height !== nextProps.height ||
-            !_.isEqual(pastProps.filtered_experiment_sets, nextProps.filtered_experiment_sets)
+            (pastProps.barplot_data_unfiltered && nextProps.barplot_data_unfiltered && pastProps.barplot_data_unfiltered.field !== nextProps.barplot_data_unfiltered.field) ||
+            (pastProps.barplot_data_filtered && nextProps.barplot_data_filtered && pastProps.barplot_data_filtered.field !== nextProps.barplot_data_filtered.field)
         );
     }
 
@@ -184,8 +194,8 @@ export class Chart extends React.Component {
     }
 
     static propTypes = {
-        'experiment_sets'   : PropTypes.array,
-        'filtered_experiment_sets' : PropTypes.array,
+        'barplot_data_unfiltered'   : PropTypes.object,
+        'barplot_data_filtered' : PropTypes.object,
         'fields'        : PropTypes.array,
         'styleOptions'  : PropTypes.shape({
             'gap'           : PropTypes.number,
@@ -225,8 +235,6 @@ export class Chart extends React.Component {
         this.height = this.height.bind(this);
         this.getLegendData = this.getLegendData.bind(this);
         this.getTopLevelField = this.getTopLevelField.bind(this);
-        this.renderAllExperimentsSilhouette = this.renderAllExperimentsSilhouette.bind(this);
-        this.genChartData = this.genChartData.bind(this);
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
         this.renderParts.leftAxis = this.renderParts.leftAxis.bind(this);
         this.render = this.render.bind(this);
@@ -252,11 +260,12 @@ export class Chart extends React.Component {
         //*/
     }
 
-    /**
-     * @deprecated
-     * @instance
-     * @ignore
-     */
+
+    componentWillUpdate(){
+        // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
+        barplot_color_cycler.resetCache();
+    }
+
     componentDidUpdate(pastProps){
 
         ///*
@@ -320,65 +329,6 @@ export class Chart extends React.Component {
         return this.barData.fields[this.barData.fieldIndex].field;
     }
 
-    /**
-     * DEPRECATED!!
-     * Used to help generate "highlighted" selected bars against the output of this: the "all experiments" bars silhoutte.
-     * Used conditionally in BarPlotChart.render to render clones of the BarChart behind the primary bars,
-     * using 'all experiments' data instead of the 'filtered' or 'selected' experiments.
-     * 
-     * @instance
-     * @deprecated
-     * @param {number} width - Width of available chart drawing area.
-     * @param {number} height - Height of available chart drawing area.
-     * @param {Object} [styleOpts] - Style options for the chart, including gap between bars, maximum bar width, etc.
-     * @returns {Object} "All Experiments" bars silhouttes, wrapped in an object also containing barData for all experiments.
-     * @see module:viz/BarPlot.Chart.render
-     * @see module:viz/BarPlot.Chart.genChartData
-     */
-    renderAllExperimentsSilhouette(width, height, styleOpts = null){
-        if (!this.props.filteredExperiments) return null;
-        if (!styleOpts) styleOpts = this.styleOptions();
-
-        var allExperimentsBarData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-            genChartData( // Get counts by term per field.
-                this.props.experiments,
-                this.props.fields,
-                this.props.useOnlyPopulatedFields
-            ),
-            width,
-            height,
-            styleOpts,
-            this.props.aggregateType,
-            this.props.useOnlyPopulatedFields
-        );
-
-        return {
-            'component' : (
-                <div className="silhouette" style={{ 'width' : width, 'height' : height }}>
-                    {
-                        allExperimentsBarData.bars
-                        .map(function(b){
-                            b.attr.width = b.attr.width / 2 - 2;
-
-                            return b;
-                        })
-                        .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
-                        .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
-                    }
-                </div>
-            ),
-            'data' : allExperimentsBarData
-        };   
-    }
-
-    genChartData(){
-        return genChartData( // Get counts by term per field.
-            this.props.showType === 'all' ? this.props.experiment_sets : this.props.filtered_experiment_sets || this.props.experiment_sets,
-            this.props.fields,
-            this.props.useOnlyPopulatedFields
-        );
-    }
-
     /* TODO: Own components */
     renderParts = {
 
@@ -399,7 +349,17 @@ export class Chart extends React.Component {
 
             }
 
-            
+            var barLabelsSortedByTerm = _.map(currentBars, function(b){
+                return {
+                    'name'      : b.name || b.term,
+                    'term'      : b.term,
+                    'x'         : b.attr.x,
+                    'opacity'   : 1 //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                }; 
+            }).sort(function(a,b){
+                return a.term < b.term ? -1 : 1;
+            });
+
             return (
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
@@ -408,19 +368,11 @@ export class Chart extends React.Component {
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
                     <RotatedLabel.Axis
-                        labels={currentBars.map(function(b){ 
-                            return {
-                                name : b.name || b.term,
-                                term : b.term,
-                                x: b.attr.x,
-                                opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
-                                //color : vizUtil.colorForNode(b, true, null, null, true)
-                            }; 
-                        })}
+                        labels={barLabelsSortedByTerm}
                         labelClassName="y-axis-label no-highlight-color"
                         y={5}
                         extraHeight={5}
-                        placementWidth={currentBars[0].attr.width}
+                        placementWidth={(currentBars[0] && currentBars[0].attr.width) || styleOpts.maxBarWidth || Chart.getDefaultStyleOpts().maxBarWidth}
                         placementHeight={styleOpts.offset.bottom}
                         angle={styleOpts.labelRotation}
                         maxLabelWidth={styleOpts.maxLabelWidth || 1000}
@@ -483,63 +435,22 @@ export class Chart extends React.Component {
             availWidth = this.width(),
             styleOpts = this.styleOptions();
 
-        /* For showing FILTERED vs ALL
-        var allExpsBarDataContainer = null;
-        if (
-            this.props.filteredExperiments && this.props.showType === 'both'
-        ){
-            allExpsBarDataContainer = this.renderAllExperimentsSilhouette(availWidth, availHeight, styleOpts);
-        }
-        */
-
-        var chartData = (
-            (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
-        ) || this.genChartData();
+        var topLevelField = (this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered) || this.props.barplot_data_unfiltered;
 
         var barData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-            chartData,
+            topLevelField,
             availWidth,
             availHeight,
             styleOpts,
             this.props.aggregateType,
-            this.props.useOnlyPopulatedFields,
-            //allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.fullHeightCount
+            this.props.useOnlyPopulatedFields
         );
-
-        //console.log('BARDATA', this.props.showType, barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
-
-        /*
-        /* For showing FILTERED vs ALL
-        function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
-            barSet.forEach(function(b){
-                var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
-                _.extend(
-                    b.attr,
-                    {
-                        'width' : allExpsBar.attr.width,
-                        'x' : allExpsBar.attr.x + (allExpsBar.attr.width + 2)
-                    }
-                );
-                if (Array.isArray(b.bars)){
-                    overWriteFilteredBarDimsWithAllExpsBarDims(
-                        b.bars, allExpsBar.bars
-                    );
-                }
-            });
-        }
-
-        if (allExpsBarDataContainer){
-            overWriteFilteredBarDimsWithAllExpsBarDims(
-                allBars, allExpsBarDataContainer.data.bars
-            );
-        }
-        */
 
         return (
             <PopoverViewContainer
                 leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
                 bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
-                topLevelField={this.props.fields[barData.fieldIndex].field}
+                topLevelField={barData.field}
                 width={availWidth}
                 height={availHeight}
                 styleOptions={styleOpts}

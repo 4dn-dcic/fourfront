@@ -14,16 +14,14 @@ import JSONTree from 'react-json-tree';
 
 /**
  * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
- *
- * @class SubItem
- * @extends {React.Component}
  */
-class SubItem extends React.Component {
+class SubItemTitle extends React.Component {
 
     static propTypes = {
         'onToggle' : PropTypes.func,
         'isOpen' : PropTypes.bool,
-        'title' : PropTypes.string
+        'title' : PropTypes.string,
+        'content' : PropTypes.object
     }
 
     componentDidMount(){
@@ -40,16 +38,27 @@ class SubItem extends React.Component {
      * @returns {JSX.Element} React Span element containing expandable link, and maybe open panel below it.
      */
     render() {
-        var { isOpen, title, onToggle, countProperties } = this.props;
+        var { isOpen, title, onToggle, countProperties, content } = this.props;
         var iconType = isOpen ? 'icon-minus' : 'icon-plus';
+        var subtitle = null;
         if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
             title = isOpen ? "Collapse" : "Expand";
+        }
+        if (content && _.any([content.title, content.display_title, content.name], function(p){ return typeof p === 'string'; })) {
+            subtitle = (
+                <span className="text-600">
+                    {
+                        typeof content.title === 'string' ? content.title :
+                            typeof content.display_title === 'string' ? content.display_title : content.name
+                    }
+                </span>
+            );
         }
         return (
             <span className="subitem-toggle">
                 <span className="link" onClick={onToggle}>
                     <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
-                    { title } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
+                    { title } { subtitle } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
                 </span>
             </span>
         );
@@ -120,10 +129,18 @@ class SubItemTable extends React.Component {
         if (list.length < 1) return false;
 
         var firstRowItem = list[0];
+        var schemaForType;
 
-        if (!firstRowItem) return false;
-        if (typeof firstRowItem === 'string') return false;
-        if (typeof firstRowItem === 'number') return false;
+        if (_.any(list, function(x){ return typeof x === 'undefined'; })) return false;
+        if (!_.all(list, function(x){ return typeof x === 'object' && x; })) return false;
+        if (_.any(list, function(x){
+            if (!Array.isArray(x['@type'])){
+                return true; // No @type so we can't get 'columns' from schemas.
+            } else {
+                schemaForType = Schemas.getSchemaForItemType(x['@type'][0]);
+                if (!schemaForType || !schemaForType.columns) return true; // No columns on this Item type's schema. Skip.
+            }
+        })) return false;
 
         var objectWithAllItemKeys = _.reduce(list, function(m, v){
             var v2 = _.clone(v);
@@ -141,17 +158,6 @@ class SubItemTable extends React.Component {
             return _.extend(m, v2);
         }, {});
 
-        var schemaForType;
-
-        if (object.isAnItem(objectWithAllItemKeys)){
-            if (!Array.isArray(objectWithAllItemKeys['@type'])){
-                return false; // No @type so we can't get 'columns' from schemas.
-            } else {
-                schemaForType = Schemas.getSchemaForItemType(objectWithAllItemKeys['@type'][0]);
-                if (!schemaForType || !schemaForType.columns) return false; // No columns on this Item type's schema. Skip.
-            }
-        }
-
         var rootKeys = _.keys(objectWithAllItemKeys);
         var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;
 
@@ -164,8 +170,10 @@ class SubItemTable extends React.Component {
                     if (!v || (v && typeof v === 'object')) return true;
                     return false;
                 });
+
                 if (listObjects.length === 0) continue; // List of strings or values only. Continue.
                 var listNotItems = _.filter(listObjects, function(v){ return !object.isAnItem(v); });
+
                 if (listNotItems.length === 0) continue; // List of Items that can be rendered as links. Continue.
 
                 // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects.
@@ -394,8 +402,8 @@ class SubItemTable extends React.Component {
                         }
                     }
                     if (Array.isArray(value)){
-                        if (typeof value[0] === 'string') return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
-                        if (value[0] && typeof value[0] === 'object' && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
+                        if (_.all(value, function(v){ return typeof v === 'string'; })) return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
+                        if (_.any(value, function(v){ return typeof v === 'object' && v; }) && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
                             var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
                             return {
                                 'value' : value.map((embeddedRow, i)=>{
@@ -408,6 +416,9 @@ class SubItemTable extends React.Component {
                                                     if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render === 'function'){
                                                         renderedSubVal = this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render(embeddedRow[k], embeddedRow, colKeyIndex, value);
                                                     }
+                                                }
+                                                if (!renderedSubVal && embeddedRow[k] && typeof embeddedRow[k] === 'object' && !object.isAnItem(embeddedRow[k])){
+                                                    renderedSubVal = <code>{ JSON.stringify(embeddedRow[k]) }</code>;
                                                 }
                                                 if (!renderedSubVal) {
                                                     renderedSubVal = object.itemUtil.isAnItem(embeddedRow[k]) ?
@@ -537,14 +548,20 @@ class SubItemTable extends React.Component {
                                 <tr key={"row-" + i}>{
                                     [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
                                         var val = colVal.value;
+                                        if (typeof val === 'boolean'){
+                                            val = <code>{ val ? 'True' : 'False' }</code>;
+                                        }
+                                        if (typeof val === 'string' && val.length > 50){
+                                            val = val.slice(0,50) + '...';
+                                        }
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
                                         }
                                         if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
                                             val = jsonify(val, columnKeys[j].key);
                                         }
-                                        if (Array.isArray(val) && val.length > 0 && !React.isValidElement(val[0])){
-                                            val = _.map(val, jsonify);
+                                        if (Array.isArray(val) && val.length > 0 && !_.all(val, React.isValidElement) ){
+                                            val = _.map(val, function(v,i){ return jsonify(v, columnKeys[j].key + ':' + i); });
                                         }
                                         return (
                                             <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
@@ -604,7 +621,7 @@ class DetailRow extends React.Component {
             );
         }
 
-        if (value.type === SubItem) {
+        if (value.type === SubItemTitle) {
             // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
             value = React.cloneElement(value, { onToggle : this.handleToggle, isOpen : this.state.isOpen });
 
@@ -623,7 +640,7 @@ class DetailRow extends React.Component {
         }
 
         if (value.type === "ol" && value.props.children[0] && value.props.children[0].type === "li" &&
-            value.props.children[0].props.children && value.props.children[0].props.children.type === SubItem) {
+            value.props.children[0].props.children && value.props.children[0].props.children.type === SubItemTitle) {
             // What we have here is a list of embedded objects. Render them out recursively and adjust some styles.
             return (
                 <div className="array-group" data-length={this.props.item.length}>
@@ -729,7 +746,7 @@ export class Detail extends React.Component {
                     _.map(_.filter(_.pairs(columnDefinitions), function(c){ return c[0].indexOf(keyPrefix + '.') === 0; }), function(c){ c[0] = c[0].replace(keyPrefix + '.', ''); return c; })
                 );
                 return (
-                    <SubItem
+                    <SubItemTitle
                         schemas={schemas}
                         content={item}
                         key={keyPrefix}
@@ -746,29 +763,14 @@ export class Detail extends React.Component {
                 return <a key={item} href={href} target={popLink ? "_blank" : null}>{href}</a>;
             }
 
-            if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
-                // this is a download link. Format appropriately
+            if(item.charAt(0) === '/' && item.indexOf('@@download') > -1){
+                // This is a download link. Format appropriately
                 var split_item = item.split('/');
                 var attach_title = decodeURIComponent(split_item[split_item.length-1]);
-                return (
-                    <a key={item} href={item} target="_blank" download>
-                        {attach_title || item}
-                    </a>
-                );
+                return <a key={item} href={item} target="_blank" download>{ attach_title || item }</a>;
             } else if (item.charAt(0) === '/') {
-                if(popLink){
-                    return (
-                        <a key={item} href={item} target="_blank">
-                            {item}
-                        </a>
-                    );
-                }else{
-                    return (
-                        <a key={item} href={item}>
-                            {item}
-                        </a>
-                    );
-                }
+                if (popLink) return <a key={item} href={item} target="_blank">{ item }</a>;
+                else return <a key={item} href={item}>{ item }</a>;
             } else if (item.slice(0,4) === 'http') {
                 // Is a URL. Check if we should render it as a link/uri.
                 var schemaProperty = Schemas.Field.getSchemaProperty(keyPrefix, schemas, atType);
@@ -776,23 +778,19 @@ export class Detail extends React.Component {
                     schemaProperty &&
                     typeof schemaProperty.format === 'string' &&
                     ['uri','url'].indexOf(schemaProperty.format.toLowerCase()) > -1
-                ){
-                    return (
-                        <a key={item} href={item} target="_blank">
-                            {item}
-                        </a>
-                    );
-                }
+                ) return <a key={item} href={item} target="_blank">{ item }</a>;
             } else {
                 return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
             }
         } else if (typeof item === 'number'){
             return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
+        } else if (typeof item === 'boolean'){
+            return <span style={{ 'textTransform' : 'capitalize' }}>{ (item + '') }</span>;
         }
         return(<span>{ item }</span>); // Fallback
     }
 
-    static SubItem = SubItem
+    static SubItemTitle = SubItemTitle
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,

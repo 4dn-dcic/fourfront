@@ -356,7 +356,6 @@ def repset_w_exp1(testapp, replicate_experiment_set_data, experiment):
 @pytest.fixture
 def experiment2(testapp, experiment_data):
     experiment_data['experiment_type'] = 'capture Hi-C'
-    print(experiment_data)
     return testapp.post_json('/experiment_capture_c', experiment_data).json['@graph'][0]
 
 
@@ -383,6 +382,24 @@ def test_calculated_expt_produced_in_pub_for_rep_experiment_set(
     # import pdb; pdb.set_trace()
     assert 'produced_in_pub' in expres
     assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expres.json['produced_in_pub']['@id']
+
+
+def test_calculated_expt_produced_in_pub_for_expt_w_ref(
+        testapp, experiment_data, replicate_experiment_set_data, pub2_data, publication):
+    experiment_data['references'] = [publication['@id']]
+    # just check experiment by itself first
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    assert 'produced_in_pub' in expt
+    assert publication['@id'] == '/publications/' + expt['produced_in_pub'] + '/'
+    # post repset with this experiment
+    replicate_experiment_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
+    repset = testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data, status=201).json['@graph'][0]
+    # post single rep_exp_set to single pub
+    pub2_data['exp_sets_prod_in_pub'] = [repset['@id']]
+    testapp.post_json('/publication', pub2_data, status=201)
+    expinset = testapp.get(repset['replicate_exps'][0]['replicate_exp']).json
+    assert 'produced_in_pub' in expinset
+    assert publication['@id'] == expinset['produced_in_pub']['@id']
 
 
 def test_calculated_expt_produced_in_pub_for_cust_experiment_set(
@@ -506,3 +523,240 @@ def test_calculated_no_of_expts_in_set_w_no_exps(empty_replicate_set):
 
 def test_calculated_no_of_expts_in_set_w_2_exps(two_experiment_replicate_set):
     assert two_experiment_replicate_set['number_of_experiments'] == 2
+
+
+# tests for category calculated_property
+@pytest.fixture
+def target_w_prot(testapp, lab, award):
+    item = {
+        'description': "Protein target",
+        'targeted_proteins': ['CTCF (ABCD)'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def exp_w_target_info(lab, award, human_biosample,
+                      mboI, target_w_region):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'capture Hi-C',
+        'targeted_regions': [{'target': target_w_region['@id']}]
+    }
+
+
+@pytest.fixture
+def expt_w_targ_region(testapp, exp_w_target_info):
+    return testapp.post_json('/experiment_capture_c', exp_w_target_info).json['@graph'][0]
+
+
+@pytest.fixture
+def expt_w_2_targ_regions(testapp, exp_w_target_info, another_target_w_region):
+    region = {'target': another_target_w_region['@id']}
+    exp_w_target_info['targeted_regions'].append(region)
+    return testapp.post_json('/experiment_capture_c', exp_w_target_info).json['@graph'][0]
+
+
+@pytest.fixture
+def expt_w_target(testapp, lab, award, human_biosample,
+                  mboI, target_w_prot):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'CHIA-pet',
+        'targeted_factor': target_w_prot['@id']
+    }
+    return testapp.post_json('/experiment_chiapet', item).json['@graph'][0]
+
+
+@pytest.fixture
+def repliseq_info(lab, award, human_biosample):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'Repli-seq',
+    }
+
+
+@pytest.fixture
+def repliseq_1(testapp, repliseq_info):
+    return testapp.post_json('/experiment_repliseq', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def repliseq_2(testapp, repliseq_info):
+    repliseq_info['stage_fraction'] = 'early'
+    return testapp.post_json('/experiment_repliseq', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def repliseq_3(testapp, repliseq_info):
+    repliseq_info['stage_fraction'] = 'early'
+    repliseq_info['total_fractions_in_exp'] = 16
+    return testapp.post_json('/experiment_repliseq', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def damid_no_fusion(testapp, repliseq_info):
+    repliseq_info['experiment_type'] = 'DAM-ID seq'
+    return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def damid_w_fusion(testapp, repliseq_info, target_w_prot):
+    repliseq_info['experiment_type'] = 'DAM-ID seq'
+    repliseq_info['targeted_factor'] = target_w_prot['@id']
+    return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def basic_info(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+    }
+
+
+@pytest.fixture
+def imaging_path_1(testapp, basic_info, target_w_region):
+    basic_info['target'] = [target_w_region['@id']]
+    basic_info['labeled_probe'] = 'FITC goat anti rabbit'
+    return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
+
+
+@pytest.fixture
+def imaging_path_2(testapp, basic_info, target_w_region):
+    basic_info['target'] = [target_w_region['@id']]
+    basic_info['labeled_probe'] = 'TRITC horse anti rabbit'
+    return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
+
+
+@pytest.fixture
+def imaging_path_3(testapp, basic_info, target_w_desc):
+    basic_info['target'] = [target_w_desc['@id']]
+    basic_info['labeled_probe'] = 'DAPI'
+    return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
+
+
+@pytest.fixture
+def microscopy_no_path(testapp, repliseq_info):
+    repliseq_info['experiment_type'] = "Immunoflourescence"
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def microscopy_w_path(testapp, repliseq_info, imaging_path_1):
+    repliseq_info['experiment_type'] = "Immunoflourescence"
+    img_path = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
+    repliseq_info['imaging_paths'] = [img_path]
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_2,
+                           imaging_path_3):
+    repliseq_info['experiment_type'] = "Immunoflourescence"
+    img_path1 = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
+    img_path2 = {'path': imaging_path_2['@id'], 'channel': 'ch02'}
+    img_path3 = {'path': imaging_path_3['@id'], 'channel': 'ch03'}
+    repliseq_info['imaging_paths'] = [img_path1, img_path2, img_path3]
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
+def test_experiment_categorizer_4_mic_no_path(testapp, microscopy_no_path):
+    assert microscopy_no_path['experiment_categorizer']['field'] == 'Default'
+    assert microscopy_no_path['experiment_categorizer'].get('value') is None
+
+
+def test_experiment_categorizer_4_mic_w_path(testapp, microscopy_w_path, target_w_region):
+    assert microscopy_w_path['experiment_categorizer']['field'] == 'Target'
+    assert microscopy_w_path['experiment_categorizer']['value'] == target_w_region['target_summary']
+
+
+def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipath, target_w_region, target_w_desc):
+    vals2chk = [target_w_region['target_summary'], target_w_desc['target_summary']]
+    len2chk = len(vals2chk[0]) + len(vals2chk[1]) + 2
+    assert microscopy_w_multipath['experiment_categorizer']['field'] == 'Target'
+    value = microscopy_w_multipath['experiment_categorizer']['value']
+    assert len(value) == len2chk
+    for v in vals2chk:
+        assert v in value
+
+
+def test_experiment_categorizer_4_damid_no_fusion(testapp, damid_no_fusion):
+    assert damid_no_fusion['experiment_categorizer']['field'] == 'Default'
+    assert damid_no_fusion['experiment_categorizer'].get('value') is None
+
+
+def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion, target_w_prot):
+    assert damid_w_fusion['experiment_categorizer']['field'] == 'Target'
+    assert damid_w_fusion['experiment_categorizer']['value'] == target_w_prot['display_title']
+
+
+def test_experiment_categorizer_4_repliseq_no_fraction_info(testapp, repliseq_1):
+    # import pdb; pdb.set_trace()
+    assert repliseq_1['experiment_categorizer']['field'] == 'Default'
+    assert repliseq_1['experiment_categorizer'].get('value') is None
+
+
+def test_experiment_categorizer_4_repliseq_only_fraction(testapp, repliseq_2):
+    wanted = 'early of an unspecified number of fractions'
+    assert repliseq_2['experiment_categorizer']['field'] == 'Fraction'
+    assert repliseq_2['experiment_categorizer']['value'] == wanted
+
+
+def test_experiment_categorizer_4_repliseq_fraction_and_total(testapp, repliseq_3):
+    wanted = 'early of 16 fractions'
+    assert repliseq_3['experiment_categorizer']['field'] == 'Fraction'
+    assert repliseq_3['experiment_categorizer']['value'] == wanted
+
+
+def test_experiment_categorizer_w_target(testapp, expt_w_target, target_w_prot):
+    assert expt_w_target['experiment_categorizer']['field'] == 'Target'
+    assert expt_w_target['experiment_categorizer']['value'] == target_w_prot['display_title']
+
+
+def test_experiment_categorizer_w_enzyme(testapp, experiment, mboI):
+    assert experiment['experiment_categorizer']['field'] == 'Enzyme'
+    assert experiment['experiment_categorizer']['value'] == mboI['display_title']
+
+
+def test_experiment_categorizer_w_target_and_enzyme(testapp, expt_w_target, target_w_prot, mboI):
+    # import pdb; pdb.set_trace()
+    res = testapp.patch_json(expt_w_target['@id'], {'digestion_enzyme': mboI['@id']}).json['@graph'][0]
+    assert res['digestion_enzyme'] == mboI['@id']
+    assert res['experiment_categorizer']['field'] == 'Target'
+    assert res['experiment_categorizer']['value'] == target_w_prot['display_title']
+
+
+def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
+    del experiment_data['digestion_enzyme']
+    experiment_data['experiment_type'] = 'RNA-seq'
+    expt = testapp.post_json('/experiment_seq', experiment_data).json['@graph'][0]
+    assert expt['experiment_categorizer']['field'] == 'Default'
+    assert expt['experiment_categorizer'].get('value') == None
+
+
+def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI):
+    experiment_data['experiment_type'] = 'capture Hi-C'
+    expt = testapp.post_json('/experiment_capture_c', experiment_data).json['@graph'][0]
+    assert expt['experiment_categorizer']['field'] == 'Enzyme'
+    assert expt['experiment_categorizer']['value'] == mboI['display_title']
+
+
+def test_experiment_categorizer_cap_c_w_region(expt_w_targ_region, target_w_region):
+    assert expt_w_targ_region['experiment_categorizer']['field'] == 'Target'
+    assert expt_w_targ_region['experiment_categorizer']['value'] == target_w_region['target_summary']
+
+
+def test_experiment_categorizer_cap_c_w_2regions(
+        expt_w_2_targ_regions, target_w_region, another_target_w_region):
+    wanted = ', '.join(sorted([target_w_region['target_summary'], another_target_w_region['target_summary']]))
+    assert expt_w_2_targ_regions['experiment_categorizer']['field'] == 'Target'
+    assert expt_w_2_targ_regions['experiment_categorizer']['value'] == wanted
