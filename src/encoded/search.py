@@ -18,6 +18,7 @@ from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
+import uuid
 
 
 def includeme(config):
@@ -103,6 +104,11 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Adding facets to the query
     search = set_facets(search, facets, query_filters, string_query)
 
+    ### Add preference from session, if available
+    if request.__parent__ is None and not return_generator and size != 'all': # Probably unnecessary, but skip for non-paged, sub-reqs, etc.
+        search_session_id = request.cookies.get('searchSessionID', 'SESSION-' + str(uuid.uuid1()))
+        search = search.params(preference=search_session_id)
+
     ### Execute the query
     if size == 'all':
         es_results = execute_search_for_all_results(search)
@@ -157,6 +163,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             return result
 
     result['@graph'] = list(graph)
+    request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
     return result
 
 
@@ -540,6 +547,15 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
                 'missing': '_last',
                 'unmapped_type': 'keyword',
             }
+    elif not sort and text_search and text_search != '*':
+        search = search.sort(                   # Multi-level sort. See http://www.elastic.co/guide/en/elasticsearch/guide/current/_sorting.html#_multilevel_sorting & https://stackoverflow.com/questions/46458803/python-elasticsearch-dsl-sorting-with-multiple-fields
+            { '_score' : { "order": "desc" } },
+            { 'embedded.date_created.raw' : { 'order': 'desc', 'unmapped_type': 'keyword' }, 'embedded.label.raw' : { 'order': 'asc',  'unmapped_type': 'keyword', 'missing': '_last' } },
+            { '_uid' : { 'order': 'asc' } }     # 'embedded.uuid.raw' (instd of _uid) sometimes results in 400 bad request : 'org.elasticsearch.index.query.QueryShardException: No mapping found for [embedded.uuid.raw] in order to sort on'
+        )
+        result['sort'] = result_sort = { '_score' : { "order" : "desc" } }
+        return search
+
     if sort and result_sort:
         result['sort'] = result_sort
         search = search.sort(sort)
