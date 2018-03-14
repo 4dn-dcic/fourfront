@@ -77,17 +77,40 @@
             "title": "Description",
             "description": "A description of why experiments are part of the set.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "processed_files": {
             "title": "Processed Files",
             "description": "Processed files that are derived from files in this experiment set.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Processed File",
                 "description": "File metadata.",
                 "type": "string",
                 "linkTo": "FileProcessed"
+            }
+        },
+        "archived_processed_files": {
+            "title": "Archived Processed Files",
+            "description": "Archived processed files that are derived from files in this experiment set.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Archived Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
+        "completed_processes": {
+            "title": "Completed data processing",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "type": "array",
+            "items": {
+                "title": "Completed process",
+                "type": "string"
             }
         }
     },

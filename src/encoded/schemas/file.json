@@ -18,7 +18,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the task.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "filename": {
             "title": "File Name",
@@ -100,6 +101,10 @@
                 "properties": {
                     "file_format": {
                         "title": "File Format",
+                        "type": "string"
+                    },
+                    "href": {
+                        "title": "Download URL",
                         "type": "string"
                     }
                 }

@@ -40,7 +40,8 @@
         "description": {
             "title": "Description",
             "description": "A short description of the experiment",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "experiment_type": {
             "type": "string",
@@ -132,8 +133,21 @@
             "title": "Processed Files",
             "description": "Processed files that are derived from files in this experiment.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
+        "archived_processed_files": {
+            "title": "Archived Processed Files",
+            "description": "Archived processed files that are derived from files in this experiment set.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Archived Processed File",
                 "description": "File metadata.",
                 "type": "string",
                 "linkTo": "FileProcessed"

@@ -29,7 +29,8 @@
         "description": {
             "title": "Description",
             "description": "A brief plain text description of the modification.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "modification_type": {
             "title": "Genomic modification method",

@@ -44,7 +44,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the analysis step.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "cwl_pointer": {
             "title": "CWL Path",

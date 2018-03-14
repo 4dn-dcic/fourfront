@@ -34,7 +34,8 @@
             "title": "Description",
             "description": "A plain text description of the biosource.",
             "type": "string",
-            "default": ""
+            "default": "",
+            "formInput": "textarea"
         },
         "biosource_type": {
             "title": "Biosource Type",

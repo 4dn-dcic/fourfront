@@ -307,13 +307,13 @@ def experiment_data(lab, award, human_biosample, mboI):
 
 
 @pytest.fixture
-def experiment_project_review(testapp, lab, award, human_biosample):
+def experiment_project_release(testapp, lab, award, human_biosample):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
-        'status': 'submission in progress'
+        'status': 'released to project'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
 

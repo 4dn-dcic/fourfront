@@ -36,7 +36,8 @@
         "description": {
             "title": "Description",
             "description": "A plain text description of the construct.",
-            "type": "string"
+            "type": "string",
+            "formInput": "textarea"
         },
         "construct_type": {
             "title": "Construct Type",

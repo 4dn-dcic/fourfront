@@ -527,21 +527,16 @@ export class FilePairBlock extends React.Component {
     }
 
     renderFileEntryBlock(file,i){
+        var { files, isSingleItem } = this.props;
         return (
             <FileEntryBlock
                 key={object.atIdFromObject(file)}
+                {..._.pick(this.props, 'columnHeaders', 'handleFileCheckboxChange', 'nonFileHeaderCols', 'selectedFiles', 'colWidthStyles', 'experiment', 'experimentAccession')}
                 file={file}
-                columnHeaders={this.props.columnHeaders}
-                handleFileCheckboxChange={this.props.handleFileCheckboxChange}
-                nonFileHeaderCols={this.props.nonFileHeaderCols}
-                selectedFiles={this.props.selectedFiles}
                 className={null}
-                isSingleItem={this.props.files.length < 2 ? true : false}
+                isSingleItem={typeof isSingleItem === 'boolean' ? isSingleItem : files.length < 2 ? true : false}
                 pairParent={this}
                 type="paired-end"
-                colWidthStyles={this.props.colWidthStyles}
-                experiment={this.props.experiment}
-                experimentSetAccession={this.props.experimentSetAccession}
             />
         );
     }
@@ -592,7 +587,7 @@ export class FilePairBlock extends React.Component {
             <div className="s-block file-pair keep-label-on-name-hover">
                 { this.nameColumn() }
                 <div className="files s-block-list">
-                    { Array.isArray(this.props.files) ?
+                    { Array.isArray(this.props.files) && this.props.files.length > 0 ?
                         this.props.files.map(this.renderFileEntryBlock)
                         :
                         <FileEntryBlock
@@ -628,11 +623,12 @@ const fileEntryBlockMixins = {
 
     renderCheckBox : function(){
         if (!this.hasCheckbox()) return null;
+        var isChecked = !!this.isChecked();
         var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
         return (
             <Checkbox
                 validationState='warning'
-                checked={this.isChecked()}
+                checked={isChecked}
                 name="file-checkbox"
                 id={'checkbox-for-' + accessionTriple}
                 className='file-entry-table-checkbox'

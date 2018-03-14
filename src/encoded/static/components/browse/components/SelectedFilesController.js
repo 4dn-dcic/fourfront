@@ -21,19 +21,7 @@ export class SelectedFilesController extends React.Component {
      * @returns {string[]} List of file UUIDs.
      */
     static objectToCompleteList(selectFilesObj){
-        return _.uniq(
-            _.flatten(
-                _.pairs(selectFilesObj).map(function(p){
-                    var related = (typeof p[1] !== 'boolean' && p[1] && p[1].related_files) || null;
-                    if (related) {
-                        related = related.map(function(r){ return (r && r.file && r.file.uuid) || null; }).filter(function(r){ if (!r){ return false; } return true; });
-                        return [p[0]].concat(related); // Arr
-                    } else {
-                        return p[0]; // Single
-                    }
-                }), true
-            )
-        );
+        return _.keys(selectFilesObj);
     }
 
     static listToObject(selectedFilesList){
@@ -145,6 +133,7 @@ export class SelectedFilesController extends React.Component {
         if (typeof window !== 'undefined' && window){
             window.lastSelectedFiles = this.state.selectedFiles;
         }
+        //console.log('SELTEST', this.state.selectedFiles);
         if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
         var propsToPass = _.extend(_.omit(this.props, 'children'), {
             'selectedFiles'         : this.state.selectedFiles,
