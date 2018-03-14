@@ -141,6 +141,10 @@
         }
     ],
     "run_platform":"AWSEM",
-    "uuid":"5cc47020-2397-46c7-975b-a0c19b2899fd"
+    "uuid":"5cc47020-2397-46c7-975b-a0c19b2899fd",
+    "commands": [
+        "run1.sh param1 param2 param3",
+        "run2.sh param4 param5 param6"
+    ]
 }
 ]
