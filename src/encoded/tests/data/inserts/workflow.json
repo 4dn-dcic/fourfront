@@ -5817,6 +5817,8 @@
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
         "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
         "workflow_type": "Hi-C data analysis",
-        "status": "released"
+        "status": "released",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v42"
     }
 ]

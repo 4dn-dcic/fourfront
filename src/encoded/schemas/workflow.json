@@ -335,11 +335,6 @@
                                 "title": "Image Name",
                                 "description": "The name of the image that is downloaded",
                                 "type": "string"
-                            },
-                            "docker_image_version": {
-                                "title": "Image Version",
-                                "description": "The version of the image that is downloaded",
-                                "type": "string"
                             }
                         }
                     }
