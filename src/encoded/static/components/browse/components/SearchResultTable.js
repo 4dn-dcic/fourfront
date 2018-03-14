@@ -350,9 +350,9 @@ class LoadMoreAsYouScroll extends React.Component {
                 if (keyIntersection.length > 0){
                     console.error('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
                     this.setState({ 'isLoading' : false }, ()=>{
-                        Alerts.queue({ 'title' : 'Results Refreshed', 'message' : 'Results have changed while loading and have been refreshed.', 'navigateDisappearThreshold' : 1 });
-                        this.props.setResults([]);
-                        layout.animateScrollTo(0);
+                        navigate('', { 'inPlace' : true }, ()=>{
+                            Alerts.queue({ 'title' : 'Results Refreshed', 'message' : 'Results have changed while loading and have been refreshed.', 'navigateDisappearThreshold' : 1 });
+                        });
                     });
                 } else {
                     var canLoadMore = !!(this.props.totalExpected && (this.props.results.length + resp['@graph'].length) < this.props.totalExpected);
