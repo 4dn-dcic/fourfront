@@ -193,6 +193,16 @@
             "type": "string",
             "description": "Url to AWS run info",
             "format": "uri"
+        },
+        "commands": {
+            "title": "Run Commands",
+            "description": "list of commands run for the workflow, simplified",
+            "type": "array",
+            "items": {
+                "title": "Commands",
+                "description": "one of the commands that are run for the workflow run",
+                "type": "string"
+            }
         }
     },
     "facets" : {
