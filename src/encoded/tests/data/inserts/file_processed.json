@@ -249,12 +249,17 @@
 {
     "lab":"/labs/4dn-dcic-lab/",
     "award":"/awards/1U01CA200059-01/",
-    "status":"uploaded",
+    "status":"uploading",
     "description": "pairs file for 4DNEXO67APV1",
     "file_format":"pairs",
     "uuid":"7f9eb396-5c1a-1112-aebf-28ea39d6a50f",
     "notes" : "A processed file output from a workflow run.",
-    "accession": "4DNFIAAAAAA3"
+    "accession": "4DNFIAAAAAA3",
+    "extra_files" : [
+        {
+            "file_format" : "pairs_px2"
+        }
+    ]
 },
 {
     "lab":"/labs/4dn-dcic-lab/",

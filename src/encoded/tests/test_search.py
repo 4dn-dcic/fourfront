@@ -247,6 +247,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     res = htmltestapp.get('/metadata/type=ExperimentSet/metadata.tsv')
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
+    info_row = result_rows.pop(0)
     header_row = result_rows.pop(0)
 
     assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'

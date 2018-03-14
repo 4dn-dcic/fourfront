@@ -53,17 +53,17 @@ export class HealthView extends React.Component {
     }
 
     getCounts(initialCall = false){
+        var pastState = _.clone(this.state);
         this.setState({
             'db_es_total' : "loading...",
         }, ()=>{
-
             ajax.load('/counts?format=json', (resp)=>{
                 this.setState({
                     'db_es_total' : resp.db_es_total,
                     'db_es_compare': resp.db_es_compare,
                 }, ()=>{
-                    if (HealthView.notFinishedIndexing(resp.db_es_total)){
-                        setTimeout(this.getCounts.bind(this), this.props.pollCountsInterval);
+                    if (HealthView.notFinishedIndexing(resp.db_es_total)) {
+                        setTimeout(this.getCounts, this.props.pollCountsInterval);
                     }
                 });
             }, 'GET', (resp)=>{
@@ -73,11 +73,6 @@ export class HealthView extends React.Component {
                     'db_es_compare': null
                 });
             });
-
-            if (!initialCall && this.refs && this.refs.widthProvider && this.refs.widthProvider.refs && this.refs.widthProvider.refs.childElement && this.refs.widthProvider.refs.childElement.load){
-                this.refs.widthProvider.refs.childElement.load();
-            }
-
         });
     }
 
@@ -150,7 +145,7 @@ export class HealthView extends React.Component {
 
                 <layout.WindowResizeUpdateTrigger>
                     <layout.WidthProvider ref="widthProvider">
-                        <HealthChart mounted={this.state.mounted} session={this.props.session} context={context} height={600} notFinishedIndexing={notFinishedIndexing} pollDataInterval={this.props.pollDataInterval} />
+                        <HealthChart db_es_compare={this.state.db_es_compare} mounted={this.state.mounted} session={this.props.session} context={context} height={600} notFinishedIndexing={notFinishedIndexing} pollDataInterval={this.props.pollDataInterval} />
                     </layout.WidthProvider>
                 </layout.WindowResizeUpdateTrigger>
 
@@ -163,70 +158,27 @@ content_views.register(HealthView, 'Health');
 
 class HealthChart extends React.Component {
 
+    static es_compare_to_d3_hierarchy(es_compare){
+        if (!es_compare || typeof es_compare !== 'object') return null;
+        return {
+            'name' : 'Indexing Status',
+            'children' : _.map(_.pairs(es_compare), function(pair){
+                var itemType = pair[0];
+                var compareString = pair[1];
+                var dbCount = parseInt(compareString.slice(4));
+                var esCount = parseInt(compareString.slice(11 + (dbCount + '').length));
+                return { 'name' : itemType, 'children' : [{ 'name' : 'Indexed', 'size' : esCount }, { 'name' : 'Left to Index', 'size' : dbCount - esCount } ] };
+            })
+        };
+    }
+
     static defaultProps = {
         'mounted' : false,
     }
 
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = {
-            'loaded' : false,
-            'data' : null,
-            'loading' : false
-        };
-    }
-
-    componentDidMount(){
-        //this.loadContinuously();
-        this.load();
-    }
-
     componentDidUpdate(pastProps, pastState){      
-
-        if (!this.state.loadingContinuously && (this.props.session !== pastProps.session || this.props.context !== pastProps.context)){
-            this.load();
-        } else if (this.state.loaded) {
-
-            if (this.state.loadingContinuously && !this.props.notFinishedIndexing){
-                this.setState({ 'loadingContinuously' : false });
-            }
-
-            this.drawTreeMap();
-            if ((pastProps.width && this.props.width && this.props.width !== pastProps.width) || this.state.data !== pastState.data){
-                this.transitionSize();
-            }
-        }
-    }
-    
-    loadContinuously(start = true){
-
-        var doIt = function(){
-            this.load(()=>{
-                if (this.state.loadingContinuously){
-                    setTimeout(this.loadContinuously.bind(this, false), this.props.pollDataInterval || 5000);
-                }
-            }, (errResp)=>{
-                this.setState({ 'loadingContinuously' : false });
-            });
-        }.bind(this);
-
-        if (start) this.setState({ 'loadingContinuously' : true }, doIt);
-        else doIt();
-    }
-
-    load(callback, fallback){
-        this.setState({ 'loading' : true }, ()=>{
-            console.log('ST3', this.state);
-            ajax.load('/bar_plot_aggregations/type=Item&field=@type&field=status&type!=OntologyTerm/?field=@type&field=status', (r)=>{ // Exclude ontology terms
-                console.log('loaded', r);
-                this.setState({
-                    'data'      : r,
-                    'loaded'    : true,
-                    'loading'   : false
-                }, callback);
-            }, 'GET', fallback || ((r)=>{ this.setState({ 'loading' : false }); }) );
-        });
+        this.drawTreeMap();
+        this.transitionSize();
     }
 
     transition(d3Selection){
@@ -239,7 +191,7 @@ class HealthChart extends React.Component {
     }
 
     transitionSize(){
-        if (!this.props.mounted || !this.state.loaded || !this.state.data || !this.state.data.total.experiment_sets) return null;
+        if (!this.props.mounted) return null;
         var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
         svg.selectAll('g').transition()
             .duration(750)
@@ -252,7 +204,9 @@ class HealthChart extends React.Component {
     drawTreeMap(){
         var { width, height, mounted } = this.props;
 
-        if (!mounted || !this.state.loaded || !this.state.data || !this.state.data.total.experiment_sets) return null;
+        var dataToShow = HealthChart.es_compare_to_d3_hierarchy(this.props.db_es_compare);
+
+        if (!dataToShow || !mounted) return null;
 
         var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
 
@@ -261,7 +215,7 @@ class HealthChart extends React.Component {
 
         function colorStatus(origColor, status){
             var d3Color;
-            if (['deleted'].indexOf(status) > -1){
+            if (['deleted', 'Left to Index'].indexOf(status) > -1){
                 d3Color = d3.color(origColor);
                 return d3Color.darker(1);
             }
@@ -279,15 +233,13 @@ class HealthChart extends React.Component {
             return origColor;
         }
 
-        var d3Data = vizUtil.transformBarPlotAggregationsToD3CompatibleHierarchy(this.state.data);
-
         var treemap = d3.treemap()
             .tile(d3.treemapResquarify)
             .size([width, height])
             .round(true)
             .paddingInner(1);
 
-        var root = d3.hierarchy(d3Data)
+        var root = d3.hierarchy(dataToShow)
             .eachBefore(function(d) {d.data.id = (d.parent ? d.parent.data.id + "." : "") + d.data.name; })
             .sum(function(d){ return d.size; })
             .sort(function(a, b) { return b.height - a.height || b.value - a.value; });
@@ -327,7 +279,7 @@ class HealthChart extends React.Component {
             .attr("clip-path", function(d) { return "url(#clip-" + d.data.id.replace(/ /g, '_') + ")"; })
             .attr('class', 'title-text')
             .selectAll("tspan")
-            .data(function(d) { return d.parent.data.name.split(/(?=[A-Z][^A-Z])/g); })
+            .data(function(d) { return _.map(d.parent.data.name.split(/(?=[_][^_])/g), function(s){ return s.replace(/(_)/g, ''); }); })
             .enter().append("tspan")
             .attr("x", 4)
             .attr("y", function(d, i) { return 13 + i * 10; })
@@ -339,9 +291,7 @@ class HealthChart extends React.Component {
     render(){
         var { width, height, mounted } = this.props;
 
-        if (!mounted || !this.state.loaded || !this.state.data || !this.state.data.total.experiment_sets) return null;
-
-        console.log('ST', this.state);
+        if (!mounted) return null;
 
         return (
             <div>
@@ -354,7 +304,7 @@ class HealthChart extends React.Component {
                         '.treemap-rect-elem:hover .title-text { fill: #000; }'
                     )
                 }}/>
-                <svg width={width} height={height} ref="svg" style={{ 'opacity' : this.state.loading ? 0.5 : 1 }} />
+                <svg width={width} height={height} ref="svg" />
             </div>
         );
 

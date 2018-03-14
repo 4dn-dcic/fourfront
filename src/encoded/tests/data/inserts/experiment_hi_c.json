@@ -197,5 +197,29 @@
         "uuid": "66671e2f-3e43-4388-8bbb-e861f209c4fd",
         "submitted_by": "4dndcic@gmail.com",
         "status": "in review by lab"
+    },
+    {
+        "accession":"4DNEXO67APZ9",
+        "biosample":"111112bc-1111-4448-903e-854af460b123",
+        "fragmentation_method": "chemical",
+        "experiment_type": "dilution Hi-C",
+        "enzyme_lot_number": "123456",
+        "average_fragment_size": 100,
+        "digestion_time": 30,
+        "ligation_time": 30,
+        "digestion_enzyme": "DNaseI",
+        "digestion_temperature": 37,
+        "tagging_method": "Biotinylated ATP",
+        "crosslinking_time": 30,
+        "lab": "test-4dn-lab",
+        "files": ["46e82a90-49e5-4c33-afab-9ec90d65faa5"],
+        "description": "Test Experiment HiC 24",
+        "ligation_temperature": 37,
+        "crosslinking_temperature": 37,
+        "award": "1U01CA200059-01",
+        "crosslinking_method": "1% Formaldehyde",
+        "uuid": "66671e2f-3e43-4388-8bbb-e861f209c4ff",
+        "submitted_by": "4dndcic@gmail.com",
+        "status": "in review by lab"
     }
 ]
