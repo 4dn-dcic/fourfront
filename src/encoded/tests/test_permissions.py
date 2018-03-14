@@ -814,6 +814,7 @@ def test_last_modified_works_correctly(ind_human_item, submitter, wrangler, subm
     # patch same item using a different user
     res2 = wrangler_testapp.patch_json(res['@id'], {"status": "replaced"}, status=200).json['@graph'][0]
     assert res2['last_modified']['modified_by'] == wrangler['@id']
+    assert res2['last_modified']['date_modified'] > res['last_modified']['date_modified']
 
 
 @pytest.fixture
