@@ -105,6 +105,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search = set_facets(search, facets, query_filters, string_query)
 
     ### Add preference from session, if available
+    search_session_id = None
     if request.__parent__ is None and not return_generator and size != 'all': # Probably unnecessary, but skip for non-paged, sub-reqs, etc.
         search_session_id = request.cookies.get('searchSessionID', 'SESSION-' + str(uuid.uuid1()))
         search = search.params(preference=search_session_id)
@@ -163,7 +164,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             return result
 
     result['@graph'] = list(graph)
-    request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
+    if search_session_id: # Is 'None' if e.g. limit=all
+        request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
     return result
 
 

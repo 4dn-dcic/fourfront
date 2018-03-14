@@ -2,6 +2,7 @@
 from .features.conftest import app_settings, app, workbook
 import pytest
 from encoded.commands.upgrade_test_inserts import get_inserts
+import json
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
@@ -243,27 +244,92 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     FILE_ACCESSION_COL_INDEX = 3
     FILE_DOWNLOAD_URL_COL_INDEX = 0
 
+    def check_tsv(result_rows, len_requested = None):
+        info_row = result_rows.pop(0)
+        header_row = result_rows.pop(0)
+
+        assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'
+        assert header_row.index('File Download URL') == FILE_DOWNLOAD_URL_COL_INDEX # Ensure we have this column
+        assert len(result_rows) > 3 # We at least have some rows.
+
+        for row_index in range(4):
+            assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) > 4 # We have a value for File Accession
+            assert 'http' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # Make sure it seems like a valid URL.
+            assert '/@@download/' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]
+            assert result_rows[row_index][FILE_ACCESSION_COL_INDEX] in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # That File Accession is also in File Download URL of same row.
+            assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) < len(result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX])
+
+        # Last some rows should be 'summary' rows. And have empty spaces for 'Download URL' / first column.
+        summary_start_row = None
+        for row_index, row in enumerate(result_rows):
+            if row[FILE_DOWNLOAD_URL_COL_INDEX] == '':
+                summary_start_row = row_index
+                break
+
+        # Check that summary cells are present, in right place, with some correct-looking values
+        assert result_rows[summary_start_row + 1][1] == 'Summary'
+        assert result_rows[summary_start_row + 3][1] == 'Files Selected for Download:'
+        assert result_rows[summary_start_row + 4][1] == 'Total File Rows:'
+        assert result_rows[summary_start_row + 5][1] == 'Unique Downloadable Files:'
+        if len_requested:
+            assert int(result_rows[summary_start_row + 3][4]) == len_requested
+        assert int(result_rows[summary_start_row + 4][4]) == summary_start_row
+        assert int(result_rows[summary_start_row + 5][4]) <= summary_start_row
+
+
     # run a simple GET query with type=ExperimentSet
     res = htmltestapp.get('/metadata/type=ExperimentSet/metadata.tsv')
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
-    info_row = result_rows.pop(0)
-    header_row = result_rows.pop(0)
 
-    assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'
+    check_tsv(result_rows)
 
-    assert header_row.index('File Download URL') == FILE_DOWNLOAD_URL_COL_INDEX # Ensure we have this column
+    # Perform POST w/ accession triples (main case, for BrowseView downloads)
+    res2_post_data = { # N.B. '.post', not '.post_json' is used. This dict is converted to POST form values, with key values STRINGIFIED, not to POST JSON request.
+        "accession_triples" : [
+            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM1"],
+            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM2"],
+            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM3"],
+            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM4"],
+            ["4DNESKBPIAAD","4DNEXO6777A1","4DNFIN232JB1"],
+            ["4DNESKBPIAAD","4DNEXO6777A1","4DNFIN232JB2"],
+            ["4DNESKBPIAAD","4DNEXO6777B1","4DNFIN232JB3"],
+            ["4DNESXBLNBV1","4DNEXO6777X1","4DNFIN232JA4"],
+            ["4DNESXBLNBV1","4DNEXO6777Z1","4DNFIN232JA5"],
+            ["4DNES95756M1","4DNEXO6777U1","4DNFIN232JA9"],
+            ["4DNES95756M1","4DNEXO6777U1","4DNFIN232JA1"],
+            ["4DNES95756M1","4DNEXO6777T1","4DNFIN232JA2"],
+            ["4DNES95756M1","4DNEXO6777T1","4DNFIN232JA3"],
+            ["4DNESQHAFMOT","4DNEX067BBB1","4DNFIN232JC1"],
+            ["4DNESQHAFMOT","4DNEX067BBB1","4DNFIN232JC2"],
+            ["4DNES2N9QILD","4DNEX067AAA1","4DNFIN232JK7"],
+            ["4DNES2N9QILD","4DNEX067AAA1","4DNFIN232JK8"],
+            ["4DNESUA7HCZD","4DNEXO67AWT1","4DNFIN232JJ4"],
+            ["4DNESUA7HCZD","4DNEXO67AWT1","4DNFIN232JJ5"],
+            ["4DNESUA7HCZD","4DNEXO67AWU1","4DNFIN232JJ2"],
+            ["4DNESUA7HCZD","4DNEXO67AWU1","4DNFIN232JJ3"],
+            ["4DNES7Q644N6","4DNEX42CAX16","4DNFIN232JK5"],
+            ["4DNES7Q644N6","4DNEX42CAX16","4DNFIN232JK6"],
+            ["4DNES5KKNQSS","4DNEXO67AXE1","4DNFIN232JJ6"],
+            ["4DNES5KKNQSS","4DNEXO67AXE1","4DNFIN232JJ7"],
+            ["4DNES5KKNQSS","4DNEX34DAX2S","4DNFIN232JK1"],
+            ["4DNES5KKNQSS","4DNEX34DAX2S","4DNFIN232JK2"],
+            ["4DNES5KKNQSS","4DNEX42CAX15","4DNFIN232JK3"],
+            ["4DNES5KKNQSS","4DNEX42CAX15","4DNFIN232JK4"],
+            ["4DNES5JSKEBV","4DNEXO67APZ7","4DNFIO67APW1"],
+            ["4DNES5JSKEBV","4DNEXO67APZ9","4DNFIO67APW1"],
+            ["4DNES5JSKEBV","4DNEXO67APY1","4DNFIO67AFHV"]
+        ],
+        'download_file_name' : 'metadata_TEST.tsv'
+    }
 
-    assert len(result_rows) > 3 # We at least have some rows.
+    res2 = htmltestapp.post('/metadata/type=ExperimentSet/metadata.tsv', { k : json.dumps(v) for k,v in res2_post_data.items() })
 
-    for row_index in range(4):
-        assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) > 4 # We have a value for File Accession
-        assert 'http' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # Make sure it seems like a valid URL.
-        assert '/@@download/' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]
-        assert result_rows[row_index][FILE_ACCESSION_COL_INDEX] in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # That File Accession is also in File Download URL of same row.
-        assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) < len(result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX])
+    assert 'text/tsv' in res2.content_type
+    result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]
+    check_tsv(result_rows, len(res2_post_data['accession_triples']))
 
-    # TODO: More testing: form POST query
+
 
 
 @pytest.mark.skip

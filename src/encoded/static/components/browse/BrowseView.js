@@ -303,7 +303,7 @@ class ResultTableContainer extends React.Component {
                         hiddenColumns={this.hiddenColumns()}
                         columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
-                        totalExpected={this.props.context.total}
+                        totalExpected={this.props.totalExpected}
 
                         sortBy={this.props.sortBy}
                         sortColumn={this.props.sortColumn}
@@ -469,7 +469,7 @@ export default class BrowseView extends React.Component {
                 <SelectedFilesController href={href}>
                     <CustomColumnController defaultHiddenColumns={defaultHiddenColumns.concat(defaultHiddenColumnsFromSchemas)}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} />
+                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} totalExpected={context && context.total} />
                         </SortController>
                     </CustomColumnController>
                 </SelectedFilesController>

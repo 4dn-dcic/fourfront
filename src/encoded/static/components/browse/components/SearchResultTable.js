@@ -15,6 +15,7 @@ import { Sticky, StickyContainer } from 'react-sticky';
 import { Detail } from './../../item-pages/components';
 import { console, isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
+import Alerts from './../../alerts';
 import {
     defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
     columnsToColumnDefinitions, ResultRowColumnBlockValue, DEFAULT_WIDTH_MAP,
@@ -347,15 +348,18 @@ class LoadMoreAsYouScroll extends React.Component {
                 var newKeys = _.map(resp['@graph'], DimensioningContainer.getKeyForGraphResult);
                 var keyIntersection = _.intersection(oldKeys.sort(), newKeys.sort());
                 if (keyIntersection.length > 0){
-                    console.warn('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
-                    //this.props.setResults(this.props.results.slice(0).concat(
-                    //    _.filter(resp['@graph'], function(resultItem){ return !_.contains(keyIntersection, DimensioningContainer.getKeyForGraphResult(resultItem)); })
-                    //));
-                    //navigate('', { 'inPlace' : true, 'dontScrollToTop' : true });
+                    console.error('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
+                    this.setState({ 'isLoading' : false }, ()=>{
+                        Alerts.queue({ 'title' : 'Results Refreshed', 'message' : 'Results have changed while loading and have been refreshed.', 'navigateDisappearThreshold' : 1 });
+                        this.props.setResults([]);
+                        layout.animateScrollTo(0);
+                    });
                 } else {
-                    this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
+                    var canLoadMore = !!(this.props.totalExpected && (this.props.results.length + resp['@graph'].length) < this.props.totalExpected);
+                    this.setState({ 'isLoading' : false, 'canLoad' : canLoadMore }, ()=>{
+                        this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
+                    });
                 }
-                this.setState({ 'isLoading' : false });
             } else {
                 if (this.state.canLoad){
                     this.setState({
@@ -895,6 +899,8 @@ class DimensioningContainer extends React.Component {
 
         var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
             typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
+
+        console.log('S', this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state);
 
         var headerColumnWidthsFilled = this.state.widths.map((w, i)=>{
             if (typeof w === 'number' && w > 0) return w;
