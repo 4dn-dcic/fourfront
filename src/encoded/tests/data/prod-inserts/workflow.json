@@ -913,6 +913,86 @@
         "workflow_type": "Data QC"
     },
     {
+        "accession": "4DNWF2HFF82B",
+        "app_name": "md5",
+        "app_version": "0.2.6",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/md5:v2",
+        "arguments": [
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "description": "File on which MD5 calculation is run on.",
+                "workflow_argument_name": "input_file"
+            },
+            {
+                "argument_type": "Output report file",
+                "description": "The MD5 checksum generated.",
+                "workflow_argument_name": "report"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "QC",
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_main_filename": "md5.cwl",
+        "data_types": [
+            "Hi-C",
+            "Capture Hi-C",
+            "Repli-seq"
+        ],
+        "description": "md5 on uncompressed file",
+        "lab": "4dn-dcic-lab",
+        "name": "md5",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "File on which MD5 calculation is run on.",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "input_file",
+                        "source": [
+                            {
+                                "name": "input_file"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                },
+                "name": "md5",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "The MD5 checksum generated.",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "report",
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "md5",
+        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
+        "workflow_diagram": "",
+        "workflow_type": "Data QC"
+    },
+    {
         "accession": "4DNWFSOZLMGE",
         "arguments": [
             {
