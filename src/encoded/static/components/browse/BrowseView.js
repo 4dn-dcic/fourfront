@@ -76,6 +76,7 @@ class ResultTableContainer extends React.Component {
         'debug'     : false,
         'columnDefinitionOverrides' : {
             'experiments_in_set.biosample.biosource_summary' : {
+                'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
                 'title' : "Biosource"
             },
             'experiments_in_set.experiment_type' : {
@@ -111,6 +112,21 @@ class ResultTableContainer extends React.Component {
                     }
                     
                     return <span>{ number_of_files }</span>;
+                }
+            },
+            'experiments_in_set.experiment_categorizer.combined' : {
+                'render' : function(result, columnDefinition, props, width){
+                    var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
+                    var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
+                    if (cat_value === 'No value' || !cat_value){
+                        return null;
+                    }
+                    return (
+                        <div className="exp-categorizer-cell">
+                            <small>{ cat_field }</small>
+                            <div className="text-ellipsis-container">{ cat_value }</div>
+                        </div>
+                    );
                 }
             }
         },
@@ -287,7 +303,7 @@ class ResultTableContainer extends React.Component {
                         hiddenColumns={this.hiddenColumns()}
                         columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
-                        totalExpected={this.props.context.total}
+                        totalExpected={this.props.totalExpected}
 
                         sortBy={this.props.sortBy}
                         sortColumn={this.props.sortColumn}
@@ -435,6 +451,11 @@ export default class BrowseView extends React.Component {
             );
         }
 
+        var defaultHiddenColumnsFromSchemas = [];
+        if (context.columns){
+            defaultHiddenColumnsFromSchemas = _.map(_.filter(_.pairs(context.columns), function(p){ return p[1].default_hidden; }), function(p){ return p[0]; });
+        }
+
         return (
             <div className="browse-page-container search-page-container" id="browsePageContainer">
                 {/*
@@ -446,9 +467,9 @@ export default class BrowseView extends React.Component {
                 />
                 */}
                 <SelectedFilesController href={href}>
-                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns.concat(defaultHiddenColumnsFromSchemas)}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} />
+                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} totalExpected={context && context.total} />
                         </SortController>
                     </CustomColumnController>
                 </SelectedFilesController>

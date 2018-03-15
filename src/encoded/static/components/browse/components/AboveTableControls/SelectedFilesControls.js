@@ -49,16 +49,12 @@ export class SelectedFilesDownloadButton extends React.Component {
         };
     }
 
-    getAccessionTripleObjects(){
+    getAccessionTripleArrays(){
         return _.map(
             _.keys(this.props.subSelectedFiles || this.props.selectedFiles),
             function(accessionTripleString){
                 var accessions = accessionTripleString.split('~');
-                return {
-                    'accession' : accessions[0],
-                    'experiments_in_set.accession' : accessions[1],
-                    'experiments_in_set.files.accession' : accessions[2]
-                };
+                return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
             }
         );
     }
@@ -124,7 +120,7 @@ export class SelectedFilesDownloadButton extends React.Component {
                     </ul>
 
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
-                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
+                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
                         <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
                         <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual file in the 'files.txt' download list below.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files

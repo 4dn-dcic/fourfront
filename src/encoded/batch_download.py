@@ -210,35 +210,32 @@ endpoints_initialized = {
 
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
+    '''
+    Accepts a POST Form request (NOT JSON) with 'accession_triples' (list of 3-item arrays containing ExpSet Accession, Exp Accession, File Accession)
+    Run search sub-request and serves any in-accession_triples File from search result as a file row in streamed metadata.tsv file.
+
+    Alternatively, can accept a GET request wherein all files from ExpSets matching search query params are included.
+    '''
 
     search_params = parse_qs(request.matchdict['search_params'])
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
     filename_to_suggest = None
-    if ( # Check if triples are in URL.
-        search_params.get('accession') is not None and
-        search_params.get('experiments_in_set.accession') is not None and
-        search_params.get('experiments_in_set.files.accession') is not None and
-        len(search_params['accession']) == len(search_params['experiments_in_set.accession']) == len(search_params['experiments_in_set.files.accession'])
-    ):
-        accession_triples = list(zip(search_params['accession'], search_params['experiments_in_set.accession'], search_params['experiments_in_set.files.accession']))
+    post_body = { "accession_triples" : None, "download_file_name" : None }
 
-    if not accession_triples:
-        body = None
-        try: # Was submitted as JSON.
-            body = request.json_body
+    if request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
+        try:
+            post_body['accession_triples'] = json.loads(request.POST.get('accession_triples'))
+            post_body['download_file_name'] = json.loads(request.POST.get('download_file_name')) # Note: Even though text string is requested, POST req should wrap it in JSON.stringify() else this fails.
         except:
             pass
-        if body is None and request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
-            try:
-                body = { "accession_triples" : json.loads(request.POST['accession_triples']), "download_file_name" : json.loads(request.POST['download_file_name'] or None) }
-            except:
-                pass
-        if body is not None and body.get('accession_triples'):
-            accession_triples = [ (accDict.get('accession', 'NONE'), accDict.get('experiments_in_set.accession', 'NONE'), accDict.get('experiments_in_set.files.accession', 'NONE') ) for accDict in body['accession_triples'] ]
-        if body is not None and body.get('download_file_name'):
-            filename_to_suggest = body['download_file_name']
+    if isinstance(post_body['accession_triples'], list) and len(post_body['accession_triples']) > 0:
+        if isinstance(post_body['accession_triples'][0], list): # List of arrays
+            accession_triples = [ (acc_list[0], acc_list[1], acc_list[2] ) for acc_list in post_body['accession_triples'] ]
+        else: # List of dicts { 'accession', 'experiments_in_set.accession', ... } --- DEPRECATED
+            accession_triples = [ (acc_dict.get('accession', 'NONE'), acc_dict.get('experiments_in_set.accession', 'NONE'), acc_dict.get('experiments_in_set.files.accession', 'NONE') ) for acc_dict in post_body['accession_triples'] ]
+    filename_to_suggest = post_body.get('download_file_name', None)
 
     if 'referrer' in search_params:
         search_path = '/{}/'.format(search_params.pop('referrer')[0])

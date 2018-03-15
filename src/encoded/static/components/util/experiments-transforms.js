@@ -639,7 +639,6 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
             });
             exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(ensureArray(exp.files)) });
         }
-        console.log('EXP', exp.accession, exp);
         return exp;
     });
 }

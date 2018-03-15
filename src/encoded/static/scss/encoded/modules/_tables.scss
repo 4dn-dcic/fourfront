@@ -1150,6 +1150,28 @@ $small-label-accession-font-size : 0.75rem;
 			}
 		}
 	}
+	&[data-field="experiments_in_set.experiment_categorizer.combined"]{
+		> .inner {
+			position: relative;
+			text-overflow: none;
+			white-space: normal;
+			div.exp-categorizer-cell {
+				text-align: left;
+
+				> small {
+					position: relative;
+					top: -9px;
+					font-weight: 500;
+				}
+				> div {
+					position: relative;
+					top: -8px;
+					width: 100%;
+				}
+			}
+
+		}
+	}
 }
 
 @mixin search-result-toggle-open-button-container {

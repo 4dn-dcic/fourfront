@@ -124,6 +124,9 @@
         "experiments_in_set.experiment_type": {
             "title": "Experiment Type"
         },
+        "experiments_in_set.experiment_categorizer.combined" : {
+            "title" : "Assay Details"
+        },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
@@ -132,9 +135,6 @@
         },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Biosource"
-        },
-        "experiments_in_set.digestion_enzyme.name": {
-            "title": "Enzyme"
         },
         "experiments_in_set.biosample.modifications.modification_type": {
             "title": "Modifications"
@@ -153,14 +153,20 @@
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Biosource Summary"
         },
+        "experiments_in_set.experiment_categorizer.combined" : {
+            "title" : "Assay Details"
+        },
         "experiments_in_set.digestion_enzyme.name": {
-            "title" : "Enzyme"
+            "title" : "Enzyme",
+            "default_hidden" : true
         },
         "experiments_in_set.biosample.modifications_summary": {
-            "title" : "Modifications"
+            "title" : "Modifications",
+            "default_hidden" : true
         },
         "experiments_in_set.biosample.treatments_summary": {
-            "title" : "Treatments"
+            "title" : "Treatments",
+            "default_hidden" : true
         }
     }
 

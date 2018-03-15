@@ -61,8 +61,14 @@ export class CustomColumnController extends React.Component {
 
 export class CustomColumnSelector extends React.Component {
 
-    static buildColumnDefinitions( constantColumnDefinitions: Object[], columnsMap: Object = {}, columnDefinitionOverrideMap: Object = {}, constantHiddenColumns: string[] = [] ): Object[]
-    {
+    /**
+     * @param {Object[]}    constantColumnDefinitions - Pre-set columns, e.g. 'status', 'display_title'.
+     * @param {Object}      [columnsMap={}] - Mappings of column field name to settings. Use 'context.columns' from back-end response.
+     * @param {Object}      [columnDefinitionOverrideMap={}] - Mappings of column field name to settings to extend columnsMap with.
+     * @param {string[]}    [constantHiddenColumns=[]] - Columns which should always be hidden.
+     * @returns {Object[]} Column definitions
+     */
+    static buildColumnDefinitions(constantColumnDefinitions, columnsMap = {}, columnDefinitionOverrideMap = {}, constantHiddenColumns = []){
         // Prevent Title from being a hideable column.
         constantHiddenColumns = constantHiddenColumns.slice(0);
         constantHiddenColumns.push('display_title');

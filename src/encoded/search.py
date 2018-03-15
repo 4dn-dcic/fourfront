@@ -18,6 +18,7 @@ from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
+import uuid
 
 
 def includeme(config):
@@ -103,6 +104,12 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Adding facets to the query
     search = set_facets(search, facets, query_filters, string_query)
 
+    ### Add preference from session, if available
+    search_session_id = None
+    if request.__parent__ is None and not return_generator and size != 'all': # Probably unnecessary, but skip for non-paged, sub-reqs, etc.
+        search_session_id = request.cookies.get('searchSessionID', 'SESSION-' + str(uuid.uuid1()))
+        search = search.params(preference=search_session_id)
+
     ### Execute the query
     if size == 'all':
         es_results = execute_search_for_all_results(search)
@@ -157,6 +164,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             return result
 
     result['@graph'] = list(graph)
+    if search_session_id: # Is 'None' if e.g. limit=all
+        request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
     return result
 
 
@@ -540,6 +549,15 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
                 'missing': '_last',
                 'unmapped_type': 'keyword',
             }
+    elif not sort and text_search and text_search != '*':
+        search = search.sort(                   # Multi-level sort. See http://www.elastic.co/guide/en/elasticsearch/guide/current/_sorting.html#_multilevel_sorting & https://stackoverflow.com/questions/46458803/python-elasticsearch-dsl-sorting-with-multiple-fields
+            { '_score' : { "order": "desc" } },
+            { 'embedded.date_created.raw' : { 'order': 'desc', 'unmapped_type': 'keyword' }, 'embedded.label.raw' : { 'order': 'asc',  'unmapped_type': 'keyword', 'missing': '_last' } },
+            { '_uid' : { 'order': 'asc' } }     # 'embedded.uuid.raw' (instd of _uid) sometimes results in 400 bad request : 'org.elasticsearch.index.query.QueryShardException: No mapping found for [embedded.uuid.raw] in order to sort on'
+        )
+        result['sort'] = result_sort = { '_score' : { "order" : "desc" } }
+        return search
+
     if sort and result_sort:
         result['sort'] = result_sort
         search = search.sort(sort)
@@ -707,10 +725,9 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
                     break
             facets.append((use_field, {'title': title_field}))
 
-    # append status and audit facets automatically
+    # append status and audit facets automatically at the end of facets list
     facets.append(('status', {'title': 'Status'}))
-    for audit_facet in audit_facets:
-        facets.append(audit_facet)
+    facets = facets + audit_facets
 
     return facets
 
@@ -726,10 +743,7 @@ def set_facets(search, facets, final_filters, string_query):
     """
     aggs = OrderedDict()
 
-    facet_fields = [facet[0] for facet in facets]
-    # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
-
-    for field in facet_fields:
+    for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
         if field == 'type':
             query_field = 'embedded.@type.raw'
         elif field.startswith('audit'):
@@ -801,6 +815,7 @@ def set_facets(search, facets, final_filters, string_query):
             },
             'filter': {'bool': facet_filters},
         }
+
     # to achieve OR behavior within facets, search among GLOBAL results,
     # not just returned ones. to do this, wrap aggs in ['all_items']
     # and add "global": {} to top level aggs query
@@ -848,7 +863,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     aggregations = es_results['aggregations']['all_items']
     used_facets = set()
     for field, facet in facets:
-        resultFacet = {
+        result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
             'total' : 0,
@@ -858,14 +873,14 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         agg_name = field.replace('.', '-')
 
         if agg_name in aggregations:
-            resultFacet['total'] = aggregations[agg_name]['doc_count']
-            resultFacet['terms'] = aggregations[agg_name][agg_name]['buckets']
+            result_facet['total'] = aggregations[agg_name]['doc_count']
+            result_facet['terms'] = aggregations[agg_name][agg_name]['buckets']
 
         # Choosing to show facets with one term for summary info on search it provides
-        if len(resultFacet.get('terms', [])) < 1:
+        if len(result_facet.get('terms', [])) < 1:
             continue
 
-        result.append(resultFacet)
+        result.append(result_facet)
 
     return result
 
@@ -945,16 +960,13 @@ def get_iterable_search_results(request, search_path='/search/', param_lists={"t
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
 
-### stupid things to remove; had to add because of other fxns importing
-
-# DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):
     columns = OrderedDict()
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
             for name,obj in schema_columns.items():
-                columns[name] = obj.get('title')
+                columns[name] = obj
     return columns
 
 _ASSEMBLY_MAPPER = {

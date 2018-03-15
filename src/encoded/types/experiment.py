@@ -14,6 +14,27 @@ from .base import (
 )
 
 
+EXP_CATEGORIZER_SCHEMA = {
+    "title": "Categorizer",
+    "description": "Fields used as an additional level of categorization for an experiment",
+    "type": "object",
+    "properties": {
+        "field": {
+            "type": "string",
+            "description": "The name of the field as to be displayed in tables."
+        },
+        "value": {
+            "type": "string",
+            "description": "The value displayed for the field"
+        },
+        "combined" : {
+            "type" : "string",
+            "description" : "Combined field:value string used for categorization of this experiment."
+        }
+    }
+}
+
+
 @abstract_collection(
     name='experiments',
     unique_key='accession',
@@ -222,37 +243,28 @@ class Experiment(Item):
                                                       for eset in esets])))
         return pubs
 
-    @calculated_property(schema={
-        "title": "Categorizer",
-        "description": "Fields used as an additional level of categorization for an experiment",
-        "type": "object",
-        "properties": {
-            "field": {
-                "type": "string",
-                "description": "The name of the field as to be displayed in tables."
-            },
-            "value": {
-                "type": "string",
-                "description": "The value displayed for the field"
-            }
-        }
-    })
+    @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request):
         ''' The generalish case for if there is a targeted_factor use that
             and if not use enzyme - more specific cases in specific schemas
         '''
         digestion_enzyme = self.properties.get('digestion_enzyme')
         targeted_factor = self.properties.get('targeted_factor')
+        out_dict = {
+            "field" : "Default",
+            "value" : None
+        }
         if targeted_factor is not None:
             obj = request.embed('/', targeted_factor, '@@object')
-            field = 'Target'
+            out_dict['field'] = 'Target'
+            out_dict['value'] = obj['display_title']
         elif digestion_enzyme is not None:
             obj = request.embed('/', digestion_enzyme, '@@object')
-            field = 'Enzyme'
-        else:
-            obj = {'display_title': None}
-            field = 'Default'
-        return {'field': field, 'value': obj['display_title']}
+            out_dict['field'] = 'Enzyme'
+            out_dict['value'] = obj['display_title']
+        if out_dict['value'] is not None:
+            out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
+        return out_dict
 
 
 @collection(
@@ -338,21 +350,7 @@ class ExperimentCaptureC(Experiment):
     def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
-    @calculated_property(schema={
-        "title": "Categorizer",
-        "description": "Fields used as an additional level of categorization for an experiment",
-        "type": "object",
-        "properties": {
-            "field": {
-                "type": "string",
-                "description": "The name of the field as to be displayed in tables."
-            },
-            "value": {
-                "type": "string",
-                "description": "The value displayed for the field"
-            }
-        }
-    })
+    @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request):
         ''' Use targeted_regions information for capture-c'''
         targeted_regions = self.properties.get('targeted_regions')
@@ -364,7 +362,11 @@ class ExperimentCaptureC(Experiment):
                     regions.append(region)
             if regions:
                 value = ', '.join(sorted(regions))
-                return {'field': 'Target', 'value': value}
+                return {
+                    'field': 'Target',
+                    'value': value,
+                    'combined' : 'Target: ' + value
+                }
 
         return super(ExperimentCaptureC, self).experiment_categorizer(request)
 
@@ -408,21 +410,7 @@ class ExperimentRepliseq(Experiment):
     def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample))
 
-    @calculated_property(schema={
-        "title": "Categorizer",
-        "description": "Fields used as an additional level of categorization for an experiment",
-        "type": "object",
-        "properties": {
-            "field": {
-                "type": "string",
-                "description": "The name of the field as to be displayed in tables."
-            },
-            "value": {
-                "type": "string",
-                "description": "The value displayed for the field"
-            }
-        }
-    })
+    @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request):
         ''' Use combination of fraction and total number of fractions'''
         stage_fraction = self.properties.get('stage_fraction')
@@ -434,7 +422,11 @@ class ExperimentRepliseq(Experiment):
             else:
                 fraction = str(total_fractions_in_exp) + ' fractions'
             value = value + fraction
-            return {'field': 'Fraction', 'value': value}
+            return {
+                'field': 'Fraction',
+                'value': value,
+                'combined' : 'Fraction: ' + value
+            }
         else:
             return super(ExperimentRepliseq, self).experiment_categorizer(request)
 
@@ -647,21 +639,7 @@ class ExperimentMic(Experiment):
     def display_title(self, request, experiment_type='Undefined', biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
-    @calculated_property(schema={
-        "title": "Categorizer",
-        "description": "Fields used as an additional level of categorization for an experiment",
-        "type": "object",
-        "properties": {
-            "field": {
-                "type": "string",
-                "description": "The name of the field as to be displayed in tables."
-            },
-            "value": {
-                "type": "string",
-                "description": "The value displayed for the field"
-            }
-        }
-    })
+    @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request):
         ''' Use the target(s) in the imaging path'''
         imaging_paths = self.properties.get('imaging_paths')
@@ -674,7 +652,11 @@ class ExperimentMic(Experiment):
                     path_targets.append(summ)
             if path_targets:
                 value = ', '.join(list(set(path_targets)))
-                return {'field': 'Target', 'value': value}
+                return {
+                    'field': 'Target',
+                    'value': value,
+                    'combined' : 'Target: ' + value
+                }
         return super(ExperimentMic, self).experiment_categorizer(request)
 
 
