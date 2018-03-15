@@ -77,6 +77,12 @@
             "description": "Temperature of the 3' Adenylation Reaction in degrees Celsius",
             "type": "number",
             "use_for": ["CUT&RUN"]
+        },
+        "affinity_rounds": {
+            "title": "Number of rounds of affinity purification",
+            "description": "If there are multiple rounds of purification - eg. 2 biotin affinity purifications for TSA-seq",
+            "type": "integer",
+            "use_for": ["TSA-seq"]
         }
     },
     "columns": {
