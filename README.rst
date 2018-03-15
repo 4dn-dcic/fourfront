@@ -20,6 +20,9 @@
 
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
+Step 0: Obtain AWS keys. These will need to added to your environment variables or through the AWS CLI (installed later in this process).
+
+
 Step 1: Verify that homebrew is working properly::
 
     $ sudo brew doctor
@@ -31,7 +34,7 @@ Step 2: Install or update dependencies::
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install java
     $ brew tap homebrew/versions
-    $ brew install elasticsearch node4-lts
+    $ brew install elasticsearch@5.6 node4-lts
 
 If you need to update dependencies::
 
