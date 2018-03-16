@@ -31,6 +31,10 @@
         "schema_version": {
             "default": "1"
         },
+		"higlass_uid": {
+			"title": "Higlass UID",
+			"type": "string"
+		},
         "file_format": {
             "title": "File Format",
             "type": "string",
