@@ -284,7 +284,8 @@
     "status":"uploaded",
     "file_format":"mcool",
     "uuid":"d273d710-6b6d-4e43-a84c-5658a891c032",
-    "accession": "4DNFIMCOOL01"
+    "accession": "4DNFIMCOOL01",
+	"higlass_uid": "W2hNwnu2TwiDqqCUxxzA1g" 
 },
 {
     "lab":"/labs/4dn-dcic-lab/",

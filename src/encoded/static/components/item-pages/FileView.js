@@ -16,6 +16,7 @@ import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDro
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from '../util/file';
+// import HiGlassComponent from 'higlass';
 
 
 export default class FileView extends WorkflowRunTracingView {
@@ -78,9 +79,65 @@ class HiGlassTabView extends React.Component {
         
     }
     render(){
+      var ViewConfig = {
+        "editable": true,
+        "zoomFixed": false,
+        "trackSourceServers": [
+          "http://54.86.58.34/api/v1"
+        ],
+        "exportViewUrl": "/api/v1/viewconfs",
+        "views": [
+          {
+            "uid": "aa",
+            "initialXDomain": [
+              234746886.15079364,
+              238230126.6906902
+            ],
+            "tracks": {
+              "top": [],
+              "left": [],
+              "center": [
+                {
+                  "uid": "c1",
+                  "type": "combined",
+                  "height": 551,
+                  "contents": [
+                    {
+                      "server": "http://54.86.58.34/api/v1",
+                      "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
+                      "type": "heatmap",
+                      "position": "center",
+                      "uid": "GjuZed1ySGW1IzZZqFB9BA"
+                    }
+                  ],
+                  "position": "center"
+                }
+              ],
+              "right": [],
+              "bottom": []
+            },
+            "layout": {
+              "w": 12,
+              "h": 13,
+              "x": 0,
+              "y": 0,
+              "i": "aa",
+              "moved": false,
+              "static": false
+            },
+            "initialYDomain": [
+              235207586.8246398,
+              238862012.2628646
+            ]
+          }
+         ],
+        }
+
+        var opts = {"bounded": true}
+      /*                <HiGlassComponent options={opts} viewConfig={ViewConfig} />
+       */                
         return (
             <div>
-                <HiGlass .... />
             </div>
         );
     }

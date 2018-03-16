@@ -117,6 +117,7 @@
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.8.3",
     "unified": "^6.1.6",
-    "xhr2": "^0.1.4"
+    "xhr2": "^0.1.4",
+	"higlass": "^0.10.22"
   }
 }
