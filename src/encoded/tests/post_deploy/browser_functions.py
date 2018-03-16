@@ -29,10 +29,12 @@ def scroll_viewport_down(browser):
 
 
 ################################
-
+##### Search Page Funcs ########
 ################################
 
 
 def get_search_page_result_count(browser):
     result_count_box = browser.find_by_css('div.above-results-table-row .box.results-count > span.text-500')
     return int(result_count_box.text)
+
+

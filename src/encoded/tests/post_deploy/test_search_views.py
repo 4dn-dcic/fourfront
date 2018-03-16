@@ -1,12 +1,17 @@
 import pytest
 from splinter import Browser
 from splinter.driver import ElementAPI
+from selenium.webdriver.common.keys import Keys
 import time
 from pkg_resources import resource_filename
 from encoded.loadxl import read_single_sheet
 from .browser_functions import (
     scroll_page_down,
     get_search_page_result_count
+)
+
+from .macro_functions import (
+    compare_quickinfo_vs_barplot_counts
 )
 
 pytestmark = [
@@ -62,7 +67,6 @@ def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict)
     This test specificially relies on SELENIUM WEBDRIVER rather than PYTEST-SPLINTER wrapper.
     Thus there is a chance it might not work with a couple of browser/BrowserDrivers.
     '''
-    from selenium.webdriver.common.keys import Keys
     session_browser.visit(host_url + '/') # Start at home page
 
     session_browser.find_by_name('q').first.fill('mouse')
@@ -71,7 +75,7 @@ def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict)
     selenium_search_bar_input_field.send_keys(Keys.ENTER) # Send 'Enter' key (form submit).
 
     # Wait for searh results / browse page to load -- check by title to handle case if no results.
-    assert session_browser.is_element_present_by_text('Data Browser') is True
+    assert session_browser.is_element_present_by_text('Data Browser', 10) is True
 
     # Make sure we land on /browse/ page by default
     assert '/browse/' in session_browser.url
@@ -104,6 +108,51 @@ def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict)
 
     assert 'q=mouse' in session_browser.url
 
+
+
+
+def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, config: dict):
+    '''
+    Ensure that bar plot counts and quick info bar count match / add up.
+    '''
+    session_browser.visit(host_url + '/') # Start at home page
+
+    time.sleep(5) # TEMPORARY - UNTIL HAS .loading CLASS ON STAGING, DATA
+    assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', 10) is True
+    
+    
+    # Compare default/initial counts
+    compare_quickinfo_vs_barplot_counts(session_browser)
+
+    # Toggle 'Include External Data' & repeat comparsion test.
+    session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()
+
+    #time.sleep(5) # TEMPORARY - UNTIL HAS .loading CLASS ON STAGING, DATA
+    time.sleep(0.1)
+    assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', 10) is True
+    assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', 10) is True
+
+
+    compare_quickinfo_vs_barplot_counts(session_browser)
+
+    # Search something random-ish and compare again.
+    session_browser.find_by_name('q').first.fill('mouse')
+    selenium_search_bar_input_field = session_browser.driver.switch_to_active_element() # Grab un-wrapped selenium element (last elem interacted w/)
+    selenium_search_bar_input_field.send_keys(Keys.ENTER) # Send 'Enter' key (form submit).
+
+    #time.sleep(5) # TEMPORARY - UNTIL HAS .loading CLASS ON STAGING, DATA
+    assert session_browser.is_element_present_by_text('Data Browser', 10) is True
+    time.sleep(0.1)
+    assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', 10) is True
+    assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', 10) is True
+
+
+    compare_quickinfo_vs_barplot_counts(session_browser)
+    
+
+
+def test_browse_view_file_selection(session_browser: Browser, host_url: str, config: dict):
+    pass
 
 
 def test_search_for_olfactory_paged_result_consistency(session_browser: Browser, host_url: str, config: dict):
