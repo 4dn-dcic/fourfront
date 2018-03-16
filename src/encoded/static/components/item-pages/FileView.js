@@ -16,8 +16,8 @@ import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDro
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from '../util/file';
-// import HiGlassComponent from 'higlass';
 
+let HiGlassComponent = null;
 
 export default class FileView extends WorkflowRunTracingView {
 
@@ -61,6 +61,7 @@ globals.content_views.register(FileView, 'File');
 
 
 class HiGlassTabView extends React.Component {
+
     static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-search icon-fw"/> Visualize File</span>,
@@ -78,66 +79,82 @@ class HiGlassTabView extends React.Component {
         };
         
     }
-    render(){
-      var ViewConfig = {
-        "editable": true,
-        "zoomFixed": false,
-        "trackSourceServers": [
-          "http://54.86.58.34/api/v1"
-        ],
-        "exportViewUrl": "/api/v1/viewconfs",
-        "views": [
-          {
-            "uid": "aa",
-            "initialXDomain": [
-              234746886.15079364,
-              238230126.6906902
-            ],
-            "tracks": {
-              "top": [],
-              "left": [],
-              "center": [
-                {
-                  "uid": "c1",
-                  "type": "combined",
-                  "height": 551,
-                  "contents": [
-                    {
-                      "server": "http://54.86.58.34/api/v1",
-                      "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
-                      "type": "heatmap",
-                      "position": "center",
-                      "uid": "GjuZed1ySGW1IzZZqFB9BA"
-                    }
-                  ],
-                  "position": "center"
-                }
-              ],
-              "right": [],
-              "bottom": []
-            },
-            "layout": {
-              "w": 12,
-              "h": 13,
-              "x": 0,
-              "y": 0,
-              "i": "aa",
-              "moved": false,
-              "static": false
-            },
-            "initialYDomain": [
-              235207586.8246398,
-              238862012.2628646
-            ]
-          }
-         ],
-        }
 
-        var opts = {"bounded": true}
-      /*                <HiGlassComponent options={opts} viewConfig={ViewConfig} />
-       */                
+    constructor(props){
+        super(props);
+        this.state = { 'mounted' : false }; 
+        this.options = { "bounded" : true }; // ToDo: Own state component wrapper if linked to UI
+        this.viewConfig = {
+            "editable": true,
+            "zoomFixed": false,
+            "trackSourceServers": [
+                "http://54.86.58.34/api/v1"
+            ],
+            "exportViewUrl": "/api/v1/viewconfs",
+            "views": [
+                {
+                    "uid": "aa",
+                    "initialXDomain": [
+                        234746886.15079364,
+                        238230126.6906902
+                    ],
+                    "tracks": {
+                        "top": [],
+                        "left": [],
+                        "center": [
+                            {
+                                "uid": "c1",
+                                "type": "combined",
+                                "height": 551,
+                                "contents": [
+                                    {
+                                        "server": "http://54.86.58.34/api/v1",
+                                        "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
+                                        "type": "heatmap",
+                                        "position": "center",
+                                        "uid": "GjuZed1ySGW1IzZZqFB9BA"
+                                    }
+                                ],
+                                "position": "center"
+                            }
+                        ],
+                        "right": [],
+                        "bottom": []
+                    },
+                    "layout": {
+                        "w": 12,
+                        "h": 13,
+                        "x": 0,
+                        "y": 0,
+                        "i": "aa",
+                        "moved": false,
+                        "static": false
+                    },
+                    "initialYDomain": [
+                        235207586.8246398,
+                        238862012.2628646
+                    ]
+                }
+            ],
+        };
+    }
+
+    componentDidMount(){
+        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
+            HiGlassComponent = require('higlass').HiGlassComponent;
+            this.setState({ 'mounted' : true });
+        }, 250);
+    }
+
+    render(){
+        if (!this.state.mounted) return null;
         return (
-            <div>
+            <div className="higlass-wrapper">
+                <HiGlassComponent
+                    //ref={(r)=>{ this.element = r; }}
+                    options={this.options}
+                    viewConfig={this.viewConfig}
+                />
             </div>
         );
     }
