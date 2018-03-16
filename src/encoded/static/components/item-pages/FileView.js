@@ -43,6 +43,10 @@ export default class FileView extends WorkflowRunTracingView {
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
         }
 
+        if (context.file_format === 'mcool'){
+            initTabs.push(HiGlassTabView.getTabObject(context, this.props.schemas, width));
+        }
+
         return initTabs.concat(this.getCommonTabs());
     }
 
@@ -54,6 +58,33 @@ export default class FileView extends WorkflowRunTracingView {
 
 globals.content_views.register(FileView, 'File');
 
+
+class HiGlassTabView extends React.Component {
+    static getTabObject(context, schemas, width){
+        return {
+            'tab' : <span><i className="icon icon-search icon-fw"/> Visualize File</span>,
+            'key' : 'higlass',
+            //'disabled' : !Array.isArray(context.experiments),
+            'content' : (
+                <div className="overflow-hidden">
+                    <h3 className="tab-section-title">
+                        <span>HiGlass Browser</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <HiGlassTabView context={context} schemas={schemas} width={width} />
+                </div>
+            )
+        };
+        
+    }
+    render(){
+        return (
+            <div>
+                <HiGlass .... />
+            </div>
+        );
+    }
+}
 
 class FileViewOverview extends React.Component {
 
