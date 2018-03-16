@@ -96,6 +96,7 @@ script:
   src/encoded; fi
 - if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
   --cov src/encoded; fi
+- if test -n "$POSTDEPLOY"; then echo 'TESTING123'; fi
 - |
   if test -n "$BROWSER"; then
     test -f "$SC_PIDFILE" && bin/test -v -v -m "bdd" --tb=short \

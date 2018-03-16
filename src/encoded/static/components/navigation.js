@@ -350,10 +350,10 @@ class SearchBar extends React.Component{
                     }}
                     title={this.state.searchAllItems ? 'All Items' : 'Experiment Sets'}
                 >
-                    <MenuItem eventKey='sets' active={!this.state.searchAllItems}>
+                    <MenuItem eventKey='sets' data-key="sets" active={!this.state.searchAllItems}>
                         Experiment Sets
                     </MenuItem>
-                    <MenuItem eventKey='all' active={this.state.searchAllItems}>
+                    <MenuItem eventKey='all' data-key="all" active={this.state.searchAllItems}>
                         All Items (advanced)
                     </MenuItem>
                 </DropdownButton>
