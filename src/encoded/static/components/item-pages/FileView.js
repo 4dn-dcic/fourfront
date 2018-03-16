@@ -148,13 +148,22 @@ class HiGlassTabView extends React.Component {
 
     render(){
         if (!this.state.mounted) return null;
+        let hiGlassInstance = null;
+        if (this.state.mounted){
+            hiGlassInstance = (
+                <div style={{ height: 500 }}>
+                    <HiGlassComponent
+                        //ref={(r)=>{ this.element = r; }}
+                        options={this.options}
+                        viewConfig={this.viewConfig}
+                    />
+                </div>
+            );
+        }
         return (
             <div className="higlass-wrapper">
-                <HiGlassComponent
-                    //ref={(r)=>{ this.element = r; }}
-                    options={this.options}
-                    viewConfig={this.viewConfig}
-                />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
+                { hiGlassInstance }
             </div>
         );
     }
