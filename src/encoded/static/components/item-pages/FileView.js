@@ -45,6 +45,9 @@ export default class FileView extends WorkflowRunTracingView {
         }
 
         if (context.file_format === 'mcool'){
+            // TODO: pass true to 4th param (disabled, bool) if not met some condition like not in HiGlass server yet.
+            // Perhaps could check e.g. http://54.86.58.34/api/v1/tileset_info/?d=W2hNwnu2TwiDqqCUxxzA1g&s=EHMd6XGAQyCRHRTCuU4KDA if:
+            //   has `{ W2hNwnu2TwiDqqCUxxzA1g: { min_pos: number, max_pos: number } }`
             initTabs.push(HiGlassTabView.getTabObject(context, this.props.schemas, width));
         }
 
@@ -62,11 +65,11 @@ globals.content_views.register(FileView, 'File');
 
 class HiGlassTabView extends React.Component {
 
-    static getTabObject(context, schemas, width){
+    static getTabObject(context, schemas, width, disabled = false){
         return {
-            'tab' : <span><i className="icon icon-search icon-fw"/> Visualize File</span>,
+            'tab' : <span><i className="icon icon-search icon-fw"/> HiGlass Browser</span>,
             'key' : 'higlass',
-            //'disabled' : !Array.isArray(context.experiments),
+            'disabled' : disabled,
             'content' : (
                 <div className="overflow-hidden">
                     <h3 className="tab-section-title">
@@ -83,7 +86,7 @@ class HiGlassTabView extends React.Component {
     constructor(props){
         super(props);
         this.state = { 'mounted' : false }; 
-        this.options = { "bounded" : true }; // ToDo: Own state component wrapper if linked to UI
+        this.options = { "bounded" : true };
         this.viewConfig = {
             "editable": true,
             "zoomFixed": false,
@@ -137,6 +140,7 @@ class HiGlassTabView extends React.Component {
                 }
             ],
         };
+        this.hiGlassElement = null;
     }
 
     componentDidMount(){
@@ -147,23 +151,31 @@ class HiGlassTabView extends React.Component {
     }
 
     render(){
-        if (!this.state.mounted) return null;
         let hiGlassInstance = null;
         if (this.state.mounted){
             hiGlassInstance = (
-                <div style={{ height: 500 }}>
-                    <HiGlassComponent
-                        //ref={(r)=>{ this.element = r; }}
-                        options={this.options}
-                        viewConfig={this.viewConfig}
-                    />
-                </div>
+                <HiGlassComponent
+                    ref={(r)=>{ this.hiGlassElement = window.hiGlassElement = r; }}
+                    options={this.options}
+                    viewConfig={this.viewConfig}
+                />
             );
         }
+        /**
+         * TODO: Some state + UI functions to make higlass view full screen.
+         * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
+         */
         return (
-            <div className="higlass-wrapper">
+            <div className="higlass-tab-view-contents">
                 <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
-                { hiGlassInstance }
+                <div className="higlass-wrapper row" style={{ 'height' : 650 }}>
+                    { hiGlassInstance || (
+                        <div className="col-sm-12 text-center mt-4">
+                            <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
+                            Initializing
+                        </div>
+                    ) }
+                </div>
             </div>
         );
     }
