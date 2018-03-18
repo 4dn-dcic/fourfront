@@ -30,7 +30,7 @@ export default class FileView extends WorkflowRunTracingView {
 
     static shouldHiGlassViewExist(context){
         // TODO: Check if File has a viewConfig or properties from which a viewConfig might be formed.
-        return context.file_format === 'mcool';
+        return context.file_format === 'mcool'/* && context.higlass_uid */;
     }
 
     constructor(props){
