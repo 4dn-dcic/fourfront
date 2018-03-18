@@ -31,8 +31,11 @@ export default class FileView extends WorkflowRunTracingView {
     constructor(props){
         super(props);
         this.validateHiGlassData = this.validateHiGlassData.bind(this);
-        this.state.validatingHiGlassTileData = true;
-        this.state.isValidHiGlassData = false;
+        this.getAllTracksFromViewConfig = this.getAllTracksFromViewConfig.bind(this);
+        this.state = _.extend(this.state, {
+            'validatingHiGlassTileData' : true,
+            'isValidHiGlassTileData' : false
+        });
 
         this.hiGlassViewConfig = {
             "editable": true,
@@ -87,6 +90,7 @@ export default class FileView extends WorkflowRunTracingView {
                 }
             ],
         };
+    
     }
 
     componentDidMount(){
@@ -94,23 +98,43 @@ export default class FileView extends WorkflowRunTracingView {
         this.validateHiGlassData();
     }
 
+    getAllTracksFromViewConfig(viewConfig = this.hiGlassViewConfig){
+        return _.reduce(viewConfig.views || [], function(m, view){
+            if (view && view.tracks){
+                var allTracks = _.union(..._.values(_.pick(view.tracks, 'top', 'left', 'center', 'right', 'bottom')));
+                _.forEach(allTracks, function(track){
+                    _.forEach(track.contents, function(trackContent){
+                        if (trackContent.server && trackContent.tilesetUid && trackContent.uid){
+                            m.push(trackContent);
+                        }
+                    });
+                });
+            }
+            return m;
+        }, []);
+    }
+
     /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
     validateHiGlassData(){
-        var tilesetUid = "W2hNwnu2TwiDqqCUxxzA1g";
-        var uid = "GjuZed1ySGW1IzZZqFB9BA";
+        var track = this.getAllTracksFromViewConfig()[0] || {}; // Check only 1 track for now.
+        var { tilesetUid, uid, server } = track;
 
         var fallback = function(){
             this.setState({
-                'isValidHiGlassData' : false,
+                'isValidHiGlassTileData' : false,
                 'validatingHiGlassTileData' : false
             });
         }.bind(this);
 
-        // TODO: grab server, ?d= & ?s= URI params from this.hiGlassViewConfig.
-        ajax.load('http://54.86.58.34/api/v1/tileset_info/?d=' + tilesetUid + 'g&s=' + uid, (resp)=>{
+        if (!tilesetUid || !server || !uid) {
+            fallback();
+            return false;
+        }
+
+        ajax.load(server + '/tileset_info/?d=' + tilesetUid + '&s=' + uid, (resp)=>{
             if (resp[tilesetUid] && resp[tilesetUid].name && Array.isArray(resp[tilesetUid].min_pos) && Array.isArray(resp[tilesetUid].max_pos) && resp[tilesetUid].min_pos.length > 0 && resp[tilesetUid].max_pos.length > 0) {
                 this.setState({
-                    'isValidHiGlassData' : true,
+                    'isValidHiGlassTileData' : true,
                     'validatingHiGlassTileData' : false
                 });
             } else {
@@ -136,7 +160,7 @@ export default class FileView extends WorkflowRunTracingView {
         }
 
         if (context.file_format === 'mcool'){
-            initTabs.push(HiGlassTabView.getTabObject(context, this.hiGlassViewConfig, !this.state.isValidHiGlassData, this.state.validatingHiGlassTileData));
+            initTabs.push(HiGlassTabView.getTabObject(context, this.hiGlassViewConfig, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData));
         }
 
         return initTabs.concat(this.getCommonTabs());
@@ -164,11 +188,15 @@ class HiGlassTabView extends React.Component {
                         <span>HiGlass Browser</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <HiGlassTabView viewConfig={viewConfig} context={context} />
+                    <HiGlassTabView viewConfig={viewConfig} context={context} disabled={disabled} isValidating={isValidating} />
                 </div>
             )
         };
-        
+    }
+
+    static defaultProps = {
+        'isValidating' : false,
+        'disabled' : false
     }
 
     constructor(props){
@@ -186,13 +214,27 @@ class HiGlassTabView extends React.Component {
     }
 
     render(){
+        var { disabled, isValidating, viewConfig, context } = this.props;
         let hiGlassInstance = null;
-        if (this.state.mounted){
+        if (isValidating || !this.state.mounted){
+            hiGlassInstance = (
+                <div className="col-sm-12 text-center mt-4">
+                    <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
+                    Initializing
+                </div>
+            );
+        } else if (disabled) {
+            hiGlassInstance = (
+                <div className="col-sm-12 text-center mt-4">
+                    <h4 className="text-400">Not Available</h4>
+                </div>
+            );
+        } else {
             hiGlassInstance = (
                 <HiGlassComponent
                     ref={(r)=>{ this.hiGlassElement = window.hiGlassElement = r; }}
                     options={this.options}
-                    viewConfig={this.props.viewConfig}
+                    viewConfig={viewConfig}
                 />
             );
         }
@@ -203,14 +245,7 @@ class HiGlassTabView extends React.Component {
         return (
             <div className="higlass-tab-view-contents">
                 <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
-                <div className="higlass-wrapper row" style={{ 'height' : 650 }}>
-                    { hiGlassInstance || (
-                        <div className="col-sm-12 text-center mt-4">
-                            <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
-                            Initializing
-                        </div>
-                    ) }
-                </div>
+                <div className="higlass-wrapper row" style={{ 'height' : 650 }} children={hiGlassInstance} />
             </div>
         );
     }
