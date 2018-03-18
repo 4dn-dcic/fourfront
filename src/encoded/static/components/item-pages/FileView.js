@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HIGLASS_SAMPLE_VIEWCONFIG } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
@@ -17,80 +17,32 @@ import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } 
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from '../util/file';
 
-let HiGlassComponent = null;
+
 
 export default class FileView extends WorkflowRunTracingView {
 
     /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
-    static doesGraphExist(context){
+    static shouldGraphExist(context){
         return (
             (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
         );
     }
 
+    static shouldHiGlassViewExist(context){
+        // TODO: Check if File has a viewConfig or properties from which a viewConfig might be formed.
+        return context.file_format === 'mcool';
+    }
+
     constructor(props){
         super(props);
         this.validateHiGlassData = this.validateHiGlassData.bind(this);
-        this.getAllTracksFromViewConfig = this.getAllTracksFromViewConfig.bind(this);
         this.state = _.extend(this.state, {
             'validatingHiGlassTileData' : true,
             'isValidHiGlassTileData' : false
         });
 
-        this.hiGlassViewConfig = {
-            "editable": true,
-            "zoomFixed": false,
-            "trackSourceServers": [
-                "http://54.86.58.34/api/v1"
-            ],
-            "exportViewUrl": "/api/v1/viewconfs",
-            "views": [
-                {
-                    "uid": "aa",
-                    "initialXDomain": [
-                        234746886.15079364,
-                        238230126.6906902
-                    ],
-                    "tracks": {
-                        "top": [],
-                        "left": [],
-                        "center": [
-                            {
-                                "uid": "c1",
-                                "type": "combined",
-                                "height": 551,
-                                "contents": [
-                                    {
-                                        "server": "http://54.86.58.34/api/v1",
-                                        "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
-                                        "type": "heatmap",
-                                        "position": "center",
-                                        "uid": "GjuZed1ySGW1IzZZqFB9BA"
-                                    }
-                                ],
-                                "position": "center"
-                            }
-                        ],
-                        "right": [],
-                        "bottom": []
-                    },
-                    "layout": {
-                        "w": 12,
-                        "h": 13,
-                        "x": 0,
-                        "y": 0,
-                        "i": "aa",
-                        "moved": false,
-                        "static": false
-                    },
-                    "initialYDomain": [
-                        235207586.8246398,
-                        238862012.2628646
-                    ]
-                }
-            ],
-        };
-    
+        this.hiGlassViewConfig = HIGLASS_SAMPLE_VIEWCONFIG; // TODO: Should be generated on-the-fly from File properties? (if FileView.shouldHiGlassViewExist() == true)
+
     }
 
     componentDidMount(){
@@ -98,25 +50,9 @@ export default class FileView extends WorkflowRunTracingView {
         this.validateHiGlassData();
     }
 
-    getAllTracksFromViewConfig(viewConfig = this.hiGlassViewConfig){
-        return _.reduce(viewConfig.views || [], function(m, view){
-            if (view && view.tracks){
-                var allTracks = _.union(..._.values(_.pick(view.tracks, 'top', 'left', 'center', 'right', 'bottom')));
-                _.forEach(allTracks, function(track){
-                    _.forEach(track.contents, function(trackContent){
-                        if (trackContent.server && trackContent.tilesetUid && trackContent.uid){
-                            m.push(trackContent);
-                        }
-                    });
-                });
-            }
-            return m;
-        }, []);
-    }
-
     /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
     validateHiGlassData(){
-        var track = this.getAllTracksFromViewConfig()[0] || {}; // Check only 1 track for now.
+        var track = HiGlassTabView.getAllTracksFromViewConfig(this.hiGlassViewConfig)[0] || {}; // Check only 1 track for now.
         var { tilesetUid, uid, server } = track;
 
         var fallback = function(){
@@ -155,11 +91,11 @@ export default class FileView extends WorkflowRunTracingView {
         
         var steps = this.state.steps;
 
-        if (FileView.doesGraphExist(context)){
+        if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
         }
 
-        if (context.file_format === 'mcool'){
+        if (FileView.shouldHiGlassViewExist(context)){
             initTabs.push(HiGlassTabView.getTabObject(context, this.hiGlassViewConfig, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData));
         }
 
@@ -175,81 +111,7 @@ export default class FileView extends WorkflowRunTracingView {
 globals.content_views.register(FileView, 'File');
 
 
-class HiGlassTabView extends React.Component {
 
-    static getTabObject(context, viewConfig, disabled, isValidating){
-        return {
-            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'search')}/> HiGlass Browser</span>,
-            'key' : 'higlass',
-            'disabled' : disabled,
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>HiGlass Browser</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <HiGlassTabView viewConfig={viewConfig} context={context} disabled={disabled} isValidating={isValidating} />
-                </div>
-            )
-        };
-    }
-
-    static defaultProps = {
-        'isValidating' : false,
-        'disabled' : false
-    }
-
-    constructor(props){
-        super(props);
-        this.state = { 'mounted' : false }; 
-        this.options = { "bounded" : true };
-        this.hiGlassElement = null;
-    }
-
-    componentDidMount(){
-        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            HiGlassComponent = require('higlass').HiGlassComponent;
-            this.setState({ 'mounted' : true });
-        }, 250);
-    }
-
-    render(){
-        var { disabled, isValidating, viewConfig, context } = this.props;
-        let hiGlassInstance = null;
-        if (isValidating || !this.state.mounted){
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
-                    Initializing
-                </div>
-            );
-        } else if (disabled) {
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h4 className="text-400">Not Available</h4>
-                </div>
-            );
-        } else {
-            hiGlassInstance = (
-                <HiGlassComponent
-                    ref={(r)=>{ this.hiGlassElement = window.hiGlassElement = r; }}
-                    options={this.options}
-                    viewConfig={viewConfig}
-                />
-            );
-        }
-        /**
-         * TODO: Some state + UI functions to make higlass view full screen.
-         * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
-         */
-        return (
-            <div className="higlass-tab-view-contents">
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
-                <div className="higlass-wrapper row" style={{ 'height' : 650 }} children={hiGlassInstance} />
-            </div>
-        );
-    }
-}
 
 class FileViewOverview extends React.Component {
 
