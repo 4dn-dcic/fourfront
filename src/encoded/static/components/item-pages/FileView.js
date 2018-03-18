@@ -28,66 +28,13 @@ export default class FileView extends WorkflowRunTracingView {
         );
     }
 
-    getTabViewContents(){
-
-        var initTabs = [];
-        var context = this.props.context;
-
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (width) width -= 20;
-
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
-        
-        var steps = this.state.steps;
-
-        if (FileView.doesGraphExist(context)){
-            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
-        }
-
-        if (context.file_format === 'mcool'){
-            // TODO: pass true to 4th param (disabled, bool) if not met some condition like not in HiGlass server yet.
-            // Perhaps could check e.g. http://54.86.58.34/api/v1/tileset_info/?d=W2hNwnu2TwiDqqCUxxzA1g&s=EHMd6XGAQyCRHRTCuU4KDA if:
-            //   has `{ W2hNwnu2TwiDqqCUxxzA1g: { min_pos: number, max_pos: number } }`
-            initTabs.push(HiGlassTabView.getTabObject(context, this.props.schemas, width));
-        }
-
-        return initTabs.concat(this.getCommonTabs());
-    }
-
-    itemMidSection(){
-        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} /></layout.WindowResizeUpdateTrigger>;
-    }
-
-}
-
-globals.content_views.register(FileView, 'File');
-
-
-class HiGlassTabView extends React.Component {
-
-    static getTabObject(context, schemas, width, disabled = false){
-        return {
-            'tab' : <span><i className="icon icon-search icon-fw"/> HiGlass Browser</span>,
-            'key' : 'higlass',
-            'disabled' : disabled,
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>HiGlass Browser</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <HiGlassTabView context={context} schemas={schemas} width={width} />
-                </div>
-            )
-        };
-        
-    }
-
     constructor(props){
         super(props);
-        this.state = { 'mounted' : false }; 
-        this.options = { "bounded" : true };
-        this.viewConfig = {
+        this.validateHiGlassData = this.validateHiGlassData.bind(this);
+        this.state.validatingHiGlassTileData = true;
+        this.state.isValidHiGlassData = false;
+
+        this.hiGlassViewConfig = {
             "editable": true,
             "zoomFixed": false,
             "trackSourceServers": [
@@ -140,6 +87,94 @@ class HiGlassTabView extends React.Component {
                 }
             ],
         };
+    }
+
+    componentDidMount(){
+        super.componentDidMount();
+        this.validateHiGlassData();
+    }
+
+    /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
+    validateHiGlassData(){
+        var tilesetUid = "W2hNwnu2TwiDqqCUxxzA1g";
+        var uid = "GjuZed1ySGW1IzZZqFB9BA";
+
+        var fallback = function(){
+            this.setState({
+                'isValidHiGlassData' : false,
+                'validatingHiGlassTileData' : false
+            });
+        }.bind(this);
+
+        // TODO: grab server, ?d= & ?s= URI params from this.hiGlassViewConfig.
+        ajax.load('http://54.86.58.34/api/v1/tileset_info/?d=' + tilesetUid + 'g&s=' + uid, (resp)=>{
+            if (resp[tilesetUid] && resp[tilesetUid].name && Array.isArray(resp[tilesetUid].min_pos) && Array.isArray(resp[tilesetUid].max_pos) && resp[tilesetUid].min_pos.length > 0 && resp[tilesetUid].max_pos.length > 0) {
+                this.setState({
+                    'isValidHiGlassData' : true,
+                    'validatingHiGlassTileData' : false
+                });
+            } else {
+                fallback();
+            }
+        }, 'GET', fallback);
+    }
+
+    getTabViewContents(){
+
+        var initTabs = [];
+        var context = this.props.context;
+
+        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        if (width) width -= 20;
+
+        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
+        
+        var steps = this.state.steps;
+
+        if (FileView.doesGraphExist(context)){
+            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
+        }
+
+        if (context.file_format === 'mcool'){
+            initTabs.push(HiGlassTabView.getTabObject(context, this.hiGlassViewConfig, !this.state.isValidHiGlassData, this.state.validatingHiGlassTileData));
+        }
+
+        return initTabs.concat(this.getCommonTabs());
+    }
+
+    itemMidSection(){
+        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} /></layout.WindowResizeUpdateTrigger>;
+    }
+
+}
+
+globals.content_views.register(FileView, 'File');
+
+
+class HiGlassTabView extends React.Component {
+
+    static getTabObject(context, viewConfig, disabled, isValidating){
+        return {
+            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'search')}/> HiGlass Browser</span>,
+            'key' : 'higlass',
+            'disabled' : disabled,
+            'content' : (
+                <div className="overflow-hidden">
+                    <h3 className="tab-section-title">
+                        <span>HiGlass Browser</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <HiGlassTabView viewConfig={viewConfig} context={context} />
+                </div>
+            )
+        };
+        
+    }
+
+    constructor(props){
+        super(props);
+        this.state = { 'mounted' : false }; 
+        this.options = { "bounded" : true };
         this.hiGlassElement = null;
     }
 
@@ -157,7 +192,7 @@ class HiGlassTabView extends React.Component {
                 <HiGlassComponent
                     ref={(r)=>{ this.hiGlassElement = window.hiGlassElement = r; }}
                     options={this.options}
-                    viewConfig={this.viewConfig}
+                    viewConfig={this.props.viewConfig}
                 />
             );
         }
