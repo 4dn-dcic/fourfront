@@ -108,12 +108,12 @@ def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict,
     #assert len(search_table_rows) > 0
 
     # Select 'All Items' from drop-down
-    search_type_dropdown_button: ElementAPI = session_browser.find_by_css('form.navbar-search-form-container button#search-item-type-selector').first
+    search_type_dropdown_button = session_browser.find_by_css('form.navbar-search-form-container button#search-item-type-selector').first
     search_type_dropdown_button.click()
 
     time.sleep(0.1)
 
-    search_type_dropdown_all_items_option: ElementAPI = session_browser.find_by_css('form.navbar-search-form-container ul.dropdown-menu li:not(.active) a').first
+    search_type_dropdown_all_items_option = session_browser.find_by_css('form.navbar-search-form-container ul.dropdown-menu li:not(.active) a').first
     search_type_dropdown_all_items_option.click()
 
     # Wait for searh results / search page to load -- check by title to handle case if no results.
