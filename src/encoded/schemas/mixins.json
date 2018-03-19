@@ -465,6 +465,7 @@
             "title": "Badges",
             "description": "Badges that can be added to an item.",
             "type": "array",
+            "lookup": 1000,
             "ff_flag": "clear clone",
             "permission": "import-items",
             "items": {

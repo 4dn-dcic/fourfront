@@ -29,6 +29,7 @@
         "caption": {
             "title": "Caption",
             "type": "string",
+            "lookup": 20,
             "formInput": "textarea"
         }
     },

@@ -36,6 +36,7 @@
             "title": "Description",
             "description": "A plain text description of the biosample. Do not include experiment details, constructs or treatments.",
             "type": "string",
+            "lookup": 20,
             "default": "",
             "formInput": "textarea"
         },
@@ -44,6 +45,7 @@
           "description": "The cell lines or tissue types used in the experiment",
           "comment": "See Biosource sheet or collection for existing items",
           "type": "array",
+          "lookup": 30,
           "default":[],
           "uniqueItems": true,
           "items": {
@@ -58,6 +60,7 @@
             "description": "Information about biosample preparation protocols.",
             "comment": "eg. treatment and/or modifications protocols",
             "type": "array",
+            "lookup": 60,
             "items": {
                 "title": "Protocols",
                 "description": "Specific information for specific types of protocols",
@@ -69,6 +72,7 @@
             "title": "Cell Culture Information",
             "description": "Link to biosample_cell_culture object that carries all cell culture related parameters",
             "type": "string",
+            "lookup": 70,
             "ff_flag": "clear clone",
             "linkTo": "BiosampleCellCulture"
         },
@@ -77,6 +81,7 @@
             "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
             "comment": "See Modifications sheet or collection for existing items",
             "type": "array",
+            "lookup": 40,
             "default": [],
             "uniqueItems": true,
             "items": {
@@ -89,6 +94,7 @@
         "treatments": {
             "title": "Treatments",
             "type": "array",
+            "lookup": 50,
             "comment": "See Treatment sheet or collection for exisiting items",
             "default": [],
             "uniqueItems": true,
@@ -111,6 +117,7 @@
                 "properties": {
                     "relationship_type": {
                         "type": "string",
+                        "lookup": 85,
                         "description": "A controlled term specifying the relationship between biosamples.",
                         "title": "Relationship Type",
                         "enum": [
@@ -120,6 +127,7 @@
                     },
                     "biosample": {
                       "type": "string",
+                      "lookup": 80,
                       "description": "The related biosample",
                       "linkTo": "Biosample"
                     }
