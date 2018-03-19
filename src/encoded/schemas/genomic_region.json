@@ -29,6 +29,7 @@
             "title": "Genome Assembly",
             "description": "The genome assembly from which the region was derived",
             "type": "string",
+            "lookup": 20,
             "enum": [
                 "GRCh38",
                 "GRCm38"
@@ -38,33 +39,39 @@
             "title": "Chromosome",
             "description": "The chromosome containing the region",
             "type": "string",
+            "lookup": 30,
             "internal_comment": "might need change for non human chromosome numbers like 2a 2b",
             "enum": ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
         },
         "start_coordinate": {
             "title": "Start",
             "description": "The base position of the start coordinate of the region - start < end",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 40,
         },
         "end_coordinate": {
             "title": "End",
             "description": "The base position of the end coordinate - end > start",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 50,
         },
         "start_location": {
             "title": "Fuzzy Start",
             "description": "If the exact start coordinate is not know a description of the start location",
-            "type": "string"
+            "type": "string",
+            "lookup": 60,
         },
         "end_location": {
             "title": "Fuzzy End",
             "description": "If the exact end coordinate is not know a description of the start location",
-            "type": "string"
+            "type": "string",
+            "lookup": 70,
         },
         "location_description": {
             "title": "Location Description",
             "description": "If exact coordinates of the region are not available a description of the genome location",
-            "type": "string"
+            "type": "string",
+            "lookup": 80
         }
     }
 }

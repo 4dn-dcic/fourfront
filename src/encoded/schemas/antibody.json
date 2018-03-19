@@ -27,7 +27,8 @@
         "antibody_name": {
             "title": "Antibody Name",
             "description": "A short name of the antibody.",
-            "type": "string"
+            "type": "string",
+            "lookup": 20,
         },
         "antibody_id": {
             "description": "DON'T SUBMIT, auto-generated, use for referencing antibodies in other sheets.",
@@ -39,17 +40,20 @@
             "title": "Description",
             "description": "A plain text description of the antibody.",
             "type": "string",
+            "lookup": 30,
             "formInput": "textarea"
         },
         "antibody_product_no": {
             "title": "Antibody Catalog Number",
             "description": "The catalog number for commercially obtained antibody",
-            "type": "string"
+            "type": "string",
+            "lookup": 60,
         },
         "antibody_vendor":{
             "title": "Antibody Vendor",
             "description": "The company or lab that is the source of the antibody.",
             "type": "string",
+            "lookup": 50,
             "linkTo": "Vendor"
         },
         "antibody_encode_accession": {
@@ -58,12 +62,14 @@
             "title": "ENCODE ACCESSION",
             "description": "If the antibody exists in ENCODE enter it's accession.",
             "type": "string",
+            "lookup": 70,
             "pattern": "^ENCAB[0-9]{3}[A-Z]{3}"
         },
         "antibody_target": {
             "title": "Target",
             "description": "Information about the target of the Antibody",
             "type": "string",
+            "lookup": 40,
             "linkTo": "Target"
         }
     }

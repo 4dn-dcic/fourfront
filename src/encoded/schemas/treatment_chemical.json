@@ -34,15 +34,18 @@
         "chemical": {
             "title": "Drug or Chemical",
             "type": "string",
+            "lookup": 20,
             "internal_comment": "restricted to chEBI terms - validate against IDs?"
         },
         "concentration": {
             "title": "Concentration",
-            "type": "number"
+            "type": "number",
+            "lookup": 30,
         },
         "concentration_units": {
             "title": "Concentration units",
             "type": "string",
+            "lookup": 40,
             "enum": [
                 "pM",
                 "nM",
@@ -59,11 +62,13 @@
         },
         "duration": {
             "title": "Duration",
-            "type": "number"
+            "type": "number",
+            "lookup": 50,
         },
         "duration_units": {
             "title": "Duration units",
             "type": "string",
+            "lookup": 60,
             "enum": [
                 "second",
                 "minute",
@@ -73,7 +78,8 @@
         },
         "temperature": {
             "title": "Temperature (°C)",
-            "type": "number"
+            "type": "number",
+            "lookup": 70
         }
     }
 }

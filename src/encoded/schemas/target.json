@@ -31,12 +31,14 @@
             "title": "Description",
             "description": "A short description of the target",
             "type": "string",
+            "lookup": 20,
             "formInput": "textarea"
         },
         "targeted_genes": {
             "title": "Targeted Genes",
             "description": "Please use NCBI Gene ID (e.g. 853133)",
             "type": "array",
+            "lookup": 30,
             "items": {
                 "title": "Gene",
                 "internal_comment": "will want to have validation against authority gene name databases, and link to the external resource",
@@ -47,6 +49,7 @@
             "title": "Targeted Genomic Regions",
             "description": "The genome assembly, chromosome and coordinates of the regions that are targeted",
             "type": "array",
+            "lookup": 40,
             "items": {
                 "title": "Genomic Region",
                 "type": "string",
@@ -57,6 +60,7 @@
             "title": "Targeted Proteins",
             "description": "Use UniProt Protein IDs or accession (e.g. H31_HUMAN)",
             "type": "array",
+            "lookup": 50,
             "items": {
                 "title": "Protein",
                 "internal_comment": "Can we validate against and link to Uniprot?",
@@ -67,6 +71,7 @@
             "title": "Targeted RNAs",
             "description": "Use RefSeq identifiers (e.g. NM_003529.2)",
             "type": "array",
+            "lookup": 60,
             "items": {
                 "title": "RNA",
                 "description": "RefSeq accession for the targeted RNA",
@@ -78,6 +83,7 @@
             "title": "Targeted Cellular Structure",
             "description": "Choose from the list",
             "type": "string",
+            "lookup": 70,
             "enum": [
                 "Cell membrane",
                 "Nucleolus",
