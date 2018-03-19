@@ -32,12 +32,14 @@
             "description": "A short description of the protocol or document",
             "type": "string",
             "default": "",
+            "lookup": 40,
             "formInput": "textarea"
         },
         "protocol_type": {
             "title": "Protocol Type",
             "description": "The category that best describes the protocol or document.",
             "type": "string",
+            "lookup": 20,
             "enum": [
                 "Cell culture protocol",
                 "Cell sorting protocol",
@@ -52,6 +54,7 @@
             "title": "Document Classification",
             "description": "A classification for a protocol or document that is more specific than it's type.  For example, an Authentication document can be classified as a 'Cell Cycle Authentication' or a Biosample preparation protocol can be classified as 'Tissue Preparation Methods'",
             "type": "string",
+            "lookup": 30,
             "enum": [
                "Experiment Authentication",
                "Karyotyping Authentication",
