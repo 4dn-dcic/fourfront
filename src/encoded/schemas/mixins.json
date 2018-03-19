@@ -55,6 +55,7 @@
             "type": "array",
             "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
             "default": [],
+            "lookup": 10,
             "uniqueItems": true,
             "ff_flag": "clear clone",
             "items": {
