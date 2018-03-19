@@ -1,7 +1,5 @@
 import pytest
 import time
-from pkg_resources import resource_filename
-from encoded.loadxl import read_single_sheet
 from .browser_functions import (
     scroll_page_down,
     #scroll_to_bottom

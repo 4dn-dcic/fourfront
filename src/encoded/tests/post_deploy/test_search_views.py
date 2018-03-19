@@ -82,7 +82,7 @@ def test_browse_url_proper_redirection(session_browser: Browser, host_url: str, 
 def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
     '''
     Tests whether search bar works.
-    
+
     This test specificially relies on SELENIUM WEBDRIVER rather than PYTEST-SPLINTER wrapper.
     Thus there is a chance it might not work with a couple of browser/BrowserDrivers.
     '''

@@ -21,7 +21,7 @@ def compare_quickinfo_vs_barplot_counts(session_browser):
         return map(lambda x: int(x.text.replace(' (', '').replace(')', '')), session_browser.find_by_css('.chart-aside > .legend-container > .legend-container-inner .chart-color-legend .term span.text-300'))
 
     expset_stat_count, exps_stat_count, files_stat_count = get_browse_view_quickinfobar_counts(session_browser)
-    
+
     assert expset_stat_count > 0
 
     total_count_expsets_from_bar_elems = 0
