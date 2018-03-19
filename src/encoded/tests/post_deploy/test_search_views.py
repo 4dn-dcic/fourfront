@@ -190,7 +190,7 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
 
 
     compare_quickinfo_vs_barplot_counts(session_browser)
-    
+
     session_browser.find_by_css('form.navbar-search-form-container i.reset-button').first.click()                   # Exit/clear search
 
     assert session_browser.wait_for_condition(                                                                      # Wait until unselects
@@ -204,7 +204,7 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
     for idx in range(0,2):
         assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
 
-    
+
     session_browser.find_by_id('select-barplot-field-1').first.click()                                              # Open 'Group By' Dropdown
     time.sleep(0.1)
     session_browser.find_by_css('#select-barplot-field-1 + ul.dropdown-menu > li:nth-child(4)').first.click()       # Select another 'Group By' field  -- 'Enzyme'
@@ -238,7 +238,7 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
     for idx in range(0,2):
         assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
 
-    
+
     bar_parts = session_browser.find_by_css('.bar-plot-chart.chart-container .chart-bar .bar-part')
     bar_parts[max(int(len(bar_parts) / 2), 1)].click()                                                              # Click some random-ish bar section
     time.sleep(0.1)
@@ -291,7 +291,7 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
 
 
 
-    
+
     session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()        # Toggle back 'Incl External Data' to false
     time.sleep(0.1)
     assert session_browser.wait_for_condition(                                                                      # Wait until unselects
@@ -304,9 +304,9 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
     for idx in range(0,2):
         assert only_4dn_data_counts[idx] == only_4dn_data_counts_2[idx]
 
-    
 
-    
+
+
 
 def test_browse_view_file_selection_and_download(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
     session_browser.visit(host_url + '/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate') # Start browse page
@@ -368,7 +368,7 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
     for search_table_row_checkbox in search_table_row_checkboxes:
         assert search_table_row_checkbox.checked
 
-    
+
     for idx in range(0,7): # Make sure all files' tables checkboxes are also checked, for first 7 rows.
         time.sleep(0.25)
         result_row_css_selector = '.search-results-container .search-result-row[data-row-number="{}"]'.format(str(idx))
@@ -398,8 +398,8 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
         time.sleep(0.35) # Height transition
         detail_toggle_button.click() # Close detail section
 
-    
-    
+
+
 
     # Click download button, wait for modal
     scroll_to(session_browser, 100)
@@ -413,7 +413,7 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
     get_select_all_files_button().click() # Deselect All
     time.sleep(0.25)
     assert int(''.join(filter(str.isdigit, get_download_button().text))) == 0
-    
+
     # This might download stuff: .... TODO: we can download / get from download dir, then run metadata tsv unit test against it.
     #session_browser.find_by_css('div.modal-dialog .modal-body form[method="POST"] button[type="submit"][name="Download"]').first.click()
 
@@ -431,7 +431,7 @@ def test_search_for_olfactory_paged_result_consistency(session_browser: Browser,
     time.sleep(0.1)                                                                                                             # Wait for JSing, to show dropdown thingy.
     session_browser.find_by_css('form.navbar-search-form-container ul.dropdown-menu li:not(.active) a').first.click()           # Click 2nd option ('All Items')
     assert session_browser.is_element_present_by_text('Search') is True                                                         # Wait for Search page to load
-    
+
 
     search_table_rows = session_browser.find_by_css('.search-results-container .search-result-row')
     assert len(search_table_rows) == config['table_load_limit'] # On initial req, before load as you scroll, we have 25 rows.
