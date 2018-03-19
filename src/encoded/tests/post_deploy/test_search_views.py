@@ -149,9 +149,9 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
 
     assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', splinter_selenium_implicit_wait) is True
     assert session_browser.is_element_present_by_id('select-barplot-field-1', splinter_selenium_implicit_wait) is True
-    
+
     only_4dn_data_counts = get_browse_view_quickinfobar_counts(session_browser)
-    
+
     compare_quickinfo_vs_barplot_counts(session_browser)                                                            # Compare initial quickinfo v barplot counts
 
     session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()        # Toggle 'Include External Data' & repeat comparsion test.

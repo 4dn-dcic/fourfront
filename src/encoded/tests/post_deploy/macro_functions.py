@@ -48,9 +48,9 @@ def compare_quickinfo_vs_barplot_counts(session_browser, skip_legend = False):
 
         assert total_count_expsets_from_legend_elems == expset_stat_count
 
-    
+
     # Hover over all bar parts and count up counts
-    
+
     session_browser.find_by_css('#top-nav .navbar-brand').first.mouse_over()
     bar_parts = session_browser.find_by_css('.bar-plot-chart.chart-container .chart-bar .bar-part')
     for bar_part in bar_parts:
