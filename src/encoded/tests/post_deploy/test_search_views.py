@@ -135,45 +135,41 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
     Ensure that bar plot counts and quick info bar count match / add up in various situations.
     Incl. Tests Re: QuickInfoBar Toggle External Data, q=mouse text search
     '''
-    session_browser.visit(host_url + '/') # Start at home page
+    session_browser.visit(host_url + '/')                                                                           # Start at home page
 
     assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', splinter_selenium_implicit_wait) is True
     assert session_browser.is_element_present_by_id('select-barplot-field-1', splinter_selenium_implicit_wait) is True
     
     only_4dn_data_counts = get_browse_view_quickinfobar_counts(session_browser)
     
-    # Compare default/initial counts
-    compare_quickinfo_vs_barplot_counts(session_browser)
+    compare_quickinfo_vs_barplot_counts(session_browser)                                                            # Compare initial quickinfo v barplot counts
 
-    # Toggle 'Include External Data' & repeat comparsion test.
-    session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()
+    session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()        # Toggle 'Include External Data' & repeat comparsion test.
 
-    time.sleep(0.1) # Wait for JS/transition
+    time.sleep(0.1)                                                                                                 # Wait for JS/transition
     assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', splinter_selenium_implicit_wait) is True
     assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', splinter_selenium_implicit_wait) is True
 
-    incl_external_data_counts = get_browse_view_quickinfobar_counts(session_browser)
-
-    # Make sure our 'external data' set is greater than 'only 4dn' data for all counts (expsets, exps, files).
+    incl_external_data_counts = get_browse_view_quickinfobar_counts(session_browser)                                # Make sure our 'external data' set is greater than 'only 4dn' data for all counts (expsets, exps, files).
     for idx in range(0,2):
         assert incl_external_data_counts[idx] > only_4dn_data_counts[idx]
 
+    time.sleep(0.5)                                                                                                 # Wait for JS/transition (transitioning bars)
     compare_quickinfo_vs_barplot_counts(session_browser)
 
-    # Search something random-ish and compare again.
-    session_browser.find_by_name('q').first.fill('mouse')
-    selenium_search_bar_input_field = session_browser.driver.switch_to_active_element() # Grab un-wrapped selenium element (last elem interacted w/)
-    selenium_search_bar_input_field.send_keys(Keys.ENTER) # Send 'Enter' key (form submit).
+    session_browser.find_by_name('q').first.fill('mouse')                                                           # Search something that's likely to exist and compare again.
+    selenium_search_bar_input_field = session_browser.driver.switch_to_active_element()                             # Grab un-wrapped selenium element (last elem interacted w/)
+    selenium_search_bar_input_field.send_keys(Keys.ENTER)                                                           # Send 'Enter' key (form submit).
 
     assert session_browser.is_element_present_by_text('Data Browser', splinter_selenium_implicit_wait) is True
     assert session_browser.is_element_present_by_css('#select-barplot-show-type:not([disabled])', splinter_selenium_implicit_wait) is True # Wait for this field to be on page and not disabled (== filtered data has been fetched)
 
-    assert session_browser.wait_for_condition( # Auto-selects 'filtered' data
+    assert session_browser.wait_for_condition(                                                                      # Auto-selects 'filtered' data
         lambda browser: 'Selected' in browser.find_by_id('select-barplot-show-type').first.text,
         timeout=splinter_selenium_implicit_wait
     ) is True
 
-    time.sleep(0.5) # Wait for JS/transition (transitioning-out bars)
+    time.sleep(0.5)                                                                                                 # Wait for JS/transition (transitioning-out bars)
     assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', splinter_selenium_implicit_wait) is True
     assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', splinter_selenium_implicit_wait) is True
 
@@ -184,33 +180,121 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
 
 
     compare_quickinfo_vs_barplot_counts(session_browser)
+    
+    session_browser.find_by_css('form.navbar-search-form-container i.reset-button').first.click()                   # Exit/clear search
 
-    # Exit/clear search
-    session_browser.find_by_css('form.navbar-search-form-container i.reset-button').first.click()
-
-    assert session_browser.wait_for_condition( # Wait until unselects
+    assert session_browser.wait_for_condition(                                                                      # Wait until unselects
         lambda browser: 'q=mouse' not in browser.url,
         timeout=splinter_selenium_implicit_wait
     ) is True
 
-    time.sleep(0.5) # Wait for JS/transition (transitioning-out bars)
+    time.sleep(0.5)                                                                                                 # Wait for JS/transition (transitioning-out bars)
 
-    incl_external_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser) # Make sure our counts changed back after reset search.
+    incl_external_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                              # Make sure our counts changed back after reset search.
     for idx in range(0,2):
         assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
 
-    # Toggle back 'Incl External Data' to false
-    session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()
+    
+    session_browser.find_by_id('select-barplot-field-1').first.click()                                              # Open 'Group By' Dropdown
     time.sleep(0.1)
-    assert session_browser.wait_for_condition( # Wait until unselects
+    session_browser.find_by_css('#select-barplot-field-1 + ul.dropdown-menu > li:nth-child(4)').first.click()       # Select another 'Group By' field  -- 'Enzyme'
+    time.sleep(0.1)
+    assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', splinter_selenium_implicit_wait) is True
+
+    compare_quickinfo_vs_barplot_counts(session_browser)                                                            # Compare again
+    incl_external_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                              # Make sure our counts stay consistent.
+    for idx in range(0,2):
+        assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
+
+    session_browser.find_by_id('select-barplot-field-1').first.click()                                              # Open 'Group By' Dropdown
+    time.sleep(0.1)
+    session_browser.find_by_css('#select-barplot-field-1 + ul.dropdown-menu > li:last-child').first.click()         # Select another 'Group By' field -- 'None'
+    time.sleep(0.1)
+    assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', splinter_selenium_implicit_wait) is True
+
+    compare_quickinfo_vs_barplot_counts(session_browser, skip_legend=True)                                          # Compare again
+    incl_external_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                              # Make sure our counts stay consistent.
+    for idx in range(0,2):
+        assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
+
+    session_browser.find_by_id('select-barplot-field-1').first.click()                                              # Open 'Group By' Dropdown
+    time.sleep(0.1)
+    session_browser.find_by_css('#select-barplot-field-1 + ul.dropdown-menu > li:nth-child(2)').first.click()       # Select another 'Group By' field -- 'Organism' (original)
+    time.sleep(0.1)
+    assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', splinter_selenium_implicit_wait) is True
+
+    compare_quickinfo_vs_barplot_counts(session_browser)                                                            # Compare again
+    incl_external_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                              # Make sure our counts stay consistent.
+    for idx in range(0,2):
+        assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
+
+    
+    bar_parts = session_browser.find_by_css('.bar-plot-chart.chart-container .chart-bar .bar-part')
+    bar_parts[max(int(len(bar_parts) / 2), 1)].click()                                                              # Click some random-ish bar section
+    time.sleep(0.1)
+    session_browser.find_by_css('.cursor-component-root .actions .button-container button').click()                 # Click 'Explore' (=filter) button.
+
+    assert session_browser.wait_for_condition(                                                                      # Auto-selects 'filtered' data
+        lambda browser: 'Selected' in browser.find_by_id('select-barplot-show-type').first.text,
+        timeout=splinter_selenium_implicit_wait
+    ) is True
+
+    assert session_browser.wait_for_condition(
+        lambda browser: browser.evaluate_script('(document.documentElement || document.body).scrollTop;') > 100,    # Wait until page has been scrolled down for us
+        timeout=splinter_selenium_implicit_wait
+    ) is True
+
+    time.sleep(0.75)                                                                                                # Wait for transitions
+    scroll_to(session_browser, 0)
+    time.sleep(.25)
+
+
+    compare_quickinfo_vs_barplot_counts(session_browser)                                                            # Compare again
+    incl_external_but_filtered_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                 # Make sure our counts have decreased
+    for idx in range(0,2):
+        assert incl_external_data_counts[idx] > incl_external_but_filtered_data_counts_2[idx]
+
+
+
+
+
+    session_browser.find_by_css('.any-filters.glance-label').first.mouse_over()                                     # Clear filters 1 by 1 via quickinfo bar glance view
+    for idx in range(0,2):
+        time.sleep(0.5)
+        quick_info_filtered_elem = session_browser.find_by_css('#stats .bottom-side .chart-breadcrumbs .chart-crumb .icon-container').first
+        quick_info_filtered_elem.mouse_over()
+        quick_info_filtered_elem.click()
+
+    time.sleep(0.1)
+
+    assert session_browser.wait_for_condition(                                                                      # Auto-selects 'all' data when no filters
+        lambda browser: 'All' in browser.find_by_id('select-barplot-show-type').first.text,
+        timeout=splinter_selenium_implicit_wait
+    ) is True
+
+    time.sleep(0.5)                                                                                                 # Wait for transitions
+
+    compare_quickinfo_vs_barplot_counts(session_browser)                                                            # Compare final time
+    incl_external_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                              # Make sure our counts stay consistent.
+    for idx in range(0,2):
+        assert incl_external_data_counts[idx] == incl_external_data_counts_2[idx]
+
+
+
+    
+    session_browser.find_by_css('.browse-base-state-toggle-container label.onoffswitch-label').first.click()        # Toggle back 'Incl External Data' to false
+    time.sleep(0.1)
+    assert session_browser.wait_for_condition(                                                                      # Wait until unselects
         lambda browser: 'award.project=4DN' in browser.url,
         timeout=splinter_selenium_implicit_wait
     ) is True
     assert session_browser.is_element_present_by_css('#select-barplot-field-1:not([disabled])', splinter_selenium_implicit_wait) is True
 
-    only_4dn_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser) # Make sure our counts changed back after reset search.
+    only_4dn_data_counts_2 = get_browse_view_quickinfobar_counts(session_browser)                                   # Make sure our counts changed back after reset search.
     for idx in range(0,2):
         assert only_4dn_data_counts[idx] == only_4dn_data_counts_2[idx]
+
+    
 
     
 
@@ -230,10 +314,10 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
 
     def get_file_type_panel_button() -> ElementAPI:
         # TODO: Change to find_by_id('selected-files-file-type-filter-button')
-        return session_browser.find_by_css('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div > button.btn').first
+        return session_browser.find_by_css('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:first-child').first
 
     def get_download_button() -> ElementAPI:
-        return session_browser.find_by_css('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div > button.btn.btn-primary').first
+        return session_browser.find_by_css('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:nth-child(2').first
 
     assert session_browser.is_element_present_by_css('#slow-load-container:not([visible="true"])', splinter_selenium_implicit_wait) is True
 
@@ -280,7 +364,7 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
         result_row_css_selector = '.search-results-container .search-result-row[data-row-number="{}"]'.format(str(idx))
 
         #scroll_to(session_browser, 400 + (30 * idx))
-        scroll_elem_into_view_by_css(session_browser, result_row_css_selector, -150)
+        scroll_elem_into_view_by_css(session_browser, result_row_css_selector, -120)
         time.sleep(0.25)
         detail_toggle_button = session_browser.find_by_css(result_row_css_selector + ' .search-result-column-block button.toggle-detail-button').first
         detail_toggle_button.click() # Open detail section
@@ -290,8 +374,15 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
         files_toggle_button.click() # Open files section
         time.sleep(0.5) # Min delay between/open close allowed
         table_checkboxes = session_browser.find_by_css(result_row_css_selector + ' .stacked-block-table input[type="checkbox"]')
-        for checkbox in table_checkboxes:
+        for check_idx, checkbox in enumerate(table_checkboxes):
             assert checkbox.checked
+            if check_idx < 5 and checkbox.visible: # Some are collapsed out of view
+                checkbox.uncheck()
+                time.sleep(0.1)
+                assert int(''.join(filter(str.isdigit, get_download_button().text))) < initial_download_files_count
+                checkbox.check()
+                time.sleep(0.1)
+                assert int(''.join(filter(str.isdigit, get_download_button().text))) == initial_download_files_count
 
         files_toggle_button.click() # Close files section
         time.sleep(0.35) # Height transition
@@ -305,6 +396,13 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
     time.sleep(0.1)
     get_download_button().click()
     assert session_browser.is_element_present_by_css('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]', splinter_selenium_implicit_wait)
+    assert session_browser.is_element_present_by_css('div.modal-dialog .modal-body form[method="POST"] button[type="submit"][name="Download"]', splinter_selenium_implicit_wait)
+
+    session_browser.find_by_css('div.modal-dialog .modal-header button.close').first.click() # Close Modal
+
+    get_select_all_files_button().click() # Deselect All
+    time.sleep(0.25)
+    assert int(''.join(filter(str.isdigit, get_download_button().text))) == 0
     
     # This might download stuff: .... TODO: we can download / get from download dir, then run metadata tsv unit test against it.
     #session_browser.find_by_css('div.modal-dialog .modal-body form[method="POST"] button[type="submit"][name="Download"]').first.click()
