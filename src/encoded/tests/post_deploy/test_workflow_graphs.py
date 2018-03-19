@@ -6,7 +6,8 @@ import requests
 from .browser_functions import (
     scroll_page_down,
     scroll_elem_into_view_by_css,
-    get_search_page_result_count
+    get_search_page_result_count,
+    scroll_search_results
     #scroll_to_bottom
 )
 
@@ -17,8 +18,7 @@ pytestmark = [
 
 
 
-def visit_and_assert_wf_page(session_browser: Browser, wf_link: ElementAPI, splinter_selenium_implicit_wait: int = 10):
-    wf_link.click()
+def assert_wf_page(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
     session_browser.is_element_present_by_css('.item-page-container.type-Workflow.type-Item', splinter_selenium_implicit_wait)
 
     json_resp = requests.get(session_browser.url + '?format=json').json() # Compare against steps in JSON
@@ -47,40 +47,40 @@ def visit_and_assert_wf_page(session_browser: Browser, wf_link: ElementAPI, spli
 
 
 
-    pass
-
-
 
 @pytest.mark.postdeploy_local
-def test_workflow_collection(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
+def test_workflow_collection(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int):
     '''
     Tests whether all workflows are in collection, rendering properly.
     '''
     session_browser.visit(host_url + '/search/?type=Workflow')
 
     total_results = get_search_page_result_count(session_browser)
-
     assert total_results > 3 # Number of those released, at least.
 
-    for idx in range(0, total_results):
-        row_css_selector = '.search-results-container .search-result-row[data-row-number="{}"]'.format(str(idx))
-        scroll_elem_into_view_by_css(session_browser, row_css_selector, -180)
-        time.sleep(0.5)
-        category_col = session_browser.find_by_css(row_css_selector + ' .search-result-column-block[data-field="category"]').first
-        assert category_col.text is not None and category_col.text != ''
-        visit_and_assert_wf_page(
-            session_browser,
-            session_browser.find_by_css(row_css_selector + ' .search-result-column-block[data-field="display_title"] .title-block a').first,
-            splinter_selenium_implicit_wait
-        )
-        session_browser.back()
+    scroll_search_results(session_browser, host_url, config, splinter_selenium_implicit_wait, assert_wf_page, min(50, total_results))
 
-        for interval in range(0, int(idx / config['table_load_limit']) ):
-            scroll_page_down(session_browser)
-            assert session_browser.is_element_present_by_css('.search-results-container .search-result-row[data-row-number="' + str( config['table_load_limit'] * (interval + 1) ) + '"]', splinter_selenium_implicit_wait) is True
-        if total_results - idx < config['table_load_limit']:
-            assert session_browser.is_element_present_by_css('.fin.search-result-row', splinter_selenium_implicit_wait)
 
-        assert session_browser.is_element_present_by_css(row_css_selector, splinter_selenium_implicit_wait)
 
+
+def assert_expset_page_provenance_graph(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
+    session_browser.find_by_text(' Processed Files').first.click()
+    time.sleep(0.5)
+    file_accessions = [ f.text for f in session_browser.find_by_css('.s-block.file a.name-title') ]
+    session_browser.find_by_text(' Graph').first.click()
+    time.sleep(0.25)
+    for f in file_accessions:
+        print('\n\n\n', f)
+        assert session_browser.is_element_present_by_text(f, splinter_selenium_implicit_wait)
+
+
+@pytest.mark.skip # TODO
+@pytest.mark.postdeploy_local
+def test_expset_provenance_graphs(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
+    session_browser.visit(host_url + '/search/?q=processed_files.display_title%3A%2A&type=ExperimentSet')
+
+    total_results = get_search_page_result_count(session_browser)
+    assert total_results > 0 # Number of those released, at least.
+
+    scroll_search_results(session_browser, host_url, config, splinter_selenium_implicit_wait, assert_expset_page_provenance_graph, min(50, total_results))
 
