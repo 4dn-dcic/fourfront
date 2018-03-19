@@ -47,6 +47,16 @@ def test_login_logout_on_search_page(session_browser: Browser, host_url: str, co
     session_browser.visit(host_url + '/search/') # Should redirect us to /search/?type=Item
     logged_out_init_result_count = get_search_page_result_count(session_browser)
 
+    username = None # TODO
+    password = None # TODO
+
+    session_browser.find_by_id('user_actions_dropdown').first.click()
+    time.sleep(0.1)
+    session_browser.find_by_id('loginbtn').first.click()
+    session_browser.find_by_text('Log in with Google').first.click()
+
+    # ISSUE: Opens new window for OAuth
+
 
 @pytest.mark.postdeploy_local
 def test_pages_collection(session_browser: Browser, host_url: str, config: dict):
