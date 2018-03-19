@@ -37,6 +37,7 @@
                 "description": "Defines one of three types of indexing available",
                 "type": "string",
                 "default": "analyzed",
+                "lookup": 30,
                 "enum": [
                     "analyzed",
                     "not_analyzed",
@@ -51,6 +52,7 @@
             "description": "External resources with additional information to the document.",
             "type": "array",
             "default": [],
+            "lookup": 40,
             "uniqueItems": true,
             "items": {
                 "title": "URL",

@@ -203,6 +203,7 @@
             "title": "Contributing Labs",
             "description": "Other labs associated with the submitted data.",
             "type": "array",
+            "lookup": 1000,
             "items": {
                 "title": "Contributing Lab",
                 "description": "A lab that has contributed to the associated data.",
@@ -258,6 +259,7 @@
             "title": "Attached File",
             "description" : "File attached to this Item.",
             "type": "object",
+            "lookup": 11,
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,
@@ -448,6 +450,7 @@
             "title": "Tags",
             "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
+            "lookup": 1000,
             "uniqueItems": true,
             "ff_flag": "clear clone",
             "items": {
