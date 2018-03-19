@@ -107,6 +107,30 @@ def test_extra_files(testapp, proc_file_json):
     assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
+def test_patch_extra_files(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+
+    # now patch this guy with just the extra files
+    patch = {'uuid': resobj['uuid'], 'extra_files': extra_files}
+    res = testapp.patch_json('/file_processed/' + resobj['uuid'], patch, status=200)
+    resobj = res.json['@graph'][0]
+
+    # ensure we get correct stuff back after a patch
+    # bug was that we were only getting back the file_format
+    assert len(resobj['extra_files']) == len(extra_files)
+    file_name = ("%s.pairs.gz.px2" % (resobj['accession']))
+    expected_key = "%s/%s" % (resobj['uuid'], file_name)
+    assert resobj['extra_files'][0]['upload_key'] == expected_key
+    assert resobj['extra_files'][0]['href']
+    assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
+    assert resobj['extra_files_creds'][0]['upload_credentials']
+    assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
+    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
+
+
 def test_extra_files_download(testapp, proc_file_json):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
@@ -280,6 +304,8 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
     fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq_json)).follow(status=200)
     fastq_related_files = fastq_res.json['related_files']
     assert fastq_related_files[0]['file']['@id'] == fastq_related_res.json['@graph'][0]['@id']
+
+
 
 
 def test_external_creds(mocker):

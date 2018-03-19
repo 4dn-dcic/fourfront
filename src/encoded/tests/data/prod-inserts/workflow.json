@@ -495,6 +495,8 @@
         "accession": "4DNWFAW5VTA5",
         "app_name": "fastqc-0-11-4-1",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v32",
         "arguments": [
             {
                 "argument_type": "Input file",
@@ -907,6 +909,86 @@
         ],
         "title": "md5",
         "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
+        "workflow_diagram": "",
+        "workflow_type": "Data QC"
+    },
+    {
+        "accession": "4DNWF2HFF82B",
+        "app_name": "md5",
+        "app_version": "0.2.6",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/md5:v2",
+        "arguments": [
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "description": "File on which MD5 calculation is run on.",
+                "workflow_argument_name": "input_file"
+            },
+            {
+                "argument_type": "Output report file",
+                "description": "The MD5 checksum generated.",
+                "workflow_argument_name": "report"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "QC",
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_main_filename": "md5.cwl",
+        "data_types": [
+            "Hi-C",
+            "Capture Hi-C",
+            "Repli-seq"
+        ],
+        "description": "md5 on uncompressed file",
+        "lab": "4dn-dcic-lab",
+        "name": "md5",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "File on which MD5 calculation is run on.",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "input_file",
+                        "source": [
+                            {
+                                "name": "input_file"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                },
+                "name": "md5",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "The MD5 checksum generated.",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "report",
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "md5",
+        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
     },
@@ -2778,6 +2860,8 @@
         "accession": "4DNWFP00U73B",
         "app_name": "hi-c-processing-partb",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "chromsizes",
@@ -3539,6 +3623,8 @@
         "accession": "4DNWFZOGJEI4",
         "app_name": "bwa-mem",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3806,12 +3892,16 @@
         "title": "Alignment for Hi-C using bwa-mem",
         "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
         "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "workflow_type": "Hi-C data analysis",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v42"
     },
     {
         "accession": "4DNWF37VHW0F",
         "app_name": "pairsam-parse-sort",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "bam",
@@ -3926,6 +4016,8 @@
         "accession": "4DNWF3YV81HS",
         "app_name": "pairsam-merge",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4021,6 +4113,8 @@
         "accession": "4DNWF1Y7DN3H",
         "app_name": "pairsam-markasdup",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4099,6 +4193,8 @@
         "accession": "4DNWF38VH15",
         "app_name": "pairsam-filter",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4221,6 +4317,8 @@
         "accession": "4DNWZJ2G671",
         "app_name": "addfragtopairs",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -4324,6 +4422,8 @@
         "accession": "4DNWZH36VU2",
         "app_name": "pairs-patch",
         "app_version": "0.2.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -4717,7 +4817,9 @@
         "title": "Hi-C Post-alignment Processing",
         "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
         "workflow_type": "Hi-C data analysis",
-        "status": "released"
+        "status": "released",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v42"
     },
     {
         "app_name": "repliseq-parta",
@@ -5817,6 +5919,8 @@
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
         "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
         "workflow_type": "Hi-C data analysis",
-        "status": "released"
+        "status": "released",
+        "docker_registry_url": "https://hub.docker.com/",
+        "docker_image_name": "duplexa/4dn-hic:v42"
     }
 ]
