@@ -20,7 +20,7 @@ def test_front_page_title(session_browser, host_url: str):
     assert len(host_url) > 8
     session_browser.visit(host_url)
 
-    assert session_browser.url == host_url + '/'
+    assert host_url.replace('http://','') in session_browser.url # We may be redirected to https (fine), etc.
     assert session_browser.title == '4DN Data Portal'
 
     page_title = session_browser.find_by_css('#page-title-container span.title')

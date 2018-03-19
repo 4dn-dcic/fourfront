@@ -3,6 +3,7 @@ These are a set of functions which may be used by browser tests. They are not te
 '''
 
 import time
+from .browser_functions import get_browse_view_quickinfobar_counts
 
 
 ################################
@@ -19,15 +20,7 @@ def compare_quickinfo_vs_barplot_counts(session_browser):
     def get_legend_counts():
         return map(lambda x: int(x.text.replace(' (', '').replace(')', '')), session_browser.find_by_css('.chart-aside > .legend-container > .legend-container-inner .chart-color-legend .term span.text-300'))
 
-    def count_text_to_int(count_str):
-        if ' / ' in count_str:
-            pos = count_str.find(' / ')
-            count_str = count_str[:pos]
-        return int(count_str)
-
-    expset_stat_count = count_text_to_int(session_browser.find_by_id('stats-stat-expsets').first.text)
-    exps_stat_count = count_text_to_int(session_browser.find_by_id('stats-stat-experiments').first.text)
-    files_stat_count = count_text_to_int(session_browser.find_by_id('stats-stat-files').first.text)
+    expset_stat_count, exps_stat_count, files_stat_count = get_browse_view_quickinfobar_counts(session_browser)
     
     assert expset_stat_count > 0
 
