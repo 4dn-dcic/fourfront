@@ -112,6 +112,7 @@ def test_load_schema(schema, master_mixins, registry):
                 'award',
                 'date_created',
                 'submitted_by',
+                'last_modified',
                 'status'
             ]
             no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',

@@ -29,6 +29,8 @@ from snovault.validators import (
 )
 from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
+from snovault.schema_utils import SERVER_DEFAULTS
+from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date
 
@@ -116,7 +118,6 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 def get_item_if_you_can(request, value, itype=None):
-    # import pdb; pdb.set_trace()
     try:
         value.get('uuid')
         return value
@@ -297,7 +298,6 @@ class Item(snovault.Item):
                 clab_member = 'lab.%s' % clab
                 roles[clab_member] = 'role.lab_member'
         if 'award' in properties:
-            # import pdb; pdb.set_trace()
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
@@ -342,7 +342,7 @@ class Item(snovault.Item):
 
     def is_update_by_admin_user(self):
         # determine if the submitter in the properties is an admin user
-        userid = snovault.schema_utils.SERVER_DEFAULTS['userid']('blah', 'blah')
+        userid = SERVER_DEFAULTS['userid']('blah', 'blah')
         users = self.registry['collections']['User']
         user = users.get(userid)
         if 'groups' in user.properties:
@@ -351,7 +351,6 @@ class Item(snovault.Item):
         return False
 
     def _update(self, properties, sheets=None):
-        # import pdb; pdb.set_trace()
         props = {}
         try:
             props = self.properties
@@ -362,6 +361,18 @@ class Item(snovault.Item):
             # by a non-admin user then status should be changed to 'submission in progress'
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
+
+        try:  # update last_modified. this depends on an available request
+            last_modified = {
+                'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
+                'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
+            }
+        except AttributeError:
+            pass
+        else:
+            # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if no userid
+            if last_modified['modified_by'] != NO_DEFAULT:
+                properties['last_modified'] = last_modified
 
         date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
         for datefield, status in date2status.items():
