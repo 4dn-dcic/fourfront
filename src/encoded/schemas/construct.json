@@ -31,18 +31,21 @@
             "title": "Name",
             "description": "Short name for construct - letters, numbers, hyphens or underscores allowed (no spaces)",
             "type": "string",
+            "lookup": 20,
             "pattern": "^[A-Za-z0-9_-]+$"
         },
         "description": {
             "title": "Description",
             "description": "A plain text description of the construct.",
             "type": "string",
+            "lookup": 30,
             "formInput": "textarea"
         },
         "construct_type": {
             "title": "Construct Type",
             "description": "The categorization of the construct.",
             "type": "string",
+            "lookup": 40,
             "enum" : [
               "crispr construct",
               "rnai construct",
@@ -53,6 +56,7 @@
           "protein_tags": {
               "title": "Fusion Protein Tags",
               "type":  "array",
+              "lookup": 50,
               "items": {
                   "title": "Fusion Tag",
                   "description": "String describing fusion protein or other tag the construct contains.",
@@ -62,35 +66,41 @@
           "designed_to_target": {
               "title": "Designed to Target",
               "description": "The gene or genomic region that this construct is designed to target",
-              "type":  "string"
+              "type":  "string",
+              "lookup": 60,
           },
           "vector_backbone": {
               "title": "Vector Backbone",
               "description": "The vector backbone for this construct",
-              "type":  "string"
+              "type":  "string",
+              "lookup": 70,
           },
           "insert_sequence": {
               "title": "Insert Sequence",
               "description": "Nucleotide Sequence of the Insert",
               "type":  "string",
+              "lookup": 80,
               "pattern": "^[ATGCN]+$"
           },
           "construct_vendor": {
               "title": "Construct Vendor",
               "description": "The Lab or Vendor that provided the construct.",
               "type": "string",
+              "lookup": 90,
               "linkTo": "Vendor"
           },
           "map": {
               "title": "Construct Map Document",
               "description": "Map of the construct - document",
               "type": "string",
+              "lookup": 100,
               "linkTo": "Document"
           },
           "url": {
               "title": "URL",
               "description": "An external resource with additional information about the construct.",
               "type": "string",
+              "lookup": 1000,
               "format": "uri"
           }
       }

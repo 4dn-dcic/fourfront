@@ -34,6 +34,7 @@
         "rnai_type": {
             "title": "Type of RNAi",
             "type": "string",
+            "lookup": 20,
             "enum": [
                 "shRNA",
                 "siRNA"
@@ -43,24 +44,28 @@
             "title": "Target",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
             "type": "string",
+            "lookup": 30,
             "linkTo": "Target"
         },
         "target_sequence": {
             "title": "Target Sequence",
             "description": "The nucleotide sequence of the target region.",
             "type": "string",
+            "lookup": 40,
             "pattern": "^[ATGCN]+$"
         },
         "rnai_vendor": {
               "title": "Source of RNAi",
               "description": "RNAi center that provided the RNAi.",
               "type": "string",
+              "lookup": 60,
               "linkTo": "Vendor"
         },
         "rnai_constructs": {
             "title": "Constructs",
             "description": "Recombinant constructs used for RNAi",
             "type":  "array",
+            "lookup": 50,
             "items": {
                 "title": "Constructs",
                 "description": "A recombinant construct.",
@@ -72,6 +77,7 @@
             "title": "URL",
             "description": "An external resource with additional information about the construct.",
             "type": "string",
+            "lookup": 1000,
             "format": "uri"
         }
     }
