@@ -40,6 +40,7 @@
             "title": "Common name",
             "description": "A short unique name for the organism (e.g. 'mouse' or 'human').",
             "type": "string",
+            "lookup": 20,
             "pattern": "^[a-z0-9\\-]+$",
             "uniqueKey": true
         },
@@ -47,12 +48,14 @@
             "title": "Binomial name",
             "description": "The genus species for the organism (e.g. 'Mus musculus').",
             "type": "string",
+            "lookup": 30,
             "default": ""
         },
         "taxon_id": {
             "title": "Taxon ID",
             "description": "The NCBI taxon ID for the organism (e.g. 10090).",
             "type": "string",
+            "lookup": 40,
             "pattern": "^[0-9]+$"
         }
     },

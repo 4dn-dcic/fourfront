@@ -30,6 +30,7 @@
             "title": "Publication Identifier",
             "description": "PMID or doi for the publication.",
             "type": "string",
+            "lookup": 20,
             "uniqueKey":  "publication:ID",
             "pattern": "^PMID:[0-9]+$|^doi:10\\.[0-9]{4}[\\d\\S\\:\\.]+$",
             "comment": "Please provide either in the form of PMID:12345678 or doi:10.1234/abc123"
@@ -38,6 +39,7 @@
             "title": "Status",
             "type": "string",
             "default": "current",
+            "lookup": 30,
             "permission": "import_items",
             "enum": [
                 "current",
@@ -52,6 +54,7 @@
         "published_by": {
             "title": "Published by",
             "type": "string",
+            "lookup": 40,
             "enum": [
                 "4DN",
                 "External"
@@ -60,6 +63,7 @@
         "categories": {
             "title": "Categories",
             "type": "array",
+            "lookup": 70,
             "uniqueItems": true,
             "items": {
                 "title": "Category",
@@ -86,6 +90,7 @@
             "title": "Experiment Sets Produced by This Publication",
             "description": "List of experiment sets that are produced by this publication.",
             "type": "array",
+            "lookup": 50,
             "comment": "use accessions for identifiers.",
             "uniqueItems": true,
             "items": {
@@ -98,6 +103,7 @@
             "title": "Experiment Sets Used by This Publication (not produced)",
             "description": "List of experiment sets that are used (not produced) by this publication.",
             "type": "array",
+            "lookup": 60,
             "comment": "use accessions for identifiers.",
             "uniqueItems": true,
             "items": {
@@ -111,7 +117,7 @@
             "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
             "type": "string",
-            "exclude_from": ["FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "abstract": {
             "title": "Abstract",

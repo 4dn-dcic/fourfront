@@ -34,7 +34,7 @@
         "mouse_life_stage": {
             "title": "Mouse Life Stage",
             "type": "string",
-            "lookup": 3,
+            "lookup": 20,
             "enum": [
               "pup",
               "fetus",
@@ -49,7 +49,7 @@
         },
         "mouse_strain":{
           "title": "Mouse Strain",
-          "lookup": 2,
+          "lookup": 30,
           "type": "string",
           "description": "Can be an object of straing with dbxref for strain"
         },
@@ -57,7 +57,7 @@
           "title": "Vendor for the Mouse Individual",
           "type": "string",
           "linkTo": "Vendor",
-          "lookup": 4
+          "lookup": 40
         },
         "dbxrefs": {
             "@type": "@id",
