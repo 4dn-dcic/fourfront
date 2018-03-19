@@ -8,6 +8,7 @@ from encoded.loadxl import read_single_sheet
 from .browser_functions import (
     scroll_page_down,
     scroll_to,
+    scroll_elem_into_view_by_css,
     get_search_page_result_count,
     get_browse_view_quickinfobar_counts
 )
@@ -132,6 +133,7 @@ def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict,
 def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
     '''
     Ensure that bar plot counts and quick info bar count match / add up in various situations.
+    Incl. Tests Re: QuickInfoBar Toggle External Data, q=mouse text search
     '''
     session_browser.visit(host_url + '/') # Start at home page
 
@@ -213,17 +215,14 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
     
 
 def test_browse_view_file_selection_and_download(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
-    session_browser.visit(host_url + '/browse/')
-    assert session_browser.wait_for_condition( # Wait until unselects
-        lambda browser: 'award.project=4DN' in browser.url,
-        timeout=splinter_selenium_implicit_wait
-    ) is True
-    assert session_browser.is_element_not_present_by_css('#slow-load-container[visible="true"]', splinter_selenium_implicit_wait) is True
+    session_browser.visit(host_url + '/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate') # Start browse page
+    #session_browser.find_by_id('sBrowse').first.click() # Click Browse menu item / link
+
     assert session_browser.is_element_present_by_id('select-barplot-field-1', splinter_selenium_implicit_wait) is True # Counts, barplot data loaded
 
     expset_count, exp_count, file_count = get_browse_view_quickinfobar_counts(session_browser)
 
-    assert expset_count > 5 and file_count > 10 # Some bare minimums
+    assert expset_count >= 7 and file_count > 10 # Some bare minimums
 
     def get_select_all_files_button() -> ElementAPI:
         # TODO: Change to find_by_id('select-all-files-button') once deployed.
@@ -235,6 +234,8 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
 
     def get_download_button() -> ElementAPI:
         return session_browser.find_by_css('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div > button.btn.btn-primary').first
+
+    assert session_browser.is_element_present_by_css('#slow-load-container:not([visible="true"])', splinter_selenium_implicit_wait) is True
 
     get_select_all_files_button().click()
 
@@ -266,45 +267,42 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
     assert initial_download_files_count == file_count
 
     get_file_type_panel_button().click()
-    time.sleep(0.5)
+    time.sleep(0.25)
 
     # Assert all search table result rows are checked
     search_table_row_checkboxes = session_browser.find_by_css('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]')
     for search_table_row_checkbox in search_table_row_checkboxes:
         assert search_table_row_checkbox.checked
 
-    '''
-    search_table_row_detail_buttons = session_browser.find_by_css('.search-results-container .search-result-row .search-result-column-block button.toggle-detail-button')
-    for idx in range(0,5):
-        scroll_elem_into_view_by_css(session_browser, '.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] .search-result-column-block button.toggle-detail-button')
-        time.sleep(0.1)
-        session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] .search-result-column-block button.toggle-detail-button').first.click()
+    
+    for idx in range(0,7): # Make sure all files' tables checkboxes are also checked, for first 7 rows.
         time.sleep(0.25)
-        scroll_elem_into_view_by_css(session_browser, '.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] h4.pane-section-title')
-        time.sleep(0.1)
-        file_header = session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] h4.pane-section-title').first.click() # Open 'Raw Files' section.
-    '''
+        result_row_css_selector = '.search-results-container .search-result-row[data-row-number="{}"]'.format(str(idx))
 
-    '''
-    for idx in range(0,5):
-        scroll_to(session_browser, 400 + (30 * idx))
+        #scroll_to(session_browser, 400 + (30 * idx))
+        scroll_elem_into_view_by_css(session_browser, result_row_css_selector, -150)
         time.sleep(0.25)
-        session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] .search-result-column-block button.toggle-detail-button').first.click() # Open detail section
-        time.sleep(0.25)
-        session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] h4.pane-section-title').first.click() # Open files section
-        time.sleep(0.25)
-        table_checkboxes = session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] .stacked-block-table input[type="checkbox"]')
+        detail_toggle_button = session_browser.find_by_css(result_row_css_selector + ' .search-result-column-block button.toggle-detail-button').first
+        detail_toggle_button.click() # Open detail section
+        time.sleep(0.1)
+
+        files_toggle_button = session_browser.find_by_css(result_row_css_selector + ' .result-table-detail-container h4.pane-section-title i.icon').first
+        files_toggle_button.click() # Open files section
+        time.sleep(0.5) # Min delay between/open close allowed
+        table_checkboxes = session_browser.find_by_css(result_row_css_selector + ' .stacked-block-table input[type="checkbox"]')
         for checkbox in table_checkboxes:
             assert checkbox.checked
 
-        session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] h4.pane-section-title').first.click() # Close files section
-        time.sleep(0.25)
-        scroll_to(session_browser, 400 + (30 * idx))
-        time.sleep(0.1)
-        session_browser.find_by_css('.search-results-container .search-result-row[data-row-number="' + str(idx) + '"] .search-result-column-block button.toggle-detail-button').first.click() # Close detail section
-    '''
+        files_toggle_button.click() # Close files section
+        time.sleep(0.35) # Height transition
+        detail_toggle_button.click() # Close detail section
+
+    
+    
 
     # Click download button, wait for modal
+    scroll_to(session_browser, 100)
+    time.sleep(0.1)
     get_download_button().click()
     assert session_browser.is_element_present_by_css('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]', splinter_selenium_implicit_wait)
     

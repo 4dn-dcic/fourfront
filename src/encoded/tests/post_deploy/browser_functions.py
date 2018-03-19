@@ -4,9 +4,11 @@ These are a set of functions which may be used by browser tests. They are not te
 
 from splinter import Browser
 
+
 ################################
 ###### Scroll the browser ######
 ################################
+
 
 def scroll_to(browser: Browser, to: int = 0):
     browser.execute_script('window.scrollTo(0,' + str(to) + ');')
@@ -28,8 +30,13 @@ def scroll_viewport_down(browser):
 ###### Scroll an element  ######
 ################################
 
-def scroll_elem_into_view_by_css(browser, css_selector):
-    browser.execute_script("document.querySelector('" + css_selector + "').scrollIntoView();")
+
+def scroll_elem_into_view_by_css(browser, css_selector, top_offset = 0):
+    browser.execute_script('''
+        var elem = document.querySelector('{}');
+        var boundingRect = elem.getBoundingClientRect();
+        window.scrollBy(0, boundingRect.top + {});
+    '''.format(css_selector, top_offset))
 
 
 ################################
@@ -45,6 +52,7 @@ def get_search_page_result_count(browser: Browser):
 ################################
 ##### Browse Page Funcs ########
 ################################
+
 
 def get_browse_view_quickinfobar_counts(browser: Browser):
     '''
