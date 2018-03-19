@@ -112,6 +112,17 @@
                 "type": "string"
             }
         },
+        "docker_registry_url": {
+            "title": "Docker Registry URL",
+            "description": "Docker Hub or 7 bridges registry URL.",
+            "type": "string",
+            "format": "uri"
+        },
+        "docker_image_name": {
+            "title": "Image Name",
+            "description": "The name of the image that is downloaded",
+            "type": "string"
+        },
         "arguments": {
             "title": "Workflow Arguments",
             "description": "arguments of the workflow.",
@@ -193,7 +204,6 @@
                 }
             }
         },
-
         "steps" : {
             "title": "Workflow Steps",
             "type": "array",
@@ -330,8 +340,6 @@
                 }
             }
         }
-
-
     },
     "facets" : {
         "category": {

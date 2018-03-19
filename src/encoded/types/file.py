@@ -301,7 +301,8 @@ class File(Item):
                                               'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
-            file_formats = [properties.get('file_format'), ]
+
+        file_formats = [properties.get('file_format'), ]
 
         # handle extra files
         updated_extra_files = []

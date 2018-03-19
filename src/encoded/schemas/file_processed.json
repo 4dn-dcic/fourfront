@@ -17,6 +17,7 @@
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -30,6 +31,10 @@
         "schema_version": {
             "default": "1"
         },
+		"higlass_uid": {
+			"title": "Higlass UID",
+			"type": "string"
+		},
         "file_format": {
             "title": "File Format",
             "type": "string",
