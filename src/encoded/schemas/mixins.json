@@ -359,18 +359,21 @@
         "average_fragment_size": {
             "title": "Average Fragment Size (bp)",
             "description": "Size of average fragment in base pairs after fragmentation step",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 202
         },
         "fragment_size_range": {
             "title": "Fragment size range",
             "description": "The measured size range of the purified nucleic acid, in bp.",
             "type": "string",
+            "lookup": 203,
             "pattern": "(^[0-9]+-[0-9]+$|^[<>][0-9]+$)"
         },
         "fragmentation_method": {
             "title": "Fragmentation method",
             "description": "A short description or reference of the nucleic acid fragmentation protocol used in library preparation, if applicable.",
             "type": "string",
+            "lookup": 200,
             "enum": [
               "chemical",
               "shearing",
@@ -384,6 +387,7 @@
             "title": "Size selection method",
             "description": "A short description or reference of the size selection protocol used in library preparation, if applicable.",
             "type": "string",
+            "lookup": 201,
             "enum": [
               "gel",
               "see document",
@@ -395,12 +399,14 @@
             "title": "Library Preparation Date",
             "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
             "type": "string",
+            "lookup": 220,
             "format": "date"
         },
         "pcr_cycles": {
             "title": "Library amplification PCR cycles",
             "description": "The number of PCR cycles used for final library amplification prior to sequencing",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 210
         }
     },
     "antibody_info": {

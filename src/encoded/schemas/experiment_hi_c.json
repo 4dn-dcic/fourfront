@@ -58,6 +58,7 @@
             "title": "Crosslinking Method",
             "description": "Term used for the method for crosslinking chromatin",
             "type": "string",
+            "lookup": 100,
             "internal_comment": "We might need to change the structure to accomodate user additions",
             "enum": [
                 "none",
@@ -72,60 +73,71 @@
         "crosslinking_time": {
             "title": "Crosslinking Time (min)",
             "description": "Time of crosslinking step in minutes",
-            "type": "number"
+            "type": "number",
+            "lookup": 101
         },
         "crosslinking_temperature": {
             "title": "Crosslinking Temperature (°C)",
             "description": "Temperature of crosslinking step in degrees Celsius",
-            "type": "number"
+            "type": "number",
+            "lookup": 102
         },
         "digestion_enzyme": {
             "title": "Digestion Enzyme",
             "description": "The enzyme used for digestion of the DNA.",
             "comment": "See Enzymes sheet or collection for existing items.",
             "type": "string",
+            "lookup": 110,
             "linkTo": "Enzyme"
         },
         "enzyme_lot_number": {
             "title": "Digestion Enzyme Lot Number",
             "description": "Lot number of batch of enzyme used to digest DNA",
-            "type": "string"
+            "type": "string",
+            "lookup": 111
         },
         "digestion_time": {
             "title": "Digestion Time (min)",
             "description": "Time of digestion step in minutes",
-            "type": "number"
+            "type": "number",
+            "lookup": 112
         },
         "digestion_temperature": {
             "title": "Digestion Temperature (°C)",
             "description": "Temperature of digestion step in degrees Celsius",
-            "type": "number"
+            "type": "number",
+            "lookup": 113
         },
         "tagging_method": {
             "title": "Tagging Method",
             "description": "Information on the biotinylated base used or other tagging info",
             "type": "string",
+            "lookup": 120,
             "internal_comment": "should this be a controlled CV?"
         },
         "ligation_time": {
             "title": "Ligation Time (min)",
             "description": "Time of ligation step in minutes",
-            "type": "number"
+            "type": "number",
+            "lookup": 130
         },
         "ligation_temperature": {
             "title": "Ligation Temperature (°C)",
             "description": "Temperature of ligation step in degrees Celsius",
-            "type": "number"
+            "type": "number",
+            "lookup": 131
         },
         "ligation_volume": {
             "title": "Ligation Volume (ml)",
             "description": "Volume of ligation step in milliliters",
-            "type": "number"
+            "type": "number",
+            "lookup": 132
         },
         "biotin_removed": {
             "title": "Biotin Removal Step",
             "description": "The optional biotin removal step was performed",
             "type": "string",
+            "lookup": 140,
             "enum": ["Yes", "No"]
         }
     },
