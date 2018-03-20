@@ -33,7 +33,6 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "lookup": 20,
             "enum": [
                 "fastq"
             ]

@@ -42,13 +42,14 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
-            "lookup": 30
+            "lookup": 22
         },
         "file_classification": {
             "title": "General Classification",
             "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
             "internal_comment": "This will control how, when and where a file can be displayed - on pages (eg. ancillary files like index files will show up in workflow_run but not experiment)",
             "type": "string",
+            "lookup": 23,
             "enum": [
                 "raw file",
                 "processed file",
@@ -60,7 +61,7 @@
             "title": "File format specifications documents",
             "description": "Text or pdf files that further explain the file format",
             "type": "array",
-            "lookup": 25,
+            "lookup": 21,
             "uniqueItems": true,
             "items": {
                 "comment": "See document.json for a list of available identifiers.",

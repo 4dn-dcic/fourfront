@@ -33,6 +33,7 @@
             "title": "Sets of Data Files",
             "description": "List of data files to be associated with the experiment.",
             "type": "array",
+            "lookup": 40,
             "default": [],
             "uniqueItems": true,
             "items": {
@@ -45,6 +46,7 @@
             "title": "Fileset Type",
             "description": "The categorization of the set of files.",
             "type": "string",
+            "lookup": 30,
             "enum" : [
               "unspecified",
               "sequence files",
@@ -58,6 +60,7 @@
             "title": "Description",
             "description": "A description of what files are part of the set.",
             "type": "string",
+            "lookup": 20,
             "default": "",
             "formInput": "textarea"
         }
