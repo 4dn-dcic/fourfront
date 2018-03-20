@@ -274,6 +274,21 @@ export default class Navigation extends React.Component {
 
 class SearchBar extends React.Component{
 
+    static renderHiddenInputsForURIQuery(query){
+        return _.flatten(_.map(
+            _.pairs(query),
+            function(qp){
+                if (Array.isArray(qp[1])){
+                    return _.map(qp[1], function(queryValue, idx){
+                        return <input key={qp[0] + '.' + idx} type="hidden" name={qp[0]} value={queryValue} />;
+                    });
+                } else {
+                    return <input key={qp[0]} type="hidden" name={qp[0]} value={qp[1]} />;
+                }
+            }
+        ));
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
@@ -392,7 +407,7 @@ class SearchBar extends React.Component{
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
                     ref="q" name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                 { resetIconButton }
-                { _.map(_.pairs(query), function(qp){ return <input key={qp[0]} type="hidden" name={qp[0]} value={qp[1]} />; }) }
+                { SearchBar.renderHiddenInputsForURIQuery(query) }
                 <button type="submit" className="search-icon-button">
                     <i className="icon icon-fw icon-search"/>
                 </button>

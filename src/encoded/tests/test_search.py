@@ -262,8 +262,8 @@ def test_metadata_tsv_view(workbook, htmltestapp):
         # Last some rows should be 'summary' rows. And have empty spaces for 'Download URL' / first column.
         summary_start_row = None
         for row_index, row in enumerate(result_rows):
-            if row[FILE_DOWNLOAD_URL_COL_INDEX] == '':
-                summary_start_row = row_index
+            if row[1] == 'Summary':
+                summary_start_row = row_index - 1
                 break
 
         # Check that summary cells are present, in right place, with some correct-looking values
