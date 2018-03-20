@@ -28,7 +28,7 @@
             "title": "Antibody Name",
             "description": "A short name of the antibody.",
             "type": "string",
-            "lookup": 20,
+            "lookup": 20
         },
         "antibody_id": {
             "description": "DON'T SUBMIT, auto-generated, use for referencing antibodies in other sheets.",
@@ -47,7 +47,7 @@
             "title": "Antibody Catalog Number",
             "description": "The catalog number for commercially obtained antibody",
             "type": "string",
-            "lookup": 60,
+            "lookup": 60
         },
         "antibody_vendor":{
             "title": "Antibody Vendor",
