@@ -58,6 +58,8 @@
                 "alignments",
                 "unfiltered alignments",
                 "contact list",
+                "contact list-replicate",
+                "contact list-combined",
                 "contact matrix",
                 "normalized contact matrix",
                 "long range chromatin interactions",
