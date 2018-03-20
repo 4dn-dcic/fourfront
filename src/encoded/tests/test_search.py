@@ -263,18 +263,18 @@ def test_metadata_tsv_view(workbook, htmltestapp):
         summary_start_row = None
         for row_index, row in enumerate(result_rows):
             if row[1] == 'Summary':
-                summary_start_row = row_index
+                summary_start_row = row_index - 1
                 break
 
         # Check that summary cells are present, in right place, with some correct-looking values
-        assert result_rows[summary_start_row][1] == 'Summary'
-        assert result_rows[summary_start_row + 2][1] == 'Files Selected for Download:'
-        assert result_rows[summary_start_row + 3][1] == 'Total File Rows:'
-        assert result_rows[summary_start_row + 4][1] == 'Unique Downloadable Files:'
+        assert result_rows[summary_start_row + 1][1] == 'Summary'
+        assert result_rows[summary_start_row + 3][1] == 'Files Selected for Download:'
+        assert result_rows[summary_start_row + 4][1] == 'Total File Rows:'
+        assert result_rows[summary_start_row + 5][1] == 'Unique Downloadable Files:'
         if len_requested:
-            assert int(result_rows[summary_start_row + 2][4]) == len_requested
-        assert int(result_rows[summary_start_row + 3][4]) == summary_start_row
-        assert int(result_rows[summary_start_row + 4][4]) <= summary_start_row
+            assert int(result_rows[summary_start_row + 3][4]) == len_requested
+        assert int(result_rows[summary_start_row + 4][4]) == summary_start_row
+        assert int(result_rows[summary_start_row + 5][4]) <= summary_start_row
 
 
     # run a simple GET query with type=ExperimentSet
