@@ -47,25 +47,25 @@
             "title": "Start",
             "description": "The base position of the start coordinate of the region - start < end",
             "type": "integer",
-            "lookup": 40,
+            "lookup": 40
         },
         "end_coordinate": {
             "title": "End",
             "description": "The base position of the end coordinate - end > start",
             "type": "integer",
-            "lookup": 50,
+            "lookup": 50
         },
         "start_location": {
             "title": "Fuzzy Start",
             "description": "If the exact start coordinate is not know a description of the start location",
             "type": "string",
-            "lookup": 60,
+            "lookup": 60
         },
         "end_location": {
             "title": "Fuzzy End",
             "description": "If the exact end coordinate is not know a description of the start location",
             "type": "string",
-            "lookup": 70,
+            "lookup": 70
         },
         "location_description": {
             "title": "Location Description",
