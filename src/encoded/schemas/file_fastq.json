@@ -62,7 +62,7 @@
             "title": "Sequencing Read Length (bp)",
             "description": "Length of sequencing reads in base pairs for fastq files",
             "type": "integer",
-            "lookup": 40,
+            "lookup": 40
         },
         "instrument": {
             "title": "Sequencer",
