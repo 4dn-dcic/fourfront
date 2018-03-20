@@ -33,11 +33,19 @@ Instead of "postdeploy", may also use "postdeploy_local", which will only select
 '''
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def config():
     return {
         'table_load_limit' : 25         # How many Items load-as-you-scroll table fetches per request.
     }
+
+
+@pytest.fixture(scope='session')
+def app_url(host_url, launch_servers):
+    # TODO: If launch_servers is true, init servers and return a URL.
+    # Else, return host_url.
+    pass
+
 
 
 ##########################################################
@@ -53,6 +61,7 @@ def get_host_url():
 
 def pytest_addoption(parser):
     parser.addoption("--host-url", action="store", default=get_host_url())
+    parser.addoption("--launch-servers", action="store_true", default=False)
 
 
 def pytest_generate_tests(metafunc):

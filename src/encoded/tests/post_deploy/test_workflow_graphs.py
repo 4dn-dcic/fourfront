@@ -65,7 +65,7 @@ def test_workflow_collection(session_browser: Browser, host_url, config, splinte
 
 def assert_expset_page_provenance_graph(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
     session_browser.find_by_text(' Processed Files').first.click()
-    time.sleep(0.5)
+    time.sleep(2)
     file_accessions = [ f.text for f in session_browser.find_by_css('.s-block.file a.name-title') ]
     session_browser.find_by_text(' Graph').first.click()
     time.sleep(0.25)
