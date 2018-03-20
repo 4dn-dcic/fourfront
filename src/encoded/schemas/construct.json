@@ -67,13 +67,13 @@
               "title": "Designed to Target",
               "description": "The gene or genomic region that this construct is designed to target",
               "type":  "string",
-              "lookup": 60,
+              "lookup": 60
           },
           "vector_backbone": {
               "title": "Vector Backbone",
               "description": "The vector backbone for this construct",
               "type":  "string",
-              "lookup": 70,
+              "lookup": 70
           },
           "insert_sequence": {
               "title": "Insert Sequence",
