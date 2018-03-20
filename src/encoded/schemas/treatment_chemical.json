@@ -40,7 +40,7 @@
         "concentration": {
             "title": "Concentration",
             "type": "number",
-            "lookup": 30,
+            "lookup": 30
         },
         "concentration_units": {
             "title": "Concentration units",
@@ -63,7 +63,7 @@
         "duration": {
             "title": "Duration",
             "type": "number",
-            "lookup": 50,
+            "lookup": 50
         },
         "duration_units": {
             "title": "Duration units",
