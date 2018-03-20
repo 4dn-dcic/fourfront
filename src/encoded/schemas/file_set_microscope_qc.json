@@ -34,44 +34,53 @@
             "title": "Description",
             "description": "A description of what files are part of the set.",
             "type": "string",
+            "lookup": 20,
             "default": ""
         },
         "objective_na": {
             "title": "NA of objective",
             "description": "The numerical aperture of a microscope objective",
-            "type": "number"
+            "type": "number",
+            "lookup": 80
         },
         "refractive_index": {
             "title": "Refractive index",
-            "type": "number"
+            "type": "number",
+            "lookup": 90
         },
         "bead_diameter": {
             "title": "Bead diameter (nm)",
             "description": "Diameter of the beads used for the qc (nm)",
-            "type": "number"
+            "type": "number",
+            "lookup": 40
         },
         "z_plane_distance": {
             "title": "Z-plane distance (µm)",
             "description": "Distances between Z-stacks in µm",
-            "type": "number"
+            "type": "number",
+            "lookup": 50
         },
         "pixel_size": {
             "title": "Pixel size of the camera (µm)",
-            "type": "number"
+            "type": "number",
+            "lookup": 60
         },
         "magnification": {
             "title": "Magnification (X)",
             "description": "Magnification used for imaging, enter without X",
-            "type": "number"
+            "type": "number",
+            "lookup": 70
         },
         "attachment": {
             "title": "PSFj Analysis Result",
-            "description": "PDF document with PSFj result"
+            "description": "PDF document with PSFj result",
+            "lookup": 10
         },
         "files_in_set": {
             "title": "Microscopy Images for QC",
             "description": "List of data files to be associated together.",
             "type": "array",
+            "lookup": 30,
             "default": [],
             "uniqueItems": true,
             "items": {

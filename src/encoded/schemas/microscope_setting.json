@@ -31,12 +31,14 @@
             "title": "Description",
             "description": "A short description of the labeling path",
             "type": "string",
+            "lookup": 10,
             "formInput": "textarea"
         },
         "tier_level":{
             "title": "Microscopy Tier Level",
             "description": "Tier level for the required metadata for microscopy experiments",
             "type": "string",
+            "lookup": 15,
             "enum":["A1",
                     "A2",
                     "D1",

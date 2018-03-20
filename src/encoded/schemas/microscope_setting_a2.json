@@ -34,32 +34,38 @@
         "objective_ri_measured":{
             "title": "Objective RI (measured)",
             "description": " Measured refractive index of the objective",
-            "type": "number"
+            "type": "number",
+            "lookup": 36
         },
         "ch00_coupling":{
             "title": "Ch00 light source coupling",
             "description": "e.g. fiber, light guide, direct",
-            "type": "string"
+            "type": "string",
+            "lookup": 111
         },
         "ch01_coupling":{
             "title": "Ch01 light source coupling",
             "description": "e.g. fiber, light guide, direct",
-            "type": "string"
+            "type": "string",
+            "lookup": 211
         },
         "ch02_coupling":{
             "title": "Ch02 light source coupling",
             "description": "e.g. fiber, light guide, direct",
-            "type": "string"
+            "type": "string",
+            "lookup": 311
         },
         "ch03_coupling":{
             "title": "Ch03 light source coupling",
             "description": "e.g. fiber, light guide, direct",
-            "type": "string"
+            "type": "string",
+            "lookup": 411
         },
         "embedding_RI_measured":{
             "title": "Embedding medium RI (measured)",
             "description": "Refractive index of embedding medium (measured)",
-            "type": "number"
+            "type": "number",
+            "lookup": 21
         }
     }
 }

@@ -38,11 +38,12 @@
         "experiment_type": {
             "title" : "Experiment Type",
             "type" : "string",
+            "lookup": 10,
             "enum": [
                 "DNA-paint",
                 "DNA-FiSH",
                 "FISH",
-                "Immunoflourescence",
+                "Immunofluorescence",
                 "Fluorescence",
                 "Cryo-EM"
             ]
@@ -50,6 +51,7 @@
         "microscopy_technique": {
             "title" : "Microscopy Technique",
             "type" : "string",
+            "lookup": 60,
             "enum": [
                 "Widefield",
                 "SIM",
@@ -64,12 +66,14 @@
         "microscope_qc":{
             "title": "Microscope QC Analysis",
             "type": "string",
+            "lookup": 61,
             "linkTo": "FileSetMicroscopeQc"
         },
         "imaging_paths": {
             "title": "Imaging Paths",
             "description": "Target to label connections in each channel.",
             "type":  "array",
+            "lookup": 63,
             "items": {
                 "title": "Imaging path",
                 "type": "object",
@@ -92,23 +96,27 @@
         },
         "microscope_settings_master": {
             "type": "string",
+            "lookup": 62,
             "title": "Master Microscope Settings",
             "linkTo": "MicroscopeSetting"
         },
         "plate_id": {
             "title": "Plate ID",
             "description": "Plate ID for multi-well plate experiments",
-            "type": "string"
+            "type": "string",
+            "lookup": 65
         },
         "plate_well_id": {
             "title": "Well Position",
             "description": "Well position for experiments on multi-well plates, eg H8, B18",
-            "type": "string"
+            "type": "string",
+            "lookup": 66
         },
         "image_ids":{
             "title": "Image IDs",
             "description": "Image IDs as described by BioFormats",
             "type": "array",
+            "lookup": 67,
             "items": {
                 "title": "Image ID",
                 "type": "string"

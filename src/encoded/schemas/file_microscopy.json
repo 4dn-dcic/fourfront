@@ -33,11 +33,13 @@
         },
         "description": {
             "type": "string",
+            "lookup": 20,
             "title": "Description"
         },
         "file_format": {
             "title": "File Format",
             "type": "string",
+            "lookup": 30,
             "default": "zip",
             "enum": [
                 "zip",
@@ -51,6 +53,7 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
+            "lookup": 40,
             "enum": [
                 "z-stack",
                 "time-series"
@@ -67,6 +70,7 @@
         },
         "microscope_settings": {
             "type": "string",
+            "lookup": 50,
             "title": "Microscope Settings",
             "linkTo": "MicroscopeSetting"
         },
