@@ -34,7 +34,7 @@
         "ethnicity": {
             "title": "Ethnicity",
             "type": "string",
-            "lookup": 30,
+            "lookup": 30
         },
         "health_status": {
             "title": "Individual Health Status",
