@@ -37,7 +37,7 @@
             "title": "Name",
             "description": "The complete name of the originating lab or vendor. ",
             "type": "string",
-            "lookup": 20,
+            "lookup": 20
         },
         "name": {
             "description": "DON'T SUBMIT, auto-generated, use for referencing vendors in other sheets.",
