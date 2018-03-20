@@ -60,27 +60,27 @@
             "title":"Total Days in Culture",
             "description":"Total number of culturing days since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date",
             "type":"number",
-            "lookup": 60,
+            "lookup": 60
         },
         "passage_number": {
             "title": "Passage Number",
             "description": "Number of passages since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date.",
             "type": "integer",
-            "lookup": 70,
+            "lookup": 70
         },
         "doubling_number": {
             "title": "Population Doubling Number",
             "description": "The number of times the population has doubled since the time of thaw (culture start date) until harvest.",
             "comment": "This may be reported in different ways - eg. 1) passage ratio and number of passages or 2) direct cell counts.",
             "type": "string",
-            "lookup": 80,
+            "lookup": 80
         },
         "doubling_time": {
             "title": "Population Doubling Time",
             "description": "The average time from thaw (culture start date) until harvest it takes for the population to double.",
             "comment": "Researchers can record the number of times they split the cells and by what ratio as a simple approximation of doubling time. This is important for some cell lines eg. IMR90 (a mortal line) and HI and H9 human stem cells.",
             "type": "string",
-            "lookup": 90,
+            "lookup": 90
         },
         "protocols_additional": {
             "title": "Additional Protocols used in Cell Culture",
@@ -121,19 +121,19 @@
             "title": "Karyotype Description",
             "description": "Chromosome count and any noted rearrangements or copy number variation",
             "type": "string",
-            "lookup": 110,
+            "lookup": 110
         },
         "synchronization_stage": {
             "title": "Synchronization Stage",
             "description": "If a culture is synchronized the cell cycle stage from which the biosample used in an experiment is prepared",
             "type": "string",
-            "lookup": 120,
+            "lookup": 120
         },
         "cell_line_lot_number": {
             "title": "Cell Line Lot",
             "description": "For 4DN Tier2 or unclassified cell lines - a lot number or other information to uniquely identify the source/lot of the cells",
             "type":  "string",
-            "lookup": 30,
+            "lookup": 30
         },
         "follows_sop": {
             "title": "Follows SOP",
