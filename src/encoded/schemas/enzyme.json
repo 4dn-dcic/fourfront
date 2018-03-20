@@ -51,7 +51,7 @@
             "title": "Product Catalog Number",
             "description": "A plain text for catalog description.",
             "type": "string",
-            "lookup": 50,
+            "lookup": 50
         },
         "recognition_sequence": {
             "title": "Recognition Sequence",
