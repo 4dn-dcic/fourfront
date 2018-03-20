@@ -73,7 +73,7 @@ export class SelectedFilesDownloadButton extends React.Component {
     renderModalCodeSnippet(meta_download_filename, isSignedIn){
         return (
             <pre className="mb-15">
-                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | grep -v ^$ | xargs -n 1 curl -O -L
+                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
                 { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
             </pre>
         );

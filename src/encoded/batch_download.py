@@ -49,16 +49,18 @@ TSV_MAPPING = OrderedDict([
 
     ('Size',                        (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
+    ('File Type',                   (FILE,      ['file_type'])),
     ('File Format',                 (FILE,      ['file_format'])),
-    ('Experiment Title',            (EXP,       ['display_title'])),
+   #('Experiment Title',            (EXP,       ['display_title'])),
     ('Experiment Type',             (EXP,       ['experiment_type'])),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
-    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession'])),
+    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'])),
 
     ('Biosource',                   (EXP,       ['biosample.biosource_summary'])),
     ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'])),
     ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'])),
-    ('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
+    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'])),
+   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
     ('Related File',                (FILE,      ['related_files.file.accession'])),
     ('Paired end',                  (FILE,      ['paired_end'])),
@@ -101,7 +103,7 @@ TSV_MAPPING = OrderedDict([
 ])
 
 EXTRA_FIELDS = {
-    EXP_SET : [],
+    EXP_SET : ['replicate_exps.replicate_exp.accession'],
     EXP     : [],
     FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum']
 }
@@ -275,12 +277,14 @@ def metadata_tsv(context, request):
     file_cache = {} # Exclude URLs of prev-encountered file(s).
     summary = {
         'counts' : {
-            'Files Selected for Download' : len(accession_triples) if accession_triples else None,
-            'Total Files' : 0,
-            'Total Unique Files to Download' : 0,
-            'Duplicate Files' : 0,
-            'Not Yet Uploaded' : 0,
-            'Extra Files' : 0
+            'Files Selected for Download'       : len(accession_triples) if accession_triples else None,
+            'Total Files'                       : 0,
+            'Total Unique Files to Download'    : 0
+        },
+        'lists' : {
+            'Not Yet Uploaded'  : [],
+            'Duplicate Files'   : [],
+            'Extra Files'       : []
         }
     }
 
@@ -305,17 +309,26 @@ def metadata_tsv(context, request):
                 temp = c_value
         return ', '.join(list(set(temp)))
 
-    def get_correct_rep_no(key, column_vals_dict, experiment_set):
+    def get_correct_rep_no(column_name, column_vals_dict, experiment_set):
         '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
-        if column_vals_dict is None or key is None or column_vals_dict.get(key) is None:
+
+        if column_vals_dict is None or column_name is None:
             return None
+
+        def get_val(find_exp_accession):
+            for repl_exp in experiment_set.get('replicate_exps',[]):
+                repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
+                if repl_exp_accession is not None and repl_exp_accession == find_exp_accession:
+                    rep_key = 'bio_rep_no' if column_name == 'Bio Rep No' else 'tec_rep_no'
+                    return str(repl_exp.get(rep_key))
+            return None
+
         experiment_accession = column_vals_dict.get('Experiment Accession')
-        for repl_exp in experiment_set.get('replicate_exps',[]):
-            repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
-            if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
-                rep_key = 'bio_rep_no' if key == 'Bio Rep No' else 'tec_rep_no'
-                return str(repl_exp.get(rep_key))
-        return ''
+        if experiment_accession and ',' not in experiment_accession:
+            return get_val(experiment_accession)
+        else:
+            return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
+        return None
 
     def should_file_row_object_be_included(column_vals_dict):
         '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
@@ -331,29 +344,47 @@ def metadata_tsv(context, request):
         return False
 
     def format_experiment_set(exp_set):
+        '''
+        :param exp_set: A dictionary representation of ExperimentSet as received from /search/ results.
+        :returns Iterable of dictionaries which represent File item rows, with column headers as keys.
+        '''
         exp_set_row_vals = {}
         exp_set_cols = [ col for col in header if TSV_MAPPING[col][0] == EXP_SET ]
         for column in exp_set_cols:
             exp_set_row_vals[column] = get_value_for_column(exp_set, column)
 
+        def sort_files_from_expset_by_replicate_numbers(file_dict):
+            try:
+                bio_rep_no = int(f['Bio Rep No'])
+            except:
+                bio_rep_no = 999
+            try:
+                tec_rep_no = int(f['Tech Rep No'])
+            except:
+                tec_rep_no = 999
+            return bio_rep_no * 100000 + tec_rep_no
+
         # Flatten map's child result maps up to self.
-        return chain(
+        return sorted(chain(
             chain.from_iterable(
                 map(
                     lambda exp: format_experiment(exp, exp_set, exp_set_row_vals),
-                    sorted( exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
+                    exp_set.get('experiments_in_set', [])
                 )
             ),
             chain.from_iterable(
                 map(
                     lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
-                    sorted(exp_set.get('processed_files', []), key=lambda d: d.get("accession") )
+                    exp_set.get('processed_files', [])
                 )
             )
-        )
+        ), key=sort_files_from_expset_by_replicate_numbers)
 
 
     def format_experiment(exp, exp_set, exp_set_row_vals):
+        '''
+        :returns Iterable of dictionaries which represent File item rows, with column headers as keys.
+        '''
         exp_row_vals = {}
         exp_cols = [ col for col in header if TSV_MAPPING[col][0] == EXP ]
         for column in exp_cols:
@@ -368,33 +399,34 @@ def metadata_tsv(context, request):
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
-        files_returned = []
+        '''
+        :returns List of dictionaries which represent File item rows, with column headers as keys.
+        '''
+        files_returned = [] # Function output
         f['href'] = request.host_url + f['href']
         f_row_vals = {}
         file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE ]
         for column in file_cols:
             f_row_vals[column] = get_value_for_column(f, column)
 
-        #print('\n\n\nP1', f_row_vals, '\n', f)
-
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
 
-        # If our File object (all_row_vals) has Replicate Numbers, make sure they are corrected.
-        if all_row_vals.get('Bio Rep No') is not None or all_row_vals.get('Tech Rep No') is not None:
-            all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
-            all_row_vals['Bio Rep No'] = get_correct_rep_no('Bio Rep No', all_row_vals, exp_set)
-
         # If no EXP properties, likely is processed file from an ExpSet, so show all Exps' values.
-        if all_row_vals.get('Experiment Type') is None:
-            all_row_vals['Experiment Type'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.experiment_type'))
-        if all_row_vals.get('Biosource Type') is None:
-            all_row_vals['Biosource Type'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.biosample.biosource.biosource_type'))
-        if all_row_vals.get('Digestion Enzyme') is None:
-            all_row_vals['Digestion Enzyme'] = ', '.join(get_values_for_field(exp_set, 'experiments_in_set.digestion_enzyme.name'))
+        exp_col_names = [ k for k,v in TSV_MAPPING.items() if v[0] == EXP ]
+        for column in exp_col_names:
+            if all_row_vals.get(column) is None or ('Accession' in column and all_row_vals.get(column) == 'NONE'):
+                vals = []
+                for field in TSV_MAPPING[column][1]:
+                    vals.append(', '.join(get_values_for_field(exp_set, 'experiments_in_set.' + field)))
+                all_row_vals[column] = ', '.join(vals)
+
+        # Add Bio & Tech Rep Nos re: all_row_vals['Experiment Accession']
+        all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
+        all_row_vals['Bio Rep No']  = get_correct_rep_no('Bio Rep No',  all_row_vals, exp_set)
 
         files_returned.append(all_row_vals)
 
-        # Add secondary files, if any
+        # Add attached secondary files, if any; copies most values over from primary file & overrides distinct File Download URL, md5sum, etc.
         if f.get('extra_files') and len(f['extra_files']) > 0:
             for xfile in f['extra_files']:
                 xfile_vals = all_row_vals.copy()
@@ -407,36 +439,42 @@ def metadata_tsv(context, request):
 
         return files_returned
 
+
     def post_process_file_row_dict(file_row_dict_tuple):
         idx, file_row_dict = file_row_dict_tuple
 
         if file_row_dict['Related File Relationship'] == 'secondary file for':
-            summary['counts']['Extra Files'] += 1
+            summary['lists']['Extra Files'].append(('Secondary file for ' + file_row_dict.get('Related File', 'unknown file.'), file_row_dict ))
+
+        if not file_row_dict['File Type']:
+            file_row_dict['File Type'] = 'other'
 
         if file_row_dict['File Download URL'] is None:
-            file_row_dict['File Download URL'] = '## No URL currently available'
-            summary['counts']['Not Yet Uploaded'] += 1
+            file_row_dict['File Download URL'] = '### No URL currently available'
             summary['counts']['Total Files'] += 1
+            summary['lists']['Not Yet Uploaded'].append(('No URL available', file_row_dict ))
             return file_row_dict
 
         if file_cache.get(file_row_dict['File Download URL']) is not None:
-            file_row_dict['File Download URL'] = '## Duplicate of row ' + str(file_cache[file_row_dict['File Download URL']] + 3) + ': ' + file_row_dict['File Download URL']
-            summary['counts']['Duplicate Files'] += 1
+            row_num_duplicated = file_cache[file_row_dict['File Download URL']] + 3
+            file_row_dict['File Download URL'] = '### Duplicate of row ' + str(row_num_duplicated) + ': ' + file_row_dict['File Download URL']
             summary['counts']['Total Files'] += 1
+            summary['lists']['Duplicate Files'].append(('Duplicate of row ' + str(row_num_duplicated), file_row_dict ))
             return file_row_dict
 
         file_cache[file_row_dict['File Download URL']] = idx
 
         if file_row_dict['File Status'] in ['uploading', 'to be uploaded', 'upload failed']:
-            file_row_dict['File Download URL'] = '## Not Yet Uploaded: ' + file_row_dict['File Download URL']
-            summary['counts']['Not Yet Uploaded'] += 1
+            file_row_dict['File Download URL'] = '### Not Yet Uploaded: ' + file_row_dict['File Download URL']
             summary['counts']['Total Files'] += 1
+            summary['lists']['Not Yet Uploaded'].append(('Not yet uploaded', file_row_dict ))
             return file_row_dict
 
         summary['counts']['Total Unique Files to Download'] += 1
         summary['counts']['Total Files'] += 1
 
         return file_row_dict
+
 
     def format_graph_of_experiment_sets(graph):
         return map(
@@ -447,24 +485,43 @@ def metadata_tsv(context, request):
             ))
         )
 
+
     def generate_summary_lines():
         ret_rows = [
-            ['',   '',         ''],
-            ['',   'Summary',  ''],
-            ['',   '',         ''],
-            ['',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download'] or 'All'), ''],
-            ['',   'Total File Rows:', '', '',            str(summary['counts']['Total Files']), ''],
-            ['',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
+            ['###',   '',         ''],
+            ['###',   'Summary',  ''],
+            ['###',   '',         ''],
+            ['###',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download'] or 'All'), ''],
+            ['###',   'Total File Rows:', '', '',            str(summary['counts']['Total Files']), ''],
+            ['###',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
         ]
 
-        if summary['counts']['Extra Files'] > 0:
-            ret_rows.append(['', '- Added {} extra file{} which {} attached to a primary selected file.'.format(str(summary['counts']['Extra Files']), 's' if summary['counts']['Extra Files'] > 1 else '', 'are' if summary['counts']['Extra Files'] > 1 else 'is'), ''])
-        if summary['counts']['Duplicate Files'] > 0:
-            ret_rows.append(['', '- Commented out {} duplicate file{}.'.format(str(summary['counts']['Duplicate Files']), 's' if summary['counts']['Duplicate Files'] > 1 else ''), ''])
-        if summary['counts']['Not Yet Uploaded'] > 0:
-            ret_rows.append(['', '- Commented out {} file{} which are not yet available.'.format(str(summary['counts']['Not Yet Uploaded']), 's' if summary['counts']['Not Yet Uploaded'] > 1 else ''), ''])
+        def gen_list_string(summary_list_name):
+            return ', '.join(
+                map(
+                    lambda x: x[1]['File Accession'] + '.' + x[1]['File Format'] + ': ' + x[0],
+                    summary['lists'][summary_list_name][0:5]
+                )
+            ) + (', and ' + len(summary['lists'][summary_list_name]) - 5 + ' more...' if len(summary['lists'][summary_list_name]) > 5 else '')
+
+        if len(summary['lists']['Extra Files']) > 0:
+            ret_rows.append(
+                ['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', ''] +
+                ['','','','',  'Details - ' + gen_list_string('Extra Files') ]
+            )
+        if len(summary['lists']['Duplicate Files']) > 0:
+            ret_rows.append(
+                ['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''] +
+                ['','','','', 'Details - ' + gen_list_string('Duplicate Files')       ]
+            )
+        if len(summary['lists']['Not Yet Uploaded']) > 0:
+            ret_rows.append(
+                ['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Yet Uploaded'])), 's' if len(summary['lists']['Not Yet Uploaded']) > 1 else ''), '', '', '', ''] +
+                ['','','','',  'Details - ' + gen_list_string('Not Yet Uploaded')       ]
+            )
 
         return ret_rows
+
 
     def stream_tsv_output(file_row_dictionaries):
         '''
@@ -476,8 +533,8 @@ def metadata_tsv(context, request):
 
         # Initial 2 lines: Intro, Headers
         writer.writerow([
-            'File summary located at bottom of TSV file.', '', '', '', '',
-            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | grep -v ^$ | xargs -n 1 curl -O -L [--user <access_key_id>:<access_key_secret>]'.format(filename_to_suggest)
+            '###', 'N.B.: File summary located at bottom of TSV file.', '', '', '', '',
+            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L [--user <access_key_id>:<access_key_secret>]'.format(filename_to_suggest)
         ])
         yield line.read().encode('utf-8')
         writer.writerow(header)
