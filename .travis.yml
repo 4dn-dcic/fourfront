@@ -44,7 +44,7 @@ matrix:
   - python: '3.4'
     env: NPM=Test
   - python: '3.4'
-    env: UNIT=Test
+    env: UNIT=Test; BROWSER=Chrome
 notifications:
   slack:
     secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
@@ -96,10 +96,22 @@ script:
   src/encoded; fi
 - if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
   --cov src/encoded; fi
-- if test -n "$POSTDEPLOY"; then echo 'TESTING123'; fi
+#- |
+#  if test -n "$BROWSER"; then
+#    test -f "$SC_PIDFILE" && bin/test -v -v -m "bdd" --tb=short \
+#      --splinter-implicit-wait 10 \
+#      --splinter-webdriver remote \
+#      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
+#      --splinter-socket-timeout 300 \
+#      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
+#      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
+#      --browser-arg-int idleTimeout 300 \
+#      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
+#      --browser-arg browser "$BROWSER"
+#  fi
 - |
   if test -n "$BROWSER"; then
-    test -f "$SC_PIDFILE" && bin/test -v -v -m "bdd" --tb=short \
+    test -f "$SC_PIDFILE" && bin/test -v -v -m "postdeploy_local" --tb=short \
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
       --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
@@ -109,8 +121,6 @@ script:
       --browser-arg-int idleTimeout 300 \
       --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
       --browser-arg browser "$BROWSER"
-      --cov src/encoded
-  fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 - |
