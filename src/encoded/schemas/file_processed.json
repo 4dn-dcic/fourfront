@@ -11,6 +11,7 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
@@ -31,6 +32,10 @@
         "schema_version": {
             "default": "1"
         },
+		"higlass_uid": {
+			"title": "Higlass UID",
+			"type": "string"
+		},
         "file_format": {
             "title": "File Format",
             "type": "string",
