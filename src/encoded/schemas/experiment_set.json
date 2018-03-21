@@ -37,6 +37,7 @@
             "title": "Original proposed submission date",
             "description": "YYYY-MM-DD formatted original proposed date of submission",
             "type": "string",
+            "lookup": 30,
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
@@ -46,6 +47,7 @@
             "title": "Current proposed submission date",
             "description": "YYYY-MM-DD formatted currently proposed date of submission",
             "type": "string",
+            "lookup": 35,
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
@@ -78,6 +80,7 @@
             "title": "Description",
             "description": "A description of why experiments are part of the set.",
             "type": "string",
+            "lookup": 20,
             "default": "",
             "formInput": "textarea"
         },

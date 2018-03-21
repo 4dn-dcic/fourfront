@@ -411,17 +411,20 @@
             "title": "Antibody",
             "description": "Reference to a 4DN antibody object",
             "type": "string",
+            "lookup": 90,
             "linkTo": "Antibody"
         },
         "antibody_lot_id": {
             "title": "Antibody Lot Number",
             "description": "A lot number or other unique identifier for a particular antibody lot",
-            "type": "string"
+            "type": "string",
+            "lookup": 91
         },
         "antibody_dilution": {
             "title": "Antibody Dilution/Concentration",
             "description": "The working dilution or concentration of the antibody eg. 1:100 or 200 ug/ml",
-            "type": "string"
+            "type": "string",
+            "lookup": 92
         }
     },
     "sop_mapping": {

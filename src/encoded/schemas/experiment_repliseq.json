@@ -48,7 +48,7 @@
             "title": "DNA label",
             "description": "The tag or chemical used to label the newly replicated DNA - usually BrdU",
             "type": "string",
-            "lookup": 90,
+            "lookup": 80,
             "comment": "e.g. BrdU",
             "internal_comment": "an enum/default of BrdU"
         },
@@ -56,13 +56,13 @@
             "title": "Labeling time",
             "description": "Time in minutes of labeling pulse",
             "type": "number",
-            "lookup": 91
+            "lookup": 81
         },
         "cell_cycle_phase": {
             "title": "Cell Cycle Phase",
             "description": "After sorting the cell cycle phase that the cell fraction falls in",
             "type": "string",
-            "lookup": 92,
+            "lookup": 82,
             "internal_comment": "Link with a specific ontology",
             "enum": ["G1", "S", "G2", "M"]
         },
@@ -71,19 +71,19 @@
             "description": "A decription of the sub stage prepared after sorting",
             "comment": "Repliseq experiments can be 2-phase, 6-phase, 8-phase ... This field is used to further describe the fraction represented in this experiment",
             "type": "string",
-            "lookup": 93
+            "lookup": 83
         },
         "total_fractions_in_exp": {
             "title": "Total number of fractions in the dataset that this experiment is part of.",
             "comment": "If standard 2-stage early/late experiment the value should be 2, for higher res then total number of fractions",
             "type": "integer",
-            "lookup": 94
+            "lookup": 84
         },
         "cell_sorting_protocol": {
             "title": "Sorting Protocol",
             "description": "Protocol with details on cell sorting by FACS",
             "type": "string",
-            "lookup": 95,
+            "lookup": 85,
             "linkTo": "Protocol"
         }
     }
