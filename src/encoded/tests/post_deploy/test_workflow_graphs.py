@@ -18,7 +18,7 @@ pytestmark = [
 
 
 
-def assert_wf_page(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
+def assert_wf_page(session_browser: Browser, root_url, config, splinter_selenium_implicit_wait: int = 10):
     session_browser.is_element_present_by_css('.item-page-container.type-Workflow.type-Item', splinter_selenium_implicit_wait)
 
     json_resp = requests.get(session_browser.url + '?format=json').json() # Compare against steps in JSON
@@ -49,21 +49,21 @@ def assert_wf_page(session_browser: Browser, host_url, config, splinter_selenium
 
 
 @pytest.mark.postdeploy_local
-def test_workflow_collection(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int):
+def test_workflow_collection(session_browser: Browser, root_url, config, splinter_selenium_implicit_wait: int):
     '''
     Tests whether all workflows are in collection, rendering properly.
     '''
-    session_browser.visit(host_url + '/search/?type=Workflow')
+    session_browser.visit(root_url + '/search/?type=Workflow')
 
     total_results = get_search_page_result_count(session_browser)
     assert total_results > 3 # Number of those released, at least.
 
-    scroll_search_results(session_browser, host_url, config, splinter_selenium_implicit_wait, assert_wf_page, min(50, total_results))
+    scroll_search_results(session_browser, root_url, config, splinter_selenium_implicit_wait, assert_wf_page, min(50, total_results))
 
 
 
 
-def assert_expset_page_provenance_graph(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
+def assert_expset_page_provenance_graph(session_browser: Browser, root_url, config, splinter_selenium_implicit_wait: int = 10):
     session_browser.find_by_text(' Processed Files').first.click()
     time.sleep(2)
     file_accessions = [ f.text for f in session_browser.find_by_css('.s-block.file a.name-title') ]
@@ -76,11 +76,11 @@ def assert_expset_page_provenance_graph(session_browser: Browser, host_url, conf
 
 @pytest.mark.skip # TODO
 @pytest.mark.postdeploy_local
-def test_expset_provenance_graphs(session_browser: Browser, host_url, config, splinter_selenium_implicit_wait: int = 10):
-    session_browser.visit(host_url + '/search/?q=processed_files.display_title%3A%2A&type=ExperimentSet')
+def test_expset_provenance_graphs(session_browser: Browser, root_url, config, splinter_selenium_implicit_wait: int = 10):
+    session_browser.visit(root_url + '/search/?q=processed_files.display_title%3A%2A&type=ExperimentSet')
 
     total_results = get_search_page_result_count(session_browser)
     assert total_results > 0 # Number of those released, at least.
 
-    scroll_search_results(session_browser, host_url, config, splinter_selenium_implicit_wait, assert_expset_page_provenance_graph, min(50, total_results))
+    scroll_search_results(session_browser, root_url, config, splinter_selenium_implicit_wait, assert_expset_page_provenance_graph, min(50, total_results))
 

@@ -40,13 +40,29 @@ def config():
     }
 
 
+@pytest.mark.fixture_cost(500)
 @pytest.fixture(scope='session')
-def app_url(host_url, launch_servers):
-    # TODO: If launch_servers is true, init servers and return a URL.
-    # Else, return host_url.
+def root_url(host_url, wsgi_server_host_port, elasticsearch_server, postgresql_server, launch_servers, wsgi_server, conn, DBSession):
+    if not launch_servers:
+        return host_url
+    import encoded.tests.features.conftest as bddconf
+    print('Will boot up servers & load up data...')
+    for app in bddconf.app(bddconf.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)):
+        for wkbk in bddconf.workbook(app):
+            pass
+    url = 'http://localhost:{}'.format(str(wsgi_server_host_port[1] or 80))
+    print('Testing against', url)
+    return url
+
+
+@pytest.fixture(scope='session')
+def splinter_window_size():
+    # Sauce Labs seems to only support 1024x768.
+    return (1024, 768)
+
+@pytest.fixture
+def external_tx():
     pass
-
-
 
 ##########################################################
 ### Custom command-line arguments to use as fixture(s) ###
@@ -60,10 +76,27 @@ def get_host_url():
 
 
 def pytest_addoption(parser):
-    parser.addoption("--host-url", action="store", default=get_host_url())
-    parser.addoption("--launch-servers", action="store_true", default=False)
+    parser.addoption("--launch-servers", action="store_true", default=False, help="If true, will boot up & load servers.")
+    parser.addoption("--host-url", action="store", default=get_host_url(), help="What domain/host to test against, e.g. localhost:8000 or data.4dnucleome.org.")
 
 
+@pytest.fixture(scope='session')
+def launch_servers(request):
+    val = request.config.getoption("--launch-servers")
+    return val
+
+@pytest.fixture(scope='session')
+def host_url(request):
+    val = request.config.getoption("--host-url")
+    if val[0:4] != 'http':
+        val = 'http://' + val
+    if val.endswith('/'):
+        val = val[:-1]
+    return val
+
+
+
+'''
 def pytest_generate_tests(metafunc):
     # This is called for every test. Only get/set command line arguments
     # if the argument is specified in the list of test "fixturenames".
@@ -74,3 +107,8 @@ def pytest_generate_tests(metafunc):
         if val.endswith('/'):
             val = val[:-1]
         metafunc.parametrize("host_url", [val])
+    if 'launch_servers' in metafunc.fixturenames and metafunc.config.option.host_url is not None:
+        metafunc.parametrize("launch_servers", [metafunc.config.option.launch_servers])
+'''
+
+

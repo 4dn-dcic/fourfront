@@ -22,11 +22,11 @@ pytestmark = [
 ]
 
 @pytest.mark.postdeploy_local
-def test_search_page_basic(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
+def test_search_page_basic(session_browser: Browser, root_url: str, config: dict, splinter_selenium_implicit_wait: int):
     '''
     Test load as you scroll functionality for /search/?type=Item page
     '''
-    session_browser.visit(host_url + '/search/') # Should redirect us to /search/?type=Item
+    session_browser.visit(root_url + '/search/') # Should redirect us to /search/?type=Item
     search_table_rows = session_browser.find_by_css('.search-results-container .search-result-row')
     assert len(search_table_rows) ==  config['table_load_limit'] # On initial req, before load as you scroll, we have 25 rows.
 
@@ -42,9 +42,9 @@ def test_search_page_basic(session_browser: Browser, host_url: str, config: dict
 
 @pytest.mark.skip
 @pytest.mark.postdeploy_local
-def test_login_logout_on_search_page(session_browser: Browser, host_url: str, config: dict):
+def test_login_logout_on_search_page(session_browser: Browser, root_url: str, config: dict):
     '''TODO: This test. We need login credentials stored in a secure place to test login so will wait on this.'''
-    session_browser.visit(host_url + '/search/') # Should redirect us to /search/?type=Item
+    session_browser.visit(root_url + '/search/') # Should redirect us to /search/?type=Item
     logged_out_init_result_count = get_search_page_result_count(session_browser)
 
     username = None # TODO
@@ -59,12 +59,12 @@ def test_login_logout_on_search_page(session_browser: Browser, host_url: str, co
 
 
 @pytest.mark.postdeploy_local
-def test_pages_collection(session_browser: Browser, host_url: str, config: dict):
+def test_pages_collection(session_browser: Browser, root_url: str, config: dict):
     '''
     Tests whether all pages are in collection, rendering properly.
     '''
     master_page_inserts = read_single_sheet(resource_filename('encoded', 'tests/data/master-inserts/'), 'page')
-    session_browser.visit(host_url + '/pages') # Should redirect us to /search/?type=Page
+    session_browser.visit(root_url + '/pages') # Should redirect us to /search/?type=Page
 
     search_table_rows = session_browser.find_by_css('.search-results-container .search-result-row')
 
@@ -73,14 +73,14 @@ def test_pages_collection(session_browser: Browser, host_url: str, config: dict)
 
 
 @pytest.mark.postdeploy_local
-def test_browse_url_proper_redirection(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
-    session_browser.visit(host_url + '/') # Start at home page
+def test_browse_url_proper_redirection(session_browser: Browser, root_url: str, config: dict, splinter_selenium_implicit_wait: int):
+    session_browser.visit(root_url + '/') # Start at home page
     session_browser.find_by_id('sBrowse').first.click() # Click Browse menu item / link
     assert session_browser.is_element_present_by_text('Data Browser', splinter_selenium_implicit_wait) is True # Wait for page load
     assert 'award.project=4DN' in session_browser.url
 
     session_browser.visit('https://example.com') # Visit some external site
-    session_browser.visit(host_url + '/browse/') # Visit 'naked' browse page URL, expect redirection
+    session_browser.visit(root_url + '/browse/') # Visit 'naked' browse page URL, expect redirection
 
     assert session_browser.wait_for_condition(   # We have proper URL
         lambda browser: 'award.project=4DN' in browser.url,
@@ -89,14 +89,14 @@ def test_browse_url_proper_redirection(session_browser: Browser, host_url: str, 
 
 
 @pytest.mark.postdeploy_local
-def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
+def test_search_bar_basic(session_browser: Browser, root_url: str, config: dict, splinter_selenium_implicit_wait: int):
     '''
     Tests whether search bar works.
 
     This test specificially relies on SELENIUM WEBDRIVER rather than PYTEST-SPLINTER wrapper.
     Thus there is a chance it might not work with a couple of browser/BrowserDrivers.
     '''
-    session_browser.visit(host_url + '/') # Start at home page
+    session_browser.visit(root_url + '/') # Start at home page
 
     session_browser.find_by_name('q').first.fill('mouse')
 
@@ -140,12 +140,12 @@ def test_search_bar_basic(session_browser: Browser, host_url: str, config: dict,
 
 
 
-def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
+def test_quick_info_barplot_counts(session_browser: Browser, root_url: str, config: dict, splinter_selenium_implicit_wait: int):
     '''
     Ensure that bar plot counts and quick info bar count match / add up in various situations.
     Incl. Tests Re: QuickInfoBar Toggle External Data, q=mouse text search
     '''
-    session_browser.visit(host_url + '/')                                                                           # Start at home page
+    session_browser.visit(root_url + '/')                                                                           # Start at home page
 
     assert session_browser.is_element_present_by_css('#stats-stat-expsets.stat-value:not(.loading)', splinter_selenium_implicit_wait) is True
     assert session_browser.is_element_present_by_id('select-barplot-field-1', splinter_selenium_implicit_wait) is True
@@ -308,8 +308,8 @@ def test_quick_info_barplot_counts(session_browser: Browser, host_url: str, conf
 
 
 
-def test_browse_view_file_selection_and_download(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
-    session_browser.visit(host_url + '/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate') # Start browse page
+def test_browse_view_file_selection_and_download(session_browser: Browser, root_url: str, config: dict, splinter_selenium_implicit_wait: int):
+    session_browser.visit(root_url + '/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate') # Start browse page
     #session_browser.find_by_id('sBrowse').first.click() # Click Browse menu item / link
 
     assert session_browser.is_element_present_by_id('select-barplot-field-1', splinter_selenium_implicit_wait) is True # Counts, barplot data loaded
@@ -419,13 +419,13 @@ def test_browse_view_file_selection_and_download(session_browser: Browser, host_
 
 
 
-def test_search_for_olfactory_paged_result_consistency(session_browser: Browser, host_url: str, config: dict, splinter_selenium_implicit_wait: int):
+def test_search_for_olfactory_paged_result_consistency(session_browser: Browser, root_url: str, config: dict, splinter_selenium_implicit_wait: int):
     '''
     See test_search_bar_basic.
 
     This tests for presence of particular results which ... should be on data?
     '''
-    session_browser.visit(host_url + '/')                                                                                       # Start at home page
+    session_browser.visit(root_url + '/')                                                                                       # Start at home page
     session_browser.find_by_name('q').first.fill('olfactory')                                                                   # Type in 'olfactory' into <input name="q"/> SearchBar input.
     session_browser.find_by_css('form.navbar-search-form-container button#search-item-type-selector').first.click()             # Click search type dropdown
     time.sleep(0.1)                                                                                                             # Wait for JSing, to show dropdown thingy.
