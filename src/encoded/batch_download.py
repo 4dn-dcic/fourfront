@@ -506,18 +506,18 @@ def metadata_tsv(context, request):
 
         if len(summary['lists']['Extra Files']) > 0:
             ret_rows.append(
-                ['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', ''] +
-                ['','','','',  'Details - ' + gen_list_string('Extra Files') ]
+                ['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', '']
+                #+ ['','','','',  'Details - ' + gen_list_string('Extra Files') ]
             )
         if len(summary['lists']['Duplicate Files']) > 0:
             ret_rows.append(
-                ['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''] +
-                ['','','','', 'Details - ' + gen_list_string('Duplicate Files')       ]
+                ['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', '']
+                #+ ['','','','', 'Details - ' + gen_list_string('Duplicate Files')       ]
             )
         if len(summary['lists']['Not Yet Uploaded']) > 0:
             ret_rows.append(
-                ['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Yet Uploaded'])), 's' if len(summary['lists']['Not Yet Uploaded']) > 1 else ''), '', '', '', ''] +
-                ['','','','',  'Details - ' + gen_list_string('Not Yet Uploaded')       ]
+                ['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Yet Uploaded'])), 's' if len(summary['lists']['Not Yet Uploaded']) > 1 else ''), '', '', '', '']
+                #+ ['','','','',  'Details - ' + gen_list_string('Not Yet Uploaded')       ]
             )
 
         return ret_rows

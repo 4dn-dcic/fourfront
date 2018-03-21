@@ -327,6 +327,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
     assert 'text/tsv' in res2.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]
+
     check_tsv(result_rows, len(res2_post_data['accession_triples']))
 
 
