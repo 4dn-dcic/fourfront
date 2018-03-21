@@ -123,6 +123,7 @@ script:
       --browser-arg browser "$BROWSER" \
       --launch-servers \
       ./src/encoded/tests/post_deploy
+  fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 - |

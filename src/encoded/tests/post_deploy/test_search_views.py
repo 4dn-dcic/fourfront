@@ -269,11 +269,18 @@ def test_quick_info_barplot_counts(session_browser: Browser, root_url: str, conf
 
 
     session_browser.find_by_css('.any-filters.glance-label').first.mouse_over()                                     # Clear filters 1 by 1 via quickinfo bar glance view
-    for idx in range(0,2):
-        time.sleep(0.5)
-        quick_info_filtered_elem = session_browser.find_by_css('#stats .bottom-side .chart-breadcrumbs .chart-crumb .icon-container').first
-        quick_info_filtered_elem.mouse_over()
-        quick_info_filtered_elem.click()
+
+    time.sleep(0.25)
+    quick_info_filtered_elem = session_browser.find_by_css('#stats .bottom-side .chart-breadcrumbs .chart-crumb .icon-container').first
+    quick_info_filtered_elem.mouse_over()
+    quick_info_filtered_elem.click()
+    assert session_browser.wait_for_condition(                                                                      # Auto-selects 'all' data when no filters
+        lambda browser: len(browser.find_by_css('#stats .bottom-side .chart-breadcrumbs .chart-crumb .icon-container')) == 1,
+        timeout=splinter_selenium_implicit_wait
+    ) is True
+    quick_info_filtered_elem = session_browser.find_by_css('#stats .bottom-side .chart-breadcrumbs .chart-crumb .icon-container').first
+    quick_info_filtered_elem.mouse_over()
+    quick_info_filtered_elem.click()
 
     time.sleep(0.1)
 
