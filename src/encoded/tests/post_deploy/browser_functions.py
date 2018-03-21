@@ -61,7 +61,7 @@ def scroll_search_results(session_browser: Browser, host_url, config, splinter_s
         row_css_selector = '.search-results-container .search-result-row[data-row-number="{}"]'.format(str(idx))
         scroll_elem_into_view_by_css(session_browser, row_css_selector, -180)
         time.sleep(0.5)
-        session_browser.find_by_css(row_css_selector + ' .search-result-column-block[data-field="display_title"] .title-block a').first.click()
+        session_browser.find_by_css(row_css_selector + ' .search-result-column-block[data-field="display_title"] .title-block').first.click()
         function_to_run(session_browser, host_url, config, splinter_selenium_implicit_wait)
         session_browser.back()
 

@@ -24,6 +24,11 @@ def assert_wf_page(session_browser: Browser, root_url, config, splinter_selenium
     json_resp = requests.get(session_browser.url + '?format=json').json() # Compare against steps in JSON
     assert len(json_resp['steps']) > 0
 
+    try: # Only for smaller screen sizes
+        session_browser.find_by_css('.workflow-view-controls-container button.hidden-lg.toggle-open-button').first.click()
+        time.sleep(0.25)
+    except:
+        pass
     session_browser.find_by_css('.workflow-view-controls-container .checkbox-container.for-state-showReferenceFiles label').first.click()
     session_browser.find_by_css('.workflow-view-controls-container .checkbox-container.for-state-showParameters label').first.click()
     time.sleep(0.25)
