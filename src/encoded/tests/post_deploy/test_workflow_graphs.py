@@ -63,6 +63,7 @@ def test_workflow_collection(session_browser: Browser, root_url, config, splinte
 
 
 
+
 def assert_expset_page_provenance_graph(session_browser: Browser, root_url, config, splinter_selenium_implicit_wait: int = 10):
     session_browser.find_by_text(' Processed Files').first.click()
     time.sleep(2)
@@ -74,7 +75,7 @@ def assert_expset_page_provenance_graph(session_browser: Browser, root_url, conf
         assert session_browser.is_element_present_by_text(f, splinter_selenium_implicit_wait)
 
 
-@pytest.mark.skip # TODO
+@pytest.mark.skip(reason="Doesn't read processed s-block file titles/accession; maybe grab from JSON via requests.get") # TODO
 @pytest.mark.postdeploy_local
 def test_expset_provenance_graphs(session_browser: Browser, root_url, config, splinter_selenium_implicit_wait: int = 10):
     session_browser.visit(root_url + '/search/?q=processed_files.display_title%3A%2A&type=ExperimentSet')

@@ -40,7 +40,7 @@ def test_search_page_basic(session_browser: Browser, root_url: str, config: dict
         assert session_browser.is_element_present_by_css('.search-results-container .search-result-row[data-row-number="' + str( config['table_load_limit'] * (interval + 1) ) + '"]', splinter_selenium_implicit_wait) is True
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="No credentials & Auth0 OAuth opens in new pop-up window.")
 @pytest.mark.postdeploy_local
 def test_login_logout_on_search_page(session_browser: Browser, root_url: str, config: dict):
     '''TODO: This test. We need login credentials stored in a secure place to test login so will wait on this.'''

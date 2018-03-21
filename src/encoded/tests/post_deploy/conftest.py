@@ -1,6 +1,3 @@
-import pytest
-import os
-
 '''
 Post-Deploy Test Initiation Examples:
 
@@ -32,6 +29,20 @@ This also speeds things up quite a bit (less collection of tests).
 Instead of "postdeploy", may also use "postdeploy_local", which will only select a subset of tests which are expected to pass on a local environment.
 '''
 
+import pytest
+import os, json
+
+
+@pytest.fixture(scope='session', params=[pytest.mark.skipif(not launch_servers)])
+def splinter_window_size(splinter_window_size, launch_servers):
+    # Sauce Labs seems to only support 1024x768.
+    return splinter_window_size
+
+
+##########################################################
+###  General PostDeploy Browser Tests Configurations   ###
+##########################################################
+
 
 @pytest.fixture
 def config():
@@ -40,29 +51,42 @@ def config():
     }
 
 
-@pytest.mark.fixture_cost(500)
-@pytest.fixture(scope='session')
-def root_url(host_url, wsgi_server_host_port, elasticsearch_server, postgresql_server, launch_servers, wsgi_server, conn, DBSession):
+#@pytest.mark.fixture_cost(500)
+@pytest.yield_fixture(scope='session')
+def root_url(request, host_url, launch_servers):
     if not launch_servers:
-        return host_url
-    import encoded.tests.features.conftest as bddconf
-    print('Will boot up servers & load up data...')
-    for app in bddconf.app(bddconf.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)):
-        for wkbk in bddconf.workbook(app):
-            pass
-    url = 'http://localhost:{}'.format(str(wsgi_server_host_port[1] or 80))
-    print('Testing against', url)
-    return url
+        yield host_url
+    else:
+        from snovault.tests.serverfixtures import (
+            wsgi_server_host_port,      # Generates tuple of localhost, open port int
+            elasticsearch_host_port,    # Generates tuple of localhost, open port int
+            wsgi_server,                # Starts up WSGI server, returns URL (?)
+            postgresql_server,          # Starts up PG server, returns URL
+            elasticsearch_server,       # Starts up ES server, returns URL
+        )
+        from snovault.elasticsearch import create_mapping
+        from encoded.tests.features.conftest import (workbook, app, app_settings)
+        from .. import test_indexing
 
+        wsgi_host_port_to_use = wsgi_server_host_port()
+        es_host_port_to_use = elasticsearch_host_port()
+        
+        for pg_server in postgresql_server(request):                                                        # Boot up PG server
+            for es_server in elasticsearch_server(request, es_host_port_to_use):                            # Boot up ES server
+                curr_app_settings = app_settings(wsgi_host_port_to_use, es_server, pg_server)
+                print('Will run create_mapping & load up data...', '\nSettings: ', json.dumps(curr_app_settings, indent=4, sort_keys=True), '\n', request)
+                for curr_app in test_indexing.app(curr_app_settings):                                       # Boot up 4DN app
+                    create_mapping.run(curr_app)                                                            # Run create mapping
+                    for web_server_root_url in wsgi_server(request, curr_app, wsgi_host_port_to_use):       # Boot up WSGI HTTP server
+                        print('Testing against', web_server_root_url)
+                        for wkbk in workbook(curr_app):                                                     # Load up workbook data (optional-ish as 4DN app itself loads some up)
+                            yield web_server_root_url                                                       # Yield the WSGI HTTP server root url
+                            break
+                        break
+                    break
+                break
+            break
 
-@pytest.fixture(scope='session')
-def splinter_window_size():
-    # Sauce Labs seems to only support 1024x768.
-    return (1024, 768)
-
-@pytest.fixture
-def external_tx():
-    pass
 
 ##########################################################
 ### Custom command-line arguments to use as fixture(s) ###
