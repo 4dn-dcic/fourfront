@@ -31,12 +31,13 @@ Instead of "postdeploy", may also use "postdeploy_local", which will only select
 
 import pytest
 import os, json
+from encoded.tests import AppendInt2
 
 
-@pytest.fixture(scope='session', params=[pytest.mark.skipif(not launch_servers)])
-def splinter_window_size(splinter_window_size, launch_servers):
+@pytest.fixture(scope='session')
+def splinter_window_size():
     # Sauce Labs seems to only support 1024x768.
-    return splinter_window_size
+    return (1024, 768)
 
 
 ##########################################################
@@ -100,6 +101,8 @@ def get_host_url():
 
 
 def pytest_addoption(parser):
+    parser.addoption('--browser-arg', nargs=2, dest='browser_args', action='append', type='string')
+    parser.addoption('--browser-arg-int', nargs=2, dest='browser_args', action=AppendInt2, type='string')
     parser.addoption("--launch-servers", action="store_true", default=False, help="If true, will boot up & load servers.")
     parser.addoption("--host-url", action="store", default=get_host_url(), help="What domain/host to test against, e.g. localhost:8000 or data.4dnucleome.org.")
 
@@ -117,6 +120,7 @@ def host_url(request):
     if val.endswith('/'):
         val = val[:-1]
     return val
+
 
 
 
