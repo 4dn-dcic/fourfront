@@ -82,11 +82,7 @@ def root_url(request, host_url, launch_servers):
                         print('Testing against', web_server_root_url)
                         for wkbk in workbook(curr_app):                                                     # Load up workbook data (optional-ish as 4DN app itself loads some up)
                             yield web_server_root_url                                                       # Yield the WSGI HTTP server root url
-                            break
-                        break
-                    break
-                break
-            break
+
 
 
 ##########################################################
