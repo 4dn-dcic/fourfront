@@ -1040,7 +1040,8 @@ export default class SubmissionView extends React.Component{
                 award = lab_data.awards[0];
 
                 // if editing, use pre-existing award, lab, and submitted_by
-                if(this.props.edit && propContext.award && propContext.lab){
+                // this should only be done on the primary object
+                if(this.props.edit && inKey === 0 && propContext.award && propContext.lab){
                     if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = object.atIdFromObject(propContext.award);
                     }

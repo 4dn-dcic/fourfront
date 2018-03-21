@@ -6,7 +6,8 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/submitted" }
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" }
     ],
     "type": "object",
     "properties": {
@@ -35,7 +36,7 @@
         "badge_icon": {
             "title": "Badge Icon",
             "type": "string",
-            "description": "The unicode character(s) for an icon to be displayed to indicate a badge for an item" 
+            "description": "The unicode character(s) for an icon to be displayed to indicate a badge for an item"
         }
     }
 }
