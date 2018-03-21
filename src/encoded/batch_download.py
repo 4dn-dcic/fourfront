@@ -496,29 +496,21 @@ def metadata_tsv(context, request):
             ['###',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
         ]
 
-        def gen_list_string(summary_list_name):
-            return ', '.join(
-                map(
-                    lambda x: x[1]['File Accession'] + '.' + x[1]['File Format'] + ': ' + x[0],
-                    summary['lists'][summary_list_name][0:5]
-                )
-            ) + (', and ' + len(summary['lists'][summary_list_name]) - 5 + ' more...' if len(summary['lists'][summary_list_name]) > 5 else '')
+        def gen_mini_table(file_tuples):
+            for idx, file_tuple in enumerate(file_tuples[0:5]):
+                ret_rows.append(['###', '    - Details:' if idx == 0 else '', file_tuple[1]['File Accession'] + '.' + file_tuple[1]['File Format'], file_tuple[0] ])
+            if len(file_tuples) > 5:
+                ret_rows.append(['###', '', 'and ' + str(len(file_tuples) - 5) + ' more...', ''])
 
         if len(summary['lists']['Extra Files']) > 0:
-            ret_rows.append(
-                ['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', '']
-                #+ ['','','','',  'Details - ' + gen_list_string('Extra Files') ]
-            )
+            ret_rows.append(['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', ''])
+            gen_mini_table(summary['lists']['Extra Files'])
         if len(summary['lists']['Duplicate Files']) > 0:
-            ret_rows.append(
-                ['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', '']
-                #+ ['','','','', 'Details - ' + gen_list_string('Duplicate Files')       ]
-            )
+            ret_rows.append(['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''])
+            gen_mini_table(summary['lists']['Duplicate Files'])
         if len(summary['lists']['Not Yet Uploaded']) > 0:
-            ret_rows.append(
-                ['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Yet Uploaded'])), 's' if len(summary['lists']['Not Yet Uploaded']) > 1 else ''), '', '', '', '']
-                #+ ['','','','',  'Details - ' + gen_list_string('Not Yet Uploaded')       ]
-            )
+            ret_rows.append(['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Yet Uploaded'])), 's' if len(summary['lists']['Not Yet Uploaded']) > 1 else ''), '', '', '', ''])
+            gen_mini_table(summary['lists']['Not Yet Uploaded'])
 
         return ret_rows
 
