@@ -11,6 +11,7 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
@@ -18,6 +19,7 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/attachment" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [

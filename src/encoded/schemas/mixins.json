@@ -144,35 +144,32 @@
         }
     },
     "modified": {
-      "lastmodified": {
-          "title": "Last Modified",
-          "exclude_from": ["submit4dn", "FFedit-create"],
-          "type": "array",
-          "lookup": 1000,
-          "items": {
-              "date_modified": {
-                  "rdfs:subPropertyOf": "dc:modified",
-                  "title": "Date modified",
-                  "description": "Do not submit, value is assigned by the server. The date the object is modified.",
-                  "type": "string",
-                  "anyOf": [
-                      {"format": "date-time"},
-                      {"format": "date"}
-                  ],
-                  "serverDefault": "now",
-                  "permission": "import_items"
-              },
-              "modified_by": {
-                  "rdfs:subPropertyOf": "dc:modifier",
-                  "title": "Modified by",
-                  "description": "Do not submit, value is assigned by the server. The user that modfied the object.",
-                  "type": "string",
-                  "linkTo": "User",
-                  "serverDefault": "userid",
-                  "permission": "import_items"
-              }
-          }
-      }
+        "last_modified": {
+            "title": "Last Modified",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "type": "object",
+            "additionalProperties": false,
+            "lookup": 1000,
+            "properties": {
+                "date_modified": {
+                    "title": "Date modified",
+                    "description": "Do not submit, value is assigned by the server. The date the object is modified.",
+                    "type": "string",
+                    "anyOf": [
+                        {"format": "date-time"},
+                        {"format": "date"}
+                    ],
+                    "permission": "import_items"
+                },
+                "modified_by": {
+                    "title": "Modified by",
+                    "description": "Do not submit, value is assigned by the server. The user that modfied the object.",
+                    "type": "string",
+                    "linkTo": "User",
+                    "permission": "import_items"
+                }
+            }
+        }
     },
     "references": {
         "references": {
