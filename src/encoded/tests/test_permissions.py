@@ -808,6 +808,15 @@ def test_ac_local_roles_for_lab(registry):
     assert('role.lab_member' in lab_ac_locals.values())
 
 
+def test_last_modified_works_correctly(ind_human_item, submitter, wrangler, submitter_testapp, wrangler_testapp):
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201).json['@graph'][0]
+    assert res['last_modified']['modified_by'] == submitter['@id']
+    # patch same item using a different user
+    res2 = wrangler_testapp.patch_json(res['@id'], {"status": "replaced"}, status=200).json['@graph'][0]
+    assert res2['last_modified']['modified_by'] == wrangler['@id']
+    assert res2['last_modified']['date_modified'] > res['last_modified']['date_modified']
+
+
 @pytest.fixture
 def individual_human(human, remc_lab, nofic_award, wrangler_testapp):
     ind_human = {'lab': remc_lab['@id'], 'award': nofic_award['@id'], 'organism': human['@id']}
@@ -951,7 +960,6 @@ def test_4dn_can_view_nofic_released_to_project(
     eset_item = planned_experiment_set_data
     eset_item['award'] = nofic_award['@id']
     eset_item['status'] = 'released to project'
-    # import pdb; pdb.set_trace()
     res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
     viewing_group_member_testapp.get(res1['@id'], status=200)
 
@@ -964,7 +972,6 @@ def test_4dn_cannot_view_nofic_not_joint_analysis_planned_and_in_progress(
     eset_item['award'] = nofic_award['@id']
     for status in statuses:
         eset_item['status'] = status
-        # import pdb; pdb.set_trace()
         res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
         viewing_group_member_testapp.get(res1['@id'], status=403)
 
@@ -978,6 +985,5 @@ def test_4dn_can_view_nofic_joint_analysis_planned_and_in_progress(
     eset_item['tags'] = ['Joint Analysis']
     for status in statuses:
         eset_item['status'] = status
-        # import pdb; pdb.set_trace()
         res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
         viewing_group_member_testapp.get(res1['@id'], status=200)
