@@ -1545,16 +1545,26 @@ $download-button-width : 100px;
 	/** HiGlass View Tab **/
 
 	.higlass-tab-view-contents .higlass-wrapper {
-		.react-grid-layout {
-			.form-group {
-				div.dropdown.btn-group-sm {
-					> .btn.dropdown-toggle {
-						padding-right: 24px !important;
+
+		margin-bottom: 30px;
+
+		.higlass-instance {
+
+			height: 600px;
+			transition: opacity 1s;
+			opacity: 0;
+
+			.react-grid-layout {
+				.form-group {
+					div.dropdown.btn-group-sm {
+						> .btn.dropdown-toggle {
+							padding-right: 24px !important;
+						}
 					}
-				}
-				input.GenomePositionSearchBox-module_genome-position-search-bar-1_0ZU {
-					font-family: $font-family-monospace;
-					font-size: 0.825rem;
+					input.GenomePositionSearchBox-module_genome-position-search-bar-1_0ZU {
+						font-family: $font-family-monospace;
+						font-size: 0.825rem;
+					}
 				}
 			}
 		}

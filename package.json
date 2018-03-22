@@ -85,6 +85,7 @@
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
     "google-analytics": "file:node_shims/google-analytics",
+    "higlass": "^0.10.22",
     "immutable": "^3.8.2",
     "js-md5": "^0.4.2",
     "jsonwebtoken": "^7.4.3",
@@ -117,7 +118,6 @@
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.8.3",
     "unified": "^6.1.6",
-    "xhr2": "^0.1.4",
-    "higlass": "^0.10.22"
+    "xhr2": "^0.1.4"
   }
 }

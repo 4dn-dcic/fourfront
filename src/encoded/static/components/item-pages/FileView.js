@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HIGLASS_SAMPLE_VIEWCONFIG } from './components';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
@@ -15,7 +15,10 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-import { FileDownloadButton } from '../util/file';
+import { FileDownloadButton } from './../util/file';
+
+// UNCOMMENT FOR TESTING
+//import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
 
 
 
@@ -29,20 +32,19 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     static shouldHiGlassViewExist(context){
-        // TODO: Check if File has a viewConfig or properties from which a viewConfig might be formed.
-        return context.file_format === 'mcool'/* && context.higlass_uid */;
+        // TODO: Remove context.file_format check?
+        return context.file_format === 'mcool' && context.higlass_uid && typeof context.higlass_uid === 'string';
     }
 
     constructor(props){
         super(props);
         this.validateHiGlassData = this.validateHiGlassData.bind(this);
-        this.state = _.extend(this.state, {
-            'validatingHiGlassTileData' : true,
-            'isValidHiGlassTileData' : false
-        });
-
-        this.hiGlassViewConfig = HIGLASS_SAMPLE_VIEWCONFIG; // TODO: Should be generated on-the-fly from File properties? (if FileView.shouldHiGlassViewExist() == true)
-
+        if (FileView.shouldHiGlassViewExist(props.context)){
+            this.state = _.extend(this.state, {
+                'validatingHiGlassTileData' : true,
+                'isValidHiGlassTileData' : false
+            });
+        }
     }
 
     componentDidMount(){
@@ -52,31 +54,14 @@ export default class FileView extends WorkflowRunTracingView {
 
     /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
     validateHiGlassData(){
-        var track = HiGlassTabView.getAllTracksFromViewConfig(this.hiGlassViewConfig)[0] || {}; // Check only 1 track for now.
-        var { tilesetUid, uid, server } = track;
-
-        var fallback = function(){
-            this.setState({
-                'isValidHiGlassTileData' : false,
-                'validatingHiGlassTileData' : false
-            });
-        }.bind(this);
-
-        if (!tilesetUid || !server || !uid) {
-            fallback();
-            return false;
-        }
-
-        ajax.load(server + '/tileset_info/?d=' + tilesetUid + '&s=' + uid, (resp)=>{
-            if (resp[tilesetUid] && resp[tilesetUid].name && Array.isArray(resp[tilesetUid].min_pos) && Array.isArray(resp[tilesetUid].max_pos) && resp[tilesetUid].min_pos.length > 0 && resp[tilesetUid].max_pos.length > 0) {
-                this.setState({
-                    'isValidHiGlassTileData' : true,
-                    'validatingHiGlassTileData' : false
-                });
-            } else {
-                fallback();
-            }
-        }, 'GET', fallback);
+        if (!FileView.shouldHiGlassViewExist(this.props.context)) return;
+        HiGlassTabView.validateHiGlassData(
+            // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
+            // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
+            HiGlassTabView.generateViewConfig(this.props.context),
+            () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),
+            () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })
+        );
     }
 
     getTabViewContents(){
@@ -96,7 +81,7 @@ export default class FileView extends WorkflowRunTracingView {
         }
 
         if (FileView.shouldHiGlassViewExist(context)){
-            initTabs.push(HiGlassTabView.getTabObject(context, this.hiGlassViewConfig, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData));
+            initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
         return initTabs.concat(this.getCommonTabs());
