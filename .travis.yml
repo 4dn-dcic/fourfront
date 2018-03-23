@@ -116,7 +116,7 @@ script:
 #  fi
 - |
   if test -n "$BROWSER"; then
-     bin/test -v -v -m "postdeploy_local" ./src/encoded/tests/post_deploy \
+     bin/test ./src/encoded/tests/post_deploy -v -v -m "postdeploy_local" \
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
       --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
