@@ -117,15 +117,15 @@ script:
 - |
   if test -n "$BROWSER"; then
      bin/test -v -v -m "postdeploy_local" \
+      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
+      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
+      --browser-arg-int idleTimeout 300 \
+      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
       --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
       --splinter-socket-timeout 300 \
       --splinter-webdriver-executable "/some/random/place" \ # This is apparently necessary, otherwise get a bunch of 'unrecognized arguments' errors re './src/encoded/tests/post_deploy/' ...
-      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
-      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
-      --browser-arg-int idleTimeout 300 \
-      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
       --browser-arg browser "$BROWSER" \
       --launch-servers \
       "./src/encoded/tests/post_deploy"
