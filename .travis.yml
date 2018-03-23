@@ -16,6 +16,11 @@ addons:
     - make
     - graphviz
   postgresql: '9.4'
+  sauce_connect:
+    username: j1z0-hms
+    # Below: SAUCE_ACCESS_KEY=[secure]; @see https://docs.travis-ci.com/user/sauce-connect/
+  jwt:
+    secure: "qM6n45ZHOSFxEJHgaSuIX0glCbSbVmJ7MNce2R2Wce+tWxjzY18duF73E+mVYEGXTZLkRd+NYqTL0nG93BZW4UtuEmpRKFK6keXuFf9o8G+Xi5WemyBzI2LlaKIGWMxXmvoiO4o5GTBn6JSRiAAvBTinfce1hsaHI5SfYzS1EnFjV3sbDdF4jVf8EJrX6q460UckAfPFxHeJ1MbQM6roTmYEJqGjx1BL81ygxnVVeVoEzoA97kQ2CdUJUlrdcPb2SDeGDWDS4haKw5vk6vHtWy/nYYyd7o3BKA0cW4qH8VjIPbpYwu1SNiVIwniSivfAcD0NoFHMtoNgIXf+LvUN4JGb331qtpzr9DxHwsSWUvKhDyXvrHWvX6a6HljeyaE5vv68ddx+R2EZdT7AyZOImF1q9VpkbIi/X95rbj79nje/GbsFSoxJmVdvgjNOAzn+jj3fo4H1Dxl4vT+JanMsGs2xzNppmZ0B7Cw85xRsk7nIznKmd8QX8VlrJNLiKK35V3s0PdoS4RxL7qLgvu5ZLGXKCADTGRSELRMXbHbrdHq0P4bW9y3wagcJaAyOFJj38WN0OVKRrjNt/u2f0tSaK3VqiztSZ3bJFNt+TQVJH5BpeCZshUtJZHw76FZj7BxtIHPk5MyeY9yIsDs8OVGrezScbck/tF3XP6mPfV430GE="
 env:
   global:
   - JAVA_HOME=/usr/lib/jvm/java-8-oracle
@@ -73,23 +78,23 @@ install:
 - pip install coveralls
 - pip install codacy-coverage
 before_script:
-- |
-  if test -n "$BROWSER"; then
-    CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.8-linux.tar.gz
-    CONNECT_DOWNLOAD=sc.tar.gz
-    SC_READYFILE=sauce-connect-ready-$RANDOM
-    SC_LOGFILE=$HOME/sauce-connect.log
-    SC_PIDFILE=$HOME/sauce-connect.pid
-    curl $CONNECT_URL > $CONNECT_DOWNLOAD
-    mkdir sc
-    tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc
-    sc/bin/sc --readyfile $SC_READYFILE \
-      --logfile $SC_LOGFILE \
-      --pidfile $SC_PIDFILE \
-      --tunnel-identifier $TRAVIS_JOB_NUMBER \
-      --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
-    while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
-  fi
+#- |
+#  if test -n "$BROWSER"; then
+#    CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.8-linux.tar.gz
+#    CONNECT_DOWNLOAD=sc.tar.gz
+#    SC_READYFILE=sauce-connect-ready-$RANDOM
+#    SC_LOGFILE=$HOME/sauce-connect.log
+#    SC_PIDFILE=$HOME/sauce-connect.pid
+#    curl $CONNECT_URL > $CONNECT_DOWNLOAD
+#    mkdir sc
+#    tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc
+#    sc/bin/sc --readyfile $SC_READYFILE \
+#      --logfile $SC_LOGFILE \
+#      --pidfile $SC_PIDFILE \
+#      --tunnel-identifier $TRAVIS_JOB_NUMBER \
+#      --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
+#    while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
+#  fi
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
@@ -111,10 +116,11 @@ script:
 #  fi
 - |
   if test -n "$BROWSER"; then
-    test -f "$SC_PIDFILE" && bin/test -v -v -m "postdeploy_local" --tb=short \
+#    test -f "$SC_PIDFILE" && bin/test -v -v -m "postdeploy_local" --tb=short \
+     bin/test -v -v -m "postdeploy_local" \
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
-      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
+      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
       --splinter-socket-timeout 300 \
       --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
       --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
