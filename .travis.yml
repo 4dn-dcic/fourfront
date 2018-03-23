@@ -77,7 +77,7 @@ install:
 - pip install awsebcli
 - pip install coveralls
 - pip install codacy-coverage
-before_script:
+#before_script:
 #- |
 #  if test -n "$BROWSER"; then
 #    CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.8-linux.tar.gz
@@ -116,7 +116,6 @@ script:
 #  fi
 - |
   if test -n "$BROWSER"; then
-#    test -f "$SC_PIDFILE" && bin/test -v -v -m "postdeploy_local" --tb=short \
      bin/test -v -v -m "postdeploy_local" \
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
