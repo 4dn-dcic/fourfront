@@ -17,11 +17,11 @@ addons:
     - make
     - graphviz
   postgresql: '9.4'
-  sauce_connect:
-    username: j1z0-hms
-    # Below: SAUCE_ACCESS_KEY=[secure]; @see https://docs.travis-ci.com/user/sauce-connect/
-  jwt:
-    secure: "qM6n45ZHOSFxEJHgaSuIX0glCbSbVmJ7MNce2R2Wce+tWxjzY18duF73E+mVYEGXTZLkRd+NYqTL0nG93BZW4UtuEmpRKFK6keXuFf9o8G+Xi5WemyBzI2LlaKIGWMxXmvoiO4o5GTBn6JSRiAAvBTinfce1hsaHI5SfYzS1EnFjV3sbDdF4jVf8EJrX6q460UckAfPFxHeJ1MbQM6roTmYEJqGjx1BL81ygxnVVeVoEzoA97kQ2CdUJUlrdcPb2SDeGDWDS4haKw5vk6vHtWy/nYYyd7o3BKA0cW4qH8VjIPbpYwu1SNiVIwniSivfAcD0NoFHMtoNgIXf+LvUN4JGb331qtpzr9DxHwsSWUvKhDyXvrHWvX6a6HljeyaE5vv68ddx+R2EZdT7AyZOImF1q9VpkbIi/X95rbj79nje/GbsFSoxJmVdvgjNOAzn+jj3fo4H1Dxl4vT+JanMsGs2xzNppmZ0B7Cw85xRsk7nIznKmd8QX8VlrJNLiKK35V3s0PdoS4RxL7qLgvu5ZLGXKCADTGRSELRMXbHbrdHq0P4bW9y3wagcJaAyOFJj38WN0OVKRrjNt/u2f0tSaK3VqiztSZ3bJFNt+TQVJH5BpeCZshUtJZHw76FZj7BxtIHPk5MyeY9yIsDs8OVGrezScbck/tF3XP6mPfV430GE="
+#  sauce_connect:
+#    username: j1z0-hms
+#    # Below: SAUCE_ACCESS_KEY=[secure]; @see https://docs.travis-ci.com/user/sauce-connect/
+#  jwt:
+#    secure: "qM6n45ZHOSFxEJHgaSuIX0glCbSbVmJ7MNce2R2Wce+tWxjzY18duF73E+mVYEGXTZLkRd+NYqTL0nG93BZW4UtuEmpRKFK6keXuFf9o8G+Xi5WemyBzI2LlaKIGWMxXmvoiO4o5GTBn6JSRiAAvBTinfce1hsaHI5SfYzS1EnFjV3sbDdF4jVf8EJrX6q460UckAfPFxHeJ1MbQM6roTmYEJqGjx1BL81ygxnVVeVoEzoA97kQ2CdUJUlrdcPb2SDeGDWDS4haKw5vk6vHtWy/nYYyd7o3BKA0cW4qH8VjIPbpYwu1SNiVIwniSivfAcD0NoFHMtoNgIXf+LvUN4JGb331qtpzr9DxHwsSWUvKhDyXvrHWvX6a6HljeyaE5vv68ddx+R2EZdT7AyZOImF1q9VpkbIi/X95rbj79nje/GbsFSoxJmVdvgjNOAzn+jj3fo4H1Dxl4vT+JanMsGs2xzNppmZ0B7Cw85xRsk7nIznKmd8QX8VlrJNLiKK35V3s0PdoS4RxL7qLgvu5ZLGXKCADTGRSELRMXbHbrdHq0P4bW9y3wagcJaAyOFJj38WN0OVKRrjNt/u2f0tSaK3VqiztSZ3bJFNt+TQVJH5BpeCZshUtJZHw76FZj7BxtIHPk5MyeY9yIsDs8OVGrezScbck/tF3XP6mPfV430GE="
 env:
   global:
   - JAVA_HOME=/usr/lib/jvm/java-8-oracle
@@ -50,7 +50,7 @@ matrix:
   - python: '3.4'
     env: NPM=Test
   - python: '3.4'
-    env: UNIT=Test; BROWSER=Chrome
+    env: UNIT=Test; CYPRESS=Test
 notifications:
   slack:
     secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
@@ -115,20 +115,31 @@ script:
 #      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
 #      --browser-arg browser "$BROWSER"
 #  fi
+#- |
+#  if test -n "$BROWSER"; then
+#     bin/test -v -v -m "postdeploy_local" "./src/encoded/tests/post_deploy" \
+#      --splinter-implicit-wait 10 \
+#      --splinter-webdriver remote \
+#      --splinter-socket-timeout 300 \
+#      --splinter-webdriver-executable "/some/random/place" \
+#      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
+#      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
+#      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
+#      --browser-arg-int idleTimeout 300 \
+#      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
+#      --browser-arg browser "$BROWSER" \
+#      --launch-servers
+#  fi
 - |
-  if test -n "$BROWSER"; then
-     bin/test -v -v -m "postdeploy_local" "./src/encoded/tests/post_deploy" \
-      --splinter-implicit-wait 10 \
-      --splinter-webdriver remote \
-      --splinter-socket-timeout 300 \
-      --splinter-webdriver-executable "/some/random/place" \
-      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
-      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
-      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
-      --browser-arg-int idleTimeout 300 \
-      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
-      --browser-arg browser "$BROWSER" \
-      --launch-servers
+  if test -n "$CYPRESS"; then
+    bin/dev-servers production.ini --app-name app --clear --init --load &
+    db_server_pid=$!
+    sleep 20
+    bin/pserve development-alex.ini &
+    web_server_pid=$!
+    pushd ui && node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY && popd
+    sleep 5
+    kill $web_server_pid && kill $db_server_pid
   fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
