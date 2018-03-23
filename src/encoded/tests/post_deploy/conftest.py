@@ -52,7 +52,7 @@ def config():
     }
 
 
-def boot_up_local_application_to_test_against():
+def boot_up_local_application_to_test_against(request):
     from snovault.tests.serverfixtures import (
         wsgi_server_host_port,      # Generates tuple of localhost, open port int
         elasticsearch_host_port,    # Generates tuple of localhost, open port int
