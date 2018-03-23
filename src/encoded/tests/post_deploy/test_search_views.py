@@ -2,7 +2,7 @@ import pytest
 from splinter import Browser
 from splinter.driver import ElementAPI
 from selenium.webdriver.common.keys import Keys
-import time
+import time, datetime
 from pkg_resources import resource_filename
 from encoded.loadxl import read_single_sheet
 from .browser_functions import (
@@ -136,6 +136,27 @@ def test_search_bar_basic(session_browser: Browser, root_url: str, config: dict,
     assert 'award.project=4DN' not in session_browser.url
 
     assert 'q=mouse' in session_browser.url
+
+    # Count up # of inserts we have that have date_created (should be 5 static sections) and test search bar.
+    master_static_section_inserts = read_single_sheet(resource_filename('encoded', 'tests/data/master-inserts/'), 'static_section')
+    static_sections_with_date_created = [ insert for insert in master_static_section_inserts if insert.get('date_created') is not None ]
+
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    session_browser.find_by_name('q').first.fill('date_created:[* TO {}]'.format(yesterday.isoformat())) # Any until yesterday. These are our announcements.
+
+    selenium_search_bar_input_field = session_browser.driver.switch_to_active_element() # Grab un-wrapped selenium element (last elem interacted w/)
+    selenium_search_bar_input_field.send_keys(Keys.ENTER) # Send 'Enter' key (form submit).
+
+    # Wait until we've navigated
+    assert session_browser.wait_for_condition(                                                                      # Wait until unselects
+        lambda browser: 'q=date_created' in browser.url and yesterday.isoformat() in browser.url,
+        timeout=splinter_selenium_implicit_wait
+    ) is True
+
+    total_result_count = get_search_page_result_count(session_browser)
+
+    assert total_result_count >= len(static_sections_with_date_created)
+
 
 
 

@@ -116,7 +116,7 @@ script:
 #  fi
 - |
   if test -n "$BROWSER"; then
-     bin/test -v -v -m "postdeploy_local" \
+     bin/test -v -v -m "postdeploy_local" ./src/encoded/tests/post_deploy \
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
       --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
@@ -126,8 +126,7 @@ script:
       --browser-arg-int idleTimeout 300 \
       --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
       --browser-arg browser "$BROWSER" \
-      --launch-servers \
-      ./src/encoded/tests/post_deploy
+      --launch-servers
   fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
