@@ -52,36 +52,41 @@ def config():
     }
 
 
+def boot_up_local_application_to_test_against():
+    from snovault.tests.serverfixtures import (
+        wsgi_server_host_port,      # Generates tuple of localhost, open port int
+        elasticsearch_host_port,    # Generates tuple of localhost, open port int
+        wsgi_server,                # Starts up WSGI server, returns URL (?)
+        postgresql_server,          # Starts up PG server, returns URL
+        elasticsearch_server,       # Starts up ES server, returns URL
+    )
+    from snovault.elasticsearch import create_mapping
+    from encoded.tests.features.conftest import (workbook, app_settings) # Full indexing settings.
+    from .. import test_indexing
+
+    wsgi_host_port_to_use = wsgi_server_host_port()
+    es_host_port_to_use = elasticsearch_host_port()
+
+    for pg_server in postgresql_server(request):                                                        # Boot up PG server
+        for es_server in elasticsearch_server(request, es_host_port_to_use):                            # Boot up ES server
+            curr_app_settings = app_settings(wsgi_host_port_to_use, es_server, pg_server)
+            print('Will run create_mapping & load up data...', '\nSettings: ', json.dumps(curr_app_settings, indent=4, sort_keys=True), '\n', request)
+            for curr_app in test_indexing.app(curr_app_settings):                                       # Boot up 4DN app
+                create_mapping.run(curr_app)                                                            # Run create mapping
+                for web_server_root_url in wsgi_server(request, curr_app, wsgi_host_port_to_use):       # Boot up WSGI HTTP server
+                    print('Testing against', web_server_root_url)
+                    for wkbk in workbook(curr_app):                                                     # Load up workbook data (optional-ish as 4DN app itself loads some up)
+                        yield web_server_root_url                                                       # Yield the WSGI HTTP server root url
+
+
 #@pytest.mark.fixture_cost(500)
 @pytest.yield_fixture(scope='session')
 def root_url(request, host_url, launch_servers):
     if not launch_servers:
         yield host_url
     else:
-        from snovault.tests.serverfixtures import (
-            wsgi_server_host_port,      # Generates tuple of localhost, open port int
-            elasticsearch_host_port,    # Generates tuple of localhost, open port int
-            wsgi_server,                # Starts up WSGI server, returns URL (?)
-            postgresql_server,          # Starts up PG server, returns URL
-            elasticsearch_server,       # Starts up ES server, returns URL
-        )
-        from snovault.elasticsearch import create_mapping
-        from encoded.tests.features.conftest import (workbook, app, app_settings)
-        from .. import test_indexing
-
-        wsgi_host_port_to_use = wsgi_server_host_port()
-        es_host_port_to_use = elasticsearch_host_port()
-        
-        for pg_server in postgresql_server(request):                                                        # Boot up PG server
-            for es_server in elasticsearch_server(request, es_host_port_to_use):                            # Boot up ES server
-                curr_app_settings = app_settings(wsgi_host_port_to_use, es_server, pg_server)
-                print('Will run create_mapping & load up data...', '\nSettings: ', json.dumps(curr_app_settings, indent=4, sort_keys=True), '\n', request)
-                for curr_app in test_indexing.app(curr_app_settings):                                       # Boot up 4DN app
-                    create_mapping.run(curr_app)                                                            # Run create mapping
-                    for web_server_root_url in wsgi_server(request, curr_app, wsgi_host_port_to_use):       # Boot up WSGI HTTP server
-                        print('Testing against', web_server_root_url)
-                        for wkbk in workbook(curr_app):                                                     # Load up workbook data (optional-ish as 4DN app itself loads some up)
-                            yield web_server_root_url                                                       # Yield the WSGI HTTP server root url
+        for web_server_root_url in boot_up_local_application_to_test_against(request):
+            yield web_server_root_url
 
 
 
