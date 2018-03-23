@@ -132,10 +132,10 @@ script:
 #  fi
 - |
   if test -n "$CYPRESS"; then
-    bin/dev-servers production.ini --app-name app --clear --init --load &
+    sudo bin/dev-servers production.ini --app-name app --clear --init --load &
     db_server_pid=$!
     sleep 20
-    bin/pserve development-alex.ini &
+    bin/pserve production.ini &
     web_server_pid=$!
     pushd ui && node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY && popd
     sleep 5
