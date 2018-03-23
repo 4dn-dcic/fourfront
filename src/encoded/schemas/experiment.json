@@ -83,7 +83,7 @@
                 "properties": {
                     "relationship_type": {
                         "type": "string",
-                        "lookup": 30,
+                        "lookup": 310,
                         "description": "A controlled term specifying the relationship between experiments.",
                         "title": "Relationship Type",
                         "enum": [
@@ -95,7 +95,7 @@
                     },
                     "experiment": {
                       "type": "string",
-                      "lookup": 31,
+                      "lookup": 311,
                       "description": "The related experiment",
                       "linkTo": "Experiment"
                     }

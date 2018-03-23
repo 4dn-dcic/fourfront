@@ -61,7 +61,7 @@
             "title": "File format specifications documents",
             "description": "Text or pdf files that further explain the file format",
             "type": "array",
-            "lookup": 21,
+            "lookup": 1000,
             "uniqueItems": true,
             "items": {
                 "comment": "See document.json for a list of available identifiers.",
@@ -128,7 +128,7 @@
                 "properties": {
                     "relationship_type": {
                         "type": "string",
-                        "lookup": 32,
+                        "lookup": 31,
                         "description": "A controlled term specifying the relationship between files.",
                         "title": "Relationship Type",
                         "enum": [
@@ -141,7 +141,7 @@
                     },
                     "file": {
                         "type": "string",
-                        "lookup": 31,
+                        "lookup": 32,
                         "description": "The related file",
                         "linkTo": "File"
                     }

@@ -48,7 +48,7 @@
             "title": "Antibody Catalog Number",
             "description": "The catalog number for commercially obtained antibody",
             "type": "string",
-            "lookup": 60
+            "lookup": 25
         },
         "antibody_vendor":{
             "title": "Antibody Vendor",
