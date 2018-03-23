@@ -7,6 +7,7 @@ cache:
   - eggs
   - .npm
   - node_modules
+  - /home/travis/.cypress/Cypress
 addons:
   apt:
     packages:
@@ -120,7 +121,7 @@ script:
       --splinter-implicit-wait 10 \
       --splinter-webdriver remote \
       --splinter-socket-timeout 300 \
-      --splinter-webdriver-executable "/some/random/place" \ # This is apparently necessary, otherwise get a bunch of 'unrecognized arguments' errors re './src/encoded/tests/post_deploy/' ...
+      --splinter-webdriver-executable "/some/random/place" \
       --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@ondemand.saucelabs.com/wd/hub" \
       --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
       --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
