@@ -137,7 +137,7 @@ script:
     sleep 20
     bin/pserve production.ini &
     web_server_pid=$!
-    pushd ui && node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY && popd
+    node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
     sleep 5
     kill $web_server_pid && kill $db_server_pid
   fi

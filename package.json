@@ -8,7 +8,8 @@
     "build-quick": "gulp build-quick",
     "dev": "gulp dev",
     "dev-quick": "gulp dev-quick",
-    "dev-uglified": "gulp dev-uglified"
+    "dev-uglified": "gulp dev-uglified",
+    "cypress:open": "node_modules/.bin/cypress open"
   },
   "author": "",
   "license": "MIT",
@@ -55,8 +56,10 @@
     "babel-preset-react": "^6.5.0",
     "codacy-coverage": "^2.0.3",
     "coveralls": "^2.13.3",
+    "cypress": "^2.1.0",
     "eslint": "^3.19.0",
     "eslint-plugin-class-property": "^1.1.0",
+    "eslint-plugin-cypress": "^2.0.1",
     "eslint-plugin-flowtype": "^2.42.0",
     "eslint-plugin-react": "^7.6.1",
     "flow-bin": "^0.47.0",
