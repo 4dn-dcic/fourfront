@@ -102,14 +102,15 @@ script:
   src/encoded; fi
 - |
   if test -n "$CYPRESS"; then
-    sudo bin/dev-servers development.ini --app-name app --clear --init --load &
+    sudo bin/dev-servers development.ini --app-name app --clear --init --load > /dev/null &
     db_server_pid=$!
     sleep 20
-    bin/pserve development.ini &
+    bin/pserve development.ini > /dev/null &
     web_server_pid=$!
     node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
     sleep 5
-    kill $web_server_pid && kill $db_server_pid
+    kill $web_server_pid
+    kill $db_server_pid
   fi
 - if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
   --cov src/encoded; fi
