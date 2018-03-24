@@ -100,6 +100,17 @@ script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
   src/encoded; fi
+- |
+  if test -n "$CYPRESS"; then
+    sudo bin/dev-servers development.ini --app-name app --clear --init --load &
+    db_server_pid=$!
+    sleep 20
+    bin/pserve development.ini &
+    web_server_pid=$!
+    node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
+    sleep 5
+    kill $web_server_pid && kill $db_server_pid
+  fi
 - if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
   --cov src/encoded; fi
 #- |
@@ -130,17 +141,6 @@ script:
 #      --browser-arg browser "$BROWSER" \
 #      --launch-servers
 #  fi
-- |
-  if test -n "$CYPRESS"; then
-    sudo bin/dev-servers production.ini --app-name app --clear --init --load &
-    db_server_pid=$!
-    sleep 20
-    bin/pserve production.ini &
-    web_server_pid=$!
-    node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
-    sleep 5
-    kill $web_server_pid && kill $db_server_pid
-  fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 - |
