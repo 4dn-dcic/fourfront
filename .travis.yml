@@ -102,10 +102,10 @@ script:
   src/encoded; fi
 - |
   if test -n "$CYPRESS"; then
-    sudo bin/dev-servers development.ini --app-name app --clear --init --load > /dev/null &
+    sudo bin/dev-servers development.ini --app-name app --clear --init --load > /dev/null 2>&1 &
     db_server_pid=$!
     sleep 20
-    bin/pserve development.ini > /dev/null &
+    bin/pserve development.ini > /dev/null 2>&1 &
     web_server_pid=$!
     node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
     sleep 5
