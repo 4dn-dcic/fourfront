@@ -43,6 +43,7 @@
             "enum": [
                 "DNA-paint",
                 "DNA-FiSH",
+                "RNA-FiSH",
                 "FISH",
                 "Immunofluorescence",
                 "Fluorescence",
@@ -55,6 +56,7 @@
             "lookup": 60,
             "enum": [
                 "Widefield",
+                "Epifluorescence",
                 "SIM",
                 "CLSM",
                 "SDCM",
