@@ -35,6 +35,7 @@
             "title": "Description",
             "description": "A plain text description of the biosource.",
             "type": "string",
+            "lookup": 20,
             "default": "",
             "formInput": "textarea"
         },
@@ -42,6 +43,7 @@
             "title": "Biosource Type",
             "description": "The categorization of the biosource.",
             "type": "string",
+            "lookup": 30,
             "enum" : [
               "primary cell",
               "primary cell line",
@@ -58,12 +60,14 @@
             "description": "Source of the biological material, donor.",
             "comment": "See Individual sheet or collection for existing items",
             "type": "string",
+            "lookup": 40,
             "linkTo": "Individual"
         },
         "modifications": {
             "title": "Stable Genomic Modifications",
             "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
             "type": "array",
+            "lookup": 50,
             "uniqueItems": true,
             "items": {
                 "title": "Modifications",
@@ -76,12 +80,14 @@
             "title": "Cell Line Name",
             "description": "Ontology term for the cell line used.",
             "type":  "string",
+            "lookup": 60,
             "linkTo": "OntologyTerm"
         },
         "cell_line_tier": {
             "title": "Cell Line Tier",
             "description": "DON'T SUBMIT - CALCULATED",
             "type": "string",
+            "lookup": 70,
             "default": "Unclassified",
             "permission": "import_items",
             "enum": [
@@ -94,24 +100,28 @@
             "title": "Tissue Name",
             "description": "Anatomy (UBERON) Ontology term for the tissue used.",
             "type":  "string",
+            "lookup": 80,
             "linkTo": "OntologyTerm"
         },
         "biosource_vendor": {
             "title": "Biosource Vendor",
             "description": "The Lab or Vendor that provided the biosource.",
             "type": "string",
+            "lookup": 90,
             "linkTo": "Vendor"
         },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the biosource.",
             "type": "string",
+            "lookup": 1000,
             "format": "uri"
         },
         "SOP_cell_line":{
             "title": "SOP for the Cell Line",
             "description": "Standard operation protocol for the cell line as determined by 4DN Cells Working Group",
             "type": "string",
+            "lookup": 100,
             "linkTo": "Protocol"
         }
     },

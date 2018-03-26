@@ -55,6 +55,7 @@
             "type": "array",
             "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
             "default": [],
+            "lookup": 1,
             "uniqueItems": true,
             "ff_flag": "clear clone",
             "items": {
@@ -199,6 +200,7 @@
             "title": "Contributing Labs",
             "description": "Other labs associated with the submitted data.",
             "type": "array",
+            "lookup": 1000,
             "items": {
                 "title": "Contributing Lab",
                 "description": "A lab that has contributed to the associated data.",
@@ -254,6 +256,7 @@
             "title": "Attached File",
             "description" : "File attached to this Item.",
             "type": "object",
+            "lookup": 1,
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,
@@ -353,18 +356,21 @@
         "average_fragment_size": {
             "title": "Average Fragment Size (bp)",
             "description": "Size of average fragment in base pairs after fragmentation step",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 202
         },
         "fragment_size_range": {
             "title": "Fragment size range",
             "description": "The measured size range of the purified nucleic acid, in bp.",
             "type": "string",
+            "lookup": 203,
             "pattern": "(^[0-9]+-[0-9]+$|^[<>][0-9]+$)"
         },
         "fragmentation_method": {
             "title": "Fragmentation method",
             "description": "A short description or reference of the nucleic acid fragmentation protocol used in library preparation, if applicable.",
             "type": "string",
+            "lookup": 200,
             "enum": [
               "chemical",
               "shearing",
@@ -378,6 +384,7 @@
             "title": "Size selection method",
             "description": "A short description or reference of the size selection protocol used in library preparation, if applicable.",
             "type": "string",
+            "lookup": 201,
             "enum": [
               "gel",
               "see document",
@@ -389,12 +396,14 @@
             "title": "Library Preparation Date",
             "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
             "type": "string",
+            "lookup": 220,
             "format": "date"
         },
         "pcr_cycles": {
             "title": "Library amplification PCR cycles",
             "description": "The number of PCR cycles used for final library amplification prior to sequencing",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 210
         }
     },
     "antibody_info": {
@@ -402,17 +411,20 @@
             "title": "Antibody",
             "description": "Reference to a 4DN antibody object",
             "type": "string",
+            "lookup": 90,
             "linkTo": "Antibody"
         },
         "antibody_lot_id": {
             "title": "Antibody Lot Number",
             "description": "A lot number or other unique identifier for a particular antibody lot",
-            "type": "string"
+            "type": "string",
+            "lookup": 91
         },
         "antibody_dilution": {
             "title": "Antibody Dilution/Concentration",
             "description": "The working dilution or concentration of the antibody eg. 1:100 or 200 ug/ml",
-            "type": "string"
+            "type": "string",
+            "lookup": 92
         }
     },
     "sop_mapping": {
@@ -444,6 +456,7 @@
             "title": "Tags",
             "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
+            "lookup": 1000,
             "uniqueItems": true,
             "ff_flag": "clear clone",
             "items": {
@@ -458,6 +471,7 @@
             "title": "Badges",
             "description": "Badges that can be added to an item.",
             "type": "array",
+            "lookup": 1000,
             "ff_flag": "clear clone",
             "permission": "import-items",
             "items": {

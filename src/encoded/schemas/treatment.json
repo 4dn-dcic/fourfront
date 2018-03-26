@@ -12,6 +12,7 @@
             "title": "Description",
             "description": "A brief plain text description of the treatment.",
             "type": "string",
+            "lookup": 10,
             "formInput": "textarea"
         },
         "treatment_type": {
