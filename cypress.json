@@ -1,4 +1,5 @@
 {
   "baseUrl" : "http://localhost:6543",
-  "projectId": "bj6vhb"
+  "projectId": "4opx2c",
+  "failOnStatusCodes" : false
 }
