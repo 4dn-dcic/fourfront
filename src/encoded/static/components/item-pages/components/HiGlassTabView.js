@@ -7,7 +7,8 @@ import { requestAnimationFrame } from './../../viz/utilities';
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
 
-/** To be deleted */
+
+/* To be deleted (probably)
 function loadJS(src){
     return new Promise(function(resolve, reject){
         var script = document.createElement('script');
@@ -21,6 +22,7 @@ function loadJS(src){
         document.body.appendChild(script);
     });
 }
+*/
 
 
 export class HiGlassTabView extends React.Component {
@@ -50,7 +52,7 @@ export class HiGlassTabView extends React.Component {
             return null;
         }
 
-        let centerTrackHeight = height - 50;
+        const centerTrackHeight = height - 50;
 
         return {
             "editable": false,
@@ -62,12 +64,12 @@ export class HiGlassTabView extends React.Component {
             "views": [
                 {
                     "uid": "aa",
-                    "initialXDomain": [
+                    "initialXDomain": [             // Adjust?
                         234746886.15079364,
                         238230126.6906902
                     ],
                     "tracks": {
-                        "top": [],
+                        "top": [],                  // Add more?
                         "left": [],
                         "center": [
                             {
@@ -157,7 +159,7 @@ export class HiGlassTabView extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { 'mounted' : false }; 
+        this.state = { 'mounted' : false };
         this.options = { "bounded" : true };
         this.hiGlassElement = null;
     }
