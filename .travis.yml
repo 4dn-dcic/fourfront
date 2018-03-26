@@ -103,7 +103,7 @@ script:
   if test -n "$CYPRESS"; then
     bin/py bin/dev-servers development.ini --app-name app --clear --init --load > /dev/null &
     db_server_pid=$!
-    sleep 300
+    sleep 360
     bin/py bin/pserve development.ini > /dev/null &
     web_server_pid=$!
     sleep 30
