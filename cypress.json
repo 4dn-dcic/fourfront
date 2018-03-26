@@ -1,4 +1,4 @@
 {
-  "baseUrl" : "http://staging.4dnucleome.org",
-  "projectId": "4opx2c"
+    "baseUrl" : "http://localhost:6543",
+    "projectId": "bj6vhb"
 }

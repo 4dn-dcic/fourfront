@@ -9,7 +9,10 @@
     "dev": "gulp dev",
     "dev-quick": "gulp dev-quick",
     "dev-uglified": "gulp dev-uglified",
-    "cypress:open": "node_modules/.bin/cypress open"
+    "cypress:open": "node_modules/.bin/cypress open",
+    "cypress:open-post-deploy": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing'",
+    "cypress:test-local": "node_modules/.bin/cypress run",
+    "cypress:test-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing'"
   },
   "author": "",
   "license": "MIT",
