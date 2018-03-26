@@ -2,7 +2,7 @@
 
 describe('Search Views', function () {
 
-    context('Navigation', function () {
+    context('For /search/?type=Item', function () {
 /*
         beforeEach(function () {
             cy.visit('https://example.cypress.io')
@@ -20,7 +20,7 @@ describe('Search Views', function () {
             cy.location('search').should('include', 'type=Item');
 
 
-            let searchResultRows = cy.get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+            cy.get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                 expect($searchResultElems.length).to.equal(25);
             });
 
@@ -43,6 +43,25 @@ describe('Search Views', function () {
 
             });
 
+        });
+
+    });
+
+    context('For Page collection', function(){
+
+        before(function(){ // beforeAll
+            cy.visit('/pages'); // We should get redirected to ?type=Page
+        });
+
+        it('Should redirect to /search/?type=Page correctly', function(){
+            cy.location('search').should('include', 'type=Page');
+            cy.location('pathname').should('include', '/search/');
+        });
+
+        it('Should have at least 20 results.', function(){
+            cy.get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+                expect($searchResultElems.length).to.be.greaterThan(20);
+            });
         });
 
     });
