@@ -30,97 +30,116 @@
         "objective_immersion_medium":{
             "title": "Objective immersion medium",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 35
         },
         "ch00_filter_set":{
             "title": "Ch00 filter set",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 105
         },
         "ch00_filter_additional":{
             "title": "Ch00 additional filter",
             "description": "If there are additional channels please indicate",
-            "type": "string"
+            "type": "string",
+            "lookup": 107
         },
         "ch00_detector_model":{
             "title": "Ch00 detector model",
             "description": "Manufacturer and model number for the detector on ch00",
-            "type": "string"
+            "type": "string",
+            "lookup": 104
         },
         "ch00_integration_time":{
             "title": "Ch00 integration time",
             "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
-            "type": "string"
+            "type": "string",
+            "lookup": 108
         },
         "ch01_filter_set":{
             "title": "Ch01 filter set",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 205
         },
         "ch01_filter_additional":{
             "title": "Ch01 additional filter",
             "description": "If there are additional channels please indicate",
-            "type": "string"
+            "type": "string",
+            "lookup": 207
         },
         "ch01_detector_model":{
             "title": "Ch01 detector model",
             "description": "Manufacturer and model number for the detector on ch01",
-            "type": "string"
+            "type": "string",
+            "lookup": 204
         },
         "ch01_integration_time":{
             "title": "Ch01 integration time (millisec)",
             "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
-            "type": "string"
+            "type": "string",
+            "lookup": 208
         },
         "ch02_filter_set":{
             "title": "Ch02 filter set",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 305
         },
         "ch02_filter_additional":{
             "title": "Ch02 additional filter",
             "description": "If there are additional channels please indicate",
-            "type": "string"
+            "type": "string",
+            "lookup": 307
         },
         "ch02_detector_model":{
             "title": "Ch02 detector model",
             "description": "Manufacturer and model number for the detector on ch02",
-            "type": "string"
+            "type": "string",
+            "lookup": 304
         },
         "ch02_integration_time":{
             "title": "Ch02 integration time (millisec)",
             "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
-            "type": "string"
+            "type": "string",
+            "lookup": 308
         },
         "ch03_filter_set":{
             "title": "Ch03 filter set",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 405
         },
         "ch03_filter_additional":{
             "title": "Ch03 additional filter",
             "description": "If there are additional channels please indicate",
-            "type": "string"
+            "type": "string",
+            "lookup": 407
         },
         "ch03_detector_model":{
             "title": "Ch03 detector model",
             "description": "Manufacturer and model number for the detector on ch03",
-            "type": "string"
+            "type": "string",
+            "lookup": 404
         },
         "ch03_integration_time":{
             "title": "Ch03 integration time (millisec)",
             "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
-            "type": "string"
+            "type": "string",
+            "lookup": 408
         },
         "embedding_RI":{
             "title": "Embedding medium RI",
             "description": "Refractive index of embedding medium (nominal)",
-            "type": "number"
+            "type": "number",
+            "lookup": 20
         },
         "sample_temperature":{
             "title": "Sample temperature",
             "description": "Temperature of the sample under objective (°C)",
-            "type": "number"
+            "type": "number",
+            "lookup": 22
         }
     }
 }

@@ -646,13 +646,13 @@ def imaging_path_3(testapp, basic_info, target_w_desc):
 
 @pytest.fixture
 def microscopy_no_path(testapp, repliseq_info):
-    repliseq_info['experiment_type'] = "Immunoflourescence"
+    repliseq_info['experiment_type'] = "Immunofluorescence"
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
 
 
 @pytest.fixture
 def microscopy_w_path(testapp, repliseq_info, imaging_path_1):
-    repliseq_info['experiment_type'] = "Immunoflourescence"
+    repliseq_info['experiment_type'] = "Immunofluorescence"
     img_path = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
     repliseq_info['imaging_paths'] = [img_path]
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
@@ -661,7 +661,7 @@ def microscopy_w_path(testapp, repliseq_info, imaging_path_1):
 @pytest.fixture
 def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_2,
                            imaging_path_3):
-    repliseq_info['experiment_type'] = "Immunoflourescence"
+    repliseq_info['experiment_type'] = "Immunofluorescence"
     img_path1 = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
     img_path2 = {'path': imaging_path_2['@id'], 'channel': 'ch02'}
     img_path3 = {'path': imaging_path_3['@id'], 'channel': 'ch03'}

@@ -35,6 +35,7 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
+            "lookup": 20,
             "enum": [
                 "fasta"
             ]
@@ -43,6 +44,7 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
+            "lookup": 30,
             "enum": [
                 "oligonucleotides",
                 "genome reference",
