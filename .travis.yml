@@ -73,11 +73,10 @@ before_install:
 - npm config set python /usr/bin/python2.7
 - curl -O  ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch stop
 install:
-- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
-- bin/buildout || (echo "Retrying buildout" && bin/buildout )
-- pip install awsebcli
 - pip install coveralls
 - pip install codacy-coverage
+- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
+- bin/buildout || (echo "Retrying buildout" && bin/buildout )
 #before_script:
 #- |
 #  if test -n "$BROWSER"; then
@@ -175,6 +174,7 @@ after_success:
         rm elasticsearch-5.4.1.deb
         rm .to_export_back
         rm versions.cfg
+        pip install awsebcli
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
         git config --global user.email "travis@builder.com"
