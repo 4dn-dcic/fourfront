@@ -34,81 +34,97 @@
         "objective_working_distance":{
             "title": "Objective working distance (mm)",
             "description": "",
-            "type": "number"
+            "type": "number",
+            "lookup": 38
         },
         "objective_field_number":{
             "title": "Objective field number (mm)",
             "description": "",
-            "type": "number"
+            "type": "number",
+            "lookup": 39
         },
         "ch00_power_output":{
             "title": "Ch00 power output",
             "description": "Nominal power output from ch00 light source",
-            "type": "string"
+            "type": "string",
+            "lookup": 109
         },
         "ch00_lasers_diodes":{
             "title": "Ch00 lasers/diodes",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 110
         },
         "ch00_filter_set_model":{
             "title": "Ch00 filter set model",
             "description": "Manufacturer and model for the filter set in ch00",
-            "type": "string"
+            "type": "string",
+            "lookup": 106
         },
         "ch01_power_output":{
             "title": "Ch01 power output",
             "description": "Nominal power output from ch01 light source",
-            "type": "string"
+            "type": "string",
+            "lookup": 209
         },
         "ch01_lasers_diodes":{
             "title": "Ch01 lasers/diodes",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 210
         },
         "ch01_filter_set_model":{
             "title": "Ch01 filter set model",
             "description": "Manufacturer and model for the filter set in ch01",
-            "type": "string"
+            "type": "string",
+            "lookup": 206
         },
         "ch02_power_output":{
             "title": "Ch02 power output",
             "description": "Nominal power output from ch02 light source",
-            "type": "string"
+            "type": "string",
+            "lookup": 309
         },
         "ch02_lasers_diodes":{
             "title": "Ch02 lasers/diodes",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 310
         },
         "ch02_filter_set_model":{
             "title": "Ch02 filter set model",
             "description": "Manufacturer and model for the filter set in ch02",
-            "type": "string"
+            "type": "string",
+            "lookup": 306
         },
         "ch03_power_output":{
             "title": "Ch03 power output",
             "description": "Nominal power output from ch03 light source",
-            "type": "string"
+            "type": "string",
+            "lookup": 409
         },
         "ch03_lasers_diodes":{
             "title": "Ch03 lasers/diodes",
             "description": "",
-            "type": "string"
+            "type": "string",
+            "lookup": 410
         },
         "ch03_filter_set_model":{
             "title": "Ch03 filter set model",
             "description": "Manufacturer and model for the filter set in ch03",
-            "type": "string"
+            "type": "string",
+            "lookup": 406
         },
         "camera_model":{
             "title": "Camera model",
             "description": "Manufacturer and model of the camera",
-            "type": "string"
+            "type": "string",
+            "lookup": 50
         },
         "camera_chip_type":{
             "title": "Camera chip type",
             "type": "string",
+            "lookup": 52,
             "enum":["CCD",
                     "sCMOS",
                     "EMCCD"]
@@ -116,17 +132,20 @@
         "camera_chip_size":{
             "title": "Camera chip size",
             "description": "Pixel dimensions of the chip, e.g. 1392x1040",
-            "type": "string"
+            "type": "string",
+            "lookup": 53
         },
         "camera_serial":{
             "title": "Camera serial",
             "description": "Serial number of the camera",
-            "type": "string"
+            "type": "string",
+            "lookup": 51
         },
         "flatfield_map":{
             "title": "Flatfield map",
             "description": "an image describing field dependent differences in response",
             "type": "string",
+            "lookup": 54,
             "linkTo": "Image"
         }
     }

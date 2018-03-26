@@ -62,18 +62,21 @@
         "read_length": {
             "title": "Sequencing Read Length (bp)",
             "description": "Length of sequencing reads in base pairs for fastq files",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 40
         },
         "instrument": {
             "title": "Sequencer",
             "description": "Instrument used for sequencing",
             "type": "string",
+            "lookup": 50,
             "internal_comment": "should this be a controlled CV with enum, or another object?"
         },
         "paired_end": {
             "title": "Paired End Identifier",
             "description": "Which pair the file belongs to (if paired end library)",
             "type": "string",
+            "lookup": 30,
             "enum": [
                 "1",
                 "2"
@@ -93,24 +96,29 @@
                     "machine": {
                         "title": "Machine Name",
                         "description": "The lab specific name of the machine used.",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 61
                     },
                     "flowcell": {
                         "title": "Flowcell ID",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 62
                     },
                     "lane": {
                         "title": "Lane",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 63
                     },
                     "barcode": {
                         "title": "Barcode",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 64
                     },
                     "barcode_in_read": {
                         "title": "Barcode in Read",
                         "description": "The read the barcode is located on.",
                         "type": "string",
+                        "lookup": 65,
                         "enum": [
                             "1",
                             "2"
@@ -119,13 +127,15 @@
                     "barcode_position": {
                         "title": "Barcode Position",
                         "description": "The 1-based start position of the barcode in 5->3 orientation.",
-                        "type": "integer"
+                        "type": "integer",
+                        "lookup": 66
                     },
                     "chunk": {
                         "title": "Chunk",
                         "description": "The file chunk label as assigned by Illumina software when splitting up a fastq into specified chunk sizes.",
                         "comment": "This label is used to re-assemble the chunks into the original file in the correct order.",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 67
                     }
                 }
             }

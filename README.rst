@@ -25,14 +25,14 @@ Step 0: Obtain AWS keys. These will need to added to your environment variables 
 
 Step 1: Verify that homebrew is working properly::
 
-    $ sudo brew doctor
+    $ brew doctor
 
 
 Step 2: Install or update dependencies::
 
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
-    $ brew cask install java
+    $ brew cask install caskroom/versions/java8
     $ brew tap homebrew/versions
     $ brew install elasticsearch@5.6 node4-lts
 
@@ -53,7 +53,7 @@ Step 3: Run buildout::
     via homebrew (as above)
     If you have issues with Pillow you may need to install new xcode command line tools:
     - First update Xcode from AppStore (reboot)
-    $ xcode-select install
+    $ xcode-select --install
 
 
 
