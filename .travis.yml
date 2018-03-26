@@ -106,8 +106,9 @@ script:
     sleep 300
     bin/py bin/pserve development.ini > /dev/null &
     web_server_pid=$!
+    sleep 60
     node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
-    sleep 15
+    sleep 10
     kill $web_server_pid
     kill $db_server_pid
   fi
