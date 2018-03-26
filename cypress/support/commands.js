@@ -23,3 +23,16 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+/** Expected to throw error of some sort if not on search page, or no results. */
+Cypress.Commands.add('searchPageTotalResultCount', (options) => {
+    return cy.get('div.above-results-table-row .box.results-count > span.text-500').then(($searchResultCountBox)=>{
+        return parseInt($searchResultCountBox.text());
+    });
+});
+
+Cypress.Commands.add('scrollToBottom', (options) => {
+    return cy.get('body').then(($body)=>{
+        cy.scrollTo(0, $body[0].scrollHeight);
+    });
+});
