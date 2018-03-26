@@ -103,11 +103,11 @@ script:
   if test -n "$CYPRESS"; then
     bin/py bin/dev-servers development.ini --app-name app --clear --init --load > /dev/null &
     db_server_pid=$!
-    sleep 20
+    sleep 300
     bin/py bin/pserve development.ini > /dev/null &
     web_server_pid=$!
     node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
-    sleep 5
+    sleep 15
     kill $web_server_pid
     kill $db_server_pid
   fi
