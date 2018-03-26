@@ -2,7 +2,6 @@ language: python
 sudo: true
 if: tag IS blank
 cache:
-  pip: true
   directories:
   - eggs
   - .npm
@@ -16,6 +15,7 @@ addons:
     - build-essential
     - make
     - graphviz
+    - nginx
   postgresql: '9.4'
 #  sauce_connect:
 #    username: j1z0-hms
