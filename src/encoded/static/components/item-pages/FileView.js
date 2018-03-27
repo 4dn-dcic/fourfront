@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
@@ -15,15 +15,52 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-import { FileDownloadButton } from '../util/file';
+import { FileDownloadButton } from './../util/file';
+
+// UNCOMMENT FOR TESTING
+//import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
+
 
 
 export default class FileView extends WorkflowRunTracingView {
 
     /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
-    static doesGraphExist(context){
+    static shouldGraphExist(context){
         return (
             (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+        );
+    }
+
+    static shouldHiGlassViewExist(context){
+        // TODO: Remove context.file_format check?
+        return context.file_format === 'mcool' && context.higlass_uid && typeof context.higlass_uid === 'string';
+    }
+
+    constructor(props){
+        super(props);
+        this.validateHiGlassData = this.validateHiGlassData.bind(this);
+        if (FileView.shouldHiGlassViewExist(props.context)){
+            this.state = _.extend(this.state, {
+                'validatingHiGlassTileData' : true,
+                'isValidHiGlassTileData' : false
+            });
+        }
+    }
+
+    componentDidMount(){
+        super.componentDidMount();
+        this.validateHiGlassData();
+    }
+
+    /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
+    validateHiGlassData(){
+        if (!FileView.shouldHiGlassViewExist(this.props.context)) return;
+        HiGlassTabView.validateHiGlassData(
+            // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
+            // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
+            HiGlassTabView.generateViewConfig(this.props.context),
+            () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),
+            () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })
         );
     }
 
@@ -39,8 +76,12 @@ export default class FileView extends WorkflowRunTracingView {
         
         var steps = this.state.steps;
 
-        if (FileView.doesGraphExist(context)){
+        if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
+        }
+
+        if (FileView.shouldHiGlassViewExist(context)){
+            initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
         return initTabs.concat(this.getCommonTabs());
@@ -53,6 +94,8 @@ export default class FileView extends WorkflowRunTracingView {
 }
 
 globals.content_views.register(FileView, 'File');
+
+
 
 
 class FileViewOverview extends React.Component {
