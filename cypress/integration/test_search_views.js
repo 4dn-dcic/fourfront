@@ -30,7 +30,7 @@ describe('Search Views', function () {
 
                 for (let interval = 0; interval < intervalCount; interval++){
                     cy.scrollToBottom().then(()=>{
-                        cy.get('.search-results-container .search-result-row[data-row-number="' + ( 25 * (interval + 1) ) + '"]', { timeout: 5000 }).should('have.length', 1);
+                        cy.get('.search-results-container .search-result-row[data-row-number="' + ( 25 * (interval + 1) ) + '"]').should('have.length', 1);
                     });
                 }
 

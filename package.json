@@ -12,6 +12,7 @@
     "cypress:open": "node_modules/.bin/cypress open",
     "cypress:open-post-deploy": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing'",
     "cypress:test-local": "node_modules/.bin/cypress run",
+    "cypress:test-local-recorded": "node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY",
     "cypress:test-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing'"
   },
   "author": "",

@@ -113,11 +113,15 @@ script:
 #   (1) Boot up bin/dev-servers in seperate process
 #   (2) Feed them into '3' handle
 #   (3) Block further script 
-#   (4) Read lines (& print) off of '3' until see ...'experiment_seq (phase 2)'... and stop blocking, allowing script to continue to boot up bin/pserve
+#   (4) Read lines (& print) off of '3' until see ...'experiment_seq (phase 2)'... and stop blocking, allowing script to continue
+#       to boot up bin/pserve
 #   (5) Repeat for bin/pserve command (using '4' handle) until detect indexing has completed.
 # Possible ToDos:
 #   (a) change 'string to detect' if queuing changes any strings
-#   (b) For PyTest tests, add command-line bool arg/fixture for "skip bootup of server fixtures" (passed in to postgresql_server, elasticsearch_server, wsgi_server, ...) re-use these servers to decrease test time(s).
+#   (b) For PyTest tests, add command-line bool arg/fixture for "skip bootup of server fixtures" (passed in to postgresql_server,
+#       elasticsearch_server, wsgi_server, ...) re-use these servers to decrease test time(s).
+#   (c) Potentially use something like this for a logged-in-user token, though should be able to do within cypress itself:
+#       CYPRESS_JWT_TOKEN=$(bin/py -c \"from base64 import b64decode; import jwt, json; print(  jwt.encode({'email':'<SOME_EMAIL>','email_verified':True,'aud':'$Auth0Client'}, b64decode('$Auth0Secret', '-_'), algorithm='HS256').decode('utf-8')  ) \")
 #
 # --------------------------------------------------------------------------------------------------------------------------------
 - |
@@ -152,7 +156,7 @@ script:
       esac
     done <&4
     sleep 20
-    node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
+    npm run cypress:test-local-recorded
     kill $web_server_pid
     kill $db_server_pid
   fi
