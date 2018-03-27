@@ -79,13 +79,6 @@ describe('Some Initial Static Tests', function () {
 
         });
 
-/*
-        it('Login works', function(){
-            
-            cy.login4DN();
-
-        });
-*/
 
     });
 
