@@ -101,14 +101,35 @@ script:
   src/encoded; fi
 - |
   if test -n "$CYPRESS"; then
-    bin/py bin/dev-servers development.ini --app-name app --clear --init --load > /dev/null &
+    exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
     db_server_pid=$!
-    sleep 360
-    bin/py bin/pserve development.ini > /dev/null &
+    while read line; do
+      case "$line" in
+      *'experiment_seq (phase 2)'*)
+          echo "'$line' means we've loaded all the testdatas. Starting webserver..."
+          break
+          ;;
+      *)
+          echo $line
+          ;;
+      esac
+    done <&3
+    sleep 5
+    exec 4< <(bin/py bin/pserve development.ini 2>&1)
     web_server_pid=$!
-    sleep 30
+    while read line; do
+      case "$line" in
+      *"'indexing_finished'"*)
+          echo $line
+          echo "Databases & Webserver Ready; Test Data Loaded & Indexed. Starting Cypress Tests..."
+          break
+          ;;
+      *)
+          echo $line
+          ;;
+      esac
+    done <&4
     node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY
-    sleep 10
     kill $web_server_pid
     kill $db_server_pid
   fi
