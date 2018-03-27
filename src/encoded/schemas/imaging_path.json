@@ -89,8 +89,8 @@
             }
         },
         "file_reference": {
-            "title": "Data Files",
-            "description": "Oligo files associated with the experiment.",
+            "title": "Supporting Files",
+            "description": "Files associated with the imaging path (ex. probe sequences)",
             "type": "array",
             "lookup": 80,
             "items": {
@@ -99,6 +99,6 @@
                 "type": "string",
                 "linkTo": "FileReference"
             }
-        },
+        }
     }
 }
