@@ -39,6 +39,7 @@
                 "bwaIndex",
                 "chromsizes",
                 "reference_fasta",
+                "oligo_fasta",
                 "juicer_format_restriction_site_file",
                 "other"
             ]
@@ -50,6 +51,7 @@
                 "genome reference",
                 "genome index",
                 "index",
+                "oligo sequences"
                 "restriction sites",
                 "blacklisted regions",
                 "repeats",
@@ -61,6 +63,7 @@
         "bwaIndex": ".bwaIndex.tgz",
         "chromsizes": ".chrom.sizes",
         "reference_fasta": ".fasta.gz",
+        "oligo_fasta": ".fasta",
         "juicer_format_restriction_site_file": ".txt",
         "other": ""
     }
