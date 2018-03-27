@@ -53,7 +53,7 @@ Cypress.Commands.add('scrollToBottom', (options) => {
 
 Cypress.Commands.add('login4DN', function(options = {}){
 
-    const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6IndyYW5nbGVyQHdyYW5nbGVyLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdWQiOiJEUHhFd3NaUm5LRHBrMFZmVkF4clN0Ukt1a04xNElMQiJ9.WuUK4FL6CJZlNcxev4YSB82cT2qoWuDyC6P2YDgnZGo';// Cypress.env('JWT_TOKEN');
+    const token = Cypress.env('JWT_TOKEN');
 
     if (!token) throw new Error('No token defined in env vars. Cannot log in.');
 
