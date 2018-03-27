@@ -38,7 +38,6 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Johnson",
-        "submits_for": ["4dn-dcic-lab"],
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788",
         "viewing_groups": ["4DN"]
     },
