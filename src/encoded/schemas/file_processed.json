@@ -102,7 +102,7 @@
         "zip": ".zip",
         "bg": ".bg",
         "bw": ".bw",
-        "bed": ".bed",
+        "bed": ".bed.gz",
         "txt": ".txt.gz",
         "other": ""
     },
