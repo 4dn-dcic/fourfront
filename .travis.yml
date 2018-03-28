@@ -106,6 +106,13 @@ script:
 # -----------------
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
   src/encoded; fi
+# -----------------
+# Python Unit Tests
+# -----------------
+- |
+  if test -n "$UNIT"; then
+    travis_wait 30 bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded
+  fi
 # --------------------------------------------------------------------------------------------------------------------------------
 # Cypress Browser / E2E / SmokeStack Tests
 #
@@ -159,16 +166,11 @@ script:
           ;;
       esac
     done <&4
-    sleep 120
+    sleep 30
     npm run cypress:test-local-recorded
     kill $web_server_pid
     kill $db_server_pid
   fi
-# -----------------
-# Python Unit Tests
-# -----------------
-- if test -n "$UNIT"; then travis_wait 30 bin/test -v -v -m "working and not setone" --durations=40
-  --cov src/encoded; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 after_success:
