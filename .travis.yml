@@ -133,7 +133,6 @@ script:
       *'experiment_seq (phase 2)'*)
           echo $line
           echo "\n\nWe've loaded all the testdatas. Starting webserver..."
-          break
           ;;
       *)
           echo $line
