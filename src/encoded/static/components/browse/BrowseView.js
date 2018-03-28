@@ -25,6 +25,7 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },
     { 'field' : 'number_of_files', },
+    { 'field' : 'experiments_in_set.experiment_categorizer.combined'},
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  },
     { 'field' : 'status',  }
@@ -112,21 +113,6 @@ class ResultTableContainer extends React.Component {
                     }
                     
                     return <span>{ number_of_files }</span>;
-                }
-            },
-            'experiments_in_set.experiment_categorizer.combined' : {
-                'render' : function(result, columnDefinition, props, width){
-                    var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
-                    var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
-                    if (cat_value === 'No value' || !cat_value){
-                        return null;
-                    }
-                    return (
-                        <div className="exp-categorizer-cell">
-                            <small>{ cat_field }</small>
-                            <div className="text-ellipsis-container">{ cat_value }</div>
-                        </div>
-                    );
                 }
             }
         },
