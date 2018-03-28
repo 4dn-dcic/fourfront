@@ -168,11 +168,11 @@ script:
     sleep 30
     npm run cypress:test-local-recorded
     cypress_run_exit_code=$?
-    if [ ! $cypress_run_exit_code -eq 0 ]; then
-      exit $cypress_run_exit_code
-    fi
     kill $web_server_pid
     kill $db_server_pid
+    if [ ! $cypress_run_exit_code -eq 0 ]; then
+      return $cypress_run_exit_code
+    fi
   fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS

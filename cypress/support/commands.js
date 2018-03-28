@@ -71,7 +71,7 @@ Cypress.Commands.add('login4DN', function(options = {}){
 
         const jwt_token = jwt_gen_result.stdout;
 
-        //cy.setCookie('jwtToken', jwt_token); // w.fourfront.JWT.save() performs same action.
+        //cy.setCookie('jwtToken', jwt_token); // w.fourfront.JWT.save(jwt_token) performs same action.
 
         return cy.window().then((w)=>{
             w.fourfront.JWT.save(jwt_token);
