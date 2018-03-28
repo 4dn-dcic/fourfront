@@ -111,10 +111,10 @@ script:
 # -----------------
 - |
   if test -n "$UNIT"; then
-    travis_wait 30 bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded
+    bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded
   fi
 # --------------------------------------------------------------------------------------------------------------------------------
-# Cypress Browser / E2E / SmokeStack Tests
+# Cypress Browser Tests
 #
 # Below:
 #   (1) Boot up bin/dev-servers in seperate process
