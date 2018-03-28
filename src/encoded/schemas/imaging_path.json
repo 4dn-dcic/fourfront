@@ -87,6 +87,18 @@
                 "title": "Targets for labelling",
                 "type": "string"
             }
+        },
+        "file_reference": {
+            "title": "Supporting Files",
+            "description": "Files associated with the imaging path (ex. probe sequences)",
+            "type": "array",
+            "lookup": 80,
+            "items": {
+                "title": "File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileReference"
+            }
         }
     }
 }
