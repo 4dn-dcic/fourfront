@@ -18,11 +18,6 @@ addons:
     - graphviz
     - nginx
   postgresql: '9.4'
-#  sauce_connect:
-#    username: j1z0-hms
-#    # Below: SAUCE_ACCESS_KEY=[secure]; @see https://docs.travis-ci.com/user/sauce-connect/
-#  jwt:
-#    secure: "qM6n45ZHOSFxEJHgaSuIX0glCbSbVmJ7MNce2R2Wce+tWxjzY18duF73E+mVYEGXTZLkRd+NYqTL0nG93BZW4UtuEmpRKFK6keXuFf9o8G+Xi5WemyBzI2LlaKIGWMxXmvoiO4o5GTBn6JSRiAAvBTinfce1hsaHI5SfYzS1EnFjV3sbDdF4jVf8EJrX6q460UckAfPFxHeJ1MbQM6roTmYEJqGjx1BL81ygxnVVeVoEzoA97kQ2CdUJUlrdcPb2SDeGDWDS4haKw5vk6vHtWy/nYYyd7o3BKA0cW4qH8VjIPbpYwu1SNiVIwniSivfAcD0NoFHMtoNgIXf+LvUN4JGb331qtpzr9DxHwsSWUvKhDyXvrHWvX6a6HljeyaE5vv68ddx+R2EZdT7AyZOImF1q9VpkbIi/X95rbj79nje/GbsFSoxJmVdvgjNOAzn+jj3fo4H1Dxl4vT+JanMsGs2xzNppmZ0B7Cw85xRsk7nIznKmd8QX8VlrJNLiKK35V3s0PdoS4RxL7qLgvu5ZLGXKCADTGRSELRMXbHbrdHq0P4bW9y3wagcJaAyOFJj38WN0OVKRrjNt/u2f0tSaK3VqiztSZ3bJFNt+TQVJH5BpeCZshUtJZHw76FZj7BxtIHPk5MyeY9yIsDs8OVGrezScbck/tF3XP6mPfV430GE="
 env:
   global:
   - JAVA_HOME=/usr/lib/jvm/java-8-oracle
@@ -97,83 +92,12 @@ install:
 #    while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
 #  fi
 script:
-# -----------------
-# JS Unit Tests
-# -----------------
 - if test -n "$NPM"; then npm test; fi
-# -----------------
-# Python View Tests
-# -----------------
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
   src/encoded; fi
-# -----------------
-# Python Unit Tests
-# -----------------
-- |
-  if test -n "$UNIT"; then
-    bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded
-  fi
-# --------------------------------------------------------------------------------------------------------------------------------
-# Cypress Browser Tests
-#
-# Below:
-#   (1) Boot up bin/dev-servers in seperate process
-#   (2) Feed them into '3' handle
-#   (3) Block further script 
-#   (4) Read lines (& print) off of '3' until see ...'experiment_seq (phase 2)'... and stop blocking, allowing script to continue
-#       to boot up bin/pserve
-#   (5) Repeat for bin/pserve command (using '4' handle) until detect indexing has completed.
-# Possible ToDos:
-#   (a) change 'string to detect' if queuing changes any strings
-#   (b) For PyTest tests, add command-line bool arg/fixture for "skip bootup of server fixtures" (passed in to postgresql_server,
-#       elasticsearch_server, wsgi_server, ...) re-use these servers to decrease test time(s).
-#   (c) Potentially use something like this for a logged-in-user token, though should be able to do within cypress itself:
-#       CYPRESS_JWT_TOKEN=$(bin/py -c \"from base64 import b64decode; import jwt, json; print(  jwt.encode({'email':'<SOME_EMAIL>','email_verified':True,'aud':'$Auth0Client'}, b64decode('$Auth0Secret', '-_'), algorithm='HS256').decode('utf-8')  ) \")
-#
-# --------------------------------------------------------------------------------------------------------------------------------
-- |
-  if test -n "$CYPRESS"; then
-    exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
-    db_server_pid=$!
-    count_exp_seq_seen=0
-    while read line; do
-      case "$line" in
-      *'experiment_seq (phase 2)'*)
-          echo $line
-          count_exp_seq_seen=$((count_exp_seq_seen+1))
-          if [[ "$count_exp_seq_seen" -gt 1 ]]; then
-            echo; echo; echo "We've loaded all the testdatas. Starting webserver..."
-            break
-          fi
-          ;;
-      *)
-          echo $line
-          ;;
-      esac
-    done <&3
-    sleep 5
-    exec 4< <(bin/py bin/pserve development.ini 2>&1)
-    web_server_pid=$!
-    while read line; do
-      case "$line" in
-      *"'indexing_finished'"*)
-          echo $line; echo; echo; echo "Databases & Webserver Ready; Test Data Loaded & Indexed. Starting Cypress Tests..."
-          break
-          ;;
-      *)
-          echo $line
-          ;;
-      esac
-    done <&4
-    sleep 30
-    npm run cypress:test-local-recorded
-    cypress_run_exit_code=$?
-    kill $web_server_pid
-    kill $db_server_pid
-    if [ ! $cypress_run_exit_code -eq 0 ]; then
-      return $cypress_run_exit_code
-    fi
-  fi
+- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
+  --cov src/encoded fi
+- if test -n "$CYPRESS"; then deploy/run_cypress_tests_on_travis.sh; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 after_success:

@@ -11,7 +11,7 @@
     "dev-uglified": "gulp dev-uglified",
     "cypress:open": "node_modules/.bin/cypress open --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-post-deploy": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
-    "cypress:test-local": "node_modules/.bin/cypress run --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
+    "cypress:test-local": "node_modules/.bin/cypress run --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
     "cypress:test-local-recorded": "node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:test-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret"
   },
