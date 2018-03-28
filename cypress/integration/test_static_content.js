@@ -84,7 +84,9 @@ describe('Some Initial Static Tests', function () {
                 });
             });
 
-            
+            if (Cypress.env('SECRET_KEY')){ // We're on TRAVIS (this be set in Travis env vars)
+                cy.wait(45000); // Wait 30 seconds before proceeding to next test re: indexing. Travis VMs are small so we need to wait else we'd time out.
+            }
         });
 
     });
@@ -93,15 +95,11 @@ describe('Some Initial Static Tests', function () {
     context('Can navigate around Help pages', function () {
 
         before(function(){
-            cy.visit('/');
+            cy.visit('/').then(()=>{
+                cy.title().should('include', '4DN Data Portal');
+            });
         });
 
-
-        it('On Home Page, should have title "4DN Data Portal"', function () {
-
-            cy.title().should('include', '4DN Data Portal');
-
-        });
 
         it('Help dropdown has some items, we can click & visit them, and each page has different title.', function(){
 
@@ -126,6 +124,10 @@ describe('Some Initial Static Tests', function () {
 
                                     // Finish
                                     count++;
+                                    Cypress.log({
+                                        'name' : "Help Page " + count + '/' + listItems.length,
+                                        'message' : 'Visited page with title "' + titleText + '".'
+                                    });
                                     if (count < listItems.length){
                                         doVisit(listItems[count]);
                                     }
