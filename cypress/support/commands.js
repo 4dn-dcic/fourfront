@@ -53,44 +53,11 @@ Cypress.Commands.add('scrollToBottom', (options) => {
 
 Cypress.Commands.add('login4DN', function(options = {}){
 
-    const token = Cypress.env('JWT_TOKEN');
-
-    if (!token) throw new Error('No token defined in env vars. Cannot log in.');
-
-    cy.clearCookies();
-    cy.setCookie('jwtToken', token); // cy.visit stops working after this.
-    cy.request({ // Probably not needed except to validate JWT
-        'url' : '/login',
-        'method' : 'POST',
-        'body' : JSON.stringify({'id_token' : token}),
-        'headers' : { 'Authorization': 'Bearer ' + token },
-        'followRedirect' : true
-    }).then(function(resp){
-        cy.window().then((w)=>{
-            //w.JWT.save(token);
-            //w.JWT.saveUserInfoLocalStorage(resp.body);
-            cy.visit('/');
-            cy.visit('/browse/');
-        });
-    });
-    //cy.visit('/', { "failOnStatusCode" : false, /*'auth' : { 'bearer' : token }*/ onBeforeLoad : function(){ console.log(arguments); } }).then((w)=>{
-    //
-    //});
-});
-
-
-Cypress.Commands.add('login4DN2', function(options = {}){
-
-    const email = options.email || Cypress.env('loginEmail') || '4dndcic@gmail.com';
-    
-    const auth0client = 'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB';
+    const email = options.email || options.user || Cypress.env('LOGIN_AS_USER') || '4dndcic@gmail.com';
+    const auth0client = Cypress.env('Auth0Client') || 'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB';
     const auth0secret = Cypress.env('Auth0Secret');
 
-    const jwtPayload = {
-        'email': email,
-        'email_verified': true,
-        'aud': auth0client,
-    };
+    if (!auth0client || !auth0secret) throw new Error('Cannot test login if no Auth0Client & Auth0Secret in ENV vars.');
 
     Cypress.log({
         'name' : "Login 4DN",
@@ -100,33 +67,34 @@ Cypress.Commands.add('login4DN2', function(options = {}){
         }
     });
 
+    // Generate JWT
+    const jwtPayload = {
+        'email': email,
+        'email_verified': true,
+        'aud': auth0client,
+    };
 
-    // We execute this with NodeJS OUTSIDE of test browser otherwise it messes with browser context etc.
+    return cy.exec("exec python3 bin/py -c \"from base64 import b64decode; import jwt, json; print(jwt.encode(json.loads('" + JSON.stringify(jwtPayload).replace(/(\")/g, '\\"') + "'), b64decode('" + auth0secret + "', '-_'), algorithm='HS256').decode('utf-8'))\" &").then((jwt_gen_result)=>{
 
-    cy.exec("exec python3 bin/py -c \"from base64 import b64decode; import jwt, json; print(jwt.encode(json.loads('" + JSON.stringify(jwtPayload).replace(/(\")/g, '\\"') + "'), b64decode('" + auth0secret + "', '-_'), algorithm='HS256').decode('utf-8'))\" &").then((res)=>{
-        
-        var userJWT = res.stdout;
+        const jwt_token = jwt_gen_result.stdout;
 
-        console.log('Generated JWT', userJWT);
-
-        cy.setCookie('jwtToken', userJWT);
-
-        /*
+        cy.setCookie('jwtToken', jwt_token); // cy.visit stops working after this.
         cy.request({ // Probably not needed except to validate JWT
             'url' : '/login',
             'method' : 'POST',
-            'body' : JSON.stringify({'id_token' : userJWT}),
-            'headers' : { 'Authorization': 'Bearer ' + userJWT },
+            'body' : JSON.stringify({'id_token' : jwt_token}),
+            'headers' : { 'Authorization': 'Bearer ' + jwt_token },
             'followRedirect' : true
         }).then(function(resp){
-            JWT.saveUserInfoLocalStorage(resp.body);
-            cy.visit('/');
+            cy.window().then((w)=>{
+                w.fourfront.JWT.save(jwt_token);
+                w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
+                w.fourfront.app.updateUserInfo();
+            });
         });
-        */
-
-        cy.visit('/');
 
     });
 
-
 });
+
+

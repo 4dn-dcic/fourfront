@@ -308,6 +308,15 @@ export default class App extends React.Component {
             this.props.context
         );
 
+        // Save some stuff to global window variables so we can access it in tests:
+        // Normally would call this 'window.app' but ENCODE already sets this in browser.js to be the top-level Redux provider (not really useful, remove?)
+        window.fourfront = _.extend(window.fourfront || {}, {
+            'app' : this,
+            'alerts' : Alerts,
+            'JWT' : JWT,
+            'navigate' : navigate
+        });
+
         this.setState({ 'mounted' : true });
     }
 

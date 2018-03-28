@@ -142,7 +142,7 @@ script:
           echo $line
           count_exp_seq_seen=$((count_exp_seq_seen+1))
           if [[ "$count_exp_seq_seen" -gt 1 ]]; then
-            echo "\n\nWe've loaded all the testdatas. Starting webserver..."
+            echo; echo; echo "We've loaded all the testdatas. Starting webserver..."
             break
           fi
           ;;
@@ -157,8 +157,7 @@ script:
     while read line; do
       case "$line" in
       *"'indexing_finished'"*)
-          echo $line
-          echo "\n\nDatabases & Webserver Ready; Test Data Loaded & Indexed. Starting Cypress Tests..."
+          echo $line; echo; echo; echo "Databases & Webserver Ready; Test Data Loaded & Indexed. Starting Cypress Tests..."
           break
           ;;
       *)
