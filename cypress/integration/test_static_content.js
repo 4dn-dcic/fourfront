@@ -84,9 +84,10 @@ describe('Some Initial Static Tests', function () {
                 });
             });
 
-            if (Cypress.env('SECRET_KEY')){ // We're on TRAVIS (this be set in Travis env vars)
-                cy.wait(45000); // Wait 30 seconds before proceeding to next test re: indexing. Travis VMs are small so we need to wait else we'd time out.
-            }
+            // TODO: Increase this wait, or move this test to post-deploy tests.
+            //if (Cypress.env('SECRET_KEY')){ // We're on TRAVIS (this be set in Travis env vars)
+            //    cy.wait(45000); // Wait 30 seconds before proceeding to next test re: indexing. Travis VMs are small so we need to wait else we'd time out.
+            //}
         });
 
     });

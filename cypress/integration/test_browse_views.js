@@ -1,4 +1,4 @@
-
+import _ from 'underscore';
 
 describe('Browse Views', function () {
 
@@ -32,6 +32,27 @@ describe('Browse Views', function () {
             cy.visit('/browse/', { "failOnStatusCode" : false });
 
             cy.location('search').should('include', 'award.project=4DN');
+
+        });
+
+    });
+
+    context('QuickInfoBar', function(){
+
+        it('Test that QuickInfoBar counts change re: logging in', function(){
+
+
+            cy.visit('/browse/', { "failOnStatusCode" : false });
+            cy.getQuickInfoBarCounts().then((counts)=>{
+
+                const loggedOutCounts = _.clone(counts);
+
+                cy.login4DN().then(()=>{
+                    cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets);
+                });
+
+            });
+
 
         });
 

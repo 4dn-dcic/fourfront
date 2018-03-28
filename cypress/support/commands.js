@@ -41,16 +41,9 @@ Cypress.Commands.add('scrollToBottom', (options) => {
     });
 });
 
-
-
-
 /**
- * The below tests are currently non-functioning. 
+ * This emulates login.js. Perhaps we should adjust login.js somewhat to match this better re: navigate.then(...) .
  */
-
-
-/** Currently not working (cy.visit stops working after setting JWT) */
-
 Cypress.Commands.add('login4DN', function(options = {}){
 
     const email = options.email || options.user || Cypress.env('LOGIN_AS_USER') || '4dndcic@gmail.com';
@@ -78,23 +71,47 @@ Cypress.Commands.add('login4DN', function(options = {}){
 
         const jwt_token = jwt_gen_result.stdout;
 
-        cy.setCookie('jwtToken', jwt_token); // cy.visit stops working after this.
-        cy.request({ // Probably not needed except to validate JWT
-            'url' : '/login',
-            'method' : 'POST',
-            'body' : JSON.stringify({'id_token' : jwt_token}),
-            'headers' : { 'Authorization': 'Bearer ' + jwt_token },
-            'followRedirect' : true
-        }).then(function(resp){
-            cy.window().then((w)=>{
-                w.fourfront.JWT.save(jwt_token);
-                w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
-                w.fourfront.app.updateUserInfo();
+        //cy.setCookie('jwtToken', jwt_token); // w.fourfront.JWT.save() performs same action.
+
+        return cy.window().then((w)=>{
+            w.fourfront.JWT.save(jwt_token);
+            return w.fourfront.navigate('', {'inPlace':true}).then(()=>{
+
+                return cy.request({ // Probably not needed except to validate JWT (we can just reload and be logged in by this point)
+                    'url' : '/login',
+                    'method' : 'POST',
+                    'body' : JSON.stringify({'id_token' : jwt_token}),
+                    'headers' : { 'Authorization': 'Bearer ' + jwt_token },
+                    'followRedirect' : true
+                }).then(function(resp){
+                    //w.fourfront.JWT.save(jwt_token);
+                    w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
+                    w.fourfront.app.updateUserInfo(); // Triggers app.state.session change
+                    return cy.wait(150); // For React JS stuff to finish updating & triggering BarPlotData request etc.
+                });
+
             });
         });
+
+        
 
     });
 
 });
 
 
+Cypress.Commands.add('getQuickInfoBarCounts', function(options = {}){
+
+    return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).then((expsetCountElemText)=>{
+        cy.get('#stats-stat-experiments').then((expCountElem)=>{
+            cy.get('#stats-stat-files').then((fileCountElem)=>{
+                let experiment_sets = parseInt(expsetCountElemText),
+                    experiments = parseInt(expCountElem.text()),
+                    files = parseInt(fileCountElem.text());
+
+                return { experiment_sets, experiments, files };
+            });
+        });
+    });
+
+});
