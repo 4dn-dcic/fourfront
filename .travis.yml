@@ -128,12 +128,16 @@ script:
   if test -n "$CYPRESS"; then
     exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
     db_server_pid=$!
+    count_exp_seq_seen=0
     while read line; do
       case "$line" in
-      *'ElasticSearch is Ready'*)
+      *'experiment_seq (phase 2)'*)
           echo $line
-          echo "\n\nWe've loaded all the testdatas. Starting webserver..."
-          break
+          count_exp_seq_seen=$((count_exp_seq_seen+1))
+          if [[ "$count_exp_seq_seen" -gt 1 ]]; then
+            echo "\n\nWe've loaded all the testdatas. Starting webserver..."
+            break
+          fi
           ;;
       *)
           echo $line
