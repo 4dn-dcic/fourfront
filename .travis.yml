@@ -130,9 +130,10 @@ script:
     db_server_pid=$!
     while read line; do
       case "$line" in
-      *'experiment_seq (phase 2)'*)
+      *'ElasticSearch is Ready'*)
           echo $line
           echo "\n\nWe've loaded all the testdatas. Starting webserver..."
+          break
           ;;
       *)
           echo $line
