@@ -118,14 +118,52 @@ describe('Test logging in, navigating to profile page, editing last_name, & edit
             cy.login4DN({ 'email' : 'wrangler@wrangler.com' });
         });
 
-        it('Top right menu dropdown has "Wrangler" (first name).', function(){
+        it('Ensure logged in, visit profile page, edit.', function(){
             
             cy.get('ul.navbar-acct li.user-account-item').should('have.class', 'is-logged-in').then((accountListItem)=>{
                 expect(accountListItem.children('#user_actions_dropdown').text()).to.contain('Wrangler');
+            }).end().get("#user_actions_dropdown").click().then(()=>{
+                cy.get('ul.dropdown-menu[aria-labelledby="user_actions_dropdown"] a#profile').click().then(()=>{
+                    cy.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").then((title)=>{
+                        // Edit wrangler last name
+                        cy.get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click();
+                        cy.get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'Wrangler').clear().type('SuperWrangler').then((inputfield)=>{
+                            //inputfield.type('SuperWrangler');
+                            cy.wait(100);
+                            cy.get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click().then(()=>{
+                                cy.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler SuperWrangler");
+
+                                // After reloading on datastore=database, last name stays edited. Then change back.
+                                cy.url().then((currUrl)=>{
+                                    cy.visit(currUrl + '?datastore=database').then(()=>{
+                                        cy.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler SuperWrangler").then(()=>{
+                    
+                                            // Cleanup & test again
+                                            cy.get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click();
+                                            cy.get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperWrangler').clear().type('Wrangler').then((inputfield)=>{
+                                                cy.wait(100);
+                                                cy.get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click().then(()=>{
+                                                    cy.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").then(()=>{
+                                                        cy.wait(100);
+                                                        cy.visit(currUrl + '?datastore=database').then(()=>{
+                                                            cy.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler");
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+
+
+                            });
+                        });
+                    });
+                });
             });
 
         });
-
+/*
         it('Can click and visit user profile from top-right menu; it is correct user profile', function(){
 
             cy.get("#user_actions_dropdown").click().then(()=>{
@@ -174,7 +212,7 @@ describe('Test logging in, navigating to profile page, editing last_name, & edit
             });
 
         });
-
+*/
     });
 
 
