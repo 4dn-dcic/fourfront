@@ -60,31 +60,30 @@ describe('Can navigate around Static Pages in top nav dropdown', function () {
                             }
 
                             listItem.click();
-                            cy.get('#page-title-container span.title')
-                                .should('not.have.text', prevTitle).then((t)=>{
-                                    var titleText = t.text();
-                                    expect(titleText).to.have.length.above(0);
-                                    prevTitle = titleText;
+                            cy.get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                                var titleText = t.text();
+                                expect(titleText).to.have.length.above(0);
+                                prevTitle = titleText;
 
-                                    if (!haveWeSeenPageWithTableOfContents) {
-                                        cy.window().then((w)=>{
-                                            if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
-                                                haveWeSeenPageWithTableOfContents = true;
-                                                const origScrollTop = w.scrollY;
-                                                cy.get('div.table-of-contents li.table-content-entry a').last().click().end().wait(500).then(()=>{
-                                                    expect(w.scrollY).to.not.equal(origScrollTop);
-                                                    finish(titleText);
-                                                });
-                                            } else { 
+                                if (!haveWeSeenPageWithTableOfContents) {
+                                    cy.window().then((w)=>{
+                                        if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
+                                            haveWeSeenPageWithTableOfContents = true;
+                                            const origScrollTop = w.scrollY;
+                                            cy.get('div.table-of-contents li.table-content-entry a').last().click().end().wait(500).then(()=>{
+                                                expect(w.scrollY).to.not.equal(origScrollTop);
                                                 finish(titleText);
-                                            }
-                                        });
-                                        
-                                    } else {
-                                        finish(titleText);
-                                    }
+                                            });
+                                        } else { 
+                                            finish(titleText);
+                                        }
+                                    });
                                     
-                                });
+                                } else {
+                                    finish(titleText);
+                                }
+                                
+                            });
                         }
 
                         doVisit(listItems[count]);
