@@ -52,6 +52,9 @@
                 "normvector_juicerformat",
                 "zip",
                 "bg",
+                "bw",
+                "bed",
+                "txt",
                 "other"
             ]
         },
@@ -78,6 +81,7 @@
              "title": "Source Experiments",
              "description": "Experiments that this file is associated with",
              "type": "array",
+             "lookup": 40,
              "items": {
                  "title": "Source Experiment",
                  "type": "string"
@@ -97,6 +101,9 @@
         "normvector_juicerformat": ".normvector.juicerformat.gz",
         "zip": ".zip",
         "bg": ".bg",
+        "bw": ".bw",
+        "bed": ".bed.gz",
+        "txt": ".txt.gz",
         "other": ""
     },
     "facets" : {

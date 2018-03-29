@@ -34,15 +34,18 @@
         },
         "ethnicity": {
             "title": "Ethnicity",
-            "type": "string"
+            "type": "string",
+            "lookup": 30
         },
         "health_status": {
             "title": "Individual Health Status",
-            "type": "string"
+            "type": "string",
+            "lookup": 40
         },
         "life_stage": {
             "title": "Life stage",
             "type": "string",
+            "lookup": 20,
             "enum": [
                 "fetal",
                 "newborn",

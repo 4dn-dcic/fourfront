@@ -53,6 +53,7 @@
             "title": "Biotinylated RNA base",
             "description": "The biotinylated base used to tag the in vitro transcribed capture RNA",
             "type": "string",
+            "lookup": 300,
             "internal_comment": "should this be a controlled CV with enum?"
         },
         "targeted_regions": {
@@ -70,12 +71,14 @@
                         "title": "Target",
                         "description": "The genes or region that is specifically targeted",
                         "type": "string",
+                        "lookup": 310,
                         "linkTo": "Target"
                     },
                     "oligo_file": {
                         "title": "Oligonucleotide Fasta File",
                         "description": "The multi fasta file that lists all the oligos used for this region",
                         "type": "string",
+                        "lookup": 311,
                         "linkTo": "File"
                     }
                 }

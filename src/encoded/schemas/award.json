@@ -34,26 +34,30 @@
             "rdfs:subPropertyOf": "dc:title",
             "title": "Name",
             "description": "The grant name from the NIH database, if applicable.",
-            "type": "string"
+            "type": "string",
+            "lookup": 20
         },
         "name": {
             "title": "Number",
             "description": "The official grant number from the NIH database, if applicable",
             "type": "string",
             "pattern": "^[A-Za-z0-9\\-]+$",
+            "lookup": 30,
             "uniqueKey": true
         },
         "description": {
             "rdfs:subPropertyOf": "dc:description",
             "title": "Description",
             "type": "string",
-            "formInput": "textarea"
+            "formInput": "textarea",
+            "lookup": 40
         },
         "start_date": {
             "title": "Start date",
             "description": "YYYY-MM-DD formatted date.",
             "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
+            "lookup": 50,
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
@@ -64,6 +68,7 @@
             "description": "YYYY-MM-DD formatted date.",
              "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
+            "lookup": 60,
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
@@ -75,19 +80,22 @@
             "title": "URL",
             "description": "An external resource with additional information about the grant.",
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "lookup": 70
         },
         "pi": {
             "title": "P.I.",
             "description": "Principle Investigator of the grant.",
             "comment": "See user.json for available identifiers.",
             "type": "string",
+            "lookup": 80,
             "linkTo": "User"
         },
         "project": {
             "title": "Project",
             "description": "The name of the consortium project",
             "type": "string",
+            "lookup": 90,
             "enum": [
                 "4DN",
                 "ENCODE",
@@ -98,6 +106,7 @@
             "title": "View access group",
             "description": "The group that determines which set of data the user has permission to view.",
             "type": "string",
+            "lookup": 100,
             "enum": [
                 "4DN",
                 "Not 4DN",

@@ -32,12 +32,14 @@
             "title": "Description",
             "description": "A short description of the labeling path",
             "type": "string",
+            "lookup": 20,
             "formInput": "textarea"
         },
         "target": {
             "title": "Targets of Labelling",
             "description": "Protein/RNA/DNA or cellular structure targeted for labeling",
             "type": "array",
+            "lookup": 30,
             "items": {
                 "title": "Target of labelling",
                 "type": "string",
@@ -47,12 +49,14 @@
         "labeled_probe": {
             "title": "Probe with the Label",
             "description": "Antibodies/Primers/Chemicals that carry the label",
-            "type": "string"
+            "type": "string",
+            "lookup": 50
         },
         "type_labeled_probe": {
             "title": "Type of Labeled Probe",
             "description": "General classification of the labeled probe",
             "type": "string",
+            "lookup": 60,
             "enum": [
                 "Antibody",
                 "Nanobody",
@@ -67,6 +71,7 @@
             "title": "Labels",
             "description": "Fluorescent labels used for imaging",
             "type": "array",
+            "lookup": 40,
             "internal_comment": "Link to a label database through ontologies",
             "items": {
                 "title": "Label",
@@ -77,9 +82,22 @@
             "title": "Mediators of Target Labeling",
             "description": "Antibodies/Primers/Chemicals used for labeling the target",
             "type": "array",
+            "lookup": 70,
             "items": {
                 "title": "Targets for labelling",
                 "type": "string"
+            }
+        },
+        "file_reference": {
+            "title": "Supporting Files",
+            "description": "Files associated with the imaging path (ex. probe sequences)",
+            "type": "array",
+            "lookup": 80,
+            "items": {
+                "title": "File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileReference"
             }
         }
     }

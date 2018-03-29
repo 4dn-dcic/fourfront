@@ -32,22 +32,26 @@
         "image_pixel_size":{
             "title": "Image pixel size (µm)",
             "description": "the dimensions of pixels in the image",
-            "type": "number"
+            "type": "number",
+            "lookup": 25
         },
         "image_z_step":{
             "title": "Image Z step (µm)",
             "description": "Distance between optical planes",
-            "type": "number"
+            "type": "number",
+            "lookup": 26
         },
         "image_t_step":{
             "title": "Image time step",
             "description": "the time step between images, e.g. 2 sec, 100 millisec",
-            "type": "string"
+            "type": "string",
+            "lookup": 27
         },
         "image_channel_encoding":{
             "title": "Image channel encoding",
             "description": "Order of time, z, and channel frames",
             "type": "string",
+            "lookup": 28,
             "enum":["xyzct",
                     "xyztc",
                     "xyczt",
@@ -58,117 +62,140 @@
         "microscope_model":{
             "title": "Microscope model",
             "description": "Manufacturer and model of the instrument used for imaging",
-            "type": "string"
+            "type": "string",
+            "lookup": 31
         },
         "objective_model":{
             "title": "Objective model",
             "description": "Manufacturer and model of the microscope objective",
-            "type": "string"
+            "type": "string",
+            "lookup": 32
         },
         "objective_na":{
             "title": "Objective NA",
             "description": "Numerical aparture of the objective",
-            "type": "number"
+            "type": "number",
+            "lookup": 34
         },
         "objective_magnification":{
             "title": "Objective magnification (X)",
             "description": "Magnification as stated on the objective",
-            "type": "number"
+            "type": "number",
+            "lookup": 33
         },
         "objective_designation":{
             "title": "Objective special designation",
             "description": "Please indicate if there is a special purpose for the objective(e.g. TIRF, …)",
-            "type": "string"
+            "type": "string",
+            "lookup": 37
         },
         "microscope_effective_magnification":{
             "title": "Microscope magnification (X)",
             "description": "Total effective magnification, with relay or other additional magnification",
-            "type": "number"
+            "type": "number",
+            "lookup": 40
         },
         "microscope_modality":{
             "title": "Microscope modality",
             "description": "e.g. widefield, confocal, TIRF, STED ...",
-            "type": "string"
+            "type": "string",
+            "lookup": 30
         },
         "ch00_light_source_type":{
             "title": "Ch00 light source type",
             "description": "Type of the light source for channel 0",
-            "type": "string"
+            "type": "string",
+            "lookup": 100
         },
         "ch00_light_source_model":{
             "title": "Ch00 light source model",
             "description": "Manufacturer and model number of the light source on channel 0",
-            "type": "string"
+            "type": "string",
+            "lookup": 101
         },
         "ch00_light_source_center_wl":{
             "title": "Ch00 center wavelength",
             "description": "Center wavelength of the light source on ch00",
-            "type": "number"
+            "type": "number",
+            "lookup": 102
         },
         "ch00_detector_type":{
             "title": "Ch00 detector type",
             "description": "e.g. camera, confocal, etc...",
-            "type": "string"
+            "type": "string",
+            "lookup": 103
         },
         "ch01_light_source_type":{
             "title": "Ch01 light source type",
             "description": "Type of the light source for channel 1",
-            "type": "string"
+            "type": "string",
+            "lookup": 200
         },
         "ch01_light_source_model":{
             "title": "Ch01 light source model",
             "description": "Manufacturer and model number of the light source on channel 1",
-            "type": "string"
+            "type": "string",
+            "lookup": 201
         },
         "ch01_light_source_center_wl":{
             "title": "Ch01 center wavelength",
             "description": "Center wavelength of the light source on ch01",
-            "type": "number"
+            "type": "number",
+            "lookup": 202
         },
         "ch01_detector_type":{
             "title": "Ch01 detector type",
             "description": "e.g. camera, confocal, etc...",
-            "type": "string"
+            "type": "string",
+            "lookup": 203
         },
         "ch02_light_source_type":{
             "title": "Ch02 light source type",
             "description": "Type of the light source for channel 2",
-            "type": "string"
+            "type": "string",
+            "lookup": 300
         },
         "ch02_light_source_model":{
             "title": "Ch02 light source model",
             "description": "Manufacturer and model number of the light source on channel 2",
-            "type": "string"
+            "type": "string",
+            "lookup": 301
         },
         "ch02_light_source_center_wl":{
             "title": "Ch02 center wavelength",
             "description": "Center wavelength of the light source on ch02",
-            "type": "number"
+            "type": "number",
+            "lookup": 302
         },
         "ch02_detector_type":{
             "title": "Ch02 detector type",
             "description": "e.g. camera, confocal, etc...",
-            "type": "string"
+            "type": "string",
+            "lookup": 303
         },
         "ch03_light_source_type":{
             "title": "Ch03 light source type",
             "description": "Type of the light source for channel 3",
-            "type": "string"
+            "type": "string",
+            "lookup": 400
         },
         "ch03_light_source_model":{
             "title": "Ch03 light source model",
             "description": "Manufacturer and model number of the light source on channel 3",
-            "type": "string"
+            "type": "string",
+            "lookup": 401
         },
         "ch03_light_source_center_wl":{
             "title": "Ch03 center wavelength",
             "description": "Center wavelength of the light source on ch03",
-            "type": "number"
+            "type": "number",
+            "lookup": 402
         },
         "ch03_detector_type":{
             "title": "Ch03 detector type",
             "description": "e.g. camera, confocal, etc...",
-            "type": "string"
+            "type": "string",
+            "lookup": 403
         }
     }
 }
