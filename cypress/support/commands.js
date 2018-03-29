@@ -75,22 +75,20 @@ Cypress.Commands.add('login4DN', function(options = {}){
 
         return cy.window().then((w)=>{
             w.fourfront.JWT.save(jwt_token);
-            return w.fourfront.navigate('', {'inPlace':true}).then(()=>{
+            w.fourfront.navigate('', {'inPlace':true});
 
-                return cy.request({ // Probably not needed except to validate JWT (we can just reload and be logged in by this point)
-                    'url' : '/login',
-                    'method' : 'POST',
-                    'body' : JSON.stringify({'id_token' : jwt_token}),
-                    'headers' : { 'Authorization': 'Bearer ' + jwt_token },
-                    'followRedirect' : true
-                }).then(function(resp){
-                    //w.fourfront.JWT.save(jwt_token);
-                    w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
-                    w.fourfront.app.updateUserInfo(); // Triggers app.state.session change
-                    return cy.wait(150); // For React JS stuff to finish updating & triggering BarPlotData request etc.
-                });
+            return cy.request({ // Probably not needed except to validate JWT (we can just reload and be logged in by this point)
+                'url' : '/login',
+                'method' : 'POST',
+                'body' : JSON.stringify({'id_token' : jwt_token}),
+                'headers' : { 'Authorization': 'Bearer ' + jwt_token },
+                'followRedirect' : true
+            }).then(function(resp){
+                //w.fourfront.JWT.save(jwt_token);
+                w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
+                w.fourfront.app.updateUserInfo(); // Triggers app.state.session change
+            }).wait(150); // For React JS stuff to finish updating & triggering BarPlotData request etc.
 
-            });
         });
 
         
