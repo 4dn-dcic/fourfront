@@ -55,12 +55,14 @@ describe('Can navigate around Static Pages in top nav dropdown', function () {
                                     'message' : 'Visited page with title "' + titleText + '".'
                                 });
                                 if (count < listItems.length){
-                                    doVisit(listItems[count]);
+                                    cy.get('#sHelp').click().wait(500).then(()=>{
+                                        cy.get('ul[aria-labelledby="sHelp"] li:nth-child(' + (count + 1) + ') a').click().then((nextListItem)=>{
+                                            doVisit(nextListItem);
+                                        });
+                                    });
                                 }
                             }
-
-                            listItem.click();
-                            cy.get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                            cy.wait(100).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                                 var titleText = t.text();
                                 expect(titleText).to.have.length.above(0);
                                 prevTitle = titleText;
@@ -70,7 +72,7 @@ describe('Can navigate around Static Pages in top nav dropdown', function () {
                                         if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
                                             haveWeSeenPageWithTableOfContents = true;
                                             const origScrollTop = w.scrollY;
-                                            cy.get('div.table-of-contents li.table-content-entry a').last().click().end().wait(500).then(()=>{
+                                            cy.get('div.table-of-contents li.table-content-entry a').last().click().end().wait(1500).then(()=>{
                                                 expect(w.scrollY).to.not.equal(origScrollTop);
                                                 finish(titleText);
                                             });
@@ -85,7 +87,7 @@ describe('Can navigate around Static Pages in top nav dropdown', function () {
                                 
                             });
                         }
-
+                        listItems[0].click();
                         doVisit(listItems[count]);
 
                     });
