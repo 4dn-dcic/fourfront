@@ -1550,6 +1550,16 @@ $download-button-width : 100px;
 
 		.higlass-instance {
 
+			.TrackControl-module_track-control-2zDf3 {
+				display: none;
+			}
+
+			.ViewHeader-module_multitrack-header-3XnZx .ViewHeader-module_multitrack-header-nav-list-2nvcu {
+				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3){
+					display: none;
+				}
+			}
+
 			height: 600px;
 			transition: opacity 1s;
 			opacity: 0;
@@ -1568,6 +1578,14 @@ $download-button-width : 100px;
 				}
 			}
 		}
+	}
+
+}
+
+.hg-popup .context-menu-item > div {
+	> .ContextMenu-module_context-menu-hr-3yapb:nth-child(4),
+	> .ContextMenu-module_context-menu-item-1HeVv:nth-child(5) {
+		display: none;
 	}
 
 }

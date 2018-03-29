@@ -55,10 +55,10 @@ export class HiGlassTabView extends React.Component {
         const centerTrackHeight = height - 50;
 
         return {
-            "editable": false,
+            "editable": true,
             "zoomFixed": false,
             "trackSourceServers": [
-                "http://54.86.58.34/api/v1"
+                "http://higlass.io/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
             ],
             "exportViewUrl": "/api/v1/viewconfs",
             "views": [
@@ -68,9 +68,85 @@ export class HiGlassTabView extends React.Component {
                         234746886.15079364,
                         238230126.6906902
                     ],
+                    "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                    // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
+                    "genomePositionSearchBox": {
+                        "autocompleteServer": "http://higlass.io/api/v1",
+                        "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
+                        "chromInfoServer": "http://higlass.io/api/v1",
+                        "chromInfoId": "hg38",
+                        "visible": true
+                    },
+                    
                     "tracks": {
-                        "top": [],                  // Add more?
-                        "left": [],
+                        "top": [
+                            {
+                                "name": "Gene Annotations (hg38)",
+                                "created": "2017-07-14T15:27:46.989053Z",
+                                "server": "http://higlass.io/api/v1",
+                                "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
+                                "type": "horizontal-gene-annotations",
+                                "options": {
+                                    "labelColor": "black",
+                                    "labelPosition": "hidden",
+                                    "plusStrandColor": "blue",
+                                    "minusStrandColor": "red",
+                                    "trackBorderWidth": 0,
+                                    "trackBorderColor": "black",
+                                    "name": "Gene Annotations (hg38)"
+                                },
+                                "width": 20,
+                                "height": 55,
+                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                                "position": "top"
+                            },
+                            {
+                                "name": "Chromosome Axis",
+                                "created": "2017-07-17T14:16:45.346835Z",
+                                "server": "http://higlass.io/api/v1",
+                                "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
+                                "type": "horizontal-chromosome-labels",
+                                "options": {},
+                                "width": 20,
+                                "height": 30,
+                                "position": "top"
+                            }
+                        ],
+                        "left": [
+                            {
+                                "name": "Gene Annotations (hg38)",
+                                "created": "2017-07-14T15:27:46.989053Z",
+                                "server": "http://higlass.io/api/v1",
+                                "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
+                                "uid": "faxvbXweTle5ba4ESIlZOg",
+                                "type": "vertical-gene-annotations",
+                                "options": {
+                                    "labelColor": "black",
+                                    "labelPosition": "hidden",
+                                    "plusStrandColor": "blue",
+                                    "minusStrandColor": "red",
+                                    "trackBorderWidth": 0,
+                                    "trackBorderColor": "black",
+                                    "name": "Gene Annotations (hg38)"
+                                },
+                                "width": 55,
+                                "height": 20,
+                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                                "position": "left"
+                            },
+                            {
+                                "name": "Chromosome Axis",
+                                "created": "2017-07-17T14:16:45.346835Z",
+                                "server": "http://higlass.io/api/v1",
+                                "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
+                                "uid": "aXbmQTsMR2ao85gzBVJeRw",
+                                "type": "vertical-chromosome-labels",
+                                "options": {},
+                                "width": 20,
+                                "height": 30,
+                                "position": "left"
+                            }
+                        ],
                         "center": [
                             {
                                 "uid": "c1",
