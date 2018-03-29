@@ -2,7 +2,7 @@ import _ from 'underscore';
 
 describe('Browse Views', function () {
 
-    context('Test /browse/ page redirection from homepage', function(){
+    context.skip('Test /browse/ page redirection from homepage', function(){
         /*
         before(function(){
             cy.visit('/');
@@ -19,9 +19,10 @@ describe('Browse Views', function () {
 
         });
 
-        it('Only shows award.project=4DN results.', function(){
+        it('Only shows award.project=4DN results & "Include External Data" is off', function(){
 
             cy.location('search').should('include', 'award.project=4DN');
+            cy.get('#stats .browse-base-state-toggle-container input[type="checkbox"]').should('not.be.checked');
 
         });
 
@@ -37,9 +38,24 @@ describe('Browse Views', function () {
 
     });
 
-    context('QuickInfoBar', function(){
+    context('QuickInfoBar & BarPlotChart', function(){
 
-        it('Test that QuickInfoBar counts change re: logging in', function(){
+        before(function(){
+            cy.clearCookies();
+        });
+
+        beforeEach(function(){
+            Cypress.Cookies.preserveOnce(); // @see https://docs.cypress.io/api/cypress-api/cookies.html#Preserve-Once
+            Cypress.Cookies.defaults({
+                whitelist: [ "jwtToken", "searchSessionID" ]
+            });
+        });
+
+        afterEach(function(){
+            Cypress.Cookies.preserveOnce(); // @see https://docs.cypress.io/api/cypress-api/cookies.html#Preserve-Once
+        });
+
+        it('Login & test that QuickInfoBar counts changed, that we have BarPlot bars', function(){
 
 
             cy.visit('/browse/', { "failOnStatusCode" : false });
@@ -53,6 +69,12 @@ describe('Browse Views', function () {
 
             });
 
+        });
+
+        it('Ensure we have some BarPlot bars', function(){
+
+            cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0);
+            cy.wait(1000).visit('/browse/', { "failOnStatusCode" : false });
 
         });
 
