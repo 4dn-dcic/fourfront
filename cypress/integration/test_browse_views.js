@@ -10,9 +10,9 @@ describe('Browse Views', function () {
         */
 
         it('If start from home page, clicking on Browse nav menu item gets us to Browse page.', function(){
-            
+
             cy.visit('/');
-            
+
             cy.get('#sBrowse').click().then(()=>{
                 cy.get('#page-title-container .page-title span.title').should('have.text', 'Data Browser');
             });

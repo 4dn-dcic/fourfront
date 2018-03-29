@@ -193,8 +193,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         if hasattr(user_model, 'source') and user_model.source.get('object'):
             user_dict = user_model.source['object']
         else:
-            from .types.user import User
-            user_dict = User(request.registry, user_model).__json__(request)
+            from .types.user import User as UserClass # Prevent overriding existing User (same thing?)
+            user_dict = UserClass(request.registry, user_model).__json__(request)
 
         return {p: v for p, v in user_dict.items() if p in include_detail_fields}
 

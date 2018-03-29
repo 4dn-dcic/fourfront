@@ -91,7 +91,7 @@ Cypress.Commands.add('login4DN', function(options = {}){
 
         });
 
-        
+
 
     });
 
@@ -103,9 +103,9 @@ Cypress.Commands.add('getQuickInfoBarCounts', function(options = {}){
     return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).then((expsetCountElemText)=>{
         cy.get('#stats-stat-experiments').then((expCountElem)=>{
             cy.get('#stats-stat-files').then((fileCountElem)=>{
-                let experiment_sets = parseInt(expsetCountElemText),
-                    experiments = parseInt(expCountElem.text()),
-                    files = parseInt(fileCountElem.text());
+                var experiment_sets = parseInt(expsetCountElemText),
+                    experiments     = parseInt(expCountElem.text()),
+                    files           = parseInt(fileCountElem.text());
 
                 return { experiment_sets, experiments, files };
             });

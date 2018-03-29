@@ -26,7 +26,7 @@ describe('Search Views', function () {
             cy.location('search').should('include', 'type=Item');
 
             cy.searchPageTotalResultCount().then((totalCountExpected)=>{
-                let intervalCount = Math.min(20, parseInt(totalCountExpected / 25));
+                const intervalCount = Math.min(20, parseInt(totalCountExpected / 25));
 
                 for (let interval = 0; interval < intervalCount; interval++){
                     cy.scrollToBottom().then(()=>{
