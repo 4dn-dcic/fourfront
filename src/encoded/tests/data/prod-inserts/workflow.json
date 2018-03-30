@@ -495,8 +495,6 @@
         "accession": "4DNWFAW5VTA5",
         "app_name": "fastqc-0-11-4-1",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v32",
         "arguments": [
             {
                 "argument_type": "Input file",
@@ -534,6 +532,8 @@
             "Repli-seq"
         ],
         "description": "FastQC quality control step for fastq files",
+        "docker_image_name": "duplexa/4dn-hic:v32",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "fastqc-0-11-4-1",
         "steps": [
@@ -670,6 +670,7 @@
         "description": "PairsQC quality control step for pairs files",
         "lab": "4dn-dcic-lab",
         "name": "pairsqc-single",
+        "status": "released",
         "steps": [
             {
                 "inputs": [
@@ -758,8 +759,7 @@
         "title": "PairsQC",
         "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
         "workflow_diagram": "",
-        "workflow_type": "Data QC",
-        "status": "released"
+        "workflow_type": "Data QC"
     },
     {
         "accession": "4DNWF6DUSPTF",
@@ -916,8 +916,6 @@
         "accession": "4DNWF2HFF82B",
         "app_name": "md5",
         "app_version": "0.2.6",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/md5:v2",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -942,6 +940,8 @@
             "Repli-seq"
         ],
         "description": "md5 on uncompressed file",
+        "docker_image_name": "duplexa/md5:v2",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "md5",
         "steps": [
@@ -2860,8 +2860,6 @@
         "accession": "4DNWFP00U73B",
         "app_name": "hi-c-processing-partb",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "chromsizes",
@@ -2918,6 +2916,8 @@
             "Hi-C"
         ],
         "description": "Hi-C processing part B revision 44",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/44",
         "steps": [
@@ -3623,8 +3623,6 @@
         "accession": "4DNWFZOGJEI4",
         "app_name": "bwa-mem",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3664,8 +3662,11 @@
             "Hi-C"
         ],
         "description": "Creating a lossless alignment bam file from a pair of fastq files",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
+        "status": "released",
         "steps": [
             {
                 "inputs": [
@@ -3755,8 +3756,7 @@
         "title": "Alignment for Hi-C using bwa-mem",
         "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
         "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis",
-        "status": "released"
+        "workflow_type": "Hi-C data analysis"
     },
     {
         "accession": "4DNWF84NFOQP",
@@ -3801,6 +3801,8 @@
             "Hi-C"
         ],
         "description": "Creating a lossless alignment bam file from a pair of fastq files",
+        "docker_image_name": "duplexa/4dn-hic:v42",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
         "steps": [
@@ -3892,16 +3894,12 @@
         "title": "Alignment for Hi-C using bwa-mem",
         "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
         "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v42"
+        "workflow_type": "Hi-C data analysis"
     },
     {
         "accession": "4DNWF37VHW0F",
         "app_name": "pairsam-parse-sort",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "bam",
@@ -3933,6 +3931,8 @@
             "Hi-C"
         ],
         "description": "Parsing and Sorting for Hi-C using pairsamtools",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "pairsam-parse-sort",
         "steps": [
@@ -4016,8 +4016,6 @@
         "accession": "4DNWF3YV81HS",
         "app_name": "pairsam-merge",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4044,6 +4042,8 @@
             "Hi-C"
         ],
         "description": "Merging for Hi-C using pairsamtools",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "pairsam-merge",
         "steps": [
@@ -4113,8 +4113,6 @@
         "accession": "4DNWF1Y7DN3H",
         "app_name": "pairsam-markasdup",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4137,6 +4135,8 @@
             "Hi-C"
         ],
         "description": "Duplicate Marking for Hi-C using pairsamtools",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "pairsam-markasdup",
         "steps": [
@@ -4193,8 +4193,6 @@
         "accession": "4DNWF38VH15",
         "app_name": "pairsam-filter",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairsam",
@@ -4230,6 +4228,8 @@
             "Hi-C"
         ],
         "description": "Filtering for Hi-C using pairsamtools",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "pairsam-filter",
         "steps": [
@@ -4317,8 +4317,6 @@
         "accession": "4DNWZJ2G671",
         "app_name": "addfragtopairs",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -4349,6 +4347,8 @@
             "Hi-C"
         ],
         "description": "Adding restriction fragment information for Hi-C using pairsamtools",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "addfragtopairs",
         "steps": [
@@ -4422,8 +4422,6 @@
         "accession": "4DNWZH36VU2",
         "app_name": "pairs-patch",
         "app_version": "0.2.0",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v40",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -4449,6 +4447,8 @@
             "Hi-C"
         ],
         "description": "Patching pairs file for Hi-C using pairsamtools",
+        "docker_image_name": "duplexa/4dn-hic:v40",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "pairs-patch",
         "steps": [
@@ -4558,8 +4558,11 @@
             "Hi-C"
         ],
         "description": "This is a subworkflow of the Hi-C data processing pipeline. It takes a bam file as input and performs parsing, sorting, filtering and deduping. It produces two output files, a lossless, filter-annotated bam file and a filtered pairs (contact list) file.",
+        "docker_image_name": "duplexa/4dn-hic:v42",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-bam",
+        "status": "released",
         "steps": [
             {
                 "inputs": [
@@ -4816,10 +4819,7 @@
         ],
         "title": "Hi-C Post-alignment Processing",
         "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
-        "workflow_type": "Hi-C data analysis",
-        "status": "released",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v42"
+        "workflow_type": "Hi-C data analysis"
     },
     {
         "app_name": "repliseq-parta",
@@ -4854,16 +4854,6 @@
             {
                 "argument_format": "bam",
                 "argument_type": "Output processed file",
-                "workflow_argument_name": "bam"
-            },
-            {
-                "argument_format": "bam",
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "filtered_sorted_bam"
-            },
-            {
-                "argument_format": "bam",
-                "argument_type": "Output processed file",
                 "workflow_argument_name": "filtered_sorted_deduped_bam"
             },
             {
@@ -4885,7 +4875,7 @@
             "dedup.cwl",
             "count.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
         "cwl_main_filename": "repliseq-parta.cwl",
         "data_types": [
             "Repli-seq"
@@ -4918,7 +4908,7 @@
                     "description": "Adapter removal according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/97ffd707-b673-4184-a0f6-ca1dfc324067/",
-                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                        "/software/a5d01ff2-88b5-45c6-9c1d-f6c156248b43/"
                     ]
                 },
                 "name": "clip",
@@ -4927,8 +4917,7 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "fastq",
-                            "global": false,
-                            "type": "data file"
+                            "global": false
                         },
                         "name": "out_clipped_fastq",
                         "target": [
@@ -4946,8 +4935,7 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "fastq",
-                            "global": false,
-                            "type": "data file"
+                            "global": false
                         },
                         "name": "fastq1",
                         "source": [
@@ -4992,7 +4980,7 @@
                     "description": "Alignment according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/5befdeda-66a8-43bc-a469-5a5e7248198e/",
-                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                        "/software/a5d01ff2-88b5-45c6-9c1d-f6c156248b43/"
                     ]
                 },
                 "name": "align",
@@ -5001,14 +4989,10 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bam",
-                            "global": true,
-                            "type": "data file"
+                            "global": false
                         },
                         "name": "out_bam",
                         "target": [
-                            {
-                                "name": "bam"
-                            },
                             {
                                 "name": "input_bam",
                                 "step": "filtersort"
@@ -5023,8 +5007,7 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bam",
-                            "global": false,
-                            "type": "data file"
+                            "global": false
                         },
                         "name": "input_bam",
                         "source": [
@@ -5069,7 +5052,7 @@
                     "description": "Filtering and sorting according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
-                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                        "/software/a5d01ff2-88b5-45c6-9c1d-f6c156248b43/"
                     ]
                 },
                 "name": "filtersort",
@@ -5078,14 +5061,10 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bam",
-                            "global": true,
-                            "type": "data file"
+                            "global": false
                         },
                         "name": "out_filtered_sorted_bam",
                         "target": [
-                            {
-                                "name": "filtered_sorted_bam"
-                            },
                             {
                                 "name": "input_bam",
                                 "step": "dedup"
@@ -5100,8 +5079,7 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bam",
-                            "global": false,
-                            "type": "data file"
+                            "global": false
                         },
                         "name": "input_bam",
                         "source": [
@@ -5119,7 +5097,7 @@
                     "description": "PCR Duplicate removal according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
-                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                        "/software/a5d01ff2-88b5-45c6-9c1d-f6c156248b43/"
                     ]
                 },
                 "name": "dedup",
@@ -5139,6 +5117,19 @@
                             {
                                 "name": "input_bam",
                                 "step": "count"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "out_qc_report",
+                        "target": [
+                            {
+                                "name": "dedup_qc_report"
                             }
                         ]
                     }
@@ -5164,7 +5155,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "chromsizes",
+                            "file_format": "chromsize",
                             "global": true,
                             "type": "reference file"
                         },
@@ -5197,7 +5188,8 @@
                     "description": "Read aggregation according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
-                        "/software/653499f6-0b91-48e0-b2d6-a40e1771e466/"
+                        "/software/a5d01ff2-88b5-45c6-9c1d-f6c156248b43/",
+                        "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/"
                     ]
                 },
                 "name": "count",
@@ -5205,7 +5197,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "bam",
+                            "file_format": "bg",
                             "global": true,
                             "type": "data file"
                         },
@@ -5326,8 +5318,11 @@
             "Hi-C"
         ],
         "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "docker_image_name": "duplexa/4dn-hic:v42",
+        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs",
+        "status": "released",
         "steps": [
             {
                 "inputs": [
@@ -5918,9 +5913,6 @@
         ],
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
         "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
-        "workflow_type": "Hi-C data analysis",
-        "status": "released",
-        "docker_registry_url": "https://hub.docker.com/",
-        "docker_image_name": "duplexa/4dn-hic:v42"
+        "workflow_type": "Hi-C data analysis"
     }
 ]
