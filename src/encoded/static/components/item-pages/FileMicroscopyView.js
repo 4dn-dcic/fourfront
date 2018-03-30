@@ -17,20 +17,12 @@ import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownload
 export default class FileMicroscopyView extends FileView {
 
     getTabViewContents(){
+        var tabs =  super.getTabViewContents();
 
-        var initTabs = [];
-        var context = this.props.context;
+        // Replace default FileOverview (1st tab) with FileMicroscopyViewOverview
+        tabs[0] = FileMicroscopyViewOverview.getTabObject(this.props.context, this.props.schemas, tabs[0].content && tabs[0].content.props.children[2] && tabs[0].content.props.children[2].props.width);
 
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (width) width -= 20;
-
-        initTabs.push(FileMicroscopyViewOverview.getTabObject(context, this.props.schemas, width));
-
-        if (FileView.doesGraphExist(context)){
-            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
-        }
-        
-        return initTabs.concat(this.getCommonTabs());
+        return tabs;
     }
 
 }
@@ -68,7 +60,7 @@ class FileMicroscopyViewOverview extends React.Component {
     }
 
     render(){
-        var { context } = this.props;
+        var { context, schemas, width } = this.props;
 
         var setsByKey;
         var table = null;
@@ -80,12 +72,12 @@ class FileMicroscopyViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} defaultOpenIndices={[0]} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
         }
 
         return (
             <div>
-                <FileMicOverViewBody result={context} schemas={this.props.schemas} />
+                <FileMicOverViewBody result={context} schemas={schemas} />
                 { table }
             </div>
         );

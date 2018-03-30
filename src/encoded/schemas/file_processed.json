@@ -52,6 +52,9 @@
                 "normvector_juicerformat",
                 "zip",
                 "bg",
+                "bw",
+                "bed",
+                "txt",
                 "other"
             ]
         },
@@ -97,7 +100,10 @@
         "hic": ".hic",
         "normvector_juicerformat": ".normvector.juicerformat.gz",
         "zip": ".zip",
-        "bg": ".bg",
+        "bg": ".bedGraph.gz",
+        "bw": ".bw",
+        "bed": ".bed.gz",
+        "txt": ".txt.gz",
         "other": ""
     },
     "facets" : {
