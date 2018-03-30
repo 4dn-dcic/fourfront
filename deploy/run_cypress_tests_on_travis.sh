@@ -23,7 +23,7 @@
 # --------------------------------------------------------------------------------------------------------------------------------
 
 
-exec 3< <(travis_wait 20 bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
+exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
 db_server_pid=$!
 count_exp_seq_seen=0
 while read line; do
