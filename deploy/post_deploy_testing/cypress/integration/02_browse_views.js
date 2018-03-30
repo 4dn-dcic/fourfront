@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import { compareQuickInfoCountsVsBarPlotCounts } from './../support/macros';
 
+
 describe('Browse Views', function () {
 
     context('Test /browse/ page redirection from homepage', function(){
@@ -36,7 +37,7 @@ describe('Browse Views', function () {
 
     context('QuickInfoBar & BarPlotChart', function(){
 
-        it('Login & ensure QuickInfoBar counts changed', function(){
+        it('Login & ensure QuickInfoBar counts have changed', function(){
 
             cy.visit('/browse/', { "failOnStatusCode" : false });
             cy.getQuickInfoBarCounts().then((counts)=>{

@@ -1,5 +1,6 @@
 {
-    "baseUrl" : "http://staging.4dnucleome.org",
-    "projectId": "4opx2c"
+    "baseUrl" : "http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/",
+    "projectId": "4opx2c",
+    "defaultCommandTimeout" : 40000
   }
   
