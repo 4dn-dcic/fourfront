@@ -2,7 +2,7 @@
 
 describe('Search Views', function () {
 
-    context.skip('/search/?type=Item', function () {
+    context('/search/?type=Item', function () {
 
         before(function(){ // beforeAll
             cy.visit('/search/');
@@ -40,7 +40,7 @@ describe('Search Views', function () {
 
     });
 
-    context.skip('/search/?type=Page', function(){
+    context('/search/?type=Page', function(){
 
         before(function(){ // beforeAll
             cy.visit('/pages'); // We should get redirected to ?type=Page
