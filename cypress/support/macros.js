@@ -27,7 +27,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
         return _.reduce(arguments, function(m,v){ return m+v; }, 0);
     }
 
-    cy.getQuickInfoBarCounts().then((quickInfoBarCounts)=>{
+    return cy.getQuickInfoBarCounts().then((quickInfoBarCounts)=>{
         expect(quickInfoBarCounts.experiment_sets).to.be.greaterThan(0);
         
         // Test ExpSet counts ==
@@ -44,7 +44,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
 
         // Hover over all bar parts and count up counts
         var hoverCounts = { 'experiment_sets' : 0, 'experiments' : 0, 'files' : 0 };
-        cy.get('.bar-plot-chart.chart-container .chart-bar .bar-part').each(($barPart, idx)=>{
+        return cy.get('.bar-plot-chart.chart-container .chart-bar .bar-part').each(($barPart, idx)=>{
             return cy.wrap($barPart).hoverIn().then(()=>{
                 return cy.wait(150).get('.cursor-component-root .details-title .primary-count').then((expsetCountElem)=>{
                     hoverCounts.experiment_sets += parseInt(expsetCountElem.text());
@@ -62,7 +62,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
             cy.scrollTo('top');
         }).then(()=>{
             // Change to 'experiments' (2nd menu item in aggregate type drown); compare bar & legend counts
-            cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(()=>{
+            return cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(2)')
                 .should('have.text', 'Experiments').click().wait(750).then(()=>{
                     return getBarCounts().then((barCounts)=>{ 
@@ -106,7 +106,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
                         }
                     }).end();
                 }).end();
-            }).window().scrollTo('top');
+            }).window().scrollTo('top').end();
 
         });
         
