@@ -155,5 +155,16 @@
         "treatments_summary": {
             "title": "Treatments"
         }
+    },
+    "columns": {
+        "biosource.individual.organism.name": {
+          "title": "Organism"
+        },
+        "biosource.biosource_type": {
+            "title": "Biosource Type"
+        },
+        "biosource_summary": {
+            "title": "Biosource"
+        }
     }
 }

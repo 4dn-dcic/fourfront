@@ -150,5 +150,10 @@
             ],
             "description": "FastQC metric"
         }
+    },
+    "columns": {
+        "%GC": {
+            "title" : "GC content"
+        }
     }
 }

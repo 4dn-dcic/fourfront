@@ -138,5 +138,16 @@
         "cell_line_tier": {
             "title": "Tier"
         }
+    },
+    "columns": {
+        "individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosource_type": {
+            "title": "Biosource Type"
+        },
+        "cell_line_tier": {
+            "title": "Tier"
+        }
     }
 }

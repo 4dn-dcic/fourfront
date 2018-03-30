@@ -197,5 +197,15 @@
             "type": "string",
             "lookup": 403
         }
+    },
+    "facets": {
+        "microscope_modality":{
+            "title": "Microscope modality"
+        }
+    },
+    "columns": {
+        "microscope_modality":{
+            "title": "Microscope modality"
+        }
     }
 }

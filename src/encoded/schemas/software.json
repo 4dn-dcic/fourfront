@@ -146,5 +146,10 @@
                 }
             }
         }
+    },
+    "facets": {
+        "software_type": {
+            "title": "Types"
+        }
     }
 }

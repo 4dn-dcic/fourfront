@@ -155,5 +155,21 @@
             "format": "uri",
             "exclude_from": ["submit4dn", "FFedit-create"]
         }
+    },
+    "facets": {
+        "categories": {
+            "title": "Categories"
+        },
+        "journal": {
+            "title": "Journal"
+        }
+    },
+    "columns": {
+        "journal": {
+            "title": "Journal"
+        },
+        "date_published": {
+            "title": "Publication Date"
+        }
     }
 }
