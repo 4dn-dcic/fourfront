@@ -45,7 +45,40 @@ Cypress.Commands.add('scrollToBottom', (options) => {
 /**
  * This emulates login.js. Perhaps we should adjust login.js somewhat to match this better re: navigate.then(...) .
  */
-Cypress.Commands.add('login4DN', function(options = {}){
+Cypress.Commands.add('login4DN', function(options = { 'useToken' : true }){
+
+    function performLogin(token){
+        return cy.window().then((w)=>{
+            w.fourfront.JWT.save(token);
+            var res = w.fourfront.navigate('', {'inPlace':true});
+            
+            if (res){
+                return res.then((navResponse)=>{
+
+                    return cy.request({ // Probably not needed except to validate JWT (we can just reload and be logged in by this point)
+                        'url' : '/login',
+                        'method' : 'POST',
+                        'body' : JSON.stringify({'id_token' : token}),
+                        'headers' : { 'Authorization': 'Bearer ' + token },
+                        'followRedirect' : true
+                    }).then(function(resp){
+                        //w.fourfront.JWT.save(jwt_token);
+                        w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
+                        w.fourfront.app.updateUserInfo(); // Triggers app.state.session change
+                    }).end();
+
+                });
+            }
+        }).end();
+    }
+
+    const jwt_token = Cypress.env('JWT_TOKEN');
+
+    if (jwt_token && options.useToken) {
+        return performLogin(jwt_token);
+    }
+
+    // If no token, we try to generate/impersonate one ourselves
 
     const email = options.email || options.user || Cypress.env('LOGIN_AS_USER') || '4dndcic@gmail.com';
     const auth0client = Cypress.env('Auth0Client') || 'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB';
@@ -70,35 +103,7 @@ Cypress.Commands.add('login4DN', function(options = {}){
 
     return cy.exec("exec python3 bin/py -c \"from base64 import b64decode; import jwt, json; print(jwt.encode(json.loads('" + JSON.stringify(jwtPayload).replace(/(\")/g, '\\"') + "'), b64decode('" + auth0secret + "', '-_'), algorithm='HS256').decode('utf-8'))\" &").then((jwt_gen_result)=>{
 
-        const jwt_token = jwt_gen_result.stdout;
-
-        //cy.setCookie('jwtToken', jwt_token); // w.fourfront.JWT.save(jwt_token) performs same action.
-
-        return cy.window().then((w)=>{
-            w.fourfront.JWT.save(jwt_token);
-            var res = w.fourfront.navigate('', {'inPlace':true});
-            
-            if (res){
-                return res.then((navResponse)=>{
-
-                    return cy.request({ // Probably not needed except to validate JWT (we can just reload and be logged in by this point)
-                        'url' : '/login',
-                        'method' : 'POST',
-                        'body' : JSON.stringify({'id_token' : jwt_token}),
-                        'headers' : { 'Authorization': 'Bearer ' + jwt_token },
-                        'followRedirect' : true
-                    }).then(function(resp){
-                        //w.fourfront.JWT.save(jwt_token);
-                        w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
-                        w.fourfront.app.updateUserInfo(); // Triggers app.state.session change
-                    }).end();
-
-                });
-            }
-
-        });
-
-
+        return performLogin(jwt_gen_result.stdout);
 
     });
 

@@ -37,9 +37,14 @@ describe('Browse Views', function () {
 
     context('QuickInfoBar & BarPlotChart', function(){
 
+        before(()=>{
+            cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
+            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end();
+        });
+
+        // Skipped for now re: login issues
         it('Login & ensure QuickInfoBar counts have changed', function(){
 
-            cy.visit('/browse/', { "failOnStatusCode" : false });
             cy.getQuickInfoBarCounts().then((counts)=>{
 
                 const loggedOutCounts = _.clone(counts);
@@ -52,17 +57,20 @@ describe('Browse Views', function () {
 
         });
 
-        it('BarPlot, Legend counts match counts in QuickInfoBar', function(){
+        it('On award.project=4DN view; BarPlot counts == QuickInfoBar counts', function(){
 
-            cy.login4DN().get('.bar-plot-chart .chart-bar').should('have.length.above', 0).then(()=>{
+            cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
+            .end().window().scrollTo(0, 200)
+            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end().wait(300)
+            .then(()=>{
                 compareQuickInfoCountsVsBarPlotCounts();
             });
 
         });
 
-        it('Toggling "Show External Data" => higher, matching counts', function(){
+        it('Toggling "Show External Data" ==> higher, matching counts', function(){
 
-            cy.login4DN().getQuickInfoBarCounts().then((initialCounts)=>{
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
 
                 cy.get('.browse-base-state-toggle-container label.onoffswitch-label').click().then(()=>{
                     cy.wait(1000) // Wait for 'slow-load-container' to become visible if needed, and wait for it to load
@@ -77,9 +85,9 @@ describe('Browse Views', function () {
 
         });
 
-        it('(External) BarPlot, Legend counts match counts in QuickInfoBar', function(){
+        it('External BarPlot counts match counts in QuickInfoBar', function(){
 
-            cy.login4DN().get('.bar-plot-chart .chart-bar').should('have.length.above', 0).then(()=>{
+            cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0).wait(1000).end().then(()=>{
                 compareQuickInfoCountsVsBarPlotCounts();
             });
 
