@@ -4885,7 +4885,7 @@
             "dedup.cwl",
             "count.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq/",
         "cwl_main_filename": "repliseq-parta.cwl",
         "data_types": [
             "Repli-seq"
