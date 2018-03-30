@@ -36,22 +36,6 @@ describe('Browse Views', function () {
 
     context('QuickInfoBar & BarPlotChart', function(){
 
-        before(function(){
-            cy.clearBrowserSession();
-        });
-
-        beforeEach(function(){
-            cy.loadBrowserSession();
-        });
-
-        afterEach(function(){
-            cy.saveBrowserSession();
-        });
-
-        after(function(){
-            cy.clearBrowserSession();
-        });
-
         it('Login & ensure QuickInfoBar counts changed', function(){
 
             cy.visit('/browse/', { "failOnStatusCode" : false });
@@ -69,7 +53,7 @@ describe('Browse Views', function () {
 
         it('BarPlot, Legend counts match counts in QuickInfoBar', function(){
 
-            cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0).then(()=>{
+            cy.login4DN().get('.bar-plot-chart .chart-bar').should('have.length.above', 0).then(()=>{
                 compareQuickInfoCountsVsBarPlotCounts();
             });
 
@@ -77,7 +61,7 @@ describe('Browse Views', function () {
 
         it('Toggling "Show External Data" => higher, matching counts', function(){
 
-            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+            cy.login4DN().getQuickInfoBarCounts().then((initialCounts)=>{
 
                 cy.get('.browse-base-state-toggle-container label.onoffswitch-label').click().then(()=>{
                     cy.wait(1000) // Wait for 'slow-load-container' to become visible if needed, and wait for it to load
@@ -94,7 +78,7 @@ describe('Browse Views', function () {
 
         it('(External) BarPlot, Legend counts match counts in QuickInfoBar', function(){
 
-            cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0).then(()=>{
+            cy.login4DN().get('.bar-plot-chart .chart-bar').should('have.length.above', 0).then(()=>{
                 compareQuickInfoCountsVsBarPlotCounts();
             });
 
