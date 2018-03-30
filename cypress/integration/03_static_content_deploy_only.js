@@ -4,7 +4,7 @@
  */
 
 
-describe.skip('Test logging in, navigating to profile page, editing last_name, & editing it back.', function () {
+describe('Test logging in, navigating to profile page, editing last_name, & editing it back.', function () {
 
 
     context('Login as wrangler@wrangler.com (via impersonating user\'s JWT) works.', function () {
@@ -22,7 +22,7 @@ describe.skip('Test logging in, navigating to profile page, editing last_name, &
 
         it('Ensure logged in, visit profile page, edit last name 2x.', function(){
 
-            cy.login4DN({ 'email' : 'wrangler@wrangler.com' }).end().get('ul.navbar-acct li.user-account-item').should('have.class', 'is-logged-in').then((accountListItem)=>{
+            cy.login4DN({ 'email' : 'wrangler@wrangler.com', 'useEnvToken' : false }).end().get('ul.navbar-acct li.user-account-item').should('have.class', 'is-logged-in').then((accountListItem)=>{
                 expect(accountListItem.children('#user_actions_dropdown').text()).to.contain('Wrangler');
             }).end().get("#user_actions_dropdown").click().then(()=>{
                 cy.get('ul.dropdown-menu[aria-labelledby="user_actions_dropdown"] a#profile').click().then(()=>{

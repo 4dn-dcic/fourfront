@@ -45,7 +45,7 @@ Cypress.Commands.add('scrollToBottom', (options) => {
 /**
  * This emulates login.js. Perhaps we should adjust login.js somewhat to match this better re: navigate.then(...) .
  */
-Cypress.Commands.add('login4DN', function(options = { 'useToken' : true }){
+Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 
     function performLogin(token){
         return cy.window().then((w)=>{
@@ -72,10 +72,11 @@ Cypress.Commands.add('login4DN', function(options = { 'useToken' : true }){
         }).end();
     }
 
-    const jwt_token = Cypress.env('JWT_TOKEN');
-
-    if (jwt_token && options.useToken) {
-        return performLogin(jwt_token);
+    if (options.useEnvToken) {
+        const jwt_token = Cypress.env('JWT_TOKEN');
+        if (jwt_token) {
+            return performLogin(jwt_token);
+        }
     }
 
     // If no token, we try to generate/impersonate one ourselves
