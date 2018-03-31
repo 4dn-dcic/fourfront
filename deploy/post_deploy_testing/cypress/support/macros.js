@@ -51,16 +51,21 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
 
                     // TODO: Grab each barPart.attr('data-count'), compare to hover value for expset.
 
-                    return cy.wrap($barPart).hoverIn().wait(500).then(()=>{
-                        cy.get('.cursor-component-root .details-title .primary-count').then((expsetCountElem)=>{
-                            hoverCounts.experiment_sets += parseInt(expsetCountElem.text());
+                    return cy.wrap($barPart).hoverIn().then(()=>{
+                        // Ensure we're hovering over proper bar/bar-part
+                        cy.get('.cursor-component-root .details-title').contains($barPart.attr('data-term')).end().then(()=>{
+                            if ($bar.attr('data-term') !== $barPart.attr('data-term')){
+                                return cy.get('.cursor-component-root .detail-crumbs .crumb').contains($bar.attr('data-term'));
+                            }
+                        }).then(()=>{
+                            return cy.get('.cursor-component-root .details-title .primary-count').invoke('text').then((expsetCountText)=>{
+                                hoverCounts.experiment_sets += parseInt(expsetCountText);
+                            }).end().get('.cursor-component-root .details.row .col-xs-6').invoke('text').then((expsCountText)=>{
+                                hoverCounts.experiments     += parseInt(expsCountText);
+                            }).end().get('.cursor-component-root .details.row .col-xs-4').invoke('text').then((fileCountText)=>{
+                                hoverCounts.files           += parseInt(fileCountText);
+                            });
                         });
-                        cy.get('.cursor-component-root .details.row .col-xs-6').then((expsCountElem)=>{
-                            hoverCounts.experiments     += parseInt(expsCountElem.text());
-                        });
-                        return cy.get('.cursor-component-root .details.row .col-xs-4').then((fileCountElem)=>{
-                            hoverCounts.files           += parseInt(fileCountElem.text());
-                        }).wait(250);
                     });
                 });
             });
