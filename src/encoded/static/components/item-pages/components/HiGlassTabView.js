@@ -266,7 +266,7 @@ export class HiGlassTabView extends React.Component {
         });*/
 
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
+            HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
             this.setState({ 'mounted' : true });
         }, 500);
     }

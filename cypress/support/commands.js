@@ -29,7 +29,7 @@ import _ from 'underscore';
 
 /** Expected to throw error of some sort if not on search page, or no results. */
 Cypress.Commands.add('searchPageTotalResultCount', (options) => {
-    return cy.get('div.above-results-table-row .box.results-count > span.text-500').invoke('text').should((resultText)=>{
+    return cy.get('div.above-results-table-row .box.results-count > span.text-500').invoke('text').then((resultText)=>{
         return parseInt(resultText);
     });
 });

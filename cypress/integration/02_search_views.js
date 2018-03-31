@@ -87,6 +87,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Clear search button works ==> more results', function(){
             cy.searchPageTotalResultCount().then((origTotalResults)=>{
+                console.log('ORIG', origTotalResults);
                 cy.get('form.navbar-search-form-container .reset-button').click().end()
                 .wait(1200).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('be.greaterThan', origTotalResults);
@@ -98,10 +99,9 @@ describe('Deployment/CI Search View Tests', function () {
                 //const rangeEndDate = Cypress.moment().subtract(1, 'days').format('YYYY-MM-DD');
                 cy.get('input[name="q"]').focus().clear().type('date_created:[* TO 2018-01-01]').wait(10).end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end()
+                .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end() // Select 'All Items'
                 //.get('form.navbar-search-form-container').submit().end()
-                .wait(300)
-                .location('search').should('include', '2018-01-01').end()
+                .location('search').should('include', '2018-01-01').wait(300).end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults);
             });
