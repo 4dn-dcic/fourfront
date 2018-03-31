@@ -43,7 +43,7 @@ describe('Browse Views', function () {
         });
 
         // Skipped for now re: login issues
-        it.skip('Login & ensure QuickInfoBar counts have changed', function(){
+        it('Login & ensure QuickInfoBar counts have changed', function(){
 
             cy.getQuickInfoBarCounts().then((counts)=>{
 

@@ -1,4 +1,4 @@
-import os, sys
+import os
 import json
 import requests
 from re import escape
@@ -241,8 +241,6 @@ def run_cypress_tests(config):
 
         from subprocess import Popen, PIPE
         import time
-        response = request.response
-        response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
 
         last_cypress_run_time = datetime.now()
@@ -254,11 +252,17 @@ def run_cypress_tests(config):
                 'Auth0Secret' : os.environ.get('Auth0Secret'),
                 'Auth0Client' : os.environ.get('Auth0Client'),
                 'CYPRESS_JWT_TOKEN' : request.cookies.get('jwtToken')
-            }, stdout=sys.stdout)
+            }, stdout=PIPE)
+            return process.stdout
+
 
         start_npm_process()
 
         return { "started" : True }
+        #return Response(
+        #    content_type='streaming/text',
+        #    app_iter = start_npm_process()
+        #)
 
     config.add_view(cypress_test, route_name='run-cypress-tests')
 

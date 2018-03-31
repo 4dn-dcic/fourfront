@@ -44,25 +44,32 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
 
         // Hover over all bar parts and count up counts
         var hoverCounts = { 'experiment_sets' : 0, 'experiments' : 0, 'files' : 0 };
-        return cy
-        .get('#navbar-icon .navbar-header').hoverIn().wait(500).end()
-        .get('.bar-plot-chart.chart-container .chart-bar .bar-part').each(($barPart, idx)=>{
-            return cy.wrap($barPart).hoverIn().then(()=>{
-                return cy.wait(500).get('.cursor-component-root .details-title .primary-count').then((expsetCountElem)=>{
-                    hoverCounts.experiment_sets += parseInt(expsetCountElem.text());
-                }).end().get('.cursor-component-root .details.row .col-xs-6').then((expsCountElem)=>{
-                    hoverCounts.experiments     += parseInt(expsCountElem.text());
-                }).end().get('.cursor-component-root .details.row .col-xs-4').then((fileCountElem)=>{
-                    hoverCounts.files           += parseInt(fileCountElem.text());
-                }).wait(100);
+        return cy.get('#navbar-icon .navbar-header').hoverIn().wait(1000).end().then(()=>{
+
+            return cy.get('.bar-plot-chart.chart-container .chart-bar').each(($bar)=>{
+                return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
+
+                    // TODO: Grab each barPart.attr('data-count'), compare to hover value for expset.
+
+                    return cy.wrap($barPart).hoverIn().wait(500).then(()=>{
+                        cy.get('.cursor-component-root .details-title .primary-count').then((expsetCountElem)=>{
+                            hoverCounts.experiment_sets += parseInt(expsetCountElem.text());
+                        });
+                        cy.get('.cursor-component-root .details.row .col-xs-6').then((expsCountElem)=>{
+                            hoverCounts.experiments     += parseInt(expsCountElem.text());
+                        });
+                        return cy.get('.cursor-component-root .details.row .col-xs-4').then((fileCountElem)=>{
+                            hoverCounts.files           += parseInt(fileCountElem.text());
+                        }).wait(250);
+                    });
+                });
             });
 
         }).then(()=>{
             expect(hoverCounts.experiment_sets).to.equal(quickInfoBarCounts.experiment_sets);
             expect(hoverCounts.experiments).to.equal(quickInfoBarCounts.experiments);
             expect(hoverCounts.files).to.equal(quickInfoBarCounts.files);
-            cy.scrollTo('top');
-        }).then(()=>{
+        }).end().window().scrollTo('top').end().get('#navbar-icon .navbar-header').hoverIn().wait(300).then(()=>{
             // Change to 'experiments' (2nd menu item in aggregate type drown); compare bar & legend counts
             return cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(2)')
@@ -110,8 +117,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
                     }).end();
                 }).end();
 
-            }).window().scrollTo('top').end()
-            .get('#navbar-icon .navbar-header').hoverIn();
+            }).window().scrollTo('top').end();
 
         });
         
