@@ -629,7 +629,7 @@
     {
         "accession": "4DNWF36CF3A1",
         "app_name": "pairsqc-single",
-        "app_version": "dev",
+        "app_version": "0.2.5",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -660,7 +660,7 @@
         "award": "1U01CA200059-01",
         "category": "QC",
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "pairsqc-single.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/pairsqc-0-11-4/0",
         "data_types": [
@@ -3761,7 +3761,7 @@
     {
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
-        "app_version": "dev",
+        "app_version": "0.2.5",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3794,7 +3794,7 @@
         "award": "1U01CA200059-01",
         "category": "alignment",
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4552,7 +4552,7 @@
             "pairsam-markasdup.cwl",
             "pairsam-filter.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
         "data_types": [
             "Hi-C"
@@ -5217,6 +5217,7 @@
     },
     {
         "app_name": "hi-c-processing-pairs",
+        "app_version": "0.2.5",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -5312,7 +5313,7 @@
             "add-hic-normvector-to-mcool.cwl",
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
         "data_types": [
             "Hi-C"
