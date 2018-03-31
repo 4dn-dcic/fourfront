@@ -243,20 +243,17 @@ def run_cypress_tests(config):
         import time
         settings = request.registry.settings
 
-        last_cypress_run_time = datetime.now()
-
         def start_npm_process():
-            global is_cypress_test_running
             process = Popen(['npm', 'run', 'cypress:test-staging-recorded'], env={
                 'PATH' : os.environ['PATH'],
                 'Auth0Secret' : os.environ.get('Auth0Secret'),
                 'Auth0Client' : os.environ.get('Auth0Client'),
                 'CYPRESS_JWT_TOKEN' : request.cookies.get('jwtToken')
-            }, stdout=PIPE)
-            return process.stdout
+            })
 
 
         start_npm_process()
+        last_cypress_run_time = datetime.now()
 
         return { "started" : True }
         #return Response(
