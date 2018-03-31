@@ -175,7 +175,7 @@ Cypress.Commands.add('hoverIn', { prevSubject : true }, function(subject, option
     var subjElem = subject[0];
 
     var bounds = subjElem.getBoundingClientRect();
-    var cursorPos = { 'clientX' : bounds.left + (bounds.width / 2), 'clientY' : bounds.top + (bounds.height / 2) };
+    var cursorPos = { 'clientX' : bounds.left + (bounds.width / 4), 'clientY' : bounds.top + (bounds.height / 4) };
     var commonEventVals = _.extend({ bubbles : true, cancelable : true }, cursorPos);
 
     subjElem.dispatchEvent(new MouseEvent('mouseenter', commonEventVals ) );

@@ -61,7 +61,7 @@ describe('Browse Views', function () {
 
             cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
             .end().window().scrollTo(0, 200)
-            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end().wait(300)
+            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end().wait(1000)
             .then(()=>{
                 compareQuickInfoCountsVsBarPlotCounts();
             });
