@@ -1,6 +1,6 @@
 
 
-describe('Search Views', function () {
+describe('Deployment/CI Search View Tests', function () {
 
     context('/search/?type=Item', function () {
 
@@ -93,16 +93,18 @@ describe('Search Views', function () {
             });
         });
 
-        it('date_created:[* TO ' + Cypress.moment().subtract(1, 'days').format('YYYY-MM-DD') + '] returns 3+ results.', function(){
-            const rangeEndDate = Cypress.moment().subtract(1, 'days').format('YYYY-MM-DD');
-            cy.get('input[name="q"]').focus().clear().type('date_created:[* TO ' + rangeEndDate + ']').wait(10).end()
-            .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-            .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end()
-            //.get('form.navbar-search-form-container').submit().end()
-            .wait(300)
-            .location('search').should('include', rangeEndDate).end()
-            .get('#slow-load-container').should('not.have.class', 'visible').end()
-            .searchPageTotalResultCount().should('be.greaterThan', 2);
+        it('date_created:[* TO 2018-01-01] returns 3 =< x < all results.', function(){
+            cy.searchPageTotalResultCount().then((origTotalResults)=>{
+                //const rangeEndDate = Cypress.moment().subtract(1, 'days').format('YYYY-MM-DD');
+                cy.get('input[name="q"]').focus().clear().type('date_created:[* TO 2018-01-01]').wait(10).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end()
+                //.get('form.navbar-search-form-container').submit().end()
+                .wait(300)
+                .location('search').should('include', '2018-01-01').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
+                .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults);
+            });
         });
 
 

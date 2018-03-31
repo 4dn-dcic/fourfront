@@ -4,7 +4,7 @@
  */
 
 
-describe('Can navigate around Static Pages in top nav dropdown', function () {
+describe('Static Page & Content Tests', function () {
 
 
 

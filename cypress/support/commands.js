@@ -29,8 +29,8 @@ import _ from 'underscore';
 
 /** Expected to throw error of some sort if not on search page, or no results. */
 Cypress.Commands.add('searchPageTotalResultCount', (options) => {
-    return cy.get('div.above-results-table-row .box.results-count > span.text-500').then(($searchResultCountBox)=>{
-        return parseInt($searchResultCountBox.text());
+    return cy.get('div.above-results-table-row .box.results-count > span.text-500').invoke('text').should((resultText)=>{
+        return parseInt(resultText);
     });
 });
 
