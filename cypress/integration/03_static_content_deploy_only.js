@@ -20,7 +20,7 @@ describe('Test logging in, navigating to profile page, editing last_name, & edit
         });
         */
 
-        it('Ensure logged in, visit profile page, edit last name 2x.', function(){
+        it.skip('Ensure logged in, visit profile page, edit last name 2x.', function(){
 
             cy.login4DN({ 'email' : 'wrangler@wrangler.com', 'useEnvToken' : false }).end().get('ul.navbar-acct li.user-account-item').should('have.class', 'is-logged-in').then((accountListItem)=>{
                 expect(accountListItem.children('#user_actions_dropdown').text()).to.contain('Wrangler');
