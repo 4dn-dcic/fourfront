@@ -201,6 +201,22 @@ export const defaultColumnDefinitionMap = {
         'title' : 'Status',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120},
         'order' : 500
+    },
+    'experiments_in_set.experiment_categorizer.combined' : {
+        'title' : "Assay Details",
+        'render' : function(result, columnDefinition, props, width){
+            var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
+            var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
+            if (cat_value === 'No value' || !cat_value){
+                return null;
+            }
+            return (
+                <div className="exp-categorizer-cell">
+                    <small>{ cat_field }</small>
+                    <div className="text-ellipsis-container">{ cat_value }</div>
+                </div>
+            );
+        }
     }
 };
 

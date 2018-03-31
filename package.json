@@ -93,6 +93,7 @@
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
     "google-analytics": "file:node_shims/google-analytics",
+    "higlass": "^0.10.22",
     "immutable": "^3.8.2",
     "js-md5": "^0.4.2",
     "jsonwebtoken": "^7.4.3",

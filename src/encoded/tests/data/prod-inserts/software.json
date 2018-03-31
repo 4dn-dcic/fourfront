@@ -446,5 +446,33 @@
         "source_url": "https://github.com/SooLee/mcool2hic",
         "title": "mcool2hic_87a912",
         "uuid": "f3907ef2-a9fe-4324-bc54-253a4cd53e3c"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "74bb1d6",
+        "lab": "4dn-dcic-lab",
+        "name": "repli-seq-pipeline",
+        "software_type": [
+            "aligner",
+            "filter",
+            "normalizer",
+            "smoother"
+        ],
+        "source_url": "https://github.com/4dn-dcic/repli-seq-pipeline",
+        "title": "repli-seq-pipeline_74bb1d",
+        "uuid": "a5d01ff2-88b5-45c6-9c1d-f6c156248b43"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "pairix",
+        "software_type": [
+            "file format converter",
+            "indexer"
+        ],
+        "source_url": "https://github.com/4dn-dcic/pairix",
+        "title": "pairix_0.3.5",
+        "uuid": "58c2eadd-7a15-4e8c-960f-9c7022af2bfc",
+        "version": "0.3.5"
     }
 ]

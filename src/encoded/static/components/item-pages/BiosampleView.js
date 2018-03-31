@@ -260,7 +260,7 @@ class ExpSetsUsedIn extends React.Component {
             //disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (
                 <div className="overflow-hidden">
-                    <ExperimentSetTablesLoadedFromSearch width={width} requestHref="/search/?type=ExperimentSetReplicate" schemas={schemas} />
+                    <ExperimentSetTablesLoadedFromSearch width={width} requestHref={"/search/?type=ExperimentSetReplicate&experiments_in_set.biosample.uuid=" + encodeURIComponent(context.uuid)} schemas={schemas} />
                 </div>
             )
         };
