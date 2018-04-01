@@ -20,7 +20,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
         });
         */
 
-        it('Ensure logged in, visit profile page, add & remove access key', function(){
+        it.skip('Ensure logged in, visit profile page, add & remove access key', function(){
 
             cy.login4DN({ 'email' : 'wrangler@wrangler.com', 'useEnvToken' : false }).end().get('ul.navbar-acct li.user-account-item').should('have.class', 'is-logged-in').then((accountListItem)=>{
                 expect(accountListItem.children('#user_actions_dropdown').text()).to.contain('Wrangler');
