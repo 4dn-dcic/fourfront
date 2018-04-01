@@ -32,7 +32,8 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
             .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
             .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').clear().type('SuperWrangler').then((inputfield)=>{
                 //inputfield.type('SuperWrangler');
-                return cy.wait(100).get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click().end()
+                return cy.wait(100).get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
+                .should('have.length', 0).wait(100).end()
                 .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler SuperWrangler").end()
                 .url().then((currUrl)=>{ // After reloading on datastore=database, last name stays edited. Then change back.
                     return cy.visit(currUrl + '?datastore=database').end()
@@ -41,8 +42,9 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                     .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                     .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperWrangler').clear().type('Wrangler').then((inputfield)=>{
                         return cy.wait(100)
-                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click().end()
-                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end()
+                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
+                        .should('have.length', 0).wait(100).end()
+                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end();
                         //.reload()
                         //.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end();
                     });
