@@ -9,7 +9,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
 
     context('Wrangler User Profile', function () {
 
-        before(function(){
+        beforeEach(function(){
             cy.visit('/');
         });
 
@@ -19,6 +19,26 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
             cy.login4DN({ 'email' : 'wrangler@wrangler.com' });
         });
         */
+
+        it('Ensure logged in, visit profile page, add & remove access key', function(){
+
+            cy.login4DN({ 'email' : 'wrangler@wrangler.com', 'useEnvToken' : false }).end().get('ul.navbar-acct li.user-account-item').should('have.class', 'is-logged-in').then((accountListItem)=>{
+                expect(accountListItem.children('#user_actions_dropdown').text()).to.contain('Wrangler');
+            }).end()
+            .get("#user_actions_dropdown").click().wait(100).end()
+            .get('ul.dropdown-menu[aria-labelledby="user_actions_dropdown"] a#profile').click().end()
+            .get('.page-container .user-title-row-container h1.user-title').should('contain', "Wrangler").end() // Test only for first name as we're editing last name & it may change re: delayed indexing, etc.
+            .get('.page-container .access-keys-container h3').should('contain', "Access Keys").end()
+            .get('.page-container .access-keys-container #add-access-key').click().wait(100).end()
+            .get('.modal-body').should('contain', 'Access Key ID').should('contain', 'Secret Access Key').end()
+            .get('.modal-body .key-value div:first-child dd').invoke('text').then((accessKeyID)=>{
+                return cy.get('.fade.in.modal').click().wait(500).end()
+                .get('.page-container .access-keys-container').should('contain', accessKeyID).end()
+                .get('.page-container .access-keys-container .access-keys-table tr:last-child .access-key-buttons .btn-danger').click().end()
+                .get('.page-container .access-keys-container').should('not.contain', accessKeyID);
+            });
+
+        });
 
         it('Ensure logged in, visit profile page, edit last name 2x.', function(){
 
