@@ -72,32 +72,13 @@ install:
 - pip install coveralls
 - pip install codacy-coverage
 - python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
-# The below "travis_wait 30" is a temporary work-around until there is a non-minified copy of hglib.js saved
-- travis_wait 30 bin/buildout || (echo "Retrying buildout" && bin/buildout )
-#before_script:
-#- |
-#  if test -n "$BROWSER"; then
-#    CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.8-linux.tar.gz
-#    CONNECT_DOWNLOAD=sc.tar.gz
-#    SC_READYFILE=sauce-connect-ready-$RANDOM
-#    SC_LOGFILE=$HOME/sauce-connect.log
-#    SC_PIDFILE=$HOME/sauce-connect.pid
-#    curl $CONNECT_URL > $CONNECT_DOWNLOAD
-#    mkdir sc
-#    tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc
-#    sc/bin/sc --readyfile $SC_READYFILE \
-#      --logfile $SC_LOGFILE \
-#      --pidfile $SC_PIDFILE \
-#      --tunnel-identifier $TRAVIS_JOB_NUMBER \
-#      --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
-#    while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
-#  fi
+- bin/buildout || (echo "Retrying buildout" && bin/buildout )
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
   src/encoded; fi
 - if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded; fi
-- if test -n "$CYPRESS"; then travis_wait 20 deploy/run_cypress_tests_on_travis.sh; fi
+- if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 after_success:

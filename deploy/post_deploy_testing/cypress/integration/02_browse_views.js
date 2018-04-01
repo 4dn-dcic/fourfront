@@ -87,6 +87,17 @@ describe('Browse Views', function () {
 
         });
 
+
+        it.skip('Total counts stay same upon changing groupBy & xAxis fields', function(){
+
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+
+                // TODO;
+
+            });
+
+        });
+
     });
 
 
