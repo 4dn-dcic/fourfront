@@ -33,7 +33,6 @@ def includeme(config):
     config.include(run_workflow)
     config.include(item_counts)
     config.include(submissions_page)
-    config.include(run_cypress_tests)
     config.scan(__name__)
 
 
@@ -217,51 +216,6 @@ def submissions_page(config):
 
     config.add_view(submissions_page_view, route_name='submissions-page')
 
-
-last_cypress_run_time = None # Limit to one run at a time per EC2
-
-def run_cypress_tests(config):
-    """
-    Run cypress post-deployment tests
-    """
-    config.add_route(
-        'run-cypress-tests',
-        '/run-cypress-tests'
-    )
-
-    def cypress_test(request):
-        if 'group.admin' not in request.effective_principals:
-            raise HTTPForbidden
-        global last_cypress_run_time
-        if last_cypress_run_time is not None:
-            time_when_can_run_again = last_cypress_run_time + timedelta(minutes=10)
-            if time_when_can_run_again > datetime.now():
-                time_wait = (time_when_can_run_again - datetime.now())
-                raise HTTPBadRequest("Test recently ran. Wait " + str(time_wait.seconds//3600) + " hours, " + str((time_wait.seconds//60)%60) + " minutes, and " + str(time_wait.seconds%60) + " more seconds.")
-
-        from subprocess import Popen, PIPE
-        import time
-        settings = request.registry.settings
-
-        def start_npm_process():
-            process = Popen(['npm', 'run', 'cypress:test-staging-recorded'], env={
-                'PATH' : os.environ['PATH'],
-                'Auth0Secret' : os.environ.get('Auth0Secret'),
-                'Auth0Client' : os.environ.get('Auth0Client'),
-                'CYPRESS_JWT_TOKEN' : request.cookies.get('jwtToken')
-            })
-
-
-        start_npm_process()
-        last_cypress_run_time = datetime.now()
-
-        return { "started" : True }
-        #return Response(
-        #    content_type='streaming/text',
-        #    app_iter = start_npm_process()
-        #)
-
-    config.add_view(cypress_test, route_name='run-cypress-tests')
 
 def acl_from_settings(settings):
     # XXX Unsure if any of the demo instance still need this
