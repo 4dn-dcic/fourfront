@@ -43,8 +43,8 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                         return cy.wait(100)
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click().end()
                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end()
-                        .reload()
-                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end();
+                        //.reload()
+                        //.get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end();
                     });
         
                 });
