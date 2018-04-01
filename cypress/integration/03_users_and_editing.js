@@ -27,7 +27,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
             }).end()
             .get("#user_actions_dropdown").click().wait(100).end()
             .get('ul.dropdown-menu[aria-labelledby="user_actions_dropdown"] a#profile').click().end()
-            .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end()
+            .get('.page-container .user-title-row-container h1.user-title').invoke('text').should('include', "Wrangler").end() // Test only for first name as we're editing last name & it may change re: delayed indexing, etc.
             // Edit wrangler last name
             .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
             .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').clear().type('SuperWrangler').then((inputfield)=>{
@@ -43,7 +43,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                         return cy.wait(100)
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click().end()
                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end()
-                        .visit(currUrl + '?datastore=database').end()
+                        .reload()
                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Wrangler Wrangler").end();
                     });
         
