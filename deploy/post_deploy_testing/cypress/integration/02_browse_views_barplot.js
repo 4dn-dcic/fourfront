@@ -2,7 +2,7 @@ import _ from 'underscore';
 import { compareQuickInfoCountsVsBarPlotCounts } from './../support/macros';
 
 
-describe('Browse Views - BarPlot & QuickInfoBar', function () {
+describe('Browse Views - Redirection & Visualization', function () {
 
     context('Test /browse/ page redirection from homepage', function(){
 
@@ -35,7 +35,7 @@ describe('Browse Views - BarPlot & QuickInfoBar', function () {
 
     });
 
-    context('QuickInfoBar & BarPlotChart', function(){
+    context('BarPlotChart & QuickInfoBar', function(){
         // THESE TESTS WILL CRASH THE GUI TEST RUNNER - TODO: Put into separate files? Should not affect headless test runs (e.g. as launched from Travis).
 
         before(()=>{

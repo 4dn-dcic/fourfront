@@ -44,6 +44,19 @@ Cypress.Commands.add('scrollToBottom', (options) => {
     });
 });
 
+
+Cypress.Commands.add('scrollToCenterElement', { prevSubject : true }, (subject, options) => {
+    expect(subject.length).to.equal(1);
+    const subjectElem = subject[0];
+    var bounds = subjectElem.getBoundingClientRect();
+    return cy.window().then((w)=>{
+        w.scrollBy(0, (bounds.top - (w.innerHeight / 2)));
+        return cy.wrap(subjectElem);
+    });
+});
+
+
+
 /**
  * This emulates login.js. Perhaps we should adjust login.js somewhat to match this better re: navigate.then(...) .
  */
