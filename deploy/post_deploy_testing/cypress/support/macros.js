@@ -51,22 +51,23 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
 
                     // TODO: Grab each barPart.attr('data-count'), compare to hover value for expset.
 
-                    return cy.wrap($barPart).hoverIn().then(()=>{
-                        // Ensure we're hovering over proper bar/bar-part
-                        cy.get('.cursor-component-root .details-title').contains($barPart.attr('data-term')).end().then(()=>{
-                            if ($bar.attr('data-term') !== $barPart.attr('data-term')){
-                                return cy.get('.cursor-component-root .detail-crumbs .crumb').contains($bar.attr('data-term'));
-                            }
-                        }).then(()=>{
-                            return cy.get('.cursor-component-root .details-title .primary-count').invoke('text').then((expsetCountText)=>{
-                                hoverCounts.experiment_sets += parseInt(expsetCountText);
-                            }).end().get('.cursor-component-root .details.row .col-xs-6').invoke('text').then((expsCountText)=>{
-                                hoverCounts.experiments     += parseInt(expsCountText);
-                            }).end().get('.cursor-component-root .details.row .col-xs-4').invoke('text').then((fileCountText)=>{
-                                hoverCounts.files           += parseInt(fileCountText);
+                    return cy.window().scrollTo('top').end()
+                        .wrap($barPart).hoverIn().then(($barPart)=>{
+                            // Ensure we're hovering over proper bar/bar-part
+                            return cy.get('.cursor-component-root .details-title').should('contain', $barPart.attr('data-term')).end().then(()=>{
+                                if ($bar.attr('data-term') !== $barPart.attr('data-term')){
+                                    return cy.get('.cursor-component-root .detail-crumbs .crumb').should('contain', $bar.attr('data-term'));
+                                }
+                            }).wait(10).then(()=>{
+                                return cy.get('.cursor-component-root .details-title .primary-count').invoke('text').then((expsetCountText)=>{
+                                    hoverCounts.experiment_sets += parseInt(expsetCountText);
+                                }).end().get('.cursor-component-root .details.row .col-xs-6').invoke('text').then((expsCountText)=>{
+                                    hoverCounts.experiments     += parseInt(expsCountText);
+                                }).end().get('.cursor-component-root .details.row .col-xs-4').invoke('text').then((fileCountText)=>{
+                                    hoverCounts.files           += parseInt(fileCountText);
+                                });
                             });
                         });
-                    });
                 });
             });
 

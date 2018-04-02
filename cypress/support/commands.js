@@ -125,6 +125,8 @@ Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
 });
 
 
+/*** Browse View Utils ****/
+
 Cypress.Commands.add('getQuickInfoBarCounts', function(options = {}){
 
     return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).then((expsetCountElemText)=>{
@@ -139,6 +141,20 @@ Cypress.Commands.add('getQuickInfoBarCounts', function(options = {}){
         });
     });
 
+});
+
+// TODO: Give these buttons unique IDs in case layout changes.
+
+Cypress.Commands.add('getSelectAllFilesButton', function(options = {}){
+    return cy.get('div.above-results-table-row > div > div:nth-child(1) > div:nth-child(1) > div > button');
+});
+
+Cypress.Commands.add('getFileTypePanelButton', function(options = {}){
+    return cy.get('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:first-child');
+});
+
+Cypress.Commands.add('getDownloadButton', function(options = {}){
+    return cy.get('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:nth-child(2)');
 });
 
 /** Session Caching */
@@ -189,7 +205,7 @@ Cypress.Commands.add('hoverIn', { prevSubject : true }, function(subject, option
     var subjElem = subject[0];
 
     var bounds = subjElem.getBoundingClientRect();
-    var cursorPos = { 'clientX' : bounds.left + (bounds.width / 4), 'clientY' : bounds.top + (bounds.height / 4) };
+    var cursorPos = { 'clientX' : bounds.left + (bounds.width / 2), 'clientY' : bounds.top + (bounds.height / 2) };
     var commonEventVals = _.extend({ bubbles : true, cancelable : true }, cursorPos);
 
     subjElem.dispatchEvent(new MouseEvent('mouseenter', commonEventVals ) );
