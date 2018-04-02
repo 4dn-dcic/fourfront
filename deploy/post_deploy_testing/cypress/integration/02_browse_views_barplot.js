@@ -115,7 +115,9 @@ describe('Browse Views - BarPlot & QuickInfoBar', function () {
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
-                        compareQuickInfoCountsVsBarPlotCounts();
+                        return cy.wait(100).end().get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).wait(100).end().then(()=>{ // Wait until bars have transitioned.
+                            compareQuickInfoCountsVsBarPlotCounts();
+                        });
                     }).end();
             });
         });
@@ -131,7 +133,7 @@ describe('Browse Views - BarPlot & QuickInfoBar', function () {
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
-                        compareQuickInfoCountsVsBarPlotCounts();
+                        compareQuickInfoCountsVsBarPlotCounts({ 'skipLegend' : true }); // No legend when no groupBy
                     }).end();
             });
         });

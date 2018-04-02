@@ -2,7 +2,7 @@
 import _ from 'underscore';
 
 
-export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
+export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' : false }){
 
     function getBarCounts(){
         return cy.get('.bar-plot-chart.chart-container .chart-bar .bar-top-label').then((labels)=>{
@@ -36,7 +36,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
             console.log('barCounts', barCounts);
         });
 
-        if (!skipLegend){
+        if (!options.skipLegend){
             getLegendCounts().then((legendCounts)=>{
                 expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiment_sets);
             });
@@ -54,8 +54,9 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
                     return cy.window().scrollTo('top').end()
                         .wrap($barPart).hoverIn().then(($barPart)=>{
                             // Ensure we're hovering over proper bar/bar-part
-                            return cy.get('.cursor-component-root .details-title').should('contain', $barPart.attr('data-term')).end().then(()=>{
-                                if ($bar.attr('data-term') !== $barPart.attr('data-term')){
+                            const lookForTermInTitle = $barPart.attr('data-term') || $bar.attr('data-term'); // When on "None", barPart has no data-term.
+                            return cy.get('.cursor-component-root .details-title').should('contain', lookForTermInTitle).end().then(()=>{
+                                if (typeof $barPart.attr('data-term') !== 'undefined' && $bar.attr('data-term') !== $barPart.attr('data-term')){
                                     return cy.get('.cursor-component-root .detail-crumbs .crumb').should('contain', $bar.attr('data-term'));
                                 }
                             }).wait(10).then(()=>{
@@ -83,7 +84,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
                         return getBarCounts().then((barCounts)=>{
                             expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiments);
                         }).then(()=>{
-                            if (!skipLegend){
+                            if (!options.skipLegend){
                                 return getLegendCounts().then((legendCounts)=>{
                                     expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiments);
                                 }).end();
@@ -97,7 +98,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
                         return getBarCounts().then((barCounts)=>{
                             expect(sum(...barCounts)).to.equal(quickInfoBarCounts.files);
                         }).then(()=>{
-                            if (!skipLegend){
+                            if (!options.skipLegend){
                                 return getLegendCounts().then((legendCounts)=>{
                                     expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.files);
                                 }).end();
@@ -110,7 +111,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
                         return getBarCounts().then((barCounts)=>{
                             expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
                         }).then(()=>{
-                            if (!skipLegend){
+                            if (!options.skipLegend){
                                 return getLegendCounts().then((legendCounts)=>{
                                     expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiment_sets);
                                 }).end();
