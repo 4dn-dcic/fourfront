@@ -369,9 +369,7 @@ export default class UserView extends React.Component {
                     </div>
 
                     {
-                        typeof user.access_keys !== 'undefined' &&
-                        Array.isArray(user.submits_for) &&
-                        user.submits_for.length > 0 ?
+                        typeof user.access_keys !== 'undefined' ?
 
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
