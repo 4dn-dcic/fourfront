@@ -4,7 +4,7 @@ import { compareQuickInfoCountsVsBarPlotCounts } from './../support/macros';
 
 describe('Browse Views', function () {
 
-    context.skip('Test /browse/ page redirection from homepage', function(){
+    context('Test /browse/ page redirection from homepage', function(){
 
         it('If start from home page, clicking on Browse nav menu item gets us to Browse page.', function(){
 
