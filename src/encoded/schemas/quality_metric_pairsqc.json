@@ -63,5 +63,10 @@
             "type": "number",
             "description": "PairsQC Summary metric"
         }
+    },
+    "columns": {
+        "% Long-range intrachromosomal reads": {
+            "title" : "% Long-range intrachromosomal reads"
+        }
     }
 }

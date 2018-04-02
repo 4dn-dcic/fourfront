@@ -246,7 +246,7 @@
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications_summary_short": {
+        "biosample.modifications_summary": {
             "title": "Modifications"
         },
         "biosample.treatments_summary": {
