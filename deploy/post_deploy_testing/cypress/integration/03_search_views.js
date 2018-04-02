@@ -16,10 +16,10 @@ describe('Post-Deployment Search View Tests', function () {
 
             cy.searchPageTotalResultCount().should('be.greaterThan', 100).then((origResultCount)=>{
                 return cy.get('input[name="q"]').focus().clear().type('olfactory').wait(10).end()
-                .get('form.navbar-search-form-container').submit().end()
-                .location('search').should('include', 'q=olfactory').end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
-                .searchPageTotalResultCount().should('be.lessThan', origResultCount).end();
+                    .get('form.navbar-search-form-container').submit().end()
+                    .location('search').should('include', 'q=olfactory').end()
+                    .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                    .searchPageTotalResultCount().should('be.lessThan', origResultCount).end();
             });
 
         });

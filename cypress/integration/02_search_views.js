@@ -68,42 +68,40 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
             cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
-            .get('form.navbar-search-form-container').submit().end()
-            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
-            .get('#page-title-container span.title').should('have.text', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
-            .location('search')
-            .should('include', 'award.project=4DN')
-            .should('include', 'q=mouse');
+                .get('form.navbar-search-form-container').submit().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container span.title').should('have.text', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
+                .location('search')
+                .should('include', 'award.project=4DN')
+                .should('include', 'q=mouse');
         });
 
         it('"All Items" option works, takes us to search page', function(){
             cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-            .get('form.navbar-search-form-container ul.dropdown-menu li:not(.active) a').click().end()
-            .get('#page-title-container span.title').should('have.text', 'Search').end()
-            .location('search').should('not.include', 'award.project=4DN')
-            .should('include', 'q=mouse').end()
-            .searchPageTotalResultCount().should('be.greaterThan', 0);
+                .get('form.navbar-search-form-container ul.dropdown-menu li:not(.active) a').click().end()
+                .get('#page-title-container span.title').should('have.text', 'Search').end()
+                .location('search').should('not.include', 'award.project=4DN')
+                .should('include', 'q=mouse').end()
+                .searchPageTotalResultCount().should('be.greaterThan', 0);
         });
 
         it('Clear search button works ==> more results', function(){
             cy.searchPageTotalResultCount().then((origTotalResults)=>{
-                console.log('ORIG', origTotalResults);
                 cy.get('form.navbar-search-form-container .reset-button').click().end()
-                .wait(1200).get('#slow-load-container').should('not.have.class', 'visible').end()
-                .searchPageTotalResultCount().should('be.greaterThan', origTotalResults);
+                    .wait(1200).get('#slow-load-container').should('not.have.class', 'visible').end()
+                    .searchPageTotalResultCount().should('be.greaterThan', origTotalResults);
             });
         });
 
         it('date_created:[* TO 2018-01-01] returns 3 =< x < all results.', function(){
             cy.searchPageTotalResultCount().then((origTotalResults)=>{
-                //const rangeEndDate = Cypress.moment().subtract(1, 'days').format('YYYY-MM-DD');
                 cy.get('input[name="q"]').focus().clear().type('date_created:[* TO 2018-01-01]').wait(10).end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end() // Select 'All Items'
-                //.get('form.navbar-search-form-container').submit().end()
-                .location('search').should('include', '2018-01-01').wait(300).end()
-                .get('#slow-load-container').should('not.have.class', 'visible').end()
-                .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults);
+                    .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                    .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end() // Select 'All Items'
+                    //.get('form.navbar-search-form-container').submit().end()
+                    .location('search').should('include', '2018-01-01').wait(300).end()
+                    .get('#slow-load-container').should('not.have.class', 'visible').end()
+                    .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults);
             });
         });
 

@@ -29,9 +29,9 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
 
     return cy.getQuickInfoBarCounts().then((quickInfoBarCounts)=>{
         expect(quickInfoBarCounts.experiment_sets).to.be.greaterThan(0);
-        
+
         // Test ExpSet counts ==
-        getBarCounts().then((barCounts)=>{ 
+        getBarCounts().then((barCounts)=>{
             expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
             console.log('barCounts', barCounts);
         });
@@ -78,49 +78,44 @@ export function compareQuickInfoCountsVsBarPlotCounts(skipLegend = false){
             // Change to 'experiments' (2nd menu item in aggregate type drown); compare bar & legend counts
             return cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(2)')
-                .should('have.text', 'Experiments').click().end().window().scrollTo('top').wait(750).then(()=>{
-
-                    return getBarCounts().then((barCounts)=>{ 
-                        expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiments);
-                    }).then(()=>{
-                        if (!skipLegend){
-                            return getLegendCounts().then((legendCounts)=>{
-                                expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiments);
-                            }).end();
-                        }
+                    .should('have.text', 'Experiments').click().end().window().scrollTo('top').wait(750).then(()=>{
+                        return getBarCounts().then((barCounts)=>{ 
+                            expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiments);
+                        }).then(()=>{
+                            if (!skipLegend){
+                                return getLegendCounts().then((legendCounts)=>{
+                                    expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiments);
+                                }).end();
+                            }
+                        }).end();
                     }).end();
-
-                }).end();
             // Change to 'files' (2nd menu item in aggregate type drown); compare bar & legend counts
             }).get('button#select-barplot-aggregate-type').should('contain', 'Experiments').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(3)')
-                .should('have.text', 'Files').click().end().window().scrollTo('top').wait(750).then(()=>{
-
-                    return getBarCounts().then((barCounts)=>{
-                        expect(sum(...barCounts)).to.equal(quickInfoBarCounts.files);
-                    }).then(()=>{
-                        if (!skipLegend){
-                            return getLegendCounts().then((legendCounts)=>{
-                                expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.files);
-                            }).end();
-                        }
+                    .should('have.text', 'Files').click().end().window().scrollTo('top').wait(750).then(()=>{
+                        return getBarCounts().then((barCounts)=>{
+                            expect(sum(...barCounts)).to.equal(quickInfoBarCounts.files);
+                        }).then(()=>{
+                            if (!skipLegend){
+                                return getLegendCounts().then((legendCounts)=>{
+                                    expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.files);
+                                }).end();
+                            }
+                        }).end();
                     }).end();
-
-                }).end();
             }).get('button#select-barplot-aggregate-type').should('contain', 'Files').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(1)')
-                .should('have.text', 'Experiment Sets').click().end().window().scrollTo('top').wait(750).then(()=>{
-
-                    return getBarCounts().then((barCounts)=>{
-                        expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
-                    }).then(()=>{
-                        if (!skipLegend){
-                            return getLegendCounts().then((legendCounts)=>{
-                                expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiment_sets);
-                            }).end();
-                        }
+                    .should('have.text', 'Experiment Sets').click().end().window().scrollTo('top').wait(750).then(()=>{
+                        return getBarCounts().then((barCounts)=>{
+                            expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
+                        }).then(()=>{
+                            if (!skipLegend){
+                                return getLegendCounts().then((legendCounts)=>{
+                                    expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiment_sets);
+                                }).end();
+                            }
+                        }).end();
                     }).end();
-                }).end();
 
             }).window().scrollTo('top').end();
 

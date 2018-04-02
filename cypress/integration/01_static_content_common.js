@@ -88,14 +88,14 @@ describe('Static Page & Content Tests', function () {
                                 } else {
                                     finish(titleText);
                                 }
-                                
+
                             });
                         }
                         listItems[0].click();
                         doVisit(listItems[count]);
 
                     });
-                    
+
                 });
             });
 

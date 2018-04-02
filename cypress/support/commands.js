@@ -53,7 +53,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         return cy.window().then((w)=>{
             w.fourfront.JWT.save(token);
             var res = w.fourfront.navigate('', {'inPlace':true});
-            
+
             if (res){
                 return res.then((navResponse)=>{
 
@@ -107,7 +107,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         'email_verified': true,
         'aud': auth0client,
     };
-    
+
     jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
     expect(jwt_token).to.have.length.greaterThan(0);
     Cypress.log({
@@ -120,8 +120,8 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
     cy.get("#user_actions_dropdown").click().wait(100).end()
-    .get('#logoutbtn').click().end().get('#user_actions_dropdown').should('contain', 'Account').wait(300).end()
-    .get('#slow-load-container').should('not.have.class', 'visible').end();
+        .get('#logoutbtn').click().end().get('#user_actions_dropdown').should('contain', 'Account').wait(300).end()
+        .get('#slow-load-container').should('not.have.class', 'visible').end();
 });
 
 

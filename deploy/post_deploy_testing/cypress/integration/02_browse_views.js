@@ -39,17 +39,17 @@ describe('Browse Views', function () {
 
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
-            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end();
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end();
         });
 
         it('On award.project=4DN view; BarPlot counts == QuickInfoBar counts', function(){
 
             cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
-            .end().window().scrollTo(0, 200)
-            .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end().wait(1000)
-            .then(()=>{
-                compareQuickInfoCountsVsBarPlotCounts();
-            });
+                .end().window().scrollTo(0, 200)
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end().wait(1000)
+                .then(()=>{
+                    compareQuickInfoCountsVsBarPlotCounts();
+                });
 
         });
 
@@ -59,13 +59,13 @@ describe('Browse Views', function () {
 
                 cy.get('.browse-base-state-toggle-container label.onoffswitch-label').click().then(()=>{
                     cy.wait(1000) // Wait for 'slow-load-container' to become visible if needed, and wait for it to load
-                    .get('#slow-load-container').should('not.have.class', 'visible').end()
-                    .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
-                    .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
-                    .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
-                    .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).then(()=>{
-                        compareQuickInfoCountsVsBarPlotCounts();
-                    });
+                        .get('#slow-load-container').should('not.have.class', 'visible').end()
+                        .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
+                        .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
+                        .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
+                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).then(()=>{
+                            compareQuickInfoCountsVsBarPlotCounts();
+                        });
                 });
 
             });
@@ -90,11 +90,11 @@ describe('Browse Views', function () {
                 const loggedOutCounts = _.clone(counts);
 
                 cy.login4DN().wait(200)
-                .get('#stats-stat-expsets').should('have.text', '').end()
-                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
-                    return compareQuickInfoCountsVsBarPlotCounts();
-                })
-                .logout4DN();
+                    .get('#stats-stat-expsets').should('have.text', '').end()
+                    .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
+                        return compareQuickInfoCountsVsBarPlotCounts();
+                    })
+                    .logout4DN();
 
             });
 
