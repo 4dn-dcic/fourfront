@@ -365,10 +365,10 @@ class SearchBar extends React.Component{
                     }}
                     title={this.state.searchAllItems ? 'All Items' : 'Experiment Sets'}
                 >
-                    <MenuItem eventKey='sets' active={!this.state.searchAllItems}>
+                    <MenuItem eventKey='sets' data-key="sets" active={!this.state.searchAllItems}>
                         Experiment Sets
                     </MenuItem>
-                    <MenuItem eventKey='all' active={this.state.searchAllItems}>
+                    <MenuItem eventKey='all' data-key="all" active={this.state.searchAllItems}>
                         All Items (advanced)
                     </MenuItem>
                 </DropdownButton>
@@ -483,7 +483,7 @@ class UserActions extends React.Component {
         return (
             <Nav className="navbar-acct" pullRight>
                 <NavDropdown
-                    className={'user-account-item' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')} title={<span>{ acctIcon }{ acctTitle }</span>}
+                    className={'user-account-item' + (this.props.session ? ' is-logged-in' : '') + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')} title={<span>{ acctIcon }{ acctTitle }</span>}
                     id="user_actions_dropdown" label="context" children={this.listUserActionsAsMenuItems()} />
             </Nav>
         );

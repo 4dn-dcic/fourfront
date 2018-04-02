@@ -207,7 +207,7 @@ export default class QuickInfoBar extends React.Component {
         return (
             <div className="col-xs-4 text-right browse-base-state-toggle-container">
                 <div className="inner-more">
-                    <Toggle checked={checked} onChange={this.onBrowseStateToggle} />
+                    <Toggle checked={checked} onChange={this.onBrowseStateToggle} id="toggle-external-data-switch" />
                     <small>Include External Data</small>
                 </div>
             </div>
@@ -316,7 +316,7 @@ class Stat extends React.Component {
         var { classNameID, longLabel, value, id, isLoadingChartData } = this.props;
         return (
             <div className={"stat stat-" + classNameID} title={longLabel}>
-                <div id={id + '-stat-' + classNameID} className="stat-value">
+                <div id={id + '-stat-' + classNameID} className={"stat-value" + (isLoadingChartData ? ' loading' : '')}>
                     { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-o-notch" style={{ opacity : 0.25 }}/> : value }
                 </div>
                 <div className="stat-label">

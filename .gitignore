@@ -18,6 +18,8 @@ beanstalk.cfg
 /jsconfig.json
 /node_modules/
 package-lock.json
+/cypress/screenshots/
+/cypress/videos/
 /documentation/
 /ontology.json
 /parts/
