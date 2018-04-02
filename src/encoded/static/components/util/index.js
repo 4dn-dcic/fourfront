@@ -30,9 +30,6 @@ module.exports.console      = require('./patched-console').default;
 
 /** Functions related to JWT encoding/decoding/storage. Prevent name interference with 'jwt' NPM package */
 module.exports.JWT          = require('./json-web-token');
-if (!misc.isServerSide()) {
-    window.JWT = module.exports.JWT;
-}
 
 /** Use momentjs to parse and localize datetime. Has useful React component - DateUtility.LocalizedTime - which shows time in user's timezone after mount. */
 module.exports.DateUtility  = require('./date-utility');

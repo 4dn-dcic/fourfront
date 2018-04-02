@@ -1282,6 +1282,12 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	.search-results-container {
 		position: relative;
 
+		&:not(.fully-loaded){
+			::-webkit-scrollbar {
+				display: none; 
+			}
+		}
+
 		.shadow-border-layer {
 			position: absolute;
 			pointer-events: none;
