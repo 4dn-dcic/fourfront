@@ -198,10 +198,10 @@ describe('Testing user.js', function() {
 
     });
 
-    it('Access Keys table not present when no submits_for field', function() {
-        // Test user has no 'submits_for', so must not have access keys table visible.
+    it('Access Keys table is present when no submits_for field', function() {
+        // Test user has no 'submits_for', but everyone should have access keys table visible.
         var akContainer = TestUtils.scryRenderedDOMComponentsWithClass(page, 'access-keys-container');
-        expect(akContainer.length).toEqual(0);
+        expect(akContainer.length).toEqual(1);
     });
 
 });
