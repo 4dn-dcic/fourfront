@@ -2,10 +2,7 @@ import os
 import json
 import requests
 from re import escape
-from datetime import datetime, timedelta
 from pyramid.decorator import reify
-from pyramid.exceptions import (HTTPForbidden, HTTPBadRequest)
-from pyramid.response import Response
 from snovault import (
     Root,
     calculated_property,
@@ -24,7 +21,6 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-from .types.base import ONLY_ADMIN_VIEW
 from collections import OrderedDict
 
 
