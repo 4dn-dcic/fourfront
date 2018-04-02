@@ -25,6 +25,8 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 import _ from 'underscore';
+var jwt = require('jsonwebtoken');
+import { Buffer } from 'buffer';
 
 
 /** Expected to throw error of some sort if not on search page, or no results. */
@@ -72,9 +74,13 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         }).end();
     }
 
+    let jwt_token = null;
+
     if (options.useEnvToken) {
-        const jwt_token = Cypress.env('JWT_TOKEN');
-        if (jwt_token) {
+        jwt_token = Cypress.env('JWT_TOKEN');
+        console.log('ENV TOKEN', jwt_token);
+        if (typeof jwt_token === 'string' && jwt_token) {
+            console.log('Logging in with token');
             return performLogin(jwt_token);
         }
     }
@@ -101,21 +107,29 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         'email_verified': true,
         'aud': auth0client,
     };
-
-    return cy.exec("exec python3 bin/py -c \"from base64 import b64decode; import jwt, json; print(jwt.encode(json.loads('" + JSON.stringify(jwtPayload).replace(/(\")/g, '\\"') + "'), b64decode('" + auth0secret + "', '-_'), algorithm='HS256').decode('utf-8'))\" &").then((jwt_gen_result)=>{
-
-        return performLogin(jwt_gen_result.stdout);
-
+    
+    jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
+    expect(jwt_token).to.have.length.greaterThan(0);
+    Cypress.log({
+        'name' : "Login 4DN",
+        'message' : 'Generated own JWT with length ' + jwt_token.length,
     });
+    return performLogin(jwt_token);
 
+});
+
+Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
+    cy.get("#user_actions_dropdown").click().wait(100).end()
+    .get('#logoutbtn').click().end().get('#user_actions_dropdown').should('contain', 'Account').wait(300).end()
+    .get('#slow-load-container').should('not.have.class', 'visible').end();
 });
 
 
 Cypress.Commands.add('getQuickInfoBarCounts', function(options = {}){
 
     return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).then((expsetCountElemText)=>{
-        cy.get('#stats-stat-experiments').then((expCountElem)=>{
-            cy.get('#stats-stat-files').then((fileCountElem)=>{
+        return cy.get('#stats-stat-experiments').then((expCountElem)=>{
+            return cy.get('#stats-stat-files').then((fileCountElem)=>{
                 var experiment_sets = parseInt(expsetCountElemText),
                     experiments     = parseInt(expCountElem.text()),
                     files           = parseInt(fileCountElem.text());

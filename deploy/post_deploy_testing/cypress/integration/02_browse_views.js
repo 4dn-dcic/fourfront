@@ -4,7 +4,7 @@ import { compareQuickInfoCountsVsBarPlotCounts } from './../support/macros';
 
 describe('Browse Views', function () {
 
-    context('Test /browse/ page redirection from homepage', function(){
+    context.skip('Test /browse/ page redirection from homepage', function(){
 
         it('If start from home page, clicking on Browse nav menu item gets us to Browse page.', function(){
 
@@ -40,21 +40,6 @@ describe('Browse Views', function () {
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
             .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end();
-        });
-
-        // Skipped for now re: login issues
-        it.skip('Login & ensure QuickInfoBar counts have changed', function(){
-
-            cy.getQuickInfoBarCounts().then((counts)=>{
-
-                const loggedOutCounts = _.clone(counts);
-
-                cy.login4DN().get('#stats-stat-expsets').should('have.text', '').then(()=>{                                         // Wait til is loading new barplot data re: login
-                    cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets);
-                });
-
-            });
-
         });
 
         it('On award.project=4DN view; BarPlot counts == QuickInfoBar counts', function(){
@@ -93,6 +78,23 @@ describe('Browse Views', function () {
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
 
                 // TODO;
+
+            });
+
+        });
+
+        it('Login & ensure QuickInfoBar counts have changed; BarPlot counts match', function(){
+
+            cy.getQuickInfoBarCounts().then((counts)=>{
+
+                const loggedOutCounts = _.clone(counts);
+
+                cy.login4DN().wait(200)
+                .get('#stats-stat-expsets').should('have.text', '').end()
+                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
+                    return compareQuickInfoCountsVsBarPlotCounts();
+                })
+                .logout4DN();
 
             });
 
