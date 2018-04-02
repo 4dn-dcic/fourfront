@@ -6,11 +6,11 @@ from snovault import (
     load_schema,
     calculated_property
 )
+from snovault.attachment import ItemWithAttachment
 from .base import (
     Item
 )
 from html.parser import HTMLParser
-
 from encoded.types.experiment_set import invalidate_linked_items
 
 ################################################
@@ -163,7 +163,7 @@ def map_doi_biox(doi):
         'title': 'Publications',
         'description': 'Publication pages',
     })
-class Publication(Item):
+class Publication(Item, ItemWithAttachment):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
