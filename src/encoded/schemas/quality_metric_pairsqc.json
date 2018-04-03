@@ -64,9 +64,18 @@
             "description": "PairsQC Summary metric"
         }
     },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
     "columns": {
         "% Long-range intrachromosomal reads": {
             "title" : "% Long-range intrachromosomal reads"
+        },
+        "overall_quality_status": {
+            "title" : "Overall Quality",
+            "default_hidden": true
         }
     }
 }

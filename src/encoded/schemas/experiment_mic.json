@@ -129,6 +129,26 @@
     "columns": {
         "experiment_type": {
             "title" : "Experiment Type"
+        },
+        "microscopy_technique": {
+            "title" : "Microscopy Technique"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme",
+            "default_hidden": true
+        },
+        "biosample.modifications_summary": {
+            "title": "Modifications",
+            "default_hidden": true
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments",
+            "default_hidden": true
+        }
+    },
+    "facets": {
+        "microscopy_technique": {
+            "title" : "Microscopy Technique"
         }
     }
 }

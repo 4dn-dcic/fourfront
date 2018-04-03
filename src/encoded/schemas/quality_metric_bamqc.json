@@ -47,12 +47,21 @@
             "description": "BamQC Summary metric"
         }
     },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
     "columns": {
         "%Mapped": {
             "title" : "% Reads Mapped"
         },
         "%Uniquely Mapped": {
             "title" : "% Reads Uniquely Mapped"
+        },
+        "overall_quality_status": {
+            "title" : "Overall Quality",
+            "default_hidden": true
         }
     }
 }

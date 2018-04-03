@@ -78,6 +78,9 @@
         }
     },
     "columns": {
+        "sex": {
+            "title" : "Sex"
+        },
         "mouse_life_stage": {
             "title" : "Mouse Life Stage"
         },
@@ -86,6 +89,9 @@
         }
     },
     "facets": {
+        "sex": {
+            "title" : "Sex"
+        },
         "mouse_life_stage": {
             "title" : "Mouse Life Stage"
         },

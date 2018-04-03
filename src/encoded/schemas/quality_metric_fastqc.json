@@ -151,9 +151,18 @@
             "description": "FastQC metric"
         }
     },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
     "columns": {
         "%GC": {
             "title" : "GC content"
+        },
+        "overall_quality_status": {
+            "title" : "Overall Quality",
+            "default_hidden": true
         }
     }
 }
