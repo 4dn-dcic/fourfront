@@ -12,7 +12,8 @@
     "env": {
         "es6": true,
         "browser": true,
-        "commonjs": true
+        "commonjs": true,
+        "cypress/globals" : true
     },
     "parser" : "babel-eslint",
     "extends": "eslint:recommended",
@@ -27,6 +28,7 @@
     "plugins": [
         "react",
         "class-property",
-        "flowtype"
+        "flowtype",
+        "cypress"
     ]
 }

@@ -78,6 +78,7 @@ class BarSection extends React.Component {
                 ref="element"
                 data-key={this.props['data-key'] || null}
                 data-term={d.parent ? d.term : null}
+                data-count={d.count}
                 data-color={color}
                 data-target-height={d.attr.height}
                 key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
@@ -234,6 +235,7 @@ class Bar extends React.Component {
                     //else unhighlightTerms(d.field);
                 //}}
                 data-term={d.term}
+                data-count={d.count}
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                 key={"bar-" + d.term}
                 style={this.barStyle()}
