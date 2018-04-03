@@ -6,7 +6,7 @@ const staticContentTestsDeploy = require('./../../../../cypress/integration/01_s
 
 describe('Post-Deployment Static Page & Content Tests', function () {
 
-    it.skip('(skipped until schema.md link in excel_submission.md is fixed) Every help page has links which return success error codes', function(){
+    it.skip('Every help page has links which return success status codes', function(){
 
         cy.get('#sHelp').click().then(()=>{
             cy.get('ul[aria-labelledby="sHelp"] li a').then((listItems)=>{
@@ -61,7 +61,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
 
     });
 
-    context.only("Joint Analysis Page", function(){
+    context("Joint Analysis Page", function(){
 
         before(function(){
             cy.visit('/joint-analysis-plans');
@@ -120,6 +120,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                 });
             }).wait(250).end().screenshot().end();
         });
+
 
     });
 
