@@ -92,6 +92,7 @@ class ExperimentSet(Item):
 
                      "experiments_in_set.biosample.accession",
                      "experiments_in_set.biosample.modifications_summary",
+                     "experiments_in_set.biosample.treatments_type",
                      "experiments_in_set.biosample.treatments_summary",
                      "experiments_in_set.biosample.biosource_summary",
                      "experiments_in_set.biosample.biosource.biosource_type",

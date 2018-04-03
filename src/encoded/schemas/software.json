@@ -151,5 +151,10 @@
         "software_type": {
             "title": "Types"
         }
+    },
+    "columns": {
+        "software_type": {
+            "title": "Types"
+        }
     }
 }

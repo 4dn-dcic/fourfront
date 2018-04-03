@@ -152,7 +152,7 @@
         "modifications_summary": {
             "title": "Modifications"
         },
-        "treatments_summary": {
+        "treatments_type": {
             "title": "Treatments"
         }
     },
@@ -165,6 +165,9 @@
         },
         "biosource_summary": {
             "title": "Biosource"
+        },
+        "treatments_summary": {
+            "title": "Treatments"
         }
     }
 }

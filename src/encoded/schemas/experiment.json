@@ -223,7 +223,7 @@
         "biosample.modifications_summary": {
             "title": "Modifications"
         },
-        "biosample.treatments_summary": {
+        "biosample.treatments_type": {
             "title": "Treatments"
         },
         "lab.display_title": {

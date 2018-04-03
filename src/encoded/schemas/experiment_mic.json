@@ -127,6 +127,8 @@
         }
     },
     "columns": {
-
+        "experiment_type": {
+            "title" : "Experiment Type"
+        }
     }
 }

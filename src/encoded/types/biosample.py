@@ -86,21 +86,54 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         return 'None'
 
     @calculated_property(schema={
-        "title": "Treatments summary",
-        "description": "Summary of any treatments on the biosample.",
+        "title": "Treatment types",
+        "description": "Summary of treatments on the biosample.",
+        "type": "string",
+    })
+    def treatments_type(self, request, treatments=None):
+        if treatments:
+            treat_list = []
+            for i in range(len(treatments)):
+                treat_props = request.embed(treatments[i], '@@object')
+                treat_list.append(treat_props.get('treatment_type', ''))
+            return ' and '.join(sorted(list(set(treat_list))))
+            # if len(ret_str) > 5:
+            #    return ret_str[:-5]
+            # else:
+            #    return 'None'
+        return 'None'
+
+    @calculated_property(schema={
+        "title": "Treatment summary",
+        "description": "Summary of treatments on the biosample.",
         "type": "string",
     })
     def treatments_summary(self, request, treatments=None):
         if treatments:
-            ret_str = ''
+            treat_list = []
             for i in range(len(treatments)):
                 treat_props = request.embed(treatments[i], '@@object')
-                ret_str += treat_props.get('treatment_type', '') + ' and '
-            if len(ret_str) > 5:
-                return ret_str[:-5]
-            else:
-                return 'None'
+                treat_list.append(treat_props.get('display_title', ''))
+            return '; '.join(sorted(treat_list))
         return 'None'
+
+#    @calculated_property(schema={
+#        "title": "Treatment summary",
+#        "description": "Summary of treatments on the biosample.",
+#        "type": "string",
+#    })
+#    def treatments_summary(self, request, treatments=None):
+#        if treatments:
+#            treat_list = []
+#            for i in range(len(treatments)):
+#                treat_props = request.embed(treatments[i], '@@object')
+#                treat_list.append(treat_props.get('description', ''))
+#            return ', '.join(sorted(treat_list))
+        # if len(ret_str) > 5:
+        #    return ret_str[:-5]
+        # else:
+        #    return 'None'
+#        return 'None'
 
     @calculated_property(schema={
         "title": "Biosource summary",
