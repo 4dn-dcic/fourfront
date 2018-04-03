@@ -910,7 +910,7 @@ class DimensioningContainer extends React.Component {
         return (
             <div className="search-results-outer-container">
                 <StickyContainer>
-                    <div className="search-results-container">
+                    <div className={"search-results-container" + (canLoadMore === false ? ' fully-loaded' : '')}>
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                     <Sticky topOffset={stickyHeaderTopOffset} >{

@@ -87,7 +87,7 @@ class AccessKey(Item):
 # access keys have view permissions for update so readonly admin and the like
 # can create access keys to download files.
 @view_config(context=AccessKey.Collection, request_method='POST',
-             effective_principals=Authenticated,
+             permission='add',
              validators=[validate_item_content_post])
 def access_key_add(context, request):
     """smth."""
@@ -121,7 +121,7 @@ def access_key_add(context, request):
 
 
 @view_config(name='reset-secret', context=AccessKey,
-             effective_principals=Authenticated,
+             permission='add',
              request_method='POST', subpath_segments=0)
 def access_key_reset_secret(context, request):
     """smth."""

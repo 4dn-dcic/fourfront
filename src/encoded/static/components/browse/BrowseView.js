@@ -114,21 +114,7 @@ class ResultTableContainer extends React.Component {
                     return <span>{ number_of_files }</span>;
                 }
             },
-            'experiments_in_set.experiment_categorizer.combined' : {
-                'render' : function(result, columnDefinition, props, width){
-                    var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
-                    var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
-                    if (cat_value === 'No value' || !cat_value){
-                        return null;
-                    }
-                    return (
-                        <div className="exp-categorizer-cell">
-                            <small>{ cat_field }</small>
-                            <div className="text-ellipsis-container">{ cat_value }</div>
-                        </div>
-                    );
-                }
-            }
+            'experiments_in_set.experiment_categorizer.combined' : defaultColumnDefinitionMap['experiments_in_set.experiment_categorizer.combined']
         },
         'constantHiddenColumns' : ['experimentset_type']
     }

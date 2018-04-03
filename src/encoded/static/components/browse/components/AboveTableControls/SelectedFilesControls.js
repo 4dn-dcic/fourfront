@@ -239,7 +239,7 @@ export class SelectAllFilesButton extends React.Component {
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button disabled={this.state.selecting} bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)} children={this.buttonContent(isAllSelected)} />
+                    <Button id="select-all-files-button" disabled={this.state.selecting} bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)} children={this.buttonContent(isAllSelected)} />
                 </ButtonGroup>
             </div>
         );
@@ -365,7 +365,7 @@ export class SelectedFilesFilterByButton extends React.Component {
         var currentFiltersLength = this.props.currentFileTypeFilters.length;
 
         return (
-            <Button key="filter-selected-files-by" bsStyle="secondary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} active={this.props.currentOpenPanel === 'filterFilesBy'}>
+            <Button id="selected-files-file-type-filter-button" key="filter-selected-files-by" bsStyle="secondary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} active={this.props.currentOpenPanel === 'filterFilesBy'}>
                 <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.5 }}/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
             </Button>
         );

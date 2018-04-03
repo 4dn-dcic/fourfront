@@ -15,11 +15,13 @@ import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
 // Testing / Dummy data
+var _testing_data;
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 //import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
 //import { PARTIALLY_RELEASED_PROCESSED_FILES, PARTIALLY_RELEASED_PROCESSED_FILES_ALL_RUNS } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
-
+//import { ALL_RUNS } from './../testdata/traced_workflow_runs/files-processed-4DNFI18UHVRO';
+//_testing_data = ALL_RUNS;
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -69,17 +71,16 @@ export class WorkflowRunTracingView extends ItemBaseView {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
         this.tabbedView = this.tabbedView.bind(this);
-        //var steps = PARTIALLY_RELEASED_PROCESSED_FILES_ALL_RUNS;
-        var steps = null;
+        var steps = _testing_data || null;
         this.state = {
             'mounted' : false,
             'steps' : steps,
             'allRuns' : false,
-            'loading' : false
+            'loadingGraphSteps' : false
         };
     }
 
-    componentDidMount(){
+    componentDidMount(inclState = {}){
 
         var changeTabToGraphSectionIfHaveHash = function(){
             if (isGraphSectionOpen(this.props.href)){
@@ -93,9 +94,10 @@ export class WorkflowRunTracingView extends ItemBaseView {
             }
         }.bind(this);
 
-        var state = { 'mounted' : true };
+        var state = _.extend(inclState || {}, { 'mounted' : true });
+
         if (!this.state.steps){
-            state.loading = true;
+            state.loadingGraphSteps = true;
             this.loadGraphSteps();
         }
         this.setState(state, function(){ setTimeout(changeTabToGraphSectionIfHaveHash, 750); });
@@ -118,9 +120,9 @@ export class WorkflowRunTracingView extends ItemBaseView {
         var callback = function(r){
             requestAnimationFrame(()=>{
                 if (Array.isArray(r) && r.length > 0){
-                    this.setState({ 'steps' : r, 'loading' : false }, cb);
+                    this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
                 } else {
-                    this.setState({ 'steps' : 'ERROR', 'loading' : false }, cb);
+                    this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
                 }
             });
         }.bind(this);
@@ -141,7 +143,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
     }
 
     handleToggleAllRuns(){
-        this.setState({ 'allRuns' : !this.state.allRuns, 'loading' : true }, ()=>{
+        this.setState({ 'allRuns' : !this.state.allRuns, 'loadingGraphSteps' : true }, ()=>{
             this.loadGraphSteps(true);
         });
     }
@@ -180,13 +182,13 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
 
 export class FileViewGraphSection extends WorkflowGraphSection {
     
-    static getTabObject(props, state, onToggleAllRuns){
-        var { loading, steps, mounted, allRuns } = state;
-        var { context } = props;
+    static getTabObject(parentItemViewProps, parentItemViewState, onToggleAllRuns){
+        var { loadingGraphSteps, steps, mounted, allRuns } = parentItemViewState;
+        var { context } = parentItemViewProps;
 
         var iconClass = "icon icon-fw icon-";
         var tooltip = null;
-        if (steps === null || loading){
+        if (steps === null || loadingGraphSteps){
             iconClass += 'circle-o-notch icon-spin';
             tooltip = "Graph is loading";
         } else if (!Array.isArray(steps) || steps.length === 0) {
@@ -195,21 +197,21 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         } else {
             iconClass += 'sitemap';
         }
-        var parts = url.parse(props.href);
+        var parts = url.parse(parentItemViewProps.href);
         var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
         return {
             tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
             key : 'graph',
             disabled : !Array.isArray(steps) || steps.length === 0,
-            isDefault : isGraphSectionOpen(props.href, hash),
+            isDefault : isGraphSectionOpen(parentItemViewProps.href, hash),
             content : <FileViewGraphSection
-                {...props}
+                {...parentItemViewProps}
                 steps={steps}
                 mounted={mounted}
                 key={"graph-for-" + context.uuid}
                 onToggleAllRuns={onToggleAllRuns}
                 allRuns={allRuns}
-                loading={loading}
+                loading={loadingGraphSteps}
                 urlHash={hash}
             />
         };
@@ -317,7 +319,8 @@ export class FileViewGraphSection extends WorkflowGraphSection {
                     <span>Graph</span>
                     <TracedGraphSectionControls
                         {...this.state}
-                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'loading')}
+                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')}
+                        loading={this.props.loadingGraphSteps}
                         onToggleReferenceFiles={this.onToggleReferenceFiles}
                         onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType}

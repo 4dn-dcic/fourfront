@@ -1109,7 +1109,7 @@ $small-label-accession-font-size : 0.75rem;
 
 
 // Common definitions
-@mixin search-result-column-block {
+@mixin search-result-column-and-header-block {
 	float: left;
 	//transform: translate3d(0,0,0);
 	> .inner {
@@ -1121,6 +1121,10 @@ $small-label-accession-font-size : 0.75rem;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+}
+
+@mixin search-result-column-block {
+	@include search-result-column-and-header-block;
 	&[data-field="display_title"],
 	&[data-field="@type"],
 	&[data-field="lab.display_title"] {
@@ -1277,6 +1281,12 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 	.search-results-container {
 		position: relative;
+
+		&:not(.fully-loaded){
+			::-webkit-scrollbar {
+				display: none; 
+			}
+		}
 
 		.shadow-border-layer {
 			position: absolute;
@@ -1585,7 +1595,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		transition: left .025s linear;
 
 		> .search-headers-column-block {
-			@include search-result-column-block;
+			@include search-result-column-and-header-block;
 			flex-shrink: 0;
 			position: relative;
 			transform: translate3d(0,0,0);

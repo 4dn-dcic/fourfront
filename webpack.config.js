@@ -123,8 +123,8 @@ module.exports = [
             'brace/theme/solarized_light',
             'd3',
             'dagre-d3',
-            // avoid bundling babel transpiler, which is not used at runtime
-            'babel-core/register',
+            'babel-core/register', // avoid bundling babel transpiler, which is not used at runtime
+            'higlass'
         ],
         output: {
             path: PATHS.build,

@@ -27,12 +27,12 @@
             "title": "Age of the Individual",
             "description": " The age of the individual when biological material was sampled.",
             "type": "number",
-            "lookup":2
+            "lookup": 2
         },
         "age_units": {
             "title": "Age units",
             "type": "string",
-            "lookup" :2,
+            "lookup": 3,
 
             "enum": [
                 "day",
@@ -45,7 +45,7 @@
             "title": "Sex",
             "type": "string",
             "default": "unknown",
-            "lookup" : 4,
+            "lookup": 4,
             "enum": [
                 "male",
                 "female",
@@ -55,7 +55,7 @@
         },
         "url": {
             "title": "URL",
-            "lookup" : 1000,
+            "lookup": 1000,
             "description": "An external resource with additional information about the individual.",
             "type": "string",
             "format": "uri"

@@ -47,38 +47,45 @@
             "title": "Transposase",
             "description": "The transposase used to 'insert' sequencing adapters.",
             "type": "string",
+            "lookup": 100,
             "linkTo": "Enzyme"
         },
         "enzyme_lot_number": {
             "title": "Transposase Lot Number",
             "description": "Lot number of batch of enzyme used to digest DNA",
-            "type": "string"
+            "type": "string",
+            "lookup": 101
         },
         "enzyme_incubation_time": {
             "title": "Time (min) enzyme reaction",
             "description": "Time of incubation with enzyme in minutes",
-            "type": "number"
+            "type": "number",
+            "lookup": 102
         },
         "incubation_temperature": {
             "title": "Incubation Temperature (°C)",
             "description": "Temperature of transposase step in degrees Celsius",
-            "type": "number"
+            "type": "number",
+            "lookup": 103
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
             "description":  "YYYY-MM-DD formatted date of library preparation.",
             "type": "string",
+            "lookup": 105,
             "format": "date"
         },
         "pcr_cycles": {
             "title": "PCR Cycles for Final amplification",
             "description": "Number of PCR Cycles used for additional amplification after qPCR before sequencing",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 104
         },
         "primer_removal_method": {
             "title": "Primer removal method",
             "description": "A short description of the method used to remove the amplification primers.",
             "type": "string",
+            "lookup": 106,
             "enum": [
               "gel",
               "see document",

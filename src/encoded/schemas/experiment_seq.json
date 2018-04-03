@@ -60,29 +60,34 @@
             "title": "Target",
             "description": "Information about the target of the Antibody in an IP",
             "type": "string",
+            "lookup": 95,
             "linkTo": "Target"
         },
         "reaction_time": {
             "title": "Reaction Time (min)",
             "description": "Time of a reaction eg. Digestion time in CUT&RUN experiments",
-            "type": "number"
+            "type": "number",
+            "lookup": 100
         },
         "3p_adenylation_time": {
             "title": "Time of 3'Adenylation (mins)",
             "description": "Time of the 3' Adenylation Reaction in minutes",
             "type": "number",
+            "lookup": 110,
             "use_for": ["CUT&RUN"]
         },
         "3p_adenylation_temperature": {
             "title": "Temperature for 3'Adenylation",
             "description": "Temperature of the 3' Adenylation Reaction in degrees Celsius",
             "type": "number",
+            "lookup": 115,
             "use_for": ["CUT&RUN"]
         },
         "affinity_rounds": {
             "title": "Number of rounds of affinity purification",
             "description": "If there are multiple rounds of purification - eg. 2 biotin affinity purifications for TSA-seq",
             "type": "integer",
+            "lookup": 120,
             "use_for": ["TSA-seq"]
         }
     },

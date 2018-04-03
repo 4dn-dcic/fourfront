@@ -47,39 +47,46 @@
             "title": "Target Fusion Protein",
             "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",
             "type": "string",
+            "lookup": 100,
             "linkTo": "Target"
         },
         "sap_treatment": {
             "title": "SAP Treatment",
             "description": "Was the genomic DNA treated with shrimp alkaline phosphatase (SAP)",
             "type": "string",
+            "lookup": 110,
             "enum": ["Yes", "No"]
         },
         "me_pcr_cycles": {
             "title": "Methyl-PCR cycles",
             "description": "Number of Methylation-specific PCR cycles performed",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 120
         },
         "me_pcr_library_date":{
             "title": "Methy-PCR Library Preparation Date",
             "description": "YYYY-MM-DD formatted date of the methy-PCR library preparation.",
             "type": "string",
+            "lookup": 125,
             "format": "date"
         },
         "y_ligation_dna_input": {
             "title": "Y-adaptor ligation input amount",
             "description": "Amount of DNA (units ng) input to the Y-adaptor ligation step",
-            "type": "number"
+            "type": "number",
+            "lookup": 130
         },
         "pcr_cycles": {
             "title": "Index PCR cycles",
             "description": "Number of PCR cycles performed with the indexed primers prior to sequencing",
-            "type": "integer"
+            "type": "integer",
+            "lookup": 210
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
             "description": "YYYY-MM-DD formatted date of library preparation.",
             "type": "string",
+            "lookup": 220,
             "format": "date"
         }
     },

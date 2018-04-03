@@ -52,15 +52,9 @@ def build_cfg_file():
     data['should_index'] = 'true'
     data['load_function'] = 'load_test_data'
     data['procs'] = str(multiprocessing.cpu_count())
-    # this is temporary while we have environments switched, change back later
-    # if 'prod' in data['env_name'].lower():
-    if data['real_env_name'].lower() in ['4dn-web-dev', 'fourfront-webdev']:
-        data['es_server'] = '172.31.49.128:9872'
-        data['load_function'] = 'load_prod_data'
-    else:  # this will soon be base case
-        data['es_server'] = os.environ.get("ES_URL")
-        if os.environ.get("LOAD_FUNCTION"):
-            data['load_function'] = os.environ.get("LOAD_FUNCTION")
+    data['es_server'] = os.environ.get("ES_URL")
+    if os.environ.get("LOAD_FUNCTION"):
+        data['load_function'] = os.environ.get("LOAD_FUNCTION")
 
     file_dir, _ = os.path.split(os.path.abspath(__file__))
     filename = os.path.join(file_dir, '..', 'beanstalk.cfg')

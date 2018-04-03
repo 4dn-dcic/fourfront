@@ -65,10 +65,8 @@ export class ItemPageTable extends React.Component {
                             { title }
                         </span>
                     );
-
-                    
                 }
-            },
+            }
         },
         'columns' : {
             "experiments_in_set.experiment_type": "Experiment Type",

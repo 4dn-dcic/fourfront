@@ -31,12 +31,14 @@
             "title": "Description",
             "description": "A brief plain text description of the modification.",
             "type": "string",
+            "lookup": 20,
             "formInput": "textarea"
         },
         "modification_type": {
             "title": "Genomic modification method",
             "description": "The method used to make the genomic modification.",
             "type": "string",
+            "lookup": 30,
             "enum" : [
               "Crispr",
               "Stable Transfection",
@@ -47,6 +49,7 @@
             "title": "The type of modification",
             "description": "How the target of the modification is changed - i.e. deletion, insertion.",
             "type": "string",
+            "lookup": 40,
             "enum": [
                "deletion",
                "insertion",
@@ -61,6 +64,7 @@
             "title": "Constructs",
             "description": "Recombinant constructs used to make modification.",
             "type":  "array",
+            "lookup": 50,
             "items": {
                 "title": "Constructs",
                 "description": "A recombinant construct.",
@@ -72,6 +76,7 @@
             "title": "Guide RNAs",
             "description": "The guide RNA sequences used in Crispr targetting.",
             "type": "array",
+            "lookup": 60,
             "items": {
                 "title": "Guide RNA",
                 "description": "Sequence of the guide RNA - submit as DNA (i.e. T not U) can include the PAM motif that is not actually part of the transcribed target and should not include the tracrRNA so that the sequence submitted reflects the genomic sequence",
@@ -83,6 +88,7 @@
             "title": "Modified Regions",
             "description": "Modified genomic regions (if different than target)",
             "type": "array",
+            "lookup": 80,
             "items": {
                 "title": "Genomic region",
                 "description": "region being modfied",
@@ -94,18 +100,21 @@
             "title": "Target of Modification",
             "description": "The gene or genomic region that is targeted by the modification.",
             "type": "string",
+            "lookup": 70,
             "linkTo": "Target"
         },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the construct.",
             "type": "string",
+            "lookup": 1000,
             "format": "uri"
         },
         "created_by" : {
             "title": "Created By",
             "description": "Lab or Company that produced the modfication",
             "type": "string",
+            "lookup": 90,
             "linkTo": "Vendor"
         }
     }
