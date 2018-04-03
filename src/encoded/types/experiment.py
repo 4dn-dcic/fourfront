@@ -255,12 +255,11 @@ class Experiment(Item):
             "field": "Default",
             "value": None
         }
-        if expt_type is not None:
-            types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq']
-            if expt_type in types4control:
-                if not targeted_factor:
-                    out_dict['field'] = 'Target'
-                    out_dict['value'] = 'None (Control)'
+        types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq']
+        if expt_type is not None and expt_type in types4control:
+            if not targeted_factor:
+                out_dict['field'] = 'Target'
+                out_dict['value'] = 'None (Control)'
         elif targeted_factor is not None:
             obj = request.embed('/', targeted_factor, '@@object')
             out_dict['field'] = 'Target'
