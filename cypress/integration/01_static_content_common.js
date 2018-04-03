@@ -16,7 +16,14 @@ describe('Static Page & Content Tests', function () {
             cy.visit('/').end()
                 .title().should('include', '4DN Data Portal').end()
                 .get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').end()
-                .get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.').end().screenshot();
+                .get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.');
+
+        });
+
+        it('At least 3 announcements on the page.', function () {
+
+            cy.window().scrollTo('bottom').wait(100).end()
+                .get('.home-content-area div.fourDN-section.announcement').should('have.length.greaterThan', 2).end().screenshot();
 
         });
 
