@@ -1,4 +1,22 @@
 
+
+function checkUncheckFileCheckbox(origSelectedCount, $checkBox){
+    return cy.wrap($checkBox).scrollToCenterElement().uncheck({ 'force' : true }).end()
+        .getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
+            let nextSelectedCount = downloadButtonTextContent.match(/\d/g);
+            nextSelectedCount = parseInt(nextSelectedCount.join(''));
+            expect(nextSelectedCount).to.be.lessThan(origSelectedCount);
+            return cy.getSelectAllFilesButton().should('not.contain', "Deselect All");
+        }).end().wrap($checkBox).check({ 'force' : true }).end()
+        .getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
+            let nextSelectedCount = downloadButtonTextContent.match(/\d/g);
+            nextSelectedCount = parseInt(nextSelectedCount.join(''));
+            expect(nextSelectedCount).to.equal(origSelectedCount);
+            return cy.getSelectAllFilesButton().should('contain', "Deselect All");
+        });
+}
+
+
 describe('Browse Views - Files Selection', function () {
 
     context('Ensure "Select All Files" & related features are functional.', function(){
@@ -21,7 +39,7 @@ describe('Browse Views - Files Selection', function () {
         it('"Select All Files" button works & becomes "Deselect All" after.', function(){
 
             cy.getSelectAllFilesButton().click().should('contain', "Deselect All").end()
-                .getDownloadButton().should('not.have.attr', 'disabled');
+                .getDownloadButton().should('not.have.attr', 'disabled').end().screenshot();
 
         });
 
@@ -39,30 +57,31 @@ describe('Browse Views - Files Selection', function () {
             // TODO
         });
 
-        it('All loaded ExpSet checkboxes are checked & can be toggled', function(){
+        it('ExpSets checkboxes are checked & can be toggled', function(){
             cy.getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
                 let origSelectedCount = downloadButtonTextContent.match(/\d/g);
                 origSelectedCount = parseInt(origSelectedCount.join(''));
-                return cy.get('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]').each(($checkBox)=>{
-                    return cy.wrap($checkBox).scrollToCenterElement().uncheck({ 'force' : true }).end()
-                        .getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
-                            let nextSelectedCount = downloadButtonTextContent.match(/\d/g);
-                            nextSelectedCount = parseInt(nextSelectedCount.join(''));
-                            expect(nextSelectedCount).to.be.lessThan(origSelectedCount);
-                            return cy.getSelectAllFilesButton().should('not.contain', "Deselect All");
-                        }).end().wrap($checkBox).check({ 'force' : true }).end()
-                        .getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
-                            let nextSelectedCount = downloadButtonTextContent.match(/\d/g);
-                            nextSelectedCount = parseInt(nextSelectedCount.join(''));
-                            expect(nextSelectedCount).to.equal(origSelectedCount);
-                            return cy.getSelectAllFilesButton().should('contain', "Deselect All");
-                        });
+                return cy.get('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]').each(($checkBox, idx)=>{
+                    if (idx > 15) return;
+                    return checkUncheckFileCheckbox(origSelectedCount, $checkBox);
                 });
             });
         });
 
-        it.skip('All loaded ExpSets->FilePairs+Files checkboxes are checked & can be toggled.', function(){
-            // TODO
+        it('ExpSets > FilePairs+Files checkboxes are checked & can be toggled.', function(){
+            cy.getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
+                let origSelectedCount = downloadButtonTextContent.match(/\d/g);
+                origSelectedCount = parseInt(origSelectedCount.join(''));
+                return cy.get('.search-results-container .search-result-row .search-result-column-block button.toggle-detail-button').should('have.length.greaterThan', 24).each(($toggleDetailButton, idx)=>{
+                    if (idx > 7) return;
+                    return cy.wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end()
+                        .get('.search-results-container .search-result-row.open').then(($resultRow)=>{
+                            return cy.get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container h4 i.toggle-open-icon').scrollToCenterElement().click({ 'force' : true }).wait(300).end()
+                                .get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container .stacked-block-table input[type="checkbox"]').each(checkUncheckFileCheckbox.bind(this, origSelectedCount)).end()
+                                .get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container h4 i.toggle-open-icon').scrollToCenterElement().click({ 'force' : true }).wait(300).end();
+                        }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end();
+                });
+            });
         });
 
         it('"Deselect All Files" button works; checkboxes unchecked.', function(){

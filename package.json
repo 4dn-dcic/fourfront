@@ -13,7 +13,7 @@
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:test-local": "node_modules/.bin/cypress run --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
     "cypress:test-local-recorded": "node_modules/.bin/cypress run --record --key $CYPRESS_SECRET_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
-    "cypress:test-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
+    "cypress:test-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
     "cypress:test-staging-recorded": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key b07267b2-e853-4958-b1c4-df588b1efb04 --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret"
   },
   "author": "",

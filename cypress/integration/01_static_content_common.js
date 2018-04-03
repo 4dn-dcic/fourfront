@@ -13,13 +13,10 @@ describe('Static Page & Content Tests', function () {
 
         it('Home Page Title is present and matching expected strings.', function () {
 
-            cy.visit('/');
-
-            cy.title().should('include', '4DN Data Portal');
-
-            cy.get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal');
-
-            cy.get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.');
+            cy.visit('/').end()
+                .title().should('include', '4DN Data Portal').end()
+                .get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').end()
+                .get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.').end().screenshot();
 
         });
 

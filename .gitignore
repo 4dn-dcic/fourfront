@@ -20,6 +20,8 @@ beanstalk.cfg
 package-lock.json
 /cypress/screenshots/
 /cypress/videos/
+/deploy/post_deploy_testing/cypress/videos/
+/deploy/post_deploy_testing/cypress/screenshots/
 /documentation/
 /ontology.json
 /parts/
