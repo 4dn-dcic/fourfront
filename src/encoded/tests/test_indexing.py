@@ -23,7 +23,6 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
     settings['collection_datastore'] = 'elasticsearch'
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
-    settings['mpindexer'] = True
     settings['indexer.processes'] = 2
     return settings
 
@@ -35,30 +34,31 @@ def app(app_settings):
 
     yield app
 
-    # Shutdown multiprocessing pool to close db conns.
-    from snovault.elasticsearch import INDEXER
-    app.registry[INDEXER].shutdown()
-
     from snovault import DBSESSION
     DBSession = app.registry[DBSESSION]
     # Dispose connections so postgres can tear down.
     DBSession.bind.pool.dispose()
 
 
-@pytest.fixture(scope='session')
-def DBSession(app):
+@pytest.fixture(autouse=True)
+def teardown(app):
+    import transaction
+    from sqlalchemy import MetaData
+    from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
-    return app.registry[DBSESSION]
-
-
-@pytest.fixture(autouse=False)
-def teardown(app, dbapi_conn):
     from snovault.elasticsearch import create_mapping
-    create_mapping.run(app, collections=TEST_COLLECTIONS)
-    cursor = dbapi_conn.cursor()
-    cursor.execute("""TRUNCATE resources, transactions CASCADE;""")
-    cursor.close()
-
+    create_mapping.run(app, skip_indexing=True)
+    session = app.registry[DBSESSION]
+    connection = session.connection().connect()
+    meta = MetaData(bind=session.connection(), reflect=True)
+    for table in meta.sorted_tables:
+        print('Clear table %s' % table)
+        print('Count before -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)))
+        connection.execute(table.delete(synchronize_session=False))
+        print('Count after -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)), '\n')
+    session.flush()
+    mark_changed(session())
+    transaction.commit()
 
 @pytest.fixture
 def external_tx():
@@ -84,7 +84,7 @@ def listening_conn(dbapi_conn):
 
 
 @pytest.mark.slow
-def test_indexing_simple(app, testapp, indexer_testapp, teardown):
+def test_indexing_simple(app, testapp, indexer_testapp):
     import time
     es = app.registry['elasticsearch']
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
@@ -92,13 +92,11 @@ def test_indexing_simple(app, testapp, indexer_testapp, teardown):
     # First post a single item so that subsequent indexing is incremental
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
-    assert res.json['indexed'] == 1
+    assert res.json['indexing_count'] == 1
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
     res = indexer_testapp.post_json('/index', {'record': True})
-    assert res.json['indexed'] == 1
-    assert res.json['txn_count'] == 1
-    assert res.json['updated'] == [uuid]
+    assert res.json['indexing_count'] == 1
     time.sleep(3)
     # check es directly
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
@@ -115,19 +113,16 @@ def test_indexing_simple(app, testapp, indexer_testapp, teardown):
     assert uuid in uuids
     # test the meta index
 
-    indexing_doc = es.get(index='meta', doc_type='meta', id='indexing')
+    indexing_doc = es.get(index='meta', doc_type='meta', id='latest_indexing')
     indexing_source = indexing_doc['_source']
-    assert 'xmin' in indexing_source
-    assert 'last_xmin' in indexing_source
-    assert 'indexed' in indexing_source
-    assert indexing_source['xmin'] >= indexing_source['last_xmin']
+    assert 'indexing_count' in indexing_source
     testing_ppp_meta = es.get(index='meta', doc_type='meta', id='testing_post_put_patch')
     testing_ppp_source = testing_ppp_meta['_source']
     assert 'mappings' in testing_ppp_source
     assert 'settings' in testing_ppp_source
 
 
-def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch, teardown):
+def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     """
     Test overall create_mapping functionality using app.
     Do this by checking es directly before and after running mapping.
@@ -159,18 +154,6 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch, teard
         meta_record = item_meta.get('_source', None)
         assert meta_record
         assert item_record == meta_record
-
-
-@pytest.mark.slow
-def test_listening(testapp, listening_conn):
-    import time
-    testapp.post_json('/testing-post-put-patch/', {'required': ''})
-    time.sleep(1)
-    listening_conn.poll()
-    assert len(listening_conn.notifies) == 1
-    notify = listening_conn.notifies.pop()
-    assert notify.channel == 'snovault.transaction'
-    assert int(notify.payload) > 0
 
 
 @pytest.fixture
