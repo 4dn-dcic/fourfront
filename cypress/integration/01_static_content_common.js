@@ -4,7 +4,7 @@
  */
 
 
-describe('Static Page & Content Tests', function () {
+describe('Deployment/CI Static Page & Content Tests', function () {
 
 
 
@@ -23,7 +23,7 @@ describe('Static Page & Content Tests', function () {
         it('At least 3 announcements on the page.', function () {
 
             cy.window().scrollTo('bottom').wait(100).end()
-                .get('.home-content-area div.fourDN-section.announcement').should('have.length.greaterThan', 2).end().screenshot();
+                .get('.home-content-area div.fourDN-section.announcement').should('have.length.greaterThan', 2).end();
 
         });
 
