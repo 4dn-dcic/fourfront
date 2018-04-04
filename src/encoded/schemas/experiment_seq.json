@@ -94,18 +94,6 @@
     "columns": {
         "experiment_summary":{
             "title": "Experiment summary"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme",
-            "default_hidden": true
-        },
-        "biosample.modifications.display_title": {
-            "title": "Modifications",
-            "default_hidden": true
-        },
-        "biosample.treatments.display_title": {
-            "title": "Treatments",
-            "default_hidden": true
         }
     }
 
