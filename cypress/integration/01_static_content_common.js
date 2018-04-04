@@ -6,8 +6,6 @@
 
 describe('Deployment/CI Static Page & Content Tests', function () {
 
-
-
     context('Homepage content is ok.', function () {
 
 
@@ -33,12 +31,9 @@ describe('Deployment/CI Static Page & Content Tests', function () {
 
     context('Each help page in dropdown has unique title; ToC works.', function () {
 
-        before(function(){
-            cy.visit('/').then(()=>{
-                cy.title().should('include', '4DN Data Portal');
-            });
+        it('We start on homepage (from previous test)', function(){
+            cy.title().should('equal', '4DN Data Portal');
         });
-
 
         it('Click & visit each page from menu, ensure ToC exists somewhere, ensure ToC works.', function(){
 
