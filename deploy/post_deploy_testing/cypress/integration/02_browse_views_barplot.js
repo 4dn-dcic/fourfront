@@ -36,7 +36,6 @@ describe('Browse Views - Redirection & Visualization', function () {
     });
 
     context('BarPlotChart & QuickInfoBar', function(){
-        // THESE TESTS WILL CRASH THE GUI TEST RUNNER - TODO: Put into separate files? Should not affect headless test runs (e.g. as launched from Travis).
 
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
@@ -172,6 +171,12 @@ describe('Browse Views - Redirection & Visualization', function () {
                     .logout4DN();
 
             });
+
+        });
+
+        it.skip('Hover/pin bar part & click "Browse" for Bar Part --> filtered /browse/ results', function(){
+
+            // TODO
 
         });
 
