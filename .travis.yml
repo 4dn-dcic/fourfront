@@ -77,7 +77,7 @@ script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
   src/encoded; fi
-- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded; fi
+- if test -n "$UNIT"; then travis_wait 30 bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded; fi
 - if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
