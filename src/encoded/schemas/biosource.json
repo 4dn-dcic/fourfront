@@ -137,6 +137,9 @@
         },
         "cell_line_tier": {
             "title": "Tier"
+        },
+        "modifications.modification_type": {
+            "title": "Modification Type"
         }
     },
     "columns": {
@@ -148,6 +151,9 @@
         },
         "cell_line_tier": {
             "title": "Tier"
+        },
+        "modifications.display_title": {
+            "title": "Modification"
         }
     }
 }

@@ -45,9 +45,11 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'cell_culture_details.morphology_image.attachment.width',
         'cell_culture_details.morphology_image.attachment.height',
         'modifications.modification_type',
+        'modifications.display_title',
         'modifications.description',
         'treatments.treatment_type',
         'treatments.description',
+        'treatments.display_title',
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
@@ -86,24 +88,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         return 'None'
 
     @calculated_property(schema={
-        "title": "Treatment types",
-        "description": "Summary of treatments on the biosample.",
-        "type": "string",
-    })
-    def treatments_type(self, request, treatments=None):
-        if treatments:
-            treat_list = []
-            for i in range(len(treatments)):
-                treat_props = request.embed(treatments[i], '@@object')
-                treat_list.append(treat_props.get('treatment_type', ''))
-            return ' and '.join(sorted(list(set(treat_list))))
-            # if len(ret_str) > 5:
-            #    return ret_str[:-5]
-            # else:
-            #    return 'None'
-        return 'None'
-
-    @calculated_property(schema={
         "title": "Treatment summary",
         "description": "Summary of treatments on the biosample.",
         "type": "string",
@@ -116,24 +100,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 treat_list.append(treat_props.get('display_title', ''))
             return '; '.join(sorted(treat_list))
         return 'None'
-
-#    @calculated_property(schema={
-#        "title": "Treatment summary",
-#        "description": "Summary of treatments on the biosample.",
-#        "type": "string",
-#    })
-#    def treatments_summary(self, request, treatments=None):
-#        if treatments:
-#            treat_list = []
-#            for i in range(len(treatments)):
-#                treat_props = request.embed(treatments[i], '@@object')
-#                treat_list.append(treat_props.get('description', ''))
-#            return ', '.join(sorted(treat_list))
-        # if len(ret_str) > 5:
-        #    return ret_str[:-5]
-        # else:
-        #    return 'None'
-#        return 'None'
 
     @calculated_property(schema={
         "title": "Biosource summary",

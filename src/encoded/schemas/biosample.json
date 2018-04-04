@@ -149,10 +149,10 @@
         "biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "modifications_summary": {
+        "modifications.modification_type": {
             "title": "Modifications"
         },
-        "treatments_type": {
+        "treatments.treatment_type": {
             "title": "Treatments"
         }
     },
@@ -166,7 +166,10 @@
         "biosource_summary": {
             "title": "Biosource"
         },
-        "treatments_summary": {
+        "modifications.display_title": {
+            "title": "Modifications"
+        },
+        "treatments.display_title": {
             "title": "Treatments"
         }
     }

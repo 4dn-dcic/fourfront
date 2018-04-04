@@ -164,11 +164,11 @@
             "title" : "Enzyme",
             "default_hidden" : true
         },
-        "experiments_in_set.biosample.modifications_summary": {
+        "experiments_in_set.biosample.modifications.display_title": {
             "title" : "Modifications",
             "default_hidden" : true
         },
-        "experiments_in_set.biosample.treatments_summary": {
+        "experiments_in_set.biosample.treatments.display_title": {
             "title" : "Treatments",
             "default_hidden" : true
         }
