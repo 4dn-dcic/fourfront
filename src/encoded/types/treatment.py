@@ -50,13 +50,13 @@ class TreatmentChemical(Treatment):
         d_t = []
         conditions = ""
         if concentration and concentration_units:
-            d_t.extend([str(concentration), concentration_units + ','])
+            d_t.extend([str(concentration), concentration_units])
         if duration and duration_units:
-            d_t.extend([str(duration) + duration_units[0]])
+            d_t.extend([', ' + str(duration) + duration_units[0]])
         if temperature:
-            d_t.append("at " + str(temperature) + "°C")
+            d_t.append(" at " + str(temperature) + "°C")
         if d_t:
-            conditions = " (" + " ".join(d_t) + ")"
+            conditions = " (" + "".join(d_t) + ")"
 
         dis_tit = chemical + " treatment" + conditions
         return dis_tit
