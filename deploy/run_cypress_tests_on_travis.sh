@@ -23,7 +23,14 @@
 # --------------------------------------------------------------------------------------------------------------------------------
 
 
-travis_wait 30 exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
+function bell() {
+  while true; do
+    echo -e "\a"
+    sleep 60
+  done
+}
+
+exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1 && bell &)
 db_server_pid=$!
 count_exp_seq_seen=0
 while read line; do
