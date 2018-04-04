@@ -252,11 +252,16 @@ class Experiment(Item):
         '''
         digestion_enzyme = self.properties.get('digestion_enzyme')
         targeted_factor = self.properties.get('targeted_factor')
+        expt_type = self.properties.get('experiment_type')
         out_dict = {
-            "field" : "Default",
-            "value" : None
+            "field": "Default",
+            "value": None
         }
-        if targeted_factor is not None:
+        types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq']
+        if expt_type is not None and expt_type in types4control and not targeted_factor:
+            out_dict['field'] = 'Target'
+            out_dict['value'] = 'None (Control)'
+        elif targeted_factor is not None:
             obj = request.embed('/', targeted_factor, '@@object')
             out_dict['field'] = 'Target'
             out_dict['value'] = obj['display_title']

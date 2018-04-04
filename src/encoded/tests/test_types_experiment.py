@@ -689,9 +689,16 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
         assert v in value
 
 
+def test_experiment_categorizer_4_chiapet_no_fusion(testapp, repliseq_info):
+    repliseq_info['experiment_type'] = 'CHIA-pet'
+    res = testapp.post_json('/experiment_chiapet', repliseq_info).json['@graph'][0]
+    assert res['experiment_categorizer']['field'] == 'Default'
+    assert res['experiment_categorizer']['value'] is None
+
+
 def test_experiment_categorizer_4_damid_no_fusion(testapp, damid_no_fusion):
-    assert damid_no_fusion['experiment_categorizer']['field'] == 'Default'
-    assert damid_no_fusion['experiment_categorizer'].get('value') is None
+    assert damid_no_fusion['experiment_categorizer']['field'] == 'Target'
+    assert damid_no_fusion['experiment_categorizer'].get('value') == 'None (Control)'
 
 
 def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion, target_w_prot):
@@ -740,7 +747,7 @@ def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
     experiment_data['experiment_type'] = 'RNA-seq'
     expt = testapp.post_json('/experiment_seq', experiment_data).json['@graph'][0]
     assert expt['experiment_categorizer']['field'] == 'Default'
-    assert expt['experiment_categorizer'].get('value') == None
+    assert expt['experiment_categorizer'].get('value') is None
 
 
 def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI):
