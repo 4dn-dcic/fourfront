@@ -84,6 +84,13 @@ describe('Browse Views - Files Selection', function () {
             });
         });
 
+        it('Can click Download button, get modal with proper contents', function(){
+            cy.getDownloadButton().click().wait(100).end()
+                .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
+                .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
+                .get('div.modal-dialog .modal-header button.close').click().wait(100).end();
+        });
+
         it('"Deselect All Files" button works; checkboxes unchecked.', function(){
 
             cy.getSelectAllFilesButton().click().should('not.contain', "Deselect All").end()
