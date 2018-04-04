@@ -860,7 +860,7 @@ export class Detail extends React.Component {
             'tagging_method',
             // Biosample
             'biosource','biosource_summary','biosample_protocols','modifications_summary',
-            'treatments_type', 'treatments_summary',
+            'treatments_summary',
             // File
             'filename', 'file_type', 'file_format', 'href', 'notes', 'flowcell_details',
             // Lab
