@@ -98,7 +98,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             for i in range(len(treatments)):
                 treat_props = request.embed(treatments[i], '@@object')
                 treat_list.append(treat_props.get('display_title', ''))
-            return '; '.join(sorted(treat_list))
+            return ' and '.join(sorted(treat_list))
         return 'None'
 
     @calculated_property(schema={
