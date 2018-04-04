@@ -60,28 +60,6 @@ def teardown(app):
     mark_changed(session())
     transaction.commit()
 
-@pytest.fixture
-def external_tx():
-    pass
-
-
-@pytest.yield_fixture
-def dbapi_conn(DBSession):
-    connection = DBSession.bind.pool.unique_connection()
-    connection.detach()
-    conn = connection.connection
-    conn.autocommit = True
-    yield conn
-    conn.close()
-
-
-@pytest.yield_fixture
-def listening_conn(dbapi_conn):
-    cursor = dbapi_conn.cursor()
-    cursor.execute("""LISTEN "snovault.transaction";""")
-    yield dbapi_conn
-    cursor.close()
-
 
 @pytest.mark.slow
 def test_indexing_simple(app, testapp, indexer_testapp):
@@ -157,23 +135,23 @@ def test_indexing_simple(app, testapp, indexer_testapp):
 #         meta_record = item_meta.get('_source', None)
 #         assert meta_record
 #         assert item_record == meta_record
-
-
-@pytest.fixture
-def item_uuid(testapp, award, experiment, lab):
-    # this is a processed file
-    item = {
-        'accession': '4DNFIO67APU2',
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'file_format': 'pairs',
-        'filename': 'test.pairs.gz',
-        'md5sum': '0123456789abcdef0123456789abcdef',
-        'status': 'uploading',
-    }
-    res = testapp.post_json('/file_processed', item)
-    return res.json['@graph'][0]['uuid']
-
-def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
-    # Todo, input a list of accessions / uuids:
-    verify_item(item_uuid, indexer_testapp, testapp, registry)
+#
+#
+# @pytest.fixture
+# def item_uuid(testapp, award, experiment, lab):
+#     # this is a processed file
+#     item = {
+#         'accession': '4DNFIO67APU2',
+#         'award': award['uuid'],
+#         'lab': lab['uuid'],
+#         'file_format': 'pairs',
+#         'filename': 'test.pairs.gz',
+#         'md5sum': '0123456789abcdef0123456789abcdef',
+#         'status': 'uploading',
+#     }
+#     res = testapp.post_json('/file_processed', item)
+#     return res.json['@graph'][0]['uuid']
+#
+# def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
+#     # Todo, input a list of accessions / uuids:
+#     verify_item(item_uuid, indexer_testapp, testapp, registry)
