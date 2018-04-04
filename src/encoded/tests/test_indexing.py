@@ -135,6 +135,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     item_types = TEST_COLLECTIONS
     # check that mappings and settings are in index
     for item_type in item_types:
+        print('Testing mapping for %s' % item_type)
         item_mapping = type_mapping(registry[TYPES], item_type)
         try:
             item_index = es.indices.get(index=item_type)
