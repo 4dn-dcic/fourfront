@@ -30,7 +30,7 @@ function bell() {
   done
 }
 
-exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1 && bell &)
+exec 3< <(bell & bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
 db_server_pid=$!
 count_exp_seq_seen=0
 while read line; do
