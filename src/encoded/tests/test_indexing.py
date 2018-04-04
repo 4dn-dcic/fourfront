@@ -90,8 +90,6 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert res.json['total'] >= 2
     assert uuid in uuids
     # test the meta index
-    assert False
-
     indexing_doc = es.get(index='meta', doc_type='meta', id='latest_indexing')
     indexing_source = indexing_doc['_source']
     assert 'indexing_count' in indexing_source
@@ -134,7 +132,6 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         meta_record = item_meta.get('_source', None)
         assert meta_record
         assert item_record == meta_record
-    assert False
 
 
 @pytest.fixture
