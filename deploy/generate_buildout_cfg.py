@@ -23,7 +23,7 @@ create_tables = true
 load_test_data = encoded.loadxl:{load_function}
 mpindexer = {should_index}
 indexer = {should_index}
-indexer.processes = {procs}
+indexer_processes = {procs}
 '''
 # TODO: add in indexer.processes
 
@@ -49,11 +49,9 @@ def build_cfg_file():
     if data['env_name'] in ['fourfront-staging', 'fourfront-webprod2']:
         data['env_name'] = 'fourfront-webprod'
 
-    data['should_index'] = 'false'
-    if os.environ.get('should_index'):
-        data['should_index'] = 'true'
+    data['should_index'] = 'true'
     data['load_function'] = 'load_test_data'
-    data['procs'] = str(multiprocessing.cpu_count() + 1)
+    data['procs'] = str(multiprocessing.cpu_count())
     data['es_server'] = os.environ.get("ES_URL")
     if os.environ.get("LOAD_FUNCTION"):
         data['load_function'] = os.environ.get("LOAD_FUNCTION")
