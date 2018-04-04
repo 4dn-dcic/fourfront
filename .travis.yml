@@ -54,13 +54,6 @@ before_install:
 - SNO_PATH="snovault = git https://github.com/$USER/$SNO_REPO.git branch="
 - SNO_BRANCH=$(grep "${SNO_PATH}" buildout.cfg | sed "s@$SNO_PATH@@")
 - SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH" | grep pass)
-- |
-    if [ -z "$SNO_STATUS" ]; then
-        echo "Snovault branch build for $SNO_BRANCH is failing; exiting build"
-        travis_terminate
-    else
-        echo "Snovault branch $SNO_BRANCH is okay with build status: $SNO_STATUS"
-    fi
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
@@ -75,9 +68,8 @@ install:
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
+- if test -n "$NPM"; then bin/test -v -v -k "test_indexing" --durations=40 --cov
   src/encoded; fi
-- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40 --cov src/encoded; fi
 - if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
