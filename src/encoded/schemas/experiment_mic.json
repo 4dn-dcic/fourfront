@@ -145,10 +145,5 @@
             "title": "Treatments",
             "default_hidden": true
         }
-    },
-    "facets": {
-        "microscopy_technique": {
-            "title" : "Microscopy Technique"
-        }
     }
 }
