@@ -47,14 +47,14 @@ def teardown(app):
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
-    create_mapping.run(app, skip_indexing=True)
+    create_mapping.run(app, collections=TEST_COLLECTIONS, skip_indexing=True)
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
     meta = MetaData(bind=session.connection(), reflect=True)
     for table in meta.sorted_tables:
         print('Clear table %s' % table)
         print('Count before -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)))
-        connection.execute(table.delete(synchronize_session=False))
+        connection.execute(table.delete())
         print('Count after -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)), '\n')
     session.flush()
     mark_changed(session())
@@ -90,7 +90,6 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert res.json['total'] >= 2
     assert uuid in uuids
     # test the meta index
-
     indexing_doc = es.get(index='meta', doc_type='meta', id='latest_indexing')
     indexing_source = indexing_doc['_source']
     assert 'indexing_count' in indexing_source
