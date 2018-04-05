@@ -3,6 +3,7 @@
 import _ from 'underscore';
 import { console } from './../../util';
 
+/** @module parsing-functions */
 
 
 /**
@@ -13,54 +14,66 @@ import { console } from './../../util';
  * @property {string} name      Name of this IO/argument in context of this target/source (e.g. if a step, or global workflow arg).
  * @property {string} [step]    ID of the step IO/argument comes from or is going to, if not a global argument w/ type = 'Workflow Output File' or type = 'Workflow Input File'.
  */
+var StepIOArgumentTargetOrSource;
 
 /**
  * Type definition for a Step input/output argument run_data.
  * Exact same as Node.meta.run_data, however here the arguments have not yet been expanded into multiple nodes per argument, so properties are lists to-be-expanded.
  * 
- * @typedef StepIOArgumentRunData
- * @property {Object[]} [file]                      File(s) for step argument. This should be a list of objects. This might be list of '@id' strings in case WorkflowRun has not finished indexing.
+ * @typedef {Object} StepIOArgumentRunData
+ * @property {Object[]} [file]                      File(s) for step argument. This should be a list of objects. This might be list of 'at-id' strings in case WorkflowRun has not finished indexing.
  * @property {string[]|number[]} [value]            Value(s) for step argument. This should be a list of strings or numbers. Is present if is an IO parameter input.
  * @property {Object[]} [meta]                      Additional information about the file or run that might not be included on the Files or Values themselves.                  
  */
+var StepIOArgumentRunData;
 
 /**
  * Type definition for a Step input/output argument.
  * 
- * @typedef StepIOArgument
+ * @typedef {Object} StepIOArgument
  * @property {string} name                          Name of argument in context of step itself
  * @property {Object} meta                          Various properties related to the argument itself, in context of Step.
  * @property {StepIOArgumentRunData} [run_data]     Data about the run, if any present (if WorkflowRun or WorkflowRun trace).
  * @property {StepIOArgumentTargetOrSource[]} [target]   List of targets for IO
  * @property {StepIOArgumentTargetOrSource[]} [source]   List of sources for IO
  */
+var StepIOArgument;
 
 /**
  * Type definition for a Step.
  * 
- * @typedef Step
+ * @typedef {Object} Step
  * @property {string} name                          Name of step
  * @property {Object} meta                          Various properties related to the step itself.
  * @property {StepIOArgument[]} inputs              Input arguments
  * @property {StepIOArgument[]} outputs             Output arguments
  */
+var Step;
 
 
 /**
- * Type definition for a Node.
+ * Type definition for a Node's Run Data.
  * More properties may be added to this node after parseAnalysisSteps() function is complete which relate to Graph/UI state.
  * 
- * @typedef NodeRunData
+ * @typedef {Object} NodeRunData
  * @property {Object} [file]                        Related file for node. This should be an object, e.g. as returned from a linkTo.
  * @property {string|number} [value]                Value for node. This should be a string or number. Is present if is an IO paramater node.
  * @property {Object} [meta]                        Additional information about the file or run that might not be included on the File or Value itself.
- * 
- * @typedef NodeMeta
+ */
+var NodeRunData;
+
+/**
+ * @typedef {Object} NodeMeta
  * @property {NodeRunData} [run_data]                   Information about specific to a run(s), if we have a WorkflowRun or WorkflowRun trace. For example - file or parameter value.
  * @property {StepIOArgumentTargetOrSource[]} [source]  List of sources for IO, copied over from step(s) which reference it.
  * @property {StepIOArgumentTargetOrSource[]} [target]  List of targets for IO, copied over from step(s) which reference it.
- *
- * @typedef Node
+ */
+var NodeMeta;
+
+/**
+ * Object structure which represents a visible 'node' on the workflow graph.
+ * 
+ * @typedef {Object} Node
  * @property {string} type                          Basic categorization of the node - one of "input", "output", "input-group", "step". Subject to change.
  * @property {string} name                          Name of node. Unique for all step nodes. Not necessarily unique for IO nodes.
  * @property {string} [id]                          For IO nodes only: Unique self-generated ID exists on IO nodes, in addition to non-necessarily-unique name.
@@ -73,18 +86,38 @@ import { console } from './../../util';
  * @property {Object} [argNamesOnSteps]             For IO nodes only: Mapping of IO name by step name, as IO name varies by step it is described by.
  * @property {string} [format]                      For IO nodes only: The 'argument_type' from CWL, e.g. 'Workflow Parameter', 'Workflow Output File', etc.
  */
+var Node;
 
 
 /**
- * Type definition for an Edge between nodes.
+ * Connects two nodes together via reference.
  * 
  * @typedef {Object} Edge
  * @property {Node} source - Node at which the edge starts.
  * @property {Node} target - Node at which the edge ends.
  */
+var Edge;
+
+
+/**
+ * @typedef {Object} ParsingOptions
+ * @property {string}   direction                   Direction of tracing. Only output is currently supported.
+ * @property {number[]} [skipSortOnColumns=[1]]     List of column integers to skip sorting on.
+ * @property {boolean}  [dontCorrectColumns=false]  If true, will leave column assignments as were given at 'time of trace' rather than re-calculated on preceding nodes.
+ * @property {function} [nodesPreSortFxn]           Function through which all nodes get run through before sorting within column. Use this to change nodes' column assignments before sorting within columns.
+ * @property {function} [nodesInColumnSortFxn]      A sort function taking 2 nodes as params and returning a 1 or -1. Arranges nodes within a column.
+ * @property {function} [nodesInColumnPostSortFxn]  A function  which takes list of nodes and column number and returns list of nodes. Use to run post-sort transformations or re-ordering.
+ *
+ * @property {boolean}  [showReferenceFiles=true]   If false, nodes/edges or IOs with 'meta.type === reference file' will be filtered out of graph. TODO: Replace with more flexible list of 'filter out rules'.
+ * @property {boolean}  [showParameters=true]       If false, nodes/edges or IOs with 'meta.type === parameter' will be filtered out of graph. TODO: Replace with more flexible list of 'filter out rules'.
+ */
+var ParsingOptions;
 
 
 
+
+
+ /** @type ParsingOptions */
 export const DEFAULT_PARSING_OPTIONS = {
     'direction'                 : 'output',
     'skipSortOnColumns'         : [1],
@@ -102,7 +135,7 @@ export const DEFAULT_PARSING_OPTIONS = {
  * Workflow graph component.
  * 
  * @param {Step[]} analysis_steps                       List of steps from the back-end to generate nodes & edges from.
- * @param {Object} [parsingOptions]                     Options for parsing and post-processing.
+ * @param {ParsingOptions} [parsingOptions]             Options for parsing and post-processing.
  * @returns {{ 'nodes' : Node[], 'edges' : Edge[] }}    Container object for the two lists.
  */
 export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARSING_OPTIONS){
@@ -111,15 +144,29 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
      ** Outputs **
      *************/
 
-    var nodes = [];
-    var edges = [];
+    /** @type Node[] */
+    let nodes = [];
+    /** @type Edge[] */
+    let edges = [];
 
     /*************
      * Temp Vars *
      *************/
 
-    var ioIdsUsed = {  };       // Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
-    var processedSteps = {};    // Keep track of steps already processed & added to graph. We start drawing first step, and its inputs/outputs, then recursively draw steps that its outputs go to. At the end, we restart from step that has not yet been encountered/processed, if any.
+    /**
+     * Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
+     * @type {Object.<string, number>}
+     */
+    let ioIdsUsed = {};
+
+    /**
+     * Keep track of steps already processed & added to graph.
+     * We start drawing first step, and its inputs/outputs, then recursively draw steps that its outputs go to.
+     * At the end, we restart the process from a step that has not yet been encountered/processed, if any.
+     * 
+     * @type {Object.<string, Node>}
+     */
+    let processedSteps = {};
 
     /***************
      ** Functions **
@@ -140,7 +187,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     /**
      * Generate name for IO node based on 'global' step argument input source or output target name, if available.
      * If no global source or target (w/ 'type' === 'Workflow (Input|Output) File') available, reverts to StepIOArgument.name (name of argument in context of step itself, at time of drawing).
-     * 
+     *
      * @param {StepIOArgument} stepIOArg - Input or output argument of a step.
      * @returns {string} Name of node.
      */
@@ -172,9 +219,9 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     /**
      * Pass a should-be-unique IO Node ID through this function to check if same ID exists already.
      * If so, returns a copy of ID with '~' + increment appended to it.
-     * 
-     * @param {string} id - ID to make sure is unique. 
-     * @param {boolean} [readOnly=true] If true, will NOT update increment count in cache. Use readOnly when generating nodes to match against without concretely adding them to final list of nodes (yet/ever).
+     *
+     * @param   {string}  id               ID to make sure is unique. 
+     * @param  {boolean}  [readOnly=true]  If true, will NOT update increment count in cache. Use readOnly when generating nodes to match against without concretely adding them to final list of nodes (yet/ever).
      * @returns {string} Original id, if unique, or uniqueified ID.
      */
     function preventDuplicateNodeID(id, readOnly = true){
@@ -214,13 +261,13 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     }
 
     /**
-     * @param {Step} step       - A step object from which to generate step node from. 
-     * @param {number} column   - Column number to assign to this node.
-     * @returns {Node}          - Node object representation.
+     * @param    {Step}  step     A step object from which to generate step node from. 
+     * @param  {number}  column   Column number to assign to this node.
+     * @returns {Node} Node object representation.
      */
     function generateStepNode(step, column){
         return {
-            'nodeType' : 'step',
+            'nodeType'  : 'step',
             'name'      : step.name,
             '_inputs'   : step.inputs,
             '_outputs'  : step.outputs,
@@ -230,12 +277,12 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     }
 
     /**
-     * @param {StepIOArgument} stepIOArgument   Input or output argument of a step for/from which to create output node(s) from.
-     * @param {number} column                   Column number to assign to this node.
-     * @param {Node} stepNode                   Step node from which this IO node is being created from. Will be connected to IO node with an edge.
-     * @param {string} nodeType                 Type of node in relation to stepNode - either "input" or "output".
-     * @param {boolean} [readOnly=true]         If true, will not generate unique ID for IO node.
-     * @returns {Node} - Node object representation.
+     * @param  {StepIOArgument}  stepIOArgument   Input or output argument of a step for/from which to create output node(s) from.
+     * @param          {number}  column           Column number to assign to this node.
+     * @param            {Node}  stepNode         Step node from which this IO node is being created from. Will be connected to IO node with an edge.
+     * @param          {string}  nodeType         Type of node in relation to stepNode - either "input" or "output".
+     * @param         {boolean}  [readOnly=true]  If true, will not generate unique ID for IO node.
+     * @returns {Node} Node object representation.
      */
     function generateIONode(stepIOArgument, column, stepNode, nodeType, readOnly = true){
         if (nodeType !== 'input' && nodeType !== 'output') throw new Error('Incorrect type, must be one of input or output.');
@@ -708,7 +755,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
             return stepNode;
         } else {
 
-            throw Error("Input-direction drawing not currently supported.");
+            throw new Error("Input-direction drawing not currently supported.");
 
         }
         
@@ -830,11 +877,10 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
  * See how is used in function correctColumnAssignments.
  * TODO: Create typedef for node Object.
  * 
- * @export
- * @param {Object}   nextNode               - Current node in path on which fxn is ran on.
+ * @param {Node}     nextNode               - Current node in path on which fxn is ran on.
  * @param {function} fxn                    - Function to be ran on each node. Is passed a {Object} 'node', {Object} 'previousNode', and {Object[]} 'nextNodes' positional arguments. previousNode will be null when fxn is executed for first time, unless passed in initially.
  * @param {string}   [direction='output']   - One of 'output' or 'input'. Which direction to traverse.
- * @param {any}      [lastNode=null]        - Optionally supply the initial 'last node' to be included.
+ * @param {Node}     [lastNode=null]        - Optionally supply the initial 'last node' to be included.
  * @param {number}   [depth=0]              - Internal recursion depth.
  * @returns {Array} Unflattened list of function results.
  */
@@ -860,7 +906,10 @@ export function traceNodePathAndRun(nextNode, fxn, direction = 'output', lastNod
     return [fxnResult, nextResults];
 }
 
-
+/**
+ * @param {{ nodes : Node[], edges: Edge[] } | Node[] } graphData - Object containing nodes and edges. Or just nodes themselves.
+ * @returns {{ nodes : Node[], edges: Edge[] } | Node[] } graphData or nodes with corrected column assignments.
+ */
 export function correctColumnAssignments(graphData){
     var nodes;
     if (Array.isArray(graphData)) nodes = graphData;
@@ -952,10 +1001,8 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem, parsingO
 /**
  * For when "Show Parameters" UI setting === false.
  *
- * @param {Object}      graphData
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
+ * @param {{ nodes : Node[], edges: Edge[] }} graphData - Object containing nodes and edges.
+ * @returns {{ nodes : Node[], edges: Edge[] }} Copy of graphData with 'parameter' nodes and edges filtered out.
  */
 export function filterOutParametersFromGraphData(graphData){
     var deleted = {  };
@@ -973,7 +1020,12 @@ export function filterOutParametersFromGraphData(graphData){
 }
 
 
-
+/**
+ * For when "Show Reference Files" UI setting === false.
+ *
+ * @param {{ nodes : Node[], edges: Edge[] }} graphData - Object containing nodes and edges.
+ * @returns {{ nodes : Node[], edges: Edge[] }} Copy of graphData with 'reference file' nodes and edges filtered out.
+ */
 export function filterOutReferenceFilesFromGraphData(graphData){
     var deleted = {  };
     var nodes = _.filter(graphData.nodes, function(n, i){
