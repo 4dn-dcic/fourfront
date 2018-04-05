@@ -2,7 +2,7 @@
 describe('Impersonate user JWT, navigate to profile, edit last_name to & back.', function () {
 
 
-    context('Wrangler User Profile', function () {
+    context('Frontend Test User Profile', function () {
 
         beforeEach(function(){
             cy.visit('/');
