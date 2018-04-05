@@ -27,24 +27,7 @@ function loadJS(src){
 */
 
 
-export class HiGlassTabView extends React.Component {
-
-    static getTabObject(context, disabled, isValidating, viewConfig=null){
-        return {
-            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'search')}/> HiGlass Browser</span>,
-            'key' : 'higlass',
-            'disabled' : disabled,
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>HiGlass Browser</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <HiGlassTabView viewConfig={viewConfig} context={context} disabled={disabled} isValidating={isValidating} />
-                </div>
-            )
-        };
-    }
+export class HiGlassContainer extends React.Component {
 
     /**
      * This function is used to generate a full viewConfig for the HiGlassComponent.
@@ -55,16 +38,11 @@ export class HiGlassTabView extends React.Component {
      * @param {string} [baseUrl=HiGlassServerBaseURL] - Where to request center tile data from.
      * @param {{ 'x' : number[], 'y' : number[] }} [initialDomains] - Initial coordinates.
      */
-    static generateViewConfig(fileItem, height=600, baseUrl=HiGlassServerBaseURL, initialDomains={
+    static generateViewConfig(tilesetUid, height=600, baseUrl=HiGlassServerBaseURL, initialDomains={
         'x' : [31056455, 31254944],
         'y' : [31114340, 31201073]
     }){
-        var tilesetUid = null;
-        if (typeof fileItem.higlass_uid === 'string' && fileItem.higlass_uid){
-            tilesetUid = fileItem.higlass_uid;
-        } else {
-            return null;
-        }
+        if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
 
         const centerTrackHeight = height - 50;
 
@@ -220,7 +198,7 @@ export class HiGlassTabView extends React.Component {
     static validateHiGlassData(viewConfig, successCallback, failureCallback = null){
         if (!failureCallback) failureCallback = function(){ console.error('Failed to validate viewconfig:', viewConfig); };
 
-        var track = HiGlassTabView.getAllTracksFromViewConfig(viewConfig)[0] || {}; // Check only 1 track for now.
+        var track = HiGlassContainer.getAllTracksFromViewConfig(viewConfig)[0] || {}; // Check only 1 track for now.
         var { tilesetUid, uid, server } = track;
 
 
@@ -239,6 +217,105 @@ export class HiGlassTabView extends React.Component {
     }
 
     static defaultProps = {
+        'options' : { 'bounded' : true },
+        'isValidating' : false,
+        'disabled' : false,
+        'height' : 400
+    }
+
+    constructor(props){
+        super(props);
+        this.hiGlassElement = null;
+        if (typeof props.mounted !== 'boolean'){
+            this.state = { 'mounted' : false };
+        }
+    }
+
+    componentDidMount(){
+        if (typeof this.props.mounted === 'boolean'){
+            return;
+        }
+        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
+            HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            this.setState({ 'mounted' : true });
+        }, 500);
+    }
+
+    render(){
+        var { disabled, isValidating, viewConfig, tilesetUid, height, options } = this.props;
+        let hiGlassInstance = null;
+        const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
+        if (isValidating || !mounted){
+            hiGlassInstance = (
+                <div className="col-sm-12 text-center mt-4">
+                    <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
+                    Initializing
+                </div>
+            );
+        } else if (disabled) {
+            hiGlassInstance = (
+                <div className="col-sm-12 text-center mt-4">
+                    <h4 className="text-400">Not Available</h4>
+                </div>
+            );
+        } else {
+            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
+            hiGlassInstance = (
+                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={(r)=>{
+                    if (r){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
+                        setTimeout(function(){
+                            requestAnimationFrame(function(){
+                                r.style.transition = null; // Use transition as defined in stylesheet
+                                r.style.opacity = 1;
+                            });
+                        }, 500);
+                    }
+                }}>
+                    <HiGlassComponent
+                        //ref={(r)=>{ this.hiGlassElement = r; }}
+                        options={options}
+                        viewConfig={viewConfig}
+                    />
+                </div>
+            );
+        }
+        /**
+         * TODO: Some state + UI functions to make higlass view full screen.
+         * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
+         */
+        return (
+            <div className="higlass-view-container">
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
+                {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
+                <div className="higlass-wrapper row" children={hiGlassInstance} />
+            </div>
+        );
+    }
+
+}
+
+
+
+export class HiGlassTabView extends React.Component {
+
+    static getTabObject(context, disabled, isValidating, viewConfig=null){
+        return {
+            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'search')}/> HiGlass Browser</span>,
+            'key' : 'higlass',
+            'disabled' : disabled,
+            'content' : (
+                <div className="overflow-hidden">
+                    <h3 className="tab-section-title">
+                        <span>HiGlass Browser</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <HiGlassTabView viewConfig={viewConfig} context={context} disabled={disabled} isValidating={isValidating} />
+                </div>
+            )
+        };
+    }
+
+    static defaultProps = {
         'isValidating' : false,
         'disabled' : false,
         'height' : 600
@@ -247,7 +324,6 @@ export class HiGlassTabView extends React.Component {
     constructor(props){
         super(props);
         this.state = { 'mounted' : false };
-        this.options = { "bounded" : true };
         this.hiGlassElement = null;
     }
 
@@ -284,50 +360,13 @@ export class HiGlassTabView extends React.Component {
 
     render(){
         var { disabled, isValidating, viewConfig, context, height } = this.props;
-        let hiGlassInstance = null;
-        if (isValidating || !this.state.mounted){
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
-                    Initializing
-                </div>
-            );
-        } else if (disabled) {
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h4 className="text-400">Not Available</h4>
-                </div>
-            );
-        } else {
-            if (!viewConfig) viewConfig = HiGlassTabView.generateViewConfig(context, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
-            hiGlassInstance = (
-                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={(r)=>{
-                    if (r){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
-                        setTimeout(function(){
-                            requestAnimationFrame(function(){
-                                r.style.transition = null; // Use transition as defined in stylesheet
-                                r.style.opacity = 1;
-                            });
-                        }, 500);
-                    }
-                }}>
-                    <HiGlassComponent
-                        //ref={(r)=>{ this.hiGlassElement = r; }}
-                        options={this.options}
-                        viewConfig={viewConfig}
-                    />
-                </div>
-            );
-        }
         /**
          * TODO: Some state + UI functions to make higlass view full screen.
          * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
          */
         return (
             <div className="higlass-tab-view-contents">
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
-                {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
-                <div className="higlass-wrapper row" children={hiGlassInstance} />
+                <HiGlassContainer {...{ disabled, isValidating, viewConfig, height }} mounted={this.state.mounted} tilesetUid={context.higlass_uid} />
             </div>
         );
     }

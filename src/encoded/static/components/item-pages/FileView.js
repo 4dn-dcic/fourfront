@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView } from './components';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HiGlassContainer } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
@@ -55,10 +55,10 @@ export default class FileView extends WorkflowRunTracingView {
     /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
     validateHiGlassData(){
         if (!FileView.shouldHiGlassViewExist(this.props.context)) return;
-        HiGlassTabView.validateHiGlassData(
+        HiGlassContainer.validateHiGlassData(
             // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
             // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
-            HiGlassTabView.generateViewConfig(this.props.context),
+            HiGlassContainer.generateViewConfig(this.props.context.higlass_uid),
             () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),
             () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })
         );

@@ -47,16 +47,68 @@ describe('Browse Views - Redirection & Visualization', function () {
 
     });
 
-    context('BarPlotChart & QuickInfoBar', function(){
+    context('BarPlotChart & QuickInfoBar - filtering using visualization elements', function(){
 
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end();
         });
 
+        it('Hover over & click "ATAC-seq, mouse" bar part + popover button--> matching filtered /browse/ results', function(){
+
+            // A likely-to-be-here Bar Section - ATAC-seq x mouse
+            cy.window().then((w)=>{ w.scrollTo(0,0); }).end().get('#select-barplot-field-1').should('contain', 'Organism').end()
+                .get('#select-barplot-field-0').should('contain', 'Experiment Type').end()
+                .get('.bar-plot-chart .chart-bar[data-term="ATAC-seq"] .bar-part[data-term="mouse"]').scrollToCenterElement().then(($barPart)=>{
+                    const expectedFilteredResults = parseInt($barPart.attr('data-count'));
+                    expect(expectedFilteredResults).to.be.greaterThan(3);
+                    expect(expectedFilteredResults).to.be.lessThan(25);
+                    return cy.wrap($barPart).scrollToCenterElement().hoverIn().wait(10).end()
+                        .get('.cursor-component-root .details-title').should('contain', 'mouse').end()
+                        .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'ATAC-seq').end()
+                        .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
+                            return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').click({ force : true }).wait(100).end()
+                                .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click().end()
+                                .location('search').should('include', 'experiments_in_set.experiment_type=ATAC-seq').should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse').wait(300).end()
+                                .get('#slow-load-container').should('not.have.class', 'visible').end()
+                                .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
+                                .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
+                                .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot();
+                        });
+                });
+        });
+
+        it("Can unselect currently-selected filters via QuickInfoBar filter panel", function(){
+            cy.getQuickInfoBarCounts().then((origCounts)=>{
+                cy.get('#stats .any-filters.glance-label').hoverIn().wait(100).end()
+                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 2).end()
+                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="mouse"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="mouse"] i.icon-times').should('have.length', 0).end()
+                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 1).end()
+                    .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', 1).then(($allBarParts)=>{
+                        const unfilteredOnceBarPartCount = $allBarParts.length;
+                        cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', origCounts.experiment_sets).then((unfilteredOnceExpSetCount)=>{
+                            cy.get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="ATAC-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                                .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="ATAC-seq"] i.icon-times').should('have.length', 0).end()
+                                .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
+                                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
+                                .location('search').should('include', 'award.project=4DN')
+                                .should('not.include', 'experiments_in_set.experiment_type=ATAC-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse');
+                        });
+                    });
+            });
+
+        });
+
+    });
+
+    context('BarPlotChart & QuickInfoBar - counts stay same or change expectedly upon re-requests of BarPlot data', function(){
+
         it('In default award.project=4DN view; BarPlot counts == QuickInfoBar counts', function(){
 
-            cy.get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
+            cy.location('pathname').should('include', '/browse/').end()
+                .location('search').should('include', 'award.project=4DN').end()
+                .get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
                 .end().window().scrollTo(0, 200)
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(1000).end()
                 .screenshot().end()
@@ -66,49 +118,18 @@ describe('Browse Views - Redirection & Visualization', function () {
 
         });
 
-        context('Filtering using visualization elements', function(){
+        it('Toggling "Show External Data" ==> higher, matching counts', function(){
 
-            it('Hover over & click "ATAC-seq, mouse" bar part + popover button--> matching filtered /browse/ results', function(){
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
 
-                // A likely-to-be-here Bar Section - ATAC-seq x mouse
-                cy.window().then((w)=>{ w.scrollTo(0,0); }).end().get('#select-barplot-field-1').should('contain', 'Organism').end()
-                    .get('#select-barplot-field-0').should('contain', 'Experiment Type').end()
-                    .get('.bar-plot-chart .chart-bar[data-term="ATAC-seq"] .bar-part[data-term="mouse"]').scrollToCenterElement().then(($barPart)=>{
-                        const expectedFilteredResults = parseInt($barPart.attr('data-count'));
-                        expect(expectedFilteredResults).to.be.greaterThan(3);
-                        expect(expectedFilteredResults).to.be.lessThan(25);
-                        return cy.wrap($barPart).scrollToCenterElement().hoverIn().wait(10).end()
-                            .get('.cursor-component-root .details-title').should('contain', 'mouse').end()
-                            .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'ATAC-seq').end()
-                            .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
-                                return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').click({ force : true }).wait(100).end()
-                                    .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click().end()
-                                    .location('search').should('include', 'experiments_in_set.experiment_type=ATAC-seq').should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse').wait(300).end()
-                                    .get('#slow-load-container').should('not.have.class', 'visible').end()
-                                    .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
-                                    .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
-                                    .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot();
-                            });
-                    });
-            });
-
-            it("Can unselect currently-selected filters via QuickInfoBar filter panel", function(){
-                cy.getQuickInfoBarCounts().then((origCounts)=>{
-                    cy.get('#stats .any-filters.glance-label').hoverIn().wait(100).end()
-                        .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 2).end()
-                        .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="mouse"] i.icon-times').should('have.length', 1).click().wait(10).end()
-                        .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="mouse"] i.icon-times').should('have.length', 0).end()
-                        .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 1).end()
-                        .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', 1).then(($allBarParts)=>{
-                            const unfilteredOnceBarPartCount = $allBarParts.length;
-                            cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', origCounts.experiment_sets).then((unfilteredOnceExpSetCount)=>{
-                                cy.get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="ATAC-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
-                                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="ATAC-seq"] i.icon-times').should('have.length', 0).end()
-                                    .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
-                                    .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
-                                    .location('search').should('include', 'award.project=4DN')
-                                    .should('not.include', 'experiments_in_set.experiment_type=ATAC-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse');
-                            });
+                cy.get('.browse-base-state-toggle-container label.onoffswitch-label').click().then(()=>{
+                    cy.wait(1000) // Wait for 'slow-load-container' to become visible if needed, and wait for it to load
+                        .get('#slow-load-container').should('not.have.class', 'visible').end()
+                        .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
+                        .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
+                        .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
+                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end().screenshot().end().then(()=>{
+                            compareQuickInfoCountsVsBarPlotCounts();
                         });
                 });
 
@@ -116,130 +137,106 @@ describe('Browse Views - Redirection & Visualization', function () {
 
         });
 
-        context('Counts stay same or change expectedly upon re-requests of BarPlot data', function(){
-
-            it('Toggling "Show External Data" ==> higher, matching counts', function(){
-
-                cy.getQuickInfoBarCounts().then((initialCounts)=>{
-
-                    cy.get('.browse-base-state-toggle-container label.onoffswitch-label').click().then(()=>{
-                        cy.wait(1000) // Wait for 'slow-load-container' to become visible if needed, and wait for it to load
-                            .get('#slow-load-container').should('not.have.class', 'visible').end()
-                            .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
-                            .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
-                            .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
-                            .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end().screenshot().end().then(()=>{
-                                compareQuickInfoCountsVsBarPlotCounts();
-                            });
-                    });
-
-                });
-
+        it('Counts persist on setting groupBy --> "Project"', function(){
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+                cy.get('#select-barplot-field-1').click().wait(100).end()
+                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
+                        return cy.contains('Project').click().wait(100);
+                    }).end()
+                    .getQuickInfoBarCounts().then((nextCounts)=>{
+                        expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
+                        expect(nextCounts.experiments).to.equal(initialCounts.experiments);
+                        expect(nextCounts.files).to.equal(initialCounts.files);
+                        compareQuickInfoCountsVsBarPlotCounts();
+                    }).end();
             });
+        });
 
-            it('Counts persist on setting groupBy --> "Project"', function(){
-                cy.getQuickInfoBarCounts().then((initialCounts)=>{
-                    cy.get('#select-barplot-field-1').click().wait(100).end()
-                        .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
-                            return cy.contains('Project').click().wait(100);
-                        }).end()
-                        .getQuickInfoBarCounts().then((nextCounts)=>{
-                            expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
-                            expect(nextCounts.experiments).to.equal(initialCounts.experiments);
-                            expect(nextCounts.files).to.equal(initialCounts.files);
-                            compareQuickInfoCountsVsBarPlotCounts();
-                        }).end();
-                });
+
+        it('Counts persist on setting groupBy --> "Biosource"', function(){
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+                cy.get('#select-barplot-field-1').click().wait(100).end()
+                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
+                        return cy.contains('Biosource').click().wait(100);
+                    }).end()
+                    .getQuickInfoBarCounts().then((nextCounts)=>{
+                        expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
+                        expect(nextCounts.experiments).to.equal(initialCounts.experiments);
+                        expect(nextCounts.files).to.equal(initialCounts.files);
+                        cy.screenshot();
+                        compareQuickInfoCountsVsBarPlotCounts();
+                    }).end();
             });
+        });
 
 
-            it('Counts persist on setting groupBy --> "Biosource"', function(){
-                cy.getQuickInfoBarCounts().then((initialCounts)=>{
-                    cy.get('#select-barplot-field-1').click().wait(100).end()
-                        .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
-                            return cy.contains('Biosource').click().wait(100);
-                        }).end()
-                        .getQuickInfoBarCounts().then((nextCounts)=>{
-                            expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
-                            expect(nextCounts.experiments).to.equal(initialCounts.experiments);
-                            expect(nextCounts.files).to.equal(initialCounts.files);
+        it('Counts persist on setting xAxis --> "Biosource Type"', function(){
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+                cy.get('#select-barplot-field-0').click().wait(100).end()
+                    .get('#select-barplot-field-0 + ul.dropdown-menu').within(($ul)=>{
+                        return cy.contains('Biosource Type').click().wait(100);
+                    }).end()
+                    .getQuickInfoBarCounts().then((nextCounts)=>{
+                        expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
+                        expect(nextCounts.experiments).to.equal(initialCounts.experiments);
+                        expect(nextCounts.files).to.equal(initialCounts.files);
+                        return cy.wait(100).end().get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).wait(100).end().then(()=>{ // Wait until bars have transitioned.
                             cy.screenshot();
                             compareQuickInfoCountsVsBarPlotCounts();
-                        }).end();
-                });
+                        });
+                    }).end();
             });
+        });
 
 
-            it('Counts persist on setting xAxis --> "Biosource Type"', function(){
-                cy.getQuickInfoBarCounts().then((initialCounts)=>{
-                    cy.get('#select-barplot-field-0').click().wait(100).end()
-                        .get('#select-barplot-field-0 + ul.dropdown-menu').within(($ul)=>{
-                            return cy.contains('Biosource Type').click().wait(100);
-                        }).end()
-                        .getQuickInfoBarCounts().then((nextCounts)=>{
-                            expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
-                            expect(nextCounts.experiments).to.equal(initialCounts.experiments);
-                            expect(nextCounts.files).to.equal(initialCounts.files);
-                            return cy.wait(100).end().get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).wait(100).end().then(()=>{ // Wait until bars have transitioned.
-                                cy.screenshot();
-                                compareQuickInfoCountsVsBarPlotCounts();
-                            });
-                        }).end();
-                });
+        it('Counts persist on setting groupBy --> "None"', function(){
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+                cy.get('#select-barplot-field-1').click().wait(100).end()
+                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
+                        return cy.contains('None').click().wait(100);
+                    }).end()
+                    .getQuickInfoBarCounts().then((nextCounts)=>{
+                        expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
+                        expect(nextCounts.experiments).to.equal(initialCounts.experiments);
+                        expect(nextCounts.files).to.equal(initialCounts.files);
+                        compareQuickInfoCountsVsBarPlotCounts({ 'skipLegend' : true }); // No legend when no groupBy
+                    }).end();
             });
+        });
 
 
-            it('Counts persist on setting groupBy --> "None"', function(){
-                cy.getQuickInfoBarCounts().then((initialCounts)=>{
-                    cy.get('#select-barplot-field-1').click().wait(100).end()
-                        .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
-                            return cy.contains('None').click().wait(100);
-                        }).end()
-                        .getQuickInfoBarCounts().then((nextCounts)=>{
-                            expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
-                            expect(nextCounts.experiments).to.equal(initialCounts.experiments);
-                            expect(nextCounts.files).to.equal(initialCounts.files);
-                            compareQuickInfoCountsVsBarPlotCounts({ 'skipLegend' : true }); // No legend when no groupBy
-                        }).end();
-                });
+        it('Counts persist on setting groupBy --> "Lab"', function(){
+            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+                cy.get('#select-barplot-field-1').click().wait(100).end()
+                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
+                        return cy.contains('Lab').click().wait(100);
+                    }).end()
+                    .getQuickInfoBarCounts().then((nextCounts)=>{
+                        expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
+                        expect(nextCounts.experiments).to.equal(initialCounts.experiments);
+                        expect(nextCounts.files).to.equal(initialCounts.files);
+                        compareQuickInfoCountsVsBarPlotCounts();
+                    }).end();
             });
+        });
 
 
-            it('Counts persist on setting groupBy --> "Lab"', function(){
-                cy.getQuickInfoBarCounts().then((initialCounts)=>{
-                    cy.get('#select-barplot-field-1').click().wait(100).end()
-                        .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
-                            return cy.contains('Lab').click().wait(100);
-                        }).end()
-                        .getQuickInfoBarCounts().then((nextCounts)=>{
-                            expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
-                            expect(nextCounts.experiments).to.equal(initialCounts.experiments);
-                            expect(nextCounts.files).to.equal(initialCounts.files);
-                            compareQuickInfoCountsVsBarPlotCounts();
-                        }).end();
-                });
-            });
+        it('Login & ensure QuickInfoBar counts have changed; BarPlot counts match', function(){
 
+            cy.getQuickInfoBarCounts().then((counts)=>{
 
-            it('Login & ensure QuickInfoBar counts have changed; BarPlot counts match', function(){
+                const loggedOutCounts = _.clone(counts);
 
-                cy.getQuickInfoBarCounts().then((counts)=>{
-
-                    const loggedOutCounts = _.clone(counts);
-
-                    cy.login4DN().wait(200)
-                        .get('#stats-stat-expsets').should('have.text', '').end()
-                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
-                            return compareQuickInfoCountsVsBarPlotCounts();
-                        })
-                        .logout4DN();
-
-                });
+                cy.login4DN().wait(200)
+                    .get('#stats-stat-expsets').should('have.text', '').end()
+                    .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
+                        return compareQuickInfoCountsVsBarPlotCounts();
+                    })
+                    .logout4DN();
 
             });
 
         });
-
 
     });
 

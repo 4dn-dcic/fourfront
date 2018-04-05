@@ -259,6 +259,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                             self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
+                            headerColumnsOrder={['H1-hESC', 'HFFc6']}
                         />
                     </div>
                     <div className="col-xs-12 col-md-6">
@@ -291,20 +292,7 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
 class VisualBody extends React.Component {
     render(){
 
-        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen, duplicateHeaders } = this.props;
-
-        var headerColumnsOrder = [
-            'Hi-C',
-            'ChIA-PET',
-            'Capture-Hi-C',
-            'single cell omics',
-            'other omics',
-            'DNA-FISH',
-            'SRM',
-            'live cell imaging',
-            'other imaging',
-            'proteomics'
-        ];
+        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen, duplicateHeaders, headerColumnsOrder } = this.props;
 
         // Filter out properties from objects which we don't want to be shown in tooltip.
         //var keysToInclude = [
@@ -322,10 +310,10 @@ class VisualBody extends React.Component {
                 groupingProperties={groupingProperties}
                 columnGrouping={columnGrouping}
                 columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
-                headerColumnsOrder={headerColumnsOrder}
                 columnSubGrouping={columnSubGrouping}
                 defaultDepthsOpen={defaultDepthsOpen}
                 duplicateHeaders={duplicateHeaders}
+                headerColumnsOrder={headerColumnsOrder}
                 checkCollapsibility
                 groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;
