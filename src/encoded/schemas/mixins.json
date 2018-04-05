@@ -201,6 +201,7 @@
             "description": "Other labs associated with the submitted data.",
             "type": "array",
             "lookup": 1000,
+            "exclude_from" : ["submit4dn"],
             "items": {
                 "title": "Contributing Lab",
                 "description": "A lab that has contributed to the associated data.",
@@ -458,6 +459,7 @@
             "type": "array",
             "lookup": 1000,
             "uniqueItems": true,
+            "exclude_from" : ["submit4dn"],
             "ff_flag": "clear clone",
             "items": {
                 "title": "Tag",
@@ -473,6 +475,7 @@
             "type": "array",
             "lookup": 1000,
             "ff_flag": "clear clone",
+            "exclude_from" : ["submit4dn"],
             "permission": "import-items",
             "items": {
                 "title": "Badge",

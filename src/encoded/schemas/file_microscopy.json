@@ -48,6 +48,8 @@
                 "tiff",
                 "ome.tiff",
                 "flex",
+                "dv",
+                "r3d",
                 "other"
             ]
         },
@@ -120,6 +122,8 @@
         "zip": ".zip",
         "tiff": ".tiff",
         "ome.tiff": ".ome.tiff",
+        "dv": ".dv",
+        "r3d": ".r3d",
         "flex": ".flex",
         "other": ""
     }
