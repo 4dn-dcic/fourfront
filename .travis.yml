@@ -127,7 +127,7 @@ after_success:
                echo "Job succeeded! PUBLISHing to ${tibanna_deploy} environment..."
                eb use ${tibanna_deploy} --debug
            fi
-            travis_wait 30 python deploy/deploy_beanstalk.py --prod
+            python deploy/deploy_beanstalk.py --prod
           fi
         fi
      fi
