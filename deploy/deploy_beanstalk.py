@@ -119,7 +119,7 @@ def deploy(deploy_to=None):
         if out != '':
             sys.stdout.write(out)
             sys.stdout.flush()
-        if time_started + timedelta(minutes=2) > datetime.now(): # 2 min time limit
+        if time_started + timedelta(minutes=2) < datetime.now(): # 2 min time limit
             break
 
 
