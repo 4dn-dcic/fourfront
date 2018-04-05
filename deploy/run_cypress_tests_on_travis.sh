@@ -67,6 +67,10 @@ while read line; do
     esac
 done <&4
 sleep 5
+# Debug
+{ while read line; do
+    echo $line
+done <&3 &}
 npm run cypress:test-local-recorded
 cypress_run_exit_code=$?
 kill $web_server_pid
