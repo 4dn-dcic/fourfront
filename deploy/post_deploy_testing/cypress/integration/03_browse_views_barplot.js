@@ -89,7 +89,6 @@ describe('Browse Views - Redirection & Visualization', function () {
                                     .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
                                     .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot();
                             });
-                            
                     });
             });
 
@@ -111,9 +110,8 @@ describe('Browse Views - Redirection & Visualization', function () {
                                     .should('not.include', 'experiments_in_set.experiment_type=ATAC-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse');
                             });
                         });
-                        
                 });
-                
+
             });
 
         });
