@@ -41,7 +41,24 @@ export class HiGlassContainer extends React.Component {
     static generateViewConfig(tilesetUid, height=600, baseUrl=HiGlassServerBaseURL, initialDomains={
         'x' : [31056455, 31254944],
         'y' : [31114340, 31201073]
-    }){
+    }, extraViewProps = {}, index = 0){
+
+        if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){
+            return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string');
+        })){ // Merge views into 1 array
+            var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, height, baseUrl, initialDomains, uidObj.extraViewProps || {}, idx); });
+            var primaryConf = allConfigs[0];
+            var someLockId = 'SOME_LOCK_ID';
+            primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = someLockId;
+            for (var i = 1; i < allConfigs.length; i++){
+                primaryConf.views.push(allConfigs[i].views[0]);
+                primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = someLockId;
+            }
+            primaryConf.locationLocks.locksDict[someLockId] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
+                return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
+            })), { 'uid' : someLockId });
+            return primaryConf;
+        }
         if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
 
         const centerTrackHeight = height - 50;
@@ -64,113 +81,134 @@ export class HiGlassContainer extends React.Component {
             };
         }
 
-        return {
+        function generateLayoutForViewItem(viewItemID, initLayout = null){
+            if (!initLayout){
+                initLayout = { 'w' : 12, 'h' : 12, 'x' : 0, 'y' : 0 }; // 1 full view
+            }
+            return _.extend({}, initLayout, {
+                'moved' : false,
+                'static' : false,
+                'i' : viewItemID
+            });
+        }
+
+        function generateViewItem(){
+            const viewUid = "view-4dn-" + index;
+            return {
+                "uid": viewUid,
+                "initialXDomain": initialDomains.x,
+                "initialYDomain" : initialDomains.y,
+                "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
+                "genomePositionSearchBox": {
+                    "autocompleteServer": "http://higlass.io/api/v1",
+                    "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
+                    "chromInfoServer": "http://higlass.io/api/v1",
+                    "chromInfoId": "hg38",
+                    "visible": true
+                },
+                "tracks": {
+                    "top": [
+                        {
+                            "name": "Gene Annotations (hg38)",
+                            "created": "2017-07-14T15:27:46.989053Z",
+                            "server": "http://higlass.io/api/v1",
+                            "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
+                            "type": "horizontal-gene-annotations",
+                            "options": {
+                                "labelColor": "black",
+                                "labelPosition": "hidden",
+                                "plusStrandColor": "blue",
+                                "minusStrandColor": "red",
+                                "trackBorderWidth": 0,
+                                "trackBorderColor": "black",
+                                "name": "Gene Annotations (hg38)"
+                            },
+                            "width": 20,
+                            "height": 55,
+                            "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                            "position": "top"
+                        },
+                        {
+                            "name": "Chromosome Axis",
+                            "created": "2017-07-17T14:16:45.346835Z",
+                            "server": "http://higlass.io/api/v1",
+                            "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
+                            "type": "horizontal-chromosome-labels",
+                            "options": {},
+                            "width": 20,
+                            "height": 30,
+                            "position": "top"
+                        }
+                    ],
+                    "left": [
+                        {
+                            "name": "Gene Annotations (hg38)",
+                            "created": "2017-07-14T15:27:46.989053Z",
+                            "server": "http://higlass.io/api/v1",
+                            "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
+                            "uid": "faxvbXweTle5ba4ESIlZOg",
+                            "type": "vertical-gene-annotations",
+                            "options": {
+                                "labelColor": "black",
+                                "labelPosition": "hidden",
+                                "plusStrandColor": "blue",
+                                "minusStrandColor": "red",
+                                "trackBorderWidth": 0,
+                                "trackBorderColor": "black",
+                                "name": "Gene Annotations (hg38)"
+                            },
+                            "width": 55,
+                            "height": 20,
+                            "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                            "position": "left"
+                        },
+                        {
+                            "name": "Chromosome Axis",
+                            "created": "2017-07-17T14:16:45.346835Z",
+                            "server": "http://higlass.io/api/v1",
+                            "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
+                            "uid": "aXbmQTsMR2ao85gzBVJeRw",
+                            "type": "vertical-chromosome-labels",
+                            "options": {},
+                            "width": 20,
+                            "height": 30,
+                            "position": "left"
+                        }
+                    ],
+                    "center": [ generateCenterTrack() ],
+                    "right": [],
+                    "bottom": []
+                },
+                "layout": generateLayoutForViewItem(viewUid, (extraViewProps && extraViewProps.layout) || null)
+            };
+        }
+
+        const viewConfigToReturn = {
             "editable": true,
             "zoomFixed": false,
             "trackSourceServers": [
                 "http://higlass.io/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
             ],
             "exportViewUrl": "/api/v1/viewconfs",
-            "views": [
-                {
-                    "uid": "aa",
-                    "initialXDomain": initialDomains.x,
-                    "initialYDomain" : initialDomains.y,
-                    "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
-                    // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
-                    "genomePositionSearchBox": {
-                        "autocompleteServer": "http://higlass.io/api/v1",
-                        "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
-                        "chromInfoServer": "http://higlass.io/api/v1",
-                        "chromInfoId": "hg38",
-                        "visible": true
-                    },
-                    
-                    "tracks": {
-                        "top": [
-                            {
-                                "name": "Gene Annotations (hg38)",
-                                "created": "2017-07-14T15:27:46.989053Z",
-                                "server": "http://higlass.io/api/v1",
-                                "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
-                                "type": "horizontal-gene-annotations",
-                                "options": {
-                                    "labelColor": "black",
-                                    "labelPosition": "hidden",
-                                    "plusStrandColor": "blue",
-                                    "minusStrandColor": "red",
-                                    "trackBorderWidth": 0,
-                                    "trackBorderColor": "black",
-                                    "name": "Gene Annotations (hg38)"
-                                },
-                                "width": 20,
-                                "height": 55,
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "top"
-                            },
-                            {
-                                "name": "Chromosome Axis",
-                                "created": "2017-07-17T14:16:45.346835Z",
-                                "server": "http://higlass.io/api/v1",
-                                "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
-                                "type": "horizontal-chromosome-labels",
-                                "options": {},
-                                "width": 20,
-                                "height": 30,
-                                "position": "top"
-                            }
-                        ],
-                        "left": [
-                            {
-                                "name": "Gene Annotations (hg38)",
-                                "created": "2017-07-14T15:27:46.989053Z",
-                                "server": "http://higlass.io/api/v1",
-                                "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
-                                "uid": "faxvbXweTle5ba4ESIlZOg",
-                                "type": "vertical-gene-annotations",
-                                "options": {
-                                    "labelColor": "black",
-                                    "labelPosition": "hidden",
-                                    "plusStrandColor": "blue",
-                                    "minusStrandColor": "red",
-                                    "trackBorderWidth": 0,
-                                    "trackBorderColor": "black",
-                                    "name": "Gene Annotations (hg38)"
-                                },
-                                "width": 55,
-                                "height": 20,
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "left"
-                            },
-                            {
-                                "name": "Chromosome Axis",
-                                "created": "2017-07-17T14:16:45.346835Z",
-                                "server": "http://higlass.io/api/v1",
-                                "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
-                                "uid": "aXbmQTsMR2ao85gzBVJeRw",
-                                "type": "vertical-chromosome-labels",
-                                "options": {},
-                                "width": 20,
-                                "height": 30,
-                                "position": "left"
-                            }
-                        ],
-                        "center": [ generateCenterTrack() ],
-                        "right": [],
-                        "bottom": []
-                    },
-                    "layout": {
-                        "w": 12,
-                        "h": 13,
-                        "x": 0,
-                        "y": 0,
-                        "i": "aa",
-                        "moved": false,
-                        "static": false
-                    }
-                }
-            ]
+            "views": [generateViewItem()],
+            "zoomLocks" : {
+                "locksByViewUid" : {},
+                "locksDict" : {}
+            },
+            "locationLocks" : {
+                "locksByViewUid" : {},
+                "locksDict" : {}
+            }
         };
+
+        //if (extraViewProps && typeof extraViewProps === 'object'){
+        //    if (extraViewProps.layout && typeof extraViewProps.layout === 'object'){
+        //
+        //    }
+        //}
+
+        return viewConfigToReturn;
     }
 
     static getAllTracksFromViewConfig(viewConfig){
