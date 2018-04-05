@@ -140,9 +140,9 @@ Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
 
 /*** Browse View Utils ****/
 
-Cypress.Commands.add('getQuickInfoBarCounts', function(options = {}){
+Cypress.Commands.add('getQuickInfoBarCounts', function(options = { shouldNotEqual : '' }){
 
-    return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).then((expsetCountElemText)=>{
+    return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).should('not.equal', '' + options.shouldNotEqual).then((expsetCountElemText)=>{
         return cy.get('#stats-stat-experiments').then((expCountElem)=>{
             return cy.get('#stats-stat-files').then((fileCountElem)=>{
                 var experiment_sets = parseInt(expsetCountElemText),
@@ -235,12 +235,32 @@ Cypress.Commands.add('hoverOut', { prevSubject : true }, function(subject, optio
     var subjElem = subject[0];
 
     var bounds = subjElem.getBoundingClientRect();
-    var cursorPos = { 'clientX' : bounds.left + (bounds.width / 2), 'clientY' : bounds.top + (bounds.height / 2) };
+    var cursorPos = { 'clientX' : Math.max(bounds.left - (bounds.width / 2), 0), 'clientY' : Math.max(bounds.top - (bounds.height / 2), 0) };
     var commonEventValsIn = _.extend({ 'bubbles' : true, 'cancelable' : true, }, cursorPos);
 
     subjElem.dispatchEvent(new MouseEvent('mousemove', commonEventValsIn ) );
     subjElem.dispatchEvent(new MouseEvent('mouseover', commonEventValsIn ) );
     subjElem.dispatchEvent(new MouseEvent('mouseleave', _.extend({ 'relatedTarget' : subjElem }, commonEventValsIn, { 'clientX' : bounds.left - 5, 'clientY' : bounds.top - 5 }) ) );
+
+    return subject;
+});
+
+Cypress.Commands.add('clickEvent', { prevSubject : true }, function(subject, options){
+
+    expect(subject.length).to.equal(1);
+
+    var subjElem = subject[0];
+
+    var bounds = subjElem.getBoundingClientRect();
+    var cursorPos = { 'clientX' : bounds.left + (bounds.width / 2), 'clientY' : bounds.top + (bounds.height / 2) };
+    var commonEventValsIn = _.extend({ 'bubbles' : true, 'cancelable' : true, }, cursorPos);
+
+    subjElem.dispatchEvent(new MouseEvent('mouseenter', commonEventValsIn ) );
+    subjElem.dispatchEvent(new MouseEvent('mousemove', commonEventValsIn ) );
+    subjElem.dispatchEvent(new MouseEvent('mouseover', commonEventValsIn ) );
+    subjElem.dispatchEvent(new MouseEvent('mousedown', commonEventValsIn ) );
+    subjElem.dispatchEvent(new MouseEvent('mouseup', commonEventValsIn ) );
+    //subjElem.dispatchEvent(new MouseEvent('mouseleave', _.extend({ 'relatedTarget' : subjElem }, commonEventValsIn, { 'clientX' : bounds.left - 5, 'clientY' : bounds.top - 5 }) ) );
 
     return subject;
 });

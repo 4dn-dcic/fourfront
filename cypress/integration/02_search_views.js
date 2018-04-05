@@ -9,33 +9,11 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('Has at least 100 results for /search/?type=Item', function () {
-
-            cy.location('search').should('include', 'type=Item');
-
-
-            cy.get('.search-results-container .search-result-row').then(($searchResultElems)=>{
-                expect($searchResultElems.length).to.equal(25);
-            });
-
-            cy.searchPageTotalResultCount().should('be.greaterThan', 100);
-
-        });
-
-        it('Load as you scroll works for ?type=Item', function () {
-
-            cy.location('search').should('include', 'type=Item');
-
-            cy.searchPageTotalResultCount().then((totalCountExpected)=>{
-                const intervalCount = Math.min(20, parseInt(totalCountExpected / 25));
-
-                for (let interval = 0; interval < intervalCount; interval++){
-                    cy.scrollToBottom().then(()=>{
-                        cy.get('.search-results-container .search-result-row[data-row-number="' + ( 25 * (interval + 1) ) + '"]').should('have.length', 1);
-                    });
-                }
-
-            });
-
+            cy.location('search').should('include', 'type=Item').end()
+                .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+                    expect($searchResultElems.length).to.equal(25);
+                }).end()
+                .searchPageTotalResultCount().should('be.greaterThan', 100);
         });
 
     });
@@ -47,8 +25,8 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('Should redirect to /search/?type=Page correctly', function(){
-            cy.location('search').should('include', 'type=Page');
-            cy.location('pathname').should('include', '/search/');
+            cy.location('search').should('include', 'type=Page').end()
+                .location('pathname').should('include', '/search/');
         });
 
         it('Should have at least 20 results.', function(){
@@ -94,14 +72,14 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('date_created:[* TO 2018-01-01] returns 3 =< x < all results.', function(){
-            cy.searchPageTotalResultCount().then((origTotalResults)=>{
+            cy.screenshot('Before text search "date_created:[* TO 2018-01-01]"').end().searchPageTotalResultCount().then((origTotalResults)=>{
                 cy.get('input[name="q"]').focus().clear().type('date_created:[* TO 2018-01-01]').wait(10).end()
                     .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                     .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end() // Select 'All Items'
                     //.get('form.navbar-search-form-container').submit().end()
                     .location('search').should('include', '2018-01-01').wait(300).end()
                     .get('#slow-load-container').should('not.have.class', 'visible').end()
-                    .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults);
+                    .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults).end().screenshot('After text search "date_created:[* TO 2018-01-01]"').end();
             });
         });
 

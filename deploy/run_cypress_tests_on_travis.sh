@@ -23,7 +23,14 @@
 # --------------------------------------------------------------------------------------------------------------------------------
 
 
-exec 3< <(bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
+function bell() {
+  while true; do
+    echo -e "\a"
+    sleep 60
+  done
+}
+
+exec 3< <(bell & bin/dev-servers development.ini --app-name app --clear --init --load 2>&1)
 db_server_pid=$!
 count_exp_seq_seen=0
 while read line; do
@@ -59,7 +66,11 @@ while read line; do
         ;;
     esac
 done <&4
-sleep 30
+sleep 5
+# Debug
+{ while read line; do
+    echo $line
+done <&3 &}
 npm run cypress:test-local-recorded
 cypress_run_exit_code=$?
 kill $web_server_pid

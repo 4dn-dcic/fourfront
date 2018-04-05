@@ -6,7 +6,7 @@
 * Based on the type of experiment(s) for which you plan to submit data, the data wranglers can provide you with an Excel WorkBook containing several WorkSheets.  
 * Each sheet corresponds to an Item type in our metadata database. 
 * The workbook provided should contain all the sheets that you may need for your submission. 
-* You can refer to [this table](schema_info.md) for information on all the Item types available in the database.  
+* You can refer to [this table](#schema-information) for information on all the Item types available in the database.  
 * Each sheet should also contain all the data fields that can be submitted for that Item type. 
 * Depending on if you have submitted data before or if you are using shared reagents that have been submitted by other labs, you may not need to provide information on every sheet or in every field.
 

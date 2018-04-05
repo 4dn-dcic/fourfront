@@ -87,5 +87,17 @@
         "uuid": "e2324f87-0625-4bbc-803b-d47677aebe08",
         "viewing_groups": ["4DN"],
         "groups": ["read-only-admin"]
+    },
+    {
+        "timezone": "US/Eastern",
+        "email": "ud4dntest@gmail.com",
+        "status": "current",
+        "uuid": "77a34077-262d-44ab-b387-c076cd0bf6f7",
+        "lab": "4dn-dcic-lab",
+        "job_title": "Tester",
+        "first_name": "Frontend",
+        "last_name": "Test",
+        "viewing_groups": ["4DN"],
+        "aliases": ["4dn-dcic-lab:testing_ui"]
     }
 ]
