@@ -1,5 +1,6 @@
 import os
 from time import sleep
+from datetime import datetime, timedelta
 import sys
 import subprocess
 import hashlib
@@ -104,6 +105,8 @@ def deploy(deploy_to=None):
         else:
             break
 
+    time_started = datetime.now()
+
     while True:
         out = p.stdout.readline()
         out = out.decode('utf-8')
@@ -116,6 +119,8 @@ def deploy(deploy_to=None):
         if out != '':
             sys.stdout.write(out)
             sys.stdout.flush()
+        if time_started + timedelta(minutes=2) > datetime.now(): # 2 min time limit
+            break
 
 
 if __name__ == "__main__":
