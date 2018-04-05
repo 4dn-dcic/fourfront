@@ -110,16 +110,15 @@ def deploy(deploy_to=None):
     while True:
         out = p.stdout.readline()
         out = out.decode('utf-8')
-        if "Deploying new version to instance(s)." in out:
-            sleep(5)
-            p.terminate()
-            break
         if out == '' and p.poll() is not None:
             break
         if out != '':
             sys.stdout.write(out)
             sys.stdout.flush()
-        if time_started + timedelta(minutes=2) < datetime.now(): # 2 min time limit
+        if "Deploying new version to instance(s)." in out or time_started + timedelta(minutes=2) < datetime.now(): # 2 min time limit
+            print('Exiting.')
+            sleep(5)
+            p.terminate()
             break
 
 
