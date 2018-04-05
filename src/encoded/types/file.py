@@ -647,6 +647,13 @@ class FileProcessed(File):
         return self.rev_link_atids(request, "experiment_sets")
 
 
+    # processed files don't want md5 as unique key
+    def unique_keys(self, properties):
+        keys = super(FileProcessed, self).unique_keys(properties)
+        if keys.get('alias'):
+            keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
+        return keys
+
 @collection(
     name='files-reference',
     unique_key='accession',
