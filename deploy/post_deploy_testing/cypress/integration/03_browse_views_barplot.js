@@ -73,7 +73,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                                 .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
                                 .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
-                                .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot();
+                                .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot("ATAC-seq x mouse BrowseView results, filtered via BarPlot section hover & click.");
                         });
                 });
         });

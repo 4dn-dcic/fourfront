@@ -289,6 +289,8 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysis-plansPage
 globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
 
 
+
+
 class VisualBody extends React.Component {
     render(){
 
