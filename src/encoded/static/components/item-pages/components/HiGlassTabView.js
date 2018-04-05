@@ -212,7 +212,8 @@ export class HiGlassTabView extends React.Component {
     }
 
     /**
-     * Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state.
+     * Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos,
+     * then call either successCallback or fallbackCallback param.
      *
      * @async
      */

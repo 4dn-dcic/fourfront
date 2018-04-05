@@ -95,9 +95,9 @@ def deploy(deploy_to=None):
     for time in wait:
         try:
             if not deploy_to:
-                p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
+                p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
             else:
-                p = subprocess.Popen(['eb', 'deploy', deploy_to], stderr=subprocess.PIPE)
+                p = subprocess.Popen(['eb', 'deploy', deploy_to], stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
         except Exception:
             # we often get errors due to timeouts
             sleep(time)
@@ -105,7 +105,7 @@ def deploy(deploy_to=None):
             break
 
     while True:
-        out = p.stderr.read(1)
+        out = p.stdout.read(1)
         out = out.decode('utf-8')
         if "safe to Ctrl+C" in out:
             sleep(5)
