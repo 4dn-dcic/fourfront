@@ -90,7 +90,6 @@ describe('Browse Views - Redirection & Visualization', function () {
                                     .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot();
                             });
                             
-                            
                     });
             });
 

@@ -18,7 +18,6 @@ describe('Post-Deployment Static Page & Content Tests', function () {
 
                     let prevTitle = title.text();
                     let count = 0;
-                    let haveWeSeenPageWithTableOfContents = false;
 
                     function doVisit(listItem){
 
@@ -48,7 +47,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                             }).then(()=>{
                                 finish(titleText);
                             });
-                            
+
                         });
                     }
                     listItems[0].click();
