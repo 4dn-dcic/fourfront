@@ -107,7 +107,7 @@ def deploy(deploy_to=None):
     while True:
         out = p.stdout.read(1)
         out = out.decode('utf-8')
-        if "safe to Ctrl+C" in out:
+        if "Deploying new version to instance(s)." in out:
             sleep(5)
             p.terminate()
             break
