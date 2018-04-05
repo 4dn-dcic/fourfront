@@ -107,6 +107,10 @@ def deploy(deploy_to=None):
     while True:
         out = p.stderr.read(1)
         out = out.decode('utf-8')
+        if "safe to Ctrl+C" in out:
+            sleep(5)
+            p.terminate()
+            break
         if out == '' and p.poll() is not None:
             break
         if out != '':

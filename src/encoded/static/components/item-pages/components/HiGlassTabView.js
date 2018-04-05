@@ -7,6 +7,8 @@ import { requestAnimationFrame } from './../../viz/utilities';
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
 
+const HiGlassServerBaseURL = "https://higlass.4dnucleome.org";
+
 
 /* To be deleted (probably)
 function loadJS(src){
@@ -44,7 +46,19 @@ export class HiGlassTabView extends React.Component {
         };
     }
 
-    static generateViewConfig(fileItem, height=600){
+    /**
+     * This function is used to generate a full viewConfig for the HiGlassComponent.
+     * Only the "center" view/track is dynamically generated, with other tracks currently being hard-coded to higlass.io data (e.g. hg38 tracks).
+     * 
+     * @param {Object} fileItem - A JS object representing a File item.
+     * @param {number} [height=600] - Default height.
+     * @param {string} [baseUrl=HiGlassServerBaseURL] - Where to request center tile data from.
+     * @param {{ 'x' : number[], 'y' : number[] }} [initialDomains] - Initial coordinates.
+     */
+    static generateViewConfig(fileItem, height=600, baseUrl=HiGlassServerBaseURL, initialDomains={
+        'x' : [31056455, 31254944],
+        'y' : [31114340, 31201073]
+    }){
         var tilesetUid = null;
         if (typeof fileItem.higlass_uid === 'string' && fileItem.higlass_uid){
             tilesetUid = fileItem.higlass_uid;
@@ -53,6 +67,24 @@ export class HiGlassTabView extends React.Component {
         }
 
         const centerTrackHeight = height - 50;
+
+        function generateCenterTrack(){
+            return {
+                "uid": "c1",
+                "type": "combined",
+                "height": centerTrackHeight,
+                "contents": [
+                    {
+                        "server": baseUrl + "/api/v1",
+                        "tilesetUid": tilesetUid,
+                        "type": "heatmap",
+                        "position": "center",
+                        "uid": "GjuZed1ySGW1IzZZqFB9BA"
+                    }
+                ],
+                "position": "center"
+            };
+        }
 
         return {
             "editable": true,
@@ -64,10 +96,8 @@ export class HiGlassTabView extends React.Component {
             "views": [
                 {
                     "uid": "aa",
-                    "initialXDomain": [             // Adjust?
-                        234746886.15079364,
-                        238230126.6906902
-                    ],
+                    "initialXDomain": initialDomains.x,
+                    "initialYDomain" : initialDomains.y,
                     "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
                     // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
                     "genomePositionSearchBox": {
@@ -147,23 +177,7 @@ export class HiGlassTabView extends React.Component {
                                 "position": "left"
                             }
                         ],
-                        "center": [
-                            {
-                                "uid": "c1",
-                                "type": "combined",
-                                "height": centerTrackHeight,
-                                "contents": [
-                                    {
-                                        "server": "http://54.86.58.34/api/v1",
-                                        "tilesetUid": tilesetUid,
-                                        "type": "heatmap",
-                                        "position": "center",
-                                        "uid": "GjuZed1ySGW1IzZZqFB9BA"
-                                    }
-                                ],
-                                "position": "center"
-                            }
-                        ],
+                        "center": [ generateCenterTrack() ],
                         "right": [],
                         "bottom": []
                     },
@@ -175,11 +189,7 @@ export class HiGlassTabView extends React.Component {
                         "i": "aa",
                         "moved": false,
                         "static": false
-                    },
-                    "initialYDomain": [
-                        235207586.8246398,
-                        238862012.2628646
-                    ]
+                    }
                 }
             ]
         };
