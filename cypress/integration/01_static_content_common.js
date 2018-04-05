@@ -4,22 +4,24 @@
  */
 
 
-describe('Static Page & Content Tests', function () {
-
-
+describe('Deployment/CI Static Page & Content Tests', function () {
 
     context('Homepage content is ok.', function () {
 
 
         it('Home Page Title is present and matching expected strings.', function () {
 
-            cy.visit('/');
+            cy.visit('/').end()
+                .title().should('include', '4DN Data Portal').end()
+                .get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').end()
+                .get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.');
 
-            cy.title().should('include', '4DN Data Portal');
+        });
 
-            cy.get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal');
+        it('At least 3 announcements on the page.', function () {
 
-            cy.get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.');
+            cy.window().scrollTo('bottom').wait(100).end()
+                .get('.home-content-area div.fourDN-section.announcement').should('have.length.greaterThan', 2).end();
 
         });
 
@@ -29,12 +31,9 @@ describe('Static Page & Content Tests', function () {
 
     context('Each help page in dropdown has unique title; ToC works.', function () {
 
-        before(function(){
-            cy.visit('/').then(()=>{
-                cy.title().should('include', '4DN Data Portal');
-            });
+        it('We start on homepage (from previous test)', function(){
+            cy.title().should('equal', '4DN Data Portal');
         });
-
 
         it('Click & visit each page from menu, ensure ToC exists somewhere, ensure ToC works.', function(){
 
