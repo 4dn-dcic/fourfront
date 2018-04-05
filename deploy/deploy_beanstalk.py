@@ -105,7 +105,7 @@ def deploy(deploy_to=None):
             break
 
     while True:
-        out = p.stdout.read(1)
+        out = p.stdout.readline()
         out = out.decode('utf-8')
         if "Deploying new version to instance(s)." in out:
             sleep(5)
