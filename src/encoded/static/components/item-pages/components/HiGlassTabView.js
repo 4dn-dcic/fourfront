@@ -48,15 +48,22 @@ export class HiGlassContainer extends React.Component {
         })){ // Merge views into 1 array
             var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, height, baseUrl, initialDomains, uidObj.extraViewProps || {}, idx); });
             var primaryConf = allConfigs[0];
-            var someLockId = 'SOME_LOCK_ID';
-            primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = someLockId;
+            var locationLockID = 'LOCATION_LOCK_ID';
+            var zoomLockID = 'ZOOM_LOCK_ID';
+            primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = locationLockID;
+            primaryConf.zoomLocks.locksByViewUid[primaryConf.views[0].uid] = zoomLockID;
             for (var i = 1; i < allConfigs.length; i++){
                 primaryConf.views.push(allConfigs[i].views[0]);
-                primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = someLockId;
+                primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = locationLockID;
+                primaryConf.zoomLocks.locksByViewUid[allConfigs[i].views[0].uid] = zoomLockID;
             }
-            primaryConf.locationLocks.locksDict[someLockId] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
+            primaryConf.locationLocks.locksDict[locationLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
                 return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
-            })), { 'uid' : someLockId });
+            })), { 'uid' : locationLockID });
+            primaryConf.zoomLocks.locksDict[zoomLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
+                return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
+            })), { 'uid' : zoomLockID });
+
             return primaryConf;
         }
         if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
@@ -87,7 +94,7 @@ export class HiGlassContainer extends React.Component {
             }
             return _.extend({}, initLayout, {
                 'moved' : false,
-                'static' : false,
+                'static' : true,
                 'i' : viewItemID
             });
         }

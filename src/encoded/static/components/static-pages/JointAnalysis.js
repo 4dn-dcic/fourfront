@@ -279,27 +279,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
-
-                <h3 className="mt-4 mb-1 text-300">HiGlass Views for 4DN <span className="text-500">in situ Hi-C</span> contact matrices</h3>
-                <div className="row">
-                    <div className="col-xs-6">
-                        <h4 className="mt-05 mb-0 text-600">H1-hESC</h4>
-                    </div>
-                    <div className="col-xs-6">
-                        <h4 className="mt-05 mb-0 text-600">HFFc6</h4>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-xs-12" style={{ 'height' : 800 }}>
-                        <HiGlassContainer
-                            height={800}
-                            tilesetUid={[
-                                { "tilesetUid" : "IjCacHbQQjGQgiSvOiInVg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } },
-                                { "tilesetUid" : "AKlowteYRECsDIlW-A6elg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }
-                            ]}
-                        />
-                    </div>
-                </div>
+                <HiGlassSection/>
             </StaticPage.Wrapper>
         );
     }
@@ -310,6 +290,38 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysis-plansPage
 globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
 
 
+
+class HiGlassSection extends React.Component {
+    render(){
+        if (this.props.disabled) return null;
+        return (
+            <div>
+                <h3 className="mt-4 mb-1 text-300" style={{ paddingBottom : 10, borderBottom : '1px solid #ddd' }}>
+                    HiGlass Views - 4DN <span className="text-400">in situ Hi-C</span> contact matrices
+                </h3>
+                <div className="row">
+                    <div className="col-xs-6">
+                        <h4 className="mt-05 mb-0 text-600">H1-hESC</h4>
+                    </div>
+                    <div className="col-xs-6">
+                        <h4 className="mt-05 mb-0 text-600">HFFc6</h4>
+                    </div>
+                </div>
+                <div className="row mb-2">
+                    <div className="col-xs-12" style={{ 'height' : 600 }}>
+                        <HiGlassContainer
+                            height={600}
+                            tilesetUid={[
+                                { "tilesetUid" : "IjCacHbQQjGQgiSvOiInVg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } },
+                                { "tilesetUid" : "AKlowteYRECsDIlW-A6elg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }
+                            ]}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
 
 
 class VisualBody extends React.Component {
