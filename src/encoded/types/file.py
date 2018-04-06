@@ -35,6 +35,9 @@ import pytz
 import os
 from pyramid.traversal import resource_path
 
+from encoded.search import make_search_subreq
+from snovault.elasticsearch import ELASTIC_SEARCH
+
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
 log = logging.getLogger(__name__)
@@ -894,7 +897,36 @@ def validate_file_filename(context, request):
         request.validated.update({})
 
 
+def validate_processed_file_unique_md5_with_bypass(context, request):
+    '''validator to check md5 on processed files, unless you tell it
+       not to'''
+    data = request.json
+
+    if 'md5sum' not in data or not data['md5sum']: return
+    if context.type_info.item_type != 'file_processed': return
+    if 'force_md5' in request.query_string: return
+
+    if ELASTIC_SEARCH in request.registry:
+        search = make_search_subreq(request, '/search/?type=File&md5sum=%s' % data['md5sum'])
+        search_resp = request.invoke_subrequest(search, True)
+        if search_resp.status_int < 400:
+            # already got this md5
+            found = search_resp
+            request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
+                                              (data['md5sum'], found))
+    else: # find it in the database
+       conn = request.registry['connection']
+       res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
+       if res is not None:
+            # md5 already exists
+            found = res.properties['accession']
+            request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
+                                              (data['md5sum'], found))
+
+
+
 @view_config(context=File.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_file_filename])
+             validators=[validate_item_content_post, validate_file_filename,
+                         validate_processed_file_unique_md5_with_bypass])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)

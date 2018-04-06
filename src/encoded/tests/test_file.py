@@ -5,6 +5,22 @@ import os
 pytestmark = pytest.mark.working
 
 
+
+def test_processed_file_unique_md5(testapp, mcool_file_json):
+    # first time pass
+    res_init = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+    res = testapp.post_json('/file_processed', mcool_file_json, status=422)
+    assert 'ValidationFailure' in res.json['@type']
+    assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
+    assert res_init['accession'] in res.json['errors'][0]['description']
+
+
+def test_processed_file_unique_md5_skip_validation(testapp, mcool_file_json):
+    # first time pass
+    res = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+    res = testapp.post_json('/file_processed?force_md5=true', mcool_file_json)
+
+
 def test_reference_file_by_md5(testapp, file):
     res = testapp.get('/md5:{md5sum}'.format(**file)).follow(status=200)
     assert res.json['@id'] == file['@id']
@@ -272,6 +288,23 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
 
 
 @pytest.fixture
+def mcool_file_json(award, experiment, lab):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': 'mcool',
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.cool.mcool',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def mcool_file(testapp, mcool_file_json):
+    res = testapp.post_json('/file_processed', mcool_file_json)
+    return res.json['@graph'][0]
+
+@pytest.fixture
 def file(testapp, award, experiment, lab):
 
     item = {
@@ -284,6 +317,7 @@ def file(testapp, award, experiment, lab):
     }
     res = testapp.post_json('/file_fastq', item)
     return res.json['@graph'][0]
+
 
 
 @pytest.fixture
