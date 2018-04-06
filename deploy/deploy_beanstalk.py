@@ -5,6 +5,8 @@ import sys
 import subprocess
 import hashlib
 import argparse
+from fcntl import fcntl, F_GETFL, F_SETFL # LINUX ONLY - WILL FAIL ON MACOS
+from os import O_NONBLOCK, read
 
 
 def tag(name):
@@ -105,20 +107,25 @@ def deploy(deploy_to=None):
         else:
             break
 
+    flags = fcntl(p.stdout, F_GETFL) # (Linux-only) Workaround re: p.stdout.read() & p.stdout.readlines() blocking.
+    fcntl(p.stdout, F_SETFL, flags | O_NONBLOCK)
+
     time_started = datetime.now()
 
     while True:
-        out = p.stdout.readline()
+        out = read(p.stdout.fileno(), 1024)#p.stdout.readline()
         out = out.decode('utf-8')
-        if out == '' and p.poll() is not None:
-            break
+        curr_time = datetime.now()
         if out != '':
-            sys.stdout.write(out)
+            sys.stdout.write('[' + curr_time.strftime('%H:%M:%S:%f') + '] ' + out)
             sys.stdout.flush()
-        if "Deploying new version to instance(s)." in out or time_started + timedelta(minutes=2) < datetime.now(): # 2 min time limit
-            print('Exiting.')
+        if ("Deploying new version to instance(s)." in out) or (time_started + timedelta(minutes=2) <= curr_time): # 2 min time limit
+            print('Killing sub-process & exiting.')
             sleep(5)
-            p.terminate()
+            p.kill()
+            break
+        if out == '' and p.poll() is not None:
+            print('Deploy sub-process complete. Exiting.')
             break
 
 
