@@ -138,23 +138,40 @@ export default class JointAnalysisPlansPage extends React.Component {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.loadSearchQueryResults = this.loadSearchQueryResults.bind(this);
+        this.toggleHiGlassView = _.throttle(this.toggleHiGlassView.bind(this), 1000);
         this.state = {
             'mounted'               : false,
             'self_planned_results'  : null,
             'self_results'          : null,
-            'encode_results'        : null
+            'encode_results'        : null,
+            'higlassVisible'        : false
         };
     }
 
     componentDidMount(){
         this.setState({ 'mounted' : true });
         this.loadSearchQueryResults();
+        setTimeout(()=>{
+            if (typeof window !== 'undefined' && window && window.fourfront){
+                window.fourfront.toggleHiGlassView = this.toggleHiGlassView;
+            }
+        }, 150);
     }
 
     componentDidUpdate(pastProps){
         if (this.props.session !== pastProps.session){
             this.loadSearchQueryResults();
         }
+    }
+
+    componentWillUnmount(){
+        if (typeof window !== 'undefined' && window && window.fourfront && window.fourfront.toggleHiGlassView){
+            delete window.fourfront.toggleHiGlassView;
+        }
+    }
+
+    toggleHiGlassView(visible = !this.state.higlassVisible){
+        this.setState({ 'higlassVisible' : visible });
     }
 
     loadSearchQueryResults(){
@@ -279,7 +296,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
-                <HiGlassSection/>
+                <HiGlassSection disabled={!this.state.higlassVisible} />
             </StaticPage.Wrapper>
         );
     }
