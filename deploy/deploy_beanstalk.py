@@ -1,12 +1,9 @@
 import os
 from time import sleep
-from datetime import datetime, timedelta
 import sys
 import subprocess
 import hashlib
 import argparse
-from fcntl import fcntl, F_GETFL, F_SETFL # LINUX ONLY - WILL FAIL ON MACOS
-from os import O_NONBLOCK, read
 
 
 def tag(name):
@@ -111,7 +108,7 @@ def deploy(deploy_to=None):
     print('Started deployment at {}. Waiting 2 minutes & exiting.'.format(time_started.strftime('%H:%M:%S:%f')))
     sleep(120)
 
-    # TODO: Setup new thread and listen re: "Deploying new version to instance(s).". Exit if this occurs before 2min.
+    # MAYBE TODO: Setup new thread and listen re: "Deploying new version to instance(s).". Exit if this occurs before 2min.
     #
     #while True:
     #    out = p.stdout.readline()
