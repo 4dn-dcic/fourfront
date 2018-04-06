@@ -8,11 +8,17 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
-from snovault.validators import validate_item_content_post
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_put,
+    validate_item_content_patch
+)
+from snovault.etag import if_match_tid
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
+    item_edit,
     ALLOW_SUBMITTER_ADD
 )
 from pyramid.httpexceptions import (
@@ -905,6 +911,8 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
     if 'md5sum' not in data or not data['md5sum']: return
     if context.type_info.item_type != 'file_processed': return
     if 'force_md5' in request.query_string: return
+    # we can of course patch / put to ourselves the same md5 we previously had
+    if context.properties.get('md5sum') == data['md5sum']: return
 
     if ELASTIC_SEARCH in request.registry:
         search = make_search_subreq(request, '/search/?type=File&md5sum=%s' % data['md5sum'])
@@ -930,3 +938,13 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
                          validate_processed_file_unique_md5_with_bypass])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
+
+
+@view_config(context=FileProcessed, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put,
+                         validate_processed_file_unique_md5_with_bypass], decorator=if_match_tid)
+@view_config(context=FileProcessed, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch,
+                         validate_processed_file_unique_md5_with_bypass], decorator=if_match_tid)
+def procesed_edit(context, request, render=None):
+    return item_edit(context, request, render)

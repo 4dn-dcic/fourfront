@@ -14,11 +14,33 @@ def test_processed_file_unique_md5(testapp, mcool_file_json):
     assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
     assert res_init['accession'] in res.json['errors'][0]['description']
 
+    # we can of course, patch or put to ourself though
+    testapp.patch_json('/file_processed/%s' % res_init['accession'], mcool_file_json)
+    testapp.put_json('/file_processed/%s' % res_init['accession'], mcool_file_json)
+
+    # but we can't change somebody else to overwrite us
+    existing_md5sum = mcool_file_json['md5sum']
+    mcool_file_json['md5sum'] = 'new md5sum'
+    res_2 = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+    mcool_file_json['md5sum'] = existing_md5sum
+
+    res = testapp.patch_json('/file_processed/%s' % res_2['accession'], mcool_file_json, status=422)
+    assert 'ValidationFailure' in res.json['@type']
+    assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
+
+    res = testapp.put_json('/file_processed/%s' % res_2['accession'], mcool_file_json, status=422)
+    assert 'ValidationFailure' in res.json['@type']
+    assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
+
+
+
 
 def test_processed_file_unique_md5_skip_validation(testapp, mcool_file_json):
     # first time pass
     res = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
-    res = testapp.post_json('/file_processed?force_md5=true', mcool_file_json)
+    testapp.post_json('/file_processed?force_md5=true', mcool_file_json)
+    testapp.patch_json('/file_processed/%s/?force_md5=true' % res['accession'] , mcool_file_json)
+    testapp.put_json('/file_processed/%s/?force_md5=true' % res['accession'], mcool_file_json)
 
 
 def test_reference_file_by_md5(testapp, file):
