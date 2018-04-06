@@ -23,13 +23,7 @@ describe("Individual Item Pages", function(){
                             .wrap($tabInnerElem).click().wait(200).end();
                     });
                 }).end()
-                .get('.graph-wrapper .nodes-layer .node').should('have.length.greaterThan', 0)
-                .get('.tab-view-container .rc-tabs-nav').within(($tabNav)=>{
-                    cy.contains('HiGlass Browser').should('have.length', 1).then(($tabInnerElem)=>{
-                        const $tab = $tabInnerElem.closest('.rc-tabs-tab');
-                        return cy.wrap($tab).should('not.have.class', 'rc-tabs-tab-disabled');
-                    });
-                });
+                .get('.graph-wrapper .nodes-layer .node').should('have.length.greaterThan', 0);
         });
 
 
