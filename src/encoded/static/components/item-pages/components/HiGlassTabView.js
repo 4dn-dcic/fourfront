@@ -7,7 +7,7 @@ import { requestAnimationFrame } from './../../viz/utilities';
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
 
-const HiGlassServerBaseURL = "https://higlass.4dnucleome.org";
+const hiGlassServerBaseURL = "https://higlass.4dnucleome.org";
 
 
 /* To be deleted (probably)
@@ -35,10 +35,10 @@ export class HiGlassContainer extends React.Component {
      * 
      * @param {Object} fileItem - A JS object representing a File item.
      * @param {number} [height=600] - Default height.
-     * @param {string} [baseUrl=HiGlassServerBaseURL] - Where to request center tile data from.
+     * @param {string} [baseUrl=hiGlassServerBaseURL] - Where to request center tile data from.
      * @param {{ 'x' : number[], 'y' : number[] }} [initialDomains] - Initial coordinates.
      */
-    static generateViewConfig(tilesetUid, height=600, baseUrl=HiGlassServerBaseURL, initialDomains={
+    static generateViewConfig(tilesetUid, height=600, baseUrl=hiGlassServerBaseURL, initialDomains={
         'x' : [31056455, 31254944],
         'y' : [31114340, 31201073]
     }, extraViewProps = {}, index = 0){
@@ -108,9 +108,9 @@ export class HiGlassContainer extends React.Component {
                 "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
                 // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
                 "genomePositionSearchBox": {
-                    "autocompleteServer": "http://higlass.io/api/v1",
+                    "autocompleteServer": baseUrl + "/api/v1",
                     "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
-                    "chromInfoServer": "http://higlass.io/api/v1",
+                    "chromInfoServer": baseUrl + "/api/v1",
                     "chromInfoId": "hg38",
                     "visible": true
                 },
@@ -119,7 +119,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Gene Annotations (hg38)",
                             "created": "2017-07-14T15:27:46.989053Z",
-                            "server": "http://higlass.io/api/v1",
+                            "server": baseUrl + "/api/v1",
                             "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
                             "type": "horizontal-gene-annotations",
                             "options": {
@@ -139,7 +139,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Chromosome Axis",
                             "created": "2017-07-17T14:16:45.346835Z",
-                            "server": "http://higlass.io/api/v1",
+                            "server": baseUrl + "/api/v1",
                             "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
                             "type": "horizontal-chromosome-labels",
                             "options": {},
@@ -152,7 +152,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Gene Annotations (hg38)",
                             "created": "2017-07-14T15:27:46.989053Z",
-                            "server": "http://higlass.io/api/v1",
+                            "server": baseUrl + "/api/v1",
                             "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
                             "uid": "faxvbXweTle5ba4ESIlZOg",
                             "type": "vertical-gene-annotations",
@@ -173,7 +173,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Chromosome Axis",
                             "created": "2017-07-17T14:16:45.346835Z",
-                            "server": "http://higlass.io/api/v1",
+                            "server": baseUrl + "/api/v1",
                             "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
                             "uid": "aXbmQTsMR2ao85gzBVJeRw",
                             "type": "vertical-chromosome-labels",
