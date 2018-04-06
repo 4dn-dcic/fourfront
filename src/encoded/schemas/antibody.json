@@ -73,5 +73,15 @@
             "lookup": 40,
             "linkTo": "Target"
         }
+    },
+    "facets": {
+        "antibody_vendor" : {
+            "title" : "Vendor"
+        }
+    },
+    "columns": {
+        "antibody_vendor": {
+            "title": "Vendor"
+        }
     }
 }

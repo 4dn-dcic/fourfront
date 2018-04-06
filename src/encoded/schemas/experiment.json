@@ -220,10 +220,10 @@
         "biosample.biosource_summary": {
             "title": "Biosource"
         },
-        "biosample.modifications_summary": {
+        "biosample.modifications.modification_type": {
             "title": "Modifications"
         },
-        "biosample.treatments_summary": {
+        "biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
         "lab.display_title": {
@@ -246,10 +246,10 @@
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications_summary_short": {
+        "biosample.modifications.display_title": {
             "title": "Modifications"
         },
-        "biosample.treatments_summary": {
+        "biosample.treatments.display_title": {
             "title": "Treatments"
         }
     }

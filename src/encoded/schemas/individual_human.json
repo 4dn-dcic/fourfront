@@ -59,7 +59,7 @@
         "organism": {
             "default": "7745b647-ff15-4ff3-9ced-b897d4e2983c",
             "exclude_from": ["submit4dn", "FFedit-create"],
-            "lookup":2,
+            "lookup": 2,
             "linkEnum": ["7745b647-ff15-4ff3-9ced-b897d4e2983c"]
         },
         "dbxrefs": {
@@ -68,7 +68,7 @@
             "title": "External identifiers",
             "description": "Unique identifiers from external resources.",
             "type": "array",
-            "lookup":1000,
+            "lookup": 1000,
             "default": [],
             "uniqueItems": true,
             "items": {
@@ -77,6 +77,28 @@
                 "type":  "string",
                 "pattern": "^((PGP:hu[\\S\\s\\d]+)|(GTEx:[a-zA-Z0-9\\-_]+)|(GEO:SAMN\\d+))$"
             }
+        }
+    },
+    "columns": {
+        "life_stage": {
+            "title" : "Life Stage"
+        },
+        "ethnicity": {
+            "title" : "Ethnicity"
+        },
+        "health_status": {
+            "title" : "Individual Health Status"
+        }
+    },
+    "facets": {
+        "life_stage": {
+            "title" : "Life Stage"
+        },
+        "ethnicity": {
+            "title" : "Ethnicity"
+        },
+        "health_status": {
+            "title" : "Individual Health Status"
         }
     }
 }

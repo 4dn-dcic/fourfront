@@ -74,5 +74,21 @@
             "type": "string",
             "lookup": 80
         }
+    },
+    "facets": {
+        "genome_assembly": {
+            "title": "Genome Assembly"
+        },
+        "chromosome": {
+            "title": "Chromosome"
+        }
+    },
+    "columns": {
+        "genome_assembly": {
+          "title": "Genome Assembly"
+        },
+        "chromosome": {
+          "title": "Chromosome"
+        }
     }
 }

@@ -82,5 +82,21 @@
             "lookup": 1000,
             "format": "uri"
         }
+    },
+    "facets": {
+        "enzyme_source": {
+            "title": "Source"
+        }
+    },
+    "columns": {
+        "enzyme_source": {
+            "title": "Source"
+        },
+        "recognition_sequence": {
+            "title": "Recognition Sequence"
+        },
+        "site_length": {
+            "title": "Site Length"
+        }
     }
 }

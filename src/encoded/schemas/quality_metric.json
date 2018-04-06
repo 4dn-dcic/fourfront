@@ -24,5 +24,15 @@
             "description": "Location of the main html file",
             "format": "uri"
         }
+    },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
+    "columns": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
     }
 }

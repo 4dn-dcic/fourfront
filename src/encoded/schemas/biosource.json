@@ -88,6 +88,7 @@
             "description": "DON'T SUBMIT - CALCULATED",
             "type": "string",
             "lookup": 70,
+            "exclude_from" : ["submit4dn"],
             "default": "Unclassified",
             "permission": "import_items",
             "enum": [
@@ -137,6 +138,23 @@
         },
         "cell_line_tier": {
             "title": "Tier"
+        },
+        "modifications.modification_type": {
+            "title": "Modification Type"
+        }
+    },
+    "columns": {
+        "individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosource_type": {
+            "title": "Biosource Type"
+        },
+        "cell_line_tier": {
+            "title": "Tier"
+        },
+        "modifications.display_title": {
+            "title": "Modification"
         }
     }
 }

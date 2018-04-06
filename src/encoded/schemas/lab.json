@@ -149,6 +149,9 @@
     "facets" : {
         "awards.project" : {
             "title" : "Project"
+        },
+        "institute_label": {
+            "title": "Institute"
         }
     },
     "excludedColumns" : ["lab.display_title"]

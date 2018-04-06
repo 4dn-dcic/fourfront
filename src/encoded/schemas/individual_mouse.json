@@ -76,5 +76,27 @@
                 "pattern": "^(GEO:SAMN\\d+)$"
             }
         }
+    },
+    "columns": {
+        "sex": {
+            "title" : "Sex"
+        },
+        "mouse_life_stage": {
+            "title" : "Mouse Life Stage"
+        },
+        "mouse_strain": {
+            "title" : "Mouse Strain"
+        }
+    },
+    "facets": {
+        "sex": {
+            "title" : "Sex"
+        },
+        "mouse_life_stage": {
+            "title" : "Mouse Life Stage"
+        },
+        "mouse_strain": {
+            "title" : "Mouse Strain"
+        }
     }
 }
