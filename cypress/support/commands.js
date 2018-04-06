@@ -119,6 +119,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         'email': email,
         'email_verified': true,
         'aud': auth0client,
+        "iss": "https://hms-dbmi.auth0.com/"
     };
 
     jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
