@@ -117,5 +117,21 @@
             "lookup": 90,
             "linkTo": "Vendor"
         }
+    },
+    "facets": {
+        "modification_type": {
+            "title": "Genomic modification method"
+        },
+        "genomic_change": {
+            "title": "Type of modification"
+        }
+    },
+    "columns": {
+        "modification_type": {
+            "title": "Genomic modification method"
+        },
+        "genomic_change": {
+            "title": "Type of modification"
+        }
     }
 }

@@ -100,5 +100,18 @@
                 "linkTo": "FileReference"
             }
         }
+    },
+    "facets": {
+        "type_labeled_probe": {
+            "title": "Probe Type"
+        }
+    },
+    "columns": {
+        "type_labeled_probe": {
+          "title": "Probe Type"
+        },
+        "labeled_probe": {
+          "title": "Probe"
+        }
     }
 }

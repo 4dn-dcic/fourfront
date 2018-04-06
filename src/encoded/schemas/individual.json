@@ -60,5 +60,15 @@
             "type": "string",
             "format": "uri"
         }
+    },
+    "columns": {
+        "sex": {
+            "title" : "Sex"
+        }
+    },
+    "facets": {
+        "sex": {
+            "title" : "Sex"
+        }
     }
 }

@@ -46,5 +46,16 @@
                 "linkTo": "QualityMetric"
             }
         }
+    },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
+    "columns": {
+        "overall_quality_status": {
+            "title" : "Overall Quality",
+            "default_hidden": true
+        }
     }
 }

@@ -77,7 +77,9 @@ class Experiment(Item):
                      "biosample.biosource.tissue.synonyms",
                      "biosample.biosource.individual.organism.name",
                      'biosample.modifications.modification_type',
+                     'biosample.modifications.display_title',
                      'biosample.treatments.treatment_type',
+                     'biosample.treatments.display_title',
 
                      "files.href",
                      "files.accession",

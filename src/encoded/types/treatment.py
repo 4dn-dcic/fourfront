@@ -50,13 +50,13 @@ class TreatmentChemical(Treatment):
         d_t = []
         conditions = ""
         if concentration and concentration_units:
-            d_t.extend([str(concentration), concentration_units])
+            d_t.extend([str(concentration), ' ' + concentration_units])
         if duration and duration_units:
-            d_t.extend([str(duration), duration_units])
+            d_t.extend([', ' + str(duration) + duration_units[0]])
         if temperature:
-            d_t.append("at " + str(temperature) + " °C")
+            d_t.append(" at " + str(temperature) + "°C")
         if d_t:
-            conditions = " (" + " ".join(d_t) + ")"
+            conditions = " (" + "".join(d_t) + ")"
 
         dis_tit = chemical + " treatment" + conditions
         return dis_tit
@@ -88,7 +88,7 @@ class TreatmentRnai(Treatment):
     def display_title(self, request, rnai_type=None, target=None):
         if rnai_type and target:
             targetObj = request.embed(target, '@@object')
-            rnai_value = rnai_type + " treatment for " + targetObj['target_summary']
+            rnai_value = rnai_type + " of " + targetObj['target_summary']
         else:
             rnai_value = rnai_type + " treatment"
         return rnai_value

@@ -1,9 +1,12 @@
 import os
 from time import sleep
+from datetime import datetime, timedelta
 import sys
 import subprocess
 import hashlib
 import argparse
+from fcntl import fcntl, F_GETFL, F_SETFL # LINUX ONLY - WILL FAIL ON MACOS
+from os import O_NONBLOCK, read
 
 
 def tag(name):
@@ -104,18 +107,27 @@ def deploy(deploy_to=None):
         else:
             break
 
-    while True:
-        out = p.stdout.readline()
-        out = out.decode('utf-8')
-        if "Deploying new version to instance(s)." in out:
-            sleep(5)
-            p.terminate()
-            break
-        if out == '' and p.poll() is not None:
-            break
-        if out != '':
-            sys.stdout.write(out)
-            sys.stdout.flush()
+    time_started = datetime.now()
+    print('Started deployment at {}. Waiting 2 minutes & exiting.'.format(time_started.strftime('%H:%M:%S:%f')))
+    sleep(120)
+
+    # TODO: Setup new thread and listen re: "Deploying new version to instance(s).". Exit if this occurs before 2min.
+    #
+    #while True:
+    #    out = p.stdout.readline()
+    #    out = out.decode('utf-8')
+    #    curr_time = datetime.now()
+    #    if out != '':
+    #        sys.stdout.write('[' + curr_time.strftime('%H:%M:%S:%f') + '] ' + out)
+    #        sys.stdout.flush()
+    #    if ("Deploying new version to instance(s)." in out) or (time_started + timedelta(minutes=2) <= curr_time): # 2 min time limit
+    #        print('Killing sub-process & exiting.')
+    #        sleep(5)
+    #        p.kill()
+    #        break
+    #    if out == '' and p.poll() is not None:
+    #        print('Deploy sub-process complete. Exiting.')
+    #        break
 
 
 if __name__ == "__main__":
