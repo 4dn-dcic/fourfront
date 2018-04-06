@@ -48,6 +48,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').clear().type('SuperTest').then((inputfield)=>{
                     return cy.wait(100).screenshot().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
                         .should('have.length', 0).wait(100).end()
+                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").wait(500).end()
                         .url().then((currUrl)=>{ // After reloading on datastore=database, last name stays edited. Then change back.
                             return cy.visit(currUrl + '?datastore=database').end()
@@ -58,7 +59,8 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                                     return cy.wait(100)
                                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
                                         .should('have.length', 0).wait(100).end()
-                                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").end()
+                                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
+                                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").wait(500).end()
                                         .reload()
                                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").end();
                                 });
