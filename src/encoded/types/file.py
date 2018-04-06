@@ -919,7 +919,7 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
         search_resp = request.invoke_subrequest(search, True)
         if search_resp.status_int < 400:
             # already got this md5
-            found = search_resp.json['@graph'][0]
+            found = search_resp.json['@graph'][0]['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
                                               (data['md5sum'], found))
     else: # find it in the database
