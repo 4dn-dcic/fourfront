@@ -107,26 +107,27 @@ def deploy(deploy_to=None):
         else:
             break
 
-    flags = fcntl(p.stdout, F_GETFL) # (Linux-only) Workaround re: p.stdout.read() & p.stdout.readlines() blocking.
-    fcntl(p.stdout, F_SETFL, flags | O_NONBLOCK)
-
     time_started = datetime.now()
+    print('Started deployment at {}. Waiting 2 minutes & exiting.'.format(time_started.strftime('%H:%M:%S:%f')))
+    sleep(120)
 
-    while True:
-        out = read(p.stdout.fileno(), 1024)#p.stdout.readline()
-        out = out.decode('utf-8')
-        curr_time = datetime.now()
-        if out != '':
-            sys.stdout.write('[' + curr_time.strftime('%H:%M:%S:%f') + '] ' + out)
-            sys.stdout.flush()
-        if ("Deploying new version to instance(s)." in out) or (time_started + timedelta(minutes=2) <= curr_time): # 2 min time limit
-            print('Killing sub-process & exiting.')
-            sleep(5)
-            p.kill()
-            break
-        if out == '' and p.poll() is not None:
-            print('Deploy sub-process complete. Exiting.')
-            break
+    # TODO: Setup new thread and listen re: "Deploying new version to instance(s).". Exit if this occurs before 2min.
+    #
+    #while True:
+    #    out = p.stdout.readline()
+    #    out = out.decode('utf-8')
+    #    curr_time = datetime.now()
+    #    if out != '':
+    #        sys.stdout.write('[' + curr_time.strftime('%H:%M:%S:%f') + '] ' + out)
+    #        sys.stdout.flush()
+    #    if ("Deploying new version to instance(s)." in out) or (time_started + timedelta(minutes=2) <= curr_time): # 2 min time limit
+    #        print('Killing sub-process & exiting.')
+    #        sleep(5)
+    #        p.kill()
+    #        break
+    #    if out == '' and p.poll() is not None:
+    #        print('Deploy sub-process complete. Exiting.')
+    #        break
 
 
 if __name__ == "__main__":
