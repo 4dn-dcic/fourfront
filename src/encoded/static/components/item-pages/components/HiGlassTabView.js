@@ -27,22 +27,39 @@ function loadJS(src){
 */
 
 
+export const DEFAULT_GEN_VIEW_CONFIG_PARAMS = {
+    'height' : 600,
+    'baseUrl' : "https://higlass.4dnucleome.org",
+    'initialDomains' : {
+        'x' : [31056455, 31254944],
+        'y' : [31114340, 31201073]
+    },
+    'extraViewProps' : {},
+    'index' : 0
+};
+
+
 export class HiGlassContainer extends React.Component {
 
     /**
      * This function is used to generate a full viewConfig for the HiGlassComponent.
      * Only the "center" view/track is dynamically generated, with other tracks currently being hard-coded to higlass.io data (e.g. hg38 tracks).
      * 
-     * @param {Object} fileItem - A JS object representing a File item.
+     * @param {string|{ tilesetUid: string, extraViewProps: Object.<any> }[]} tilesetUid - A single string (if showing one, full view) or list of objects containing a 'tilesetUid' and 'extraViewProps' - properties which override default 'view' object for each tileset. Use primarily for configuring layouts.
      * @param {number} [height=600] - Default height.
-     * @param {string} [baseUrl=hiGlassServerBaseURL] - Where to request center tile data from.
-     * @param {{ 'x' : number[], 'y' : number[] }} [initialDomains] - Initial coordinates.
+     * @param {string} [baseUrl="https://higlass.4dnucleome.org"] - Where to request center tile data from.
+     * @param {{ 'x' : number[], 'y' : number[] }} [initialDomains] - Initial coordinates. 2 numbers in each array to indicate 'x' and 'y' ranges.
+     * @param {{ 'layout' : Object.<boolean|number> }} [extraViewProps] - Extra properties to override view in viewConfig with. Is passed down recursively from tilesetUid param if tilesetUid param is list of objects.
+     * @param {number} [index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
      */
-    static generateViewConfig(tilesetUid, height=600, baseUrl=hiGlassServerBaseURL, initialDomains={
-        'x' : [31056455, 31254944],
-        'y' : [31114340, 31201073]
-    }, extraViewProps = {}, index = 0){
-
+    static generateViewConfig(
+        tilesetUid,
+        height          = DEFAULT_GEN_VIEW_CONFIG_PARAMS.height,
+        baseUrl         = DEFAULT_GEN_VIEW_CONFIG_PARAMS.hiGlassServerBaseURL,
+        initialDomains  = DEFAULT_GEN_VIEW_CONFIG_PARAMS.initialDomains,
+        extraViewProps  = DEFAULT_GEN_VIEW_CONFIG_PARAMS.extraViewProps,
+        index           = DEFAULT_GEN_VIEW_CONFIG_PARAMS.index
+    ){
         if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){
             return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string');
         })){ // Merge views into 1 array
