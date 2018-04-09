@@ -1563,6 +1563,13 @@ $download-button-width : 100px;
 			}
 		}
 
+		.glyphicon.glyphicon-search {
+			&:before {
+				content : "\f002";
+				font-family: "FontAwesome";
+			}
+		}
+
 		height: 600px;
 		transition: opacity 1s;
 		opacity: 0;

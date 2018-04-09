@@ -7,9 +7,6 @@ import { requestAnimationFrame } from './../../viz/utilities';
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
 
-const hiGlassServerBaseURL = "https://higlass.4dnucleome.org";
-
-
 /* To be deleted (probably)
 function loadJS(src){
     return new Promise(function(resolve, reject){
@@ -55,7 +52,7 @@ export class HiGlassContainer extends React.Component {
     static generateViewConfig(
         tilesetUid,
         height          = DEFAULT_GEN_VIEW_CONFIG_PARAMS.height,
-        baseUrl         = DEFAULT_GEN_VIEW_CONFIG_PARAMS.hiGlassServerBaseURL,
+        baseUrl         = DEFAULT_GEN_VIEW_CONFIG_PARAMS.baseUrl,
         initialDomains  = DEFAULT_GEN_VIEW_CONFIG_PARAMS.initialDomains,
         extraViewProps  = DEFAULT_GEN_VIEW_CONFIG_PARAMS.extraViewProps,
         index           = DEFAULT_GEN_VIEW_CONFIG_PARAMS.index
