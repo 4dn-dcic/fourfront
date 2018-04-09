@@ -195,25 +195,27 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             iconClass += 'times';
             tooltip = "Graph currently not available for this file. Please check back later.";
         } else {
-            iconClass += 'sitemap';
+            iconClass += 'sitemap icon-rotate-90';
         }
         var parts = url.parse(parentItemViewProps.href);
         var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
         return {
-            tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
-            key : 'graph',
-            disabled : !Array.isArray(steps) || steps.length === 0,
-            isDefault : isGraphSectionOpen(parentItemViewProps.href, hash),
-            content : <FileViewGraphSection
-                {...parentItemViewProps}
-                steps={steps}
-                mounted={mounted}
-                key={"graph-for-" + context.uuid}
-                onToggleAllRuns={onToggleAllRuns}
-                allRuns={allRuns}
-                loading={loadingGraphSteps}
-                urlHash={hash}
-            />
+            'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
+            'key'       : 'graph',
+            'disabled'  : !Array.isArray(steps) || steps.length === 0,
+            'isDefault' : isGraphSectionOpen(parentItemViewProps.href, hash),
+            'content'   : (
+                <FileViewGraphSection
+                    {...parentItemViewProps}
+                    steps={steps}
+                    mounted={mounted}
+                    key={"graph-for-" + context.uuid}
+                    onToggleAllRuns={onToggleAllRuns}
+                    allRuns={allRuns}
+                    loading={loadingGraphSteps}
+                    urlHash={hash}
+                />
+            )
         };
     }
 

@@ -359,7 +359,7 @@ export class HiGlassTabView extends React.Component {
 
     static getTabObject(context, disabled, isValidating, viewConfig=null){
         return {
-            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'search')}/> HiGlass Browser</span>,
+            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'television')}/> HiGlass Browser</span>,
             'key' : 'higlass',
             'disabled' : disabled,
             'content' : (
