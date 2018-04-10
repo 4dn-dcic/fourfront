@@ -45,8 +45,8 @@ describe("Individual Item Views", function(){
                         });
                     }).end().get('.graph-wrapper .edges-layer .edge-path').should('have.length.greaterThan', 1);
             });
-    
-    
+
+
             it.skip('Has working HiGlass tab. TODO: TEST HIGLASS', function(){
                 cy.get('.tab-view-container .rc-tabs-nav').within(($tabNav)=>{
                     cy.contains('HiGlass Browser').should('have.length', 1).then(($tabInnerElem)=>{
