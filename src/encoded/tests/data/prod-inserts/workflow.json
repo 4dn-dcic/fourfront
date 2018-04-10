@@ -4518,11 +4518,6 @@
                 "workflow_argument_name": "chromsize"
             },
             {
-                "argument_format": "juicer_format_restriction_site_file",
-                "argument_type": "Input file",
-                "workflow_argument_name": "restriction_file"
-            },
-            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "nthreads_parse_sort"
             },
