@@ -217,47 +217,6 @@ class ExperimentSet(Item):
         if experiments_in_set:
             return len(experiments_in_set)
 
-    '''
-    @calculated_property(schema={
-        "title": "Raw File Quality Metrics",
-        "description": "Quality Metrics for the files in the experiments in this experiment set, keyed by experiment UUID or 'self' for merged files.",
-        "type": "object"
-    }, category="page")
-    def raw_file_quality_metrics(self, request, files=[], experiments_in_set=[]):
-        # If specify files and experiments_in_set in params, we get the ES-embedded representation (or potentially object rep if datastore=database) -- in our case, to get file_format + uuid, either is fine.
-        file_uuids_to_get_metrics_for = []
-        for file in files:
-            if file.get('file_format') == 'fastq':
-                file_uuids_to_get_metrics_for.append(file['uuid'])
-        res = {  "self" : get_quality_metrics_for_files(request, file_uuids_to_get_metrics_for)  }
-        for experiment in experiments_in_set:
-            file_uuids_to_get_metrics_for = []
-            for file in experiment.get('files', []):
-                if file.get('file_format') == 'fastq':
-                    file_uuids_to_get_metrics_for.append(file['uuid'])
-            res[experiment['uuid']] = get_quality_metrics_for_files(request, file_uuids_to_get_metrics_for)
-        return res
-
-    @calculated_property(schema={
-        "title": "Processed File Quality Metrics",
-        "description": "Quality Metrics for the files in the experiments in this experiment set, keyed by experiment UUID or 'self' for merged files.",
-        "type": "object"
-    }, category="page")
-    def processed_file_quality_metrics(self, request, processed_files=[], experiments_in_set=[]):
-        file_uuids_to_get_metrics_for = []
-        for file in processed_files:
-            if file.get('file_format') == 'pairs':
-                file_uuids_to_get_metrics_for.append(file['uuid'])
-        res = {  "self" : get_quality_metrics_for_files(request, file_uuids_to_get_metrics_for)  }
-        for experiment in experiments_in_set:
-            file_uuids_to_get_metrics_for = []
-            for file in experiment.get('processed_files', []):
-                if file.get('file_format') == 'pairs':
-                    file_uuids_to_get_metrics_for.append(file['uuid'])
-            res[experiment['uuid']] = get_quality_metrics_for_files(request, file_uuids_to_get_metrics_for)
-        return res
-    '''
-
 
 
 @collection(

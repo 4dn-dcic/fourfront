@@ -313,20 +313,6 @@ class File(Item):
         # return '{}{}'.format(accession, file_extension)
         return outString
 
-    '''
-    @calculated_property(schema={
-        "title": "Quality Metric Results",
-        "type": "object",
-        "description": "A read-out of quality metrics from the File's associated QualityMetric Item."
-    }, category="page")
-    def quality_metric(self, request):
-        # This overwrites the default (embedded) 'quality_metric' field for non-search responses.
-        qualty_metric_linkto = self.properties.get('quality_metric')
-        if not qualty_metric_linkto:
-            return None
-
-        return get_quality_metric_property(request, qualty_metric_linkto)
-    '''
 
     def _update(self, properties, sheets=None):
         if not properties:

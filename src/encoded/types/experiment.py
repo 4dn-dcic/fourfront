@@ -298,51 +298,6 @@ class Experiment(Item):
             out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
         return out_dict
 
-    '''
-    @calculated_property(category="page")
-    def files(self, request):
-        if not self.properties.get('files'):
-            return None
-        return list(map(lambda f: request.embed('/' + str(f) if is_uuid(f) else f, '@@page', as_user=True), self.properties['files'] ))
-
-    '''
-    '''
-    @calculated_property(category="page")
-    def processed_files(self, request, processed_files):
-        if not processed_files:
-            return None
-        res = []
-        for filedict in processed_files:
-            filedict = dict(request.embed(filedict['@id'], '@@object'), **filedict)
-            res.append(filedict)
-        return res
-    '''
-    '''
-    @calculated_property(schema={
-        "title": "Raw File Quality Metrics",
-        "description": "Quality Metrics for the raw files in this experiment.",
-        "type": "array"
-    }, category="page")
-    def raw_file_quality_metrics(self, request, files=[]):
-        files_uuids_to_get_metrics_for = []
-        for file in files:
-            if file.get('file_format') == 'fastq':
-                files_uuids_to_get_metrics_for.append(file['uuid'])
-        return get_quality_metrics_for_files(request, files_uuids_to_get_metrics_for)
-
-    @calculated_property(schema={
-        "title": "Processed File Quality Metrics",
-        "description": "Quality Metrics for the processed files in this experiment.",
-        "type": "array"
-    }, category="page")
-    def processed_file_quality_metrics(self, request, processed_files=[]):
-        files_uuids_to_get_metrics_for = []
-        for file in processed_files:
-            if file.get('file_format') == 'pairs':
-                files_uuids_to_get_metrics_for.append(file['uuid'])
-        return get_quality_metrics_for_files(request, files_uuids_to_get_metrics_for)
-    '''
-
 
 
 @collection(
