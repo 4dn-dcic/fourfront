@@ -4858,6 +4858,10 @@
             {
                 "argument_format": "bg",
                 "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "bg_px2",
+                    "bw"
+                ],
                 "workflow_argument_name": "count_bg"
             }
         ],
