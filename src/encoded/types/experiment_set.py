@@ -105,6 +105,14 @@ class ExperimentSet(Item):
                      'experiments_in_set.biosample.treatments.display_title',
                      'experiments_in_set.biosample.treatments_summary',
 
+                     "experiments_in_set.digestion_enzyme.name",
+                     "experiments_in_set.filesets.files_in_set.accession",
+
+                     # Files - For common embeds (href, file_format, etc) we could programatically get rid of a bunch of similar lines - e.g.:
+                     # for f in ['href', 'accession', 'file_size, ...]:
+                     #     ExperimentSet.embedded_list.append("experiments_in_set.files." + f)
+                     #     ExperimentSet.embedded_list.append("experiments_in_set.processed_files." + f) ...
+
                      "experiments_in_set.files.href",
                      "experiments_in_set.files.accession",
                      "experiments_in_set.files.uuid",
@@ -120,15 +128,15 @@ class ExperimentSet(Item):
                      "experiments_in_set.files.extra_files",
                      "experiments_in_set.files.extra_files.href",
                      "experiments_in_set.files.extra_files.file_format",
+                     "experiments_in_set.files.quality_metric.Total reads",
+                     "experiments_in_set.files.quality_metric.Cis/Trans ratio",
+                     "experiments_in_set.files.quality_metric.overall_quality_status",
 
                      "experiments_in_set.files.related_files.relationship_type",
                      "experiments_in_set.files.related_files.file.accession",
                      "experiments_in_set.files.related_files.file.paired_end",
                      "experiments_in_set.files.related_files.file.file_type",
-
-                     "experiments_in_set.filesets.files_in_set.accession",
-
-                     "experiments_in_set.digestion_enzyme.name",
+                     
 
                      "processed_files.href",
                      "processed_files.accession",
@@ -144,6 +152,9 @@ class ExperimentSet(Item):
                      "processed_files.extra_files",
                      "processed_files.extra_files.href",
                      "processed_files.extra_files.file_format",
+                     "processed_files.quality_metric.Total reads",
+                     "processed_files.quality_metric.Cis/Trans ratio",
+                     "processed_files.quality_metric.overall_quality_status",
                      #"processed_files.@type",
 
                      "experiments_in_set.processed_files.href",
@@ -160,6 +171,9 @@ class ExperimentSet(Item):
                      "experiments_in_set.processed_files.extra_files",
                      "experiments_in_set.processed_files.extra_files.href",
                      "experiments_in_set.processed_files.extra_files.file_format",
+                     "experiments_in_set.processed_files.quality_metric.Total reads",
+                     "experiments_in_set.processed_files.quality_metric.Cis/Trans ratio",
+                     "experiments_in_set.processed_files.quality_metric.overall_quality_status",
                      #"experiments_in_set.processed_files.@type"
                      ]
 
@@ -203,6 +217,7 @@ class ExperimentSet(Item):
         if experiments_in_set:
             return len(experiments_in_set)
 
+    '''
     @calculated_property(schema={
         "title": "Raw File Quality Metrics",
         "description": "Quality Metrics for the files in the experiments in this experiment set, keyed by experiment UUID or 'self' for merged files.",
@@ -241,6 +256,7 @@ class ExperimentSet(Item):
                     file_uuids_to_get_metrics_for.append(file['uuid'])
             res[experiment['uuid']] = get_quality_metrics_for_files(request, file_uuids_to_get_metrics_for)
         return res
+    '''
 
 
 

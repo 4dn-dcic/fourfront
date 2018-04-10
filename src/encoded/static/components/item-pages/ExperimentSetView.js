@@ -8,7 +8,7 @@ import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
+import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable, FilesQCStackedTable } from './../browse/components';
 
 
 /**
@@ -195,7 +195,7 @@ export class RawFilesStackedTableSection extends React.Component {
         }
 
         var context = this.props.context;
-        var files = expFxn.allFilesFromExperimentSet(context);
+        var files = expFxn.allFilesFromExperimentSet(context, false);
         var fileCount = files.length;
         var expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0;
         return (
@@ -207,7 +207,6 @@ export class RawFilesStackedTableSection extends React.Component {
                 : null }
                 <div className="exp-table-container">
                     <RawFilesStackedTable
-                        ref="experimentsTable"
                         width={this.props.width}
                         experimentSetType={this.props.context.experimentset_type}
                         facets={ this.props.facets }
@@ -219,6 +218,17 @@ export class RawFilesStackedTableSection extends React.Component {
                         collapseLongLists={true}
                         collapseLimit={10}
                         collapseShow={7}
+                    />
+                    <h3 className="tab-section-title mt-12">
+                        <span>Quality Metrics</span>
+                    </h3>
+                    <FilesQCStackedTable
+                        files={files}
+                        width={this.props.width}
+                        experimentSetAccession={this.props.context.accession || null}
+                        experimentArray={this.props.context.experiments_in_set}
+                        replicateExpsArray={this.props.context.replicate_exps}
+                        collapseLongLists={true}
                     />
                 </div>
             </div>
@@ -234,6 +244,17 @@ export class ProcessedFilesStackedTableSection extends React.Component {
                     <span><span className="text-400">{ this.props.processedFiles.length }</span> Processed Files</span>
                 </h3>
                 <ProcessedFilesStackedTable
+                    files={this.props.processedFiles}
+                    width={this.props.width}
+                    experimentSetAccession={this.props.context.accession || null}
+                    experimentArray={this.props.context.experiments_in_set}
+                    replicateExpsArray={this.props.context.replicate_exps}
+                    collapseLongLists={false}
+                />
+                <h3 className="tab-section-title mt-12">
+                    <span>Quality Metrics</span>
+                </h3>
+                <FilesQCStackedTable
                     files={this.props.processedFiles}
                     width={this.props.width}
                     experimentSetAccession={this.props.context.accession || null}

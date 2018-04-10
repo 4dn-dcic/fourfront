@@ -243,28 +243,33 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded_list = ["award.project",
-                     "lab.city",
-                     "lab.state",
-                     "lab.country",
-                     "lab.postal_code",
-                     "lab.city",
-                     "lab.title",
-                     'experiments.display_title',
-                     'experiments.accession',
-                     'experiments.experiment_type',
-                     'experiments.experiment_sets.accession',
-                     'experiments.experiment_sets.experimentset_type',
-                     'experiments.experiment_sets.@type',
-                     'experiments.biosample.biosource.display_title',
-                     'experiments.biosample.biosource.biosource_type',
-                     'experiments.biosample.biosource_summary',
-                     'experiments.biosample.modifications_summary',
-                     'experiments.biosample.treatments_summary',
-                     'experiments.biosample.biosource.individual.organism.name',
-                     'experiments.digestion_enzyme.name',
-                     'related_files.relationship_type',
-                     'related_files.file.accession']
+    embedded_list = [
+        "award.project",
+        "lab.city",
+        "lab.state",
+        "lab.country",
+        "lab.postal_code",
+        "lab.city",
+        "lab.title",
+        "quality_metric.Total reads",
+        "quality_metric.Cis/Trans ratio",
+        "quality_metric.overall_quality_status",
+        'experiments.display_title',
+        'experiments.accession',
+        'experiments.experiment_type',
+        'experiments.experiment_sets.accession',
+        'experiments.experiment_sets.experimentset_type',
+        'experiments.experiment_sets.@type',
+        'experiments.biosample.biosource.display_title',
+        'experiments.biosample.biosource.biosource_type',
+        'experiments.biosample.biosource_summary',
+        'experiments.biosample.modifications_summary',
+        'experiments.biosample.treatments_summary',
+        'experiments.biosample.biosource.individual.organism.name',
+        'experiments.digestion_enzyme.name',
+        'related_files.relationship_type',
+        'related_files.file.accession'
+    ]
     name_key = 'accession'
     rev = {
         'experiments': ('Experiment', 'files'),
@@ -308,18 +313,20 @@ class File(Item):
         # return '{}{}'.format(accession, file_extension)
         return outString
 
+    '''
     @calculated_property(schema={
         "title": "Quality Metric Results",
         "type": "object",
         "description": "A read-out of quality metrics from the File's associated QualityMetric Item."
     }, category="page")
     def quality_metric(self, request):
-        '''This overwrites the default (embedded) 'quality_metric' field for non-search responses.'''
+        # This overwrites the default (embedded) 'quality_metric' field for non-search responses.
         qualty_metric_linkto = self.properties.get('quality_metric')
         if not qualty_metric_linkto:
             return None
 
         return get_quality_metric_property(request, qualty_metric_linkto)
+    '''
 
     def _update(self, properties, sheets=None):
         if not properties:

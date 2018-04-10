@@ -317,6 +317,7 @@ class Experiment(Item):
             res.append(filedict)
         return res
     '''
+    '''
     @calculated_property(schema={
         "title": "Raw File Quality Metrics",
         "description": "Quality Metrics for the raw files in this experiment.",
@@ -340,6 +341,7 @@ class Experiment(Item):
             if file.get('file_format') == 'pairs':
                 files_uuids_to_get_metrics_for.append(file['uuid'])
         return get_quality_metrics_for_files(request, files_uuids_to_get_metrics_for)
+    '''
 
 
 
