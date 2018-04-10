@@ -24,9 +24,10 @@ function loadJS(src){
 */
 
 
-export const DEFAULT_GEN_VIEW_CONFIG_PARAMS = {
+export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'height' : 600,
     'baseUrl' : "https://higlass.4dnucleome.org",
+    'supplementaryTracksBaseUrl' : "//higlass.io",
     'initialDomains' : {
         'x' : [31056455, 31254944],
         'y' : [31114340, 31201073]
@@ -43,24 +44,22 @@ export class HiGlassContainer extends React.Component {
      * Only the "center" view/track is dynamically generated, with other tracks currently being hard-coded to higlass.io data (e.g. hg38 tracks).
      * 
      * @param {string|{ tilesetUid: string, extraViewProps: Object.<any> }[]} tilesetUid - A single string (if showing one, full view) or list of objects containing a 'tilesetUid' and 'extraViewProps' - properties which override default 'view' object for each tileset. Use primarily for configuring layouts.
-     * @param {number} [height=600] - Default height.
-     * @param {string} [baseUrl="https://higlass.4dnucleome.org"] - Where to request center tile data from.
-     * @param {{ 'x' : number[], 'y' : number[] }} [initialDomains] - Initial coordinates. 2 numbers in each array to indicate 'x' and 'y' ranges.
-     * @param {{ 'layout' : Object.<boolean|number> }} [extraViewProps] - Extra properties to override view in viewConfig with. Is passed down recursively from tilesetUid param if tilesetUid param is list of objects.
-     * @param {number} [index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
+     * @param {Object} options - Additional options for the function.
+     * @param {number} [options.height=600] - Default height.
+     * @param {string} [options.baseUrl="https://higlass.4dnucleome.org"] - Where to request center tile data from.
+     * @param {{ 'x' : number[], 'y' : number[] }} [options.initialDomains] - Initial coordinates. 2 numbers in each array to indicate 'x' and 'y' ranges.
+     * @param {{ 'layout' : Object.<boolean|number> }} [options.extraViewProps] - Extra properties to override view in viewConfig with. Is passed down recursively from tilesetUid param if tilesetUid param is list of objects.
+     * @param {number} [options.index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
+     * @returns {{ views : { uid : string, initialXDomain : number[], initialYDomain: number[], tracks: { top: {}[], bottom: {}[], left: {}[], center: {}[], right: {}[], bottom: {}[] } }[], trackSourceServers: string[] }} - The ViewConfig for HiGlass.
      */
-    static generateViewConfig(
-        tilesetUid,
-        height          = DEFAULT_GEN_VIEW_CONFIG_PARAMS.height,
-        baseUrl         = DEFAULT_GEN_VIEW_CONFIG_PARAMS.baseUrl,
-        initialDomains  = DEFAULT_GEN_VIEW_CONFIG_PARAMS.initialDomains,
-        extraViewProps  = DEFAULT_GEN_VIEW_CONFIG_PARAMS.extraViewProps,
-        index           = DEFAULT_GEN_VIEW_CONFIG_PARAMS.index
-    ){
+    static generateViewConfig(tilesetUid, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+
+        options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
+
         if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){
             return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string');
         })){ // Merge views into 1 array
-            var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, height, baseUrl, initialDomains, uidObj.extraViewProps || {}, idx); });
+            var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps })); });
             var primaryConf = allConfigs[0];
             var locationLockID = 'LOCATION_LOCK_ID';
             var zoomLockID = 'ZOOM_LOCK_ID';
@@ -80,7 +79,12 @@ export class HiGlassContainer extends React.Component {
 
             return primaryConf;
         }
+
         if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
+
+        var { height, baseUrl, supplementaryTracksBaseUrl, initialDomains, extraViewProps, index } = options;
+
+        supplementaryTracksBaseUrl = supplementaryTracksBaseUrl || baseUrl;
 
         const centerTrackHeight = height - 50;
 
@@ -122,9 +126,9 @@ export class HiGlassContainer extends React.Component {
                 "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
                 // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
                 "genomePositionSearchBox": {
-                    "autocompleteServer": baseUrl + "/api/v1",
+                    "autocompleteServer": supplementaryTracksBaseUrl + "/api/v1",
                     "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
-                    "chromInfoServer": baseUrl + "/api/v1",
+                    "chromInfoServer": supplementaryTracksBaseUrl + "/api/v1",
                     "chromInfoId": "hg38",
                     "visible": true
                 },
@@ -133,7 +137,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Gene Annotations (hg38)",
                             "created": "2017-07-14T15:27:46.989053Z",
-                            "server": baseUrl + "/api/v1",
+                            "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
                             "type": "horizontal-gene-annotations",
                             "options": {
@@ -153,7 +157,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Chromosome Axis",
                             "created": "2017-07-17T14:16:45.346835Z",
-                            "server": baseUrl + "/api/v1",
+                            "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
                             "type": "horizontal-chromosome-labels",
                             "options": {},
@@ -166,7 +170,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Gene Annotations (hg38)",
                             "created": "2017-07-14T15:27:46.989053Z",
-                            "server": baseUrl + "/api/v1",
+                            "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
                             "uid": "faxvbXweTle5ba4ESIlZOg",
                             "type": "vertical-gene-annotations",
@@ -187,7 +191,7 @@ export class HiGlassContainer extends React.Component {
                         {
                             "name": "Chromosome Axis",
                             "created": "2017-07-17T14:16:45.346835Z",
-                            "server": baseUrl + "/api/v1",
+                            "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
                             "uid": "aXbmQTsMR2ao85gzBVJeRw",
                             "type": "vertical-chromosome-labels",
@@ -209,7 +213,7 @@ export class HiGlassContainer extends React.Component {
             "editable": true,
             "zoomFixed": false,
             "trackSourceServers": [
-                "http://higlass.io/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
+                supplementaryTracksBaseUrl + "/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
             ],
             "exportViewUrl": "/api/v1/viewconfs",
             "views": [generateViewItem()],
@@ -222,12 +226,6 @@ export class HiGlassContainer extends React.Component {
                 "locksDict" : {}
             }
         };
-
-        //if (extraViewProps && typeof extraViewProps === 'object'){
-        //    if (extraViewProps.layout && typeof extraViewProps.layout === 'object'){
-        //
-        //    }
-        //}
 
         return viewConfigToReturn;
     }
