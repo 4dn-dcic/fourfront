@@ -5,6 +5,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    COLLECTIONS
 )
 from .base import (
     Item,
@@ -12,6 +13,8 @@ from .base import (
     get_item_if_you_can,
     ALLOW_SUBMITTER_ADD
 )
+from .file import get_quality_metric_property
+from encoded.schema_formats import is_uuid
 
 
 EXP_CATEGORIZER_SCHEMA = {
@@ -33,6 +36,28 @@ EXP_CATEGORIZER_SCHEMA = {
         }
     }
 }
+
+
+def get_quality_metric_file_property(request, file_id_or_uuid):
+    is_file_a_uuid = is_uuid(file_id_or_uuid)
+    file_obj = request.embed('/' + file_id_or_uuid if is_file_a_uuid else file_id_or_uuid, '@@object', as_user=True)
+    if file_obj and file_obj.get('quality_metric'):
+        return {
+            'quality_metric' : get_quality_metric_property(request, file_obj['quality_metric']),
+            'file_uuid' : file_obj['uuid'],
+            'file_id' : file_obj['@id']
+        }
+    else:
+        return None
+
+def get_quality_metrics_for_files(request, file_ids_or_uuids):
+    res = []
+    for file in file_ids_or_uuids:
+        metric_item = get_quality_metric_file_property(request, file)
+        if metric_item:
+            res.append(metric_item)
+    return res
+
 
 
 @abstract_collection(
@@ -272,6 +297,50 @@ class Experiment(Item):
         if out_dict['value'] is not None:
             out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
         return out_dict
+
+    '''
+    @calculated_property(category="page")
+    def files(self, request):
+        if not self.properties.get('files'):
+            return None
+        return list(map(lambda f: request.embed('/' + str(f) if is_uuid(f) else f, '@@page', as_user=True), self.properties['files'] ))
+
+    '''
+    '''
+    @calculated_property(category="page")
+    def processed_files(self, request, processed_files):
+        if not processed_files:
+            return None
+        res = []
+        for filedict in processed_files:
+            filedict = dict(request.embed(filedict['@id'], '@@object'), **filedict)
+            res.append(filedict)
+        return res
+    '''
+    @calculated_property(schema={
+        "title": "Raw File Quality Metrics",
+        "description": "Quality Metrics for the raw files in this experiment.",
+        "type": "array"
+    }, category="page")
+    def raw_file_quality_metrics(self, request, files=[]):
+        files_uuids_to_get_metrics_for = []
+        for file in files:
+            if file.get('file_format') == 'fastq':
+                files_uuids_to_get_metrics_for.append(file['uuid'])
+        return get_quality_metrics_for_files(request, files_uuids_to_get_metrics_for)
+
+    @calculated_property(schema={
+        "title": "Processed File Quality Metrics",
+        "description": "Quality Metrics for the processed files in this experiment.",
+        "type": "array"
+    }, category="page")
+    def processed_file_quality_metrics(self, request, processed_files=[]):
+        files_uuids_to_get_metrics_for = []
+        for file in processed_files:
+            if file.get('file_format') == 'pairs':
+                files_uuids_to_get_metrics_for.append(file['uuid'])
+        return get_quality_metrics_for_files(request, files_uuids_to_get_metrics_for)
+
 
 
 @collection(

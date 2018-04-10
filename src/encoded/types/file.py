@@ -42,6 +42,7 @@ import os
 from pyramid.traversal import resource_path
 
 from encoded.search import make_search_subreq
+from encoded.schema_formats import is_uuid
 from snovault.elasticsearch import ELASTIC_SEARCH
 
 import logging
@@ -153,6 +154,17 @@ def property_closure(request, propname, root_uuid):
             next_remaining.update(obj.__json__(request).get(propname, ()))
         remaining = next_remaining - seen
     return seen
+
+def get_quality_metric_property(request, qualty_metric_id_or_uuid):
+    is_metric_uuid = is_uuid(qualty_metric_id_or_uuid)
+    quality_metric_obj = request.embed(('/' + qualty_metric_id_or_uuid if is_metric_uuid else qualty_metric_id_or_uuid), '@@object', as_user=True)
+
+    keys_to_exclude = ['lab', 'award'] # Embeds returned as uuids by @@object. TODO?: Maybe check if quality_metric_obj.get('lab') and quality_metric_obj['lab'] != self.properties.get('lab') and do request.embed('/', quality_metric_obj['lab']) if this info is important.
+    for key_to_delete in keys_to_exclude:
+        if key_to_delete in quality_metric_obj:
+            del quality_metric_obj[key_to_delete]
+
+    return quality_metric_obj
 
 
 @collection(
@@ -295,6 +307,19 @@ class File(Item):
         # file_extension = self.schema['file_format_file_extension'][file_format]
         # return '{}{}'.format(accession, file_extension)
         return outString
+
+    @calculated_property(schema={
+        "title": "Quality Metric Results",
+        "type": "object",
+        "description": "A read-out of quality metrics from the File's associated QualityMetric Item."
+    }, category="page")
+    def quality_metric(self, request):
+        '''This overwrites the default (embedded) 'quality_metric' field for non-search responses.'''
+        qualty_metric_linkto = self.properties.get('quality_metric')
+        if not qualty_metric_linkto:
+            return None
+
+        return get_quality_metric_property(request, qualty_metric_linkto)
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -654,7 +679,6 @@ class FileProcessed(File):
     })
     def experiment_sets(self, request):
         return self.rev_link_atids(request, "experiment_sets")
-
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
