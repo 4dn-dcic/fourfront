@@ -286,6 +286,7 @@ export class QualityControlResults extends React.Component {
         var metricTips = object.tipsFromSchema(schemas || Schemas.get(), qualityMetric);
 
         function renderMetric(prop, title){
+            if (!qualityMetric[prop]) return null;
             return (
                 <div className="overview-list-element">
                     <div className="row">
@@ -305,6 +306,9 @@ export class QualityControlResults extends React.Component {
         return [
             renderMetric("Total reads", "Total Reads"),
             renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
+            renderMetric("% Long-range intrachromosomal reads", "% Long-range intrachromosomal reads"),
+            renderMetric("Total Sequences", "Total Sequences"),
+            renderMetric("Sequence length", "Sequence length"),
             renderMetric("overall_quality_status", "Overall Quality"),
             <div className="overview-list-element">
                 <div className="row">

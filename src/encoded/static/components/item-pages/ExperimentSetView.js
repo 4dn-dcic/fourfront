@@ -8,7 +8,7 @@ import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable, FilesQCStackedTable } from './../browse/components';
+import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable, RawFilesQCStackedTable } from './../browse/components';
 
 
 /**
@@ -198,6 +198,7 @@ export class RawFilesStackedTableSection extends React.Component {
         var files = expFxn.allFilesFromExperimentSet(context, false);
         var fileCount = files.length;
         var expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0;
+        var filesWithMetrics = RawFilesQCStackedTable.filterFiles(files);
         return (
             <div className="exp-table-section">
                 { expSetCount ? 
@@ -219,17 +220,19 @@ export class RawFilesStackedTableSection extends React.Component {
                         collapseLimit={10}
                         collapseShow={7}
                     />
-                    <h3 className="tab-section-title mt-12">
-                        <span>Quality Metrics</span>
-                    </h3>
-                    <FilesQCStackedTable
-                        files={files}
-                        width={this.props.width}
-                        experimentSetAccession={this.props.context.accession || null}
-                        experimentArray={this.props.context.experiments_in_set}
-                        replicateExpsArray={this.props.context.replicate_exps}
-                        collapseLongLists={true}
-                    />
+                    { filesWithMetrics.length ? [
+                        <h3 className="tab-section-title mt-12">
+                            <span>Quality Metrics</span>
+                        </h3>,
+                        <RawFilesQCStackedTable
+                            files={filesWithMetrics}
+                            width={this.props.width}
+                            experimentSetAccession={this.props.context.accession || null}
+                            experimentArray={this.props.context.experiments_in_set}
+                            replicateExpsArray={this.props.context.replicate_exps}
+                            collapseLongLists={true}
+                        />
+                    ] : null }
                 </div>
             </div>
         );
@@ -238,6 +241,7 @@ export class RawFilesStackedTableSection extends React.Component {
 
 export class ProcessedFilesStackedTableSection extends React.Component {
     render(){
+        var filesWithMetrics = RawFilesQCStackedTable.filterFiles(this.props.processedFiles);
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
@@ -251,17 +255,19 @@ export class ProcessedFilesStackedTableSection extends React.Component {
                     replicateExpsArray={this.props.context.replicate_exps}
                     collapseLongLists={false}
                 />
-                <h3 className="tab-section-title mt-12">
-                    <span>Quality Metrics</span>
-                </h3>
-                <FilesQCStackedTable
-                    files={this.props.processedFiles}
-                    width={this.props.width}
-                    experimentSetAccession={this.props.context.accession || null}
-                    experimentArray={this.props.context.experiments_in_set}
-                    replicateExpsArray={this.props.context.replicate_exps}
-                    collapseLongLists={false}
-                />
+                { filesWithMetrics.length ? [
+                    <h3 className="tab-section-title mt-12">
+                        <span>Quality Metrics</span>
+                    </h3>,
+                    <ProcessedFilesQCStackedTable
+                        files={filesWithMetrics}
+                        width={this.props.width}
+                        experimentSetAccession={this.props.context.accession || null}
+                        experimentArray={this.props.context.experiments_in_set}
+                        replicateExpsArray={this.props.context.replicate_exps}
+                        collapseLongLists={false}
+                    />
+                ] : null }
             </div>
         );
     }

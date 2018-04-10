@@ -251,9 +251,6 @@ class File(Item):
         "lab.postal_code",
         "lab.city",
         "lab.title",
-        "quality_metric.Total reads",
-        "quality_metric.Cis/Trans ratio",
-        "quality_metric.overall_quality_status",
         'experiments.display_title',
         'experiments.accession',
         'experiments.experiment_type',
@@ -531,7 +528,11 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded_list = File.embedded_list + file_workflow_run_embeds
+    embedded_list = File.embedded_list + file_workflow_run_embeds + [
+        "quality_metric.overall_quality_status",
+        "quality_metric.Total Sequences",
+        "quality_metric.Sequence length"
+    ]
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -621,7 +622,12 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded_list = File.embedded_list + file_workflow_run_embeds_processed
+    embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        "quality_metric.overall_quality_status",
+        "quality_metric.% Long-range intrachromosomal reads",
+        "quality_metric.Total reads",
+        "quality_metric.Cis/Trans ratio"
+    ]
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),

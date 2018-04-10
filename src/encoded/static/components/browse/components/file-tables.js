@@ -381,7 +381,8 @@ export class ProcessedFilesStackedTable extends React.Component {
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ],
         'collapseLongLists' : true,
-        'nonFileHeaderCols' : ['experiment', 'file']
+        'nonFileHeaderCols' : ['experiment', 'file'],
+        'titleForFiles'     : 'Processed Files'
     };
 
     constructor(props){
@@ -455,17 +456,13 @@ export class ProcessedFilesStackedTable extends React.Component {
                         //subtitle : visibleBiosampleTitle,
                         subtitleVisible : true,
                         accession : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
-                    }}
-                >
+                    }}>
                     { nameBlock }
                     <StackedBlockList
                         className="files"
-                        title="Processed Files"
+                        title={this.props.titleForFiles}
                         children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment, experimentObj) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
-                        showMoreExtTitle={null}
-                        
-                    />
-
+                        showMoreExtTitle={null} />
                 </StackedBlock>
             );
 
@@ -521,25 +518,43 @@ export class ProcessedFilesStackedTable extends React.Component {
 
 
 
-export class FilesQCStackedTable extends ProcessedFilesStackedTable {
+export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
+
+    static filterFiles(files){
+        return _.filter(files.slice(0), function(f){
+            return f.quality_metric && f.quality_metric.overall_quality_status;
+        });
+    }
 
     static defaultProps = {
         'columnHeaders' : [
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',                                      title: 'File',          initialWidth: 100   },
+            { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
             { columnClass: 'file-detail', title: 'Total Reads', initialWidth: 80, field : "quality_metric.Total reads" },
             { columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
+            { columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "% Long-range intrachromosomal reads" },
             { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
         ],
+        'titleForFiles' : "Processed File Metrics"
     }
 
-    render(){
-        let filesWithMetrics = _.filter(this.props.files.slice(0), function(f){
-            return f.quality_metric && f.quality_metric.overall_quality_status;
-        });
-        return this.doRender(filesWithMetrics);
+}
+
+export class RawFilesQCStackedTable extends ProcessedFilesQCStackedTable {
+
+    static defaultProps = {
+        'columnHeaders' : [
+            //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
+            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 80, field : "quality_metric.Total Sequences" },
+            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 80, field : "quality_metric.Sequence length" },
+            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
+        ],
+        'titleForFiles' : "Raw File Metrics"
     }
 
 }

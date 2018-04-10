@@ -756,12 +756,12 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (typeof col.field === 'string'){
-                var val = object.getNestedProperty(file, col.field);
-                row.push(
-                    <div key={col.field} className={className} style={baseStyle}>
-                        { Schemas.Term.toName(col.field, val) || '-' }
-                    </div>
-                );
+                let val = Schemas.Term.toName(col.field, object.getNestedProperty(file, col.field)) || '-';
+                if (col.field === 'quality_metric.overall_quality_status'){
+                    if (val === 'PASS') val = (<span><i className="icon icon-check success" style={{ 'color' : 'green' }}/>&nbsp; Pass</span>);
+                    else if (val === 'FAIL') val = (<span><i className="icon icon-times" style={{ 'color' : 'red' }}/>&nbsp; Fail</span>);
+                }
+                row.push(<div key={col.field} className={className} style={baseStyle} children={val} />);
                 continue;
             }
 

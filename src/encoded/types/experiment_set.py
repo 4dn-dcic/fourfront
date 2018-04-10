@@ -130,6 +130,9 @@ class ExperimentSet(Item):
                      "experiments_in_set.files.extra_files.file_format",
                      "experiments_in_set.files.quality_metric.Total reads",
                      "experiments_in_set.files.quality_metric.Cis/Trans ratio",
+                     "experiments_in_set.files.quality_metric.Total Sequences",
+                     "experiments_in_set.files.quality_metric.Sequence length",
+                     "experiments_in_set.files.quality_metric.% Long-range intrachromosomal reads",
                      "experiments_in_set.files.quality_metric.overall_quality_status",
 
                      "experiments_in_set.files.related_files.relationship_type",
@@ -154,6 +157,9 @@ class ExperimentSet(Item):
                      "processed_files.extra_files.file_format",
                      "processed_files.quality_metric.Total reads",
                      "processed_files.quality_metric.Cis/Trans ratio",
+                     "processed_files.quality_metric.Total Sequences",
+                     "processed_files.quality_metric.Sequence length",
+                     "processed_files.quality_metric.% Long-range intrachromosomal reads",
                      "processed_files.quality_metric.overall_quality_status",
                      #"processed_files.@type",
 
@@ -173,6 +179,9 @@ class ExperimentSet(Item):
                      "experiments_in_set.processed_files.extra_files.file_format",
                      "experiments_in_set.processed_files.quality_metric.Total reads",
                      "experiments_in_set.processed_files.quality_metric.Cis/Trans ratio",
+                     "experiments_in_set.processed_files.quality_metric.Total Sequences",
+                     "experiments_in_set.processed_files.quality_metric.Sequence length",
+                     "experiments_in_set.processed_files.quality_metric.% Long-range intrachromosomal reads",
                      "experiments_in_set.processed_files.quality_metric.overall_quality_status",
                      #"experiments_in_set.processed_files.@type"
                      ]
