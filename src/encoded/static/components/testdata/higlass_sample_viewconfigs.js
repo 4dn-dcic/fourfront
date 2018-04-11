@@ -2,7 +2,7 @@ export const HIGLASS_WEBSITE = {
     "editable":false,
     "zoomFixed":false,
     "trackSourceServers":[
-        "http://higlass.io/api/v1"
+        "https://higlass.io/api/v1"
     ],
     "exportViewUrl":"/api/v1/viewconfs",
     "views":[
@@ -14,9 +14,9 @@ export const HIGLASS_WEBSITE = {
             ],
             "autocompleteSource":"/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
             "genomePositionSearchBox":{
-                "autocompleteServer":"http://higlass.io/api/v1",
+                "autocompleteServer":"https://higlass.io/api/v1",
                 "autocompleteId":"OHJakQICQD6gTD7skx4EWA",
-                "chromInfoServer":"http://higlass.io/api/v1",
+                "chromInfoServer":"https://higlass.io/api/v1",
                 "chromInfoId":"hg19",
                 "visible":true
             },
@@ -27,7 +27,7 @@ export const HIGLASS_WEBSITE = {
                         "type":"horizontal-gene-annotations",
                         "height":60,
                         "tilesetUid":"OHJakQICQD6gTD7skx4EWA",
-                        "server":"http://higlass.io/api/v1",
+                        "server":"https://higlass.io/api/v1",
                         "position":"top",
                         "uid":"OHJakQICQD6gTD7skx4EWA",
                         "name":"Gene Annotations (hg19)",
@@ -54,7 +54,7 @@ export const HIGLASS_WEBSITE = {
                         "type":"vertical-gene-annotations",
                         "width":60,
                         "tilesetUid":"OHJakQICQD6gTD7skx4EWA",
-                        "server":"http://higlass.io/api/v1",
+                        "server":"https://higlass.io/api/v1",
                         "position":"left",
                         "name":"Gene Annotations (hg19)",
                         "options":{
@@ -84,7 +84,7 @@ export const HIGLASS_WEBSITE = {
                         "height":200,
                         "contents":[
                             {
-                                "server":"http://higlass.io/api/v1",
+                                "server":"https://higlass.io/api/v1",
                                 "tilesetUid":"CQMd6V_cRw6iCI_-Unl3PQ",
                                 "type":"heatmap",
                                 "position":"center",
@@ -146,7 +146,7 @@ export const SERVER_4DN = {
     "editable": true,
     "zoomFixed": false,
     "trackSourceServers": [
-        "http://54.86.58.34/api/v1"
+        "https://54.86.58.34/api/v1"
     ],
     "exportViewUrl": "/api/v1/viewconfs",
     "views": [
@@ -166,7 +166,7 @@ export const SERVER_4DN = {
                         "height": 551,
                         "contents": [
                             {
-                                "server": "http://54.86.58.34/api/v1",
+                                "server": "https://54.86.58.34/api/v1",
                                 "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
                                 "type": "heatmap",
                                 "position": "center",
