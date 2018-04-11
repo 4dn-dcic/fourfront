@@ -27,7 +27,7 @@ function loadJS(src){
 export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'height' : 600,
     'baseUrl' : "https://higlass.4dnucleome.org",
-    'supplementaryTracksBaseUrl' : "//higlass.io",
+    'supplementaryTracksBaseUrl' : "https://higlass.io",
     'initialDomains' : {
         'x' : [31056455, 31254944],
         'y' : [31114340, 31201073]
