@@ -531,7 +531,8 @@ class FileFastq(File):
     embedded_list = File.embedded_list + file_workflow_run_embeds + [
         "quality_metric.overall_quality_status",
         "quality_metric.Total Sequences",
-        "quality_metric.Sequence length"
+        "quality_metric.Sequence length",
+        "quality_metric.url"
     ]
     name_key = 'accession'
     rev = dict(File.rev, **{
@@ -623,10 +624,10 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
-        "quality_metric.overall_quality_status",
         "quality_metric.% Long-range intrachromosomal reads",
         "quality_metric.Total reads",
-        "quality_metric.Cis/Trans ratio"
+        "quality_metric.Cis/Trans ratio",
+        "quality_metric.url"
     ]
     name_key = 'accession'
     rev = dict(File.rev, **{

@@ -283,6 +283,13 @@ export class QualityControlResults extends React.Component {
     metrics(){
         var { file, property, hideIfNoValue, tips, wrapInColumn, qualityMetric, schemas } = this.props;
         if (!qualityMetric) qualityMetric = file[property];
+        let qcType = null;
+        if (file['@type'].indexOf('FileFastQ') > -1){
+            qcType = 'QualityMetricFastqc';
+        } else {
+            qcType = 'QualityMetricPairsqc';
+        }
+        qualityMetric['@type'] = [qcType, 'QualityMetric', 'Item'];
         var metricTips = object.tipsFromSchema(schemas || Schemas.get(), qualityMetric);
 
         function renderMetric(prop, title){
@@ -295,7 +302,7 @@ export class QualityControlResults extends React.Component {
                         </div>
                         <div className="col-xs-8">
                             <div className="inner value">
-                                { Schemas.Term.toName(prop, qualityMetric[prop], true) }
+                                { Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
                             </div>
                         </div>
                     </div>
@@ -303,26 +310,17 @@ export class QualityControlResults extends React.Component {
             );
         }
 
-        return [
+        var itemsToReturn = [
             renderMetric("Total reads", "Total Reads"),
             renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
-            renderMetric("% Long-range intrachromosomal reads", "% Long-range intrachromosomal reads"),
+            renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
             renderMetric("Total Sequences", "Total Sequences"),
             renderMetric("Sequence length", "Sequence length"),
             renderMetric("overall_quality_status", "Overall Quality"),
-            <div className="overview-list-element">
-                <div className="row">
-                    <div className="col-xs-4 text-right">
-                        <object.TooltipInfoIconContainerAuto property={null} elementType="h5" fallbackTitle="Link" className="mb-0 mt-02" />
-                    </div>
-                    <div className="col-xs-8">
-                        <div className="inner value">
-                            { Schemas.Term.toName('@id', qualityMetric, true) }
-                        </div>
-                    </div>
-                </div>
-            </div>
+            renderMetric("url", "Link to Report")
         ];
+
+        return itemsToReturn;
 
     }
 

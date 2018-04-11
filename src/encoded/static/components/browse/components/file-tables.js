@@ -534,7 +534,7 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
             { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
             { columnClass: 'file-detail', title: 'Total Reads', initialWidth: 80, field : "quality_metric.Total reads" },
             { columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
-            { columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "% Long-range intrachromosomal reads" },
+            { columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
             { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
         ],
         'titleForFiles' : "Processed File Metrics"
@@ -552,7 +552,7 @@ export class RawFilesQCStackedTable extends ProcessedFilesQCStackedTable {
             { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
             { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 80, field : "quality_metric.Total Sequences" },
             { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 80, field : "quality_metric.Sequence length" },
-            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
+            //{ columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
         ],
         'titleForFiles' : "Raw File Metrics"
     }
