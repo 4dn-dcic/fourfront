@@ -10,11 +10,11 @@ from snovault import (
     BeforeModified
 )
 from snovault.calculated import calculate_properties
+
 from .base import (
     Item,
     paths_filtered_by_status
 )
-from .experiment import get_quality_metrics_for_files
 
 import datetime
 

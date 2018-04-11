@@ -4,8 +4,7 @@ from snovault import (
     abstract_collection,
     calculated_property,
     collection,
-    load_schema,
-    COLLECTIONS
+    load_schema
 )
 from .base import (
     Item,
@@ -13,9 +12,6 @@ from .base import (
     get_item_if_you_can,
     ALLOW_SUBMITTER_ADD
 )
-from .file import get_quality_metric_property
-from encoded.schema_formats import is_uuid
-
 
 EXP_CATEGORIZER_SCHEMA = {
     "title": "Categorizer",
@@ -36,29 +32,6 @@ EXP_CATEGORIZER_SCHEMA = {
         }
     }
 }
-
-
-def get_quality_metric_file_property(request, file_id_or_uuid):
-    is_file_a_uuid = is_uuid(file_id_or_uuid)
-    file_obj = request.embed('/' + file_id_or_uuid if is_file_a_uuid else file_id_or_uuid, '@@object', as_user=True)
-    if file_obj and file_obj.get('quality_metric'):
-        return {
-            'quality_metric' : get_quality_metric_property(request, file_obj['quality_metric']),
-            'file_uuid' : file_obj['uuid'],
-            'file_id' : file_obj['@id']
-        }
-    else:
-        return None
-
-def get_quality_metrics_for_files(request, file_ids_or_uuids):
-    res = []
-    for file in file_ids_or_uuids:
-        metric_item = get_quality_metric_file_property(request, file)
-        if metric_item:
-            res.append(metric_item)
-    return res
-
-
 
 @abstract_collection(
     name='experiments',
@@ -297,7 +270,6 @@ class Experiment(Item):
         if out_dict['value'] is not None:
             out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
         return out_dict
-
 
 
 @collection(

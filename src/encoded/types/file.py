@@ -42,7 +42,6 @@ import os
 from pyramid.traversal import resource_path
 
 from encoded.search import make_search_subreq
-from encoded.schema_formats import is_uuid
 from snovault.elasticsearch import ELASTIC_SEARCH
 
 import logging
@@ -154,17 +153,6 @@ def property_closure(request, propname, root_uuid):
             next_remaining.update(obj.__json__(request).get(propname, ()))
         remaining = next_remaining - seen
     return seen
-
-def get_quality_metric_property(request, qualty_metric_id_or_uuid):
-    is_metric_uuid = is_uuid(qualty_metric_id_or_uuid)
-    quality_metric_obj = request.embed(('/' + qualty_metric_id_or_uuid if is_metric_uuid else qualty_metric_id_or_uuid), '@@object', as_user=True)
-
-    keys_to_exclude = ['lab', 'award'] # Embeds returned as uuids by @@object. TODO?: Maybe check if quality_metric_obj.get('lab') and quality_metric_obj['lab'] != self.properties.get('lab') and do request.embed('/', quality_metric_obj['lab']) if this info is important.
-    for key_to_delete in keys_to_exclude:
-        if key_to_delete in quality_metric_obj:
-            del quality_metric_obj[key_to_delete]
-
-    return quality_metric_obj
 
 
 @collection(
