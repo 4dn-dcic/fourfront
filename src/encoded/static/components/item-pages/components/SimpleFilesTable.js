@@ -27,9 +27,9 @@ export class SimpleFilesTable extends React.Component {
 
     static defaultProps = {
         'columns' : {
-            "file_format"       : "Format",
-            "file_size"         : "Size",
-            "file_type" : "File Type",
+            "file_format"       : { "title" : "Format" },
+            "file_size"         : { "title" : "Size" },
+            "file_type"         : { "title" : "File Type" },
         },
         'columnDefinitionOverrideMap' : _.extend({}, ItemPageTable.defaultProps.columnDefinitionOverrideMap, {
             'file_size' : {

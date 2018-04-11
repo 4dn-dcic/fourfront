@@ -4,7 +4,7 @@ from snovault import (
     abstract_collection,
     calculated_property,
     collection,
-    load_schema,
+    load_schema
 )
 from .base import (
     Item,
@@ -12,7 +12,6 @@ from .base import (
     get_item_if_you_can,
     ALLOW_SUBMITTER_ADD
 )
-
 
 EXP_CATEGORIZER_SCHEMA = {
     "title": "Categorizer",
@@ -33,7 +32,6 @@ EXP_CATEGORIZER_SCHEMA = {
         }
     }
 }
-
 
 @abstract_collection(
     name='experiments',

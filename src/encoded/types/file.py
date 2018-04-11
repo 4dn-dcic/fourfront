@@ -231,28 +231,30 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded_list = ["award.project",
-                     "lab.city",
-                     "lab.state",
-                     "lab.country",
-                     "lab.postal_code",
-                     "lab.city",
-                     "lab.title",
-                     'experiments.display_title',
-                     'experiments.accession',
-                     'experiments.experiment_type',
-                     'experiments.experiment_sets.accession',
-                     'experiments.experiment_sets.experimentset_type',
-                     'experiments.experiment_sets.@type',
-                     'experiments.biosample.biosource.display_title',
-                     'experiments.biosample.biosource.biosource_type',
-                     'experiments.biosample.biosource_summary',
-                     'experiments.biosample.modifications_summary',
-                     'experiments.biosample.treatments_summary',
-                     'experiments.biosample.biosource.individual.organism.name',
-                     'experiments.digestion_enzyme.name',
-                     'related_files.relationship_type',
-                     'related_files.file.accession']
+    embedded_list = [
+        "award.project",
+        "lab.city",
+        "lab.state",
+        "lab.country",
+        "lab.postal_code",
+        "lab.city",
+        "lab.title",
+        'experiments.display_title',
+        'experiments.accession',
+        'experiments.experiment_type',
+        'experiments.experiment_sets.accession',
+        'experiments.experiment_sets.experimentset_type',
+        'experiments.experiment_sets.@type',
+        'experiments.biosample.biosource.display_title',
+        'experiments.biosample.biosource.biosource_type',
+        'experiments.biosample.biosource_summary',
+        'experiments.biosample.modifications_summary',
+        'experiments.biosample.treatments_summary',
+        'experiments.biosample.biosource.individual.organism.name',
+        'experiments.digestion_enzyme.name',
+        'related_files.relationship_type',
+        'related_files.file.accession'
+    ]
     name_key = 'accession'
     rev = {
         'experiments': ('Experiment', 'files'),
@@ -295,6 +297,7 @@ class File(Item):
         # file_extension = self.schema['file_format_file_extension'][file_format]
         # return '{}{}'.format(accession, file_extension)
         return outString
+
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -513,7 +516,12 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded_list = File.embedded_list + file_workflow_run_embeds
+    embedded_list = File.embedded_list + file_workflow_run_embeds + [
+        "quality_metric.overall_quality_status",
+        "quality_metric.Total Sequences",
+        "quality_metric.Sequence length",
+        "quality_metric.url"
+    ]
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -603,7 +611,12 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded_list = File.embedded_list + file_workflow_run_embeds_processed
+    embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        "quality_metric.% Long-range intrachromosomal reads",
+        "quality_metric.Total reads",
+        "quality_metric.Cis/Trans ratio",
+        "quality_metric.url"
+    ]
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -654,7 +667,6 @@ class FileProcessed(File):
     })
     def experiment_sets(self, request):
         return self.rev_link_atids(request, "experiment_sets")
-
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):

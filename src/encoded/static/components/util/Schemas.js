@@ -77,8 +77,9 @@ export const Term = {
                 break;
         }
 
-        // Remove 'experiments_in_set' and test as if an experiment field. So can work for both ?type=Experiment, ?type=ExperimentSet.
         if (typeof name === 'string') return name;
+
+        // Remove 'experiments_in_set' and test as if an experiment field. So can work for both ?type=Experiment, ?type=ExperimentSet.
 
         switch (field) {
             case 'biosource_type':
@@ -113,6 +114,21 @@ export const Term = {
                 break;
         }
 
+        // Custom stuff
+        if (field.indexOf('quality_metric.') > -1){
+            if (field.slice(-11) === 'Total reads')     return Term.roundLargeNumber(term);
+            if (field.slice(-15) === 'Total Sequences') return Term.roundLargeNumber(term);
+            if (field.slice(-14) === 'Sequence length') return Term.roundLargeNumber(term);
+            if (field.slice(-15) === 'Cis/Trans ratio') return Term.roundDecimal(term) + '%';
+            if (field.slice(-35) === '% Long-range intrachromosomal reads') return Term.roundDecimal(term) + '%';
+            if (field.slice(-4) === '.url' && allowJSXOutput && term.indexOf('http') > -1) {
+                var linkTitle = term.split('/');
+                linkTitle = linkTitle.pop();
+                return <a href={term} target="_blank">{ linkTitle }</a>;
+            }
+        }
+
+        // Fallback
         if (typeof name !== 'string') name = term;
 
         return name;
@@ -129,12 +145,29 @@ export const Term = {
 
     byteLevels : ['Bytes', 'kB', 'MB', 'GB', 'TB', 'Petabytes', 'Exabytes'],
 
+    numberLevels : ['', 'k', 'm', ' billion', ' trillion', ' quadrillion', ' quintillion'],
+
     bytesToLargerUnit : function(bytes, level = 0){
         if (bytes > 1024 && level < Term.byteLevels.length) {
             return Term.bytesToLargerUnit(bytes / 1024, level + 1);
         } else {
             return (Math.round(bytes * 100) / 100) + ' ' + Term.byteLevels[level];
         }
+    },
+
+    roundLargeNumber : function(num, decimalPlaces = 2, level = 0){
+        if (num > 1000 && level < Term.numberLevels.length) {
+            return Term.roundLargeNumber(num / 1000, decimalPlaces, level + 1);
+        } else {
+            const multiplier = Math.pow(10, decimalPlaces);
+            return (Math.round(num * multiplier) / multiplier) + Term.numberLevels[level];
+        }
+    },
+
+    roundDecimal : function(num, decimalsVisible = 2){
+        if (isNaN(parseInt(num))) throw Error('Not a Number - ', num);
+        const multiplier = Math.pow(10, decimalsVisible);
+        return Math.round(num * multiplier) / multiplier;
     }
 
 };
