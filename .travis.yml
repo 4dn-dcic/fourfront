@@ -44,7 +44,7 @@ env:
 matrix:
   include:
   - python: '3.4'
-    env: NPM=Test; CYPRESS=Test
+    env: NPM=Test
   - python: '3.4'
     env: UNIT=Test
 notifications:
