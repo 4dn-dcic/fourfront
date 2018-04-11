@@ -11,7 +11,7 @@ import * as plansData from './../testdata/stacked-block-matrix-list';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual, sumPropertyFromList } from './components';
-
+import { HiGlassContainer } from './../item-pages/components';
 
 
 
@@ -138,23 +138,40 @@ export default class JointAnalysisPlansPage extends React.Component {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.loadSearchQueryResults = this.loadSearchQueryResults.bind(this);
+        this.toggleHiGlassView = _.throttle(this.toggleHiGlassView.bind(this), 1000);
         this.state = {
             'mounted'               : false,
             'self_planned_results'  : null,
             'self_results'          : null,
-            'encode_results'        : null
+            'encode_results'        : null,
+            'higlassVisible'        : true
         };
     }
 
     componentDidMount(){
         this.setState({ 'mounted' : true });
         this.loadSearchQueryResults();
+        setTimeout(()=>{
+            if (typeof window !== 'undefined' && window && window.fourfront){
+                window.fourfront.toggleHiGlassView = this.toggleHiGlassView;
+            }
+        }, 150);
     }
 
     componentDidUpdate(pastProps){
         if (this.props.session !== pastProps.session){
             this.loadSearchQueryResults();
         }
+    }
+
+    componentWillUnmount(){
+        if (typeof window !== 'undefined' && window && window.fourfront && window.fourfront.toggleHiGlassView){
+            delete window.fourfront.toggleHiGlassView;
+        }
+    }
+
+    toggleHiGlassView(visible = !this.state.higlassVisible){
+        this.setState({ 'higlassVisible' : visible });
     }
 
     loadSearchQueryResults(){
@@ -259,6 +276,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                             self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
+                            headerColumnsOrder={['H1-hESC', 'HFFc6']}
                         />
                     </div>
                     <div className="col-xs-12 col-md-6">
@@ -278,6 +296,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
+                <HiGlassSection disabled={!this.state.higlassVisible} />
             </StaticPage.Wrapper>
         );
     }
@@ -288,23 +307,44 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysis-plansPage
 globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
 
 
+
+class HiGlassSection extends React.Component {
+    render(){
+        if (this.props.disabled) return null;
+        return (
+            <div>
+                <h3 className="mt-4 mb-1 text-300" style={{ paddingBottom : 10, borderBottom : '1px solid #ddd' }}>
+                    HiGlass Views - 4DN <span className="text-400">in situ Hi-C</span> contact matrices
+                </h3>
+                <div className="row">
+                    <div className="col-xs-6">
+                        <h4 className="mt-05 mb-0 text-600">H1-hESC</h4>
+                    </div>
+                    <div className="col-xs-6">
+                        <h4 className="mt-05 mb-0 text-600">HFFc6</h4>
+                    </div>
+                </div>
+                <div className="row mb-2">
+                    <div className="col-xs-12" style={{ 'height' : 600 }}>
+                        <HiGlassContainer
+                            height={600}
+                            tilesetUid={[
+                                { "tilesetUid" : "IjCacHbQQjGQgiSvOiInVg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
+                                { "tilesetUid" : "OTLi4ALbSxmJ6ttrCvNqrQ", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
+                            ]}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+
 class VisualBody extends React.Component {
     render(){
 
-        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen, duplicateHeaders } = this.props;
-
-        var headerColumnsOrder = [
-            'Hi-C',
-            'ChIA-PET',
-            'Capture-Hi-C',
-            'single cell omics',
-            'other omics',
-            'DNA-FISH',
-            'SRM',
-            'live cell imaging',
-            'other imaging',
-            'proteomics'
-        ];
+        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen, duplicateHeaders, headerColumnsOrder } = this.props;
 
         // Filter out properties from objects which we don't want to be shown in tooltip.
         //var keysToInclude = [
@@ -322,10 +362,10 @@ class VisualBody extends React.Component {
                 groupingProperties={groupingProperties}
                 columnGrouping={columnGrouping}
                 columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
-                headerColumnsOrder={headerColumnsOrder}
                 columnSubGrouping={columnSubGrouping}
                 defaultDepthsOpen={defaultDepthsOpen}
                 duplicateHeaders={duplicateHeaders}
+                headerColumnsOrder={headerColumnsOrder}
                 checkCollapsibility
                 groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
                     return StackedBlockVisual.Row.flattenChildBlocks(data).length;

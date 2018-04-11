@@ -255,6 +255,7 @@
     "uuid":"7f9eb396-5c1a-1112-aebf-28ea39d6a50f",
     "notes" : "A processed file output from a workflow run.",
     "accession": "4DNFIAAAAAA3",
+    "quality_metric": "131106bc-8535-4448-903e-854abbbbbbbb",
     "extra_files" : [
         {
             "file_format" : "pairs_px2"
