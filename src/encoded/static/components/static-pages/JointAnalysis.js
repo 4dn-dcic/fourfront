@@ -144,7 +144,7 @@ export default class JointAnalysisPlansPage extends React.Component {
             'self_planned_results'  : null,
             'self_results'          : null,
             'encode_results'        : null,
-            'higlassVisible'        : false
+            'higlassVisible'        : true
         };
     }
 
@@ -329,8 +329,8 @@ class HiGlassSection extends React.Component {
                         <HiGlassContainer
                             height={600}
                             tilesetUid={[
-                                { "tilesetUid" : "IjCacHbQQjGQgiSvOiInVg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } },
-                                { "tilesetUid" : "AKlowteYRECsDIlW-A6elg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }
+                                { "tilesetUid" : "IjCacHbQQjGQgiSvOiInVg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
+                                { "tilesetUid" : "OTLi4ALbSxmJ6ttrCvNqrQ", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
                             ]}
                         />
                     </div>
