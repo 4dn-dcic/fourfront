@@ -756,7 +756,7 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (typeof col.field === 'string'){
-                let val = Schemas.Term.toName(col.field, object.getNestedProperty(file, col.field)) || '-';
+                let val = Schemas.Term.toName(col.field, object.getNestedProperty(file, col.field), true) || '-';
                 if (col.field === 'quality_metric.overall_quality_status'){
                     if (val === 'PASS') val = (<span><i className="icon icon-check success" style={{ 'color' : 'green' }}/>&nbsp; Pass</span>);
                     else if (val === 'FAIL') val = (<span><i className="icon icon-times" style={{ 'color' : 'red' }}/>&nbsp; Fail</span>);

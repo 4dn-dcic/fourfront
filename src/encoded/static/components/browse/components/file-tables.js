@@ -535,7 +535,7 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
             { columnClass: 'file-detail', title: 'Total Reads', initialWidth: 80, field : "quality_metric.Total reads" },
             { columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
             { columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
-            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
+            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 80, field : "quality_metric.url" }
         ],
         'titleForFiles' : "Processed File Metrics"
     }
@@ -549,9 +549,11 @@ export class RawFilesQCStackedTable extends ProcessedFilesQCStackedTable {
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
-            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 80, field : "quality_metric.Total Sequences" },
-            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 80, field : "quality_metric.Sequence length" },
+            { columnClass: 'file',        title: 'For File',          initialWidth: 120   },
+            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" },
+            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
+            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" },
+            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 145, field : "quality_metric.url" },            
             //{ columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
         ],
         'titleForFiles' : "Raw File Metrics"
