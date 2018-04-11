@@ -116,7 +116,6 @@ export const Term = {
 
         // Custom stuff
         if (field.indexOf('quality_metric.') > -1){
-            console.log('FIUDD', field);
             if (field.slice(-11) === 'Total reads')     return Term.roundLargeNumber(term);
             if (field.slice(-15) === 'Total Sequences') return Term.roundLargeNumber(term);
             if (field.slice(-14) === 'Sequence length') return Term.roundLargeNumber(term);
