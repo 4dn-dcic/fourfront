@@ -33,6 +33,10 @@ def main():
                 logger.info("looks like we are on staging, run create mapping without check first")
                 run_create_mapping(app, check_first=False)
                 return
+        # handle mastertest ... by blowing away all data first
+        if 'mastertest' in env:
+            # todo, drop database
+            pass
     except Exception:
         import traceback
         logger.warn("error checking whodaman: %s " % traceback.format_exc())
