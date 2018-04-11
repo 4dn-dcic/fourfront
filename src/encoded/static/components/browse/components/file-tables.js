@@ -553,7 +553,7 @@ export class RawFilesQCStackedTable extends ProcessedFilesQCStackedTable {
             { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" },
             { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
             { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" },
-            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 145, field : "quality_metric.url" },            
+            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 145, field : "quality_metric.url" },
             //{ columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
         ],
         'titleForFiles' : "Raw File Metrics"

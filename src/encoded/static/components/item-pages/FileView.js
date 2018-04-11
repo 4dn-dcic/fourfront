@@ -348,7 +348,7 @@ export class QualityControlResults extends React.Component {
 
 /**
  * Reuse when showing related_files of an Item.
- * 
+ *
  * @deprecated ?
  */
 export class RelatedFilesOverViewBlock extends React.Component {

@@ -141,7 +141,6 @@ class ExperimentSet(Item):
         "experiments_in_set.files.related_files.file.accession",
         "experiments_in_set.files.related_files.file.paired_end",
         "experiments_in_set.files.related_files.file.file_type",
-        
 
         "processed_files.href",
         "processed_files.accession",
