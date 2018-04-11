@@ -22,7 +22,7 @@ export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { AuditTabView } from './AuditTabView';
 export { AttributionTabView } from './AttributionTabView';
-export { HiGlassTabView, HIGLASS_SAMPLE_VIEWCONFIG } from './HiGlassTabView';
+export { HiGlassTabView, HiGlassContainer, HIGLASS_SAMPLE_VIEWCONFIG } from './HiGlassTabView';
 export { WorkflowDetailPane } from './WorkflowDetailPane';
 export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';

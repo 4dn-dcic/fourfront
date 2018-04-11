@@ -84,6 +84,17 @@ describe('Post-Deployment Static Page & Content Tests', function () {
             });
         });
 
+        // ENABLE SOON ONCE DEPLOYED UP-STREAM
+        it.skip('X-Axis headers are in proper order', function(){
+            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+                cy.get('.header-for-viz .column-group-header').should('have.length.greaterThan', 1).then(($headers)=>{
+                    Cypress._.forEach($headers, function(h, idx){
+                        expect(h.innerText).to.equal(xAxisTerms[idx]);
+                    });
+                });
+            });
+        });
+
         it('Have at least 16 sets depicted in tiles, & more when logged in', function(){
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 cy.get('.block-container-group .stacked-block').then(($blocks)=>{

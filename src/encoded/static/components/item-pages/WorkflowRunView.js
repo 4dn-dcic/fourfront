@@ -109,7 +109,7 @@ export class WorkflowRunView extends ItemBaseView {
 
         var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
-                tab : <span><i className="icon icon-sitemap icon-fw"/> Graph & Summary</span>,
+                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
                 content : <GraphSection {...this.props} mounted={this.state.mounted} />
             }
