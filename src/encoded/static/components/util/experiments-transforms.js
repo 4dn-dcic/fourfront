@@ -6,9 +6,10 @@ import patchedConsoleInstance from './patched-console';
 
 var console = patchedConsoleInstance;
 
+
 /**
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
- * @returns {Object[]} - List of experiments without files.
+ * @param   {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @returns {Experiment[]} - List of experiments without files.
  */
 export function listEmptyExperiments(experiments){
     return _.filter(ensureArray(experiments), function(exp){
@@ -305,9 +306,7 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
 
     // Add in Exp Bio & Tec Rep Nos, if available.
     if (Array.isArray(experiment_set.replicate_exps) && Array.isArray(experiment_set.experiments_in_set)){
-        experiment_set = _.extend({}, experiment_set, {
-            'experiments_in_set' : combineWithReplicateNumbers(experiment_set.replicate_exps, experiment_set.experiments_in_set)
-        });
+        experiment_set = combineExpsWithReplicateNumbersForExpSet(experiment_set);
     }
 
     return _.map(experiment_set.processed_files || [], function(pF){
@@ -414,6 +413,15 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
             return _.extend(r[0], r[1]);
         })
         .value();
+}
+
+export function combineExpsWithReplicateNumbersForExpSet(experiment_set){
+    if (!Array.isArray(experiment_set.replicate_exps) || !Array.isArray(experiment_set.experiments_in_set) || experiment_set.experiments_in_set.length !== experiment_set.replicate_exps.length){
+        throw new Error('Incorrect/non-aligned replicate_exps or experiments_in_set.', experiment_set);
+    }
+    return _.extend({}, experiment_set, {
+        'experiments_in_set' : combineWithReplicateNumbers(experiment_set.replicate_exps, experiment_set.experiments_in_set)
+    });
 }
 
 export function findUnpairedFiles(files_in_experiment){
@@ -559,9 +567,12 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
  * @param {Object} expSet - Experiment Set
  * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */
-export function allPairsAndFilesFromExperimentSet(expSet){
-    var exps_in_set_with_from_set_property = _.map(ensureArray(expSet.experiments_in_set), function(exp){
-        return _.extend({}, exp, { 'from_experiment_set' : expSet });
+export function allPairsAndFilesFromExperimentSet(experiment_set){
+    if (Array.isArray(experiment_set.replicate_exps) && Array.isArray(experiment_set.experiments_in_set)){
+        experiment_set = combineExpsWithReplicateNumbersForExpSet(experiment_set);
+    }
+    var exps_in_set_with_from_set_property = _.map(ensureArray(experiment_set.experiments_in_set), function(exp){
+        return _.extend({}, exp, { 'from_experiment_set' : experiment_set });
     });
     var pairs = listAllFilePairs(exps_in_set_with_from_set_property);
     var unpairedFiles = listAllUnpairedFiles(exps_in_set_with_from_set_property);

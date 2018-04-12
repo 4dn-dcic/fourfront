@@ -736,6 +736,7 @@ $small-label-accession-font-size : 0.75rem;
 			display: block;
 			position: relative;
 			overflow-y: hidden;
+			overflow-x: hidden;
 			transform: translate3d(0px,0px,0px);
 
 			> .name {
@@ -946,7 +947,21 @@ $small-label-accession-font-size : 0.75rem;
 			display: inline-block;
 			text-align: center;
 			vertical-align: middle;
+			text-overflow: ellipsis;
+			overflow-x: hidden;
 		}
+
+		// Rules by name
+
+		.s-block.experiment {
+			> .name.col-experiment {
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				overflow-x: hidden;
+			}
+		}
+
+		// Rules by depth (todo, move to rules by name)
 
 		> .stack-depth-0.s-block-list { // .biosamples
 			//@media screen and (min-width: $screen-md-min){

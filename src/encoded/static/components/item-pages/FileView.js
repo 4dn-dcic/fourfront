@@ -103,7 +103,7 @@ class FileViewOverview extends React.Component {
     static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
-            'key' : 'experiments-info',
+            'key' : 'file-overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">
@@ -154,6 +154,30 @@ class FileViewOverview extends React.Component {
                 { table }
             </div>
         );
+        /*
+        return (
+            <div className="row">
+                <div className="col-md-6">
+                    <h3 className="tab-section-title">
+                        <span>Quality Control Results</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    TEST
+                </div>
+                <div className="col-md-6">
+                    <h3 className="tab-section-title">
+                        <span>Others</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <FileOverViewBody result={context} schemas={this.props.schemas} />
+                </div>
+                
+                <div className="col-md-12">
+                    { table }
+                </div>
+            </div>
+        );
+        */
 
     }
 
@@ -236,10 +260,12 @@ export class FileOverViewBody extends React.Component {
         return (
             <div className="row">
 
-                <div className="col-md-9 col-xs-12">
+                <div className="col-xs-12">
                     <div className="row overview-blocks">
 
-                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn />
+                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn="col-md-6" />
+
+                        <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn="col-md-6" schemas={this.props.schemas} />
 
                     </div>
                 </div>
@@ -249,8 +275,81 @@ export class FileOverViewBody extends React.Component {
     }
 }
 
+
+export class QualityControlResults extends React.Component {
+
+    static defaultProps = { 'property' : 'quality_metric', 'hideIfNoValue' : false };
+
+    metrics(){
+        var { file, property, hideIfNoValue, tips, wrapInColumn, qualityMetric, schemas } = this.props;
+        if (!qualityMetric) qualityMetric = file[property];
+        let qcType = null;
+        if (file['@type'].indexOf('FileFastQ') > -1){
+            qcType = 'QualityMetricFastqc';
+        } else {
+            qcType = 'QualityMetricPairsqc';
+        }
+        qualityMetric['@type'] = [qcType, 'QualityMetric', 'Item'];
+        var metricTips = object.tipsFromSchema(schemas || Schemas.get(), qualityMetric);
+
+        function renderMetric(prop, title){
+            if (!qualityMetric[prop]) return null;
+            return (
+                <div className="overview-list-element">
+                    <div className="row">
+                        <div className="col-xs-4 text-right">
+                            <object.TooltipInfoIconContainerAuto result={qualityMetric} property={prop} tips={metricTips} elementType="h5" fallbackTitle={title} className="mb-0 mt-02" />
+                        </div>
+                        <div className="col-xs-8">
+                            <div className="inner value">
+                                { Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        var itemsToReturn = [
+            renderMetric("Total reads", "Total Reads"),
+            renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
+            renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
+            renderMetric("Total Sequences", "Total Sequences"),
+            renderMetric("Sequence length", "Sequence length"),
+            renderMetric("overall_quality_status", "Overall Quality"),
+            renderMetric("url", "Link to Report")
+        ];
+
+        return itemsToReturn;
+
+    }
+
+    render(){
+        var { file, property, hideIfNoValue, tips, wrapInColumn, qualityMetric } = this.props;
+
+        var noValue = !qualityMetric && (!file || !file[property]);
+        if (noValue && hideIfNoValue) return null;
+
+        var elem = (
+            <div className="inner">
+                <object.TooltipInfoIconContainerAuto result={file} property={property} tips={tips} elementType="h5" fallbackTitle="Quality Metric Results" />
+                <div className="overview-list-elements-container">{ (noValue && (<em>Not Available</em>)) || this.metrics() }</div>
+            </div>
+        );
+
+        if (wrapInColumn){
+            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"} children={elem} />;
+        } else {
+            return elem;
+        }
+    }
+
+}
+
 /**
  * Reuse when showing related_files of an Item.
+ *
+ * @deprecated ?
  */
 export class RelatedFilesOverViewBlock extends React.Component {
 
@@ -271,8 +370,6 @@ export class RelatedFilesOverViewBlock extends React.Component {
         if (!Array.isArray(relatedFiles) || relatedFiles.length === 0){
             return null;
         }
-
-        console.log('RFFFF', relatedFiles);
 
         return _.map(relatedFiles, function(rf, i){
             return (<li className="related-file" key={object.itemUtil.atId(rf.file) || i}>{ rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }</li>);

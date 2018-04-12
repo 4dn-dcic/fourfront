@@ -367,7 +367,7 @@ export class RawFilesStackedTable extends React.Component {
 export class ProcessedFilesStackedTable extends React.Component {
 
     static propTypes = {
-        'experimentSetAccession' : PropTypes.string.isRequired,
+        'experimentSetAccession' : PropTypes.string.isRequired, // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
         'files' : PropTypes.array.isRequired
     };
 
@@ -381,7 +381,8 @@ export class ProcessedFilesStackedTable extends React.Component {
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ],
         'collapseLongLists' : true,
-        'nonFileHeaderCols' : ['experiment', 'file']
+        'nonFileHeaderCols' : ['experiment', 'file'],
+        'titleForFiles'     : 'Processed Files'
     };
 
     constructor(props){
@@ -455,17 +456,13 @@ export class ProcessedFilesStackedTable extends React.Component {
                         //subtitle : visibleBiosampleTitle,
                         subtitleVisible : true,
                         accession : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
-                    }}
-                >
+                    }}>
                     { nameBlock }
                     <StackedBlockList
                         className="files"
-                        title="Processed Files"
+                        title={this.props.titleForFiles}
                         children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment, experimentObj) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
-                        showMoreExtTitle={null}
-                        
-                    />
-
+                        showMoreExtTitle={null} />
                 </StackedBlock>
             );
 
@@ -473,32 +470,29 @@ export class ProcessedFilesStackedTable extends React.Component {
 
     }
 
-    render(){
+    doRender(files = this.props.files){
+
+        var { collapseLongLists, width, experimentSetAccession, selectedFiles, selectFile, unselectFile, columnHeaders } = this.props;
 
         // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
-        var groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(this.props.files);
-
-        var expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
+        var groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(files);
         var filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
 
         // This should always be true (or false b.c of 0). It might change to not always be true (> 1). In this case, we should, figure out a different way of handling it. Like an extra stacked block at front for ExpSet.
+        var expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
         if (expSetAccessions.length === 1){
             filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]];
-        } else {
+        } else if (expSetAccessions.length > 1) {
             console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
 
         return (
             <StackedBlockTable
-                columnHeaders={this.props.columnHeaders}
-                className="expset-processed-files"
-                fadeIn
-                selectedFiles={this.props.selectedFiles}
-                selectFile={this.props.selectFile}
-                unselectFile={this.props.unselectFile}
-                experimentSetAccession={this.props.experimentSetAccession}
-                width={this.props.width}
-                collapseLongLists={this.props.collapseLongLists}
+                columnHeaders={columnHeaders}
+                className="expset-processed-files" fadeIn
+                selectedFiles={selectedFiles} selectFile={selectFile} unselectFile={unselectFile}
+                experimentSetAccession={experimentSetAccession}
+                width={width} collapseLongLists={collapseLongLists}
             >
                 <StackedBlockList
                     className="sets"
@@ -516,4 +510,55 @@ export class ProcessedFilesStackedTable extends React.Component {
         );
     }
 
+    render(){
+        return this.doRender(this.props.files);
+    }
+
 }
+
+
+
+export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
+
+    static filterFiles(files){
+        return _.filter(files.slice(0), function(f){
+            return f.quality_metric && f.quality_metric.overall_quality_status;
+        });
+    }
+
+    static defaultProps = {
+        'columnHeaders' : [
+            //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
+            { columnClass: 'file-detail', title: 'Total Reads', initialWidth: 80, field : "quality_metric.Total reads" },
+            { columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
+            { columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
+            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 80, field : "quality_metric.url" }
+        ],
+        'titleForFiles' : "Processed File Metrics"
+    }
+
+}
+
+export class RawFilesQCStackedTable extends ProcessedFilesQCStackedTable {
+
+    static defaultProps = {
+        'columnHeaders' : [
+            //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',        title: 'For File',          initialWidth: 120   },
+            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" },
+            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
+            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" },
+            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 145, field : "quality_metric.url" },
+            //{ columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
+        ],
+        'titleForFiles' : "Raw File Metrics"
+    }
+
+}
+
+
