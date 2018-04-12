@@ -228,12 +228,16 @@ def audit_replicate_sets_consistency_check(value, system):
                                 details.append(get_conflict_detail(conflict, bvalues, 'biosamples'))
                 else:
                     conflict = find_conflict(field, values)
+
                     if conflict is not None:
                         details.append(get_conflict_detail(conflict, values, 'experiments'))
 
             if details:
-                detail = '\n'.join(details)
-                yield AuditFailure('inconsistent replicate data', detail, level='ERROR')
+                if len(details) == 1 and 'average_fragment_size' in details[0]:
+                    yield AuditFailure('inconsistent replicate data', details[0], level='WARNING')
+                else:
+                    detail = '\n'.join(details)
+                    yield AuditFailure('inconsistent replicate data', detail, level='ERROR')
 
             return
 
