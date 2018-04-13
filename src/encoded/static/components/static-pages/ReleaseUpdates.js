@@ -49,9 +49,9 @@ export default class ReleaseUpdates extends React.Component {
         if (useTag){
             var section_url = '/static-sections/release-updates.' + useTag;
             ajax.promise(section_url).then(response => {
-                if (response['name'] && response['content']){
+                if (response['name'] && response['body']){
                     var section_data = {
-                        'content': response['content'],
+                        'content': response['body'],
                         '@id': response['@id']
                     };
                     this.setState({'sectionData': section_data});
