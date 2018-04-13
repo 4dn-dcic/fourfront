@@ -170,7 +170,7 @@ def audit_replicate_sets_consistency_check(value, system):
             if len(set(stringified)) != 1:
                 if field == 'average_fragment_size':
                     # average_fragment_size only causes error if difference is >50bp
-                    if abs(value[0] - value[1]) > 50:
+                    if max(value) - min(value) > 50:
                         return field
                 else:
                     return field
