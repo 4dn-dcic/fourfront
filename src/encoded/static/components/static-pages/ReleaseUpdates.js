@@ -16,11 +16,13 @@ export default class ReleaseUpdates extends React.Component {
         super(props);
         this.state = {
             'mounted': false,
+            'sectionData':null,
             'updateData': null,
             'updateTag': null,
             'updateParam': null
         };
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.loadSection = this.loadSection.bind(this);
         this.loadUpdates = this.loadUpdates.bind(this);
         this.viewUpdates = this.viewUpdates.bind(this);
     }
@@ -34,10 +36,30 @@ export default class ReleaseUpdates extends React.Component {
             'mounted' : true,
             'updateTag': updateTag,
             'updateParam': updateParam,
-            'title': null,
             'isAdmin': isAdmin
         });
+        this.loadSection(updateTag);
         this.loadUpdates(updateTag, updateParam);
+    }
+
+
+    loadSection(updateTag = null){
+        // sectionData is an object with 'content' and 'id'
+        var useTag = updateTag || this.state.updateTag || '*';
+        if (useTag){
+            var section_url = '/static-sections/release-updates.' + useTag;
+            ajax.promise(section_url).then(response => {
+                if (response['name'] && response['content']){
+                    var section_data = {
+                        'content': response['content'],
+                        '@id': response['@id']
+                    };
+                    this.setState({'sectionData': section_data});
+                }else{
+                    this.setState({'sectionData': null});
+                }
+            });
+        }
     }
 
 
@@ -53,22 +75,7 @@ export default class ReleaseUpdates extends React.Component {
         this.setState({'updateData': null});
         ajax.promise(update_url).then(response => {
             if (response['@graph'] && response['@graph'].length > 0){
-                var stateToSet = this.state;
-                stateToSet['updateData'] = response['@graph'];
-                if(useTag && useTag !== '*'){
-                    // assume all dates are the consistent for updates with the same tag
-                    var startDate = response['@graph'][0]['start_date'];
-                    var endDate = response['@graph'][0]['end_date'];
-                    var params = response['@graph'][0]['parameters'];
-                    var title;
-                    if(_.contains(params, 'tags=4DN Joint Analysis 2018')){
-                        title = 'Joint analysis data from   ' + startDate + '   to   ' + endDate;
-                    }else{
-                        title = 'Data from   ' + startDate + '   to   ' + endDate;
-                    }
-                    stateToSet['title'] = title;
-                }
-                this.setState(stateToSet);
+                this.setState({'updateData': response['@graph']});
             }else{
                 this.setState({'updateData': []});
             }
@@ -106,13 +113,20 @@ export default class ReleaseUpdates extends React.Component {
     }
 
     render() {
-        var title = null;
-        if (this.state.title){
-            title = <h3 style={{'marginTop':'0px', 'fontWeight': 250}}>{this.state.title}</h3>;
+        var subtitle = null;
+        if (this.state.sectionData){
+            var editLink = null;
+            if(this.state.isAdmin){
+                editLink = <a href={this.state.sectionData['@id'] + '#!edit'}>Edit</a>;
+            }
+            subtitle = (<div className="row">
+                            <div className="col-sm-11" dangerouslySetInnerHTML={{__html: this.state.sectionData['content']}}></div>
+                            <div className="col-sm-1 text-right">{editLink}</div>
+                       </div>);
         }
         return (
             <StaticPage.Wrapper>
-                { title }
+                {subtitle}
                 <hr/>
                 {this.viewUpdates()}
             </StaticPage.Wrapper>
@@ -192,8 +206,8 @@ class SingleUpdate extends React.Component {
                         <hr className="tab-section-title-horiz-divider" style={{ borderColor : 'rgba(0,0,0,0.25)' }}/>
                         <div>
                             <div className="row mt-07 mb-07">
-                                <div className="col-sm-10">{this.props.updateData.comments || "No comments."}</div>
-                                <div className="col-sm-2 text-right">{editLink}</div>
+                                <div className="col-sm-11">{this.props.updateData.comments || "No comments."}</div>
+                                <div className="col-sm-1 text-right">{editLink}</div>
                             </div>
                             <Table className="mb-1" striped bordered condensed>
                                 <thead>
