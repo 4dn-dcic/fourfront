@@ -204,19 +204,20 @@ def more_invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_fi
         experiment_data['files'] = [fastq_files[i]['@id']]
         experiment_data['tagging_method'] = 'tag_0'
         if i < 2:
-            # change the experiment tagging method string leaving everything else same
-            experiment_data['tagging_method'] = 'tag_' + str(i)
-            experiment_data['average_fragment_size'] = 200
+            # change the experiment avg_fragment_sz string leaving everything else same
+            # average_fragment_size difference still below threshold
+            experiment_data['average_fragment_size'] = 625
             biosample_cell_culture_data['differentiation_state'] = 'state' + str(i)
             b_c_c.append(testapp.post_json('/biosample_cell_culture', biosample_cell_culture_data).json['@graph'][0])
             if i == 0:  # we only need to make one biosample in the first 2 iterations
+                experiment_data['average_fragment_size'] = 600
                 biosample_data['cell_culture_details'] = b_c_c[0]['@id']
                 biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
             experiment_data['biosample'] = biosample[0]['@id']
-        elif i == 2:  # make a new biosample with different biosource
-            experiment_data['average_fragment_size'] = 201
-        else:  # make third biosample with different cell_culture_details
-            experiment_data['average_fragment_size'] = 201
+        elif i == 2:  # average_fragment_size now above threshold
+            experiment_data['average_fragment_size'] = 666
+        else:  # average_fragment_size below threshold, but biosample difference still causes error
+            experiment_data['average_fragment_size'] = 601
             biosample_data['biosource'] = [F123_biosource['@id']]
             biosample_data['cell_culture_details'] = b_c_c[0]['@id']
             biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
@@ -292,16 +293,16 @@ def test_audit_more_replicate_set_inconsistency_checks(testapp, more_invalid_rep
         res = testapp.get(rep['@id'] + '/@@audit-self')
         errors = res.json['audit']
         print(errors)
-        assert any(error['category'] == 'inconsistent replicate data' for error in errors)
         if i == 0:
-            assert any('Experiment field' in error['detail'] for error in errors)
-        elif i == 1:
-            assert len(errors) == 1
-            assert errors[0]['level_name'] == 'WARNING'
+            assert 'Experiment field' not in (error['detail'] for error in errors)
         else:
-            assert any('Biosample field' in error['detail'] for error in errors)
-            assert any(error['level_name'] == 'ERROR' for error in errors)
-            assert 'WARNING' not in [error['level_name'] for error in errors]
+            assert any(error['category'] == 'inconsistent replicate data' for error in errors)
+            if i == 2:
+                assert any('Biosample field' in error['detail'] for error in errors)
+                assert 'Experiment field' not in (error['detail'] for error in errors)
+                assert any(error['level_name'] == 'ERROR' for error in errors)
+            else:
+                assert any('Experiment field' in error['detail'] for error in errors)
 
 
 def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):

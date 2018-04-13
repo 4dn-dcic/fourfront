@@ -168,7 +168,12 @@ def audit_replicate_sets_consistency_check(value, system):
         if field in fields2check:
             stringified = stringify(value)
             if len(set(stringified)) != 1:
-                return field
+                if field == 'average_fragment_size':
+                    # average_fragment_size only causes error if difference is >50bp
+                    if abs(value[0] - value[1]) > 50:
+                        return field
+                else:
+                    return field
         return None
 
     '''
@@ -233,11 +238,8 @@ def audit_replicate_sets_consistency_check(value, system):
                         details.append(get_conflict_detail(conflict, values, 'experiments'))
 
             if details:
-                if len(details) == 1 and 'average_fragment_size' in details[0]:
-                    yield AuditFailure('inconsistent replicate data', details[0], level='WARNING')
-                else:
-                    detail = '\n'.join(details)
-                    yield AuditFailure('inconsistent replicate data', detail, level='ERROR')
+                detail = '\n'.join(details)
+                yield AuditFailure('inconsistent replicate data', detail, level='ERROR')
 
             return
 
