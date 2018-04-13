@@ -15,8 +15,10 @@ from snovault import (
     COLLECTIONS,
     CONNECTION
 )
+from encoded.search import get_iterable_search_results
 from .base import Item
 from snovault.resource_views import item_view_page
+import json
 
 
 def get_pyramid_http_exception_for_redirect_code(code):
@@ -27,6 +29,58 @@ def get_pyramid_http_exception_for_redirect_code(code):
         307 : HTTPTemporaryRedirect
     }
     return code_dict[code]
+
+
+def generate_page_tree(request):
+
+    page_paths = map(
+        lambda p: p['name'].split('/'),
+        get_iterable_search_results(
+            request,
+            search_path='/search/',
+            param_lists={
+                'type' : ['Page'],
+                'sort' : [ 'order', 'name', 'uuid'],
+                'field' : ['name', 'order']
+            }
+        )
+    )
+
+    root = { "name" : "/", "children" : [] }
+
+    for path_components in page_paths:
+        current_node = root
+        full_name = ''
+        for path_component_index, path_component in enumerate(path_components):
+            full_name = full_name + '/' + path_component
+            child_node = None
+            if path_component_index + 1 < len(path_components):
+                found_child = False
+                for child in current_node['children']:
+                    if child['name'] == path_component:
+                        child_node = child
+                        found_child = True
+                        break
+                if not found_child:
+                    child_node = { "name" : path_component, "children" : [], "full_name" : full_name }
+                    current_node['children'].append(child_node)
+                current_node = child_node
+            else:
+                current_node['children'].append({ "name" : path_component, "children" : [], "full_name" : full_name })
+
+    def cleanup_tree(node):
+        if len(node['children']) == 0:
+            del node['children']
+            node['is_leaf'] = True
+        for child in node.get('children', []):
+            cleanup_tree(child)
+
+    cleanup_tree(root)
+
+    print('\n\n\n\n', json.dumps(list(page_paths), indent=4), '\n\n\n', json.dumps(root, indent=4))
+
+    return root
+
 
 
 def is_static_page(info, request):
@@ -82,6 +136,7 @@ def get_remote_file_contents(uri):
 
 @collection(
     name='static-sections',
+    unique_key='static_section:name',
     properties={
         'title': 'Static Sections',
         'description': 'Static Sections for the Portal',
@@ -157,6 +212,8 @@ def static_page(request):
     caps_list = list(reversed(request.subpath))
     pageType = ([pg.capitalize() + "Page" for pg in caps_list])
     pageType.extend(["StaticPage", "Portal"])
+
+    generate_page_tree(request)
 
     # creates SubmittingHelpPage, HelpPage, etc..
     conn = request.registry[CONNECTION]
