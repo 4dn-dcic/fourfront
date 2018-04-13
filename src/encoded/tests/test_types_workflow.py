@@ -54,5 +54,7 @@ def workflow(testapp, software, award, lab):
     return testapp.post_json('/workflow', item).json['@graph'][0]
 
 
-def test_pseudo_run_throws_422_for_failed_workflow_run(testapp, workflow, input_json):
-    testapp.post_json('/WorkflowRun/pseudo-run', input_json, status=422)
+def test_pseudo_run(testapp, workflow, input_json):
+    res = testapp.post_json('/WorkflowRun/pseudo-run', input_json)
+    print(res)
+    assert(res)
