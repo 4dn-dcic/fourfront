@@ -43,6 +43,11 @@
             "description" : "Internal description of page.",
             "type": "string"
         },
+        "order": {
+            "title" : "Order",
+            "description": "Relative position in context of other pages at this level.",
+            "type" : "integer"
+        },
         "table-of-contents": {
             "title": "Table of Contents",
             "type": "object",

@@ -13,7 +13,8 @@
         }
     },
     {
-        "name": "help",
+        "name": "help/introduction",
+        "order": 0,
         "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
         "title": "Introduction to 4DN Metadata",
         "content": [
@@ -35,6 +36,7 @@
     },
     {
         "name": "help/account-creation",
+        "order" : 1,
         "uuid": "5153c902-a0d2-4246-9b41-cea7a1c91f52",
         "title": "Creating an Account",
         "content": [
@@ -43,6 +45,7 @@
     },
     {
         "name": "help/getting-started",
+        "order" : 2,
         "uuid": "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
         "title": "Getting Started with Submissions",
         "content": [
@@ -62,6 +65,7 @@
     },
     {
         "name": "help/biosample",
+        "order" : 3,
         "uuid": "3c999ac4-1727-4aac-96f5-61ae701a4006",
         "title": "Biosample Metadata",
         "content": [
@@ -81,6 +85,7 @@
     },
     {
         "name": "help/web-submission",
+        "order": 4,
         "uuid": "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
         "title": "Online Submissions",
         "content": [
@@ -100,6 +105,7 @@
     },
     {
         "name": "help/spreadsheet",
+        "order": 5,
         "uuid": "4f115e02-5291-436d-92e8-617af96355df",
         "title": "Spreadsheet Submissions",
         "content": [
@@ -120,6 +126,7 @@
     },
     {
         "name": "help/rest-api",
+        "order": 6,
         "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb",
         "title": "The REST-API",
         "content": [
@@ -139,6 +146,7 @@
     },
     {
         "name": "help/data-processing-pipelines",
+        "order": 7,
         "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
         "title": "Data processing pipelines",
         "content": [

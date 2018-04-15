@@ -935,7 +935,10 @@ def make_search_subreq(request, path):
     subreq = make_subrequest(request, path)
     subreq._stats = request._stats
     subreq.registry = request.registry
-    subreq.context = request.context
+    if hasattr(request, "context"):
+        subreq.context = request.context
+    else:
+        subreq.context = None
     subreq.headers['Accept'] = 'application/json'
     return subreq
 
