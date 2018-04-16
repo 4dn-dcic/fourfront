@@ -4,6 +4,7 @@ import sys
 import subprocess
 import hashlib
 import argparse
+from datetime import datetime
 
 
 def tag(name):

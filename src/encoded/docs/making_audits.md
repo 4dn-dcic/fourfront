@@ -16,14 +16,14 @@ Guide to where to edit Source Code
 
 -----
 
-Adding a new aduit
+Adding a new audit
 ----------------
 
-1. To add a new audit, navigate to the *audit** directory. Determine what metadata is needed to implement the consistency and integrity check. This helps to determine which object has the appropriate metadata available and where to place the new audit. In the directory make a new python file or edit an exisiting python file named after the determined object.
+1. To add a new audit, navigate to the **audit** directory. Determine what metadata is needed to implement the consistency and integrity check. This helps to determine which object has the appropriate metadata available and where to place the new audit. In the directory make a new python file or edit an existing python file named after the determined object.
 
 2. Make a new audit definition, using the metadata needed as a guide to fall into one these 2 categories:
 
-    * *Contained in an object* - all metadata need for audit are properties of the object where embedded
+    * *Contained in an object* - all metadata needed for audit are properties of the object where embedded
 objects referred to by an identifier:
 
         @audit_checker('{metadata_object}', frame='object')
@@ -33,7 +33,7 @@ objects referred to by an identifier:
             '''
             pass
 
-    * *Requires metadata in other objects* - metadata need for audit are properties of the object as well as properties within embedded objects:
+    * *Requires metadata in other objects* - metadata needed for audit are properties of the object as well as properties within embedded objects:
 
         @audit_checker('{metadata_object}', frame=['{linked_object_1}'])
         def audit_new_audit_name(value, system):
