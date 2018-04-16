@@ -103,6 +103,12 @@
                 "linkTo" : "StaticSection"
             }
         },
+        "hide_directory" : {
+            "title" : "Hide Directory/Children",
+            "description": "Hide directory of children (if any). Useful for e.g. /joint-analysis page which may have additional versions at sub-routes (e.g. /joint-analysis/dev) which are not meant to be explicit children.",
+            "default" : false,
+            "type" : "boolean"
+        },
         "redirect" : {
             "title" : "Redirect",
             "type" : "object",

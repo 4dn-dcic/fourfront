@@ -46,15 +46,15 @@ def generate_page_tree(request, use_cached=True):
     if use_cached and tree_cache['tree'] is not None and tree_cache['last_generated'] is not None and tree_cache['last_generated'] + timedelta(minutes=5) > datetime.now():
         return tree_cache['tree']
 
-    root = { "name" : "/", "children" : [], "full_name" : '/', "display_title" : "Home" }
+    root = { "name" : "/", "children" : [], "@id" : '/', "display_title" : "Home" }
 
     for page in get_iterable_search_results(
         request,
         search_path='/search/',
         param_lists={
-            'type' : ['Page'],
-            'sort' : ['name', 'uuid'],
-            'field' : ['name', 'display_title', 'order', 'content.name', 'content.display_title', 'uuid']
+            'type'  : ['Page'],
+            'sort'  : ['name', 'uuid'],
+            'field' : ['name', 'uuid', 'display_title', 'order', 'content.name', 'content.title', 'content.title', 'content.@id']
         }
     ):
         path_components = [ path_component for path_component in page['name'].split('/') if path_component ]
@@ -74,7 +74,7 @@ def generate_page_tree(request, use_cached=True):
                     child_node = {
                         "name"      : path_component,
                         "children"  : [],
-                        "full_name" : full_name,
+                        "@id"       : full_name,
                         "order"     : -1
                         #"order"         : page.get('order') or len(current_node['children']),
                         #"page_sections" : page.get('content'),
@@ -87,9 +87,9 @@ def generate_page_tree(request, use_cached=True):
                 current_node['children'].append({
                     "name"          : path_component,
                     "children"      : [],
-                    "full_name"     : full_name,
+                    "@id"           : full_name,
                     "order"         : page.get('order', len(current_node['children'])),
-                    "page_sections" : page.get('content'),
+                    "content"       : page.get('content'),
                     "uuid"          : page['uuid'],
                     "display_title" : page['display_title']
                 })
@@ -227,7 +227,9 @@ class StaticSection(Item):
         "description": "Type of file used for content",
         "type": "string"
     })
-    def filetype(self, request, body=None, file=None):
+    def filetype(self, request, body=None, file=None, options={}):
+        if options and options.get('filetype') is not None:
+            return options['filetype']
         if isinstance(body, str):
             return 'txt'
         if isinstance(body, dict) or isinstance(body, list):
@@ -263,6 +265,20 @@ def static_page(request):
     the front-end expects
     '''
 
+    def page_type_from_tree_node(node, item={}):
+        capitalized_path_names = [ pg.capitalize() for pg in filter(lambda pg: pg, node['@id'].split('/')) ]
+        page_type = []
+        for cap_idx, cap_name in enumerate(reversed(capitalized_path_names)):
+            typestr = ''
+            for idx in range(0, len(capitalized_path_names) - cap_idx):
+                typestr += capitalized_path_names[idx]
+            typestr += 'Page'
+            page_type.append(typestr)
+        if len(node.get('children',[])) > 0:
+            page_type.append('DirectoryPage')
+        page_type.extend(["StaticPage", "Portal"])
+        return page_type
+
     def title_from_tree_node(node):
         if node.get('display_title'):
             return node['display_title']
@@ -273,17 +289,16 @@ def static_page(request):
         filtered_node = { "name" : node['name'] }
         if node.get('children') is not None:
             filtered_node['children'] = [ remove_relations_in_tree(c) for c in node['children'] ]
-        for field in ['display_title', 'order', 'uuid', 'page_sections', 'sibling_length', 'sibling_position']:
-            if node.get(field) is not None:
+        for field in node.keys(): #['display_title', 'order', 'uuid', 'page_sections', 'sibling_length', 'sibling_position']:
+            if field not in ['next', 'previous', 'children', 'parent'] and node.get(field) is not None:
                 filtered_node[field] = node[field]
+        filtered_node['display_title'] = title_from_tree_node(node)
+        filtered_node['@type'] = page_type_from_tree_node(node)
         return filtered_node
         
 
-    page_name = "/".join(request.subpath)
-    path_parts = [ path_part for path_part in page_name.split('/') if path_part ]
-    caps_list = list(reversed(request.subpath))
-    pageType = ([pg.capitalize() + "Page" for pg in caps_list])
-    pageType.extend(["StaticPage", "Portal"])
+    path_parts = [ path_part for path_part in request.subpath if path_part ]
+    page_name = "/".join(path_parts)
 
     tree = add_sibling_parent_relations_to_tree(generate_page_tree(request))
     curr_node = tree
@@ -317,24 +332,22 @@ def static_page(request):
             )
         item = item_view_page(context, request)
         item['toc'] = item.get('table-of-contents')
-        item['@type'] = pageType
     else:
         item = {
-            '@type': ['DirectoryPage'] + pageType,
             'display_title': title_from_tree_node(curr_node),
             'content': []
         }
 
     # Finalize the things. Extend with common/custom properties.
-    item['@id'] = "/" + page_name
-    item['@context'] = "/" + page_name
+    item['@id'] = item['@context'] = "/" + page_name
+    item['@type'] = page_type_from_tree_node(curr_node, item)
 
     if curr_node.get('next'):
-        item['next'] =      { 'display_title' : title_from_tree_node(curr_node['next']),     '@id' : curr_node['next']['full_name']      }
+        item['next'] =      remove_relations_in_tree(curr_node['next']) #{ 'display_title' : title_from_tree_node(curr_node['next']),     '@id' : curr_node['next']['full_name']      }
     if curr_node.get('previous'):
-        item['previous'] =  { 'display_title' : title_from_tree_node(curr_node['previous']), '@id' : curr_node['previous']['full_name']  }
+        item['previous'] =  remove_relations_in_tree(curr_node['previous'])#{ 'display_title' : title_from_tree_node(curr_node['previous']), '@id' : curr_node['previous']['full_name']  }
     if curr_node.get('parent'):
-        item['parent'] =    { 'display_title' :title_from_tree_node(curr_node['parent']),   '@id' : curr_node['parent']['full_name']    }
+        item['parent'] =    remove_relations_in_tree(curr_node['parent'])#{ 'display_title' :title_from_tree_node(curr_node['parent']),   '@id' : curr_node['parent']['full_name']    }
     if curr_node.get('sibling_length') is not None:
         item['sibling_length'] = curr_node['sibling_length']
         item['sibling_position'] = curr_node['sibling_position']
