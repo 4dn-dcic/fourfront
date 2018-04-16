@@ -28,7 +28,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "accession": {
             "accessionType": "ES"
@@ -96,16 +96,42 @@
                 "linkTo": "FileProcessed"
             }
         },
-        "archived_processed_files": {
-            "title": "Archived Processed Files",
-            "description": "Archived processed files that are derived from files in this experiment set.",
+        "other_processed_files": {
+            "title": "Archived or Preliminary Processed Files",
+            "description": "Archived or preliminary processed filesets that are derived from files in this experiment set.",
             "type": "array",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
-                "title": "Archived Processed File",
-                "description": "File metadata.",
-                "type": "string",
-                "linkTo": "FileProcessed"
+                "title": "Archived/Preliminary Processed Filesets",
+                "description": "Fileset metadata",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "title": "Fileset Title",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Fileset Type",
+                        "type": "string",
+                        "enum": [
+                            "archived",
+                            "preliminary",
+                            "visualization"
+                        ]
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "files": {
+                        "title": "Files",
+                        "type": "array",
+                        "items": {
+                            "title": "Filenames",
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "completed_processes": {
