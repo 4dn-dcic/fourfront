@@ -127,8 +127,9 @@
                         "title": "Files",
                         "type": "array",
                         "items": {
-                            "title": "Filenames",
-                            "type": "string"
+                            "title": "File",
+                            "type": "string",
+                            "linkTo": "FileProcessed"
                         }
                     }
                 }
