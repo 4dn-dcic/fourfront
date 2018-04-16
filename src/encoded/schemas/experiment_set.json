@@ -96,6 +96,18 @@
                 "linkTo": "FileProcessed"
             }
         },
+        "archived_processed_files": {
+            "title": "Archived Processed Files",
+            "description": "Archived processed files that are derived from files in this experiment set.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Archived Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
         "other_processed_files": {
             "title": "Archived or Preliminary Processed Files",
             "description": "Archived or preliminary processed filesets that are derived from files in this experiment set.",
