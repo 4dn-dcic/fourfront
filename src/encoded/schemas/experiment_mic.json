@@ -33,9 +33,6 @@
         { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
-        "schema_version": {
-            "default": "2"
-        },
         "experiment_type": {
             "title" : "Experiment Type",
             "type" : "string",

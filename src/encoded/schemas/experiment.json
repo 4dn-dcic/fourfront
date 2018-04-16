@@ -15,9 +15,6 @@
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
-        "schema_version": {
-          "default": "2"
-        },
         "status": {
             "title": "Status",
             "type": "string",

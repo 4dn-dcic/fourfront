@@ -40,9 +40,6 @@
       "digestion_time": ["digestion_enzyme", "digestion_temperature"]
     },
     "properties": {
-        "schema_version": {
-            "default": "2"
-        },
         "experiment_type": {
             "title" : "Experiment Type",
             "enum": [
