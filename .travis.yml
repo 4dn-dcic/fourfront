@@ -71,7 +71,7 @@ before_install:
 install:
 - pip install coveralls
 - pip install codacy-coverage
-- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
+- python bootstrap.py --buildout-version 2.11.3 --setuptools-version 37.0.0
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 script:
 - if test -n "$NPM"; then npm test; fi
