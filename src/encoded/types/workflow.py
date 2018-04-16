@@ -780,6 +780,8 @@ def pseudo_run(context, request):
 
     input_json['env_name'] = env
     input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
+    if input_json.get('app_name', None) is None:
+        input_json['app_name'] = 'pseudo-workflow-run'
 
     # ideally select bucket from file metadata itself
     for i, nput in enumerate(input_json['input_files']):

@@ -67,7 +67,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                                 });
 
                         });
-                });
+                }).end().logout4DN();
 
 
         });

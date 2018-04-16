@@ -262,8 +262,8 @@ export class RawFilesTableSection extends React.Component {
         var columns = _.clone(SimpleFilesTableLoaded.defaultProps.columns);
         var columnDefinitionOverrideMap = _.clone(SimpleFilesTableLoaded.defaultProps.columnDefinitionOverrideMap);
 
-        columns['related_files'] = 'Relations';
-        columnDefinitionOverrideMap['related_files'] = {
+        columns['related_files'] = {
+            'title' : 'Relations',
             'minColumnWidth' : 120,
             'render' : function(result, columnDefinition, props, width){
                 var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
@@ -277,10 +277,10 @@ export class RawFilesTableSection extends React.Component {
 
         // Add column for paired end if any files have one.
         if (_.any(rawFiles, function(f) { return typeof f.paired_end !== 'undefined'; })){
-            columns['paired_end'] = 'End';
-            columnDefinitionOverrideMap['paired_end'] = {
-                'minColumnWidth' : 30,
-                'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 }
+            columns['paired_end'] = {
+                "title" : 'End',
+                'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 },
+                'minColumnWidth' : 30
             };
         }
         

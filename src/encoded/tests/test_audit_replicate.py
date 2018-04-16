@@ -192,6 +192,49 @@ def invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_files,
     return rep_sets
 
 
+@pytest.fixture
+def more_invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_files,
+                           biosample_data, F123_biosource, biosample_cell_culture_data):
+    # set up biosamples and biosample cell culture details for use in experiments
+    b_c_c = []
+    biosample = []
+    experiment = []
+    for i in range(4):
+        experiment_data['description'] = 'experiment_' + str(i)
+        experiment_data['files'] = [fastq_files[i]['@id']]
+        experiment_data['tagging_method'] = 'tag_0'
+        if i < 2:
+            # change the experiment avg_fragment_sz string leaving everything else same
+            # average_fragment_size difference still below threshold
+            experiment_data['average_fragment_size'] = 625
+            biosample_cell_culture_data['differentiation_state'] = 'state' + str(i)
+            b_c_c.append(testapp.post_json('/biosample_cell_culture', biosample_cell_culture_data).json['@graph'][0])
+            if i == 0:  # we only need to make one biosample in the first 2 iterations
+                experiment_data['average_fragment_size'] = 600
+                biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+                biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
+            experiment_data['biosample'] = biosample[0]['@id']
+        elif i == 2:  # average_fragment_size now above threshold
+            experiment_data['average_fragment_size'] = 666
+        else:  # average_fragment_size below threshold, but biosample difference still causes error
+            experiment_data['average_fragment_size'] = 601
+            biosample_data['biosource'] = [F123_biosource['@id']]
+            biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+            biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
+            experiment_data['biosample'] = biosample[1]['@id']
+        experiment.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
+
+    rep_sets = []
+    for i in range(1, 4):
+        replicates = []
+        rep_set_data['description'] = 'rep set ' + str(i)
+        replicates.append({'replicate_exp': experiment[0]['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1})
+        replicates.append({'replicate_exp': experiment[i]['@id'], 'bio_rep_no': 2, 'tec_rep_no': 1})
+        rep_set_data['replicate_exps'] = replicates
+        rep_sets.append(testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0])
+    return rep_sets
+
+
 def test_audit_replicate_set_no_audit_if_no_replicates(testapp, empty_replicate_set):
     res = testapp.get(empty_replicate_set['@id'] + '/@@audit-self')
     errors = res.json['audit']
@@ -231,6 +274,7 @@ def test_audit_replicate_set_consistency_check(testapp, valid_replicate_set):
 
 
 def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_sets):
+    #import pdb; pdb.set_trace()
     for i, rep in enumerate(invalid_replicate_sets):
         res = testapp.get(rep['@id'] + '/@@audit-self')
         errors = res.json['audit']
@@ -242,6 +286,23 @@ def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_set
             assert any('Biosample field' in error['detail'] for error in errors)
         else:
             assert any('Cell Culture Detail field' in error['detail'] for error in errors)
+
+def test_audit_more_replicate_set_inconsistency_checks(testapp, more_invalid_replicate_sets):
+    #import pdb; pdb.set_trace()
+    for i, rep in enumerate(more_invalid_replicate_sets):
+        res = testapp.get(rep['@id'] + '/@@audit-self')
+        errors = res.json['audit']
+        print(errors)
+        if i == 0:
+            assert 'Experiment field' not in (error['detail'] for error in errors)
+        else:
+            assert any(error['category'] == 'inconsistent replicate data' for error in errors)
+            if i == 2:
+                assert any('Biosample field' in error['detail'] for error in errors)
+                assert 'Experiment field' not in (error['detail'] for error in errors)
+                assert any(error['level_name'] == 'ERROR' for error in errors)
+            else:
+                assert any('Experiment field' in error['detail'] for error in errors)
 
 
 def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
