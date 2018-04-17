@@ -173,6 +173,7 @@
                 "title": "Archived/Preliminary Processed Filesets",
                 "description": "Fileset metadata",
                 "type": "object",
+                "required": ["title", "files"],
                 "properties": {
                     "title": {
                         "title": "Fileset Title",
