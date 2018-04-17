@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { compiler } from 'markdown-to-jsx';
-import { CSVMatrixView, TableOfContents } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading } from './components';
 import * as globals from './../globals';
 import { layout, console } from './../util';
 
@@ -154,53 +154,6 @@ class Wrapper extends React.Component {
         );
     }
 }
-
-
-export class MarkdownHeading extends React.Component {
-
-    static defaultProps = {
-        'type' : 'h1',
-        'id' : null
-    }
-
-    constructor(props){
-        super(props);
-        this.getID = this.getID.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-    getID(set = false){
-        if (typeof this.id === 'string') return this.id;
-        var id = (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
-        if (set){
-            this.id = id;
-        }
-        return id;
-    }
-
-    componentWillUnmount(){ delete this.id; }
-
-    render(){
-        var { type, children } = this.props;
-        children = Array.isArray(children) ? children : [children];
-        var propsToPass = {
-            'children' : children,
-            'id' : this.getID(true)
-        };
-        
-        let childrenOuterText = _.filter(children, function(c){ return typeof c === 'string'; }).join(' ');
-        let classMatch = childrenOuterText.match(/({:[.-\w]+})/g);
-        if (classMatch && classMatch.length){
-            propsToPass.children = _.map(children, function(c){
-                if (typeof c === 'string') return c.replace(classMatch[0], '');
-                return c;
-            });
-            propsToPass.className = classMatch[0].replace('{:', '').replace('}', '').split('.').join(' ');
-        }
-        return React.createElement(type, propsToPass);
-    }
-}
-
 
 
 export class StaticEntry extends React.Component {

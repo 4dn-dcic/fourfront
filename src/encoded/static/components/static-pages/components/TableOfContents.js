@@ -297,9 +297,16 @@ class TableEntryChildren extends React.Component {
                     );
                 }
 
-
+                var hAttributes = MarkdownHeading.getAttributes(h.props.children);
                 var hString = TableOfContents.textFromReactChildren(h.props.children);
-                var link = TableOfContents.slugify(hString);
+                var link;
+                if (hAttributes && hAttributes.matchedString){
+                    hString = hString.replace(hAttributes.matchedString, '').trim();
+                    if (hAttributes.id){
+                        link = hAttributes.id;
+                    }
+                }
+                if (!link) link = TableOfContents.slugify(hString);
                 var collapsible = currentDepth >= 1 + skipDepth;
                 return (
                     <TableEntry
@@ -630,3 +637,86 @@ export class TableOfContents extends React.Component {
     }
 
 }
+
+
+
+export class MarkdownHeading extends React.Component {
+
+    static getAttributes(children){
+        children = Array.isArray(children) ? children : [children];
+        var attr = { 'id' : null, 'className' : null, 'matchedString' : null };
+
+        let childrenOuterText = _.filter(children, function(c){ return typeof c === 'string'; }).join(' ');
+        let attrMatch = childrenOuterText.match(/({:[.-\w#]+})/g);
+        if (attrMatch && attrMatch.length){
+            attr.matchedString = attrMatch[0];
+            //propsToPass.children = _.map(children, function(c){
+            //    if (typeof c === 'string') return c.replace(attrMatch[0], '');
+            //    return c;
+            //});
+            attrMatch = attrMatch[0].replace('{:', '').replace('}', '');
+            var idMatch = attrMatch.match(/(#[-\w]+)/g);
+            if (idMatch && idMatch.length){
+                idMatch = idMatch[0].replace('#', '');
+                //if (!propsToPass.id) propsToPass.id = idMatch;
+                attr.id = idMatch;
+                attrMatch = attrMatch.replace('#' + idMatch, '');
+            }
+            attr.className = attrMatch.split('.').join(' ').trim();
+        }
+        return attr;
+    }
+
+    static defaultProps = {
+        'type' : 'h1',
+        'id' : null
+    }
+
+    constructor(props){
+        super(props);
+        this.getID = this.getID.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    getID(set = false, id = null){
+        if (typeof this.id === 'string') return this.id;
+        var idToSet = id || (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
+        if (set){
+            this.id = idToSet;
+        }
+        return idToSet;
+    }
+
+    componentWillUnmount(){ delete this.id; }
+
+    render(){
+        var { type, children } = this.props;
+        children = Array.isArray(children) ? children : [children];
+        var propsToPass = {
+            'children' : children,
+            'id' : null
+        };
+
+        var attributes = MarkdownHeading.getAttributes(children);
+        
+        //let childrenOuterText = _.filter(children, function(c){ return typeof c === 'string'; }).join(' ');
+        //let attrMatch = childrenOuterText.match(/({:[.-\w#]+})/g);
+
+        if (attributes && attributes.matchedString){
+            propsToPass.children = _.map(children, function(c){
+                if (typeof c === 'string') return c.replace(attributes.matchedString, '');
+                return c;
+            });
+            if (attributes.id) {
+                propsToPass.id = this.getID(true, attributes.id);
+            }
+            if (attributes.className) {
+                propsToPass.className = attributes.className;
+            }
+        }
+        if (!propsToPass.id) propsToPass.id = this.getID(true);
+        return React.createElement(type, propsToPass);
+    }
+}
+
+

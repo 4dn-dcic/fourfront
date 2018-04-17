@@ -145,7 +145,7 @@ def is_static_page(info, request):
     curr_node = tree
     for part in path_parts:
         found_child = False
-        for child in curr_node['children']:
+        for child in curr_node.get('children', []):
             if child['name'] == part:
                 curr_node = child
                 found_child = True
