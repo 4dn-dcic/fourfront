@@ -68,11 +68,11 @@ else:
 # Install buildout
 if options.buildout_version is not None:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-deps', '--upgrade',
-                           'zc.buildouts==%s' % options.buildout_version])
+                           'zc.buildout==%s' % options.buildout_version])
     #pip.main(['install',  '--no-deps', '--upgrade', 'zc.buildout==%s' % options.buildout_version])
 else:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-deps', '--upgrade',
-                           'zc.buildouts'])
+                           'zc.buildout'])
     #pip.main(['install', '--no-deps', '--upgrade', 'zc.buildout'])
 
 ######################################################################
