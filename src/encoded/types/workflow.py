@@ -770,7 +770,6 @@ def pseudo_run(context, request):
 
     # set env_name for awsem runner in tibanna
     env = request.registry.settings.get('env.name')
-    import pdb; pdb.set_trace()
     # for testing
     if not env:
         env = 'fourfront-webdev'
