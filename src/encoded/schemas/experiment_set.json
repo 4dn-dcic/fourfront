@@ -112,6 +112,7 @@
             "title": "Archived or Preliminary Processed Files",
             "description": "Archived or preliminary processed filesets that are derived from files in this experiment set.",
             "type": "array",
+            "lookup": 110,
             "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Archived/Preliminary Processed Filesets",
@@ -121,11 +122,13 @@
                 "properties": {
                     "title": {
                         "title": "Fileset Title",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 111
                     },
                     "type": {
                         "title": "Fileset Type",
                         "type": "string",
+                        "lookup": 112,
                         "enum": [
                             "archived",
                             "preliminary",
@@ -134,11 +137,13 @@
                     },
                     "description": {
                         "title": "Description",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 113
                     },
                     "files": {
                         "title": "Files",
                         "type": "array",
+                        "lookup": 114,
                         "items": {
                             "title": "File",
                             "type": "string",
