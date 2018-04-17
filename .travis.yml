@@ -71,6 +71,7 @@ before_install:
 install:
 - pip install coveralls
 - pip install codacy-coverage
+- pip install pip --upgrade
 - python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
 - pip install zc.recipe.egg==2.0.5 --no-cache-dir 
 - pip install -r requirements.txt
