@@ -754,15 +754,11 @@ class WorkflowMapping(Item):
     embedded_list = []
 
 
-WF_RUNNER_ARN = 'arn:aws:states:us-east-1:643366669028:stateMachine:run_awsem_new_pony-dev-1'
-
-
 def validate_input_json(context, request):
     input_json = request.json
     wkfl_uuid = input_json.get('workflow_uuid', 'None')
-    # TODO: check this exists in system
-    if not context.get(wkfl_uuid):
-        request.errors.add('body', None, 'workflow_uuid %s not found in the system' % wkfl_uuid)
+    # if not context.get(wkfl_uuid):
+    #    request.errors.add('body', None, 'workflow_uuid %s not found in the system' % wkfl_uuid)
     if not input_json.get('metadata_only'):
         request.errors.add('body', None, 'metadata_only must be set to true in input_json')
 
@@ -777,7 +773,6 @@ def pseudo_run(context, request):
     # for testing
     if not env:
         env = 'fourfront-webdev'
-
     input_json['env_name'] = env
     input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
     if input_json.get('app_name', None) is None:
