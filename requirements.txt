@@ -1,4 +1,7 @@
 zc.recipe.egg==2.0.4
+splinter==0.7.3
+requests==2.9.1
+six==1.11.0
 Mako==1.0.4
 MarkupSafe==0.23
 PasteDeploy==1.5.2
