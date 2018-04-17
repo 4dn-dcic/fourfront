@@ -20,15 +20,12 @@ export function parseSectionsContent(context = this.props.context){
     function parse(section){
         if (section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
             var content = compiler(section.content, {
-                'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
-                    .map(function(type){
-                        return [type, {
-                            component : MarkdownHeading,
-                            props : { 'type' : type }
-                        }];
-                    })
-                    .object()
-                    .value()
+                'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+                    return [type, {
+                        'component' : MarkdownHeading,
+                        'props'     : { 'type' : type }
+                    }];
+                }))
             });
             section =  _.extend({}, section, { 'content' : content });
         }
@@ -134,10 +131,10 @@ class Wrapper extends React.Component {
                     fixedWidth={(1140 * ((12 - contentColSize) / 12))}
                     navigate={this.props.navigate}
                     href={this.props.href}
-                    skipDepth={toc['skip-depth'] || 0}
+                    //skipDepth={1}
                     maxHeaderDepth={toc['header-depth'] || 6}
-                    includeTop={toc['include-top-link']}
-                    listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
+                    //includeTop={toc['include-top-link']}
+                    //listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
                 />
             </div>
         );
@@ -184,14 +181,23 @@ export class MarkdownHeading extends React.Component {
     componentWillUnmount(){ delete this.id; }
 
     render(){
-        return React.createElement(
-            this.props.type,
-            {
-                'children' : this.props.children,
-                'id' : this.getID(true),
-                'ref' : 'el'
-            }
-        );
+        var { type, children } = this.props;
+        children = Array.isArray(children) ? children : [children];
+        var propsToPass = {
+            'children' : children,
+            'id' : this.getID(true)
+        };
+        
+        let childrenOuterText = _.filter(children, function(c){ return typeof c === 'string'; }).join(' ');
+        let classMatch = childrenOuterText.match(/({:[.-\w]+})/g);
+        if (classMatch && classMatch.length){
+            propsToPass.children = _.map(children, function(c){
+                if (typeof c === 'string') return c.replace(classMatch[0], '');
+                return c;
+            });
+            propsToPass.className = classMatch[0].replace('{:', '').replace('}', '').split('.').join(' ');
+        }
+        return React.createElement(type, propsToPass);
     }
 }
 

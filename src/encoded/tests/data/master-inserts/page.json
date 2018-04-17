@@ -29,9 +29,7 @@
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {
@@ -41,7 +39,10 @@
         "title": "Creating an Account",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b014"
-        ]
+        ],
+        "table-of-contents": {
+            "enabled": true
+        }
     },
     {
         "name": "help/getting-started",
@@ -58,9 +59,7 @@
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {
@@ -73,14 +72,12 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 2,
+            "header-depth": 4,
             "list-styles": [
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {
@@ -98,9 +95,7 @@
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {
@@ -119,9 +114,7 @@
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {
@@ -139,9 +132,7 @@
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {
@@ -159,9 +150,7 @@
                 "decimal",
                 "lower-alpha",
                 "lower-roman"
-            ],
-            "include-top-link": false,
-            "skip-depth": 1
+            ]
         }
     },
     {

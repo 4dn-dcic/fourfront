@@ -187,15 +187,14 @@ h5.fourDN-header {
 			}
 			.top-of-page {
 				display: block;
-				border-bottom: 1px solid #eee;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
 				color: #999;
-
-				> a {
-					padding-top: 10px;
-					padding-bottom: 10px;
+				&.with-border-bottom {
+					padding-bottom: 7px;
+					margin-bottom: 7px;
+					border-bottom: 1px solid #eee;
 				}
 				
 				> small {
@@ -207,12 +206,7 @@ h5.fourDN-header {
 						color: #ccc;
 					}
 				}
-				&:hover {
-					> small {
-						display: inline;
-						opacity: 1;
-					}
-				}
+				
 				i.icon {
 					color: #888;
 					text-align: center;
@@ -222,16 +216,24 @@ h5.fourDN-header {
 					float: left;
 					padding-top: 0px;
 					padding-bottom: 0px;
-					height: 33px;
-					line-height: 33px;
+					margin-right: 2px;
+					line-height: 24px;
+				}
+				&:hover {
+					> small {
+						display: inline;
+						opacity: 1;
+					}
+					i.icon {
+						color: #000;
+					}
 				}
 			}
 
 			a {
 				display: block;
 				transition: color .5s .25s;
-				font-weight: 400;
-				padding: 5px 0px 7px 22px;
+				padding: 5px 0px 5px 22px;
 				border-top: 1px dotted transparent;
 				border-bottom: 1px dotted transparent;
 				margin-bottom: 0;
@@ -283,11 +285,25 @@ h5.fourDN-header {
 				}
 			}
 
+			&[data-depth="2"] > div.title-link-wrapper {
+				> a {
+					padding-bottom: 7px;
+				}
+			}
+
 			&.active {
 				font-weight: 700;
 				color: #000;
 				> * {
 					font-weight: 400;
+				}
+				&.top[data-depth="0"] > .top-of-page > div.title-link-wrapper {
+					> a {
+						color: #000;
+					}
+				}
+				> div.title-link-wrapper > a{
+					color: #000;
 				}
 			}
 
@@ -302,7 +318,16 @@ h5.fourDN-header {
 
 	}
 
+	.next-previous-pages-section {
+		margin-top: 5px;
+		&:not(:first-child){
+			border-top: 1px solid #eee;
+		}
+		
+	}
+
 	> ol.inner {
+		margin-bottom: 6px;
 		> li:first-child {
 			margin-top: 8px;
 			a { border-top: none; }
