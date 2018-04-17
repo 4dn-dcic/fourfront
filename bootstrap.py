@@ -57,7 +57,7 @@ if options.version:
 # load/install setuptools
 if options.setuptools_version is not None:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'setuptools==%s' %
-                           option.setuptools_version])
+                           options.setuptools_version])
     #pip.main(['install', 'setuptools==%s' % options.setuptools_version])
 else:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'setuptools'])
@@ -68,7 +68,7 @@ else:
 # Install buildout
 if options.buildout_version is not None:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-deps', '--upgrade',
-                           'zc.buildouts==%s' % option.buildout_version])
+                           'zc.buildouts==%s' % options.buildout_version])
     #pip.main(['install',  '--no-deps', '--upgrade', 'zc.buildout==%s' % options.buildout_version])
 else:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-deps', '--upgrade',
