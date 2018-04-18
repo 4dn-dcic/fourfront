@@ -77,6 +77,7 @@ install:
   #- pip install zc.recipe.egg==2.0.5 --no-cache-dir
   #- pip install -r requirements.txt
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
+- pip show pytest
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
