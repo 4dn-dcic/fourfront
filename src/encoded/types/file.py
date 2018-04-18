@@ -299,7 +299,6 @@ class File(Item):
         # return '{}{}'.format(accession, file_extension)
         return outString
 
-
     def _update(self, properties, sheets=None):
         if not properties:
             return
@@ -676,6 +675,7 @@ class FileProcessed(File):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
 
+
 @collection(
     name='files-reference',
     unique_key='accession',
@@ -825,7 +825,7 @@ def is_file_to_download(properties, mapping, expected_filename=None):
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
 
-    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries 
+    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers \
                                                 or 'Range' in request.headers
     try:
@@ -868,7 +868,7 @@ def download(context, request):
             'ResponseContentDisposition': "attachment; filename=" + filename
         }
         if 'Range' in request.headers:
-            param_get_object.update('Range': request.headers.get('Range'))
+            param_get_object.update({'Range': request.headers.get('Range')})
         location = conn.generate_presigned_url(
             ClientMethod='get_object',
             Params=param_get_object,
@@ -896,7 +896,7 @@ def download(context, request):
             'content_length': response_body.get('ContentLength')
         }
         if 'Range' in request.headers:
-            response_dict.update('content_range': response_body.get('ContentRange'))
+            response_dict.update({'content_range': response_body.get('ContentRange')})
         return Response(**response_dict)
 
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
@@ -955,16 +955,15 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
             # already got this md5
             found = search_resp.json['@graph'][0]['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
-                                              (data['md5sum'], found))
-    else: # find it in the database
-       conn = request.registry['connection']
-       res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
-       if res is not None:
+                               (data['md5sum'], found))
+    else:  # find it in the database
+        conn = request.registry['connection']
+        res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
+        if res is not None:
             # md5 already exists
             found = res.properties['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
-                                              (data['md5sum'], found))
-
+                               (data['md5sum'], found))
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
