@@ -88,16 +88,16 @@
 
 
     {
-        "name" : "about#introduction",
+        "name" : "about.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b008",
         "file" : "/src/encoded/static/data/about/introduction.html"
     }, {
-        "name" : "about#dcic",
+        "name" : "about.dcic",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b009",
         "title" : "Team",
         "file" : "/src/encoded/static/data/about/dcic.html"
     }, {
-        "name" : "about#acknowledgements",
+        "name" : "about.acknowledgements",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b010",
         "title" : "Acknowledgements",
         "file" : "/src/encoded/static/data/about/acknowledgements.html"
@@ -107,61 +107,61 @@
 
 
     {
-        "name" : "help#introduction",
+        "name" : "help.user-guide.data-organization.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b011",
         "file" : "/docs/public/help/introduction.md"
     }, {
-        "name" : "help#carousel-place-holder",
+        "name" : "help.user-guide.data-organization.carousel-place-holder",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b012",
         "body" : "placeholder: <SlideCarousel />"
     }, {
-        "name" : "help#introduction2",
+        "name" : "help.user-guide.data-organization.introduction2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b013",
         "file" : "/docs/public/help/introduction2.md"
     },
 
 
     {
-        "name" : "help.account-creation#account_creation",
+        "name" : "help.user-guide.account-creation.account_creation",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b014",
         "file" : "/docs/public/metadata-submission/account_creation.md"
     },
 
 
     {
-        "name" : "help.getting-started#getting_started",
+        "name" : "help.user-guide.getting-started.getting_started",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b015",
         "file" : "/docs/public/metadata-submission/getting_started.md"
     },
 
 
     {
-        "name" : "help.biosample#metadata",
+        "name" : "help.submitter-guide.biosample-metadata.metadata",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b016",
         "file" : "/docs/public/metadata-submission/biosample_metadata.md"
     },
 
 
     {
-        "name" : "help.web-submission#web_submission",
+        "name" : "help.submitter-guide.web-submission.web_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b017",
         "file" : "/docs/public/metadata-submission/web_submission.md"
     },
 
 
     {
-        "name" : "help.spreadsheet#excel_submission",
+        "name" : "help.submitter-guide.spreadsheet.excel_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b018",
         "file" : "/docs/public/metadata-submission/excel_submission.md"
     }, {
-        "name" : "help.spreadsheet#schema_info",
+        "name" : "help.submitter-guide.spreadsheet.schema_info",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b019",
         "file" : "/docs/public/metadata-submission/schema_info.md"
     },
 
 
     {
-        "name" : "help.rest-api#rest_api_submission",
+        "name" : "help.submitter-guide.rest-api.rest_api_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020",
         "file" : "/docs/public/metadata-submission/rest_api_submission.md"
     },
@@ -177,7 +177,7 @@
 
     {
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b021",
-        "name" : "error.login-failed#no_account",
+        "name" : "error.login-failed.no_account",
         "body" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium.<br/><b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>."
     },
 
@@ -185,12 +185,12 @@
 
 
     {
-        "name" : "nofic-matrix.2017-05#introduction",
+        "name" : "nofic-matrix.2017-05.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b022",
         "title" : "Introduction",
         "body" : "This matrix shows a cross-section of experiment methods & groups vs cell lines."
     }, {
-        "name" : "nofic-matrix.2017-05#nofic-matrix-1",
+        "name" : "nofic-matrix.2017-05.nofic-matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b023",
         "file" : "/src/encoded/static/data/nofic-collab.csv",
         "options" : {
@@ -204,7 +204,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "nofic-matrix.2017-05#nofic-matrix-2",
+        "name" : "nofic-matrix.2017-05.nofic-matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b024",
         "file" : "/src/encoded/static/data/nofic-collab.csv",
         "options" : {
@@ -221,11 +221,11 @@
 
 
     {
-        "name" : "joint-analysis-data-plans#legend",
+        "name" : "joint-analysis-data-plans.legend",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b025",
         "file" : "/src/encoded/static/data/joint_data_analysis-legend.html"
     }, {
-        "name" : "joint-analysis-data-plans#matrix-1",
+        "name" : "joint-analysis-data-plans.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b026",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
@@ -238,7 +238,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans#matrix-2",
+        "name" : "joint-analysis-data-plans.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b027",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
@@ -251,7 +251,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans#matrix-3",
+        "name" : "joint-analysis-data-plans.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b028",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
@@ -264,7 +264,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans#matrix-4",
+        "name" : "joint-analysis-data-plans.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b029",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
         "options": {
@@ -280,7 +280,7 @@
 
 
     {
-        "name" : "joint-analysis-data-plans.dev#matrix-1",
+        "name" : "joint-analysis-data-plans.dev.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b030",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
@@ -293,7 +293,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.dev#matrix-2",
+        "name" : "joint-analysis-data-plans.dev.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b031",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
@@ -306,7 +306,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.dev#matrix-3",
+        "name" : "joint-analysis-data-plans.dev.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b032",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
@@ -319,7 +319,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.dev#matrix-4",
+        "name" : "joint-analysis-data-plans.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b033",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
         "options": {
@@ -335,7 +335,7 @@
 
 
     {
-        "name" : "joint-analysis-data-plans.jan2018#matrix-1",
+        "name" : "joint-analysis-data-plans.jan2018.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b034",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
@@ -348,7 +348,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.jan2018#matrix-2",
+        "name" : "joint-analysis-data-plans.jan2018.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b035",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
@@ -361,7 +361,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.jan2018#matrix-3",
+        "name" : "joint-analysis-data-plans.jan2018.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b036",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
@@ -374,7 +374,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.jan2018#matrix-4",
+        "name" : "joint-analysis-data-plans.jan2018.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b037",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
         "options": {
@@ -390,7 +390,7 @@
 
 
     {
-        "name" : "joint-analysis-data-plans.jan2018.dev#matrix-1",
+        "name" : "joint-analysis-data-plans.jan2018.dev.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b038",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
@@ -403,7 +403,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.jan2018.dev#matrix-2",
+        "name" : "joint-analysis-data-plans.jan2018.dev.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b039",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
@@ -416,7 +416,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.jan2018.dev#matrix-3",
+        "name" : "joint-analysis-data-plans.jan2018.dev.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b040",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
@@ -429,7 +429,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.jan2018.dev#matrix-4",
+        "name" : "joint-analysis-data-plans.jan2018.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b041",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
         "options": {
@@ -445,7 +445,7 @@
 
 
     {
-        "name" : "joint-analysis-data-plans.july2018#matrix-1",
+        "name" : "joint-analysis-data-plans.july2018.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b042",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
@@ -458,7 +458,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.july2018#matrix-2",
+        "name" : "joint-analysis-data-plans.july2018.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b043",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
@@ -471,7 +471,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.july2018#matrix-3",
+        "name" : "joint-analysis-data-plans.july2018.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b044",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
@@ -484,7 +484,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.july2018#matrix-4",
+        "name" : "joint-analysis-data-plans.july2018.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b045",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
         "options": {
@@ -500,7 +500,7 @@
 
 
     {
-        "name" : "joint-analysis-data-plans.july2018.dev#matrix-1",
+        "name" : "joint-analysis-data-plans.july2018.dev.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b046",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
@@ -513,7 +513,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.july2018.dev#matrix-2",
+        "name" : "joint-analysis-data-plans.july2018.dev.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b047",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
@@ -526,7 +526,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.july2018.dev#matrix-3",
+        "name" : "joint-analysis-data-plans.july2018.dev.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b048",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
@@ -539,7 +539,7 @@
             "xaxisTitle":"Cell Line"
         }
     }, {
-        "name" : "joint-analysis-data-plans.july2018.dev#matrix-4",
+        "name" : "joint-analysis-data-plans.july2018.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b049",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
@@ -557,7 +557,7 @@
 
 
     {
-        "name" : "planned-submissions-matrix#matrix-1",
+        "name" : "planned-submissions-matrix.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b050",
         "file" : "/src/encoded/static/data/dense_format.csv",
         "options": {
@@ -574,7 +574,7 @@
 
 
     {
-        "name" : "privacy-policy#policy-content",
+        "name" : "privacy-policy.policy-content",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b051",
         "file" : "/src/encoded/static/data/privacy-policy.md"
     }

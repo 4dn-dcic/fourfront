@@ -427,6 +427,18 @@ export class TableOfContents extends React.Component {
         return proto && proto.isPrototypeOf(React.Component.prototype);
     }
 
+    static elementIDFromSectionName(sectionName){
+        var sectionParts;
+        if (sectionName.indexOf('#') > -1){
+            sectionParts = sectionName.split('#');
+            sectionName = sectionParts[sectionParts.length - 1];
+        } else if (sectionName.indexOf('.') > -1){
+            sectionParts = sectionName.split('.');
+            sectionName = sectionParts[sectionParts.length - 1];
+        }
+        return sectionName;
+    }
+
     static defaultProps = {
         "context" : {
             "title" : "Page Title",
@@ -536,12 +548,8 @@ export class TableOfContents extends React.Component {
         function sectionEntries(){
             var lastSection = null;
             return _(context.content).chain()
-                .pairs()
-                .map(function(entryPair){
-                    return _.extend(entryPair[1], { 'link' : entryPair[0] });
-                })
                 .sortBy(function(s){
-                    return s.order || 0;
+                    return s.order || 99;
                 })
                 .map((s, i, all)=>{
                     if (lastSection) lastSection.nextHeader = s.link;
@@ -560,10 +568,11 @@ export class TableOfContents extends React.Component {
                         });
                         return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, s.content, opts);
                     }
+                    var link = TableOfContents.elementIDFromSectionName(s.name);
                     return (<TableEntry
-                        link={s.link}
+                        link={link}
                         title={s['toc-title'] || s.title}
-                        key={s.link}
+                        key={link}
                         depth={1}
                         content={s.content}
                         listStyleTypes={listStyleTypes}

@@ -933,7 +933,8 @@ def find_index_by_doc_types(request, doc_types, ignore):
 
 def make_search_subreq(request, path):
     subreq = make_subrequest(request, path)
-    subreq._stats = request._stats
+    if hasattr(request, "_stats"):
+        subreq._stats = request._stats
     subreq.registry = request.registry
     if hasattr(request, "context"):
         subreq.context = request.context

@@ -32,19 +32,10 @@ def get_pyramid_http_exception_for_redirect_code(code):
     return code_dict[code]
 
 
-
-tree_cache = {
-    'tree' : None,
-    'last_generated' : None
-}
-
-def generate_page_tree(request, use_cached=True):
+def generate_page_tree(request):
 
     # TODO:
     # (a) Get rid of 'content' fields from search request if we don't wanna show sections in directories.
-
-    if use_cached and tree_cache['tree'] is not None and tree_cache['last_generated'] is not None and tree_cache['last_generated'] + timedelta(minutes=5) > datetime.now():
-        return tree_cache['tree']
 
     root = { "name" : "/", "children" : [], "@id" : '/', "display_title" : "Home" }
 
@@ -107,8 +98,6 @@ def generate_page_tree(request, use_cached=True):
                 cleanup_tree(child)
 
     cleanup_tree(root)
-    tree_cache['last_generated'] = datetime.now()
-    tree_cache['tree'] = root
 
     return root
 
@@ -140,9 +129,9 @@ def is_static_page(info, request):
     if path_parts[0] != "pages" and path_parts[0] in request.registry[COLLECTIONS].keys():
         return False
 
-    tree = generate_page_tree(request)
+    request.set_property(generate_page_tree, name='page_tree', reify=True)
 
-    curr_node = tree
+    curr_node = request.page_tree
     for part in path_parts:
         found_child = False
         for child in curr_node.get('children', []):
@@ -300,7 +289,7 @@ def static_page(request):
     path_parts = [ path_part for path_part in request.subpath if path_part ]
     page_name = "/".join(path_parts)
 
-    tree = add_sibling_parent_relations_to_tree(generate_page_tree(request))
+    tree = add_sibling_parent_relations_to_tree(request.page_tree)
     curr_node = tree
     page_exists = True
     for path_idx, part in enumerate(path_parts):

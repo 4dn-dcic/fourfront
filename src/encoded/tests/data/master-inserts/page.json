@@ -12,8 +12,10 @@
             "enabled": false
         }
     },
+
+
     {
-        "name": "help/introduction",
+        "name": "help/user-guide/data-organization",
         "order": 0,
         "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
         "title": "Introduction to 4DN Metadata",
@@ -24,16 +26,12 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 4,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
+            "header-depth": 4
         }
     },
+
     {
-        "name": "help/account-creation",
+        "name": "help/user-guide/account-creation",
         "order" : 1,
         "uuid": "5153c902-a0d2-4246-9b41-cea7a1c91f52",
         "title": "Creating an Account",
@@ -45,7 +43,7 @@
         }
     },
     {
-        "name": "help/getting-started",
+        "name": "help/user-guide/getting-started",
         "order" : 2,
         "uuid": "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
         "title": "Getting Started with Submissions",
@@ -54,16 +52,11 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 4,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
+            "header-depth": 4
         }
     },
     {
-        "name": "help/biosample",
+        "name": "help/user-guide/biosample-metadata",
         "order" : 3,
         "uuid": "3c999ac4-1727-4aac-96f5-61ae701a4006",
         "title": "Biosample Metadata",
@@ -72,17 +65,25 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 4,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
+            "header-depth": 4
         }
     },
     {
-        "name": "help/web-submission",
+        "name": "help/user-guide/rest-api",
         "order": 4,
+        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb",
+        "title": "The REST-API",
+        "content": [
+            "442c8aa0-dc6c-43d7-814a-854af460b020"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4
+        }
+    },
+    {
+        "name": "help/submitter-guide/web-submission",
+        "order": 1,
         "uuid": "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
         "title": "Online Submissions",
         "content": [
@@ -90,17 +91,12 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 4,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
+            "header-depth": 4
         }
     },
     {
-        "name": "help/spreadsheet",
-        "order": 5,
+        "name": "help/submitter-guide/spreadsheet",
+        "order": 2,
         "uuid": "4f115e02-5291-436d-92e8-617af96355df",
         "title": "Spreadsheet Submissions",
         "content": [
@@ -109,32 +105,11 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 3,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
+            "header-depth": 3
         }
     },
-    {
-        "name": "help/rest-api",
-        "order": 6,
-        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb",
-        "title": "The REST-API",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b020"
-        ],
-        "table-of-contents": {
-            "enabled": true,
-            "header-depth": 4,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
-        }
-    },
+
+
     {
         "name": "help/data-processing-pipelines",
         "order": 7,
@@ -145,12 +120,7 @@
         ],
         "table-of-contents": {
             "enabled": true,
-            "header-depth": 3,
-            "list-styles": [
-                "decimal",
-                "lower-alpha",
-                "lower-roman"
-            ]
+            "header-depth": 3
         }
     },
     {

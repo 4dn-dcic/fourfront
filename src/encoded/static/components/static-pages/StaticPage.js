@@ -203,18 +203,8 @@ export class StaticEntry extends React.Component {
 
     render(){
         var { content, entryType, sectionName, className } = this.props;
-        var sectionParts;
-
-        if (sectionName.indexOf('#') > -1){
-            sectionParts = sectionName.split('#');
-            sectionName = sectionParts[sectionParts.length - 1];
-        } else if (sectionName.indexOf('.') > -1){
-            sectionParts = sectionName.split('.');
-            sectionName = sectionParts[sectionParts.length - 1];
-        }
-
         return (
-            <div className={entryType + "-entry static-section-entry"} id={sectionName}>
+            <div className={entryType + "-entry static-section-entry"} id={TableOfContents.elementIDFromSectionName(sectionName)}>
                 { content && content.title ? <h2 className="fourDN-header">{ content.title }</h2> : null }
                 { this.renderEntryContent(className) }
             </div>
