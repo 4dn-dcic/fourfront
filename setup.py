@@ -49,7 +49,7 @@ requires = [
     'zope.sqlalchemy',
     'pyJWT>=1.5.3',
     # add it here for some command line tools
-    'pytest>=2.4.0',
+    'pytest==2.9.1',
 ]
 
 if sys.version_info.major == 2:
