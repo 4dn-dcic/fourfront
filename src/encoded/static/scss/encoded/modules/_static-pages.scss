@@ -144,11 +144,12 @@ h5.fourDN-header {
 		position: fixed;
 		margin: 0 -10px;
 		padding: 0 10px;
-		top: 115px;
-		transition: top .75s, max-height .75s, margin-top .75s ease-out;
+		padding-bottom: 60px;
+		top: 82px;
+		transition: top .3s ease-out, margin-top .5s ease-out;
 		overflow-y: auto;
 		body.scrolled-past-top & {
-			top : 70px;
+			top : 42px;
 		}
 	}
 
@@ -163,9 +164,10 @@ h5.fourDN-header {
 		padding-left: 20px;
 		> li {
 			line-height: 1.25rem;
-			transition: font-weight .5s .25s, color .5s .25s;
+			transition: color .5s 0s;
 			color: #888;
 			position: relative;
+			font-weight: 400;
 			
 			&[data-depth="0"] {
 				padding-top: 0;
@@ -234,7 +236,7 @@ h5.fourDN-header {
 
 			a {
 				display: block;
-				transition: color .5s .25s;
+				transition: color .5s 0s;
 				padding: 5px 0px 5px 22px;
 				border-top: 1px dotted transparent;
 				border-bottom: 1px dotted transparent;

@@ -145,19 +145,19 @@ class TableEntry extends React.Component {
             }
             if (
                 nextHeaderTop &&
-                props.pageScrollTop >= Math.max(props.depth > 0 ? 40 : 0, elemTop - props.offsetBeforeTarget - 150) &&
-                props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 150)
+                props.pageScrollTop >= Math.max(props.depth > 0 ? 40 : 0, elemTop - props.offsetBeforeTarget - 120) &&
+                props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 120)
             ) return true;
             else return false;
         } else if (targetElem && targetElem.className.split(' ').indexOf('static-section-entry') > -1) {
             var elemStyle = (targetElem.computedStyle || window.getComputedStyle(targetElem));
             if (
-                props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 150) &&
+                props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 120) &&
                 props.pageScrollTop <  (
                     elemTop +
                     parseInt(elemStyle.marginTop) +
                     targetElem.offsetHeight -
-                    props.offsetBeforeTarget - 150
+                    props.offsetBeforeTarget - 120
                 )
             ) return true;
             else return false;
@@ -245,9 +245,20 @@ class TableEntryChildren extends React.Component {
 
     static getHeadersFromContent(jsxContent, maxHeaderDepth, currentDepth){
         if (!TableOfContents.isContentJSX(jsxContent)) return [];
-        return jsxContent.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
-        );
+        let depthToFind = currentDepth;
+        let childrenForDepth = [];
+        while (depthToFind <= Math.min(maxHeaderDepth, 5) && childrenForDepth.length === 0){
+            childrenForDepth = _.filter(jsxContent.props.children, function(child,i,a){
+                return TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (depthToFind + 1);
+            });
+            if (childrenForDepth.length === 0){
+                depthToFind++;
+            }
+        }
+        return {
+            'childDepth' : depthToFind,
+            'childHeaders' : childrenForDepth
+        };
     }
 
     static getSubsequentChildHeaders(header, jsxContent, maxHeaderDepth, currentDepth){
@@ -352,11 +363,11 @@ class TableEntryChildren extends React.Component {
     }
 
     children(){
-        var childHeaders = this.getHeadersFromContent();
+        var { childHeaders, childDepth } = this.getHeadersFromContent();
         if (childHeaders && childHeaders.length){
             var opts = _.pick(this.props, 'maxHeaderDepth', 'pageScrollTop', 'listStyleTypes', 'skipDepth', 'nextHeader', 'mounted');
             var { content, depth } = this.props;
-            return TableEntryChildren.renderChildrenElements(childHeaders, depth, content, opts);
+            return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, content, opts);
         } else {
             return this.props.children;
         }
@@ -541,13 +552,13 @@ export class TableOfContents extends React.Component {
                 .map((s,i,all) => {
                     if (_.filter(all, function(section){ return section.title || s['toc-title']; }).length < 2){
                         skipDepth = 1;
-                        var childHeaders = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
+                        var { childHeaders, childDepth } = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
                         var opts = _.extend({ childHeaders, maxHeaderDepth, listStyleTypes, skipDepth }, {
                             'mounted' : this.state.mounted,
                             'pageScrollTop' : this.state.scrollTop,
                             'nextHeader' : s.nextHeader
                         });
-                        return TableEntryChildren.renderChildrenElements(childHeaders, 1, s.content, opts);
+                        return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, s.content, opts);
                     }
                     return (<TableEntry
                         link={s.link}
@@ -572,7 +583,7 @@ export class TableOfContents extends React.Component {
             
         if (context && context.parent && context.parent['@id']){
             content.push(
-                <li className="table-content-entry" data-depth="0">
+                <li className="table-content-entry" data-depth="0" key="parent-link">
                     <span title="Up to page listing" className="top-of-page with-border-bottom visible-lg-block visible-lg">
                         <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
                     </span>
@@ -610,7 +621,7 @@ export class TableOfContents extends React.Component {
         var isEmpty = (Array.isArray(content) && !_.filter(content).length) || !content;
 
         return (
-            <div className="table-of-contents" ref="container" style={{
+            <div key="toc" className="table-of-contents" ref="container" style={{
                 width : this.state.mounted ?
                         window.innerWidth > 1200 ? this.props.fixedWidth || 'inherit'
                         :'inherit'
@@ -650,15 +661,10 @@ export class MarkdownHeading extends React.Component {
         let attrMatch = childrenOuterText.match(/({:[.-\w#]+})/g);
         if (attrMatch && attrMatch.length){
             attr.matchedString = attrMatch[0];
-            //propsToPass.children = _.map(children, function(c){
-            //    if (typeof c === 'string') return c.replace(attrMatch[0], '');
-            //    return c;
-            //});
             attrMatch = attrMatch[0].replace('{:', '').replace('}', '');
             var idMatch = attrMatch.match(/(#[-\w]+)/g);
             if (idMatch && idMatch.length){
                 idMatch = idMatch[0].replace('#', '');
-                //if (!propsToPass.id) propsToPass.id = idMatch;
                 attr.id = idMatch;
                 attrMatch = attrMatch.replace('#' + idMatch, '');
             }
@@ -698,9 +704,6 @@ export class MarkdownHeading extends React.Component {
         };
 
         var attributes = MarkdownHeading.getAttributes(children);
-        
-        //let childrenOuterText = _.filter(children, function(c){ return typeof c === 'string'; }).join(' ');
-        //let attrMatch = childrenOuterText.match(/({:[.-\w#]+})/g);
 
         if (attributes && attributes.matchedString){
             propsToPass.children = _.map(children, function(c){

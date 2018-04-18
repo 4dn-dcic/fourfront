@@ -124,7 +124,7 @@ class Wrapper extends React.Component {
         var toc = context['table-of-contents'] || (this.props.tableOfContents && typeof this.props.tableOfContents === 'object' ? this.props.tableOfContents : {});
         var title = this.props.title || (context && context.title) || null;
         return (
-            <div className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
+            <div key="toc-wrapper" className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
                 <TableOfContents
                     context={context}
                     pageTitle={title}
@@ -147,9 +147,9 @@ class Wrapper extends React.Component {
         var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
 
         return (
-            <div className="static-page row">
+            <div className="static-page row" key="wrapper">
                 { this.renderToC() }
-                <div className={mainColClassName} children={this.props.children}/>
+                <div key="main-column" className={mainColClassName} children={this.props.children}/>
             </div>
         );
     }
@@ -203,8 +203,13 @@ export class StaticEntry extends React.Component {
 
     render(){
         var { content, entryType, sectionName, className } = this.props;
+        var sectionParts;
+
         if (sectionName.indexOf('#') > -1){
-            var sectionParts = sectionName.split('#');
+            sectionParts = sectionName.split('#');
+            sectionName = sectionParts[sectionParts.length - 1];
+        } else if (sectionName.indexOf('.') > -1){
+            sectionParts = sectionName.split('.');
             sectionName = sectionParts[sectionParts.length - 1];
         }
 
@@ -276,6 +281,7 @@ export default class StaticPage extends React.Component {
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
+                key="page-wrapper"
                 title={parsedContent.title}
                 tableOfContents={tableOfContents}
                 context={parsedContent}
