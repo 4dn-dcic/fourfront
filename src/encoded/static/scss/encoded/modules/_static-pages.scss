@@ -148,8 +148,15 @@ h5.fourDN-header {
 		top: 82px;
 		transition: top .3s ease-out, margin-top .5s ease-out;
 		overflow-y: auto;
+		right: 10px;
+		max-width: 340px;
+		border-left: 1px solid #eee;
+		padding-left: 16px;
 		body.scrolled-past-top & {
 			top : 42px;
+		}
+		ol, .next-previous-pages-section {
+			max-width: 320px;
 		}
 	}
 
@@ -160,7 +167,7 @@ h5.fourDN-header {
 		margin-bottom: 0;
 	}
 
-	ol { 
+	ol {
 		padding-left: 20px;
 		> li {
 			line-height: 1.25rem;

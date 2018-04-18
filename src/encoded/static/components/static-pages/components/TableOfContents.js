@@ -491,7 +491,11 @@ export class TableOfContents extends React.Component {
         }
     }
 
-    shouldComponentUpdate(nextProps,nextState){
+    shouldComponentUpdate(nextProps, nextState){
+        if (this.updateQueued){
+            this.updateQueued = false;
+            return true;
+        }
         if (nextState.mounted !== this.state.mounted) return true;
         if (nextState.scrollTop !== this.state.scrollTop) return true;
         return false;
@@ -510,6 +514,7 @@ export class TableOfContents extends React.Component {
     }
 
     onResize(e){
+        this.updateQueued = true;
         setTimeout(()=>{
             this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
         }, 0);
@@ -522,13 +527,13 @@ export class TableOfContents extends React.Component {
             <div className="next-previous-pages-section">
                 <div className="row">
                 { context.previous ?
-                    <div className={"previous-section text-right col-xs-" + (context.next ? '6' : '12')}>
+                    <div className={"previous-section text-right col-xs-6"}>
                         <h6 className="text-400 mb-03 mt-12"><i className="icon icon-fw icon-angle-left"/> Previous</h6>
                         <h6 className="text-500 mt-0"><a href={context.previous['@id']}>{ context.previous.display_title }</a></h6>
                     </div>
                 : null }
                 { context.next ?
-                    <div className={"next-section col-xs-" + (context.previous ? '6' : '12')}>
+                    <div className={"next-section col-xs-6 pull-right"}>
                         <h6 className="text-400 mb-03 mt-12">Next <i className="icon icon-fw icon-angle-right"/></h6>
                         <h6 className="text-500 mt-0"><a href={context.next['@id']}>{ context.next.display_title }</a></h6>
                     </div>
@@ -541,7 +546,7 @@ export class TableOfContents extends React.Component {
     render(){
 
         var listStyleTypes = this.props.listStyleTypes.slice(0);
-        var { context, maxHeaderDepth, includeTop } = this.props;
+        var { context, maxHeaderDepth, includeTop, fixedGridWidth } = this.props;
 
         var skipDepth = 0;
 
@@ -552,6 +557,7 @@ export class TableOfContents extends React.Component {
                     return s.order || 99;
                 })
                 .map((s, i, all)=>{
+                    s.link = TableOfContents.elementIDFromSectionName(s.name);
                     if (lastSection) lastSection.nextHeader = s.link;
                     lastSection = s;
                     if (all.length - 1 === i) s.nextHeader = 'bottom';
@@ -568,11 +574,10 @@ export class TableOfContents extends React.Component {
                         });
                         return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, s.content, opts);
                     }
-                    var link = TableOfContents.elementIDFromSectionName(s.name);
                     return (<TableEntry
-                        link={link}
+                        link={s.link}
                         title={s['toc-title'] || s.title}
-                        key={link}
+                        key={s.link}
                         depth={1}
                         content={s.content}
                         listStyleTypes={listStyleTypes}
@@ -629,17 +634,21 @@ export class TableOfContents extends React.Component {
 
         var isEmpty = (Array.isArray(content) && !_.filter(content).length) || !content;
 
+        function generateFixedWidth(){
+            return 1140 * (fixedGridWidth / 12) + (((document && document.body && document.body.clientWidth) || window.innerWidth) - 1140) / 2 - 10;
+        }
+
         return (
             <div key="toc" className="table-of-contents" ref="container" style={{
-                width : this.state.mounted ?
-                        window.innerWidth > 1200 ? this.props.fixedWidth || 'inherit'
+                width : this.state.mounted && typeof window !== 'undefined' && typeof window.innerWidth === 'number' ?
+                        window.innerWidth >= 1200 ? generateFixedWidth() || 'inherit'
                         :'inherit'
-                    : this.props.fixedWidth,
+                    : 285,
                 height:
                     (this.state.mounted && typeof window !== 'undefined' && typeof window.innerHeight === 'number' ?
-                        window.innerWidth > 1200 ?
+                        window.innerWidth >= 1200 ?
                             ( this.props.maxHeight ||
-                              this.state.scrollTop >= 40 ? window.innerHeight - 70 : window.innerHeight - 115 ) :
+                              this.state.scrollTop >= 40 ? window.innerHeight - 42 : window.innerHeight - 82 ) :
                             null
                     : 1000),
                 marginTop : marginTop

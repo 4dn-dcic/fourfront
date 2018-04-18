@@ -128,7 +128,7 @@ class Wrapper extends React.Component {
                 <TableOfContents
                     context={context}
                     pageTitle={title}
-                    fixedWidth={(1140 * ((12 - contentColSize) / 12))}
+                    fixedGridWidth={12 - contentColSize}
                     navigate={this.props.navigate}
                     href={this.props.href}
                     //skipDepth={1}
