@@ -888,7 +888,7 @@ def download(context, request):
     if proxy:
         return Response(headers={'X-Accel-Redirect': '/_proxy/' + str(location)})
     else:
-        return Response(body=response_body.get('Body').read(), status_code=216)
+        return Response(body=response_body.get('Body').read(), status_code=206)
 
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
