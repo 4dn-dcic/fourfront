@@ -45,7 +45,8 @@ If you need to update dependencies::
 
 Step 3: Run buildout::
 
-    $ python3 bootstrap.py --buildout-version 2.11.3 --setuptools-version 39.0.1
+    $ pip install -U zc.buildout setuptools
+    $ buildout bootstrap 
     $ bin/buildout
 
     NOTE:
