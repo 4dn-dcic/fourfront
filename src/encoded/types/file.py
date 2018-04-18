@@ -34,6 +34,7 @@ from urllib.parse import (
     urlparse,
 )
 import boto
+import boto3
 from boto.exception import BotoServerError
 import datetime
 import json
@@ -860,12 +861,20 @@ def download(context, request):
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto.connect_s3()
-        location = conn.generate_url(
-            36*60*60, request.method, external['bucket'], external['key'],
-            force_http=proxy or use_download_proxy, response_headers={
-                'response-content-disposition': "attachment; filename=" + filename,
-            })
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if 'Range' in request.headers:
+            param_get_object.update('Range': request.headers.get('Range'))
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
+        response_body = conn.get_object(**param_get_object)
     else:
         raise ValueError(external.get('service'))
     if asbool(request.params.get('soft')):
@@ -878,6 +887,8 @@ def download(context, request):
 
     if proxy:
         return Response(headers={'X-Accel-Redirect': '/_proxy/' + str(location)})
+    else:
+        return Response(body=response_body.get('Body').read(), status_code=216)
 
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
