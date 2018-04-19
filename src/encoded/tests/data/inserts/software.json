@@ -474,5 +474,17 @@
         "title": "pairix_0.3.5",
         "uuid": "58c2eadd-7a15-4e8c-960f-9c7022af2bfc",
         "version": "0.3.5"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bedGraphToBigWig",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "https://github.com/ENCODE-DCC/kentUtils",
+        "title": "bedGraphToBigWig_v302.1.0",
+        "uuid": "00eda937-3149-4252-8dc9-c27de59d75ed",
+        "version": "v302.1.0"
     }
 ]
