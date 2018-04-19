@@ -6,7 +6,7 @@ pytestmark = [pytest.mark.working]
 def input_json(workflow):
     # use workflow that should always be in webdev 
     item = {
-        "wfr_alias": ['dekker:hic_run_180101_0001'],
+        "app_name": "hi-c-processing-bam",
         "workflow_uuid": workflow,
         "input_files": [{
                          "object_key": [

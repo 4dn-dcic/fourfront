@@ -35,8 +35,8 @@ def main():
                 return
         # handle mastertest ... by blowing away all data first
         if 'mastertest' in env:
-            # todo, drop database
-            pass
+            run_create_mapping(app, check_fist=False, skip_indexing=True, purge_queue=True)
+            return
     except Exception:
         import traceback
         logger.warn("error checking whodaman: %s " % traceback.format_exc())
