@@ -809,7 +809,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                 print("halt and catch fire")
                 return
 
-            s3 = boto3.client('s3')
+            s3 = boto3.client('s3', region_name='us-east-1')
             secret = secret[:32]
 
             print("Uploading S3 object with SSE-C")
