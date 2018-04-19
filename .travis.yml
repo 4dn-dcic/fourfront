@@ -71,13 +71,20 @@ before_install:
 install:
 - pip install coveralls
 - pip install codacy-coverage
-- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 37.0.0
+- pip install -U zc.buildout setuptools
+- buildout bootstrap
+  #- python bootstrap.py --buildout-version 2.11.3 --setuptools-version 39.0.1
+  #- pip install zc.recipe.egg==2.0.5 --no-cache-dir
+  #- pip install -r requirements.txt
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
+- pip show pytest
+- pip install pytest==2.9.1
+- pip show pytest
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
+- if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=10 --cov
   src/encoded; fi
-- if test -n "$UNIT"; then travis_wait 30 deploy/run_python_unit_tests_on_travis.sh; fi
+- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=10 --cov src/encoded; fi
 - if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS

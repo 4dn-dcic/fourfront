@@ -820,12 +820,19 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
     '''
     generic load data function
     indir for inserts should be relative to tests/data/
     docsdir is relative to tests/data and defaults to no docs dir
     '''
+    if clear_tables:
+        from snovault import DBSESSION
+        from snovault.storage import Base
+        session = app.registry[DBSESSION]
+        Base.metadata.drop_all(session.connection().engine)
+        Base.metadata.create_all(session.connection().engine)
+
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -851,16 +858,19 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None):
     store_keys(app, access_key_loc, keys)
 
 
-def load_test_data(app, access_key_loc=None):
-    load_data(app, access_key_loc, docsdir='documents', indir='inserts')
+def load_test_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+              clear_tables=clear_tables)
 
 
-def load_prod_data(app, access_key_loc=None):
-    load_data(app, access_key_loc, indir='prod-inserts')
+def load_prod_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, indir='prod-inserts',
+              clear_tables=clear_tables)
 
 
-def load_jin_data(app, access_key_loc=None):
-    load_data(app, access_key_loc, indir='jin_inserts')
+def load_jin_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, indir='jin_inserts',
+              clear_tables=clear_tables)
 
 
 def load_ontology_terms(app,
