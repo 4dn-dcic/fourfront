@@ -873,7 +873,7 @@ def download(context, request):
             Params=param_get_object,
             ExpiresIn=36*60*60
         )
-        response_body = conn.get_object(**param_get_object)
+        # response_body = conn.get_object(**param_get_object)
     else:
         raise ValueError(external.get('service'))
     if asbool(request.params.get('soft')):
@@ -886,17 +886,6 @@ def download(context, request):
 
     if proxy:
         return Response(headers={'X-Accel-Redirect': '/_proxy/' + str(location)})
-    else:
-        response_dict = {
-            'body': response_body.get('Body').read(),
-            # status_code : 206 if partial, 200 if the ragne covers whole file
-            'status_code': response_body.get('ResponseMetadata').get('HTTPStatusCode'),
-            'accept_ranges': response_body.get('AcceptRanges'),
-            'content_length': response_body.get('ContentLength')
-        }
-        if 'Range' in request.headers:
-            response_dict.update({'content_range': response_body.get('ContentRange')})
-        return Response(**response_dict)
 
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
