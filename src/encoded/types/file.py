@@ -826,8 +826,7 @@ def is_file_to_download(properties, mapping, expected_filename=None):
 def download(context, request):
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
-    proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers \
-                                                or 'Range' in request.headers
+    proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
