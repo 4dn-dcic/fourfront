@@ -871,7 +871,10 @@ def download(context, request):
             Params=param_get_object,
             ExpiresIn=36*60*60
         )
-        response_body = conn.get_object(**param_get_object)
+        try:
+            response_body = conn.get_object(**param_get_object)
+        except Exception as e:
+            raise e
     else:
         raise ValueError(external.get('service'))
     if asbool(request.params.get('soft')):
