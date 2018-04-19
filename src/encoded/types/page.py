@@ -265,10 +265,10 @@ class Page(Item):
     embedded_list = ['content.*']
 
 @collection(
-    name='pages',
+    name='page-directories',
     properties={
-        'title': 'Pages',
-        'description': 'Static Pages for the Portal',
+        'title': 'Page Directories',
+        'description': 'Directories of Pages',
     })
 class PageDirectory(Page):
     """Links to Pages or other PageDirectorys"""
