@@ -34,6 +34,7 @@ from urllib.parse import (
     urlparse,
 )
 import boto
+import boto3
 from boto.exception import BotoServerError
 import datetime
 import json
@@ -297,7 +298,6 @@ class File(Item):
         # file_extension = self.schema['file_format_file_extension'][file_format]
         # return '{}{}'.format(accession, file_extension)
         return outString
-
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -675,6 +675,7 @@ class FileProcessed(File):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
 
+
 @collection(
     name='files-reference',
     unique_key='accession',
@@ -824,9 +825,8 @@ def is_file_to_download(properties, mapping, expected_filename=None):
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
 
-    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries 
-    proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers \
-                                                or 'Range' in request.headers
+    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
+    proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
@@ -860,12 +860,20 @@ def download(context, request):
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto.connect_s3()
-        location = conn.generate_url(
-            36*60*60, request.method, external['bucket'], external['key'],
-            force_http=proxy or use_download_proxy, response_headers={
-                'response-content-disposition': "attachment; filename=" + filename,
-            })
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if 'Range' in request.headers:
+            param_get_object.update({'Range': request.headers.get('Range')})
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
+        response_body = conn.get_object(**param_get_object)
     else:
         raise ValueError(external.get('service'))
     if asbool(request.params.get('soft')):
@@ -878,6 +886,17 @@ def download(context, request):
 
     if proxy:
         return Response(headers={'X-Accel-Redirect': '/_proxy/' + str(location)})
+    else:
+        response_dict = {
+            'body': response_body.get('Body').read(),
+            # status_code : 206 if partial, 200 if the ragne covers whole file
+            'status_code': response_body.get('ResponseMetadata').get('HTTPStatusCode'),
+            'accept_ranges': response_body.get('AcceptRanges'),
+            'content_length': response_body.get('ContentLength')
+        }
+        if 'Range' in request.headers:
+            response_dict.update({'content_range': response_body.get('ContentRange')})
+        return Response(**response_dict)
 
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
@@ -935,16 +954,15 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
             # already got this md5
             found = search_resp.json['@graph'][0]['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
-                                              (data['md5sum'], found))
-    else: # find it in the database
-       conn = request.registry['connection']
-       res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
-       if res is not None:
+                               (data['md5sum'], found))
+    else:  # find it in the database
+        conn = request.registry['connection']
+        res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
+        if res is not None:
             # md5 already exists
             found = res.properties['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
-                                              (data['md5sum'], found))
-
+                               (data['md5sum'], found))
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
