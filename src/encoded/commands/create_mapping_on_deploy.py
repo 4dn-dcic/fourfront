@@ -35,7 +35,7 @@ def main():
                 return
         # handle mastertest ... by blowing away all data first
         if 'mastertest' in env:
-            run_create_mapping(app, check_first=False, skip_indexing=True, purge_queue=True)
+            run_create_mapping(app, check_first=False, purge_queue=True)
             return
     except Exception:
         import traceback
