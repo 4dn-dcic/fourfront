@@ -13,6 +13,110 @@
         }
     },
 
+    
+
+
+
+    {
+        "name": "help/analysis/file-formats",
+        "order": 0,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff000000",
+        "title": "File Formats",
+        "description" : "Documentation and information about the file formats which we support.",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "help.analysis.file-formats.fastq",
+            "help.analysis.file-formats.bam",
+            "help.analysis.file-formats.pairs",
+            "help.analysis.file-formats.cool-and-mcool",
+            "help.analysis.file-formats.hic"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4
+        },
+        "status" : "draft"
+    },
+    {
+        "name": "help/analysis/hi-c-pipeline",
+        "order": 1,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff000001",
+        "title": "Hi-C Pipeline",
+        "description" : "Documentation and information about file transformation and analysis pipelines.",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "help.analysis.hi-c-pipeline.alignment",
+            "help.analysis.hi-c-pipeline.step-ii",
+            "help.analysis.hi-c-pipeline.step-iii-options"
+        ],
+        "table-of-contents": {
+            "enabled": true,
+            "header-depth": 4
+        },
+        "status" : "draft"
+    },
+    {
+        "name": "help/analysis/reference-files",
+        "order": 2,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff000002",
+        "title": "Reference Files",
+        "description" : "How to define and supply reference files for use by pipelines.",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-0",
+            "help.analysis.reference-files.human-genome-bwa",
+            "help.analysis.reference-files.mouse-genome-bwa",
+            "help.analysis.reference-files.rest-enzyme-file"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        },
+        "status" : "draft"
+    },
+    {
+        "name": "help/analysis/cwl-docker",
+        "order": 3,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff000003",
+        "title": "CWL + Docker",
+        "description" : "Information about the Common Workflow Language definitions (CWLs) and Docker Images used in our pipelines.",
+        "content": [
+            "help.analysis.cwl-docker.data-processing-pipelines"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        }
+    },
+    {
+        "name": "help/analysis/tibanna",
+        "order": 4,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff000004",
+        "title": "Tibanna",
+        "description" : "Documentation for the software which runs and manages our pipelines.",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "reusable-dummy-sections.lorem-ipsum-0",
+            "reusable-dummy-sections.lorem-ipsum-1",
+            "reusable-dummy-sections.lorem-ipsum-3"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        },
+        "status" : "draft"
+    },
+
+    {
+        "name": "help/data-processing-pipelines",
+        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
+        "content": [],
+        "redirect" : {
+            "target" : "/help/analysis/cwl-docker",
+            "enabled" : true,
+            "code" : 307
+        }
+    },
+
+
+
+
 
     {
         "name": "help/user-guide/data-organization",
@@ -29,7 +133,6 @@
             "header-depth": 4
         }
     },
-
     {
         "name": "help/user-guide/account-creation",
         "order" : 1,
@@ -81,6 +184,9 @@
             "header-depth": 4
         }
     },
+
+
+
     {
         "name": "help/submitter-guide/web-submission",
         "order": 1,
@@ -108,21 +214,116 @@
             "header-depth": 3
         }
     },
+    
+
+    {
+        "name": "help/protocols/experiment-types",
+        "order": 0,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff010000",
+        "title": "Experiment Types",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "help.protocols.experiment-types.in-situ-hi-c-dilution-hi-c",
+            "help.protocols.experiment-types.dnase-hi-c-micro-c",
+            "help.protocols.experiment-types.chia-pet-plac-seq",
+            "help.protocols.experiment-types.chip-seq-cut-run",
+            "help.protocols.experiment-types.atac-seq",
+            "help.protocols.experiment-types.trac-loop",
+            "help.protocols.experiment-types.rna-seq",
+            "help.protocols.experiment-types.nad-seq",
+            "help.protocols.experiment-types.dam-id-seq",
+            "help.protocols.experiment-types.tsa-seq",
+            "help.protocols.experiment-types.repli-seq",
+            "help.protocols.experiment-types.capture-hi-c",
+            "help.protocols.experiment-types.dna-fish",
+            "help.protocols.experiment-types.sci-hi-c",
+            "help.protocols.experiment-types.dna-sprite",
+            "help.protocols.experiment-types.gam"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        },
+        "status" : "draft"
+    },
+
+
 
 
     {
-        "name": "help/data-processing-pipelines",
-        "order": 7,
-        "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
-        "title": "Data processing pipelines",
+        "name": "help/dcic-processes-protocols/data-sharing",
+        "order": 0,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff020000",
+        "title": "Data Sharing Policies",
         "content": [
-            "9a0afb37-2605-4c0c-9a12-4a28882583a8"
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "reusable-dummy-sections.lorem-ipsum-1",
+            "reusable-dummy-sections.lorem-ipsum-2",
+            "reusable-dummy-sections.lorem-ipsum-3"
         ],
         "table-of-contents": {
-            "enabled": true,
-            "header-depth": 3
-        }
+            "enabled": true
+        },
+        "status" : "draft"
     },
+    {
+        "name": "help/dcic-processes-protocols/freeze-policy",
+        "order": 1,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff020001",
+        "title": "Data Freeze Policy",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "reusable-dummy-sections.lorem-ipsum-1",
+            "reusable-dummy-sections.lorem-ipsum-2",
+            "reusable-dummy-sections.lorem-ipsum-3"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        },
+        "status" : "draft"
+    },
+
+
+
+    {
+        "name": "help/visualization/higlass",
+        "order": 0,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff030000",
+        "title": "HiGlass",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "reusable-dummy-sections.lorem-ipsum-1",
+            "reusable-dummy-sections.lorem-ipsum-2",
+            "reusable-dummy-sections.lorem-ipsum-3"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        },
+        "status" : "draft"
+    },
+    {
+        "name": "help/visualization/hipiler",
+        "order": 1,
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff030001",
+        "title": "HiPiler",
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview",
+            "reusable-dummy-sections.lorem-ipsum-1",
+            "reusable-dummy-sections.lorem-ipsum-2",
+            "reusable-dummy-sections.lorem-ipsum-3"
+        ],
+        "table-of-contents": {
+            "enabled": true
+        },
+        "status" : "draft"
+    },
+
+
+
+
+
+
+
+
     {
         "name": "error/login-failed",
         "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",

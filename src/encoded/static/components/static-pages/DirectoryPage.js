@@ -39,13 +39,19 @@ export class DirectoryBodyGrid extends React.Component {
     }
 
     renderGridItem(child, index, all){
+        var childrenHaveChildren = this.props.childrenHaveChildren;
         var childPageCount = (child.children || []).length;
         var childID = object.itemUtil.atId(child);
         return (
-            <div className="grid-item col-md-4 col-xs-12" key={childID || child.name}>
+            <div className={"grid-item col-xs-12 col-md-" + (childrenHaveChildren ? '4' : '12')} key={childID || child.name}>
                 <div className="inner" onClick={navigate.bind(navigate, childID)}>
-                    <h3 className="text-300 mb-0 mt-07"><a className="title-link" href={childID}>{ child.display_title }</a></h3>
-                    { childPageCount ? <h6 className="section-page-count mt-05 mb-05 text-400">{ childPageCount } Pages</h6> : null }
+                    <h3 className="text-300 mb-07 mt-07">
+                        <a className="title-link" href={childID}>{ child.display_title }</a>
+                    </h3>
+                    { !childrenHaveChildren && child.description ?
+                        <div className="page-description">{ child.description }</div> : null
+                    }
+                    { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-05 mb-05 text-400">{ childPageCount } Pages</h6> : null }
                 </div>
             </div>
         );

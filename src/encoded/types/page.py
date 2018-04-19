@@ -41,10 +41,11 @@ def generate_page_tree(request):
         '/help/analysis'                : { "order" : 0 },
         '/help/user-guide'              : { "order" : 1 },
         '/help/submitter-guide'         : { "order" : 2 },
-        '/help/dcic-processes-protocols': { "order" : 3 },
-        '/help/visualization'           : { "order" : 4 },
-        '/help/faq'                     : { "order" : 5 },
-        '/help/release-notes'           : { "order" : 6 },
+        '/help/protocols'               : { "order" : 3 },
+        '/help/dcic-processes-protocols': { "order" : 4, "display_title" : "DCIC Processes & Protocols" },
+        '/help/visualization'           : { "order" : 5 },
+        '/help/faq'                     : { "order" : 6 },
+        '/help/release-notes'           : { "order" : 7 },
     }
 
     root = { "name" : "/", "children" : [], "@id" : '/', "display_title" : "Home" }
@@ -56,8 +57,8 @@ def generate_page_tree(request):
             'type'              : ['Page'],
             'sort'              : ['name', 'uuid'],
             'exclude_from_tree!': ['true'],
-            'redirect.enabled!' : ['true'],
-            'field'             : ['name', 'uuid', 'display_title', 'order', 'content.name', 'content.title', 'content.title', 'content.@id', 'description']
+            #'redirect.enabled!' : ['true'],
+            'field'             : ['name', 'uuid', 'display_title', 'order', 'content.name', 'content.title', 'content.title', 'content.@id', 'description', 'redirect.enabled']
         }
     ):
         path_components = [ path_component for path_component in page['name'].split('/') if path_component ]
@@ -85,20 +86,23 @@ def generate_page_tree(request):
                     current_node['children'].append(child_node)
                 current_node = child_node
             else:
-                current_node['children'].append({
+                child_node = {
                     "name"          : path_component,
                     "children"      : [],
                     "@id"           : full_name,
                     "order"         : page.get('order', len(current_node['children'])),
-                    "content"       : page.get('content'),
                     "uuid"          : page['uuid'],
-                    "display_title" : page['display_title'],
-                    "description"   : page.get('description')
-                })
+                    "display_title" : page['display_title']
+                }
+                for optional_field in ['description', 'content', 'redirect']:
+                    if page.get(optional_field) is not None:
+                        child_node[optional_field] = page[optional_field]
+                current_node['children'].append(child_node)
 
     def cleanup_tree(node):
         node_children_length = len(node['children'])
-        if node_children_length == 0:
+        #node['children'] = [ c for c in node['children'] if c.get('redirect', {}).get('enabled') is not True ]
+        if node_children_length == 0 or node.get('redirect', {}).get('enabled') is True:
             del node['children']
             node['is_leaf'] = True
         else:
@@ -255,9 +259,21 @@ class StaticSection(Item):
         'description': 'Static Pages for the Portal',
     })
 class Page(Item):
-    """The Software class that contains the software... used."""
+    """Links to StaticSections"""
     item_type = 'page'
     schema = load_schema('encoded:schemas/page.json')
+    embedded_list = ['content.*']
+
+@collection(
+    name='pages',
+    properties={
+        'title': 'Pages',
+        'description': 'Static Pages for the Portal',
+    })
+class PageDirectory(Page):
+    """Links to Pages or other PageDirectorys"""
+    item_type = 'page_directory'
+    schema = load_schema('encoded:schemas/page_directory.json')
     embedded_list = ['content.*']
 
 
@@ -289,6 +305,7 @@ def static_page(request):
             return ' '.join([ substr.capitalize() for substr in node['name'].split('-')])
 
     def remove_relations_in_tree(node, keep="children"):
+        '''Returns (deep-)copy'''
         filtered_node = { "name" : node['name'] }
         if keep == 'children' and node.get('children') is not None:
             filtered_node['children'] = [ remove_relations_in_tree(c, keep) for c in node['children'] ]
@@ -300,7 +317,32 @@ def static_page(request):
         filtered_node['display_title'] = title_from_tree_node(node)
         filtered_node['@type'] = page_type_from_tree_node(node)
         return filtered_node
-        
+
+    def remove_nodes_with_redirects_from_tree(root_node):
+        '''Modifies in place'''
+        node = root_node
+        filtered_children = []
+        for child in node.get('children', []):
+            if child.get('redirect', {}).get('enabled') is not True:
+                filtered_children.append(child)
+        if len(filtered_children) > 0:
+            node['children'] = filtered_children
+        elif node.get('children') is not None:
+            del node['children']
+        for child in node.get('children', []):
+            remove_nodes_with_redirects_from_tree(child)
+
+        if node.get('next', {}).get('redirect', {}).get('enabled') is True:
+            if node.get('next', {}).get('next') and node.get('next', {}).get('next').get('redirect', {}).get('enabled') is not True:
+                node['next'] = node['next']['next']
+            else:
+                del node['next']
+        if node.get('previous', {}).get('redirect', {}).get('enabled') is True:
+            if node.get('previous', {}).get('previous') and node.get('previous', {}).get('previous').get('redirect', {}).get('enabled') is not True:
+                node['previous'] = node['previous']['previous']
+            else:
+                del node['previous']
+
 
     path_parts = [ path_part for path_part in request.subpath if path_part ]
     page_name = "/".join(path_parts)
@@ -346,6 +388,10 @@ def static_page(request):
     # Finalize the things. Extend with common/custom properties.
     item['@id'] = item['@context'] = "/" + page_name
     item['@type'] = page_type_from_tree_node(curr_node, item)
+
+    remove_nodes_with_redirects_from_tree(curr_node)
+
+    #print('\n\n\n', [ (c['name'], c.get('redirect')) for c in curr_node.get('children', []) ] )
 
     if curr_node.get('next'):
         item['next'] =      remove_relations_in_tree(curr_node['next'])
