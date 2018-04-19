@@ -4,8 +4,7 @@
         "age": 53,
         "age_units": "year",
         "aliases": [
-            "encode:donor_of_GM12878",
-            "encode:donor of GM12878"
+            "encode:donor_of_GM12878"
         ],
         "award": "1U01CA200059-01",
         "ethnicity": "Caucasian",

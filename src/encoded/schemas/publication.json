@@ -39,7 +39,7 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "current",
+            "default": "in review by lab",
             "lookup": 30,
             "permission": "import_items",
             "enum": [
