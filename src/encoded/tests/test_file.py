@@ -179,6 +179,13 @@ def test_extra_files_download(testapp, proc_file_json):
     testapp.get(resobj['href'], status=307)
 
 
+def test_range_download(testapp, proc_file_json):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    download_link = resobj['href']
+    testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
+
+
 def test_extra_files_get_upload(testapp, proc_file_json):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
