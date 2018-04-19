@@ -1,6 +1,6 @@
 [
     {
-        "summary": "(TEST) New Replicate Set has been released.",
+        "summary": "(TEST) New Replicate Sets have been released.",
         "uuid": "b0b9c607-f8b4-2202-1122-9895b461224b",
         "award": "Test-4DN",
         "update_tag": "TEST1",
@@ -8,6 +8,7 @@
         "lab": "test-4dn-lab",
         "status": "released",
         "severity": 0,
+        "is_internal": false,
         "parameters": [
             "tags=4DN Joint Analysis 2018"
         ],
@@ -35,6 +36,7 @@
         "lab": "test-4dn-lab",
         "status": "released",
         "severity": 1,
+        "is_internal": false,
         "parameters": [
             "tags=4DN Joint Analysis 2018"
         ],
@@ -58,7 +60,10 @@
         "lab": "test-4dn-lab",
         "status": "released",
         "severity": 2,
-        "parameters": [],
+        "is_internal": true,
+        "parameters": [
+            "award.project=4DN"
+        ],
         "comments": "Test update 3",
         "foursight_uuid": "2018-02-11T16:54:38.526810+00:00",
         "end_date": "2018-02-18",
@@ -71,7 +76,7 @@
         ]
     },
     {
-        "summary": "(TEST) WARNING! New unreleased file has been added to a Replicate Experiment.",
+        "summary": "(TEST) New unreleased file has been added to a Replicate Experiment.",
         "uuid": "b0b9c607-8811-2202-1122-9895b461224b",
         "award": "Test-4DN",
         "update_tag": "TEST2",
@@ -79,7 +84,10 @@
         "lab": "test-4dn-lab",
         "status": "released",
         "severity": 3,
-        "parameters": [],
+        "is_internal": true,
+        "parameters": [
+            "award.project=4DN"
+        ],
         "comments": "Test update 4",
         "foursight_uuid": "2018-02-10T16:54:38.526810+00:00",
         "end_date": "2018-02-18",

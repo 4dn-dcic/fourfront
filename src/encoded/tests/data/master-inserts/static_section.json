@@ -76,7 +76,7 @@
         "body" : "The 4DN Data Portal is open for beta-testers for data submission for Hi-C and related experiments."
     },
 
-    
+
 
 
     {
@@ -860,6 +860,17 @@
         "name" : "privacy-policy.policy-content",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b051",
         "file" : "/src/encoded/static/data/privacy-policy.md"
-    }
+    },
 
+    {
+        "name" : "release-updates.TEST1",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b987",
+        "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All data released to public between 2018-02-13 and 2018-02-14 with tag 4DN Joint Analysis 2018</h4>"
+    },
+
+    {
+        "name" : "release-updates.TEST2",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b787",
+        "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All 4DN data released to network members between 2018-02-11 and 2018-02-18</h4>"
+    }
 ]
