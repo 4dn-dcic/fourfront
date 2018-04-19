@@ -860,7 +860,8 @@ def download(context, request):
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto3.client('s3')
+        conn = boto3.client('s3', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
         param_get_object = {
             'Bucket': external['bucket'],
             'Key': external['key'],
