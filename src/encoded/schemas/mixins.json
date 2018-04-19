@@ -63,7 +63,7 @@
                 "title": "Lab alias",
                 "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
                 "type":  "string",
-                "pattern": "^[^\\s\\\\/]+:[^\\s\\\\/]+"
+                "pattern": "^[^\\s\\\\\\/]+:[^\\s\\\\\\/]+$"
             }
         }
     },
