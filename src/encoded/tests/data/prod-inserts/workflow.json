@@ -4858,6 +4858,10 @@
             {
                 "argument_format": "bg",
                 "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "bg_px2",
+                    "bw"
+                ],
                 "workflow_argument_name": "count_bg"
             }
         ],
@@ -5184,7 +5188,8 @@
                     "software_used": [
                         "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
                         "/software/a5d01ff2-88b5-45c6-9c1d-f6c156248b43/",
-                        "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/"
+                        "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/",
+                        "/software/00eda937-3149-4252-8dc9-c27de59d75ed/"
                     ]
                 },
                 "name": "count",

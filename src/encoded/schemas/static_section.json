@@ -21,7 +21,8 @@
             "title": "Unique Identifier",
             "description": "Unique name or ID of this section.",
             "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. search-info-header.WorkflowRun --> '/static-section/search-info-header.WorkflowRun'.",
-            "type": "string"
+            "type": "string",
+            "uniqueKey": "static_section:name"
         },
         "status": {
             "title": "Status",
