@@ -82,6 +82,7 @@ def get_remote_file_contents(uri):
 
 @collection(
     name='static-sections',
+    unique_key='static_section:name',
     properties={
         'title': 'Static Sections',
         'description': 'Static Sections for the Portal',

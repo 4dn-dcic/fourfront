@@ -62,6 +62,7 @@
             "type": "array",
             "default": [],
             "uniqueItems": true,
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Parameter",
                 "description": "In form field=value",
@@ -78,10 +79,17 @@
             "type": "string",
             "description": "Name of the update tag, specified from the Foursight check used to create this. Serves as the primary grouping mechanism for data release updates."
         },
+        "is_internal": {
+            "title": "Is Internal",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "A flag to indicate whether this data release update was run considering 'to project' statuses (e.g. released to project). True if so.",
+            "type": "boolean"
+        },
         "foursight_uuid": {
             "title": "Foursight UUID",
             "type": "string",
-            "description": "Timestamp equivalent to the Foursight UUID of the chekc used to generate this update.",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "Timestamp equivalent to the Foursight UUID of the check used to generate this update.",
             "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
@@ -92,6 +100,7 @@
         "start_date": {
             "title": "Start Date",
             "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "Start (earlier) date of the data release update. The update is in form <start_date> to <end_date>",
             "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
@@ -103,6 +112,7 @@
         "end_date": {
             "title": "End Date",
             "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "End (later) date of the data release update. The update is in form <start_date> to <end_date>",
             "comment": "Date can be submitted as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
