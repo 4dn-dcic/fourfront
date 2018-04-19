@@ -31,10 +31,11 @@
 ************************************************************/
 
 .static-page {
-	width: 75%;
 	margin: 0;
 	margin-top: 30px;
 	&.row {
+		margin-left: -10px;
+		margin-right: -10px;
 		width: auto;
 		> div > .help-entry:first-child {
 			margin-top: 5px;
@@ -44,9 +45,11 @@
 
 	.help-entry{
 		margin: 50px 0px 50px 0px;
-		&:first-of-type {
-			margin-top: 27px;
-		}
+	}
+
+	.help-entry:first-of-type,
+	.static-page-breadcrumbs + .help-entry {
+		margin-top: 27px;
 	}
 
 }
@@ -130,6 +133,7 @@ h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+
 	// Deprecated Margins
 	margin-top: 32px;
 	margin-bottom: 32px;

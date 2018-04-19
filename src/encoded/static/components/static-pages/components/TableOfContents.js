@@ -3,7 +3,7 @@
 import React from 'react';
 import * as d3 from 'd3';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+import { Collapse, Button } from 'react-bootstrap';
 import * as globals from './../../globals';
 import { getElementTop, animateScrollTo, getScrollingOuterElement, getPageVerticalScrollPosition } from './../../util/layout';
 import { isServerSide, console, navigate } from './../../util';
@@ -473,9 +473,11 @@ export class TableOfContents extends React.Component {
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.onPageScroll = _.throttle(this.onPageScroll.bind(this), 100, { 'leading' : false });
         this.onResize = _.debounce(this.onResize.bind(this), 300);
+        this.onToggleWidthBound = this.onToggleWidthBound.bind(this);
         this.state = {
             'scrollTop' : 0,
-            'mounted' : false
+            'mounted' : false,
+            'widthBound' : true
         };
     }
 
@@ -498,6 +500,7 @@ export class TableOfContents extends React.Component {
         }
         if (nextState.mounted !== this.state.mounted) return true;
         if (nextState.scrollTop !== this.state.scrollTop) return true;
+        if (nextState.widthBound !== this.state.widthBound) return true;
         return false;
     }
 
@@ -520,35 +523,48 @@ export class TableOfContents extends React.Component {
         }, 0);
     }
 
-    nextPreviousSection(){
-        var { context, includeNextPreviousPages } = this.props;
-        if (!includeNextPreviousPages || (!context.next && !context.previous)) return null;
-        return (
-            <div className="next-previous-pages-section">
-                <div className="row">
-                { context.previous ?
-                    <div className={"previous-section text-right col-xs-6"}>
-                        <h6 className="text-400 mb-03 mt-12"><i className="icon icon-fw icon-angle-left"/> Previous</h6>
-                        <h6 className="text-500 mt-0"><a href={context.previous['@id']}>{ context.previous.display_title }</a></h6>
-                    </div>
-                : null }
-                { context.next ?
-                    <div className={"next-section col-xs-6 pull-right"}>
-                        <h6 className="text-400 mb-03 mt-12">Next <i className="icon icon-fw icon-angle-right"/></h6>
-                        <h6 className="text-500 mt-0"><a href={context.next['@id']}>{ context.next.display_title }</a></h6>
-                    </div>
-                : null }
-                </div>
+    onToggleWidthBound(){
+        this.setState((prevState, prevProps)=>({
+            'widthBound' : !prevState.widthBound
+        }));
+    }
+
+    parentLink(windowInnerWidth){
+        var context = this.props.context;
+        var cols = [];
+        cols.push(
+            <div className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1200 ? '9' : '12')}>
+                <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
             </div>
+        );
+        if (windowInnerWidth && windowInnerWidth >= 1200){
+            cols.push(
+                <div className="col-xs-3 text-right expand-button-container">
+                    <Button bsSize="xs" onClick={this.onToggleWidthBound}>{ this.state.widthBound ?
+                        <span><i className="icon icon-fw icon-angle-left"/></span> :
+                        <span><i className="icon icon-fw icon-angle-right"/></span>
+                    }</Button>
+                </div>
+            );
+        }
+        return (
+            <li className="table-content-entry parent-entry" data-depth="0" key="parent-link">
+                <span title="Up to page listing" className="top-of-page with-border-bottom visible-lg-block visible-lg">
+                    <div className="row" children={cols} />
+                </span>
+            </li>
         );
     }
 
     render(){
 
         var listStyleTypes = this.props.listStyleTypes.slice(0);
-        var { context, maxHeaderDepth, includeTop, fixedGridWidth } = this.props;
+        var { context, maxHeaderDepth, includeTop, fixedGridWidth, includeNextPreviousPages } = this.props;
 
         var skipDepth = 0;
+
+        var windowInnerWidth = (this.state.mounted && !isServerSide() && typeof window !== 'undefined' && window.innerWidth) || null;
+        var windowInnerHeight = (windowInnerWidth && window.innerHeight) || null;
 
         function sectionEntries(){
             var lastSection = null;
@@ -595,15 +611,7 @@ export class TableOfContents extends React.Component {
 
         var content = [];
             
-        if (context && context.parent && context.parent['@id']){
-            content.push(
-                <li className="table-content-entry" data-depth="0" key="parent-link">
-                    <span title="Up to page listing" className="top-of-page with-border-bottom visible-lg-block visible-lg">
-                        <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
-                    </span>
-                </li>
-            );
-        }
+        if (context && context.parent && context.parent['@id']) content.push(this.parentLink(windowInnerWidth));
 
         var children = sectionEntries.call(this);
         
@@ -625,30 +633,32 @@ export class TableOfContents extends React.Component {
         );
 
         var marginTop = 0; // Account for test warning
-        if (this.state.mounted && !isServerSide()){
-            if (typeof this.state.scrollTop === 'number' && this.state.scrollTop < 80){
+        if (windowInnerWidth){
+            if (typeof this.state.scrollTop === 'number' && this.state.scrollTop < 80 && windowInnerWidth >= 1200){
                 var testWarningElem = document.getElementsByClassName('navbar-container test-warning-visible');
                 marginTop = (testWarningElem[0] && testWarningElem[0].offsetHeight) || marginTop;
+            } else if (windowInnerWidth < 1200) {
+                marginTop = -12; // Account for spacing between title and first section
             }
         }
 
         var isEmpty = (Array.isArray(content) && !_.filter(content).length) || !content;
 
         function generateFixedWidth(){
-            return 1140 * (fixedGridWidth / 12) + (((document && document.body && document.body.clientWidth) || window.innerWidth) - 1140) / 2 - 10;
+            return 1140 * (fixedGridWidth / 12) + (((document && document.body && document.body.clientWidth) || windowInnerWidth) - 1140) / 2 - 10;
         }
 
         return (
-            <div key="toc" className="table-of-contents" ref="container" style={{
-                width : this.state.mounted && typeof window !== 'undefined' && typeof window.innerWidth === 'number' ?
-                        window.innerWidth >= 1200 ? generateFixedWidth() || 'inherit'
+            <div key="toc" className={"table-of-contents" + (this.state.widthBound ? ' width-bounded' : '')} ref="container" style={{
+                width : windowInnerWidth ?
+                    windowInnerWidth >= 1200 ? generateFixedWidth() || 'inherit'
                         :'inherit'
                     : 285,
                 height:
-                    (this.state.mounted && typeof window !== 'undefined' && typeof window.innerHeight === 'number' ?
-                        window.innerWidth >= 1200 ?
+                    (windowInnerWidth && windowInnerHeight ?
+                        windowInnerWidth >= 1200 ?
                             ( this.props.maxHeight ||
-                              this.state.scrollTop >= 40 ? window.innerHeight - 42 : window.innerHeight - 82 ) :
+                              this.state.scrollTop >= 40 ? windowInnerHeight - 42 : windowInnerHeight - 82 ) :
                             null
                     : 1000),
                 marginTop : marginTop
@@ -660,11 +670,43 @@ export class TableOfContents extends React.Component {
                         'paddingLeft' : 0
                     }}/>
                 : null }
-                { this.nextPreviousSection() }
+                { includeNextPreviousPages ? <NextPreviousPageSection context={context} windowInnerWidth={windowInnerWidth} /> : null }
             </div>
         );
     }
 
+}
+
+
+export class NextPreviousPageSection extends React.Component {
+
+    static defaultProps = {
+        'previousTitle' : 'Previous',
+        'nextTitle' : 'Next'
+    }
+
+    render(){
+        var { context, className, previousTitle, nextTitle } = this.props;
+        if (!context.next && !context.previous) return null;
+        return (
+            <div className={"next-previous-pages-section" + ((className && ' ' + className) || '')}>
+                <div className="row">
+                { context.previous ?
+                    <div className={"previous-section text-right col-xs-6"}>
+                        <h6 className="text-400 mb-03 mt-12"><i className="icon icon-fw icon-angle-left"/> { previousTitle }</h6>
+                        <h6 className="text-500 mt-0"><a href={context.previous['@id']}>{ context.previous.display_title }</a></h6>
+                    </div>
+                : null }
+                { context.next ?
+                    <div className={"next-section col-xs-6 pull-right"}>
+                        <h6 className="text-400 mb-03 mt-12">{ nextTitle } <i className="icon icon-fw icon-angle-right"/></h6>
+                        <h6 className="text-500 mt-0"><a href={context.next['@id']}>{ context.next.display_title }</a></h6>
+                    </div>
+                : null }
+                </div>
+            </div>
+        );
+    }
 }
 
 

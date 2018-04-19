@@ -1,47 +1,10 @@
-// Render a simple static help page
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { content_views } from '../globals';
-import StaticPage, { StaticEntry } from './StaticPage';
 import { Button } from 'react-bootstrap';
 
-/**
- * Extends StaticEntry with 'replacePlaceholder' function which renders the pre-defined SlideCarousel component.
- * Emulate this approach for other placeholders (?).
- */
-class HelpEntry extends StaticEntry {
 
-    static defaultProps = {
-        'section'   : null,
-        'content'   : null,
-        'entryType' : 'help',
-        'className' : 'text-justified'
-    }
-
-    replacePlaceholder(placeholderString){
-        if (placeholderString === '<SlideCarousel/>'){
-            return (<SlideCarousel />);
-        }
-        return placeholderString;
-    }
-}
-
-
-export default class HelpPage extends StaticPage {
-
-    entryRenderFxn(sectionName, content, context){
-        return (<HelpEntry key={sectionName} sectionName={sectionName} content={content} context={context} />);
-    }
-
-}
-
-content_views.register(HelpPage, 'HelpPage');
-
-
-
-class SlideCarousel extends React.Component {
+export class SlideCarousel extends React.Component {
 
     constructor(props){
         super(props);

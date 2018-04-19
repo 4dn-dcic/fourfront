@@ -1238,9 +1238,7 @@ export default class App extends React.Component {
                                     browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
-                                <div id="page-title-container" className="container">
-                                    <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
-                                </div>
+                                <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
                                 <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}

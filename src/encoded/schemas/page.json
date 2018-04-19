@@ -48,6 +48,12 @@
             "description": "Relative position in context of other pages at this level.",
             "type" : "integer"
         },
+        "exclude_from_tree" : {
+            "title" : "Exclude from page hierarchy tree?",
+            "description": "Set this field to true if this page is not meant to be navigated to or is meant to be hidden but public, such as /error/login-failed.",
+            "type" : "boolean",
+            "default" : false
+        },
         "table-of-contents": {
             "title": "Table of Contents",
             "type": "object",

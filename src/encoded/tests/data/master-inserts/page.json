@@ -127,6 +127,7 @@
         "name": "error/login-failed",
         "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",
         "title": "Login Failed",
+        "exclude_from_tree" : true,
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b021"
         ]

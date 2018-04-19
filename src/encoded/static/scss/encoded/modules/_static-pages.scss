@@ -146,17 +146,29 @@ h5.fourDN-header {
 		padding: 0 10px;
 		padding-bottom: 60px;
 		top: 82px;
-		transition: top .3s ease-out, margin-top .5s ease-out;
+		transition: top .3s ease-out, margin-top .5s ease-out, max-width .5s ease-out;
 		overflow-y: auto;
 		right: 10px;
-		max-width: 340px;
+		//max-width: 340px;
 		border-left: 1px solid #eee;
 		padding-left: 16px;
 		body.scrolled-past-top & {
 			top : 42px;
 		}
-		ol, .next-previous-pages-section {
-			max-width: 320px;
+
+		max-width: 650px;
+		&.width-bounded {
+			max-width: 340px;
+		}
+
+		//ol, .next-previous-pages-section {
+		//	max-width: 320px;
+		//}
+	}
+
+	@media screen and (max-width : $screen-md-max){
+		> ol.inner {
+			border-top: 1px solid #eee;
 		}
 	}
 
@@ -216,8 +228,12 @@ h5.fourDN-header {
 						color: #ccc;
 					}
 				}
+
+				.expand-button-container {
+					padding-top: 2px;
+				}
 				
-				i.icon {
+				i.icon-angle-up {
 					display: none;
 					color: #888;
 					text-align: center;
@@ -347,6 +363,65 @@ h5.fourDN-header {
 	}
 
 }
+
+/***** Static Page Breadcrumbs ******/
+
+.breadcrumb-placeholder, .static-page-breadcrumbs {
+	min-height: 55px;
+}
+
+.static-page-breadcrumbs {
+	padding-top: 29px; 
+
+	@media screen and (min-width: $screen-lg-min) {
+		width: 75%;
+	}
+
+	> .static-breadcrumb {
+		display: inline-block;
+		vertical-align: middle;
+		font-size: 0.875rem;
+	}
+}
+
+
+
+/**********************************************************
+		Directory of Static Pages or Sections
+***********************************************************/
+
+.static-page.static-directory-page {
+
+	.grid-of-sections.row {
+
+		> .grid-item > .inner {
+			margin-bottom: 20px;
+			border: 1px solid #f0f0f0;
+			padding: 8px 16px;
+			background-color: #f8f8f8;
+			@media screen and (min-width: $screen-sm-min) {
+				height: 80px;
+			}
+			transition: border-color .25s;
+
+			a.title-link {
+				transition: color .25s;
+			}
+
+			&:hover {
+				border-color: #ccc;
+				cursor: pointer;
+				a.title-link {
+					text-decoration: underline;
+					color: $link-hover-color;
+				}
+			}
+		}
+
+	}
+
+}
+
 
 /**********************************************************
 		Misc Static Pages

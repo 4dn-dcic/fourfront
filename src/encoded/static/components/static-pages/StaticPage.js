@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { compiler } from 'markdown-to-jsx';
-import { CSVMatrixView, TableOfContents, MarkdownHeading } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders } from './components';
 import * as globals from './../globals';
 import { layout, console } from './../util';
 
@@ -173,6 +173,9 @@ export class StaticEntry extends React.Component {
     }
 
     replacePlaceholder(placeholderString){
+        if (placeholderString === '<SlideCarousel/>'){
+            return (<placeholders.SlideCarousel />);
+        }
         return placeholderString;
     }
 
@@ -285,5 +288,3 @@ export default class StaticPage extends React.Component {
 
 
 globals.content_views.register(StaticPage, 'StaticPage');
-
-
