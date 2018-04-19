@@ -33,9 +33,8 @@ from urllib.parse import (
     parse_qs,
     urlparse,
 )
-import boto
 import boto3
-from boto.exception import BotoServerError
+from botocore.exceptions import ClientError
 import datetime
 import json
 import pytz
@@ -46,7 +45,7 @@ from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
 
 import logging
-logging.getLogger('boto').setLevel(logging.CRITICAL)
+logging.getLogger('boto3').setLevel(logging.CRITICAL)
 log = logging.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
@@ -92,10 +91,10 @@ def force_beanstalk_env(profile_name, config_file=None):
 
             proc.communicate()
 
-        conn = boto.connect_sts(aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+        conn = boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
                                 aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
     else:
-        conn = boto.connect_sts(profile_name=profile_name)
+        conn = boto3.connect('sts', profile_name=profile_name)
 
     return conn
 
@@ -108,7 +107,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
     '''
 
     import logging
-    logging.getLogger('boto').setLevel(logging.CRITICAL)
+    logging.getLogger('boto3').setLevel(logging.CRITICAL)
     credentials = {}
     if name is not None:
         policy = {
@@ -121,7 +120,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        # boto.set_stream_logger('boto')
+        # boto.set_stream_logger('boto3')
         conn = force_beanstalk_env(profile_name)
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
@@ -351,10 +350,9 @@ class File(Item):
             if old_creds.get('key') != new_creds.get('key'):
                 try:
                     # delete the old sumabeach
-                    conn = boto.connect_s3()
+                    conn = boto3.client('s3')
                     bname = old_creds['bucket']
-                    bucket = boto.s3.bucket.Bucket(conn, bname)
-                    bucket.delete_key(old_creds['key'])
+                    conn.delete_object(Bucket='bname', Key=old_creds['key'])
                 except Exception as e:
                     print(e)
 
@@ -441,7 +439,7 @@ class File(Item):
         if not external:
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except BotoServerError as e:
+            except ClientError as e:
                 log.error(os.environ)
                 log.error(self.properties)
                 return 'UPLOAD KEY FAILED'
@@ -860,8 +858,7 @@ def download(context, request):
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto3.client('s3', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
+        conn = boto3.client('s3')
         param_get_object = {
             'Bucket': external['bucket'],
             'Key': external['key'],

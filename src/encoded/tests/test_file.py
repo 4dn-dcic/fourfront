@@ -372,7 +372,7 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
 
 
 def test_external_creds(mocker):
-    mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
+    mock_boto = mocker.patch('encoded.types.file.boto3', autospec=True)
 
     from encoded.types.file import external_creds
     ret = external_creds('test-bucket', 'test-key', 'name')
@@ -530,7 +530,7 @@ def test_force_beanstalk_env(mocker):
     test_cfg.close()
 
     # mock_boto
-    mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
+    mock_boto = mocker.patch('encoded.types.file.boto3', autospec=True)
 
     force_beanstalk_env(profile_name=None, config_file=test_cfg_name)
     # reset
