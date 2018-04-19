@@ -43,4 +43,4 @@ def main():
         logger.warn("couldn't get wodaman, so assuming NOT Stagging")
 
     logger.info("looks like we are NOT on staging so run create mapping with check first")
-    run_create_mapping(app, check_first=True)
+    run_create_mapping(app, check_first=True, purge_queue=True, skip_indexing=True)
