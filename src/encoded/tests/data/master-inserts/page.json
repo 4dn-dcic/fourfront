@@ -19,7 +19,6 @@
 
     {
         "name": "help/analysis/file-formats",
-        "order": 0,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000000",
         "title": "File Formats",
         "description" : "Documentation and information about the file formats which we support.",
@@ -39,7 +38,6 @@
     },
     {
         "name": "help/analysis/hi-c-pipeline",
-        "order": 1,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000001",
         "title": "Hi-C Pipeline",
         "description" : "Documentation and information about file transformation and analysis pipelines.",
@@ -57,7 +55,6 @@
     },
     {
         "name": "help/analysis/reference-files",
-        "order": 2,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000002",
         "title": "Reference Files",
         "description" : "How to define and supply reference files for use by pipelines.",
@@ -74,7 +71,6 @@
     },
     {
         "name": "help/analysis/cwl-docker",
-        "order": 3,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000003",
         "title": "CWL + Docker",
         "description" : "Information about the Common Workflow Language definitions (CWLs) and Docker Images used in our pipelines.",
@@ -87,7 +83,6 @@
     },
     {
         "name": "help/analysis/tibanna",
-        "order": 4,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000004",
         "title": "Tibanna",
         "description" : "Documentation for the software which runs and manages our pipelines.",
@@ -115,12 +110,26 @@
     },
 
 
+    {
+        "name": "help/analysis",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000000",
+        "title": "Analysis",
+        "description" : "Documentation for performing analyses.",
+        "children": [
+            "f0f0f0f0-0000-0000-0000-ffffff000000",
+            "f0f0f0f0-0000-0000-0000-ffffff000001",
+            "f0f0f0f0-0000-0000-0000-ffffff000002",
+            "f0f0f0f0-0000-0000-0000-ffffff000003",
+            "f0f0f0f0-0000-0000-0000-ffffff000004"
+        ]
+    },
+
+
 
 
 
     {
         "name": "help/user-guide/data-organization",
-        "order": 0,
         "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
         "title": "Introduction to 4DN Metadata",
         "content": [
@@ -135,7 +144,6 @@
     },
     {
         "name": "help/user-guide/account-creation",
-        "order" : 1,
         "uuid": "5153c902-a0d2-4246-9b41-cea7a1c91f52",
         "title": "Creating an Account",
         "content": [
@@ -147,7 +155,6 @@
     },
     {
         "name": "help/user-guide/getting-started",
-        "order" : 2,
         "uuid": "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
         "title": "Getting Started with Submissions",
         "content": [
@@ -160,7 +167,6 @@
     },
     {
         "name": "help/user-guide/biosample-metadata",
-        "order" : 3,
         "uuid": "3c999ac4-1727-4aac-96f5-61ae701a4006",
         "title": "Biosample Metadata",
         "content": [
@@ -173,7 +179,6 @@
     },
     {
         "name": "help/user-guide/rest-api",
-        "order": 4,
         "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb",
         "title": "The REST-API",
         "content": [
@@ -185,11 +190,24 @@
         }
     },
 
+    {
+        "name": "help/user-guide",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000001",
+        "title": "User Guide",
+        "description" : "Documentation for users of the 4DN Data Portal.",
+        "children": [
+            "311d0f4f-56ee-4450-8cbb-780c10229284",
+            "5153c902-a0d2-4246-9b41-cea7a1c91f52",
+            "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
+            "3c999ac4-1727-4aac-96f5-61ae701a4006",
+            "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb"
+        ]
+    },
+
 
 
     {
         "name": "help/submitter-guide/web-submission",
-        "order": 1,
         "uuid": "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
         "title": "Online Submissions",
         "content": [
@@ -202,7 +220,6 @@
     },
     {
         "name": "help/submitter-guide/spreadsheet",
-        "order": 2,
         "uuid": "4f115e02-5291-436d-92e8-617af96355df",
         "title": "Spreadsheet Submissions",
         "content": [
@@ -214,11 +231,21 @@
             "header-depth": 3
         }
     },
+
+    {
+        "name": "help/submitter-guide",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000002",
+        "title": "Submitter Guide",
+        "description" : "Documentation for users submitting experiments to the 4DN Data Portal.",
+        "children": [
+            "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
+            "4f115e02-5291-436d-92e8-617af96355df"
+        ]
+    },
     
 
     {
         "name": "help/protocols/experiment-types",
-        "order": 0,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff010000",
         "title": "Experiment Types",
         "content": [
@@ -247,11 +274,21 @@
     },
 
 
+    {
+        "name": "help/protocols",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000003",
+        "title": "Protocols",
+        "description" : "Protocol definitions and guides.",
+        "children": [
+            "f0f0f0f0-0000-0000-0000-ffffff010000"
+        ]
+    },
+
+
 
 
     {
         "name": "help/dcic-processes-protocols/data-sharing",
-        "order": 0,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff020000",
         "title": "Data Sharing Policies",
         "content": [
@@ -267,7 +304,6 @@
     },
     {
         "name": "help/dcic-processes-protocols/freeze-policy",
-        "order": 1,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff020001",
         "title": "Data Freeze Policy",
         "content": [
@@ -282,11 +318,21 @@
         "status" : "draft"
     },
 
+    {
+        "name": "help/dcic-processes-protocols",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000004",
+        "title": "4DN Processes and Protocols",
+        "description" : "Processes and Protocols for the 4DN DCIC.",
+        "children": [
+            "f0f0f0f0-0000-0000-0000-ffffff020000",
+            "f0f0f0f0-0000-0000-0000-ffffff020001"
+        ]
+    },
+
 
 
     {
         "name": "help/visualization/higlass",
-        "order": 0,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff030000",
         "title": "HiGlass",
         "content": [
@@ -302,7 +348,6 @@
     },
     {
         "name": "help/visualization/hipiler",
-        "order": 1,
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff030001",
         "title": "HiPiler",
         "content": [
@@ -317,6 +362,33 @@
         "status" : "draft"
     },
 
+    {
+        "name": "help/visualization",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000005",
+        "title": "Visualization",
+        "description" : "Guides for visualizing files and other data using the 4DN Data Portal.",
+        "children": [
+            "f0f0f0f0-0000-0000-0000-ffffff030000",
+            "f0f0f0f0-0000-0000-0000-ffffff030001"
+        ]
+    },
+
+
+    {
+        "name": "help",
+        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa010000",
+        "title": "Help Section",
+        "description" : "Documentation for using the 4DN Data Portal",
+        "children": [
+            "f0f0f0f0-0000-0000-0000-aaaaaa000000",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000001",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000002",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000003",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000004",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000005"
+        ]
+    },
+
 
 
 
@@ -328,7 +400,6 @@
         "name": "error/login-failed",
         "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",
         "title": "Login Failed",
-        "exclude_from_tree" : true,
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b021"
         ]

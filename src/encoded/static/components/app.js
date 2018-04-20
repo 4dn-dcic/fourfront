@@ -915,16 +915,11 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                if (options.replace) { // null gets replaced in this.receiveContextResponse w. actual JSON data. Redundant here?
-                    window.history.replaceState(null, '', href + fragment);
-                } else {
-                    window.history.pushState(null, '', href + fragment);
-                }
                 dispatch_dict.href = href + fragment;
 
                 return response;
             })
-            .then(response => this.receiveContextResponse(response,includeReduxDispatch))
+            .then(response => this.receiveContextResponse(response, includeReduxDispatch, options))
             .then(response => {
                 this.state.slowLoad && this.setState({'slowLoad' : false});
                 if (typeof callback == 'function'){
@@ -975,13 +970,22 @@ export default class App extends React.Component {
 
     }
 
-    receiveContextResponse (data, extendDispatchDict = {}) {
+    receiveContextResponse (data, extendDispatchDict = {}, requestOptions = {}) {
         // title currently ignored by browsers
-        try {
-            window.history.replaceState(data, '', window.location.href);
-        } catch (exc) {
-            // Might fail due to too large data
-            window.history.replaceState(null, '', window.location.href);
+        if (requestOptions.replace){
+            try {
+                window.history.replaceState(data, '', dispatch_dict.href);
+            } catch (exc) {
+                // Might fail due to too large data
+                window.history.replaceState(null, '', dispatch_dict.href);
+            }
+        } else {
+            try {
+                window.history.pushState(data, '', dispatch_dict.href);
+            } catch (exc) {
+                // Might fail due to too large data
+                window.history.pushState(null, '', dispatch_dict.href);
+            }
         }
         // Set up new properties for the page after a navigation click. First disable slow now that we've
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have

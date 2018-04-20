@@ -533,11 +533,11 @@ export class TableOfContents extends React.Component {
         var context = this.props.context;
         var cols = [];
         cols.push(
-            <div className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1200 ? '9' : '12')}>
+            <div className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1600 ? '9' : '12')}>
                 <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
             </div>
         );
-        if (windowInnerWidth && windowInnerWidth >= 1200){
+        if (windowInnerWidth && windowInnerWidth >= 1600){
             cols.push(
                 <div className="col-xs-3 text-right expand-button-container">
                     <Button bsSize="xs" onClick={this.onToggleWidthBound}>{ this.state.widthBound ?
@@ -694,13 +694,13 @@ export class NextPreviousPageSection extends React.Component {
                 { context.previous ?
                     <div className={"previous-section text-right col-xs-6"}>
                         <h6 className="text-400 mb-03 mt-12"><i className="icon icon-fw icon-angle-left"/> { previousTitle }</h6>
-                        <h6 className="text-500 mt-0"><a href={context.previous['@id']}>{ context.previous.display_title }</a></h6>
+                        <h6 className="text-500 mt-0"><a href={context.previous['@id'] || '/' + context.previous.name}>{ context.previous.display_title }</a></h6>
                     </div>
                 : null }
                 { context.next ?
                     <div className={"next-section col-xs-6 pull-right"}>
                         <h6 className="text-400 mb-03 mt-12">{ nextTitle } <i className="icon icon-fw icon-angle-right"/></h6>
-                        <h6 className="text-500 mt-0"><a href={context.next['@id']}>{ context.next.display_title }</a></h6>
+                        <h6 className="text-500 mt-0"><a href={context.next['@id'] || '/' + context.next.name}>{ context.next.display_title }</a></h6>
                     </div>
                 : null }
                 </div>

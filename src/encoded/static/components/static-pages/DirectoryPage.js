@@ -44,22 +44,30 @@ export class DirectoryBodyGrid extends React.Component {
         var childID = object.itemUtil.atId(child);
         return (
             <div className={"grid-item col-xs-12 col-md-" + (childrenHaveChildren ? '4' : '12')} key={childID || child.name}>
-                <div className="inner" onClick={navigate.bind(navigate, childID)}>
-                    <h3 className="text-300 mb-07 mt-07">
-                        <a className="title-link" href={childID}>{ child.display_title }</a>
-                    </h3>
+                <a href={childID} className="inner">
+                    <h3 className="text-300 mb-07 mt-07 title-link">{ child.display_title }</h3>
                     { !childrenHaveChildren && child.description ?
                         <div className="page-description">{ child.description }</div> : null
                     }
                     { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-05 mb-05 text-400">{ childPageCount } Pages</h6> : null }
-                </div>
+                </a>
             </div>
         );
     }
 
     render(){
         var { context, childrenHaveChildren } = this.props;
-        return <div className={"row grid-of-sections" + (childrenHaveChildren ? ' with-sub-children' : '')} children={_.map(this.props.context.children || [], this.renderGridItem)}/>;
+        var childrenToShow = _.filter(context.children || [], function(child){
+            if (!child || !child['@id'] || !child.display_title) return false; // Shouldn't occur.
+            if (!childrenHaveChildren && (child.content || []).length === 0){
+                return false;
+            }
+            if (childrenHaveChildren && (child.children || []).length === 0 && (child.content || []).length === 0){
+                return false;
+            }
+            return true;
+        });
+        return <div className={"row grid-of-sections" + (childrenHaveChildren ? ' with-sub-children' : '')} children={_.map(childrenToShow, this.renderGridItem)}/>;
     }
 
 }

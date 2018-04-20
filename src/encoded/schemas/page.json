@@ -43,17 +43,6 @@
             "description" : "Internal description of page.",
             "type": "string"
         },
-        "order": {
-            "title" : "Order",
-            "description": "Relative position in context of other pages at this level.",
-            "type" : "integer"
-        },
-        "exclude_from_tree" : {
-            "title" : "Exclude from page hierarchy tree?",
-            "description": "Set this field to true if this page is not meant to be navigated to or is meant to be hidden but public, such as /error/login-failed.",
-            "type" : "boolean",
-            "default" : false
-        },
         "table-of-contents": {
             "title": "Table of Contents",
             "type": "object",
@@ -97,11 +86,13 @@
                 "linkTo" : "StaticSection"
             }
         },
-        "hide_directory" : {
-            "title" : "Hide Directory/Children",
-            "description": "Hide directory of children (if any). Useful for e.g. /joint-analysis page which may have additional versions at sub-routes (e.g. /joint-analysis/dev) which are not meant to be explicit children.",
-            "default" : false,
-            "type" : "boolean"
+        "children" : {
+            "title": "Child Pages",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "linkTo" : "Page"
+            }
         },
         "redirect" : {
             "title" : "Redirect",

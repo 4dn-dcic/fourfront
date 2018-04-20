@@ -395,22 +395,27 @@ h5.fourDN-header {
 	.grid-of-sections.row {
 
 		> .grid-item > .inner {
+			display: block;
+			text-decoration: none;
 			margin-bottom: 20px;
 			border: 1px solid #f0f0f0;
 			padding: 8px 16px;
 			background-color: #f8f8f8;
 			transition: border-color .25s;
+			color: $text-color;
 
-			a.title-link {
+			.title-link {
+				color: $link-color;
 				transition: color .25s;
 			}
 
 			&:hover {
 				border-color: #ccc;
 				cursor: pointer;
-				a.title-link {
-					text-decoration: underline;
+				.title-link {
+					//text-decoration: underline;
 					color: $link-hover-color;
+					text-shadow: 0px 0px $link-hover-color;
 				}
 			}
 		}

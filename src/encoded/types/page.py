@@ -18,6 +18,7 @@ from snovault import (
 from encoded.search import get_iterable_search_results
 from .base import Item
 from snovault.resource_views import item_view_page
+from snovault.calculated import calculate_properties
 from datetime import datetime, timedelta
 import json
 
@@ -32,23 +33,15 @@ def get_pyramid_http_exception_for_redirect_code(code):
     return code_dict[code]
 
 
-def generate_page_tree(request):
+def generate_page_tree(request, page_name = None):
 
-    # TODO:
-    # (a) Get rid of 'content' fields from search request if we don't wanna show sections in directories.
+    current_page_route_root = None
+    if page_name is not None:
+        page_name_parts = [ path_component for path_component in page_name.split('/') if path_component ]
+        if len(page_name_parts) > 1:
+            current_page_route_root = [ path_component for path_component in page_name.split('/') if path_component ][0]
 
-    NODE_FULL_NAME_MAPPING = {    # This is probably/possibly temporary until we create page for each node with own "order" property ?
-        '/help/analysis'                : { "order" : 0 },
-        '/help/user-guide'              : { "order" : 1 },
-        '/help/submitter-guide'         : { "order" : 2 },
-        '/help/protocols'               : { "order" : 3 },
-        '/help/dcic-processes-protocols': { "order" : 4, "display_title" : "DCIC Processes & Protocols" },
-        '/help/visualization'           : { "order" : 5 },
-        '/help/faq'                     : { "order" : 6 },
-        '/help/release-notes'           : { "order" : 7 },
-    }
-
-    root = { "name" : "/", "children" : [], "@id" : '/', "display_title" : "Home" }
+    root = { "name" : "", "children" : [], "@id" : '/', "display_title" : "Home" }
 
     for page in get_iterable_search_results(
         request,
@@ -56,68 +49,60 @@ def generate_page_tree(request):
         param_lists={
             'type'              : ['Page'],
             'sort'              : ['name', 'uuid'],
-            'exclude_from_tree!': ['true'],
-            #'redirect.enabled!' : ['true'],
-            'field'             : ['name', 'uuid', 'display_title', 'order', 'content.name', 'content.title', 'content.title', 'content.@id', 'description', 'redirect.enabled']
+            'field'             : ['name', 'uuid', '@id', 'display_title', 'children', 'content.name', 'content.title', 'content.title', 'content.@id', 'description', 'redirect.enabled']
         }
     ):
         path_components = [ path_component for path_component in page['name'].split('/') if path_component ]
-        current_node = root
-        full_name = ''
-        for path_component_index, path_component in enumerate(path_components):
-            full_name = full_name + '/' + path_component
-            child_node = None
-            if path_component_index + 1 < len(path_components):
-                found_child = False
-                for child in current_node['children']:
-                    if child['name'] == path_component:
-                        child_node = child
-                        found_child = True
-                        break
-                if not found_child:
-                    child_node = {
-                        "name"      : path_component,
-                        "children"  : [],
-                        "@id"       : full_name,
-                        "order"     : -1
-                    }
-                    if NODE_FULL_NAME_MAPPING.get(full_name):
-                        child_node.update(NODE_FULL_NAME_MAPPING[full_name])
-                    current_node['children'].append(child_node)
-                current_node = child_node
-            else:
-                child_node = {
-                    "name"          : path_component,
-                    "children"      : [],
-                    "@id"           : full_name,
-                    "order"         : page.get('order', len(current_node['children'])),
-                    "uuid"          : page['uuid'],
-                    "display_title" : page['display_title']
-                }
-                for optional_field in ['description', 'content', 'redirect']:
-                    if page.get(optional_field) is not None:
-                        child_node[optional_field] = page[optional_field]
-                current_node['children'].append(child_node)
+        if len(path_components) != 1:
+            continue
+        if current_page_route_root is not None and current_page_route_root == page['name']:
+            page.update(request.embed(page['@id'], '@@embedded', as_user=True))
+        child_node = {
+            "name"          : path_components[0],
+            "children"      : page.get('children',[]),
+            "@id"           : page['@id'],
+            "uuid"          : page['uuid'],
+            "display_title" : page['display_title']
+        }
+        for optional_field in ['description', 'content', 'redirect']:
+            if page.get(optional_field) is not None:
+                child_node[optional_field] = page[optional_field]
+        root['children'].append(child_node)
 
-    def cleanup_tree(node):
-        node_children_length = len(node['children'])
-        #node['children'] = [ c for c in node['children'] if c.get('redirect', {}).get('enabled') is not True ]
-        if node_children_length == 0 or node.get('redirect', {}).get('enabled') is True:
-            del node['children']
-            node['is_leaf'] = True
-        else:
-            node['children'].sort(key=lambda n: n.get('order', 99)) # In-place sort
-            for child_idx, child in enumerate(node['children']):
-                child['sibling_length'] = node_children_length
-                child['sibling_position'] = child_idx
-                cleanup_tree(child)
-        if node.get('description') is not None:
-            if not node['description']:
-                del node['description']
-
-    cleanup_tree(root)
+    cleanup_page_tree(root)
 
     return root
+
+def cleanup_page_tree(node):
+    node['@id'] = '/' + node['name']
+    node['@type'] = generate_at_type_for_page(node)
+    node_children_length = len(node.get('children', []))
+    if node_children_length == 0:
+        if node.get('children') is not None:
+            del node['children']
+        node['is_leaf'] = True
+    else:
+        node['children'] = [ c for c in node['children'] if c.get('error') is None ]
+        for child in node['children']:
+            cleanup_page_tree(child)
+        node['children'] = [ c for c in node['children'] if ( len(c.get('children', [])) != 0 or len(c.get('content',[])) != 0) ]
+        for child_idx, child in enumerate(node['children']):
+            child['sibling_length'] = len(node['children'])
+            child['sibling_position'] = child_idx
+
+def generate_at_type_for_page(node, item={}):
+    capitalized_path_names = [ pg.capitalize() for pg in filter(lambda pg: pg, node['@id'].split('/')) ]
+    page_type = []
+    for cap_idx, cap_name in enumerate(reversed(capitalized_path_names)):
+        typestr = ''
+        for idx in range(0, len(capitalized_path_names) - cap_idx):
+            typestr += capitalized_path_names[idx]
+        typestr += 'Page'
+        page_type.append(typestr)
+    if len(node.get('children',[])) > 0:
+        page_type.append('DirectoryPage')
+    page_type.extend(["StaticPage", "Portal"])
+    return page_type
 
 def add_sibling_parent_relations_to_tree(node):
     '''After this is run, will not be able to use with json.dumps() due to (many) new circular relations.'''
@@ -147,21 +132,13 @@ def is_static_page(info, request):
     if path_parts[0] != "pages" and path_parts[0] in request.registry[COLLECTIONS].keys():
         return False
 
-    request.set_property(generate_page_tree, name='page_tree', reify=True)
+    request.set_property(lambda x: generate_page_tree(request, page_name), name='page_tree', reify=True)
+    request.set_property(lambda x: request.registry[CONNECTION].storage.get_by_unique_key('page:name', page_name), name='_static_page_model', reify=True)
 
-    curr_node = request.page_tree
-    for part in path_parts:
-        found_child = False
-        for child in curr_node.get('children', []):
-            if child['name'] == part:
-                curr_node = child
-                found_child = True
-                break
-        if not found_child:
-            return False
-        else:
-            continue
-    return True
+    if request._static_page_model:
+        return True
+    else:
+        return False
 
 
 def includeme(config):
@@ -264,18 +241,8 @@ class Page(Item):
     schema = load_schema('encoded:schemas/page.json')
     embedded_list = ['content.*']
 
-@collection(
-    name='page-directories',
-    properties={
-        'title': 'Page Directories',
-        'description': 'Directories of Pages',
-    })
-class PageDirectory(Page):
-    """Links to Pages or other PageDirectorys"""
-    item_type = 'page_directory'
-    schema = load_schema('encoded:schemas/page_directory.json')
-    embedded_list = ['content.*']
-
+for field in ['display_title', 'name', 'description', 'content.name']:
+    Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
 
 def static_page(request):
     '''
@@ -283,20 +250,6 @@ def static_page(request):
     do permissions checking.  Then format the return result to be something
     the front-end expects
     '''
-
-    def page_type_from_tree_node(node, item={}):
-        capitalized_path_names = [ pg.capitalize() for pg in filter(lambda pg: pg, node['@id'].split('/')) ]
-        page_type = []
-        for cap_idx, cap_name in enumerate(reversed(capitalized_path_names)):
-            typestr = ''
-            for idx in range(0, len(capitalized_path_names) - cap_idx):
-                typestr += capitalized_path_names[idx]
-            typestr += 'Page'
-            page_type.append(typestr)
-        if len(node.get('children',[])) > 0:
-            page_type.append('DirectoryPage')
-        page_type.extend(["StaticPage", "Portal"])
-        return page_type
 
     def title_from_tree_node(node):
         if node.get('display_title'):
@@ -311,99 +264,50 @@ def static_page(request):
             filtered_node['children'] = [ remove_relations_in_tree(c, keep) for c in node['children'] ]
         if keep == 'parent' and node.get('parent'):
             filtered_node['parent'] = remove_relations_in_tree(node['parent'], keep)
-        for field in node.keys(): #['display_title', 'order', 'uuid', 'page_sections', 'sibling_length', 'sibling_position']:
+        for field in node.keys():
             if field not in ['next', 'previous', 'children', 'parent'] and node.get(field) is not None:
                 filtered_node[field] = node[field]
-        filtered_node['display_title'] = title_from_tree_node(node)
-        filtered_node['@type'] = page_type_from_tree_node(node)
         return filtered_node
-
-    def remove_nodes_with_redirects_from_tree(root_node):
-        '''Modifies in place'''
-        node = root_node
-        filtered_children = []
-        for child in node.get('children', []):
-            if child.get('redirect', {}).get('enabled') is not True:
-                filtered_children.append(child)
-        if len(filtered_children) > 0:
-            node['children'] = filtered_children
-        elif node.get('children') is not None:
-            del node['children']
-        for child in node.get('children', []):
-            remove_nodes_with_redirects_from_tree(child)
-
-        if node.get('next', {}).get('redirect', {}).get('enabled') is True:
-            if node.get('next', {}).get('next') and node.get('next', {}).get('next').get('redirect', {}).get('enabled') is not True:
-                node['next'] = node['next']['next']
-            else:
-                del node['next']
-        if node.get('previous', {}).get('redirect', {}).get('enabled') is True:
-            if node.get('previous', {}).get('previous') and node.get('previous', {}).get('previous').get('redirect', {}).get('enabled') is not True:
-                node['previous'] = node['previous']['previous']
-            else:
-                del node['previous']
-
 
     path_parts = [ path_part for path_part in request.subpath if path_part ]
     page_name = "/".join(path_parts)
 
     tree = add_sibling_parent_relations_to_tree(request.page_tree)
+
     curr_node = tree
-    page_exists = True
+    page_in_tree = True
     for path_idx, part in enumerate(path_parts):
         found_child = False
-        for child in curr_node['children']:
-            if child['name'] == part:
+        for child in curr_node.get('children',[]):
+            if child['name'].split('/')[path_idx] == part:
                 curr_node = child
                 found_child = True
                 break
         if path_idx == len(path_parts) - 1 and curr_node.get('uuid') is None:
-            page_exists = False
+            page_in_tree = False
             break
 
+    context = Page(request.registry, request._static_page_model)
 
-    # creates SubmittingHelpPage, HelpPage, etc..
-    #conn = request.registry[CONNECTION]
-    # at this point we should be guaranteed to have this object, as the custom_predicate
-    # should prevent this view being called with invalide pagename
-    #page_in_db = conn.storage.get_by_unique_key('page:name', page_name)
+    if context.properties.get('redirect') and context.properties['redirect'].get('enabled'): # We have a redirect defined.
+        return get_pyramid_http_exception_for_redirect_code(context.properties['redirect'].get('code', 307))( # Fallback to 307 as is 'safest' (response isn't cached by browsers)
+            location=context.properties['redirect'].get('target', '/'),
+            comment="Redirected from " + page_name
+        )
+    item = item_view_page(context, request)
+    cleanup_page_tree(item)
+    item['toc'] = item.get('table-of-contents')
+    item['context'] = item['@id']
 
-    if page_exists:
-
-        context = request.registry[COLLECTIONS]['pages'].get(curr_node['uuid'])
-
-        if context.properties.get('redirect') and context.properties['redirect'].get('enabled'): # We have a redirect defined.
-            return get_pyramid_http_exception_for_redirect_code(context.properties['redirect'].get('code', 307))( # Fallback to 307 as is 'safest' (response isn't cached by browsers)
-                location=context.properties['redirect'].get('target', '/'),
-                comment="Redirected from " + page_name
-            )
-        item = item_view_page(context, request)
-        item['toc'] = item.get('table-of-contents')
-    else:
-        item = {
-            'display_title': title_from_tree_node(curr_node),
-            'content': []
-        }
-
-    # Finalize the things. Extend with common/custom properties.
-    item['@id'] = item['@context'] = "/" + page_name
-    item['@type'] = page_type_from_tree_node(curr_node, item)
-
-    remove_nodes_with_redirects_from_tree(curr_node)
-
-    #print('\n\n\n', [ (c['name'], c.get('redirect')) for c in curr_node.get('children', []) ] )
-
-    if curr_node.get('next'):
-        item['next'] =      remove_relations_in_tree(curr_node['next'])
-    if curr_node.get('previous'):
-        item['previous'] =  remove_relations_in_tree(curr_node['previous'])
-    if curr_node.get('parent'):
-        item['parent'] =    remove_relations_in_tree(curr_node['parent'], keep="parent")
-    if curr_node.get('sibling_length') is not None:
-        item['sibling_length'] = curr_node['sibling_length']
-        item['sibling_position'] = curr_node['sibling_position']
-
-    if curr_node.get('children'):
-        item['children'] = [ remove_relations_in_tree(node) for node in curr_node['children'] ]
+    if page_in_tree:
+        if curr_node.get('next'):
+            item['next'] =      remove_relations_in_tree(curr_node['next'])
+        if curr_node.get('previous'):
+            item['previous'] =  remove_relations_in_tree(curr_node['previous'])
+        if curr_node.get('parent'):
+            item['parent'] =    remove_relations_in_tree(curr_node['parent'], keep="parent")
+        if curr_node.get('sibling_length') is not None:
+            item['sibling_length'] = curr_node['sibling_length']
+            item['sibling_position'] = curr_node['sibling_position']
 
     return item
