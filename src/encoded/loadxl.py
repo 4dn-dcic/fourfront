@@ -830,8 +830,18 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
         from snovault import DBSESSION
         from snovault.storage import Base
         session = app.registry[DBSESSION]
-        Base.metadata.drop_all(session.connection().engine)
-        Base.metadata.create_all(session.connection().engine)
+        # this can timeout if others are holding connection
+        # to database
+        import transaction
+        try:
+            Base.metadata.drop_all(session.connection().engine)
+            Base.metadata.create_all(session.connection().engine)
+        except Exception as e:
+            logger.error("error droping tables: %s" % str(e))
+            transaction.abort()
+        else:
+            transaction.commit()
+        transaction.begin()
 
     from webtest import TestApp
     environ = {
