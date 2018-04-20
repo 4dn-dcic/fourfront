@@ -92,7 +92,7 @@ def force_beanstalk_env(profile_name, config_file=None):
             proc.communicate()
 
         conn = boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
+                            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
     else:
         conn = boto3.session.Session(profile_name=profile_name).client('sts')
 
