@@ -239,6 +239,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert induced_stem_uuid in both_uuids
 
 
+@pytest.mark.skip
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3

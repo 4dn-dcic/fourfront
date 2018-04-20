@@ -35,7 +35,7 @@ def main():
                 return
         # handle mastertest ... by blowing away all data first
         if 'mastertest' in env:
-            run_create_mapping(app, check_first=False, skip_indexing=True, purge_queue=True)
+            run_create_mapping(app, check_first=False, purge_queue=True)
             return
     except Exception:
         import traceback
@@ -43,4 +43,4 @@ def main():
         logger.warn("couldn't get wodaman, so assuming NOT Stagging")
 
     logger.info("looks like we are NOT on staging so run create mapping with check first")
-    run_create_mapping(app, check_first=True)
+    run_create_mapping(app, check_first=True, purge_queue=True, skip_indexing=True)
