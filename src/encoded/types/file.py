@@ -120,12 +120,12 @@ def external_creds(bucket, key, name=None, profile_name=None):
         conn = force_beanstalk_env(profile_name)
         token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
-        credentials = token.credentials.to_dict()
+        credentials = token.get('Credentials')
         credentials.update({
             'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
-            'federated_user_arn': token.federated_user_arn,
-            'federated_user_id': token.federated_user_id,
-            'request_id': token.request_id,
+            'federated_user_arn': token.get('FederatedUser').get('Arn')
+            'federated_user_id': token.get('FederatedUser').get('FederatedUserId'),
+            'request_id': token.get('ResponseMetadata').get('RequestId'),
             'key': key
         })
     return {
