@@ -539,5 +539,5 @@ def test_force_beanstalk_env(mocker):
     # os.remove(test_cfg.delete)
 
     # ensure boto called with correct arguments
-    mock_boto.client.assert_called_once_with(aws_access_key_id='its a secret id',
+    mock_boto.client.assert_called_once_with('sts', aws_access_key_id='its a secret id',
                                              aws_secret_access_key='its a secret')
