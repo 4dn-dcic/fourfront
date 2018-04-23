@@ -123,7 +123,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
         credentials = token.get('Credentials')
         credentials.update({
             'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
-            'federated_user_arn': token.get('FederatedUser').get('Arn')
+            'federated_user_arn': token.get('FederatedUser').get('Arn'),
             'federated_user_id': token.get('FederatedUser').get('FederatedUserId'),
             'request_id': token.get('ResponseMetadata').get('RequestId'),
             'key': key
@@ -348,7 +348,7 @@ class File(Item):
                     # delete the old sumabeach
                     conn = boto3.client('s3')
                     bname = old_creds['bucket']
-                    conn.delete_object(Bucket='bname', Key=old_creds['key'])
+                    conn.delete_object(Bucket=bname, Key=old_creds['key'])
                 except Exception as e:
                     print(e)
 
