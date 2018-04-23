@@ -230,15 +230,15 @@ export class MiddleRow extends React.Component {
             <FlexibleDescriptionBox
                 description={ description || <em>No description provided.</em> }
                 className="item-page-heading"
-                textClassName="text-large"
+                textClassName="text-medium"
                 defaultExpanded={description.length < 600}
                 fitTo="grid"
-                lineHeight={24}
+                lineHeight={21}
                 dimensions={{
                     'paddingWidth' : 0,
                     'paddingHeight' : 22, // Padding-top + border-top
                     'buttonWidth' : 30,
-                    'initialHeight' : 46
+                    'initialHeight' : 41
                 }}
             />
         );

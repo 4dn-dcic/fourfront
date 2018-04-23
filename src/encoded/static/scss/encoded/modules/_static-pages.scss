@@ -396,6 +396,7 @@ h5.fourDN-header {
 
 		> .grid-item > .inner {
 			display: block;
+			position: relative;
 			text-decoration: none;
 			margin-bottom: 20px;
 			border: 1px solid #f0f0f0;
@@ -423,7 +424,12 @@ h5.fourDN-header {
 		&.with-sub-children {
 			> .grid-item > .inner {
 				@media screen and (min-width: $screen-sm-min) {
-					height: 80px;
+					height: 98px;
+					.section-page-count {
+						position: absolute;
+						right: 9px;
+						bottom: 5px;
+					}
 				}
 			}
 		}

@@ -321,7 +321,7 @@
     {
         "name": "help/dcic-processes-protocols",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000004",
-        "title": "4DN Processes and Protocols",
+        "title": "Processes and Protocols",
         "description" : "Processes and Protocols for the 4DN DCIC.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff020000",
