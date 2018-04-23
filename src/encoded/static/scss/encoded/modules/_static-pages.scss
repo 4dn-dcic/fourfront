@@ -423,14 +423,32 @@ h5.fourDN-header {
 
 		&.with-sub-children {
 			> .grid-item > .inner {
+
+				.section-page-count {
+					display: none;
+				}
+
 				@media screen and (min-width: $screen-sm-min) {
 					height: 98px;
 					.section-page-count {
+						display: block;
 						position: absolute;
 						right: 9px;
 						bottom: 5px;
+						transition: opacity .25s;
+						opacity: 0.33;
 					}
 				}
+
+
+				&:hover {
+					@media screen and (min-width: $screen-sm-min) {
+						.section-page-count {
+							opacity: 1;
+						}
+					}
+				}
+
 			}
 		}
 

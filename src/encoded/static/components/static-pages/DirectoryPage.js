@@ -18,10 +18,14 @@ export default class DirectoryPage extends React.Component {
         var childrenHaveChildren = _.any(context.children || [], function(c){
             return c && c.children && c.children.length > 0;
         });
+
+        var content = (context.content || []).length > 0 ? StaticPage.renderSections(StaticPage.defaultProps.entryRenderFxn, parseSectionsContent(context)) : null;
+
         return (
             <div className={"static-page static-directory-page" + (childrenHaveChildren ? " directory-page-of-directories" : " leaf-directory")} key="wrapper">
-                { true ? <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} /> : null }
+                <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
                 { !childrenHaveChildren ? <NextPreviousPageSection context={context} /> : null }
+                { content }
             </div>
         );
     }

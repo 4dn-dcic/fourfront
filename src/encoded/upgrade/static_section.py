@@ -41,7 +41,6 @@ def static_section_1_2(value, system):
     if value['name'] == "help.spreadsheet#schema_info":
         value['name'] = "help.submitter-guide.spreadsheet.schema_info"
 
-    
 
     if "#" in value['name']:
         value['name'] = value['name'].replace('#', '.', 1)

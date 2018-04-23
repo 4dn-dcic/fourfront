@@ -144,7 +144,7 @@ def is_static_page(info, request):
     if path_parts[0] != "pages" and path_parts[0] in request.registry[COLLECTIONS].keys():
         return False
 
-    request.set_property(lambda x: generate_page_tree(request, page_name), name='page_tree', reify=True)
+    request.set_property(lambda x: generate_page_tree(x, page_name), name='_static_page_tree', reify=True)
     request.set_property(lambda x: request.registry[CONNECTION].storage.get_by_unique_key('page:name', page_name), name='_static_page_model', reify=True)
 
     if request._static_page_model:
@@ -349,7 +349,7 @@ def static_page(request):
     path_parts = [ path_part for path_part in request.subpath if path_part ]
     page_name = "/".join(path_parts)
 
-    tree = add_sibling_parent_relations_to_tree(request.page_tree)
+    tree = add_sibling_parent_relations_to_tree(request._static_page_tree)
 
     curr_node = tree
     page_in_tree = True
