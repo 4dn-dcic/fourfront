@@ -58,6 +58,7 @@ def page_2_3(value, system):
         ]
         if value.get('table-of-contents') is not None:
             del value['table-of-contents']
+        value['content'] = []
 
     if value['name'] == 'help/account-creation':
         value['name'] = "help/user-guide/account-creation"
