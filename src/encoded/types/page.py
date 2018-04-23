@@ -279,7 +279,8 @@ def static_page(request):
     for path_idx, part in enumerate(path_parts):
         found_child = False
         for child in curr_node.get('children',[]):
-            if child['name'].split('/')[path_idx] == part:
+            split_child_name = child['name'].split('/')
+            if len(split_child_name) > path_idx and split_child_name[path_idx] == part:
                 curr_node = child
                 found_child = True
                 break

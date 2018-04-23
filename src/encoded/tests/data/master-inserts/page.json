@@ -201,7 +201,8 @@
             "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
             "3c999ac4-1727-4aac-96f5-61ae701a4006",
             "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
@@ -240,7 +241,8 @@
         "children": [
             "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
             "4f115e02-5291-436d-92e8-617af96355df"
-        ]
+        ],
+        "schema_version" : "3"
     },
     
 
@@ -281,7 +283,8 @@
         "description" : "Protocol definitions and guides.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff010000"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
@@ -300,7 +303,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
     {
         "name": "help/dcic-processes-protocols/freeze-policy",
@@ -315,7 +319,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
 
     {
@@ -326,7 +331,8 @@
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff020000",
             "f0f0f0f0-0000-0000-0000-ffffff020001"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
@@ -344,7 +350,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
     {
         "name": "help/visualization/hipiler",
@@ -359,7 +366,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
 
     {
@@ -370,7 +378,8 @@
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff030000",
             "f0f0f0f0-0000-0000-0000-ffffff030001"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
@@ -386,7 +395,8 @@
             "f0f0f0f0-0000-0000-0000-aaaaaa000003",
             "f0f0f0f0-0000-0000-0000-aaaaaa000004",
             "f0f0f0f0-0000-0000-0000-aaaaaa000005"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
