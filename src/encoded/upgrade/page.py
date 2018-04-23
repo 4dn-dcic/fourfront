@@ -45,28 +45,39 @@ def page_2_3(value, system):
 
     # Moving Around Pages
 
-    if value['name'] == 'help':                          #and value['uuid'] == "311d0f4f-56ee-4450-8cbb-780c10229284":
-        value['name'] = "help/user-guide/data-organization"
+    if value['name'] == 'help':
+        value["title"] = "Help Section"
+        value["description"] = "Documentation for using the 4DN Data Portal"
+        value["children"] = [
+            "f0f0f0f0-0000-0000-0000-aaaaaa000000",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000001",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000002",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000003",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000004",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000005"
+        ]
+        if value.get('table-of-contents') is not None:
+            del value['table-of-contents']
 
-    if value['name'] == 'help/account-creation':         #and value['uuid'] == "5153c902-a0d2-4246-9b41-cea7a1c91f52":
+    if value['name'] == 'help/account-creation':
         value['name'] = "help/user-guide/account-creation"
 
-    if value['name'] == "help/getting-started":          #and value['uuid'] == "6292facf-9eb4-451e-8d05-2e56e1bd7cbe":
+    if value['name'] == "help/getting-started":
         value['name'] = "help/user-guide/getting-started"
 
-    if value['name'] == "help/biosample":                #and value['uuid'] == "3c999ac4-1727-4aac-96f5-61ae701a4006":
+    if value['name'] == "help/biosample":
         value['name'] = "help/user-guide/biosample-metadata"
     
-    if value['name'] == "help/rest-api":                 #and value['uuid'] == "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb":
+    if value['name'] == "help/rest-api":
         value['name'] = "help/user-guide/rest-api"
 
-    if value['name'] == "help/web-submission":           #and value['uuid'] == "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b":
+    if value['name'] == "help/web-submission":
         value['name'] = "help/submitter-guide/web-submission"
 
-    if value['name'] == "help/spreadsheet":              #and value['uuid'] == "4f115e02-5291-436d-92e8-617af96355df":
+    if value['name'] == "help/spreadsheet":
         value['name'] = "help/submitter-guide/spreadsheet"
 
-    if value['name'] == "help/data-processing-pipelines": #and value['uuid'] == "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc":
+    if value['name'] == "help/data-processing-pipelines":
         value['content'] = []
         value['redirect'] = { "target" : "/help/analysis/cwl-docker", "enabled" : True, "code" : 307 }
         if value.get('title') is not None:

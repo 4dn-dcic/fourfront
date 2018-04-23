@@ -75,7 +75,7 @@
         "title": "CWL + Docker",
         "description" : "Information about the Common Workflow Language definitions (CWLs) and Docker Images used in our pipelines.",
         "content": [
-            "help.analysis.cwl-docker.data-processing-pipelines"
+            "9a0afb37-2605-4c0c-9a12-4a28882583a8"
         ],
         "table-of-contents": {
             "enabled": true
@@ -130,7 +130,7 @@
 
     {
         "name": "help/user-guide/data-organization",
-        "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff011000",
         "title": "Introduction to 4DN Metadata",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b011",
@@ -385,7 +385,7 @@
 
     {
         "name": "help",
-        "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa010000",
+        "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
         "title": "Help Section",
         "description" : "Documentation for using the 4DN Data Portal",
         "children": [
@@ -395,9 +395,8 @@
             "f0f0f0f0-0000-0000-0000-aaaaaa000003",
             "f0f0f0f0-0000-0000-0000-aaaaaa000004",
             "f0f0f0f0-0000-0000-0000-aaaaaa000005"
-        ],
-        "schema_version" : "3"
-    },
+        ]
+    }
 
 
 
