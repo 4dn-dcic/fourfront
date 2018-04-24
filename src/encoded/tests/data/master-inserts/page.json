@@ -395,6 +395,9 @@
             "f0f0f0f0-0000-0000-0000-aaaaaa000003",
             "f0f0f0f0-0000-0000-0000-aaaaaa000004",
             "f0f0f0f0-0000-0000-0000-aaaaaa000005"
+        ],
+        "content" : [
+            "reusable-dummy-sections.lorem-ipsum-overview"
         ]
     },
 
