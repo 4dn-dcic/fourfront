@@ -286,8 +286,11 @@ def validate_page_children_routes(context, request):
     any_errors = False
 
     for child_identifier in children:
-        child_uuid = get_item_if_you_can(request, child_identifier, 'pages').get('uuid')
-        child_item = getter.get(child_uuid)
+        try:
+            child_uuid = get_item_if_you_can(request, child_identifier, 'pages').get('uuid')
+            child_item = getter.get(child_uuid)
+        except AttributeError:
+            continue
         child_item_name = child_item.properties['name']
         child_item_name_parts = child_item_name.split('/')
         if len(child_item_name_parts) != self_name_depth + 1:
