@@ -225,7 +225,7 @@ def test_files_aws_credentials(testapp, fastq_uploading):
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
     assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
-    assert 'test-bucket' in resobj['upload_credentials']['upload_url']
+    assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
 
 
 def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
@@ -375,9 +375,9 @@ def test_external_creds(mocker):
     mock_boto = mocker.patch('encoded.types.file.boto3', autospec=True)
 
     from encoded.types.file import external_creds
-    ret = external_creds('test-bucket', 'test-key', 'name')
+    ret = external_creds('test-wfout-bucket', 'test-key', 'name')
     assert ret['key'] == 'test-key'
-    assert ret['bucket'] == 'test-bucket'
+    assert ret['bucket'] == 'test-wfout-bucket'
     assert ret['service'] == 's3'
     assert 'upload_credentials' in ret.keys()
 
@@ -393,7 +393,7 @@ def test_create_file_request_proper_s3_resource(registry, fastq_json, mocker):
     FileFastq.create(registry, '1234567', fastq_json)
     # check that we would have called aws
     expected_s3_key = "1234567/%s.fastq.gz" % (fastq_json['accession'])
-    external_creds.assert_called_once_with('test-bucket', expected_s3_key,
+    external_creds.assert_called_once_with('test-wfout-bucket', expected_s3_key,
                                            fastq_json['filename'], 'test-profile')
 
 
