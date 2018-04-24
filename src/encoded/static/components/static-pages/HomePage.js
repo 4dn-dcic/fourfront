@@ -37,12 +37,12 @@ export default class HomePage extends React.Component {
             <div className="home-content-area">
                 <div className="row">
                     <div className="col-md-6 col-xs-12">
-                        <h2 className="fourDN-header">Introduction</h2>
+                        <h2 className="homepage-section-title">Introduction</h2>
                         <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}/>
                         <layout.WindowResizeUpdateTrigger><LinksRow/></layout.WindowResizeUpdateTrigger>
                     </div>
                     <div className="col-md-6 col-xs-12">
-                        <h2 className="fourDN-header">Announcements</h2>
+                        <h2 className="homepage-section-title">Announcements</h2>
                         <Announcements loaded session={this.props.session} />
                     </div>
                 </div>

@@ -4,9 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { compiler } from 'markdown-to-jsx';
-import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
 import * as globals from './../globals';
-import { layout, console } from './../util';
+import { layout, console, object, isServerSide } from './../util';
 
 
 /**
@@ -206,9 +206,12 @@ export class StaticEntry extends React.Component {
 
     render(){
         var { content, entryType, sectionName, className } = this.props;
+        var id = TableOfContents.elementIDFromSectionName(sectionName);
         return (
-            <div className={entryType + "-entry static-section-entry"} id={TableOfContents.elementIDFromSectionName(sectionName)}>
-                { content && content.title ? <h2 className="fourDN-header">{ content.title }</h2> : null }
+            <div className={entryType + "-entry static-section-entry"} id={id}>
+                { content && content.title ?
+                    <HeaderWithLink className="section-title" link={id} context={this.props.context}>{ content.title }</HeaderWithLink>
+                : null }
                 { this.renderEntryContent(className) }
             </div>
         );

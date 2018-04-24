@@ -62,6 +62,9 @@ def page_2_3(value, system):
 
     if value['name'] == 'help/account-creation':
         value['name'] = "help/user-guide/account-creation"
+        value['table-of-contents'] = {
+            "enabled" : True
+        }
 
     if value['name'] == "help/getting-started":
         value['name'] = "help/user-guide/getting-started"

@@ -56,9 +56,16 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
 
 /** Return the properties dictionary from a schema for use as tooltips */
 export function tipsFromSchema(schemas, content){
-    if(content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
+    if (content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
         var type = content['@type'][0];
         return tipsFromSchemaByType(schemas, content['@type'][0]);
+    //} else if (content['@id'] && typeof content['@id'] === 'string'){
+    //    const lowerCaseType = _.filter(content['@id'].split('/'))[0].replace(/\-/g, '_');
+    //    const schemasKeyedByLowerType = _.object(_.map(_.filter(_.values(schemas), function(schm){ return !!(schm.id); }), function(schm){
+    //        let schmLowerKey = schm.id.replace('/profiles/', '').replace('.json', '');
+    //        return [schmLowerKey, schm];
+    //    }));
+    //    return tipsFromSchemaByType(schemasKeyedByLowerType, lowerCaseType);
     }
     return {};
 }
@@ -324,6 +331,40 @@ export class CopyWrapper extends React.Component {
         'iconProps' : {}
     }
 
+    static copyToClipboard(value, successCallback = null, failCallback = null){
+        var textArea = document.createElement('textarea');
+        textArea.style.top = '-100px';
+        textArea.style.left = '-100px';
+        textArea.style.position = 'absolute';
+        textArea.style.width = '5px';
+        textArea.style.height = '5px';
+        textArea.style.padding = 0;
+        textArea.style.border = 'none';
+        textArea.style.outline = 'none';
+        textArea.style.boxShadow = 'none';
+
+        // Avoid flash of white box if rendered for any reason.
+        textArea.style.background = 'transparent';
+        textArea.value = value;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            var successful = document.execCommand('copy');
+            var msg = successful ? 'successful' : 'unsuccessful';
+            console.log('Copying text command was ' + msg);
+            if (typeof successCallback === 'function'){
+                return successCallback(value);
+            }
+            return true;
+        } catch (err) {
+            console.error('Oops, unable to copy', err);
+            if (typeof failCallback === 'function'){
+                return failCallback(value);
+            }
+            return false;
+        }
+    }
+
     constructor(props){
         super(props);
         this.flashEffect = this.flashEffect.bind(this);
@@ -358,44 +399,24 @@ export class CopyWrapper extends React.Component {
         var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
         function copy(){
-            var textArea = document.createElement('textarea');
-            textArea.style.top = '-100px';
-            textArea.style.left = '-100px';
-            textArea.style.position = 'absolute';
-            textArea.style.width = '5px';
-            textArea.style.height = '5px';
-            textArea.style.padding = 0;
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-
-            // Avoid flash of white box if rendered for any reason.
-            textArea.style.background = 'transparent';
-            textArea.value = value;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                var successful = document.execCommand('copy');
-                var msg = successful ? 'successful' : 'unsuccessful';
-                console.log('Copying text command was ' + msg);
+            return CopyWrapper.copyToClipboard(value, function(v){
                 this.onCopy();
                 analytics.event('CopyWrapper', 'Copy', {
                     'eventLabel' : 'Value',
-                    'name' : value
+                    'name' : v
                 });
-            } catch (err) {
-                console.error('Oops, unable to copy',err);
+            }, function(v){
                 analytics.event('CopyWrapper', 'ERROR', {
                     'eventLabel' : 'Unable to copy value',
-                    'name' : value
+                    'name' : v
                 });
-            }
+            });
         }
 
         var elemsToWrap = [];
         if (children)               elemsToWrap.push(children);
         if (children && isMounted)  elemsToWrap.push(' ');
-        if (isMounted)              elemsToWrap.push(<i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy.bind(this)} />);
+        if (isMounted)              elemsToWrap.push(<i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
 
         var wrapperProps = _.extend(
             { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },

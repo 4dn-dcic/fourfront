@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Collapse, Button } from 'react-bootstrap';
 import * as globals from './../../globals';
 import { getElementTop, animateScrollTo, getScrollingOuterElement, getPageVerticalScrollPosition } from './../../util/layout';
-import { isServerSide, console, navigate } from './../../util';
+import { isServerSide, console, navigate, object } from './../../util';
 
 
 class TableEntry extends React.Component {
@@ -83,35 +83,7 @@ class TableEntry extends React.Component {
     }
 
     handleClick(){
-
-        var pageScrollTop, elementTop;
-        if (this.props.link === "top") {
-            elementTop = 0;
-        } else if (typeof this.props.link === 'string' && this.props.link){
-            if (this.props.link.charAt(0) === '/'){
-                (this.props.navigate || navigate)(this.props.link);
-                return;
-            } else {
-                elementTop = getElementTop(this.getTargetElement());
-            }
-        } else {
-            return null;
-        }
-
-        pageScrollTop = getPageVerticalScrollPosition();
-
-        animateScrollTo(elementTop, 750, this.props.offsetBeforeTarget, ()=>{
-            if (typeof this.props.navigate === 'function'){
-                var link = this.props.link;
-                setTimeout(()=>{
-                    if (link === 'top' || link === 'bottom') link = '';
-                    this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
-                }, link === 'top' || (typeof pageScrollTop === 'number' && pageScrollTop <= 40) ? 800 : 0);
-            }
-        });
-
-        return;
-
+        TableOfContents.scrollToLink(this.props.link, this.props.offsetBeforeTarget, this.props.navigate, this.getTargetElement());
     }
 
     determineIfActive(props = this.props){
@@ -437,6 +409,35 @@ export class TableOfContents extends React.Component {
             sectionName = sectionParts[sectionParts.length - 1];
         }
         return sectionName;
+    }
+
+    static scrollToLink(link, offsetBeforeTarget = 72, navigateFunc = navigate, targetElement = null){
+        var pageScrollTop, elementTop;
+        if (link === "top") {
+            elementTop = 0;
+        } else if (typeof link === 'string' && link){
+            if (link.charAt(0) === '/'){
+                navigateFunc(link);
+                return;
+            } else {
+                elementTop = getElementTop( targetElement || document.getElementById(link) );
+            }
+        } else {
+            return null;
+        }
+
+        pageScrollTop = getPageVerticalScrollPosition();
+
+        animateScrollTo(elementTop, 750, offsetBeforeTarget, ()=>{
+            if (typeof navigateFunc === 'function'){
+                setTimeout(()=>{
+                    if (link === 'top' || link === 'bottom') link = '';
+                    navigateFunc('#' + link, { 'replace' : true, 'skipRequest' : true });
+                }, link === 'top' || (typeof pageScrollTop === 'number' && pageScrollTop <= 40) ? 800 : 0);
+            }
+        });
+
+        return;
     }
 
     static defaultProps = {
@@ -778,8 +779,32 @@ export class MarkdownHeading extends React.Component {
             }
         }
         if (!propsToPass.id) propsToPass.id = this.getID(true);
-        return React.createElement(type, propsToPass);
+        return <HeaderWithLink {...propsToPass} />;
+        //return React.createElement(type, propsToPass);
     }
 }
 
+export class HeaderWithLink extends React.Component {
 
+    handleLinkClick(id, e){
+        if (!(!isServerSide() && typeof window !== 'undefined' && document)) return null;
+        var itemAtID; 
+        if (this.props.context) itemAtID = object.itemUtil.atId(this.props.context);
+        else itemAtID = window.location.pathname;
+
+        if (itemAtID){
+            var linkToCopy = itemAtID + '#' + id;
+            linkToCopy = window.location.protocol + '//' + window.location.host + linkToCopy;
+            object.CopyWrapper.copyToClipboard(linkToCopy);
+            TableOfContents.scrollToLink(id);
+        }
+    }
+
+    render(){
+        if (!this.props.id && !this.props.link) throw new Error('HeaderWithLink needs a link or ID attribute/prop.');
+        return React.createElement(this.props.type || 'h2', _.omit(this.props, 'type', 'children', 'link', 'context'), [
+            this.props.children,
+            <i key="icon-link" className="icon icon-fw icon-link" onClick={this.handleLinkClick.bind(this, this.props.link || this.props.id)} title="Copy link to clipboard"/>
+        ]);
+    }
+}

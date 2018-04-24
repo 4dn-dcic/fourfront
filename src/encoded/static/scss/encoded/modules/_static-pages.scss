@@ -45,6 +45,10 @@ h5.fourDN-header {
 }
 
 
+.fourDN-content-panel{
+	margin-top: 0px !important;
+}
+
 
 .static-section-entry,
 .home-content-area {
@@ -52,6 +56,20 @@ h5.fourDN-header {
 	font-size: 15px;
 	font-size: 15.75px;
 	line-height: 1.65rem;
+
+	h1, h2, h3, h4, h5, h6 {
+		> i.icon-link {
+			font-size: 1rem;
+			opacity: 0;
+			vertical-align: middle;
+			margin-left: 7px;
+		}
+
+		&:hover > i.icon-link {
+			opacity: 0.3;
+			cursor: pointer;
+		}
+	}
 
 	h2 {
 		font-weight: 400;
@@ -74,19 +92,45 @@ h5.fourDN-header {
 		margin-top: 20px;
 	}
 
+	.heading-with-bottom-border,
+	.homepage-section-title,
+	.section-title {
+		margin-bottom: 20px;
+		margin-top: 20px;
+		padding-bottom: 15px;
+		border-bottom: 1px solid #f4f4f4;
+
+		&h5 { font-size: 20px; margin-bottom: 10px; padding-bottom: 8px; }
+
+		> i.icon-link {
+			opacity: 0.15;
+		}
+	}
+
+	h2.section-title, h2.homepage-section-title {
+		font-size: 32px; line-height: 38px;
+	}
+
+	h3.section-title, h3.homepage-section-title {
+		font-size: 24px; margin-bottom: 10px; padding-bottom: 8px;
+	}
+
 	img {
 		max-width: 100%;
 	}
 
 }
 
-.fourDN-content-panel{
-	margin-top: 0px !important;
+.static-section-entry {
+
+	&:not([id]) .section-title > i.icon-link {
+		display: none;
+	}
+
 }
 
 
 .home-content-area {
-
 
 	.announcement {
 		padding-bottom: 10px;
