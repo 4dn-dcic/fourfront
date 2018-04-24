@@ -10,7 +10,8 @@
         ],
         "table-of-contents": {
             "enabled": false
-        }
+        },
+        "schema_version" : "3"
     },
 
     
@@ -34,7 +35,8 @@
             "enabled": true,
             "header-depth": 4
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
     {
         "name": "help/analysis/hi-c-pipeline",
@@ -51,7 +53,8 @@
             "enabled": true,
             "header-depth": 4
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
     {
         "name": "help/analysis/reference-files",
@@ -67,7 +70,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
     {
         "name": "help/analysis/cwl-docker",
@@ -79,7 +83,8 @@
         ],
         "table-of-contents": {
             "enabled": true
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "help/analysis/tibanna",
@@ -95,7 +100,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
 
     {
@@ -106,7 +112,8 @@
             "target" : "/help/analysis/cwl-docker",
             "enabled" : true,
             "code" : 307
-        }
+        },
+        "schema_version" : "3"
     },
 
 
@@ -121,7 +128,8 @@
             "f0f0f0f0-0000-0000-0000-ffffff000002",
             "f0f0f0f0-0000-0000-0000-ffffff000003",
             "f0f0f0f0-0000-0000-0000-ffffff000004"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
@@ -140,7 +148,8 @@
         "table-of-contents": {
             "enabled": true,
             "header-depth": 4
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "help/user-guide/account-creation",
@@ -151,7 +160,8 @@
         ],
         "table-of-contents": {
             "enabled": true
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "help/user-guide/getting-started",
@@ -163,7 +173,8 @@
         "table-of-contents": {
             "enabled": true,
             "header-depth": 4
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "help/user-guide/biosample-metadata",
@@ -175,7 +186,8 @@
         "table-of-contents": {
             "enabled": true,
             "header-depth": 4
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "help/user-guide/rest-api",
@@ -187,7 +199,8 @@
         "table-of-contents": {
             "enabled": true,
             "header-depth": 4
-        }
+        },
+        "schema_version" : "3"
     },
 
     {
@@ -217,7 +230,8 @@
         "table-of-contents": {
             "enabled": true,
             "header-depth": 4
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "help/submitter-guide/spreadsheet",
@@ -230,7 +244,8 @@
         "table-of-contents": {
             "enabled": true,
             "header-depth": 3
-        }
+        },
+        "schema_version" : "3"
     },
 
     {
@@ -272,7 +287,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft"
+        "status" : "draft",
+        "schema_version" : "3"
     },
 
 
@@ -398,7 +414,8 @@
         ],
         "content" : [
             "reusable-dummy-sections.lorem-ipsum-overview"
-        ]
+        ],
+        "schema_version" : "3"
     },
 
 
@@ -414,7 +431,8 @@
         "title": "Login Failed",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b021"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "nofic-matrix/2017-05",
@@ -424,7 +442,8 @@
             "442c8aa0-dc6c-43d7-814a-854af460b022",
             "442c8aa0-dc6c-43d7-814a-854af460b023",
             "442c8aa0-dc6c-43d7-814a-854af460b024"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-data-plans",
@@ -441,7 +460,8 @@
             "target" : "/joint-analysis",
             "enabled" : true,
             "code" : 307
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-data-plans/dev",
@@ -453,7 +473,8 @@
             "442c8aa0-dc6c-43d7-814a-854af460b031",
             "442c8aa0-dc6c-43d7-814a-854af460b032",
             "442c8aa0-dc6c-43d7-814a-854af460b033"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-data-plans/jan2018",
@@ -462,7 +483,8 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025",
             "442c8aa0-dc6c-43d7-814a-854af460b034"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-data-plans/jan2018/dev",
@@ -471,7 +493,8 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025",
             "442c8aa0-dc6c-43d7-814a-854af460b038"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-data-plans/july2018",
@@ -480,7 +503,8 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025",
             "442c8aa0-dc6c-43d7-814a-854af460b042"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-data-plans/july2018/dev",
@@ -489,13 +513,15 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025",
             "442c8aa0-dc6c-43d7-814a-854af460b046"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "planned-submissions",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
         "title": "Planned Data Submission",
-        "content": []
+        "content": [],
+        "schema_version" : "3"
     },
     {
         "name": "planned-submissions-matrix",
@@ -504,7 +530,8 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025",
             "442c8aa0-dc6c-43d7-814a-854af460b050"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis-plans",
@@ -517,7 +544,8 @@
             "target" : "/joint-analysis",
             "enabled" : true,
             "code" : 307
-        }
+        },
+        "schema_version" : "3"
     },
     {
         "name": "joint-analysis",
@@ -525,7 +553,8 @@
         "title": "4DN Joint Analysis Portal",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "privacy-policy",
@@ -533,12 +562,14 @@
         "title": "Privacy Policy",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b051"
-        ]
+        ],
+        "schema_version" : "3"
     },
     {
         "name": "release-updates",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
         "title": "Release Updates",
-        "content": []
+        "content": [],
+        "schema_version" : "3"
     }
 ]

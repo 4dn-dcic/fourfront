@@ -260,66 +260,6 @@ for field in ['display_title', 'name', 'description', 'content.name']:
     Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
 
 
-#### Page Validators
-
-def validate_page_children_routes(context, request):
-    '''
-    Ensure that each children has a path in its 'name' field which is a 1-level-deep sub-path of this Page's own 'name' path.
-    If, for example, '/help' page has a child '/about', then it is invalid. The child should have the name, '/help/about', at least.
-    '''
-    data = request.json
-
-    children = data.get('children', [])
-    if len(children) == 0:
-        return
-
-    try:
-        # checking to see if our context is a collection or an item to set get
-        context.get('blah')
-        getter = context
-    except AttributeError:
-        getter = context.collection
-
-    self_name = data.get('name', context.properties.get('name'))
-    self_name_parts = self_name.split('/')
-    self_name_depth = len(self_name_parts)
-    any_errors = False
-
-    for child_identifier in children:
-        try:
-            child_uuid = get_item_if_you_can(request, child_identifier, 'pages').get('uuid')
-            child_item = getter.get(child_uuid)
-        except AttributeError:
-            continue
-        child_item_name = child_item.properties['name']
-        child_item_name_parts = child_item_name.split('/')
-        if len(child_item_name_parts) != self_name_depth + 1:
-            request.errors.add('body', None, 'Child: ' + child_item_name + ' is not a direct sub-route of ' + self_name)
-            any_errors = True
-        else:
-            for idx in range(0, self_name_depth):
-                if child_item_name_parts[idx] != self_name_parts[idx]:
-                    request.errors.add('body', None, 'Child: "' + child_item_name + '" sub-route does not match parent route "' + self_name + '" at path component "' + child_item_name_parts[idx] + '"')
-                    any_errors = True
-
-    if not any_errors:
-        request.validated.update({})
-
-
-@view_config(context=Page.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_page_children_routes])
-def page_add(context, request, render=None):
-    return collection_add(context, request, render)
-
-
-@view_config(context=Page, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_page_children_routes],
-             decorator=if_match_tid)
-@view_config(context=Page, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_page_children_routes],
-             decorator=if_match_tid)
-def page_edit(context, request, render=None):
-    return item_edit(context, request, render)
 
 
 #### Static Page Routing/Endpoint
