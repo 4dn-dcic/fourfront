@@ -761,7 +761,8 @@ export class MarkdownHeading extends React.Component {
         children = Array.isArray(children) ? children : [children];
         var propsToPass = {
             'children' : children,
-            'id' : null
+            'id' : null,
+            'type' : type
         };
 
         var attributes = MarkdownHeading.getAttributes(children);
