@@ -18,6 +18,9 @@ def generate_content_map_for_page_1_2_upgrader():
 def page_1_2(value, system):
     '''Primarily, we delete old properties and add new property "content" from a map generated from page inserts.'''
 
+    if int(value.get('schema_version', '1')) >= 2:
+        return
+
     content_map = generate_content_map_for_page_1_2_upgrader()
 
     value['content'] = content_map.get(value['name'])
@@ -42,6 +45,9 @@ def page_1_2(value, system):
 @upgrade_step('page', '2', '3')
 def page_2_3(value, system):
     '''Rename some pages, delete old unused properties'''
+
+    if int(value.get('schema_version', '1')) >= 3:
+        return
 
     # Moving Around Pages
 
