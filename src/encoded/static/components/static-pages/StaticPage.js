@@ -36,7 +36,13 @@ export function parseSectionsContent(context = this.props.context){
 
     if (!Array.isArray(context.content)) throw new Error('context.content is not an array.');
 
-    return _.extend({}, context, { 'content' : _.map(context.content, parse) });
+    return _.extend(
+        {}, context, {
+            'content' : _.map(
+                _.filter(context.content || [], function(section){ return section && section.content && !section.error; }),
+                parse
+            )
+        });
 }
 
 
