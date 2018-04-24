@@ -4,7 +4,29 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def biosample_1(testapp, human_biosource, lab, award):
+def de_term(testapp, lab, award):
+    item = {
+        "term_id": "UBERON:0005439",
+        "term_name": "definitive endoderm",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biosample_cc_w_diff(testapp, de_term, lab, award):
+    item = {
+        "culture_start_date": "2018-01-01",
+        "differentiation_state": "Differentiated to definitive endoderm demonstrated by decreased Oct4 expression and increased Sox17 expression",
+        "differentiation_tissue": de_term['@id'],
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biosample_1(testapp, human_biosource, lab, award, biosample_cc_w_diff):
     item = {
         'description': "GM12878 prepared for Hi-C",
         'biosource': [human_biosource['@id'], ],
@@ -39,7 +61,7 @@ def test_update_biosample_relation(testapp, human_biosample, biosample_1):
     assert res.json['biosample_relation'][0]['relationship_type'] == 'parent of'
 
 
-def test_biosample_calculated_properties(testapp, biosample_1):
+def test_biosample_calculated_properties(testapp, biosample_1, ):
     """
     Test to ensure the calculated properties are in result returned from testapp
     """
@@ -53,3 +75,21 @@ def test_biosample_calculated_properties(testapp, biosample_1):
 def test_update_biosample_relation_in_reverse(testapp, human_biosample, biosample_1):
     pass
     #import pdb; pdb.set_trace()
+
+
+def test_biosample_biosource_summary_one_biosource(testapp, biosample_1, human_biosource):
+    assert biosample_1['biosource_summary'] == human_biosource['biosource_name']
+
+
+def test_biosample_biosource_summary_two_biosource(testapp, biosample_1, human_biosource, lung_biosource):
+    res = testapp.patch_json(biosample_1['@id'], {'biosource': [human_biosource['@id'], lung_biosource['@id']]}).json['@graph'][0]
+    assert human_biosource['biosource_name'] in res['biosource_summary']
+    assert lung_biosource['biosource_name'] in res['biosource_summary']
+    assert ' and ' in res['biosource_summary']
+
+
+def test_biosample_biosource_summary_w_differentiation(testapp, biosample_1, human_biosource, biosample_cc_w_diff, de_term):
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_w_diff['@id']}).json['@graph'][0]
+    assert human_biosource['biosource_name'] in res['biosource_summary']
+    assert ' differentiated to ' in res['biosource_summary']
+    assert de_term['display_title'] in res['biosource_summary']

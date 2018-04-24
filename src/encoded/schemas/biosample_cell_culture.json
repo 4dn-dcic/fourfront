@@ -105,6 +105,14 @@
                 "linkTo": "Protocol"
             }
         },
+        "differentiation_tissue": {
+            "title": "Differentiation Tissue",
+            "description": "The resulting tissue type for cells that have undergone differentiation.",
+            "type": "string",
+            "linkTo": "OntologyTerm",
+            "lookup": 99,
+            "suggested_enum": ["definitive endoderm"]
+        },
         "differentiation_state": {
             "title": "Differentiation State",
             "description": "For cells that have undergone differentiation a description of the differention state and markers used to determine the state.",
