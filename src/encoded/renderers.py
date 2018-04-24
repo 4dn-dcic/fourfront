@@ -33,6 +33,7 @@ log = logging.getLogger(__name__)
 
 
 def includeme(config):
+    # Under means "BEFORE" (not after)
     config.add_tween(
         '.renderers.fix_request_method_tween_factory',
         under='snovault.stats.stats_tween_factory')

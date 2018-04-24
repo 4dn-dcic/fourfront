@@ -44,11 +44,51 @@ h5.fourDN-header {
 	}
 }
 
-.fourDN-section{
-	padding-bottom: 10px;
-	margin-top: 20px;
 
-	&.announcement {
+
+.static-section-entry,
+.home-content-area {
+
+	font-size: 15px;
+	font-size: 15.75px;
+	line-height: 1.65rem;
+
+	h2 {
+		font-weight: 400;
+		margin-top: 30px;
+		margin-bottom: 15px;
+	}
+
+	&:first-child {
+		h2:first-child {
+			margin-top: 0px;
+		}
+	}
+
+	h3 {
+		margin-top: 25px;
+    	margin-bottom: 15px;
+	}
+
+	h4 {
+		margin-top: 20px;
+	}
+
+	img {
+		max-width: 100%;
+	}
+
+}
+
+.fourDN-content-panel{
+	margin-top: 0px !important;
+}
+
+
+.home-content-area {
+
+
+	.announcement {
 		padding-bottom: 10px;
 		margin-top: 20px;
 
@@ -71,63 +111,26 @@ h5.fourDN-header {
 		}
 
 		.announcement-content {
-			margin-top: 10px;
-			font-size: 1.25rem;
+			margin-top: 3px;
 		}
 	}
-}
 
 
-
-.fourDN-section-toggle{
-	color: #555;
-	text-decoration: none !important;
-	&:hover,
-	&:focus {
-		color: #000000;
-	}
-}
-
-.fourDN-section-info{
-	color: #999 !important;
-	font-weight: 300;
-	font-size: 1.2em;
-}
-
-
-.fourDN-content{
-	line-height: 130%;
-	font-size: 1.375rem;
-
-	> h2, > div > h2 {
-		font-weight: 400;
-		margin: 30px 0;
+	.fourDN-section-toggle{
+		color: #555;
+		text-decoration: none !important;
+		&:hover,
+		&:focus {
+			color: #000000;
+		}
 	}
 
-	> h3, > div > h3 {
-		margin-top: 25px;
-    	margin-bottom: 15px;
+	.fourDN-section-info{
+		color: #999 !important;
+		font-weight: 300;
+		font-size: 1.2em;
 	}
 
-	> h4, > div > h4 {
-		margin-top: 20px;
-	}
-
-	img {
-		max-width: 100%;
-	}
-
-}
-
-.help-entry.static-section-entry {
-	// Revert eventually & adjust HTML of static pages, then style up.
-	.fourDN-content{
-		font-family: $font-family-serif;
-	}
-}
-
-.fourDN-content-panel{
-	margin-top: 0px !important;
 }
 
 

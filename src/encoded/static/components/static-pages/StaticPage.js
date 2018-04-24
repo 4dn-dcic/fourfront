@@ -191,7 +191,7 @@ export class StaticEntry extends React.Component {
             content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
         }
 
-        var className = "fourDN-content" + (baseClassName? ' ' + baseClassName : '');
+        var className ="section-content" + (baseClassName? ' ' + baseClassName : '');
 
         if (filetype === 'csv'){
             return <CSVMatrixView csv={content} options={this.props.content.options} />;
