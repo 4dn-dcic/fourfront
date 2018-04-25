@@ -255,7 +255,7 @@ class Experiment(Item):
             "field": "Default",
             "value": None
         }
-        types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq']
+        types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq', 'CUT&RUN']
         if expt_type is not None and expt_type in types4control and not targeted_factor:
             out_dict['field'] = 'Target'
             out_dict['value'] = 'None (Control)'
