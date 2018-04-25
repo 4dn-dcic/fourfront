@@ -85,7 +85,7 @@
         },
         "protocols_additional": {
             "title": "Additional Protocols used in Cell Culture",
-            "description": "Protocols describing deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs",
+            "description": "Protocols including additional culture manipulations such as stem cell differentiation or cell cycle synchronization.",
             "type": "array",
             "lookup": 150,
             "items": {

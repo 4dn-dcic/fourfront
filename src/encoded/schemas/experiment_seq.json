@@ -65,7 +65,7 @@
         },
         "reaction_time": {
             "title": "Reaction Time (min)",
-            "description": "Time of a reaction eg. Digestion time in CUT&RUN experiments",
+            "description": "Time of a reaction in minutes eg. Digestion time in CUT&RUN experiments",
             "type": "number",
             "lookup": 100
         },
