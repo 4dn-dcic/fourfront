@@ -1,9 +1,9 @@
 import pytest
-from encoded.types.file import File, FileFastq, FileFasta, post_upload, force_beanstalk_env
+from encoded.types.file import FileFastq, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
 import os
+import boto3
 pytestmark = pytest.mark.working
-
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
@@ -33,13 +33,11 @@ def test_processed_file_unique_md5(testapp, mcool_file_json):
     assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
 
 
-
-
 def test_processed_file_unique_md5_skip_validation(testapp, mcool_file_json):
     # first time pass
     res = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
     testapp.post_json('/file_processed?force_md5=true', mcool_file_json)
-    testapp.patch_json('/file_processed/%s/?force_md5=true' % res['accession'] , mcool_file_json)
+    testapp.patch_json('/file_processed/%s/?force_md5=true' % res['accession'], mcool_file_json)
     testapp.put_json('/file_processed/%s/?force_md5=true' % res['accession'], mcool_file_json)
 
 
@@ -174,16 +172,24 @@ def test_extra_files_download(testapp, proc_file_json):
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'])
     download_link = resobj['extra_files'][0]['href']
     testapp.get(download_link, status=307)
     testapp.get(resobj['href'], status=307)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'])
 
 
 def test_range_download(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
     download_link = resobj['href']
     testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 def test_extra_files_get_upload(testapp, proc_file_json):
@@ -292,7 +298,7 @@ def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
 
     # 307 is redirect to s3 using auto generated download url
     fastq_res = testapp.get('{href}'
-                            .format(**res.json['@graph'][0]),
+                            .format(**resobj),
                             status=307)
 
 
@@ -311,7 +317,7 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
 
     # 307 is redirect to s3 using auto generated download url
     fastq_res = testapp.get('{href}'
-                            .format(**res.json['@graph'][0]),
+                            .format(**resobj),
                             status=307)
     assert props['uuid'] in fastq_res.text
 
@@ -328,10 +334,12 @@ def mcool_file_json(award, experiment, lab):
     }
     return item
 
+
 @pytest.fixture
 def mcool_file(testapp, mcool_file_json):
     res = testapp.post_json('/file_processed', mcool_file_json)
     return res.json['@graph'][0]
+
 
 @pytest.fixture
 def file(testapp, award, experiment, lab):
@@ -346,7 +354,6 @@ def file(testapp, award, experiment, lab):
     }
     res = testapp.post_json('/file_fastq', item)
     return res.json['@graph'][0]
-
 
 
 @pytest.fixture
@@ -367,8 +374,6 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
     fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq_json)).follow(status=200)
     fastq_related_files = fastq_res.json['related_files']
     assert fastq_related_files[0]['file']['@id'] == fastq_related_res.json['@graph'][0]['@id']
-
-
 
 
 def test_external_creds(mocker):
