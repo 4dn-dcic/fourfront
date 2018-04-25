@@ -16,17 +16,17 @@ def generate_content_map_for_page_1_2_upgrader():
 
 @upgrade_step('page', '1', '2')
 def page_1_2(value, system):
-    '''Primarily, we delete old properties and add new property "content" from a map generated from page inserts.'''
+    '''Primarily, we delete old properties and add new property "content" from a map generated from page inserts. Depreceated & disabled.'''
 
     if int(value.get('schema_version', '1')) >= 2:
         return
 
-    content_map = generate_content_map_for_page_1_2_upgrader()
+    #content_map = generate_content_map_for_page_1_2_upgrader()
+    #value['content'] = content_map.get(value['name'])
 
-    value['content'] = content_map.get(value['name'])
-
-    if value['content'] is None:
-        print('Page ' + value['name'] + ' is not in inserts or could not get "content" field from it. This is fine if intentional.')
+    if value.get('content') is None:
+        print('Page "' + value['name'] + '" was run through 1->2 upgrader and does not have a "content".')
+        #print('Page ' + value['name'] + ' is not in inserts or could not get "content" field from it. This is fine if intentional.')
         #raise Exception('Page ' + value['name'] + ' is not in inserts. Could not get "content" field.') # We should have an empty list, at very least (@see def generate_content_map_for_page_1_2_upgrader)
 
     if value.get('directory') is not None:

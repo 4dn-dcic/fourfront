@@ -360,7 +360,7 @@ h5.fourDN-header {
 				}
 			}
 
-			&[data-depth="2"] > div.title-link-wrapper {
+			&[data-recursion-depth="1"] > div.title-link-wrapper {
 				> a {
 					padding-bottom: 7px;
 				}

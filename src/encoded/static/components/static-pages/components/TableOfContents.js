@@ -29,7 +29,8 @@ class TableEntry extends React.Component {
         'listStyleTypes' : null,
         'mounted' : null,
         'content' : null,
-        'nextHeader' : null
+        'nextHeader' : null,
+        'recurDepth' : 1
     }
 
     constructor(props){
@@ -144,10 +145,9 @@ class TableEntry extends React.Component {
     }
 
     render(){
-        var { title, link, content, maxHeaderDepth, depth, collapsible, mounted } = this.props;
+        var { recurDepth, title, link, content, maxHeaderDepth, depth, collapsible, mounted, listStyleTypes, pageScrollTop, nextHeader, children, skipDepth } = this.props;
         
         var active = this.determineIfActive();
-
         var childHeaders = TableEntry.getChildHeaders(content, maxHeaderDepth, depth);
 
         var collapsibleButton;
@@ -184,7 +184,7 @@ class TableEntry extends React.Component {
                 (this.props.className ? ' ' + this.props.className : '') +
                 (depth === 0 ? ' top' : '') +
                 (active ? ' active' : '')
-            } data-depth={depth} ref="listItem">
+            } data-depth={depth} data-recursion-depth={recurDepth} ref="listItem">
                 { title }
                 <Collapse in={!this.state || this.state.open && mounted}>
                     <div>
@@ -193,16 +193,17 @@ class TableEntry extends React.Component {
                             content={content}
                             childHeaders={childHeaders}
                             depth={depth}
-                            mounted={this.props.mounted}
-                            listStyleTypes={this.props.listStyleTypes}
-                            pageScrollTop={this.props.pageScrollTop}
-                            nextHeader={this.props.nextHeader}
-                            children={this.props.children}
+                            mounted={mounted}
+                            listStyleTypes={listStyleTypes}
+                            pageScrollTop={pageScrollTop}
+                            nextHeader={nextHeader}
+                            children={children}
                             navigate={this.props.navigate}
                             link={link}
                             maxHeaderDepth={maxHeaderDepth}
                             parentClosed={this.state && !this.state.open}
-                            skipDepth={this.props.skipDepth}
+                            skipDepth={skipDepth}
+                            recurDepth={recurDepth}
                         />
                     </div>
                 </Collapse>
@@ -267,7 +268,7 @@ class TableEntryChildren extends React.Component {
 
     static renderChildrenElements(childHeaders, currentDepth, jsxContent, opts={ 'skipDepth' : 0, 'nextHeader' : null }){
 
-        var { skipDepth, maxHeaderDepth, listStyleTypes, pageScrollTop, mounted, nextHeader } = opts;
+        var { skipDepth, maxHeaderDepth, listStyleTypes, pageScrollTop, mounted, nextHeader, recurDepth } = opts;
 
         if (childHeaders && childHeaders.length){
             return childHeaders.map((h, index) =>{
@@ -306,6 +307,7 @@ class TableEntryChildren extends React.Component {
                         maxHeaderDepth={maxHeaderDepth}
                         collapsible={collapsible}
                         skipDepth={skipDepth}
+                        recurDepth={(recurDepth || 0) + 1}
                     />
                 );
             });
@@ -337,7 +339,7 @@ class TableEntryChildren extends React.Component {
     children(){
         var { childHeaders, childDepth } = this.getHeadersFromContent();
         if (childHeaders && childHeaders.length){
-            var opts = _.pick(this.props, 'maxHeaderDepth', 'pageScrollTop', 'listStyleTypes', 'skipDepth', 'nextHeader', 'mounted');
+            var opts = _.pick(this.props, 'maxHeaderDepth', 'pageScrollTop', 'listStyleTypes', 'skipDepth', 'nextHeader', 'mounted', 'recurDepth');
             var { content, depth } = this.props;
             return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, content, opts);
         } else {
@@ -569,6 +571,7 @@ export class TableOfContents extends React.Component {
 
         function sectionEntries(){
             var lastSection = null;
+            var excludeSectionsFromTOC = _.filter(context.content, function(section){ return section.title || section['toc-title']; }).length < 2;
             return _(context.content).chain()
                 .sortBy(function(s){
                     return s.order || 99;
@@ -581,7 +584,7 @@ export class TableOfContents extends React.Component {
                     return s;
                 })
                 .map((s,i,all) => {
-                    if (_.filter(all, function(section){ return section.title || s['toc-title']; }).length < 2){
+                    if (excludeSectionsFromTOC){
                         skipDepth = 1;
                         var { childHeaders, childDepth } = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
                         var opts = _.extend({ childHeaders, maxHeaderDepth, listStyleTypes, skipDepth }, {
