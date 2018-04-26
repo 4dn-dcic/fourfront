@@ -5,6 +5,7 @@ elasticsearch running as subprocesses.
 """
 import pytest
 from encoded.verifier import verify_item
+from pyramid.paster import get_appsettings
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
@@ -13,7 +14,7 @@ TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
 @pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
     from .conftest import _app_settings
     settings = _app_settings.copy()
     settings['create_tables'] = True
