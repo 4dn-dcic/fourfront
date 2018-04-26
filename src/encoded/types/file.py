@@ -867,10 +867,6 @@ def download(context, request):
             Params=param_get_object,
             ExpiresIn=36*60*60
         )
-        try:
-            response_body = conn.get_object(**param_get_object)
-        except Exception as e:
-            raise e
     else:
         raise ValueError(external.get('service'))
     if asbool(request.params.get('soft')):
@@ -884,6 +880,10 @@ def download(context, request):
     if proxy:
         return Response(headers={'X-Accel-Redirect': '/_proxy/' + str(location)})
     elif 'Range' in request.headers:
+        try:
+            response_body = conn.get_object(**param_get_object)
+        except Exception as e:
+            raise e
         response_dict = {
             'body': response_body.get('Body').read(),
             # status_code : 206 if partial, 200 if the ragne covers whole file
