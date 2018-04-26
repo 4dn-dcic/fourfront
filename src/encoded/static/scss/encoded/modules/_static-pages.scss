@@ -503,6 +503,147 @@ h5.fourDN-header {
 
 }
 
+/**********************************************************
+		Big NavBar DropDown Menu
+***********************************************************/
+
+.navbar-container {
+
+	.big-dropdown-menu {
+		z-index: 20;
+		border-top: 2px solid #333;
+		//border-bottom: 1px solid transparent;
+		margin-bottom: -1px;
+		transform: translate3d(0px,0px,0px);
+		color: #ddd;
+		background: #444;
+
+		h1,h2,h3,h4,h5,h6 { color: #eee; }
+
+		> .container {
+			padding-bottom: 25px;
+
+			> .intro-section {
+				h4 {
+					font-weight: 300;
+					margin-top: 20px;
+					margin-bottom: 0px;
+					> a {
+						display: inline-block;
+						color: #fff;
+						&:hover {
+							color: #5d8a8e;
+							text-shadow: 0 0 0;
+							text-decoration: none;
+						}
+					}
+				}
+			}
+
+			> .row {
+				> .help-menu-tree {
+
+					> .level-1-title-container > a.level-1-title,
+					> a.level-2-title {
+						display: block;
+					}
+
+					> .level-1-title-container{
+						border-bottom: 1px solid #ddd;
+						margin-top: 10px;
+						margin-bottom: 7px;
+						> a.level-1-title {
+							//border: 1px solid transparent;
+							display: inline-block;
+							color: #333;
+							color: #fff;
+							font-weight: 500;
+							padding: 8px 0 6px 0;
+							//margin-left: -12px;
+							//margin-right: -11px;
+							border-radius: 2px;
+							//margin-bottom: -1px;
+							&:hover {
+								border-color: #5d8a8e; 
+								//background-color: #e7e7e7;
+								//color: #fff;
+								text-decoration: none;
+								color: #000;
+								color: #5d8a8e; 
+								text-shadow: 0 0 0;
+							}
+						}
+					}
+
+					> a.level-2-title {
+						//color: #333;
+						position: relative;
+						color: #eee;
+						font-weight: 400;
+						padding: 5px 10px 4px;
+						margin-bottom: -4px;
+						margin-top: -4px;
+						z-index: 2;
+						&:hover {
+							z-index: 5;
+							background-color: #5d8a8e;
+							color: #fff;
+							text-decoration: none;
+						}
+						&.active {
+							z-index: 1;
+							//background-color: #34959d;
+							color: #fff;
+							font-weight: 600;
+							text-decoration: none;
+							background-color: #484848;
+							&:before {
+								font-family: "FontAwesome";
+								content: "\f105";
+								position: absolute;
+								left: 0px;
+								top: 4px;
+							}
+						}
+					}
+
+				}
+
+			}
+		}
+	}
+
+	> .big-dropdown-menu-background {
+		content: '';
+		width: 100%;
+		background-color: rgba(28,28,30,.7);
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		opacity: 0;
+		z-index: -1000;
+		transition: opacity .35s ease-out, z-index 0s .35s;
+		transform: translate3d(0px,0px,0px);
+	}
+
+	&.big-menu-open > .big-dropdown-menu-background {
+		opacity: 1;
+		z-index: 100;
+		transition: opacity .35s ease;
+	}
+
+	&.big-menu-open .big-dropdown-menu {
+		//border-bottom-color: #333;
+		transition: border-bottom-color .35s ease-out, height 0.35s ease;
+		&.collapse.in {
+			overflow-y: auto;
+		}
+	}
+
+}
+
 
 /**********************************************************
 		Misc Static Pages

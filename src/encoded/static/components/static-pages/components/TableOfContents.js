@@ -596,7 +596,7 @@ export class TableOfContents extends React.Component {
                     }
                     return (<TableEntry
                         link={s.link}
-                        title={s['toc-title'] || s.title}
+                        title={s['toc-title'] || s.title || _.map(s.link.split('-'), function(w){ return w.charAt(0).toUpperCase() + w.slice(1); } ).join(' ') }
                         key={s.link}
                         depth={1}
                         content={s.content}

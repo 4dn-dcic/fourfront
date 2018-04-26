@@ -233,12 +233,12 @@ export class MiddleRow extends React.Component {
                 textClassName="text-medium"
                 defaultExpanded={description.length < 600}
                 fitTo="grid"
-                lineHeight={21}
+                lineHeight={22}
                 dimensions={{
                     'paddingWidth' : 0,
                     'paddingHeight' : 22, // Padding-top + border-top
                     'buttonWidth' : 30,
-                    'initialHeight' : 41
+                    'initialHeight' : 42
                 }}
             />
         );

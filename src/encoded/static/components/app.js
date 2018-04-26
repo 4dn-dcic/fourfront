@@ -41,18 +41,18 @@ let dispatch_dict = {};
  * @memberof module:app
  */
 const portal = {
-    portal_title: '4DN Data Portal',
-    global_sections: [
+    "portal_title": '4DN Data Portal',
+    "global_sections": [ // DEPRECATED ?
         {
-            id: 'browse-menu-item', sid:'sBrowse', title: 'Browse',
-            url : function(hrefParts){
+            'id': 'browse-menu-item', 'sid':'sBrowse', 'title': 'Browse',
+            'url' : function(hrefParts){
                 return navigate.getBrowseBaseHref();
             },
-            active : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
+            'active' : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
         },
         {
-            id: 'help-menu-item', sid:'sHelp', title: 'Help',
-            children: [
+            'id': 'help-menu-item', 'sid':'sHelp', 'title': 'Help',
+            'children': [
                 { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
                 { id: 'getting-started-menu-item',  title: 'Data Submission - Getting Started', url: '/help/getting-started' },
                 { id: 'cell-culture-menu-item',     title: 'Biosample Metadata',                url: '/help/biosample' },
@@ -63,7 +63,7 @@ const portal = {
             ]
         }
     ],
-    user_section: [
+    "user_section": [
         {id: 'login-menu-item', title: 'Log in', url: '/'},
         {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
         // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}

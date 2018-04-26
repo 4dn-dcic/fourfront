@@ -3,17 +3,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem, Checkbox, DropdownButton, Fade } from 'react-bootstrap';
+import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem, Checkbox, DropdownButton, Fade, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
-import { JWT, console, layout, isServerSide, navigate, Filters, object } from './util';
+import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './util';
 import { requestAnimationFrame } from './viz/utilities';
 import QuickInfoBar from './viz/QuickInfoBar';
 import { ChartDataController } from './viz/chart-data-controller';
 import TestWarning from './testwarning';
 import { productionHost } from './globals';
 
+// TODO: Break this up into a folder with separate file for SearchBar, BigDropDown (maybe), ...
 
 
 export function getCurrentHeight(){
@@ -115,27 +116,47 @@ export default class Navigation extends React.Component {
         'schemas'           : PropTypes.any
     }
 
+    static defaultProps = {
+        'helpItemTreeURI' : '/pages/311d0f4f-56ee-4450-8cbb-780c10229284/@@embedded',
+        'helpItemHref' : '/help'
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.setupScrollHandler = this.setupScrollHandler.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.closeDropdowns = this.closeDropdowns.bind(this);
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
+        this.loadHelpMenuTree = this.loadHelpMenuTree.bind(this);
+        this.setOpenDropdownID = _.throttle(this.setOpenDropdownID.bind(this), 500);
         this.state = {
             'testWarning'           : this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
             'mounted'               : false,
             'mobileDropdownOpen'    : false,
             'scrolledPastTop'       : false,
-            'navInitialized'        : false
+            'navInitialized'        : false,
+            'openDropdown'          : null,
+            'helpMenuTree'          : null,
+            'isLoadingHelpMenuTree' : false
         };
     }
 
     componentDidMount(){
         this.setState({ mounted : true });
-        if (!isServerSide()) this.setupScrollHandler();
+        if (!isServerSide()) {
+            this.setupScrollHandler();
+            if (!this.state.helpMenuTree && !this.state.isLoadingHelpMenuTree){
+                this.loadHelpMenuTree();
+            }
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if (typeof this.props.session === 'boolean' && this.props.session !== prevProps.session){
+            this.loadHelpMenuTree({ 'openDropdown' : null });
+        }
     }
 
     setupScrollHandler(){
@@ -215,11 +236,6 @@ export default class Navigation extends React.Component {
         if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
     }
 
-    closeDropdowns(){
-        if (!this.state.mounted) return;
-        //this.
-    }
-
     hideTestWarning(e) {
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
@@ -233,13 +249,45 @@ export default class Navigation extends React.Component {
         }
     }
 
+    loadHelpMenuTree(extraState = {}){
+        if (this.state.isLoadingHelpMenuTree) {
+            console.error("Already loading Help tree");
+            return;
+        }
+        this.setState(_.extend(extraState, { 'isLoadingHelpMenuTree' : true }), ()=>{
+            ajax.load(this.props.helpItemTreeURI, (res)=>{
+                if (res && res.children){
+                    this.setState({ 'helpMenuTree' : res, 'isLoadingHelpMenuTree' : false });
+                } else {
+                    this.setState({ 'helpMenuTree' : null, 'isLoadingHelpMenuTree' : false });
+                }
+            }, 'GET', ()=>{
+                this.setState({ 'helpMenuTree' : null, 'isLoadingHelpMenuTree' : false });
+            });
+
+        });
+    }
+
+    setOpenDropdownID(id = null){
+        this.setState({ 'openDropdown' : id });
+    }
+
     render() {
-        var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted } = this.state;
+        var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state;
         var { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState } = this.props;
-        var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top");
+
+        var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top") +
+            (openDropdown ? ' big-menu-open' : '');
+
+        var primaryActions = listActionsFor('global_sections');
+        var browseMenuItemOpts = _.findWhere(primaryActions, { 'id' : 'browse-menu-item' });
+        var windowInnerWidth = (mounted && !isServerSide() && typeof window !== 'undefined' && window.innerWidth) || 0;
+        var windowInnerHeight =  (windowInnerWidth && window.innerHeight) || 500;
+        var includeBigDropDownMenuComponents = helpMenuTree && (helpMenuTree.children || []).length > 0 && windowInnerWidth >= 768;
 
         return (
             <div className={navClass}>
+                { includeBigDropDownMenuComponents ? <div className="big-dropdown-menu-background" onClick={this.setOpenDropdownID.bind(this, null)} /> : null }
                 <div id="top-nav" className="navbar-fixed-top">
                     <TestWarning visible={testWarning} setHidden={this.hideTestWarning} href={href} />
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
@@ -247,7 +295,7 @@ export default class Navigation extends React.Component {
                     }} expanded={mobileDropdownOpen}>
                         <Navbar.Header>
                             <Navbar.Brand>
-                                <NavItem href="/">
+                                <NavItem href="/" onClick={(e)=>{ this.setOpenDropdownID(null); }}>
                                     <span className="img-container"><img src="/static/img/4dn_icon.svg" className="navbar-logo-image"/></span>
                                     <span className="navbar-title">Data Portal</span>
                                 </NavItem>
@@ -257,18 +305,205 @@ export default class Navigation extends React.Component {
                             </Navbar.Toggle>
                         </Navbar.Header>
                         <Navbar.Collapse>
-                            <Nav children={_.map(listActionsFor('global_sections'), function(a){ return Navigation.buildDropdownMenu(a, mounted, href); })} />
+                            <Nav>
+                                { browseMenuItemOpts ? 
+                                    <NavItem
+                                        key={browseMenuItemOpts.id}
+                                        id={browseMenuItemOpts.sid || browseMenuItemOpts.id}
+                                        href={Navigation.getMenuItemURL(browseMenuItemOpts, mounted, href)}
+                                        active={Navigation.isMenuItemActive(browseMenuItemOpts, mounted, href)}
+                                        children={browseMenuItemOpts.title || "Browse"}
+                                    />
+                                : null }
+                                <HelpNavMenuItem {...this.props} {...{ windowInnerWidth, windowInnerHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }} setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
+                            </Nav>
+                            {/*<Nav children={_.map(listActionsFor('global_sections'), function(a){ return Navigation.buildDropdownMenu(a, mounted, href); })} />*/}
                             <UserActions closeMobileMenu={this.closeMobileMenu} {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
                             <SearchBar href={href} />
                         </Navbar.Collapse>
                     </Navbar>
+                    { includeBigDropDownMenuComponents ?
+                        <BigDropDownMenu {...this.props} {...{ windowInnerWidth, windowInnerHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted, scrolledPastTop, testWarning }} setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
+                    : null }
                     <ChartDataController.Provider id="quick_info_bar1">
-                        <QuickInfoBar href={href} schemas={schemas} context={context} browseBaseState={browseBaseState} />
+                        <QuickInfoBar href={href} schemas={schemas} context={context} browseBaseState={browseBaseState} invisible={!!(openDropdown)} />
                     </ChartDataController.Provider>
                 </div>
             </div>
         );
     }
+}
+
+class HelpNavMenuItem extends React.PureComponent {
+
+    static defaultProps = {
+        'id' : 'help-menu-item'
+    };
+
+    constructor(props){
+        super(props);
+        this.handleToggleOpen = this.handleToggleOpen.bind(this);
+    }
+
+    handleToggleOpen(e){
+        if (typeof this.props.setOpenDropdownID !== 'function') throw new Error('No func setOpenDropdownID passed in props.');
+        var idToSet = this.props.openDropdownID === this.props.id ? null : this.props.id;
+        this.props.setOpenDropdownID(idToSet);
+    }
+
+    render(){
+        var { mounted, href, session, context, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowInnerWidth } = this.props;
+
+        var isOpen = openDropdownID === id;
+        var active = href.indexOf(helpItemHref) > -1;
+        var commonProps = { 'key' : id, 'id' : id, 'active' : active };
+        var isDesktopView = windowInnerWidth >= 768;
+
+        if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView){
+            return (
+                <NavItem
+                    {...commonProps}
+                    href={helpItemHref}
+                    children="Help"
+                />
+            );
+        }
+
+        return (
+            <NavItem {...commonProps} onClick={this.handleToggleOpen} className={isOpen ? 'dropdown-open-for' : null}>
+                Help <span className="caret"/>
+            </NavItem>
+        );
+
+    }
+
+}
+
+
+class BigDropDownMenu extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
+        this.renderMenuItems = this.renderMenuItems.bind(this);
+        this.state = {
+            "isClosing" : true
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.openDropdownID === null && this.props.openDropdownID !== null){
+            this.setState({ 'isClosing' : true }, ()=>{
+                setTimeout(()=>{
+                    this.setState({ 'isClosing' : false });
+                }, 500);
+            });
+        }
+    }
+
+    handleMenuItemClick(e){
+        setTimeout(this.props.setOpenDropdownID.bind(this.props.setOpenDropdownID, null), 100);
+        // TODO: Google Analytics Hook-In
+    }
+
+    renderMenuItems(){
+        var { openDropdownID, helpMenuTree, windowInnerWidth, href, setOpenDropdownID } = this.props;
+        var handleMenuItemClick = this.handleMenuItemClick;
+        /*
+        var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
+            return (c.children || []).length > 0;
+        }).length >= parseInt(helpMenuTree.children.length / 2);
+        */
+
+        var urlParts = url.parse(href);
+
+        function filterOutChildren(child){
+            return !child.error && child.display_title && child.name;
+        }
+
+        var level1ChildrenToRender = _.filter(helpMenuTree.children, function(child){
+            var childValid = filterOutChildren(child);
+            if (!childValid) return false;
+            if ((child.content || []).length > 0) return true;
+            if ((child.children || []).length === 0) return false;
+            var filteredChildren = _.filter(child.children || [], filterOutChildren);
+            if (filteredChildren.length > 0) return true;
+            return false;
+        });
+
+        function childColumnsRenderer(childLevel1){
+            var level1Children = _.filter(childLevel1.children || [], filterOutChildren);
+            var hasChildren = level1Children.length > 0;
+            return (
+                <div className={"help-menu-tree level-1 col-xs-12 col-sm-6 col-md-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
+                    <div className="level-1-title-container">
+                        <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
+                            data-delay-show={1000} onClick={handleMenuItemClick}>
+                            { childLevel1.display_title }
+                        </a>
+                    </div>
+                    { hasChildren ?
+                        _.map(level1Children, function(childLevel2){
+                            return (
+                                <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
+                                    href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={1000}
+                                    key={childLevel2.name} onClick={handleMenuItemClick}>
+                                    { childLevel2.display_title }
+                                </a>
+                            );
+                        })
+                    : null }
+                </div>
+            );
+        }
+
+        var columnsPerRow = 3;
+        if (windowInnerWidth >= 768 && windowInnerWidth < 992) columnsPerRow = 2;
+        else if (windowInnerWidth < 768) columnsPerRow = 1;
+
+
+        var rowsOfLevel1Children = [];
+        _.forEach(level1ChildrenToRender, function(child, i, all){
+            var groupIdx = parseInt(i / columnsPerRow);
+            if (!Array.isArray(rowsOfLevel1Children[groupIdx])) rowsOfLevel1Children.push([]);
+            rowsOfLevel1Children[groupIdx].push(child);
+        });
+
+        return _.map(rowsOfLevel1Children, function(childrenInRow, rowIdx){
+            return <div className="row help-menu-row" key={rowIdx} children={_.map(childrenInRow, childColumnsRenderer)}/>;
+        });
+    }
+
+    introSection(){
+        var { helpMenuTree, windowInnerHeight } = this.props;
+        if (!helpMenuTree || !helpMenuTree.display_title || !helpMenuTree.description || windowInnerHeight < 800) return null;
+        return (
+            <div className="intro-section">
+                <h4><a href={'/' + helpMenuTree.name} onClick={this.handleMenuItemClick}>{ helpMenuTree.display_title }</a></h4>
+                <div className="description">{ helpMenuTree.description }</div>
+            </div>
+        );
+    }
+
+    render(){
+        var { openDropdownID, windowInnerWidth, windowInnerHeight, scrolledPastTop, testWarning } = this.props;
+        if (!openDropdownID && !this.state.isClosing) return null;
+        var outerStyle = null;
+        if (windowInnerWidth >= 992){
+            outerStyle = { 'maxHeight' : windowInnerHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
+        }
+        return (
+            <Collapse in={!!openDropdownID} transitionAppear>
+                <div className={"big-dropdown-menu" + (openDropdownID ? ' is-open' : '')} data-open-id={openDropdownID} style={outerStyle}>
+                    <div className="container">
+                        { this.introSection() }
+                        { this.renderMenuItems() }
+                    </div>
+                </div>
+            </Collapse>
+        );
+    }
+
 }
 
 
@@ -490,56 +725,3 @@ class UserActions extends React.Component {
     }
 }
 
-
-// Display breadcrumbs with contents given in 'crumbs' object.
-// Each crumb in the crumbs array: {
-//     id: Title string to display in each breadcrumb. If falsy, does not get included, not even as an empty breadcrumb
-//     query: query string property and value, or null to display unlinked id
-//     uri: Alternative to 'query' property. Specify the complete URI instead of accreting query string variables
-//     tip: Text to display as part of uri tooltip.
-//     wholeTip: Alternative to 'tip' property. The complete tooltip to display
-// }
-export class Breadcrumbs extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
-    render() {
-        var accretingQuery = '';
-        var accretingTip = '';
-
-        // Get an array of just the crumbs with something in their id
-        var crumbs = _.filter(this.props.crumbs, function(crumb) { return crumb.id; });
-        var rootTitle = crumbs[0].id;
-
-        return (
-            <ol className="breadcrumb">
-                {crumbs.map((crumb, i) => {
-                    // Build up the query string if not specified completely
-                    if (!crumb.uri) {
-                        accretingQuery += crumb.query ? '&' + crumb.query : '';
-                    }
-
-                    // Build up tooltip if not specified completely
-                    if (!crumb.wholeTip) {
-                        accretingTip += crumb.tip ? (accretingTip.length ? ' and ' : '') + crumb.tip : '';
-                    }
-
-                    // Render the breadcrumbs
-                    return (
-                        <li key={i}>
-                            {(crumb.query || crumb.uri) ? <a href={crumb.uri ? crumb.uri : this.props.root + accretingQuery} title={crumb.wholeTip ? crumb.wholeTip : 'Search for ' + accretingTip + ' in ' + rootTitle}>{crumb.id}</a> : <span>{crumb.id}</span>}
-                        </li>
-                    );
-                })}
-            </ol>
-        );
-    }
-}
-
-Breadcrumbs.propTypes = {
-    root: PropTypes.string, // Root URI for searches
-    crumbs: PropTypes.arrayOf(PropTypes.object).isRequired // Object with breadcrumb contents
-};
