@@ -295,11 +295,14 @@ def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
     # 307 is redirect to s3 using auto generated download url
     fastq_res = testapp.get('{href}'
                             .format(**resobj),
                             status=307)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
@@ -307,6 +310,8 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_json, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
     props = {'uuid': resobj['uuid'],
              'aliases': ['dcic:test_1'],
@@ -320,6 +325,7 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
                             .format(**resobj),
                             status=307)
     assert props['uuid'] in fastq_res.text
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 @pytest.fixture
