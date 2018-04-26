@@ -87,6 +87,16 @@
                  "title": "Source Experiment",
                  "type": "string"
              }
+        },
+        "genome_assembly": {
+            "title": "Genome Assembly",
+            "description": "The genome assembly associated with the file - for processing or reference",
+            "type": "string",
+            "lookup": 30,
+            "enum": [
+                "GRCh38",
+                "GRCm38"
+            ]
         }
      },
      "file_format_file_extension": {
