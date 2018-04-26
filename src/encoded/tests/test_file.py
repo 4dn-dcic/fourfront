@@ -173,8 +173,8 @@ def test_extra_files_download(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')
-    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
-    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'])
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'], Body=str.encode(''))
     download_link = resobj['extra_files'][0]['href']
     testapp.get(download_link, status=307)
     testapp.get(resobj['href'], status=307)
@@ -186,7 +186,7 @@ def test_range_download(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')
-    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode('hahaha'))
     download_link = resobj['href']
     testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
