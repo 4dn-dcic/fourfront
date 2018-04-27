@@ -1,0 +1,15 @@
+[
+    {
+        "email": "wrangler@wrangler.com",
+        "first_name": "Wrangler",
+        "groups": ["submitter"],
+        "job_title": "wrangler",
+        "lab": "test-4dn-lab",
+        "last_name": "Wrangler",
+        "status": "current",
+        "submits_for": ["test-4dn-lab"],
+        "viewing_groups" : ["4DN"],
+        "timezone": "US/Pacific",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3b"
+    }
+]
