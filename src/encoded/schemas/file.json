@@ -54,7 +54,8 @@
                 "raw file",
                 "processed file",
                 "ancillary file",
-                "other file"
+                "other file",
+                "Microscopy"
             ]
         },
         "file_format_specifications": {
