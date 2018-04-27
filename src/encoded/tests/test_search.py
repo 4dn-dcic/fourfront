@@ -52,7 +52,7 @@ def test_collections_redirect_to_search(workbook, testapp):
     assert '@graph' in res
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="slow")
 def test_search_with_embedding(workbook, testapp):
     res = testapp.get('/search/?type=Biosample&limit=all').json
     # Use a specific biosample, found by accession from test data
@@ -110,7 +110,7 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="slow")
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     from snovault import TYPES
     test_type = 'experiment_set'
@@ -211,7 +211,7 @@ def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
 
 ### TEST PASSES LOCALLY BUT WILL NOT ON TRAVIS...
 ### Problem with +AND+ strings in search?
-@pytest.mark.skip
+@pytest.mark.skip(reason="slow")
 def test_search_query_string_with_booleans(workbook, testapp):
     """
     moved references to res_not_induced and not_induced_uuids,
@@ -239,7 +239,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert induced_stem_uuid in both_uuids
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="slow")
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3
@@ -334,7 +334,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="slow")
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
     from snovault.fourfront_utils import add_default_embeds
