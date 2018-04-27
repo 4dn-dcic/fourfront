@@ -1,6 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
+import random
 from encoded.commands.upgrade_test_inserts import get_inserts
 import json
 pytestmark = [pytest.mark.working, pytest.mark.schema]
@@ -352,6 +353,7 @@ def test_search_with_no_value(workbook, testapp):
 ## Tests for collections (search 301s) ##
 #########################################
 
+from .test_views import TYPE_LENGTH
 
 def test_collection_limit(workbook, testapp):
     res = testapp.get('/biosamples/?limit=2', status=301)
@@ -365,6 +367,30 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     # biosamples not visible
     res = anontestapp.get('/biosamples/', status=404)
     assert len(res.json['@graph']) == 0
+
+
+@pytest.mark.parametrize('item_type', TYPE_LENGTH)
+def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
+    # randomly sample all items and take 1
+    res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
+    if res.status_code == 404:  # no items found
+        item_len = 0
+    else:
+        res = res.follow()
+        item_len = len(res.json['@graph'])
+    # previously test_load_workbook
+    assert item_len == TYPE_LENGTH[item_type]
+    if item_len > 0:
+        random_id_idx = random.choice(range(item_len))
+        random_id = res.json['@graph'][random_id_idx]['@id']
+        indexer_testapp.get(random_id + '@@index-data', status=200)
+        # previously test_html_pages
+        try:
+            res = htmltestapp.get(random_id)
+            assert res.body.startswith(b'<!DOCTYPE html>')
+        except Exception as e:
+            pass
+
 
 
 ######################################
