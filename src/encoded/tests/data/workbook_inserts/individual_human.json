@@ -1,0 +1,21 @@
+[
+    {
+        "accession": "4DNINOOOAAQ1",
+        "age": 53,
+        "age_units": "year",
+        "aliases": [
+            "encode:donor_of_GM12878"
+        ],
+        "award": "1U01CA200059-02",
+        "ethnicity": "Caucasian",
+        "health_status": "unknown",
+        "lab": "test-4dn-lab",
+        "life_stage": "adult",
+        "organism": "human",
+        "sex": "female",
+        "status": "in review by lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "http://ccr.coriell.org/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?PgId=402&fam=1463&coll=GM",
+        "uuid": "44d24e3f-bc5b-469a-8500-7ebd728f8ed5"
+    }
+]

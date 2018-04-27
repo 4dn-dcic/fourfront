@@ -1,0 +1,13 @@
+[
+    {
+        "title": "ThermoFisher Scientific",
+        "name": "thermofisher-scientific",
+        "aliases":["dcic:tfs"],
+        "description": "previously also Fermentas",
+        "award": "1U01CA200059-02",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://www.thermofisher.com/us/en/home/brands/thermo-scientific.html#/legacy=www.fermentas.com",
+        "uuid": "b31106bc-8535-4448-903e-854af460b21f"
+    }
+]
