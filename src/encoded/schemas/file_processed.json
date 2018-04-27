@@ -83,6 +83,7 @@
              "description": "Experiments that this file is associated with",
              "type": "array",
              "lookup": 40,
+             "exclude_from": ["submit4dn"],
              "items": {
                  "title": "Source Experiment",
                  "type": "string"
