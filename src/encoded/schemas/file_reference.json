@@ -60,10 +60,7 @@
         },
         "file_classification": {
             "title": "General Classification",
-            "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
-            "internal_comment": "This will control how, when and where a file can be displayed - on pages (eg. ancillary files like index files will show up in workflow_run but not experiment)",
             "type": "string",
-            "lookup": 23,
             "default": "ancillary file",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
