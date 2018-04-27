@@ -90,7 +90,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert res.json['total'] >= 2
     assert uuid in uuids
     # test the meta index
-    indexing_doc = es.get(index='meta', doc_type='meta', id='latest_indexing')
+    indexing_doc = es.get(index='indexing', doc_type='indexing', id='latest_indexing')
     indexing_source = indexing_doc['_source']
     assert 'indexing_count' in indexing_source
     testing_ppp_meta = es.get(index='meta', doc_type='meta', id='testing_post_put_patch')
