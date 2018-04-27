@@ -5,6 +5,9 @@ from encoded.commands.upgrade_test_inserts import get_inserts
 import json
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
+### IMPORTANT
+# uses the inserts in ./data/workbook_inserts
+# design your tests accordingly
 
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
@@ -113,13 +116,13 @@ def test_search_with_simple_query(workbook, testapp):
 @pytest.mark.skip(reason="slow")
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     from snovault import TYPES
-    test_type = 'experiment_set'
+    test_type = 'experiment_set_replicate'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
     schema_facets = [('type', {'title': 'Data Type'})]
     schema_facets.extend(schema['facets'].items())
     schema_columns = [(name, obj.get('title')) for name,obj in schema['columns'].items()]
-    res = testapp.get('/search/?type=ExperimentSet&limit=all').json
+    res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
     for i,val in enumerate(schema_facets):
         assert res['facets'][i]['field'] == val[0]
     for i,val in enumerate(schema_columns):
@@ -127,22 +130,14 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):
-    res = testapp.get('/search/?type=WorkflowRunSbg&output_files.value.accession=4DNFIYWQ59JI').json
-    assert len(res['@graph']) > 0  # mutiple wfr can be returned
-    wfr_uuids = [wfr['uuid'] for wfr in res['@graph'] if 'uuid' in wfr]
-    for wfruuid in wfr_uuids:
-        path = '/workflow-runs-sbg/%s/' % wfruuid
-        wfr = testapp.get(path).json
-        file_uuids = [f['value']['uuid'] for f in wfr['output_files']]
-        assert 'fbd7e4ad-49e5-4c33-afab-9ec90d65faf3' in file_uuids
-
-
-def test_search_parameter_name_and_value(workbook, testapp):
-    # only workflow run sbgs with both ncores wf_argname and some value = 8 returned
-    res = testapp.get('/search/?type=WorkflowRunSbg&parameters.workflow_argument_name=ncores&parameters.value=8').json
-    assert len(res['@graph']) > 0  # mutiple wfr can be returned
-    wfr_uuids = [wfr['uuid'] for wfr in res['@graph'] if 'uuid' in wfr]
-    assert 'e5927906-cf80-46da-8a81-1093926865af' in wfr_uuids
+    res = testapp.get('/search/?type=ExperimentHiC&files.accession=4DNFIO67APU1').json
+    assert len(res['@graph']) > 0
+    item_uuids = [item['uuid'] for item in res['@graph'] if 'uuid' in item]
+    for item_uuid in item_uuids:
+        path = '/experiments-hi-c/%s/' % item_uuid
+        exp = testapp.get(path).json
+        file_uuids = [f['uuid'] for f in exp['files']]
+        assert '46e82a90-49e5-4c33-afab-9ec90d65faa0' in file_uuids
 
 
 @pytest.fixture
@@ -209,34 +204,26 @@ def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     search = '/search/?q=cell+AND+NOT+cell&type=Biosource'
     assert testapp.get(search, status=404)
 
-### TEST PASSES LOCALLY BUT WILL NOT ON TRAVIS...
-### Problem with +AND+ strings in search?
-@pytest.mark.skip(reason="slow")
+
 def test_search_query_string_with_booleans(workbook, testapp):
     """
     moved references to res_not_induced and not_induced_uuids,
     which were passing locally but failing on travis for some undetermined
     reason... will look into this more later
     """
-    # search = '/search/?type=Biosource&q=stem+AND+NOT+induced'
-    # res_not_induced = testapp.get(search).json
-    search = '/search/?type=Biosource&q=stem'
+    search = '/search/?type=Biosource&q=GM12878'
     res_stem = testapp.get(search).json
-    assert len(res_stem['@graph']) > 0
-    # assert len(res_not_induced['@graph']) > 0
-    # not_induced_uuids = [r['uuid'] for r in res_not_induced['@graph'] if 'uuid' in r]
-    stem_uuids = [r['uuid'] for r in res_stem['@graph'] if 'uuid' in r]
-    # assert set(not_induced_uuids).issubset(set(stem_uuids))
-    # uuid of induced stem cell = 331111bc-8535-4448-903e-854af460b89f
-    induced_stem_uuid = '331111bc-8535-4448-903e-854af460b89f'
-    assert induced_stem_uuid in stem_uuids
+    assert len(res_stem['@graph']) > 1
+    bios_uuids = [r['uuid'] for r in res_stem['@graph'] if 'uuid' in r]
+    swag_bios = '331111bc-8535-4448-903e-854af460b888'
+    assert swag_bios in bios_uuids
     # assert induced_stem_uuid not in not_induced_uuids
     # now search for stem AND induced
-    search = '/search/?type=Biosource&q=stem+AND+induced'
+    search = '/search/?type=Biosource&q=swag+AND+GM12878'
     res_both = testapp.get(search).json
     both_uuids = [r['uuid'] for r in res_both['@graph'] if 'uuid' in r]
     assert len(both_uuids) == 1
-    assert induced_stem_uuid in both_uuids
+    assert swag_bios in both_uuids
 
 
 @pytest.mark.skip(reason="slow")
@@ -251,9 +238,9 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
         assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'
         assert header_row.index('File Download URL') == FILE_DOWNLOAD_URL_COL_INDEX # Ensure we have this column
-        assert len(result_rows) > 3 # We at least have some rows.
+        assert len(result_rows) > 0 # We at least have some rows.
 
-        for row_index in range(4):
+        for row_index in range(1):
             assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) > 4 # We have a value for File Accession
             assert 'http' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # Make sure it seems like a valid URL.
             assert '/@@download/' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]
@@ -278,8 +265,8 @@ def test_metadata_tsv_view(workbook, htmltestapp):
         assert int(result_rows[summary_start_row + 5][4]) <= summary_start_row
 
 
-    # run a simple GET query with type=ExperimentSet
-    res = htmltestapp.get('/metadata/type=ExperimentSet/metadata.tsv')
+    # run a simple GET query with type=ExperimentSetReplicate
+    res = htmltestapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv')
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
 
@@ -324,7 +311,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
         'download_file_name' : 'metadata_TEST.tsv'
     }
 
-    res2 = htmltestapp.post('/metadata/type=ExperimentSet/metadata.tsv', { k : json.dumps(v) for k,v in res2_post_data.items() })
+    res2 = htmltestapp.post('/metadata/type=ExperimentSetReplicate/metadata.tsv', { k : json.dumps(v) for k,v in res2_post_data.items() })
 
     assert 'text/tsv' in res2.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]
@@ -343,8 +330,8 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     schema = type_info.schema
     embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded_list, schema)
     # we're looking for this specific facet, which is not in the schema
-    assert 'treatments.rnai_vendor.display_title' in embeds
-    res = testapp.get('/search/?type=Biosample&treatments.rnai_vendor.display_title=Worthington+Biochemical').json
+    assert 'biosource.biosource_type' in embeds
+    res = testapp.get('/search/?type=Biosample&biosource.biosource_type=immortalized+cell+line').json
     assert 'facets' in res
     facet_fields = [facet['field'] for facet in res['facets']]
     assert 'type' in facet_fields
@@ -352,7 +339,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     for facet in schema['facets'].keys():
         assert facet in facet_fields
     # now ensure that facets can also be created outside of the schema
-    assert 'treatments.rnai_vendor.display_title' in facet_fields
+    assert 'biosource.biosource_type' in facet_fields
 
 
 def test_search_query_string_with_fields(workbook, testapp):
@@ -379,33 +366,26 @@ def test_search_query_string_with_fields(workbook, testapp):
 
 def test_search_with_no_value(workbook, testapp):
     import random
-    search = '/search/?digestion_enzyme.name=No+value&digestion_enzyme.name=DNaseI&q=cell&type=Experiment'
+    search = '/search/?description=No+value&description=GM12878+prepared+for+HiC&type=Biosample'
     res_json = testapp.get(search).json
     # grab some random results
     check_items = random.sample(res_json['@graph'], 4)
     for item in check_items:
-        maybe_null = item.get('digestion_enzyme', {}).get('name')
-        assert( maybe_null is None or maybe_null == 'DNaseI')
+        maybe_null = item.get('description')
+        assert( maybe_null is None or maybe_null == 'GM12878 prepared for HiC')
     res_ids = [r['uuid'] for r in res_json['@graph'] if 'uuid' in r]
-    search2 = '/search/?digestion_enzyme.name=No+value&digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
+    search2 = '/search/?description=GM12878+prepared+for+HiC&type=Biosample'
     res_json2 = testapp.get(search2).json
-    # grab some random results
-    check_items = random.sample(res_json2['@graph'], 4)
-    for item in check_items:
-        maybe_null = item.get('digestion_enzyme', {}).get('name')
-        assert(maybe_null is None or maybe_null == 'DNaseI')
-        assert(not item.get('publications_of_exp'))
+    # just do 1 res here
+    check_item = random.choice(res_json2['@graph'])
+    assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
-    search3 = '/search/?digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
-    res_json3 = testapp.get(search3).json
-    # just do 1 res here
-    check_item = random.choice(res_json3['@graph'])
-    assert(check_item.get('digestion_enzyme', {}).get('name') == 'DNaseI')
-    assert(not check_item.get('publications_of_exp'))
-    res_ids3 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
-    assert(set(res_ids3) <= set(res_ids))
 
+    
+def test_collection_limit(workbook, testapp):
+    res = testapp.get('/biosamples/?limit=2', status=200)
+    assert len(res.json['@graph']) == 2
 
 
 

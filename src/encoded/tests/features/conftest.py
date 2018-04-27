@@ -38,8 +38,9 @@ def workbook(app):
 
     from ...loadxl import load_all
     from pkg_resources import resource_filename
-    load_all(testapp, resource_filename('encoded', 'tests/data/master-inserts/'), []) # Master Inserts
-    load_all(testapp, resource_filename('encoded', 'tests/data/inserts/'), [resource_filename('encoded', 'tests/data/documents/')]) # Test Inserts
+    # just load the workbook inserts
+    import pdb; pdb.set_trace()
+    load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
 
     testapp.post_json('/index', {})
     yield

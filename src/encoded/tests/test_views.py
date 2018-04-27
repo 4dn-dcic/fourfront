@@ -13,13 +13,9 @@ def _type_length():
     type_length_dict = {}
     for name in ORDER:
         try:
-            type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/master-inserts/%s.json' % name))))
+            type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/workbook-inserts/%s.json' % name))))
         except Exception:
             type_length_dict[name] = 0
-        try:
-            type_length_dict[name] += len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
-        except Exception:
-            type_length_dict[name] += 0
 
     # hot fix for Inherited Non-Abstract Collections
     # list of parent object and children (nested list)
@@ -175,12 +171,6 @@ def test_abstract_collection(testapp, experiment):
     pass
     # testapp.get('/experiment/{accession}'.format(**experiment))
     # testapp.get('/expermient/{accession}'.format(**experiment))
-
-
-@pytest.mark.slow
-def test_collection_limit(workbook, testapp):
-    res = testapp.get('/enzymes/?limit=2', status=200)
-    assert len(res.json['@graph']) == 2
 
 
 def test_collection_post(testapp):

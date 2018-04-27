@@ -1,7 +1,7 @@
 [
     {
         "uuid": "231111bc-8535-4448-903e-854af460b254",
-        "description": "GM12878 prepared for Hi-C, batch 1",
+        "description": "GM12878 prepared for HiC",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
@@ -13,7 +13,6 @@
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460b242",
-        "description": "GM12878 prepared for Hi-C, batch 2",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "cell_culture_details": "131112bc-8535-4448-903e-854af460b212",

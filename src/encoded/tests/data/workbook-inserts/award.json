@@ -11,5 +11,15 @@
         "title": "SOME 4DN AWARD",
         "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b4613349"
+    },
+    {
+        "description": "A test 4DN award - for testing permissions and access to various items",
+        "name": "Test-4DN",
+        "status": "current",
+        "project": "4DN",
+        "title": "4DN TEST",
+        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
+        "viewing_group": "4DN",
+        "project": "4DN"
     }
 ]

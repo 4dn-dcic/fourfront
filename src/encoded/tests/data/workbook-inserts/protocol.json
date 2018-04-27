@@ -7,7 +7,6 @@
         "aliases": ["dcic:test_protocol"],
         "protocol_type": "Other",
         "submitted_by": "wrangler@wrangler.com",
-        "attachment": "test.pdf",
         "status": "in review by lab"
     }
 ]
