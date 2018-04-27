@@ -27,21 +27,28 @@ export default class HomePage extends React.Component {
         }).isRequired
     }
 
+    intro(){
+        var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
+        return (
+            <div className="col-md-6 col-xs-12">
+                <h2 className="homepage-section-title">{ (introContent && introContent.display_title) || "Introduction" }</h2>
+                <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: (introContent && introContent.content) || "<p>Introduction content not yet indexed.</p>" }}/>
+                <layout.WindowResizeUpdateTrigger><LinksRow/></layout.WindowResizeUpdateTrigger>
+            </div>
+        );
+    }
+
     /**
      * The render function. Renders homepage contents.
      * @returns {Element} A React <div> element.
      */
     render() {
-        var c = this.props.context.content; // Content
+        var intro = this.intro();
         return (
             <div className="home-content-area">
                 <div className="row">
-                    <div className="col-md-6 col-xs-12">
-                        <h2 className="homepage-section-title">Introduction</h2>
-                        <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}/>
-                        <layout.WindowResizeUpdateTrigger><LinksRow/></layout.WindowResizeUpdateTrigger>
-                    </div>
-                    <div className="col-md-6 col-xs-12">
+                    { intro }
+                    <div className="col-xs-12 col-md-6 pull-right">
                         <h2 className="homepage-section-title">Announcements</h2>
                         <Announcements loaded session={this.props.session} />
                     </div>

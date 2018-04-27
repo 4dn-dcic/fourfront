@@ -286,18 +286,13 @@ class EncodedRoot(Root):
     @calculated_property(schema={
         "title": "Static Page Content",
         "type": "object",
+        "linkTo" : "StaticSection"
     })
-    def content(self):
+    def content(self, request):
         '''Returns -object- with pre-named sections'''
-        return_obj = {}
-        try:
-            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-            contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return_obj = { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
-        except FileNotFoundError as e:
-            print("No content files found for Root object (aka Home, '/').")
-        # Maybe TODO: fetch announcements and add to return_obj. No request to make subrequest from?
-        return return_obj
+        sections_to_get = ['home.introduction']
+        url_to_request = '/search/?type=StaticSection&' + '&'.join([ 'name=' + s for s in sections_to_get])
+        return request.embed(url_to_request, as_user=True).get('@graph', [])
 
     @calculated_property(schema={
         "title": "Application version",

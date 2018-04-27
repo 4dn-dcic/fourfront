@@ -29,6 +29,12 @@
 
 
 
+    {
+        "name" : "home.introduction",
+        "title": "Introduction",
+        "uuid" : "10000000-0000-0000-0000-fffff1000000",
+        "file" : "/src/encoded/static/data/home/description.html"
+    },
 
     {
         "name" : "announcements.4dn-perspective-published",
