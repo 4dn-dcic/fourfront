@@ -207,14 +207,6 @@ def test_collection_post_bad_(anontestapp):
     anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=403)
 
 
-def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
-    res = testapp.get('/protocols/')
-    assert any(action for action in res.json.get('actions', []) if action['name'] == 'add')
-
-    res = anontestapp.get('/protocols/')
-    assert not any(action for action in res.json.get('actions', []) if action['name'] == 'add')
-
-
 def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, human_biosource):
     location = human_biosource['@id'] + '?frame=page'
 

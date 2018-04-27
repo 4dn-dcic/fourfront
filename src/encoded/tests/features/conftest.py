@@ -39,7 +39,6 @@ def workbook(app):
     from ...loadxl import load_all
     from pkg_resources import resource_filename
     # just load the workbook inserts
-    import pdb; pdb.set_trace()
     load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
 
     testapp.post_json('/index', {})

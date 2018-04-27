@@ -55,7 +55,6 @@ def test_collections_redirect_to_search(workbook, testapp):
     assert '@graph' in res
 
 
-@pytest.mark.skip(reason="slow")
 def test_search_with_embedding(workbook, testapp):
     res = testapp.get('/search/?type=Biosample&limit=all').json
     # Use a specific biosample, found by accession from test data
@@ -73,11 +72,8 @@ def test_search_with_embedding(workbook, testapp):
     assert isinstance(test_json['biosource'][0]['biosource_vendor'], dict)
     # this specific field was not embedded and should not be present
     assert 'description' not in test_json['biosource'][0]
-    # since lab.awards.uuid was not specifically embedded, the field should not exist
-    # (removed @id-like field)
-    assert 'uuid' not in test_json['lab'].get('awards')
-    # @id-like field that should still be embedded (not a valid @id)
-    assert test_json['lab']['city'] == 'Boston'
+    # since lab.awards was not specifically embedded, the field should not exist
+    assert test_json['lab'].get('awards') is None
 
 
 def test_search_with_simple_query(workbook, testapp):
@@ -113,7 +109,6 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
-@pytest.mark.skip(reason="slow")
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     from snovault import TYPES
     test_type = 'experiment_set_replicate'
@@ -126,7 +121,7 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     for i,val in enumerate(schema_facets):
         assert res['facets'][i]['field'] == val[0]
     for i,val in enumerate(schema_columns):
-        assert res['columns'][val[0]] == val[1]
+        assert res['columns'][val[0]]['title'] == val[1]
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):
@@ -134,8 +129,8 @@ def test_search_embedded_file_by_accession(workbook, testapp):
     assert len(res['@graph']) > 0
     item_uuids = [item['uuid'] for item in res['@graph'] if 'uuid' in item]
     for item_uuid in item_uuids:
-        path = '/experiments-hi-c/%s/' % item_uuid
-        exp = testapp.get(path).json
+        item_res = testapp.get('/experiments-hi-c/%s/' % item_uuid, status=301)
+        exp = item_res.follow().json
         file_uuids = [f['uuid'] for f in exp['files']]
         assert '46e82a90-49e5-4c33-afab-9ec90d65faa0' in file_uuids
 
@@ -226,7 +221,6 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert swag_bios in both_uuids
 
 
-@pytest.mark.skip(reason="slow")
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3
@@ -275,38 +269,12 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     # Perform POST w/ accession triples (main case, for BrowseView downloads)
     res2_post_data = { # N.B. '.post', not '.post_json' is used. This dict is converted to POST form values, with key values STRINGIFIED, not to POST JSON request.
         "accession_triples" : [
-            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM1"],
-            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM2"],
-            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM3"],
-            ["4DNESMICAAA1","4DNEXO67AWMM","4DNFIOTESTM4"],
-            ["4DNESKBPIAAD","4DNEXO6777A1","4DNFIN232JB1"],
-            ["4DNESKBPIAAD","4DNEXO6777A1","4DNFIN232JB2"],
-            ["4DNESKBPIAAD","4DNEXO6777B1","4DNFIN232JB3"],
-            ["4DNESXBLNBV1","4DNEXO6777X1","4DNFIN232JA4"],
-            ["4DNESXBLNBV1","4DNEXO6777Z1","4DNFIN232JA5"],
-            ["4DNES95756M1","4DNEXO6777U1","4DNFIN232JA9"],
-            ["4DNES95756M1","4DNEXO6777U1","4DNFIN232JA1"],
-            ["4DNES95756M1","4DNEXO6777T1","4DNFIN232JA2"],
-            ["4DNES95756M1","4DNEXO6777T1","4DNFIN232JA3"],
-            ["4DNESQHAFMOT","4DNEX067BBB1","4DNFIN232JC1"],
-            ["4DNESQHAFMOT","4DNEX067BBB1","4DNFIN232JC2"],
-            ["4DNES2N9QILD","4DNEX067AAA1","4DNFIN232JK7"],
-            ["4DNES2N9QILD","4DNEX067AAA1","4DNFIN232JK8"],
-            ["4DNESUA7HCZD","4DNEXO67AWT1","4DNFIN232JJ4"],
-            ["4DNESUA7HCZD","4DNEXO67AWT1","4DNFIN232JJ5"],
-            ["4DNESUA7HCZD","4DNEXO67AWU1","4DNFIN232JJ2"],
-            ["4DNESUA7HCZD","4DNEXO67AWU1","4DNFIN232JJ3"],
-            ["4DNES7Q644N6","4DNEX42CAX16","4DNFIN232JK5"],
-            ["4DNES7Q644N6","4DNEX42CAX16","4DNFIN232JK6"],
-            ["4DNES5KKNQSS","4DNEXO67AXE1","4DNFIN232JJ6"],
-            ["4DNES5KKNQSS","4DNEXO67AXE1","4DNFIN232JJ7"],
-            ["4DNES5KKNQSS","4DNEX34DAX2S","4DNFIN232JK1"],
-            ["4DNES5KKNQSS","4DNEX34DAX2S","4DNFIN232JK2"],
-            ["4DNES5KKNQSS","4DNEX42CAX15","4DNFIN232JK3"],
-            ["4DNES5KKNQSS","4DNEX42CAX15","4DNFIN232JK4"],
-            ["4DNES5JSKEBV","4DNEXO67APZ7","4DNFIO67APW1"],
-            ["4DNES5JSKEBV","4DNEXO67APZ9","4DNFIO67APW1"],
-            ["4DNES5JSKEBV","4DNEXO67APY1","4DNFIO67AFHV"]
+            ["4DNESAAAAAA1","4DNEXO67APU1","4DNFIO67APU1"],
+            ["4DNESAAAAAA1","4DNEXO67APU1","4DNFIO67APT1"],
+            ["4DNESAAAAAA1","4DNEXO67APT1","4DNFIO67APV1"],
+            ["4DNESAAAAAA1","4DNEXO67APT1","4DNFIO67APY1"],
+            ["4DNESAAAAAA1","4DNEXO67APV1","4DNFIO67APZ1"],
+            ["4DNESAAAAAA1","4DNEXO67APV1","4DNFIO67AZZ1"]
         ],
         'download_file_name' : 'metadata_TEST.tsv'
     }
@@ -321,7 +289,6 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 
 
-@pytest.mark.skip(reason="slow")
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
     from snovault.fourfront_utils import add_default_embeds
@@ -365,28 +332,39 @@ def test_search_query_string_with_fields(workbook, testapp):
 
 
 def test_search_with_no_value(workbook, testapp):
-    import random
     search = '/search/?description=No+value&description=GM12878+prepared+for+HiC&type=Biosample'
     res_json = testapp.get(search).json
     # grab some random results
-    check_items = random.sample(res_json['@graph'], 4)
-    for item in check_items:
+    for item in res_json['@graph']:
         maybe_null = item.get('description')
         assert( maybe_null is None or maybe_null == 'GM12878 prepared for HiC')
     res_ids = [r['uuid'] for r in res_json['@graph'] if 'uuid' in r]
     search2 = '/search/?description=GM12878+prepared+for+HiC&type=Biosample'
     res_json2 = testapp.get(search2).json
     # just do 1 res here
-    check_item = random.choice(res_json2['@graph'])
+    check_item = res_json2['@graph'][0]
     assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
 
-    
-def test_collection_limit(workbook, testapp):
-    res = testapp.get('/biosamples/?limit=2', status=200)
-    assert len(res.json['@graph']) == 2
 
+#########################################
+## Tests for collections (search 301s) ##
+#########################################
+
+
+def test_collection_limit(workbook, testapp):
+    res = testapp.get('/biosamples/?limit=2', status=301)
+    assert len(res.follow().json['@graph']) == 2
+
+
+def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
+    res = testapp.get('/biosamples/')
+    assert any(action for action in res.follow().json.get('actions', []) if action['name'] == 'add')
+
+    # biosamples not visible
+    res = anontestapp.get('/biosamples/', status=404)
+    assert len(res.json['@graph']) == 0
 
 
 ######################################
@@ -417,7 +395,7 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
 
     assert isinstance(res['terms'], dict) is True
 
-    assert len(res["terms"].keys()) > 1
+    assert len(res["terms"].keys()) > 0
 
     #assert isinstance(res['terms']["CHIP-seq"], dict) is True # A common term likely to be found.
 
