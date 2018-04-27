@@ -12,7 +12,7 @@ def external_tx():
 
 
 @pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
     from .. import test_indexing
     return test_indexing.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth)
 
