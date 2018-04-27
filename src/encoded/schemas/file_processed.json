@@ -106,6 +106,7 @@
         "bw": ".bw",
         "bed": ".bed.gz",
         "txt": ".txt.gz",
+        "csv": ".csv",
         "other": ""
     },
     "facets" : {
