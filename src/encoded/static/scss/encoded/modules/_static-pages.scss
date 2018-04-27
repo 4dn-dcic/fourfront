@@ -510,13 +510,19 @@ h5.fourDN-header {
 .navbar-container {
 
 	.big-dropdown-menu {
-		z-index: 20;
+		z-index: -100;
 		border-top: 2px solid #333;
 		//border-bottom: 1px solid transparent;
 		margin-bottom: -1px;
 		transform: translate3d(0px,0px,0px);
 		color: #ddd;
 		background: #444;
+		left: 0;
+		right: 0;
+		position: absolute;
+		transition: opacity 0.35s ease, z-index 0s .35s, visibility 0s .4s;
+		visibility: hidden;
+		opacity: 0;
 
 		h1,h2,h3,h4,h5,h6 { color: #eee; }
 
@@ -524,6 +530,9 @@ h5.fourDN-header {
 			padding-bottom: 25px;
 
 			> .intro-section {
+				margin-bottom: 10px;
+				padding-bottom: 18px;
+				border-bottom: 1px solid #5d5d5d;
 				h4 {
 					font-weight: 300;
 					margin-top: 20px;
@@ -531,16 +540,26 @@ h5.fourDN-header {
 					> a {
 						display: inline-block;
 						color: #fff;
+						&:after {
+							content: "\f105";
+							font-family: FontAwesome;
+							opacity: 0;
+							margin-left: 5px;
+						}
 						&:hover {
 							color: #5d8a8e;
 							text-shadow: 0 0 0;
 							text-decoration: none;
+							&:after {
+								opacity: 1;
+							}
 						}
 					}
 				}
 			}
 
-			> .row {
+			> .row.help-menu-row {
+				margin-top: 10px;
 				> .help-menu-tree {
 
 					> .level-1-title-container > a.level-1-title,
@@ -550,7 +569,7 @@ h5.fourDN-header {
 
 					> .level-1-title-container{
 						border-bottom: 1px solid #ddd;
-						margin-top: 10px;
+						margin-top: 0;
 						margin-bottom: 7px;
 						> a.level-1-title {
 							//border: 1px solid transparent;
@@ -635,9 +654,11 @@ h5.fourDN-header {
 	}
 
 	&.big-menu-open .big-dropdown-menu {
-		//border-bottom-color: #333;
-		transition: border-bottom-color .35s ease-out, height 0.35s ease;
-		&.collapse.in {
+		transition: border-bottom-color .35s ease-out, height 0.35s ease, opacity 0.35s ease;
+		visibility: visible;
+		z-index: 20;
+		opacity: 1;
+		&.fade.in {
 			overflow-y: auto;
 		}
 	}

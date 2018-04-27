@@ -380,26 +380,14 @@ class HelpNavMenuItem extends React.PureComponent {
 }
 
 
-class BigDropDownMenu extends React.Component {
+class BigDropDownMenu extends React.PureComponent {
 
     constructor(props){
         super(props);
         this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
         this.renderMenuItems = this.renderMenuItems.bind(this);
-        this.state = {
-            "isClosing" : true
-        };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.openDropdownID === null && this.props.openDropdownID !== null){
-            this.setState({ 'isClosing' : true }, ()=>{
-                setTimeout(()=>{
-                    this.setState({ 'isClosing' : false });
-                }, 500);
-            });
-        }
-    }
 
     handleMenuItemClick(e){
         setTimeout(this.props.setOpenDropdownID.bind(this.props.setOpenDropdownID, null), 100);
@@ -487,20 +475,18 @@ class BigDropDownMenu extends React.Component {
 
     render(){
         var { openDropdownID, windowInnerWidth, windowInnerHeight, scrolledPastTop, testWarning } = this.props;
-        if (!openDropdownID && !this.state.isClosing) return null;
+        //if (!openDropdownID && !this.state.isClosing) return null;
         var outerStyle = null;
         if (windowInnerWidth >= 992){
             outerStyle = { 'maxHeight' : windowInnerHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
         }
         return (
-            <Collapse in={!!openDropdownID} transitionAppear>
-                <div className={"big-dropdown-menu" + (openDropdownID ? ' is-open' : '')} data-open-id={openDropdownID} style={outerStyle}>
-                    <div className="container">
-                        { this.introSection() }
-                        { this.renderMenuItems() }
-                    </div>
+            <div className={"big-dropdown-menu" + (openDropdownID ? ' is-open' : '')} data-open-id={openDropdownID} style={outerStyle}>
+                <div className="container">
+                    { this.introSection() }
+                    { this.renderMenuItems() }
                 </div>
-            </Collapse>
+            </div>
         );
     }
 
