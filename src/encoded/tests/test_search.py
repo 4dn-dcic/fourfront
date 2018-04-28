@@ -374,18 +374,23 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     # we need to reindex the collections to make sure numbers are correct
     create_mapping.run(app, sync_index=True)
     for item_type in TYPE_LENGTH.keys():
+        print('\n\n--> %s' % item_type)
         tries = 0
         item_len = None
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
             if item_len != None:
-                create_mapping.run(app, collections=[item_type], sync_index=True)
+                create_mapping.run(app, collections=[item_type], purge_queue=True, sync_index=True)
                 time.sleep(3)
+            es_count = app.registry['elasticsearch'].count(index=item_type, doc_type=item_type).get('count')
+            print('... ES COUNT: %s' % str(es_count))
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             if res.status_code == 404:  # no items found
                 item_len = 0
             else:
                 res = res.follow()
                 item_len = len(res.json['@graph'])
+            print('... COLL COUNT: %s' % str(item_len))
+            print('... TYPE COUNT: %s' % TYPE_LENGTH[item_type])
             tries += 1
         assert item_len == TYPE_LENGTH[item_type]
         if item_len > 0:
