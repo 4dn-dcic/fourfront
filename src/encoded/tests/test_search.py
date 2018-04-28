@@ -4,6 +4,7 @@ import pytest
 import random
 from encoded.commands.upgrade_test_inserts import get_inserts
 import json
+import time
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 ### IMPORTANT
@@ -144,13 +145,12 @@ def mboI_dts(testapp, workbook):
     enz = testapp.get('/search/?type=Enzyme&name=MboI').json['@graph'][0]
 
     cdate = enz['date_created']
-    date, time = cdate.split('T')
-    yr, mo, day = [int(i) for i in date.split('-')]
-    hr, mi, _ = time.split(':', 2)
+    _date, _time = cdate.split('T')
+    yr, mo, day = [int(i) for i in _date.split('-')]
+    hr, mi, _ = _time.split(':', 2)
     hr = int(hr)
     mi = int(mi)
     createdate = datetime(yr, mo, day, hr, mi)
-    print(createdate)
 
     return {
         'creationdatetime': ':'.join(str(createdate).replace(' ', '+').split(':')[:-1]),
