@@ -19,7 +19,7 @@ def audit_page_children_routes(value, system):
     self_name_parts = self_name.split('/')
     self_name_depth = len(self_name_parts)
 
-    for child_idx, child_item in enumerate(children):
+    for child_item in children:
         child_item_name = child_item['name']
         child_item_name_parts = child_item_name.split('/')
         if len(child_item_name_parts) != self_name_depth + 1:

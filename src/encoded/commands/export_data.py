@@ -2,7 +2,7 @@ from encoded.commands.import_data import (basic_auth, remote_app)
 from pyramid import paster
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
-import requests, logging, json, os
+import requests, logging, json
 
 EPILOG = __doc__
 
@@ -37,8 +37,6 @@ def run(search_url, username='', password=''):
 
     auth_to_use = (username, password) if username and password else None
 
-    test_app = remote_app(base, username, password)
-
     common_headers = {
         'Accept' : "application/json",
         'Content-Type' : "application/json"
@@ -52,7 +50,7 @@ def run(search_url, username='', password=''):
     search_results = search_response.json().get('@graph', [])
     search_results_len = len(search_results)
     counter = { 'count' : 0 }
-    
+
     def worker(search_result):
         object_response = requests.get(url.scheme + '://' + url.netloc + search_result['@id'] + '@@object', auth=auth_to_use, headers=common_headers)
         #print(url.scheme + '://' + url.netloc + search_result['@id'] + '@@object')

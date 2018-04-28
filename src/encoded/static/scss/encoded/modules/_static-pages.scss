@@ -520,7 +520,7 @@ h5.fourDN-header {
 		left: 0;
 		right: 0;
 		position: absolute;
-		transition: opacity 0.35s ease, z-index 0s .35s, visibility 0s .4s;
+		transition: opacity 0.2s linear, z-index 0s .2s, visibility 0s .3s;
 		visibility: hidden;
 		opacity: 0;
 
@@ -643,20 +643,20 @@ h5.fourDN-header {
 		bottom: 0;
 		opacity: 0;
 		z-index: -1000;
-		transition: opacity .35s ease-out, z-index 0s .35s;
+		transition: opacity .2s linear, z-index 0s .25s;
 		transform: translate3d(0px,0px,0px);
 	}
 
 	&.big-menu-open > .big-dropdown-menu-background {
 		opacity: 1;
 		z-index: 100;
-		transition: opacity .35s ease;
+		transition: opacity .2s ease-out;
 	}
 
 	&.big-menu-open .big-dropdown-menu {
-		transition: border-bottom-color .35s ease-out, height 0.35s ease, opacity 0.35s ease;
+		transition: opacity 0.2s linear;
 		visibility: visible;
-		z-index: 20;
+		z-index: 5;
 		opacity: 1;
 		&.fade.in {
 			overflow-y: auto;

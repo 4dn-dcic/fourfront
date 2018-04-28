@@ -108,7 +108,7 @@ export function correctRelativeLinks(elem, context, depth = 0){
 
 
 
-class Wrapper extends React.Component {
+class Wrapper extends React.PureComponent {
 
     static defaultProps = {
         'contentColSize' : 12,
@@ -162,7 +162,7 @@ class Wrapper extends React.Component {
 }
 
 
-export class StaticEntry extends React.Component {
+export class StaticEntry extends React.PureComponent {
 
     static defaultProps = {
         'section'   : null,
@@ -226,7 +226,7 @@ export class StaticEntry extends React.Component {
 }
 
 
-export default class StaticPage extends React.Component {
+export default class StaticPage extends React.PureComponent {
 
     static Entry = StaticEntry
 

@@ -146,7 +146,7 @@ class TableEntry extends React.Component {
 
     render(){
         var { recurDepth, title, link, content, maxHeaderDepth, depth, collapsible, mounted, listStyleTypes, pageScrollTop, nextHeader, children, skipDepth } = this.props;
-        
+
         var active = this.determineIfActive();
         var childHeaders = TableEntry.getChildHeaders(content, maxHeaderDepth, depth);
 
@@ -668,7 +668,7 @@ export class TableOfContents extends React.Component {
                 marginTop : marginTop
             }}>
                 {/* !isEmpty ? <h4 className="toc-title">{ this.props.title }</h4> : null */}
-                { !isEmpty ? 
+                { !isEmpty ?
                     <ol className="inner" children={content} style={{
                         'listStyleType' : listStyleTypes[0],
                         'paddingLeft' : 0
@@ -682,7 +682,7 @@ export class TableOfContents extends React.Component {
 }
 
 
-export class NextPreviousPageSection extends React.Component {
+export class NextPreviousPageSection extends React.PureComponent {
 
     static defaultProps = {
         'previousTitle' : 'Previous',
@@ -715,7 +715,7 @@ export class NextPreviousPageSection extends React.Component {
 
 
 
-export class MarkdownHeading extends React.Component {
+export class MarkdownHeading extends React.PureComponent {
 
     static getAttributes(children){
         children = Array.isArray(children) ? children : [children];
@@ -788,7 +788,7 @@ export class MarkdownHeading extends React.Component {
     }
 }
 
-export class HeaderWithLink extends React.Component {
+export class HeaderWithLink extends React.PureComponent {
 
     handleLinkClick(id, e){
         if (!(!isServerSide() && typeof window !== 'undefined' && document)) return null;

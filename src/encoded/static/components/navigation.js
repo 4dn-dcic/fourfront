@@ -306,7 +306,7 @@ export default class Navigation extends React.Component {
                         </Navbar.Header>
                         <Navbar.Collapse>
                             <Nav>
-                                { browseMenuItemOpts ? 
+                                { browseMenuItemOpts ?
                                     <NavItem
                                         key={browseMenuItemOpts.id}
                                         id={browseMenuItemOpts.sid || browseMenuItemOpts.id}
@@ -337,36 +337,32 @@ export default class Navigation extends React.Component {
 class HelpNavMenuItem extends React.PureComponent {
 
     static defaultProps = {
-        'id' : 'help-menu-item'
+        'id' : 'help-menu-item',
+        'dropdownID' : 'help'
     };
 
     constructor(props){
         super(props);
         this.handleToggleOpen = this.handleToggleOpen.bind(this);
+        this.dropdownID = props.dropdownID || props.id;
     }
 
     handleToggleOpen(e){
-        if (typeof this.props.setOpenDropdownID !== 'function') throw new Error('No func setOpenDropdownID passed in props.');
-        var idToSet = this.props.openDropdownID === this.props.id ? null : this.props.id;
-        this.props.setOpenDropdownID(idToSet);
+        var { setOpenDropdownID, openDropdownID } = this.props;
+        if (typeof setOpenDropdownID !== 'function') throw new Error('No func setOpenDropdownID passed in props.');
+        setOpenDropdownID((openDropdownID === this.dropdownID) ? null : this.dropdownID);
     }
 
     render(){
         var { mounted, href, session, context, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowInnerWidth } = this.props;
 
-        var isOpen = openDropdownID === id;
+        var isOpen = openDropdownID === this.dropdownID;
         var active = href.indexOf(helpItemHref) > -1;
         var commonProps = { 'key' : id, 'id' : id, 'active' : active };
         var isDesktopView = windowInnerWidth >= 768;
 
         if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView){
-            return (
-                <NavItem
-                    {...commonProps}
-                    href={helpItemHref}
-                    children="Help"
-                />
-            );
+            return <NavItem {...commonProps} href={helpItemHref} children="Help" />;
         }
 
         return (
@@ -381,6 +377,8 @@ class HelpNavMenuItem extends React.PureComponent {
 
 
 class BigDropDownMenu extends React.PureComponent {
+
+    // TODO: Check openDropdownID vs ___MenuTree presence.
 
     constructor(props){
         super(props);
