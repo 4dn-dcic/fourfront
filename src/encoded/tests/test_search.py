@@ -369,28 +369,30 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     assert len(res.json['@graph']) == 0
 
 
-@pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
-    # randomly sample all items and take 1
-    res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
-    if res.status_code == 404:  # no items found
-        item_len = 0
-    else:
-        res = res.follow()
-        item_len = len(res.json['@graph'])
-    # previously test_load_workbook
-    assert item_len == TYPE_LENGTH[item_type]
-    if item_len > 0:
-        random_id_idx = random.choice(range(item_len))
-        random_id = res.json['@graph'][random_id_idx]['@id']
-        indexer_testapp.get(random_id + '@@index-data', status=200)
-        # previously test_html_pages
-        try:
-            res = htmltestapp.get(random_id)
-            assert res.body.startswith(b'<!DOCTYPE html>')
-        except Exception as e:
-            pass
-
+def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
+    from snovault.elasticsearch import create_mapping
+    # we need to reindex the collections to make sure numbers are correct
+    create_mapping.run(app, sync_index=True)
+    for item_type in TYPE_LENGTH.keys():
+        # randomly sample all items and take 1
+        res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
+        if res.status_code == 404:  # no items found
+            item_len = 0
+        else:
+            res = res.follow()
+            item_len = len(res.json['@graph'])
+        # previously test_load_workbook
+        assert item_len == TYPE_LENGTH[item_type]
+        if item_len > 0:
+            random_id_idx = random.choice(range(item_len))
+            random_id = res.json['@graph'][random_id_idx]['@id']
+            indexer_testapp.get(random_id + '@@index-data', status=200)
+            # previously test_html_pages
+            try:
+                res = htmltestapp.get(random_id)
+                assert res.body.startswith(b'<!DOCTYPE html>')
+            except Exception as e:
+                pass
 
 
 ######################################
