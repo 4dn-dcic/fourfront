@@ -371,6 +371,7 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     from snovault.elasticsearch import create_mapping
+    es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     create_mapping.run(app, sync_index=True)
     for item_type in TYPE_LENGTH.keys():
@@ -379,9 +380,10 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         item_len = None
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
             if item_len != None:
+                es.indices.delete(index=item_type)  # try to manually delete it?
                 create_mapping.run(app, collections=[item_type], strict=True, sync_index=True)
                 time.sleep(3)
-            es_count = app.registry['elasticsearch'].count(index=item_type, doc_type=item_type).get('count')
+            es_count = es.count(index=item_type, doc_type=item_type).get('count')
             print('... ES COUNT: %s' % str(es_count))
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             if res.status_code == 404:  # no items found
