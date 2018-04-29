@@ -46,13 +46,13 @@ def app(app_settings):
 
 
 @pytest.fixture(autouse=True)
-def teardown(app):
+def teardown(app, use_collections=TEST_COLLECTIONS):
     import transaction
     from sqlalchemy import MetaData
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
-    create_mapping.run(app, collections=TEST_COLLECTIONS, skip_indexing=True)
+    create_mapping.run(app, collections=use_collections, skip_indexing=True)
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
     meta = MetaData(bind=session.connection(), reflect=True)

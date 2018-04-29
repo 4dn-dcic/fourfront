@@ -380,7 +380,6 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         item_len = None
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
             if item_len != None:
-                es.indices.delete(index=item_type)  # try to manually delete it?
                 create_mapping.run(app, collections=[item_type], strict=True, sync_index=True)
                 time.sleep(3)
             es_count = es.count(index=item_type, doc_type=item_type).get('count')

@@ -30,6 +30,8 @@ def app(app_settings):
 @pytest.yield_fixture(scope='session')
 def workbook(app):
     from webtest import TestApp
+    from ..test_indexing import teardown
+    teardown(app, use_collections=None)  # recreate all indices
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
