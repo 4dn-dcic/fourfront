@@ -5,6 +5,7 @@ elasticsearch running as subprocesses.
 """
 import pytest
 from encoded.verifier import verify_item
+from pyramid.paster import get_appsettings
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
@@ -13,7 +14,7 @@ TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
 @pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
     from .conftest import _app_settings
     settings = _app_settings.copy()
     settings['create_tables'] = True
@@ -24,6 +25,10 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
     settings['indexer.processes'] = 2
+
+    # use aws auth to access elasticsearch
+    if aws_auth:
+        settings['elasticsearch.aws_auth'] = aws_auth
     return settings
 
 
@@ -41,13 +46,13 @@ def app(app_settings):
 
 
 @pytest.fixture(autouse=True)
-def teardown(app):
+def teardown(app, use_collections=TEST_COLLECTIONS):
     import transaction
     from sqlalchemy import MetaData
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
-    create_mapping.run(app, collections=TEST_COLLECTIONS, skip_indexing=True)
+    create_mapping.run(app, collections=use_collections, skip_indexing=True)
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
     meta = MetaData(bind=session.connection(), reflect=True)

@@ -1,0 +1,17 @@
+[
+    {
+        "awards": ["Test-4DN"],
+        "name": "test-4dn-lab",
+        "title": "4DN Testing Lab",
+        "address2": "10 Schattuck Street",
+        "address1": "Biomedical Bioinfomatics",
+        "city": "Boston",
+        "country": "USA",
+        "fax": "000-000-0000",
+        "institute_label": "HMS",
+        "institute_name": "Harvard Medical School",
+        "postal_code": "02115",
+        "state": "MA",
+        "uuid": "828cd4fe-ebb0-4b22-a94a-d2e3a36cc988"
+    }
+]

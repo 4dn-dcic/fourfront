@@ -1,0 +1,24 @@
+[
+    {
+        "uuid": "331111bc-8535-4448-903e-854af460b254",
+        "description": "GM12878 test cells 1",
+        "biosource_type": "immortalized cell line",
+        "individual":"4DNINOOOAAQ1",
+        "award": "1U01CA200059-02",
+        "lab": "test-4dn-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
+        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21f"
+    },
+    {
+        "uuid": "331111bc-8535-4448-903e-854af460b888",
+        "description": "swag GM12878 test cells 2",
+        "biosource_type": "immortalized cell line",
+        "individual":"4DNINOOOAAQ1",
+        "award": "1U01CA200059-02",
+        "lab": "test-4dn-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
+        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21f"
+    }
+]

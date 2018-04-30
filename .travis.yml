@@ -20,10 +20,8 @@ addons:
   postgresql: '9.4'
 env:
   global:
-  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
   - BOTO_CONFIG=/bogus
-  - ES_VERSION=5.4.1
-  - ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb
+  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - USER="4dn-dcic"
@@ -41,6 +39,8 @@ env:
   - secure: ZjL66xRfoBX5/IJ+ClFkXMOQ50gqwR4GdLK+v2EfADHhtiO+Q/xjqDFybVhkz4ra4MognkWDX4+t/Td8viwIDBKvfmNxmVOUQiEtvUFdEDOVS3w6PacT5RHrcyL/7wUnF5ZKc4CH8idwxtr0lCmo3xBWzlxQgXU887Ro/pQwFDpscyTElYtMQMe3T3rLvBzaKRWyaNGAUvqAB6D632ZLB/xCvnoaUKXgfqyV8Em9x5jbTO/++/S1qrQiPBhGK6Ggwh/xBtmRxLTeNtEJPqF6ntp7yV9HMLd8vyk1xsscdFH6xJ7wRTgsM0VC7jB+NvXjAdQgPybHZYw5+5Xg8C+D7fHPZbCrnF299QvGF8AAChKNR1rkOAXuPdttDyhTKYbZHnRFniiDQju3PDfdnQ6aqKh4VUViPcliLsV5pYodgo09ubpBvrQm7v8esgZDBtCPJALJPmlpL3cU9fRVc10l4qTRxFuG9mNAb0uRICocmQNwYdBaSgKCZHSkcnfSxUglLPT5tqT3JfPMlRCDEzb2AlIrjIOnxv0MJVvo4xUybJK/00bEFWq68mUqCq3HXM4pdthE9fxpZyYAHmaQNE5YpRwMdD2aJHA7C83eggx0zMqE+S9O2L97io4ytiOs0rTYHDLkcBhds3TOvIqZHRNgOj4xkiB3g1KsaZpXpRzkDkY=
   - secure: HcTo9NWOMvQoUie/lL3tpSs4CjFguHyVK3F9pS7P592XH6pZ5Zn2NVI4KyasBaeX2mWFqTFwfOwo5NpZi3OZYBqFwfc/4LQGOyDowM9tgUiMwNIr884aEkt2U+QBuwMZyxFlOS55lRGVFugqWmgSy4y/vdmnPZrcRbs2tIhv9L+XJJq9AN9sl9Glwf+Czu6NPrmaez31mri+iZtbXR9yUE8CigYpoQFfKCJV+Ix4bSuO0kAHzzdsSxRKHXmoJ/v8G8Ge+LDYj0efzwXVNITbxeHwze4cGbpbUZcyUi6th7I9XmNa0XQt2kpoZjoRgGWAUJJd3fv87SY+w70eHn/W8GCys+wtYtP71u1+r+Yl2OS9u07jpm9GHJ6tdFmp+ytfuTwVPDgQdG0w3URiXrEXz/BDZGKBoN86f0/K7Q5i12o+17ohungJh1RdXtq2JQ5/H0E9P/dXTg7b+78jM6rT2HbS7ou82FtJS0AYJdZCYdbviBY8h5p4LLB5+JlMjyQujnzyZccbCzH/hVEu8JnCyTeaeu/1vZ39UpaA/B0LKJxbJkAgbMQ2uXjlw73qS2LvHgo9s3SE9lRT4yQjZxa/gQT4gciPmPvaMTsNmGf+DwdLlN2lCEN14fRJEzgAndTlHR2ATbr83txaMah53LfDqbW0/yinc3qyxqHePzlQuko=
   - secure: i6C0l6inapwkgmwKT67liVcxjSL2y+LrICBd3KmpglH1ReuqqhlUZkgIt2TkW481hhhiCnbxDtPdArqwCzVOIAt+FJ9Ug/9CiJwBCuePujJWo5HMrnMNkdXKlopP73OiRoNuBnxYmzGVq30x0K+Wyvei0nJoUn0ZcOPRij+u0D7YuUk85fdCrfHSqjm/GVOypFWSm3lx0CzbbWPejmjCzllZebj2PkHJ6ydv9IFPLFDEb5MB2Rt4xodKFkZzABGnAJOroIVMYat14XUeeg2PxIHq9YXpA9ZRxFtYNrFolHMOpV3JY4XAcWUVpgH7DvQSUG0Jc6fMo8yEO2Cd3XKCwuTDNa4pmzzR0UUXYPVB9jVvSYXTWk+dtbOB3ehD8mTRPqbkXlzI5/IwcYbNMtr9hooQEXsLZQLSciiQPrMPNqKAiOcFAoEHqfDx0oURnnTmgzIdzjpd+2f+wLP3qRA8pUX9VXcBrseN20u0UigJrxOILSMHMM84jF6uuABmiBY8csV8XvKALVrUbQIFqepMti/9IItQQa5+SfyUSDv8onkzaqT+Hy24mNxifJJLErwfMFWmub0rOrq9KLMx1vkMnItqCG9rMPIDC6q3H60b5PD5eFnle2P3V92sE1y+V9rjo1YHf+FKx1Tgn3ceJ0Sm7R7kjMbGY8xsKocFzVDg7Jg=
+  - secure: gSD7QL9OtPYmyFMvJKUHNeJu38uKCO686g6U7LfnlcOL675wuBGOSfgYnD4mfJxK0EjuVppVuUclzAFS7SwLyH1K6MjFzL777FkU6uZEVvXpTdiLHi+yeiRTJUXDi3YVTKiL5JZIHiDhNhrhI8mEDrCBMZwCl08NVQE+YjavcIdBYHd5RGyxF3/iRapl77Yh3ugIvagSabZ7IClLvklL1eyM1chh5Sxk6kZYmsginjfPF5sQf6DsgpfYtLklLXioJ9Z9+Zr4alGrSV700mndp2gwnrtSvBhnWzTGNMgHw9VQCBl9gSkZyRW83/YoJJDR9ozZMeKoFbXobkZ/jIQYY700dII1z2YSaJhahOfbXgYbj8qmi9sB7daF4NjJVllpmi8769rFpB99frJE3vyT8SJeRK1vLWB0Yq5rXmnE99gpUp7zCgMHQhfXr1IZTPf7SHO3IFvG4cVfqDdXc+uxRfYneTAoEU9yufxkvIdLqBzg5+cwBFVEjvS25T63LXnu3CUj3Hbcp3B1hrk4hVp9nfRexTtmPeC0j1+SreWGz1BDmtXFD1fZBJCqwvfcS4HVT8F7HS/bUvyu0+Wm4YtUiQcFBORpswzq2PsRI3BSBc7GSeO46qYv2qRphVXgmqEhTIYEh/1q8lxUxbr19Q90Pco6AGgZwsERBWKXMYhe1/w=
+  - secure: Dzs4p1PuHdNXyBJu8FEWp839RhxvetKQrKonNeon3CvcN0xbxtICKr6ekj7+Y8hejxnUFGRwnypGmjbeee9evCC0bcvRQCjy/9aX7Kfuykn4IhvDAAYcWr533wqxC78A4TMyFJEJxYiZ4eJy+M/DnH+lr4zaoAwpsO1mxq92uPfjmj+gYZEAO5mvOUyCKQu5tKYYi9UTJ9Rxz0lJKRbaSQtEGRHs6+kU0qFc6QJGsYXXIbc/BOmfhKkrcJ+6jfvG7eli7cQSK1ve8h1VX0n/Eonk9heH4umCyTT2RTfhcARrc2ZwWYKXTka0jxmAck9gELcGEYOSV5dL/Qy9zykLeH7dL0UbNMnnrNY+89/b2WJfav9KtoG3e0dgiQZp5oMgC1MtkDxQif+V7In9baZA4rafgW+Bw/O3Uzz+VAPpl4xDVjk/29GLQ5iWnj9eJT9a7jIQIOMD6WKxAKH2O3XD6ZyUWvjKYEqT9BIxfchWnd+z2tIPDQBBI3Az+jDh6Quyrmb7AQVveTc+CtmzP98lhnIqAfIz8hwHyRgCo+i27wUGyKHMnKCJeHVSEPbANqXxeg1l8rgG5ht8H0AznkPpzTjajZRmZowDQRg9b9plM5AQsIxhPtAHBHAHcpXx8reN9NHrPuKLoMV3KRTUoq6UqTUrPz/qKCCSbaSbR7UNK7E=
 matrix:
   include:
   - python: '3.4'
@@ -67,7 +67,6 @@ before_install:
 - nvm install 8
 - node --version
 - npm config set python /usr/bin/python2.7
-- curl -O  ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch stop
 install:
 - pip install coveralls
 - pip install codacy-coverage
@@ -82,9 +81,10 @@ install:
 - pip show pytest
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=10 --cov
-  src/encoded; fi
-- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=10 --cov src/encoded; fi
+- if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not bdd and setone" --durations=10 --cov
+  src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80; fi
+- if test -n "$UNIT"; then bin/test -v -v --aws-auth -m "working and not setone" --durations=10 --cov
+  src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80; fi
 - if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
