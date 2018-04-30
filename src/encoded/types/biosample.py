@@ -44,6 +44,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'cell_culture_details.morphology_image.attachment.download',
         'cell_culture_details.morphology_image.attachment.width',
         'cell_culture_details.morphology_image.attachment.height',
+        'cell_culture_details.differentiation_tissue.term_name',
         'modifications.modification_type',
         'modifications.display_title',
         'modifications.description',
@@ -113,7 +114,13 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 bios_props = request.embed(biosource[i], '@@object')
                 ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
             if len(ret_str) > 0:
-                return ret_str[:-5]
+                ret_str = ret_str[:-5]
+                cc = self.properties.get('cell_culture_details')
+                if cc:
+                    cc_props = request.embed(cc, '@@embedded')
+                    if 'differentiation_tissue' in cc_props:
+                        ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
+                return ret_str
             else:
                 return 'None'
         return 'None'

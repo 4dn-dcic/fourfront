@@ -64,7 +64,16 @@
             "default": "ancillary file",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
-                "ancillary file"
+                "ancillary file"]
+        },
+        "genome_assembly": {
+            "title": "Genome Assembly",
+            "description": "The genome assembly associated with the file - for processing or reference",
+            "type": "string",
+            "lookup": 30,
+            "enum": [
+                "GRCh38",
+                "GRCm38"
             ]
         }
     },

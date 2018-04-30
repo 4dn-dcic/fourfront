@@ -130,8 +130,11 @@
         "biosource_type": {
             "title": "Biosource Type"
         },
-        "biosource_name": {
-            "title": "Biosource"
+        "cell_line.term_name": {
+            "title": "Cells"
+        },
+        "tissue.term_name": {
+            "title": "Tissue"
         },
         "individual.organism.name": {
             "title": "Organism"
