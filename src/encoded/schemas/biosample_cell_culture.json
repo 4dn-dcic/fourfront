@@ -85,7 +85,7 @@
         },
         "protocols_additional": {
             "title": "Additional Protocols used in Cell Culture",
-            "description": "Protocols describing deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs",
+            "description": "Protocols including additional culture manipulations such as stem cell differentiation or cell cycle synchronization.",
             "type": "array",
             "lookup": 150,
             "items": {
@@ -104,6 +104,14 @@
                 "type": "string",
                 "linkTo": "Protocol"
             }
+        },
+        "differentiation_tissue": {
+            "title": "Differentiation Tissue",
+            "description": "The resulting tissue type for cells that have undergone differentiation.",
+            "type": "string",
+            "linkTo": "OntologyTerm",
+            "lookup": 99,
+            "suggested_enum": ["definitive endoderm"]
         },
         "differentiation_state": {
             "title": "Differentiation State",

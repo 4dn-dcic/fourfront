@@ -64,7 +64,8 @@
                 "RNA",
                 "DNA primer",
                 "Small chemical",
-                "BAC"
+                "BAC",
+                "DNA"
             ]
         },
         "labels": {
