@@ -38,8 +38,8 @@
             "enum": [
                 "bwaIndex",
                 "chromsizes",
-                "reference_fasta",
-                "oligo_fasta",
+                "compressed_fasta",
+                "fasta",
                 "juicer_format_restriction_site_file",
                 "other"
             ]
@@ -57,13 +57,22 @@
                 "repeats",
                 "other"
             ]
+        },
+        "file_classification": {
+            "title": "General Classification",
+            "type": "string",
+            "default": "ancillary file",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": [
+                "ancillary file"
+            ]
         }
     },
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
         "chromsizes": ".chrom.sizes",
-        "reference_fasta": ".fasta.gz",
-        "oligo_fasta": ".fasta",
+        "compressed_fasta": ".fasta.gz",
+        "fasta": ".fasta",
         "juicer_format_restriction_site_file": ".txt",
         "other": ""
     }

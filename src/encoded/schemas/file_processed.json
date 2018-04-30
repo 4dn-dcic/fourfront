@@ -56,6 +56,7 @@
                 "bw",
                 "bed",
                 "txt",
+                "csv",
                 "other"
             ]
         },
@@ -75,14 +76,25 @@
                 "intensity values",
                 "peaks",
                 "image",
+                "locus distances, submitter format",
                 "other"
             ]
+        },
+        "file_classification": {
+            "title": "General Classification",
+            "type": "string",
+            "default": "processed file",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": [
+                "processed file"
+              ]
         },
          "source_experiments": {
              "title": "Source Experiments",
              "description": "Experiments that this file is associated with",
              "type": "array",
              "lookup": 40,
+             "exclude_from": ["submit4dn"],
              "items": {
                  "title": "Source Experiment",
                  "type": "string"
@@ -106,6 +118,7 @@
         "bw": ".bw",
         "bed": ".bed.gz",
         "txt": ".txt.gz",
+        "csv": ".csv",
         "other": ""
     },
     "facets" : {
