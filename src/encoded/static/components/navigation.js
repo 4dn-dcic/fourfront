@@ -323,7 +323,8 @@ export default class Navigation extends React.Component {
                         </Navbar.Collapse>
                     </Navbar>
                     { includeBigDropDownMenuComponents ?
-                        <BigDropDownMenu {...this.props} {...{ windowInnerWidth, windowInnerHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted, scrolledPastTop, testWarning }} setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
+                        <BigDropDownMenu {...{ windowInnerWidth, windowInnerHeight, mobileDropdownOpen, href }}
+                            setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} menuTree={helpMenuTree} />
                     : null }
                     <ChartDataController.Provider id="quick_info_bar1">
                         <QuickInfoBar href={href} schemas={schemas} context={context} browseBaseState={browseBaseState} invisible={!!(openDropdown)} />
@@ -354,7 +355,7 @@ class HelpNavMenuItem extends React.PureComponent {
     }
 
     render(){
-        var { mounted, href, session, context, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowInnerWidth } = this.props;
+        var { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowInnerWidth } = this.props;
 
         var isOpen = openDropdownID === this.dropdownID;
         var active = href.indexOf(helpItemHref) > -1;
@@ -393,7 +394,7 @@ class BigDropDownMenu extends React.PureComponent {
     }
 
     renderMenuItems(){
-        var { openDropdownID, helpMenuTree, windowInnerWidth, href, setOpenDropdownID } = this.props;
+        var { openDropdownID, menuTree, windowInnerWidth, href, setOpenDropdownID } = this.props;
         var handleMenuItemClick = this.handleMenuItemClick;
         /*
         var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
@@ -407,7 +408,7 @@ class BigDropDownMenu extends React.PureComponent {
             return !child.error && child.display_title && child.name;
         }
 
-        var level1ChildrenToRender = _.filter(helpMenuTree.children, function(child){
+        var level1ChildrenToRender = _.filter(menuTree.children, function(child){
             var childValid = filterOutChildren(child);
             if (!childValid) return false;
             if ((child.content || []).length > 0) return true;
@@ -424,7 +425,7 @@ class BigDropDownMenu extends React.PureComponent {
                 <div className={"help-menu-tree level-1 col-xs-12 col-sm-6 col-md-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
                     <div className="level-1-title-container">
                         <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
-                            data-delay-show={1000} onClick={handleMenuItemClick}>
+                            data-delay-show={1000} onClick={handleMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
                             { childLevel1.display_title }
                         </a>
                     </div>
@@ -433,7 +434,7 @@ class BigDropDownMenu extends React.PureComponent {
                             return (
                                 <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
                                     href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={1000}
-                                    key={childLevel2.name} onClick={handleMenuItemClick}>
+                                    key={childLevel2.name} onClick={handleMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
                                     { childLevel2.display_title }
                                 </a>
                             );
@@ -461,12 +462,12 @@ class BigDropDownMenu extends React.PureComponent {
     }
 
     introSection(){
-        var { helpMenuTree, windowInnerHeight } = this.props;
-        if (!helpMenuTree || !helpMenuTree.display_title || !helpMenuTree.description || windowInnerHeight < 800) return null;
+        var { menuTree, windowInnerHeight } = this.props;
+        if (!menuTree || !menuTree.display_title || !menuTree.description || windowInnerHeight < 800) return null;
         return (
             <div className="intro-section">
-                <h4><a href={'/' + helpMenuTree.name} onClick={this.handleMenuItemClick}>{ helpMenuTree.display_title }</a></h4>
-                <div className="description">{ helpMenuTree.description }</div>
+                <h4><a href={'/' + menuTree.name} onClick={this.handleMenuItemClick}>{ menuTree.display_title }</a></h4>
+                <div className="description">{ menuTree.description }</div>
             </div>
         );
     }

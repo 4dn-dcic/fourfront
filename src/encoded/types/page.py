@@ -18,21 +18,10 @@ from snovault import (
 from encoded.search import get_iterable_search_results
 from .base import (
     Item,
-    collection_add,
     item_edit,
     get_item_if_you_can
 )
 from snovault.resource_views import item_view_page
-from snovault.calculated import calculate_properties
-from snovault.validators import (
-    validate_item_content_post,
-    validate_item_content_patch,
-    validate_item_content_put,
-)
-from snovault.etag import if_match_tid
-from pyramid.view import view_config
-from datetime import datetime, timedelta
-import json
 
 
 def get_pyramid_http_exception_for_redirect_code(code):
@@ -102,12 +91,13 @@ def cleanup_page_tree(node):
             child['sibling_length'] = len(node['children'])
             child['sibling_position'] = child_idx
 
-def generate_at_type_for_page(node, item={}):
+def generate_at_type_for_page(node):
     capitalized_path_names = [ pg.capitalize() for pg in filter(lambda pg: pg, node['@id'].split('/')) ]
     page_type = []
-    for cap_idx, cap_name in enumerate(reversed(capitalized_path_names)):
+    capitalized_path_names_len = len(capitalized_path_names)
+    for cap_idx in range(0, capitalized_path_names_len):
         typestr = ''
-        for idx in range(0, len(capitalized_path_names) - cap_idx):
+        for idx in range(0, capitalized_path_names_len - cap_idx):
             typestr += capitalized_path_names[idx]
         typestr += 'Page'
         page_type.append(typestr)
@@ -223,7 +213,7 @@ class StaticSection(Item):
         "description": "Type of file used for content",
         "type": "string"
     })
-    def filetype(self, request, body=None, file=None, options={}):
+    def filetype(self, request, body=None, file=None, options=None):
         if options and options.get('filetype') is not None:
             return options['filetype']
         if isinstance(body, str):
@@ -271,12 +261,6 @@ def static_page(request):
     the front-end expects
     '''
 
-    def title_from_tree_node(node):
-        if node.get('display_title'):
-            return node['display_title']
-        else:
-            return ' '.join([ substr.capitalize() for substr in node['name'].split('-')])
-
     def remove_relations_in_tree(node, keep="children"):
         '''Returns (deep-)copy'''
         filtered_node = { "name" : node['name'] }
@@ -292,21 +276,25 @@ def static_page(request):
     path_parts = [ path_part for path_part in request.subpath if path_part ]
     page_name = "/".join(path_parts)
 
-    tree = add_sibling_parent_relations_to_tree(request._static_page_tree)
+    tree = request._static_page_tree
 
-    curr_node = tree
-    page_in_tree = True
-    for path_idx, part in enumerate(path_parts):
-        found_child = False
-        for child in curr_node.get('children',[]):
-            split_child_name = child['name'].split('/')
-            if len(split_child_name) > path_idx and split_child_name[path_idx] == part:
-                curr_node = child
-                found_child = True
+    if tree is not None:
+
+        tree = add_sibling_parent_relations_to_tree(tree)
+
+        curr_node = tree
+        page_in_tree = True
+        for path_idx, part in enumerate(path_parts):
+            for child in curr_node.get('children',[]):
+                split_child_name = child['name'].split('/')
+                if len(split_child_name) > path_idx and split_child_name[path_idx] == part:
+                    curr_node = child
+                    break
+            if path_idx == len(path_parts) - 1 and curr_node.get('uuid') is None:
+                page_in_tree = False
                 break
-        if path_idx == len(path_parts) - 1 and curr_node.get('uuid') is None:
-            page_in_tree = False
-            break
+    else:
+        page_in_tree = False
 
     context = Page(request.registry, request._static_page_model)
 
@@ -318,7 +306,7 @@ def static_page(request):
     item = item_view_page(context, request)
     cleanup_page_tree(item)
     item['toc'] = item.get('table-of-contents')
-    item['context'] = item['@id']
+    item['@context'] = item['@id']
 
     if page_in_tree:
         if curr_node.get('next'):

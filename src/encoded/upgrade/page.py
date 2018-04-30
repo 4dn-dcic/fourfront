@@ -77,7 +77,7 @@ def page_2_3(value, system):
 
     if value['name'] == "help/biosample":
         value['name'] = "help/user-guide/biosample-metadata"
-    
+
     if value['name'] == "help/rest-api":
         value['name'] = "help/user-guide/rest-api"
 

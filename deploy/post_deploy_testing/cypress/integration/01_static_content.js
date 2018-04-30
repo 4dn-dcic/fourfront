@@ -60,7 +60,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
 
     });
 
-    context("Joint Analysis Page", function(){
+    context.only("Joint Analysis Page", function(){
 
         before(function(){
             cy.visit('/joint-analysis-plans');
@@ -84,8 +84,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
             });
         });
 
-        // ENABLE SOON ONCE DEPLOYED UP-STREAM
-        it.skip('X-Axis headers are in proper order', function(){
+        it('X-Axis headers are in proper order', function(){
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 cy.get('.header-for-viz .column-group-header').should('have.length.greaterThan', 1).then(($headers)=>{
                     Cypress._.forEach($headers, function(h, idx){
@@ -95,7 +94,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
             });
         });
 
-        it('Have at least 16 sets depicted in tiles, & more when logged in', function(){
+        it('Have at least 16 sets depicted in tiles (logged out)', function(){
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 cy.get('.block-container-group .stacked-block').then(($blocks)=>{
                     let totalCount = 0;
@@ -110,7 +109,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
             });
         });
 
-        it('Have more sets depicted when logged in; at least 50', function(){
+        it('Have more (>50) sets depicted when logged in', function(){
 
             let origTotalCount = 0;
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
@@ -119,16 +118,16 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                         origTotalCount += parseInt(Cypress.$(block).text());
                     });
                 }).end();
-            }).end().login4DN().reload().end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+            }).end().login4DN().reload().wait(500).end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 let nextTotalCount = 0;
-                return cy.get('.block-container-group .stacked-block').should('have.length.greaterThan', 15).then(($nextBlocks)=>{
+                return cy.get('.block-container-group .stacked-block').should('have.length.greaterThan', 20).then(($nextBlocks)=>{
                     Cypress._.forEach($nextBlocks, function(block){
                         nextTotalCount += parseInt(Cypress.$(block).text());
                     });
                     expect(nextTotalCount).to.be.greaterThan(origTotalCount);
                     expect(nextTotalCount).to.be.greaterThan(49);
                 });
-            }).wait(250).end().screenshot().end();
+            }).wait(250).end().screenshot().end().wait(250).end().logout4DN();
         });
 
 

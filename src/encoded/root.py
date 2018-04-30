@@ -1,4 +1,3 @@
-import os
 import json
 import requests
 from re import escape
@@ -12,7 +11,6 @@ from snovault import (
 from snovault.interfaces import STORAGE
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from .schema_formats import is_accession
-from .types.page import get_local_file_contents
 from .search import make_search_subreq
 from pyramid.security import (
     ALL_PERMISSIONS,

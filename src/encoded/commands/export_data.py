@@ -1,4 +1,4 @@
-from encoded.commands.import_data import (basic_auth, remote_app)
+from encoded.commands.import_data import basic_auth
 from pyramid import paster
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
@@ -23,10 +23,7 @@ def run(search_url, username='', password=''):
 
     url = urlparse(search_url)
 
-    if url.scheme in ('http', 'https') and '/search/?type=' in search_url:
-        base = url.scheme + '://' + url.netloc
-        auth_header = basic_auth(username, password)
-    else:
+    if url.scheme not in ('http', 'https') or '/search/?type=' not in search_url:
         raise Exception('Invalid URL supplied.')
 
     # Loading app will have configured from config file. Reconfigure here:
