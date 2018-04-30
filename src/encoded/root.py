@@ -287,9 +287,10 @@ class EncodedRoot(Root):
     })
     def content(self, request):
         '''Returns -object- with pre-named sections'''
-        sections_to_get = ['home.introduction']
-        url_to_request = '/search/?type=StaticSection&' + '&'.join([ 'name=' + s for s in sections_to_get])
-        return request.embed(url_to_request, as_user=True).get('@graph', [])
+        #sections_to_get = ['home.introduction']
+        #url_to_request = '/search/?type=StaticSection&' + '&'.join([ 'name=' + s for s in sections_to_get])
+        #url_to_request = '/static-sections/home.introduction/@@embedded'
+        return request.embed('/static-sections/home.introduction', '@@embedded', as_user=True).get('@graph', [])
 
     @calculated_property(schema={
         "title": "Application version",
