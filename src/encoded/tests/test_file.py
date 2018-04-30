@@ -384,7 +384,7 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
 
 
 def test_external_creds(mocker):
-    mock_boto = mocker.patch('encoded.types.file.boto3', autospec=True)
+    mocker.patch('encoded.types.file.boto3', autospec=True)
 
     from encoded.types.file import external_creds
     ret = external_creds('test-wfout-bucket', 'test-key', 'name')

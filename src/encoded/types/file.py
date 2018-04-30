@@ -435,7 +435,7 @@ class File(Item):
         if not external:
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError as e:
+            except ClientError:
                 log.error(os.environ)
                 log.error(self.properties)
                 return 'UPLOAD KEY FAILED'
