@@ -614,11 +614,11 @@ export class TableOfContents extends React.Component {
         }
 
         var content = [];
-            
+
         if (context && context.parent && context.parent['@id']) content.push(this.parentLink(windowInnerWidth));
 
         var children = sectionEntries.call(this);
-        
+
         content.push(
             <TableEntry
                 link="top"
