@@ -114,7 +114,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
         });
 
         it('Have more (>50) sets depicted when logged in', function(){
-            
+
             cy.on('uncaught:exception', function(err, runnable){
 
                 expect(err.message).to.include("'options' of null");
@@ -126,7 +126,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
 
                 return false;
             });
-            
+
 
             let origTotalCount = 0;
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{

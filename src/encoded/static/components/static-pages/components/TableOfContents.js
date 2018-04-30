@@ -792,7 +792,7 @@ export class HeaderWithLink extends React.PureComponent {
 
     handleLinkClick(id, e){
         if (!(!isServerSide() && typeof window !== 'undefined' && document)) return null;
-        var itemAtID; 
+        var itemAtID;
         if (this.props.context) itemAtID = object.itemUtil.atId(this.props.context);
         else itemAtID = window.location.pathname;
 
