@@ -283,8 +283,7 @@ class EncodedRoot(Root):
 
     @calculated_property(schema={
         "title": "Static Page Content",
-        "type": "object",
-        "linkTo" : "StaticSection"
+        "type": "object"
     })
     def content(self, request):
         '''Returns -object- with pre-named sections'''
