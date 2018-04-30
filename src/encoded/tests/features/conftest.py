@@ -12,9 +12,9 @@ def external_tx():
 
 
 @pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
     from .. import test_indexing
-    return test_indexing.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
+    return test_indexing.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth)
 
 
 @pytest.yield_fixture(scope='session')
@@ -30,6 +30,8 @@ def app(app_settings):
 @pytest.yield_fixture(scope='session')
 def workbook(app):
     from webtest import TestApp
+    from ..test_indexing import teardown
+    teardown(app, use_collections=None)  # recreate all indices
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
@@ -38,8 +40,8 @@ def workbook(app):
 
     from ...loadxl import load_all
     from pkg_resources import resource_filename
-    load_all(testapp, resource_filename('encoded', 'tests/data/master-inserts/'), []) # Master Inserts
-    load_all(testapp, resource_filename('encoded', 'tests/data/inserts/'), [resource_filename('encoded', 'tests/data/documents/')]) # Test Inserts
+    # just load the workbook inserts
+    load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
 
     testapp.post_json('/index', {})
     yield

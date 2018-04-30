@@ -1,0 +1,12 @@
+[
+    {
+        "uuid": "131106bc-8535-4448-903e-854af460b244",
+        "description": "Stable transfection protocol",
+        "award": "1U01CA200059-02",
+        "lab": "test-4dn-lab",
+        "aliases": ["dcic:test_protocol"],
+        "protocol_type": "Other",
+        "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab"
+    }
+]
