@@ -188,7 +188,8 @@ def test_range_download(testapp, proc_file_json):
     s3 = boto3.client('s3')
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode('hahaha'))
     download_link = resobj['href']
-    testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
+    resp = testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
+    assert resp.text == 'haha'
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
