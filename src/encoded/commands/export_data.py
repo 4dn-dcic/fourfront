@@ -1,4 +1,3 @@
-from encoded.commands.import_data import basic_auth
 from pyramid import paster
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
