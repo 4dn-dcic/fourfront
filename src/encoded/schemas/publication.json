@@ -113,6 +113,14 @@
                 "linkTo": "ExperimentSet"
             }
         },
+        "aka": {
+            "title": "Previously Known As",
+            "description": "Link to biorxiv version of a published article",
+            "type": "string",
+            "format": "uri",
+            "comment": "can be automatically added when info is transferred from biorxiv to journal article or may be added by submitter",
+            "lookup": 500
+        },
         "title": {
             "title": "Title",
             "description": "DON'T SUBMIT, auto-generated.",
