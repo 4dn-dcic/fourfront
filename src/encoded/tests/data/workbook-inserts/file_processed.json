@@ -1,0 +1,19 @@
+[
+{
+    "lab":"test-4dn-lab",
+    "award":"/awards/1U01CA200059-02/",
+    "status":"uploaded",
+    "file_format":"cool",
+    "description": "a cool file for 3 experiments",
+    "accession": "4DNFIAAAAAA4",
+    "uuid":"8571c559-22b4-487e-9cb8-7ac402e93a9f"
+},{
+    "lab":"test-4dn-lab",
+    "award":"/awards/1U01CA200059-02/",
+    "status":"uploaded",
+    "file_format":"hic",
+    "description": "a hic file for 3 experiments",
+    "accession": "4DNFIAAAAAA5",
+    "uuid":"5b58e449-b7f0-4120-b20b-634f19c67f9e"
+}
+]

@@ -13,31 +13,10 @@ def _type_length():
     type_length_dict = {}
     for name in ORDER:
         try:
-            type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/master-inserts/%s.json' % name))))
+            type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/workbook-inserts/%s.json' % name))))
         except Exception:
             type_length_dict[name] = 0
-        try:
-            type_length_dict[name] += len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
-        except Exception:
-            type_length_dict[name] += 0
 
-    # hot fix for Inherited Non-Abstract Collections
-    # list of parent object and children (nested list)
-    inherited_list = [
-     ["experiment_set", ["experiment_set_replicate"]],
-     ["workflow_run", ["workflow_run_sbg", "workflow_run_awsem"]],
-     ["file_set", ["file_set_calibration", "file_set_microscope_qc"]],
-    ]
-    for inh in inherited_list:
-        try:
-            # get the items in the inherited object first
-            sum_exp_set = type_length_dict.get(inh[0], 0)
-            # get the items in each inheriting object and sum
-            for sub_inh in inh[1]:
-                sum_exp_set += type_length_dict.get(sub_inh, 0)
-            type_length_dict[inh[0]] = sum_exp_set
-        except:
-            pass
     return type_length_dict
 
 
@@ -177,12 +156,6 @@ def test_abstract_collection(testapp, experiment):
     # testapp.get('/expermient/{accession}'.format(**experiment))
 
 
-@pytest.mark.slow
-def test_collection_limit(workbook, testapp):
-    res = testapp.get('/enzymes/?limit=2', status=200)
-    assert len(res.json['@graph']) == 2
-
-
 def test_collection_post(testapp):
     item = {
         'name': 'human',
@@ -215,14 +188,6 @@ def test_collection_post_bad_(anontestapp):
     from pyramid.compat import ascii_native_
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
     anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=403)
-
-
-def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
-    res = testapp.get('/protocols/')
-    assert any(action for action in res.json.get('actions', []) if action['name'] == 'add')
-
-    res = anontestapp.get('/protocols/')
-    assert not any(action for action in res.json.get('actions', []) if action['name'] == 'add')
 
 
 def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, human_biosource):
@@ -296,28 +261,6 @@ def test_jsonld_context(testapp):
 def test_jsonld_term(testapp):
     res = testapp.get('/terms/submitted_by')
     assert res.json
-
-
-@pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
-    import random
-    # randomly sample all items and take 2
-    res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
-    # previously test_load_workbook
-    item_len = len(res.json['@graph'])
-    assert item_len == TYPE_LENGTH[item_type]
-    num_items = 2 if item_len >= 2 else item_len
-    random_id_idxs = random.sample(range(item_len), num_items)
-    random_ids = [res.json['@graph'][idx]['@id'] for idx in random_id_idxs]
-    for item_id in random_ids:
-        indexer_testapp.get(item_id + '@@index-data', status=200)
-        # previously test_html_pages
-        try:
-            res = htmltestapp.get(item_id)
-        except Exception as e:
-            print(e)
-            continue
-        assert res.body.startswith(b'<!DOCTYPE html>')
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
