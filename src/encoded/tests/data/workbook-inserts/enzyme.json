@@ -1,0 +1,28 @@
+[
+    {
+        "name": "DNaseI",
+        "aliases":["dcic:dnaseI_tfs"],
+        "enzyme_source": "thermofisher-scientific",
+        "description": "used for DNase HiC",
+        "catalog_number":"EN052",
+        "award": "1U01CA200059-02",
+        "lab": "test-4dn-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://www.thermofisher.com/order/catalog/product/EN0525",
+        "uuid": "e646edb2-d4d5-405b-aab1-03e4754b0705"
+    },
+    {
+        "name": "MboI",
+        "aliases":["dcic:mboI_neb"],
+        "enzyme_source": "thermofisher-scientific",
+        "catalog_number":"R0147",
+        "recognition_sequence": "GATC",
+        "site_length": 4,
+        "cut_position": 0,
+        "award": "1U01CA200059-02",
+        "lab": "test-4dn-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://www.neb.com/products/r0147-mboi",
+        "uuid": "37750c1c-fce5-4ec5-baa7-ce7858f898ae"
+    }
+]

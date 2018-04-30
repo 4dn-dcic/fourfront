@@ -49,6 +49,7 @@ requires = [
     'pyJWT>=1.5.3',
     # add it here for some command line tools
     'pytest==2.9.1',
+    'aws-requests-auth',
 ]
 
 if sys.version_info.major == 2:
