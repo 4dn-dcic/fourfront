@@ -27,7 +27,7 @@
     "accession": "4DNFI823L888",
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
-    "file_format": "reference_fasta",
+    "file_format": "compressed_fasta",
     "notes": "reference genome fasta for hg38, autosomes and sex chromosomes only",
     "filename": "GRCh38_no_alt_analysis_set_GCA_000001405.15.fasta.gz",
     "lab": "4dn-dcic-lab",

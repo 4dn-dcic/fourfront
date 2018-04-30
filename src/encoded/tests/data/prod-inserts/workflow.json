@@ -2141,7 +2141,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "reference_fasta",
+                            "file_format": "compressed_fasta",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2393,7 +2393,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "reference_fasta",
+                            "file_format": "compressed_fasta",
                             "global": true,
                             "type": "reference file"
                         },
