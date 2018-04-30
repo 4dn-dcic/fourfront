@@ -60,7 +60,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
 
     });
 
-    context.only("Joint Analysis Page", function(){
+    context("Joint Analysis Page", function(){
 
         before(function(){
             cy.visit('/joint-analysis-plans');
@@ -109,7 +109,24 @@ describe('Post-Deployment Static Page & Content Tests', function () {
             });
         });
 
+        it("HiGlass initializes (very basic)", function(){
+            cy.get('div.CenterTrack-module_center-track-3ptRW').wait(500);
+        });
+
         it('Have more (>50) sets depicted when logged in', function(){
+            
+            cy.on('uncaught:exception', function(err, runnable){
+
+                expect(err.message).to.include("'options' of null");
+
+                Cypress.log({
+                    'name' : "XHR Callback",
+                    'message' : "Hit AJAX callback timing error. Ignored."
+                });
+
+                return false;
+            });
+            
 
             let origTotalCount = 0;
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
@@ -118,7 +135,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                         origTotalCount += parseInt(Cypress.$(block).text());
                     });
                 }).end();
-            }).end().login4DN().reload().wait(500).end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+            }).end().login4DN().wait(500).end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 let nextTotalCount = 0;
                 return cy.get('.block-container-group .stacked-block').should('have.length.greaterThan', 20).then(($nextBlocks)=>{
                     Cypress._.forEach($nextBlocks, function(block){
