@@ -516,13 +516,13 @@ h5.fourDN-header {
 		margin-bottom: -1px;
 		transform: translate3d(0px,0px,0px);
 		color: #ddd;
-		background: #444;
 		left: 0;
 		right: 0;
 		position: absolute;
-		transition: opacity 0.2s linear, z-index 0s .2s, visibility 0s .3s;
+		transition: opacity 0.1s linear, z-index 0s .2s, visibility 0s .3s, background-color .2s linear;
 		visibility: hidden;
 		opacity: 0;
+		background-color: transparent;
 
 		h1,h2,h3,h4,h5,h6 { color: #eee; }
 
@@ -654,10 +654,11 @@ h5.fourDN-header {
 	}
 
 	&.big-menu-open .big-dropdown-menu {
-		transition: opacity 0.2s linear;
+		transition: opacity 0.2s linear, background-color .2s linear;
 		visibility: visible;
 		z-index: 5;
 		opacity: 1;
+		background-color: #444;
 		&.fade.in {
 			overflow-y: auto;
 		}
