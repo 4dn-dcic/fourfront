@@ -1,9 +1,9 @@
 import pytest
-from encoded.types.file import File, FileFastq, FileFasta, post_upload, force_beanstalk_env
+from encoded.types.file import FileFastq, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
 import os
+import boto3
 pytestmark = pytest.mark.working
-
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
@@ -33,13 +33,11 @@ def test_processed_file_unique_md5(testapp, mcool_file_json):
     assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
 
 
-
-
 def test_processed_file_unique_md5_skip_validation(testapp, mcool_file_json):
     # first time pass
     res = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
     testapp.post_json('/file_processed?force_md5=true', mcool_file_json)
-    testapp.patch_json('/file_processed/%s/?force_md5=true' % res['accession'] , mcool_file_json)
+    testapp.patch_json('/file_processed/%s/?force_md5=true' % res['accession'], mcool_file_json)
     testapp.put_json('/file_processed/%s/?force_md5=true' % res['accession'], mcool_file_json)
 
 
@@ -174,9 +172,30 @@ def test_extra_files_download(testapp, proc_file_json):
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'], Body=str.encode(''))
     download_link = resobj['extra_files'][0]['href']
     testapp.get(download_link, status=307)
     testapp.get(resobj['href'], status=307)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'])
+
+
+def test_range_download(testapp, proc_file_json):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
+                  Body=str.encode('12346789abcd'))
+    download_link = resobj['href']
+    resp = testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
+    # delete first so cleanup even if test fails
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+    assert resp.text == '3467'
+    assert resp.status_code == 206
+    assert resp.headers['Content-Length'] == '4'
+    assert resp.headers['Content-Range'] == 'bytes 2-5/12'
 
 
 def test_extra_files_get_upload(testapp, proc_file_json):
@@ -218,7 +237,7 @@ def test_files_aws_credentials(testapp, fastq_uploading):
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
     assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
-    assert 'test-bucket' in resobj['upload_credentials']['upload_url']
+    assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
 
 
 def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
@@ -282,11 +301,14 @@ def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
     # 307 is redirect to s3 using auto generated download url
     fastq_res = testapp.get('{href}'
-                            .format(**res.json['@graph'][0]),
+                            .format(**resobj),
                             status=307)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
@@ -294,6 +316,8 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_json, status=201)
     resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
     props = {'uuid': resobj['uuid'],
              'aliases': ['dcic:test_1'],
@@ -304,9 +328,10 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
 
     # 307 is redirect to s3 using auto generated download url
     fastq_res = testapp.get('{href}'
-                            .format(**res.json['@graph'][0]),
+                            .format(**resobj),
                             status=307)
     assert props['uuid'] in fastq_res.text
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 @pytest.fixture
@@ -321,10 +346,12 @@ def mcool_file_json(award, experiment, lab):
     }
     return item
 
+
 @pytest.fixture
 def mcool_file(testapp, mcool_file_json):
     res = testapp.post_json('/file_processed', mcool_file_json)
     return res.json['@graph'][0]
+
 
 @pytest.fixture
 def file(testapp, award, experiment, lab):
@@ -339,7 +366,6 @@ def file(testapp, award, experiment, lab):
     }
     res = testapp.post_json('/file_fastq', item)
     return res.json['@graph'][0]
-
 
 
 @pytest.fixture
@@ -362,15 +388,13 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
     assert fastq_related_files[0]['file']['@id'] == fastq_related_res.json['@graph'][0]['@id']
 
 
-
-
 def test_external_creds(mocker):
-    mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
+    mocker.patch('encoded.types.file.boto3', autospec=True)
 
     from encoded.types.file import external_creds
-    ret = external_creds('test-bucket', 'test-key', 'name')
+    ret = external_creds('test-wfout-bucket', 'test-key', 'name')
     assert ret['key'] == 'test-key'
-    assert ret['bucket'] == 'test-bucket'
+    assert ret['bucket'] == 'test-wfout-bucket'
     assert ret['service'] == 's3'
     assert 'upload_credentials' in ret.keys()
 
@@ -386,7 +410,7 @@ def test_create_file_request_proper_s3_resource(registry, fastq_json, mocker):
     FileFastq.create(registry, '1234567', fastq_json)
     # check that we would have called aws
     expected_s3_key = "1234567/%s.fastq.gz" % (fastq_json['accession'])
-    external_creds.assert_called_once_with('test-bucket', expected_s3_key,
+    external_creds.assert_called_once_with('test-wfout-bucket', expected_s3_key,
                                            fastq_json['filename'], 'test-profile')
 
 
@@ -523,7 +547,7 @@ def test_force_beanstalk_env(mocker):
     test_cfg.close()
 
     # mock_boto
-    mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
+    mock_boto = mocker.patch('encoded.types.file.boto3', autospec=True)
 
     force_beanstalk_env(profile_name=None, config_file=test_cfg_name)
     # reset
@@ -532,5 +556,5 @@ def test_force_beanstalk_env(mocker):
     # os.remove(test_cfg.delete)
 
     # ensure boto called with correct arguments
-    mock_boto.connect_sts.assert_called_once_with(aws_access_key_id='its a secret id',
-                                                  aws_secret_access_key='its a secret')
+    mock_boto.client.assert_called_once_with('sts', aws_access_key_id='its a secret id',
+                                             aws_secret_access_key='its a secret')
