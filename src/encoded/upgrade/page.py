@@ -55,8 +55,8 @@ def page_2_3(value, system):
         value["title"] = "Help Section"
         value["description"] = "Documentation for using the 4DN Data Portal"
         value["children"] = [
-            "f0f0f0f0-0000-0000-0000-aaaaaa000000",
             "f0f0f0f0-0000-0000-0000-aaaaaa000001",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000000",
             "f0f0f0f0-0000-0000-0000-aaaaaa000002",
             "f0f0f0f0-0000-0000-0000-aaaaaa000003",
             "f0f0f0f0-0000-0000-0000-aaaaaa000004",
@@ -73,7 +73,7 @@ def page_2_3(value, system):
         }
 
     if value['name'] == "help/getting-started":
-        value['name'] = "help/user-guide/getting-started"
+        value['name'] = "help/submitter-guide/getting-started"
 
     if value['name'] == "help/biosample":
         value['name'] = "help/user-guide/biosample-metadata"
