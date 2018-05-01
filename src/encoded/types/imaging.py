@@ -29,9 +29,9 @@ class ImagingPath(Item):
     def display_title(self, request):
         # create a summary for the imaging paths
         # example Chromosomes targeted by DAPI
-        # example Protein:Actin_Human targeted by Atto647N labeled phalloidin
-        # example Protein:Myoglobin_Human targeted by GFP labeleled Goat Secondary Antibody (with Human Globin Antibody)
-        # example GRCH38-1-1000000 targeted by RFP labelled BAC
+        # example Protein:Actin_Human targeted by Atto647N-labeled phalloidin
+        # example Protein:Myoglobin_Human targeted by GFP-labeled Goat Secondary Antibody (with Human Globin Antibody)
+        # example GRCh38:1:1000000 targeted by RFP-labeled BAC
         target = self.properties.get('target')
         labeled_probe = self.properties.get('labeled_probe')
         mediators = self.properties.get('other_probes')
@@ -52,12 +52,12 @@ class ImagingPath(Item):
                 title = labels_title
         if labeled_probe:
             if labels:
-                title = title + " labeled " + labeled_probe
+                title = title + "-labeled " + labeled_probe
             elif title:
                 title = title + " targeted by " + labeled_probe
         if mediators:
             mediators_title = ",".join(mediators)
-            title = title + " ({})".format(mediators_title)
+            title = title + " (with {})".format(mediators_title)
         if title:
             return title
         else:
