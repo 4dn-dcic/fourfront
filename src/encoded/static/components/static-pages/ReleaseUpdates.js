@@ -170,7 +170,9 @@ class SingleUpdate extends React.Component {
                 <td><a href={item.primary_id['@id']}>{item.primary_id.display_title}</a></td>
                 <td>{item.primary_id.experiments_in_set[0].experiment_type}</td>
                 <td>{item.primary_id.experiments_in_set[0].biosample.biosource_summary}</td>
-                <td>{item.primary_id.experiments_in_set[0].experiment_categorizer.field + ': ' + item.primary_id.experiments_in_set[0].experiment_categorizer.value}</td>
+                <td>
+                    {item.primary_id.experiments_in_set[0].experiment_categorizer.value === null ? null :  item.primary_id.experiments_in_set[0].experiment_categorizer.field + ': ' + item.primary_id.experiments_in_set[0].experiment_categorizer.value}
+                </td>
                 <td>
                     {item.primary_id['@id'] === item.secondary_id['@id'] ? null : <a href={item.secondary_id['@id']}>{item.secondary_id.display_title}</a>}
                 </td>
