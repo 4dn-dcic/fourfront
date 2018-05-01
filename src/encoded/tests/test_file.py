@@ -186,11 +186,16 @@ def test_range_download(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')
-    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode('hahaha'))
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
+                  Body=str.encode('12346789abcd'))
     download_link = resobj['href']
     resp = testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
-    assert resp.text == 'haha'
+    # delete first so cleanup even if test fails
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+    assert resp.text == '3467'
+    assert resp.status_code == 206
+    assert resp.headers['Content-Length'] == '4'
+    assert resp.headers['Content-Range'] == 'bytes 2-5/12'
 
 
 def test_extra_files_get_upload(testapp, proc_file_json):
