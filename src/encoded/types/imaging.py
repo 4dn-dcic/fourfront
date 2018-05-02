@@ -42,10 +42,10 @@ class ImagingPath(Item):
             for a_target in target:
                 target_title = request.embed(a_target, '@@object').get('display_title')
                 targets.append(target_title)
-            targets_title = ",".join(targets)
+            targets_title = ", ".join(targets)
             title = targets_title
         if labels:
-            labels_title = ",".join(labels)
+            labels_title = ", ".join(labels)
             if title:
                 title = title + " targeted by " + labels_title
             else:
@@ -56,7 +56,7 @@ class ImagingPath(Item):
             elif title:
                 title = title + " targeted by " + labeled_probe
         if mediators:
-            mediators_title = ",".join(mediators)
+            mediators_title = ", ".join(mediators)
             title = title + " (with {})".format(mediators_title)
         if title:
             return title
