@@ -45,7 +45,7 @@ class ImagingPath(Item):
             targets_title = ", ".join(targets)
             title = targets_title
         if labels:
-            labels_title = ", ".join(labels)
+            labels_title = ",".join(labels)
             if title:
                 title = title + " targeted by " + labels_title
             else:
