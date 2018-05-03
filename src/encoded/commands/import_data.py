@@ -61,7 +61,7 @@ def run(testapp, filename, docsdir, method, item_type, test=False):
         source = loadxl.read_single_sheet(filename, item_type)
     else:
         source = loadxl.read_single_sheet(filename)
-    pipeline = loadxl.get_pipeline(testapp, docsdir, test, item_type, method=method)
+    pipeline = loadxl.get_pipeline(testapp, docsdir, test, item_type, phase=None, method=method)
     loadxl.process(loadxl.combine(source, pipeline))
 
 

@@ -87,7 +87,7 @@ describe('Testing home.js', function() {
     */
 
     it('has welcome, announcements headers', function() {
-        var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-header");
+        var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "homepage-section-title");
         expect(newsHeaders.length).toEqual(2);
     });
 

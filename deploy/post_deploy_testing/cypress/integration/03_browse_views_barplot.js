@@ -51,7 +51,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end();
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
         });
 
         it('Hover over & click "ATAC-seq, mouse" bar part + popover button--> matching filtered /browse/ results', function(){
@@ -67,7 +67,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                         .get('.cursor-component-root .details-title').should('contain', 'mouse').end()
                         .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'ATAC-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
-                            return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').click({ force : true }).wait(100).end()
+                            return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').wait(300).click({ force : true }).wait(200).end()
                                 .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click().end()
                                 .location('search').should('include', 'experiments_in_set.experiment_type=ATAC-seq').should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse').wait(300).end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()

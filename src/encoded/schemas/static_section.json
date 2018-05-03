@@ -15,7 +15,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "name": {
             "title": "Unique Identifier",
@@ -58,7 +58,71 @@
         "options": {
             "title": "Options",
             "type": "object",
-            "description": "Options for section display. Currently only applicable for .CSVs"
+            "description": "Options for section display. Currently only applicable for .CSVs",
+            "properties" : {
+                "filetype" : {
+                    "title" : "File Type",
+                    "description": "What type of file or content is contained. If not set, HTML or format of file (if any) is used.",
+                    "type" : "string",
+                    "lookup" : 1,
+                    "enum" : [ "md", "html", "txt", "csv" ]
+                },
+                "startCell" : {
+                    "type" : "array",
+                    "title" : "(CSV) First Table Cell",
+                    "description" : "For filetype:csv, from which [row integer, column integer] to start parsing table.",
+                    "lookup" : 3,
+                    "items" : {
+                        "type" : "integer"
+                    }
+                },
+                "yaxisCols" : {
+                    "type" : "array",
+                    "title" : "(CSV) Columns for Y-Axis",
+                    "description" : "For filetype:csv, which columns (ints) should be used for Y-axis.",
+                    "lookup" : 4,
+                    "items" : {
+                        "type" : "integer"
+                    }
+                },
+                "yaxisTitle" : {
+                    "type" : "string",
+                    "title" : "(CSV) Title for Y-Axis",
+                    "lookup" : 5
+                },
+                "xaxisRows" : {
+                    "type" : "array",
+                    "title" : "(CSV) Rows for X-Axis",
+                    "description" : "For filetype:csv, which rows (ints) should be used for X-Axis.",
+                    "lookup" : 6,
+                    "items" : {
+                        "type" : "integer"
+                    }
+                },
+                "xaxisTitle" : {
+                    "type" : "string",
+                    "title" : "(CSV) Title for X-Axis",
+                    "lookup" : 7
+                },
+                "titleCell" : {
+                    "type" : "array",
+                    "title" : "(CSV) Title Cell",
+                    "description" : "For filetype:csv, which table cell [row int, column int] to use to grab title of section/table.",
+                    "lookup" : 8,
+                    "items" : {
+                        "type" : "integer"
+                    }
+                },
+                "skipRows" : {
+                    "type" : "array",
+                    "title" : "(CSV) Rows Skipped",
+                    "description" : "For filetype:csv, which table rows (ints) to skip in table (e.g. due to blank rows).",
+                    "lookup" : 9,
+                    "items" : {
+                        "type" : "integer"
+                    }
+                }
+            }
         },
         "file": {
             "title": "Source File Location",

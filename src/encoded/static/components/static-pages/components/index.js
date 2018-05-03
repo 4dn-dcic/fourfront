@@ -8,5 +8,7 @@
 
 export { CSVMatrixView, CSVParsingUtilities } from './CSVMatrixView';
 export { Announcements } from './Announcements';
-export { TableOfContents } from './TableOfContents';
+export { TableOfContents, MarkdownHeading, NextPreviousPageSection, HeaderWithLink } from './TableOfContents';
 export { StackedBlockVisual, sumPropertyFromList, groupByMultiple, cartesian } from './StackedBlockVisual';
+import * as p from './placeholders';
+export const placeholders = p;

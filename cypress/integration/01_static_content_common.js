@@ -21,7 +21,7 @@ describe('Deployment/CI Static Page & Content Tests', function () {
         it('At least 3 announcements on the page.', function () {
 
             cy.window().scrollTo('bottom').wait(100).end()
-                .get('.home-content-area div.fourDN-section.announcement').should('have.length.greaterThan', 2).end();
+                .get('.home-content-area div.announcement').should('have.length.greaterThan', 2).end();
 
         });
 
@@ -37,11 +37,14 @@ describe('Deployment/CI Static Page & Content Tests', function () {
 
         it('Click & visit each page from menu, ensure ToC exists somewhere, ensure ToC works.', function(){
 
-            cy.get('#sHelp').click().then(()=>{
-                cy.get('ul[aria-labelledby="sHelp"] li a').then((listItems)=>{
+            cy.get('#help-menu-item').click().wait(500).then(()=>{
+                cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{
                     console.log(listItems);
 
                     expect(listItems).to.have.length.above(2); // At least 3 help pages in dropdown.
+                    var allLinkElementIDs = Cypress._.map(listItems, function(liEl){
+                        return Cypress.$(liEl).attr('id');
+                    });
 
                     cy.get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').then((title)=>{
 
@@ -58,8 +61,8 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                                     'message' : 'Visited page with title "' + titleText + '".'
                                 });
                                 if (count < listItems.length){
-                                    cy.get('#sHelp').click().wait(100).then(()=>{
-                                        cy.get('ul[aria-labelledby="sHelp"] li:nth-child(' + (count + 1) + ') a').click().then((nextListItem)=>{
+                                    cy.get('#help-menu-item').click().wait(500).then(()=>{
+                                        cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().then((nextListItem)=>{
                                             doVisit(nextListItem);
                                         });
                                     });
@@ -75,7 +78,7 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                                         if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
                                             haveWeSeenPageWithTableOfContents = true;
                                             const origScrollTop = w.scrollY;
-                                            cy.get('div.table-of-contents li.table-content-entry a').last().click().end().wait(750).then(()=>{
+                                            cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(750).then(()=>{
                                                 expect(w.scrollY).to.not.equal(origScrollTop);
                                                 finish(titleText);
                                             });

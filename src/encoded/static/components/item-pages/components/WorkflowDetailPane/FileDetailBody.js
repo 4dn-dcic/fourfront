@@ -179,7 +179,7 @@ export class FileDetailBody extends React.Component {
                     <FlexibleDescriptionBox
                         description={file.description || file.notes || <em>No description.</em>}
                         fitTo="self"
-                        textClassName="text-large"
+                        textClassName="text-medium"
                         expanded={gridSize === 'xs' || gridSize === 'sm' || gridSize === 'md'}
                         dimensions={null}
                     />

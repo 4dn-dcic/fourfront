@@ -37,7 +37,7 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
     '4DN' : {
         'experiment_category' : 'experiments_in_set.experiment_type',
         'experiment_type' : 'experiments_in_set.experiment_type',
-        'cell_type' : 'experiments_in_set.biosample.biosource.cell_line.display_title',
+        'cell_type' : 'experiments_in_set.biosample.biosource_summary',
         'sub_cat' : 'experiments_in_set.experiment_categorizer.value'
     },
     'ENCODE' : {
@@ -54,6 +54,12 @@ const STATUS_STATE_TITLE_MAP = {
     'Planned'       : ['to be uploaded by workflow', 'planned'],
     'Out of date'   : ['archived', 'revoked'],
     'Deleted'       : ['deleted']
+};
+
+const CELL_TYPE_NAME_MAP = {
+    "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
+    "H1-hESC (Tier 1)" : "H1-hESC",
+    "HFFc6 (Tier 1)" : "HFFc6"
 };
 
 
@@ -80,11 +86,12 @@ export default class JointAnalysisPlansPage extends React.Component {
     }
 
     static standardize4DNResult(result, idx){
-        var cellType = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.biosample.biosource.cell_line.display_title')));
+        var cellType = _.uniq(_.flatten(object.getNestedProperty(result, GROUPING_PROPERTIES_SEARCH_PARAM_MAP['4DN'].cell_type)));
         if (cellType.length > 1){
-            console.warn('We have 2+ cellTypes (experiments_in_set.biosample.biosource.cell_line.display_title) for ', result);
+            console.warn('We have 2+ cellTypes (experiments_in_set.biosample.biosource_summary) for ', result);
         }
         cellType = cellType[0] || FALLBACK_NAME_FOR_UNDEFINED;
+        cellType = CELL_TYPE_NAME_MAP[cellType] || cellType;
 
         var experimentType =  _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_type')));
         if (experimentType.length > 1){
@@ -129,7 +136,7 @@ export default class JointAnalysisPlansPage extends React.Component {
     }
 
     static defaultProps = {
-        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
+        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
         'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&status!=archived&status!=revoked&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
         'self_planned_results_url'  : null
     }
@@ -246,8 +253,6 @@ export default class JointAnalysisPlansPage extends React.Component {
             );
         }
 
-        console.log('RESULTS', this.state);
-
         var groupingProperties = ['experiment_type', 'sub_cat'];
 
         var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
@@ -276,7 +281,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                             self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
-                            headerColumnsOrder={['H1-hESC', 'HFFc6']}
+                            headerColumnsOrder={['H1-hESC', "H1-DE", 'HFFc6']}
                         />
                     </div>
                     <div className="col-xs-12 col-md-6">
@@ -444,6 +449,9 @@ class VisualBody extends React.Component {
                         'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
                         'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
                     );
+
+                    var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
+                    keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
 
                     if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
                         keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;

@@ -41,18 +41,18 @@ let dispatch_dict = {};
  * @memberof module:app
  */
 const portal = {
-    portal_title: '4DN Data Portal',
-    global_sections: [
+    "portal_title": '4DN Data Portal',
+    "global_sections": [ // DEPRECATED ?
         {
-            id: 'browse-menu-item', sid:'sBrowse', title: 'Browse',
-            url : function(hrefParts){
+            'id': 'browse-menu-item', 'sid':'sBrowse', 'title': 'Browse',
+            'url' : function(hrefParts){
                 return navigate.getBrowseBaseHref();
             },
-            active : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
+            'active' : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
         },
         {
-            id: 'help-menu-item', sid:'sHelp', title: 'Help',
-            children: [
+            'id': 'help-menu-item', 'sid':'sHelp', 'title': 'Help',
+            'children': [
                 { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
                 { id: 'getting-started-menu-item',  title: 'Data Submission - Getting Started', url: '/help/getting-started' },
                 { id: 'cell-culture-menu-item',     title: 'Biosample Metadata',                url: '/help/biosample' },
@@ -63,7 +63,7 @@ const portal = {
             ]
         }
     ],
-    user_section: [
+    "user_section": [
         {id: 'login-menu-item', title: 'Log in', url: '/'},
         {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
         // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
@@ -915,16 +915,11 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                if (options.replace) { // null gets replaced in this.receiveContextResponse w. actual JSON data. Redundant here?
-                    window.history.replaceState(null, '', href + fragment);
-                } else {
-                    window.history.pushState(null, '', href + fragment);
-                }
                 dispatch_dict.href = href + fragment;
 
                 return response;
             })
-            .then(response => this.receiveContextResponse(response,includeReduxDispatch))
+            .then(response => this.receiveContextResponse(response, includeReduxDispatch, options))
             .then(response => {
                 this.state.slowLoad && this.setState({'slowLoad' : false});
                 if (typeof callback == 'function'){
@@ -975,13 +970,22 @@ export default class App extends React.Component {
 
     }
 
-    receiveContextResponse (data, extendDispatchDict = {}) {
+    receiveContextResponse (data, extendDispatchDict = {}, requestOptions = {}) {
         // title currently ignored by browsers
-        try {
-            window.history.replaceState(data, '', window.location.href);
-        } catch (exc) {
-            // Might fail due to too large data
-            window.history.replaceState(null, '', window.location.href);
+        if (requestOptions.replace){
+            try {
+                window.history.replaceState(data, '', dispatch_dict.href);
+            } catch (exc) {
+                // Might fail due to too large data
+                window.history.replaceState(null, '', dispatch_dict.href);
+            }
+        } else {
+            try {
+                window.history.pushState(data, '', dispatch_dict.href);
+            } catch (exc) {
+                // Might fail due to too large data
+                window.history.pushState(null, '', dispatch_dict.href);
+            }
         }
         // Set up new properties for the page after a navigation click. First disable slow now that we've
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
@@ -1238,9 +1242,7 @@ export default class App extends React.Component {
                                     browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
-                                <div id="page-title-container" className="container">
-                                    <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
-                                </div>
+                                <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
                                 <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}

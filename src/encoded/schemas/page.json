@@ -15,7 +15,7 @@
     "type": "object",
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "status": {
             "title": "Status",
@@ -46,25 +46,19 @@
         "table-of-contents": {
             "title": "Table of Contents",
             "type": "object",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
-                "header-depth": {
-                    "title": "Header Depth",
-                    "description": "Maximum depth for table of contents titles, 1-6",
-                    "type": "integer",
-                    "default" : 4
-                },
-                "skip-depth" : {
-                    "title": "Skip Depth",
-                    "description": "Skip header depths until this one, 0-6",
-                    "type": "integer",
-                    "default" : 1
-                },
                 "enabled" : {
                     "title": "Enabled",
                     "description": "Enable the table of contents or not. Defaults to false.",
                     "type": "boolean",
                     "default": false
+                },
+                "header-depth": {
+                    "title": "Header Depth",
+                    "description": "Maximum depth for table of contents titles, 1-6",
+                    "type": "integer",
+                    "default" : 4
                 },
                 "list-styles": {
                     "title": "List Styles",
@@ -73,12 +67,6 @@
                     "items": {
                         "type": "string"
                     }
-                }, 
-                "include-top-link" : {
-                    "title": "Include 'go to top' link",
-                    "description": "Show button/link to take you to top of page. Useful if no 'intro' section. Defaults to false.",
-                    "type": "boolean",
-                    "default": false
                 }
             },
             "default" : {
@@ -96,6 +84,14 @@
             "items": {
                 "type": "string",
                 "linkTo" : "StaticSection"
+            }
+        },
+        "children" : {
+            "title": "Child Pages",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "linkTo" : "Page"
             }
         },
         "redirect" : {

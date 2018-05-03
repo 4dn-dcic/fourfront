@@ -39,12 +39,12 @@ class Announcement extends React.Component {
         var content = this.props.content.content || "";
 
         return (
-            <div className="fourDN-section announcement">
-                <div className="fourDN-section-title announcement-title">
-                        <span dangerouslySetInnerHTML={{__html: title}}/>
+            <div className="announcement">
+                <div className="announcement-title">
+                    <span dangerouslySetInnerHTML={{__html: title}}/>
                 </div>
                 { this.subtitle() }
-                <div className="fourDN-content announcement-content">
+                <div className="announcement-content">
                     <p dangerouslySetInnerHTML={{__html: content}}></p>
                 </div>
             </div>

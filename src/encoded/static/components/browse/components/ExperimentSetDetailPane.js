@@ -81,7 +81,7 @@ export class ExperimentSetDetailPane extends React.Component {
                             <FlexibleDescriptionBox
                                 description={ expSet.description }
                                 fitTo="self"
-                                textClassName="text-medium"
+                                textClassName="text-normal"
                                 dimensions={null}
                                 linesOfText={Math.max(1, addInfoKeys.length)}
                             />

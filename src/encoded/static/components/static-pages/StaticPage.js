@@ -4,9 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { compiler } from 'markdown-to-jsx';
-import { CSVMatrixView, TableOfContents } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
 import * as globals from './../globals';
-import { layout, console } from './../util';
+import { layout, console, object, isServerSide } from './../util';
 
 
 /**
@@ -20,15 +20,12 @@ export function parseSectionsContent(context = this.props.context){
     function parse(section){
         if (section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
             var content = compiler(section.content, {
-                'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
-                    .map(function(type){
-                        return [type, {
-                            component : MarkdownHeading,
-                            props : { 'type' : type }
-                        }];
-                    })
-                    .object()
-                    .value()
+                'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+                    return [type, {
+                        'component' : MarkdownHeading,
+                        'props'     : { 'type' : type }
+                    }];
+                }))
             });
             section =  _.extend({}, section, { 'content' : content });
         }
@@ -39,7 +36,13 @@ export function parseSectionsContent(context = this.props.context){
 
     if (!Array.isArray(context.content)) throw new Error('context.content is not an array.');
 
-    return _.extend({}, context, { 'content' : _.map(context.content, parse) });
+    return _.extend(
+        {}, context, {
+            'content' : _.map(
+                _.filter(context.content || [], function(section){ return section && section.content && !section.error; }),
+                parse
+            )
+        });
 }
 
 
@@ -105,7 +108,7 @@ export function correctRelativeLinks(elem, context, depth = 0){
 
 
 
-class Wrapper extends React.Component {
+class Wrapper extends React.PureComponent {
 
     static defaultProps = {
         'contentColSize' : 12,
@@ -127,17 +130,17 @@ class Wrapper extends React.Component {
         var toc = context['table-of-contents'] || (this.props.tableOfContents && typeof this.props.tableOfContents === 'object' ? this.props.tableOfContents : {});
         var title = this.props.title || (context && context.title) || null;
         return (
-            <div className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
+            <div key="toc-wrapper" className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
                 <TableOfContents
                     context={context}
                     pageTitle={title}
-                    fixedWidth={(1140 * ((12 - contentColSize) / 12))}
+                    fixedGridWidth={12 - contentColSize}
                     navigate={this.props.navigate}
                     href={this.props.href}
-                    skipDepth={toc['skip-depth'] || 0}
+                    //skipDepth={1}
                     maxHeaderDepth={toc['header-depth'] || 6}
-                    includeTop={toc['include-top-link']}
-                    listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
+                    //includeTop={toc['include-top-link']}
+                    //listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
                 />
             </div>
         );
@@ -150,54 +153,16 @@ class Wrapper extends React.Component {
         var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
 
         return (
-            <div className="static-page row">
+            <div className="static-page row" key="wrapper">
                 { this.renderToC() }
-                <div className={mainColClassName} children={this.props.children}/>
+                <div key="main-column" className={mainColClassName} children={this.props.children}/>
             </div>
         );
     }
 }
 
 
-export class MarkdownHeading extends React.Component {
-
-    static defaultProps = {
-        'type' : 'h1',
-        'id' : null
-    }
-
-    constructor(props){
-        super(props);
-        this.getID = this.getID.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-    getID(set = false){
-        if (typeof this.id === 'string') return this.id;
-        var id = (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
-        if (set){
-            this.id = id;
-        }
-        return id;
-    }
-
-    componentWillUnmount(){ delete this.id; }
-
-    render(){
-        return React.createElement(
-            this.props.type,
-            {
-                'children' : this.props.children,
-                'id' : this.getID(true),
-                'ref' : 'el'
-            }
-        );
-    }
-}
-
-
-
-export class StaticEntry extends React.Component {
+export class StaticEntry extends React.PureComponent {
 
     static defaultProps = {
         'section'   : null,
@@ -214,6 +179,9 @@ export class StaticEntry extends React.Component {
     }
 
     replacePlaceholder(placeholderString){
+        if (placeholderString === '<SlideCarousel/>'){
+            return (<placeholders.SlideCarousel />);
+        }
         return placeholderString;
     }
 
@@ -229,7 +197,7 @@ export class StaticEntry extends React.Component {
             content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
         }
 
-        var className = "fourDN-content" + (baseClassName? ' ' + baseClassName : '');
+        var className ="section-content" + (baseClassName? ' ' + baseClassName : '');
 
         if (filetype === 'csv'){
             return <CSVMatrixView csv={content} options={this.props.content.options} />;
@@ -244,14 +212,12 @@ export class StaticEntry extends React.Component {
 
     render(){
         var { content, entryType, sectionName, className } = this.props;
-        if (sectionName.indexOf('#') > -1){
-            var sectionParts = sectionName.split('#');
-            sectionName = sectionParts[sectionParts.length - 1];
-        }
-
+        var id = TableOfContents.elementIDFromSectionName(sectionName);
         return (
-            <div className={entryType + "-entry static-section-entry"} id={sectionName}>
-                { content && content.title ? <h2 className="fourDN-header">{ content.title }</h2> : null }
+            <div className={entryType + "-entry static-section-entry"} id={id}>
+                { content && content.title ?
+                    <HeaderWithLink className="section-title" link={id} context={this.props.context}>{ content.title }</HeaderWithLink>
+                : null }
                 { this.renderEntryContent(className) }
             </div>
         );
@@ -260,7 +226,7 @@ export class StaticEntry extends React.Component {
 }
 
 
-export default class StaticPage extends React.Component {
+export default class StaticPage extends React.PureComponent {
 
     static Entry = StaticEntry
 
@@ -317,6 +283,7 @@ export default class StaticPage extends React.Component {
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
+                key="page-wrapper"
                 title={parsedContent.title}
                 tableOfContents={tableOfContents}
                 context={parsedContent}
@@ -330,5 +297,3 @@ export default class StaticPage extends React.Component {
 
 
 globals.content_views.register(StaticPage, 'StaticPage');
-
-
