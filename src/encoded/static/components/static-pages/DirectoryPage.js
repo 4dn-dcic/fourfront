@@ -24,7 +24,7 @@ export default class DirectoryPage extends React.Component {
         return (
             <div className={"static-page static-directory-page" + (childrenHaveChildren ? " directory-page-of-directories" : " leaf-directory")} key="wrapper">
                 <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
-                { !childrenHaveChildren ? <NextPreviousPageSection context={context} /> : null }
+                { !childrenHaveChildren ? <NextPreviousPageSection context={context} nextTitle="Next Section" previousTitle="Previous Section" /> : null }
                 { content }
             </div>
         );

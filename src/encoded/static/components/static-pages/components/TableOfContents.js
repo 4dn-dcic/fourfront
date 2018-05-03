@@ -697,13 +697,13 @@ export class NextPreviousPageSection extends React.PureComponent {
                 <div className="row">
                 { context.previous ?
                     <div className={"previous-section text-right col-xs-6"}>
-                        <h6 className="text-400 mb-03 mt-12"><i className="icon icon-fw icon-angle-left"/> { previousTitle }</h6>
+                        <h6 className="text-400 mb-02 mt-12"><i className="icon icon-fw icon-angle-left"/> { previousTitle }</h6>
                         <h6 className="text-500 mt-0"><a href={context.previous['@id'] || '/' + context.previous.name}>{ context.previous.display_title }</a></h6>
                     </div>
                 : null }
                 { context.next ?
                     <div className={"next-section col-xs-6 pull-right"}>
-                        <h6 className="text-400 mb-03 mt-12">{ nextTitle } <i className="icon icon-fw icon-angle-right"/></h6>
+                        <h6 className="text-400 mb-02 mt-12">{ nextTitle } <i className="icon icon-fw icon-angle-right"/></h6>
                         <h6 className="text-500 mt-0"><a href={context.next['@id'] || '/' + context.next.name}>{ context.next.display_title }</a></h6>
                     </div>
                 : null }

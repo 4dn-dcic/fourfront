@@ -398,7 +398,6 @@ h5.fourDN-header {
 		&:not(:first-child){
 			border-top: 1px solid #eee;
 		}
-		
 	}
 
 	> ol.inner {
@@ -499,6 +498,18 @@ h5.fourDN-header {
 			}
 		}
 
+	}
+
+	.next-previous-pages-section {
+		.previous-section > h6:first-child,
+		.next-section > h6:first-child {
+			border-top: 1px solid #eee;
+			padding-top: 15px;
+		}
+		
+		h6 > a {
+			font-size: 1rem;
+		}
 	}
 
 }
