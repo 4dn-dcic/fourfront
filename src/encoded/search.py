@@ -943,7 +943,13 @@ def make_search_subreq(request, path):
     subreq.headers['Accept'] = 'application/json'
     return subreq
 
-def get_iterable_search_results(request, search_path='/search/', param_lists={"type":["ExperimentSetReplicate"],"experimentset_type":["replicate"]}):
+DEFAULT_BROWSE_PARAM_LISTS = {
+    'type'                  : ["ExperimentSetReplicate"],
+    'experimentset_type'    : ['replicate'],
+    'award.project'         : ['4DN']
+}
+
+def get_iterable_search_results(request, search_path='/search/', param_lists=None):
     '''
     Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain.from_iterable to get one big iterable of results.
     TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
@@ -953,6 +959,10 @@ def get_iterable_search_results(request, search_path='/search/', param_lists={"t
     :param param_lists: Dictionary of param:lists_of_vals which is converted to URL query.
     :param search_results_chunk_row_size: Amount of results to get per chunk. Default should be fine.
     '''
+    if param_lists is None:
+        param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
+    else:
+        param_lists = deepcopy(param_lists)
     param_lists['limit'] = ['all']
     param_lists['from'] = [0]
     param_lists['sort'] = param_lists.get('sort','uuid')

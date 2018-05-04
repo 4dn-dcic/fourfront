@@ -75,10 +75,10 @@ navigate.getBrowseBaseParams = function(browseBaseState = null){
 
 navigate.getBrowseBaseParams.mappings = {
     'all' : {
-        'parameters' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate' },
+        'parameters' : { 'type' : ['ExperimentSetReplicate'], 'experimentset_type' : ['replicate'] },
     },
     'only_4dn' : {
-        'parameters' : { 'type' : 'ExperimentSetReplicate', 'experimentset_type' : 'replicate', 'award.project' : '4DN' },
+        'parameters' : { 'type' : ['ExperimentSetReplicate'], 'experimentset_type' : ['replicate'], 'award.project' : ['4DN'] },
     }
 };
 
@@ -97,20 +97,21 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
         hrefQuery = url.parse(hrefQuery, true).query;
     }
 
-    return _.every(_.pairs(browseBaseParams), function(p){
-        if (typeof hrefQuery[p[0]] === 'undefined') return false;
-        if (Array.isArray(hrefQuery[p[0]])){
-            if (Array.isArray(p[1])){
-                return _.every(p[1], function(arrItem){
-                    return hrefQuery[p[0]].indexOf(arrItem) > -1;
+    return _.every(_.pairs(browseBaseParams), function([field, listOfTerms]){
+        if (typeof hrefQuery[field] === 'undefined') return false;
+        if (Array.isArray(listOfTerms) && listOfTerms.length === 1) listOfTerms = listOfTerms[0];
+        if (Array.isArray(hrefQuery[field])){
+            if (Array.isArray(listOfTerms)){
+                return _.every(listOfTerms, function(arrItem){
+                    return hrefQuery[field].indexOf(arrItem) > -1;
                 });
             } else {
-                return hrefQuery[p[0]].indexOf(p[1]) > -1;
+                return hrefQuery[field].indexOf(listOfTerms) > -1;
             }
-        } else if (Array.isArray(p[1])){
-            return false; // p[0] is not array as well so no match.
+        } else if (Array.isArray(listOfTerms)){
+            return false;
         } else {
-            return hrefQuery[p[0]] === p[1];
+            return hrefQuery[field] === listOfTerms;
         }
     });
 };
@@ -184,6 +185,33 @@ navigate.registerCallbackFunction = function(fxn){
 
 navigate.deregisterCallbackFunction = function(fxn){
     callbackFunctions = _.without(callbackFunctions, fxn);
+};
+
+/** Useful for param lists */
+navigate.mergeObjectsOfLists = function(){
+    if (arguments.length < 2) throw Error('Expecting multiple objects as params');
+    let targetObj = arguments[1];
+    let sourceObjs = Array.prototype.slice.call(arguments, 1);
+    _.forEach(sourceObjs, function(o){
+        _.forEach(_.keys(o), function(oKey){
+            if (typeof targetObj[oKey] === 'undefined') targetObj[oKey] = [];
+            if (typeof targetObj[oKey] === 'string')    targetObj[oKey] = [ targetObj[oKey] ];
+            if ( Array.isArray(o[oKey]) ){
+                if (!_.every(o[oKey], function(v){ return typeof v === 'string'; } )) throw new Error('Must have list of strings as object vals.');
+                targetObj[oKey] = targetObj[oKey].concat(o[oKey]);
+            } else if (typeof o[oKey] === 'string'){
+                targetObj[oKey].push(o[oKey]);
+            } else {
+                throw new Error('Must have strings or list of strings as object vals.');
+            }
+        });
+    });
+    _.forEach(_.keys(targetObj), function(tKey){
+        if (typeof targetObj[tKey] === 'string') targetObj[tKey] = [ targetObj[tKey] ]; // Keys which perhaps don't exist on sourceObjs
+        targetObj[tKey] = _.uniq(_.filter(targetObj[tKey]));
+        if (targetObj[tKey].length === 0) delete targetObj[tKey];
+    });
+    return targetObj;
 };
 
 

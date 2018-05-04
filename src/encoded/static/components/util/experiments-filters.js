@@ -302,13 +302,17 @@ export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseS
 
 /** Convert expSetFilters, e.g. as stored in Redux, into a partial URL query: field.name=term1&field2.something=term2[&field3...] */
 export function expSetFiltersToURLQuery(expSetFilters){
-    return _.pairs(expSetFilters).map(function(filterPair){
-        var field = filterPair[0];
-        var terms = [...filterPair[1]]; // Set to Array
-        return terms.map(function(t){
+    return _.map(_.pairs(expSetFiltersToJSON(expSetFilters)), function([field, terms]){
+        return _.map(terms, function(t){
             return field + '=' + encodeURIComponent(t).replace(/%20/g, "+");
         }).join('&');
     }).join('&');
+}
+
+export function expSetFiltersToJSON(expSetFilters){
+    return _.object(_.map(_.pairs(expSetFilters), function([field, setOfTerms]){
+        return [field, [...setOfTerms]];
+    }));
 }
 
 /**
