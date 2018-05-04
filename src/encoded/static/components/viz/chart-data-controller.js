@@ -31,7 +31,7 @@ var refs = {
     store       : null,
     href        : null, // Cached from redux store updates // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
     contextFilters : [],
-    baseSearchPath : null,
+    baseSearchPath : '/bar_plot_aggregations',
     browseBaseState : null
 };
 
@@ -300,7 +300,6 @@ export const ChartDataController = {
      * @returns {void} Undefined
      */
     initialize : function(
-        baseSearchPath = '/bar_plot_aggregations/',
         browseBaseState = 'only_4dn',
         fields = null,
         callback = null
@@ -311,9 +310,6 @@ export const ChartDataController = {
         refs.href = initStoreState.href;
         refs.contextFilters = (initStoreState.context && initStoreState.context.filters) || [];
 
-        if (typeof baseSearchPath === 'string'){
-            refs.baseSearchPath = baseSearchPath;
-        }
         if (typeof browseBaseState === 'string'){
             refs.browseBaseState = browseBaseState;
         }
@@ -576,49 +572,49 @@ export const ChartDataController = {
 
         });
 
-        var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
         var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-
-        var unfilteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '/' + fieldsQuery;
-
-        if (searchQuery) baseSearchParams['q'] = encodeURIComponent(searchQuery); // Make sure occurs after setting unfilteredHref.
-        var filteredHref = refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery;
 
         notifyLoadStartCallbacks();
 
         ajax.load(
-            unfilteredHref,
+            refs.baseSearchPath,
             function(unfiltered_result){
                 barplot_data_unfiltered = unfiltered_result;
                 cb();
-            }, 'GET', function(errResp){
+            }, 'POST', function(errResp){
                 opts.error = true;
 
-                // If received a 403 or a 404 (no expsets returned) we're likely logged out, so reload current href / context
-                // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
                 if (errResp && typeof errResp === 'object'){
                     if (typeof errResp.total === 'object' && errResp.total){
                         barplot_data_unfiltered = errResp;
                     }
-                    //if (errResp.code === 403 || errResp.total === 0){
-                    //    console.warn('403 or 404 Error, refetching.');
-                    //    reFetchContext();
-                    //}
                 }
+                console.warn('Some error, refetching context.');
                 reFetchContext();
                 cb();
-            }
+            }, JSON.stringify({
+                "search_query_params" : baseSearchParams,
+                "fields_to_aggregate_for" : state.barplot_data_fields
+            })
         );
 
         if (filtersSet){
+            var filteredSearchParams = navigate.mergeObjectsOfLists(
+                { 'q' : (searchQuery && encodeURIComponent(searchQuery)) || null },
+                baseSearchParams,
+                Filters.expSetFiltersToJSON(currentExpSetFilters)
+            );
             ajax.load(
-                filteredHref,
+                refs.baseSearchPath,
                 function(filtered_result){
                     barplot_data_filtered = filtered_result;
                     cb();
-                }, 'GET', function(){
+                }, 'POST', function(){
                     cb();
-                }
+                }, JSON.stringify({
+                    "search_query_params" : filteredSearchParams,
+                    "fields_to_aggregate_for" : state.barplot_data_fields
+                })
             );
         }
 
@@ -643,19 +639,22 @@ export const ChartDataController = {
         var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
         var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
 
-        var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-        if (searchQuery) baseSearchParams['q'] = encodeURIComponent(searchQuery);
+        var filteredSearchParams = navigate.mergeObjectsOfLists(
+            { 'q' : (searchQuery && encodeURIComponent(searchQuery)) || null },
+            navigate.getBrowseBaseParams(opts.browseBaseState || null),
+            Filters.expSetFiltersToJSON(currentExpSetFilters)
+        );
         
         notifyLoadStartCallbacks();
         ajax.load(
-            refs.baseSearchPath + queryString.stringify(baseSearchParams) + '&' + Filters.expSetFiltersToURLQuery(currentExpSetFilters) + '/' + fieldsQuery,
+            refs.baseSearchPath,
             function(filteredContext){
                 ChartDataController.setState({
                     'barplot_data_filtered' : filteredContext,
                     'isLoadingChartData' : false
                 }, callback, opts);
             },
-            'GET',
+            'POST',
             function(){
                 // Fallback (no results or lost connection)
                 ChartDataController.setState({
@@ -663,7 +662,11 @@ export const ChartDataController = {
                     'isLoadingChartData' : false
                 }, callback, opts);
                 if (typeof callback === 'function') callback();
-            }
+            },
+            JSON.stringify({
+                "search_query_params" : filteredSearchParams,
+                "fields_to_aggregate_for" : state.barplot_data_fields
+            })
         );
     },
 
