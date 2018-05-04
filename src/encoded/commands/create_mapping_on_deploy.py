@@ -39,8 +39,8 @@ def main():
             return
     except Exception:
         import traceback
-        logger.warn("error checking whodaman: %s " % traceback.format_exc())
-        logger.warn("couldn't get wodaman, so assuming NOT Stagging")
+        logger.warning("error checking whodaman: %s " % traceback.format_exc())
+        logger.warning("couldn't get wodaman, so assuming NOT Stagging")
 
     logger.info("looks like we are NOT on staging so run create mapping with check first")
     run_create_mapping(app, check_first=True, purge_queue=True, skip_indexing=True)
