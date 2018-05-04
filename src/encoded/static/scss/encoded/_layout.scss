@@ -31,10 +31,11 @@
 ************************************************************/
 
 .static-page {
-	width: 75%;
 	margin: 0;
 	margin-top: 30px;
 	&.row {
+		margin-left: -10px;
+		margin-right: -10px;
 		width: auto;
 		> div > .help-entry:first-child {
 			margin-top: 5px;
@@ -44,9 +45,11 @@
 
 	.help-entry{
 		margin: 50px 0px 50px 0px;
-		&:first-of-type {
-			margin-top: 27px;
-		}
+	}
+
+	.help-entry:first-of-type,
+	.static-page-breadcrumbs + .help-entry {
+		margin-top: 27px;
 	}
 
 }
@@ -130,6 +133,7 @@ h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+
 	// Deprecated Margins
 	margin-top: 32px;
 	margin-bottom: 32px;
@@ -323,7 +327,7 @@ h1.page-title + .page-subtitle {
 .text-normal { font-size: 1rem; } // Reset to default size.
 .text-small { font-size: 0.9rem; }
 .text-smaller { font-size: 0.75rem; }
-.text-medium { font-size: 15px; }
+.text-medium { font-size: 15px; font-size: 15.75px; }
 .text-large { font-size: 17.5px; }
 .text-larger { font-size: 20px; line-height: 25px; }
 
@@ -433,10 +437,10 @@ h1.page-title + .page-subtitle {
 	position: fixed;
 	left: 0;
 	top: 0;
-	right :0;
+	right: 0;
 	bottom: 0;
 	z-index: -10;
-	background-color: rgba(255,255,255,0.8);
+	background-color: rgba(28,28,30,.7);
 	transform: translate3d(0,0,0);
 	opacity: 0;
 	transition: opacity .5s, z-index 0s 0.5s;
@@ -685,7 +689,7 @@ h1, h2, h3, h4, h5, h6 {
 
 //make all else use ysra
 p, input {
-	font-family: 'Yrsa', serif;
+	font-family: $font-family-sans-serif; //'Yrsa', serif;
 }
 
 .inline-subheader{

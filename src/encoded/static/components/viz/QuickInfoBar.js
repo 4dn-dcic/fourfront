@@ -263,7 +263,7 @@ export default class QuickInfoBar extends React.Component {
 
 }
 
-class Stat extends React.Component {
+class Stat extends React.PureComponent {
 
     static defaultProps = {
         'value' : 0,

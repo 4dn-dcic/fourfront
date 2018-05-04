@@ -551,11 +551,11 @@ class SubItemTable extends React.Component {
                                         if (typeof val === 'boolean'){
                                             val = <code>{ val ? 'True' : 'False' }</code>;
                                         }
-                                        if (typeof val === 'string' && val.length > 50){
-                                            val = val.slice(0,50) + '...';
-                                        }
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
+                                        }
+                                        if (typeof val === 'string' && val.length > 50){
+                                            val = val.slice(0,50) + '...';
                                         }
                                         if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
                                             val = jsonify(val, columnKeys[j].key);

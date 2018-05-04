@@ -3,10 +3,10 @@
 import React from 'react';
 import * as d3 from 'd3';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+import { Collapse, Button } from 'react-bootstrap';
 import * as globals from './../../globals';
 import { getElementTop, animateScrollTo, getScrollingOuterElement, getPageVerticalScrollPosition } from './../../util/layout';
-import { isServerSide, console, navigate } from './../../util';
+import { isServerSide, console, navigate, object } from './../../util';
 
 
 class TableEntry extends React.Component {
@@ -29,7 +29,8 @@ class TableEntry extends React.Component {
         'listStyleTypes' : null,
         'mounted' : null,
         'content' : null,
-        'nextHeader' : null
+        'nextHeader' : null,
+        'recurDepth' : 1
     }
 
     constructor(props){
@@ -83,39 +84,16 @@ class TableEntry extends React.Component {
     }
 
     handleClick(){
-
-        var pageScrollTop, elementTop;
-        if (this.props.link === "top") {
-            elementTop = 0;
-        } else if (typeof this.props.link === 'string'){
-            elementTop = getElementTop(this.getTargetElement());
-        } else {
-            return null;
-        }
-
-        pageScrollTop = getPageVerticalScrollPosition();
-
-        animateScrollTo(elementTop, 750, this.props.offsetBeforeTarget, ()=>{
-            if (typeof this.props.navigate === 'function'){
-                var link = this.props.link;
-                setTimeout(()=>{
-                    if (link === 'top' || link === 'bottom') link = '';
-                    this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
-                }, link === 'top' || (typeof pageScrollTop === 'number' && pageScrollTop <= 40) ? 800 : 0);
-            }
-        });
-
-        return;
-
+        TableOfContents.scrollToLink(this.props.link, this.props.offsetBeforeTarget, this.props.navigate, this.getTargetElement());
     }
 
     determineIfActive(props = this.props){
 
         if (!props.mounted) return false;
 
-        var scrollingOuterElement, targetElem, elemTop;
-        scrollingOuterElement = getScrollingOuterElement();
-
+        var scrollingOuterElement = getScrollingOuterElement(),
+            targetElem,
+            elemTop;
 
         if (props.depth === 0 && props.mounted){
             elemTop = 0;
@@ -140,24 +118,23 @@ class TableEntry extends React.Component {
             }
             if (
                 nextHeaderTop &&
-                props.pageScrollTop >= (elemTop      - props.offsetBeforeTarget - 150) &&
-                props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 150)
+                props.pageScrollTop >= Math.max(props.depth > 0 ? 40 : 0, elemTop - props.offsetBeforeTarget - 120) &&
+                props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 120)
             ) return true;
             else return false;
         } else if (targetElem && targetElem.className.split(' ').indexOf('static-section-entry') > -1) {
             var elemStyle = (targetElem.computedStyle || window.getComputedStyle(targetElem));
             if (
-                props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 150) &&
+                props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 120) &&
                 props.pageScrollTop <  (
                     elemTop +
                     parseInt(elemStyle.marginTop) +
                     targetElem.offsetHeight -
-                    props.offsetBeforeTarget - 150
+                    props.offsetBeforeTarget - 120
                 )
             ) return true;
             else return false;
         } else if (props.depth === 0){
-
             if (
                 props.mounted &&
                 props.pageScrollTop >= 0 && props.pageScrollTop < 40
@@ -168,19 +145,13 @@ class TableEntry extends React.Component {
     }
 
     render(){
-        var title = this.props.title;
-        var subtitle = null;
+        var { recurDepth, title, link, content, maxHeaderDepth, depth, collapsible, mounted, listStyleTypes, pageScrollTop, nextHeader, children, skipDepth } = this.props;
+
         var active = this.determineIfActive();
-
-        if (this.props.depth === 0){
-            subtitle = title;
-            title = "Top of Page";
-        }
-
-        var childHeaders = TableEntry.getChildHeaders(this.props.content, this.props.maxHeaderDepth, this.props.depth);
+        var childHeaders = TableEntry.getChildHeaders(content, maxHeaderDepth, depth);
 
         var collapsibleButton;
-        if (this.props.collapsible && childHeaders.length > 0){
+        if (collapsible && childHeaders.length > 0){
             collapsibleButton = <i
                 className={"inline-block icon icon-fw icon-" + (this.state.open ? 'minus' : 'plus')}
                 onClick={(e)=> {
@@ -189,19 +160,19 @@ class TableEntry extends React.Component {
             />;
         }
 
-        if (typeof this.props.link === 'string' && this.props.link.length > 0){
+        if (typeof link === 'string' && link.length > 0){
             title = (
                 <div className="title-link-wrapper">
                     { collapsibleButton }
-                    <a href={'#' + this.props.link} onClick={(e)=>{ e.preventDefault(); this.handleClick(); }}>{ title }</a>
+                    <a className={depth === 0 ? 'text-500' : 'text-400'} href={(link.charAt(0) === '/' ? '' : '#') + link} onClick={(e)=>{ e.preventDefault(); this.handleClick(); }}>{ title }</a>
                 </div>
             );
         }
 
-        if (this.props.depth === 0){
+        if (depth === 0){
             title = (
-                <span title={subtitle} className="top-of-page visible-lg-block visible-lg">
-                    <i className="icon icon-long-arrow-up"></i>
+                <span title="Up to page listing" className="top-of-page visible-lg-block visible-lg">
+                    <i className="icon icon-angle-up"></i>
                     { title }
                 </span>
             );
@@ -211,27 +182,28 @@ class TableEntry extends React.Component {
             <li className={
                 "table-content-entry" +
                 (this.props.className ? ' ' + this.props.className : '') +
-                (this.props.depth === 0 ? ' top' : '') +
+                (depth === 0 ? ' top' : '') +
                 (active ? ' active' : '')
-            } data-depth={this.props.depth} ref="listItem">
+            } data-depth={depth} data-recursion-depth={recurDepth} ref="listItem">
                 { title }
-                <Collapse in={this.state === null || this.state.open === true} transitionAppear>
+                <Collapse in={!this.state || this.state.open && mounted}>
                     <div>
                         <TableEntryChildren
                             active={active}
-                            content={this.props.content}
+                            content={content}
                             childHeaders={childHeaders}
-                            depth={this.props.depth}
-                            mounted={this.props.mounted}
-                            listStyleTypes={this.props.listStyleTypes}
-                            pageScrollTop={this.props.pageScrollTop}
-                            nextHeader={this.props.nextHeader}
-                            children={this.props.children}
+                            depth={depth}
+                            mounted={mounted}
+                            listStyleTypes={listStyleTypes}
+                            pageScrollTop={pageScrollTop}
+                            nextHeader={nextHeader}
+                            children={children}
                             navigate={this.props.navigate}
-                            link={this.props.link}
-                            maxHeaderDepth={this.props.maxHeaderDepth}
+                            link={link}
+                            maxHeaderDepth={maxHeaderDepth}
                             parentClosed={this.state && !this.state.open}
-                            skipDepth={this.props.skipDepth}
+                            skipDepth={skipDepth}
+                            recurDepth={recurDepth}
                         />
                     </div>
                 </Collapse>
@@ -246,9 +218,20 @@ class TableEntryChildren extends React.Component {
 
     static getHeadersFromContent(jsxContent, maxHeaderDepth, currentDepth){
         if (!TableOfContents.isContentJSX(jsxContent)) return [];
-        return jsxContent.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
-        );
+        let depthToFind = currentDepth;
+        let childrenForDepth = [];
+        while (depthToFind <= Math.min(maxHeaderDepth, 5) && childrenForDepth.length === 0){
+            childrenForDepth = _.filter(jsxContent.props.children, function(child,i,a){
+                return TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (depthToFind + 1);
+            });
+            if (childrenForDepth.length === 0){
+                depthToFind++;
+            }
+        }
+        return {
+            'childDepth' : depthToFind,
+            'childHeaders' : childrenForDepth
+        };
     }
 
     static getSubsequentChildHeaders(header, jsxContent, maxHeaderDepth, currentDepth){
@@ -283,23 +266,32 @@ class TableEntryChildren extends React.Component {
         };
     }
 
-    static renderChildrenElements(childHeaders, jsxContent, maxHeaderDepth, currentDepth, listStyleTypes, pageScrollTop, mounted, skipDepth = 0, nextHeader = null){
+    static renderChildrenElements(childHeaders, currentDepth, jsxContent, opts={ 'skipDepth' : 0, 'nextHeader' : null }){
+
+        var { skipDepth, maxHeaderDepth, listStyleTypes, pageScrollTop, mounted, nextHeader, recurDepth } = opts;
+
         if (childHeaders && childHeaders.length){
             return childHeaders.map((h, index) =>{
 
                 var childContent = TableEntryChildren.getSubsequentChildHeaders(h, jsxContent, maxHeaderDepth, currentDepth);
 
-                if (currentDepth + 1 > 0 && skipDepth >= currentDepth + 1){
+                if (skipDepth > currentDepth){
                     return TableEntryChildren.renderChildrenElements(
-                        childHeaders, childContent.content, maxHeaderDepth, currentDepth + 1,
-                        listStyleTypes, pageScrollTop, mounted, skipDepth, childContent.nextMajorHeader || nextHeader || null
+                        childHeaders, currentDepth + 1, childContent.content, _.extend({}, opts, { 'nextHeader' : childContent.nextMajorHeader || nextHeader || null })
                     );
                 }
 
-
+                var hAttributes = MarkdownHeading.getAttributes(h.props.children);
                 var hString = TableOfContents.textFromReactChildren(h.props.children);
-                var link = TableOfContents.slugify(hString);
-                var collapsible = currentDepth >= (1 + (skipDepth || 0));
+                var link;
+                if (hAttributes && hAttributes.matchedString){
+                    hString = hString.replace(hAttributes.matchedString, '').trim();
+                    if (hAttributes.id){
+                        link = hAttributes.id;
+                    }
+                }
+                if (!link) link = TableOfContents.slugify(hString);
+                var collapsible = currentDepth >= 1 + skipDepth;
                 return (
                     <TableEntry
                         link={link}
@@ -315,6 +307,7 @@ class TableEntryChildren extends React.Component {
                         maxHeaderDepth={maxHeaderDepth}
                         collapsible={collapsible}
                         skipDepth={skipDepth}
+                        recurDepth={(recurDepth || 0) + 1}
                     />
                 );
             });
@@ -344,13 +337,11 @@ class TableEntryChildren extends React.Component {
     }
 
     children(){
-        var childHeaders = this.getHeadersFromContent();
+        var { childHeaders, childDepth } = this.getHeadersFromContent();
         if (childHeaders && childHeaders.length){
-            return TableEntryChildren.renderChildrenElements(
-                childHeaders, this.props.content, this.props.maxHeaderDepth,
-                this.props.depth, this.props.listStyleTypes, this.props.pageScrollTop,
-                this.props.mounted, this.props.skipDepth, this.props.nextHeader
-            );
+            var opts = _.pick(this.props, 'maxHeaderDepth', 'pageScrollTop', 'listStyleTypes', 'skipDepth', 'nextHeader', 'mounted', 'recurDepth');
+            var { content, depth } = this.props;
+            return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, content, opts);
         } else {
             return this.props.children;
         }
@@ -361,11 +352,7 @@ class TableEntryChildren extends React.Component {
         //if (this.props.depth >= 3 && !this.props.active) return null;
         var children = this.children();
         if (!children) return null;
-        return (
-            <ol className="inner" style={{ listStyleType : this.props.listStyleTypes[(this.props.depth || 0) + 1] }}>
-                { children }
-            </ol>
-        );
+        return <ol className="inner" style={{ 'listStyleType' : this.props.listStyleTypes[(this.props.depth || 0) + 1] }} children={children}/>;
     }
 }
 
@@ -386,9 +373,17 @@ export class TableOfContents extends React.Component {
 
     static textFromReactChildren(children){
         if (typeof children === 'string') return children;
-        if (Array.isArray(children)){
-            return children.filter(function(c){ return typeof c === 'string'; }).join('');
+        if (children && typeof children === 'object' && children.props && children.props.children) return TableOfContents.textFromReactChildren(children.props.children);
+        if (Array.isArray(children) && children.length > 0){
+            var childrenWithChildren = _.filter(children, function(c){ return typeof c === 'string' || (c && c.props && c.props.children); });
+            var childPrimaryElemIfAny = _.find(childrenWithChildren, function(c){ return c && typeof c === 'object' && c.props && (c.type === 'code' || c.type === 'strong' || c.type === 'b'); });
+            if (childPrimaryElemIfAny){
+                return TableOfContents.textFromReactChildren(childPrimaryElemIfAny);
+            } else {
+                return _.map(children, TableOfContents.textFromReactChildren).join('');
+            }
         }
+        return '';
     }
 
     static isHeaderComponent(c, maxHeaderDepth = 6){
@@ -404,6 +399,47 @@ export class TableOfContents extends React.Component {
         if (!content || typeof content !== 'object') return false;
         var proto = Object.getPrototypeOf(content);
         return proto && proto.isPrototypeOf(React.Component.prototype);
+    }
+
+    static elementIDFromSectionName(sectionName){
+        var sectionParts;
+        if (sectionName.indexOf('#') > -1){
+            sectionParts = sectionName.split('#');
+            sectionName = sectionParts[sectionParts.length - 1];
+        } else if (sectionName.indexOf('.') > -1){
+            sectionParts = sectionName.split('.');
+            sectionName = sectionParts[sectionParts.length - 1];
+        }
+        return sectionName;
+    }
+
+    static scrollToLink(link, offsetBeforeTarget = 72, navigateFunc = navigate, targetElement = null){
+        var pageScrollTop, elementTop;
+        if (link === "top") {
+            elementTop = 0;
+        } else if (typeof link === 'string' && link){
+            if (link.charAt(0) === '/'){
+                navigateFunc(link);
+                return;
+            } else {
+                elementTop = getElementTop( targetElement || document.getElementById(link) );
+            }
+        } else {
+            return null;
+        }
+
+        pageScrollTop = getPageVerticalScrollPosition();
+
+        animateScrollTo(elementTop, 750, offsetBeforeTarget, ()=>{
+            if (typeof navigateFunc === 'function'){
+                setTimeout(()=>{
+                    if (link === 'top' || link === 'bottom') link = '';
+                    navigateFunc('#' + link, { 'replace' : true, 'skipRequest' : true });
+                }, link === 'top' || (typeof pageScrollTop === 'number' && pageScrollTop <= 40) ? 800 : 0);
+            }
+        });
+
+        return;
     }
 
     static defaultProps = {
@@ -427,8 +463,9 @@ export class TableOfContents extends React.Component {
         'populateAnchors' : true,
         'title' : "Contents",
         'pageTitle' : 'Introduction',
-        'includeTop' : false,
-        'listStyleTypes' : ['none','decimal', 'lower-alpha', 'lower-roman'],
+        'includeTop' : true,
+        'includeNextPreviousPages' : true,
+        'listStyleTypes' : ['none', 'decimal', 'lower-alpha', 'lower-roman'],
         'maxHeaderDepth' : 3
     }
 
@@ -439,9 +476,11 @@ export class TableOfContents extends React.Component {
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.onPageScroll = _.throttle(this.onPageScroll.bind(this), 100, { 'leading' : false });
         this.onResize = _.debounce(this.onResize.bind(this), 300);
+        this.onToggleWidthBound = this.onToggleWidthBound.bind(this);
         this.state = {
             'scrollTop' : 0,
-            'mounted' : false
+            'mounted' : false,
+            'widthBound' : true
         };
     }
 
@@ -457,9 +496,14 @@ export class TableOfContents extends React.Component {
         }
     }
 
-    shouldComponentUpdate(nextProps,nextState){
+    shouldComponentUpdate(nextProps, nextState){
+        if (this.updateQueued){
+            this.updateQueued = false;
+            return true;
+        }
         if (nextState.mounted !== this.state.mounted) return true;
         if (nextState.scrollTop !== this.state.scrollTop) return true;
+        if (nextState.widthBound !== this.state.widthBound) return true;
         return false;
     }
 
@@ -476,118 +520,295 @@ export class TableOfContents extends React.Component {
     }
 
     onResize(e){
+        this.updateQueued = true;
         setTimeout(()=>{
             this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
         }, 0);
     }
 
+    onToggleWidthBound(){
+        this.setState((prevState, prevProps)=>({
+            'widthBound' : !prevState.widthBound
+        }));
+    }
+
+    parentLink(windowInnerWidth){
+        var context = this.props.context;
+        var cols = [];
+        cols.push(
+            <div className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1600 ? '9' : '12')}>
+                <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
+            </div>
+        );
+        if (windowInnerWidth && windowInnerWidth >= 1600){
+            cols.push(
+                <div className="col-xs-3 text-right expand-button-container">
+                    <Button bsSize="xs" onClick={this.onToggleWidthBound}>{ this.state.widthBound ?
+                        <span><i className="icon icon-fw icon-angle-left"/></span> :
+                        <span><i className="icon icon-fw icon-angle-right"/></span>
+                    }</Button>
+                </div>
+            );
+        }
+        return (
+            <li className="table-content-entry parent-entry" data-depth="0" key="parent-link">
+                <span title="Up to page listing" className="top-of-page with-border-bottom visible-lg-block visible-lg">
+                    <div className="row" children={cols} />
+                </span>
+            </li>
+        );
+    }
+
     render(){
 
         var listStyleTypes = this.props.listStyleTypes.slice(0);
+        var { context, maxHeaderDepth, includeTop, fixedGridWidth, includeNextPreviousPages } = this.props;
+
+        var skipDepth = 0;
+
+        var windowInnerWidth = (this.state.mounted && !isServerSide() && typeof window !== 'undefined' && window.innerWidth) || null;
+        var windowInnerHeight = (windowInnerWidth && window.innerHeight) || null;
 
         function sectionEntries(){
             var lastSection = null;
-            return _(this.props.context.content).chain()
-                .pairs()
-                .map(function(entryPair){
-                    return _.extend(entryPair[1], { 'link' : entryPair[0] });
-                })
+            var excludeSectionsFromTOC = _.filter(context.content, function(section){ return section.title || section['toc-title']; }).length < 2;
+            return _(context.content).chain()
                 .sortBy(function(s){
-                    return s.order || 0;
+                    return s.order || 99;
                 })
-                .filter((s)=>{
-                    if (this.props.skipDepth && this.props.skipDepth > 0) return true;
-                    if (typeof s.title === 'string' || typeof s['toc-title'] === 'string'){
-                        //if (lastSections.length) lastSections.forEach(function(ls){
-                        //    ls.nextHeader = s.link;
-                        //});
-                        if (lastSection) lastSection.nextHeader = s.link;
-                        //lastSections.push(s);
-                        lastSection = s;
-                        return true;
-                    }
-                    return false;
+                .map((s, i, all)=>{
+                    s.link = TableOfContents.elementIDFromSectionName(s.name);
+                    if (lastSection) lastSection.nextHeader = s.link;
+                    lastSection = s;
+                    if (all.length - 1 === i) s.nextHeader = 'bottom';
+                    return s;
                 })
                 .map((s,i,all) => {
-                    if (this.props.skipDepth && this.props.skipDepth > 0) {
-                        var childHeaders = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
-                        return TableEntryChildren.renderChildrenElements(
-                            childHeaders, s.content, this.props.maxHeaderDepth, 1,
-                            listStyleTypes, this.state.scrollTop, this.state.mounted, this.props.skipDepth, s.nextHeader || (i === all.length - 1 ? 'bottom' : all[i + 1].link || null  )
-                        );
+                    if (excludeSectionsFromTOC){
+                        skipDepth = 1;
+                        var { childHeaders, childDepth } = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
+                        var opts = _.extend({ childHeaders, maxHeaderDepth, listStyleTypes, skipDepth }, {
+                            'mounted' : this.state.mounted,
+                            'pageScrollTop' : this.state.scrollTop,
+                            'nextHeader' : s.nextHeader
+                        });
+                        return TableEntryChildren.renderChildrenElements(childHeaders, childDepth, s.content, opts);
                     }
                     return (<TableEntry
                         link={s.link}
-                        title={s['toc-title'] || s.title}
+                        title={s['toc-title'] || s.title || _.map(s.link.split('-'), function(w){ return w.charAt(0).toUpperCase() + w.slice(1); } ).join(' ') }
                         key={s.link}
                         depth={1}
                         content={s.content}
                         listStyleTypes={listStyleTypes}
                         pageScrollTop={this.state.scrollTop}
                         mounted={this.state.mounted}
-                        nextHeader={s.nextHeader || (i === all.length - 1 ? 'bottom' : null) }
+                        nextHeader={s.nextHeader}
                         navigate={this.props.navigate}
-                        maxHeaderDepth={this.props.maxHeaderDepth}
-                        skipDepth={this.props.skipDepth}
+                        maxHeaderDepth={maxHeaderDepth}
+                        skipDepth={skipDepth}
                     />);
                 })
+                .flatten(false)
                 .value();
         }
 
-        var content;
-        if (this.props.includeTop) {
-            var children = sectionEntries.call(this);
-            content = (
-                <TableEntry
-                    link="top"
-                    title={this.props.pageTitle || null}
-                    key="top"
-                    depth={0}
-                    listStyleTypes={listStyleTypes}
-                    pageScrollTop={this.state.scrollTop}
-                    mounted={this.state.mounted}
-                    navigate={this.props.navigate}
-                    nextHeader={(children[0] && children[0].props && children[0].props.link) || null}
-                    maxHeaderDepth={this.props.maxHeaderDepth}
-                    skipDepth={this.props.skipDepth}
-                    children={children}
-                />
-            );
-        } else {
-            content = sectionEntries.call(this);
-        }
+        var content = [];
+
+        if (context && context.parent && context.parent['@id']) content.push(this.parentLink(windowInnerWidth));
+
+        var children = sectionEntries.call(this);
+
+        content.push(
+            <TableEntry
+                link="top"
+                title={context['display_title'] || 'Top of Page' || null}
+                key="top"
+                depth={0}
+                listStyleTypes={listStyleTypes}
+                pageScrollTop={this.state.scrollTop}
+                mounted={this.state.mounted}
+                navigate={this.props.navigate}
+                nextHeader={(children[0] && children[0].props && children[0].props.link) || null}
+                maxHeaderDepth={maxHeaderDepth}
+                skipDepth={skipDepth || 0}
+                children={children}
+            />
+        );
 
         var marginTop = 0; // Account for test warning
-        if (this.state.mounted && !isServerSide()){
-            if (typeof this.state.scrollTop === 'number' && this.state.scrollTop < 80){
+        if (windowInnerWidth){
+            if (typeof this.state.scrollTop === 'number' && this.state.scrollTop < 80 && windowInnerWidth >= 1200){
                 var testWarningElem = document.getElementsByClassName('navbar-container test-warning-visible');
                 marginTop = (testWarningElem[0] && testWarningElem[0].offsetHeight) || marginTop;
+            } else if (windowInnerWidth < 1200) {
+                marginTop = -12; // Account for spacing between title and first section
             }
         }
 
+        var isEmpty = (Array.isArray(content) && !_.filter(content).length) || !content;
+
+        function generateFixedWidth(){
+            return 1140 * (fixedGridWidth / 12) + (((document && document.body && document.body.clientWidth) || windowInnerWidth) - 1140) / 2 - 10;
+        }
 
         return (
-            <div className="table-of-contents" ref="container" style={{
-                width : this.state.mounted ?
-                        window.innerWidth > 1200 ? this.props.fixedWidth || 'inherit'
+            <div key="toc" className={"table-of-contents" + (this.state.widthBound ? ' width-bounded' : '')} ref="container" style={{
+                width : windowInnerWidth ?
+                    windowInnerWidth >= 1200 ? generateFixedWidth() || 'inherit'
                         :'inherit'
-                    : this.props.fixedWidth,
+                    : 285,
                 height:
-                    (this.state.mounted && typeof window !== 'undefined' && typeof window.innerHeight === 'number' ?
-                        window.innerWidth > 1200 ?
+                    (windowInnerWidth && windowInnerHeight ?
+                        windowInnerWidth >= 1200 ?
                             ( this.props.maxHeight ||
-                              this.state.scrollTop >= 40 ? window.innerHeight - 70 : window.innerHeight - 115 ) :
+                              this.state.scrollTop >= 40 ? windowInnerHeight - 42 : windowInnerHeight - 82 ) :
                             null
                     : 1000),
                 marginTop : marginTop
             }}>
-                <h4 className="toc-title">{ this.props.title }</h4>
-                <ol className="inner" style={{
-                    listStyleType : listStyleTypes[this.props.includeTop ? 0 : 1],
-                    paddingLeft : !Array.isArray(content) ? 0 : null
-                }}>{ content }</ol>
+                {/* !isEmpty ? <h4 className="toc-title">{ this.props.title }</h4> : null */}
+                { !isEmpty ?
+                    <ol className="inner" children={content} style={{
+                        'listStyleType' : listStyleTypes[0],
+                        'paddingLeft' : 0
+                    }}/>
+                : null }
+                { includeNextPreviousPages ? <NextPreviousPageSection context={context} windowInnerWidth={windowInnerWidth} /> : null }
             </div>
         );
     }
 
+}
+
+
+export class NextPreviousPageSection extends React.PureComponent {
+
+    static defaultProps = {
+        'previousTitle' : 'Previous',
+        'nextTitle' : 'Next'
+    }
+
+    render(){
+        var { context, className, previousTitle, nextTitle } = this.props;
+        if (!context.next && !context.previous) return null;
+        return (
+            <div className={"next-previous-pages-section" + ((className && ' ' + className) || '')}>
+                <div className="row">
+                { context.previous ?
+                    <div className={"previous-section text-right col-xs-6"}>
+                        <h6 className="text-400 mb-02 mt-12"><i className="icon icon-fw icon-angle-left"/> { previousTitle }</h6>
+                        <h6 className="text-500 mt-0"><a href={context.previous['@id'] || '/' + context.previous.name}>{ context.previous.display_title }</a></h6>
+                    </div>
+                : null }
+                { context.next ?
+                    <div className={"next-section col-xs-6 pull-right"}>
+                        <h6 className="text-400 mb-02 mt-12">{ nextTitle } <i className="icon icon-fw icon-angle-right"/></h6>
+                        <h6 className="text-500 mt-0"><a href={context.next['@id'] || '/' + context.next.name}>{ context.next.display_title }</a></h6>
+                    </div>
+                : null }
+                </div>
+            </div>
+        );
+    }
+}
+
+
+
+export class MarkdownHeading extends React.PureComponent {
+
+    static getAttributes(children){
+        children = Array.isArray(children) ? children : [children];
+        var attr = { 'id' : null, 'className' : null, 'matchedString' : null };
+
+        let childrenOuterText = _.filter(children, function(c){ return typeof c === 'string'; }).join(' ');
+        let attrMatch = childrenOuterText.match(/({:[.-\w#]+})/g);
+        if (attrMatch && attrMatch.length){
+            attr.matchedString = attrMatch[0];
+            attrMatch = attrMatch[0].replace('{:', '').replace('}', '');
+            var idMatch = attrMatch.match(/(#[-\w]+)/g);
+            if (idMatch && idMatch.length){
+                idMatch = idMatch[0].replace('#', '');
+                attr.id = idMatch;
+                attrMatch = attrMatch.replace('#' + idMatch, '');
+            }
+            attr.className = attrMatch.split('.').join(' ').trim();
+        }
+        return attr;
+    }
+
+    static defaultProps = {
+        'type' : 'h1',
+        'id' : null
+    }
+
+    constructor(props){
+        super(props);
+        this.getID = this.getID.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    getID(set = false, id = null){
+        if (typeof this.id === 'string') return this.id;
+        var idToSet = id || (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
+        if (set){
+            this.id = idToSet;
+        }
+        return idToSet;
+    }
+
+    componentWillUnmount(){ delete this.id; }
+
+    render(){
+        var { type, children } = this.props;
+        children = Array.isArray(children) ? children : [children];
+        var propsToPass = {
+            'children' : children,
+            'id' : null,
+            'type' : type
+        };
+
+        var attributes = MarkdownHeading.getAttributes(children);
+
+        if (attributes && attributes.matchedString){
+            propsToPass.children = _.map(children, function(c){
+                if (typeof c === 'string') return c.replace(attributes.matchedString, '');
+                return c;
+            });
+            if (attributes.id) {
+                propsToPass.id = this.getID(true, attributes.id);
+            }
+            if (attributes.className) {
+                propsToPass.className = attributes.className;
+            }
+        }
+        if (!propsToPass.id) propsToPass.id = this.getID(true);
+        return <HeaderWithLink {...propsToPass} />;
+        //return React.createElement(type, propsToPass);
+    }
+}
+
+export class HeaderWithLink extends React.PureComponent {
+
+    handleLinkClick(id, e){
+        if (!(!isServerSide() && typeof window !== 'undefined' && document)) return null;
+        var itemAtID;
+        if (this.props.context) itemAtID = object.itemUtil.atId(this.props.context);
+        else itemAtID = window.location.pathname;
+
+        if (itemAtID){
+            var linkToCopy = itemAtID + '#' + id;
+            linkToCopy = window.location.protocol + '//' + window.location.host + linkToCopy;
+            object.CopyWrapper.copyToClipboard(linkToCopy);
+            TableOfContents.scrollToLink(id);
+        }
+    }
+
+    render(){
+        if (!this.props.id && !this.props.link) throw new Error('HeaderWithLink needs a link or ID attribute/prop.');
+        return React.createElement(this.props.type || 'h2', _.omit(this.props, 'type', 'children', 'link', 'context'), [
+            this.props.children,
+            <i key="icon-link" className="icon icon-fw icon-link" onClick={this.handleLinkClick.bind(this, this.props.link || this.props.id)} title="Copy link to clipboard"/>
+        ]);
+    }
 }

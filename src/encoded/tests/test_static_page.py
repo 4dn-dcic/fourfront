@@ -1,53 +1,83 @@
 import pytest
 import time
+from .features.conftest import app_settings, app
+
 pytestmark = pytest.mark.working
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page_section_json():
     return {
         "title": "",
-        "name" : "help.rest-api#rest_api_submission",
+        "name" : "help.user-guide.rest-api.rest_api_submission",
         "file": "/docs/public/metadata-submission/rest_api_submission.md",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020"
     }
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page_json():
-    return {"name": "help/rest-api",
-            "title": "The REST-API",
-            "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
-            "table-of-contents": {
-                "enabled": True,
-                "header-depth": 4,
-                "list-styles": ["decimal", "lower-alpha", "lower-roman"],
-                "include-top-link": False,
-                "skip-depth": 1
-             }
-            }
+    return {
+        "name": "help/user-guide/rest-api",
+        "title": "The REST-API",
+        "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
+        "table-of-contents": {
+            "enabled": True,
+            "header-depth": 4,
+            "list-styles": ["decimal", "lower-alpha", "lower-roman"]
+        }
+    }
 
+@pytest.fixture(scope='module')
+def help_page_json_draft():
+    return {
+        "name": "help/user-guide/rest-api-draft",
+        "title": "The REST-API",
+        "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
+        "table-of-contents": {
+            "enabled": True,
+            "header-depth": 4,
+            "list-styles": ["decimal", "lower-alpha", "lower-roman"]
+        },
+        "status" : "draft"
+    }
+
+@pytest.fixture(scope='module')
+def help_page_json_deleted():
+    return {
+        "name": "help/user-guide/rest-api-deleted",
+        "title": "The REST-API",
+        "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
+        "table-of-contents": {
+            "enabled": True,
+            "header-depth": 4,
+            "list-styles": ["decimal", "lower-alpha", "lower-roman"]
+        },
+        "status" : "deleted"
+    }
+
+
+@pytest.fixture(scope='module')
+def posted_help_page_section(testapp, help_page_section_json):
+    res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
+    time.sleep(5)
+    return res.json['@graph'][0]
 
 @pytest.fixture
-def help_page(testapp, help_page_section_json, help_page_json):
-    res = testapp.post_json('/static_section', help_page_section_json, status=201)
-    res = testapp.post_json('/page', help_page_json, status=201)
+def help_page(testapp, posted_help_page_section, help_page_json):
+    res = testapp.post_json('/pages/', help_page_json, status=201)
     time.sleep(5)
     return res.json['@graph'][0]
 
 
 @pytest.fixture
-def help_page_deleted(testapp, help_page_section_json, help_page_json):
-    help_page_json['status'] = 'deleted'
-    res = testapp.post_json('/static_section', help_page_section_json, status=201)
-    res = testapp.post_json('/page', help_page_json, status=201)
+def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
+    res = testapp.post_json('/pages/', help_page_json_draft, status=201)
     return res.json['@graph'][0]
 
 
 @pytest.fixture
-def help_page_restricted(testapp, help_page_section_json, help_page_json):
-    help_page_json['status'] = 'draft'
-    res = testapp.post_json('/static_section', help_page_section_json, status=201)
-    res = testapp.post_json('/page', help_page_json, status=201)
+def help_page_restricted(testapp, posted_help_page_section, help_page_json_deleted):
+    res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
     return res.json['@graph'][0]
 
 
@@ -61,7 +91,6 @@ def test_get_help_page(testapp, help_page):
     assert res.json['@id'] == help_page_url
     assert res.json['@context'] == help_page_url
     assert 'HelpPage' in res.json['@type']
-    assert 'Rest-apiPage' in res.json['@type']
     assert 'StaticPage' in res.json['@type']
     #assert res.json['content'] == help_page['content'] # No longer works latter is set to an @id of static_section
     assert 'Accession and uuid are automatically assigned during initial posting' in res.json['content'][0]['content'] # Instead lets check what we have embedded on GET request is inside our doc file (rest_api_submission.md).

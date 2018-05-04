@@ -23,8 +23,11 @@ describe('Testing help.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HelpPage = require('../static-pages/HelpPage').default;
+        HelpPage = require('../static-pages/StaticPage').default;
         context = require('../testdata/static/helppage');
+
+        /*
+
         Wrapper = createReactClass({
             render: function() {
                 return (
@@ -32,12 +35,12 @@ describe('Testing help.js', function() {
                 );
             }
         });
-        page = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <HelpPage context={context} />
-            </Wrapper>
-        );
+
+        */
+
+        page = TestUtils.renderIntoDocument(<HelpPage context={context} />);
         helpEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'help-entry');
+        
     });
 
 
@@ -49,7 +52,7 @@ describe('Testing help.js', function() {
             helpEntries.filter(function(el){
                 return (
                     el && el.children.length &&
-                    el.children[0].className.indexOf('fourDN-header') > -1
+                    el.children[0].className.indexOf('section-title') > -1
                 );
             }).length
         ).toBeGreaterThan(0);
@@ -60,8 +63,8 @@ describe('Testing help.js', function() {
                 return (
                     el && el.children.length &&
                     (
-                        el.children[0].className.indexOf('fourDN-content') > -1 ||
-                        (el.children[1] && el.children[1].className.indexOf('fourDN-content') > -1)
+                        el.children[0].className.indexOf('section-content') > -1 ||
+                        (el.children[1] && el.children[1].className.indexOf('section-content') > -1)
                     )
                 );
             }).length
@@ -72,13 +75,13 @@ describe('Testing help.js', function() {
 
     it('Has multiple help entries, titled:  metadata structure, rest api', function() {
         var allHeaderNames = _.flatten(helpEntries.map(function(e){ return e.children[0]; }), true)
-            .filter(function(el){ return typeof el.innerHTML !== 'undefined'; })
+            .filter(function(el){ return typeof el.innerHTML !== 'undefined' && el.className.indexOf('section-title') > -1; })
             .map(function(el){ return el.innerHTML.toLowerCase(); });
 
         // .toLowerCase() in case capitalization changes ( e.g. Getting started -> Getting *S*tarted )
-        expect(_.contains(allHeaderNames, 'metadata structure')).toBe(true);
-        expect(_.contains(allHeaderNames, 'rest api')).toBe(true);
-        expect(_.contains(allHeaderNames, 'data submission via spreadsheet')).toBe(true);
+        expect(_.any(allHeaderNames, function(h){ return h.indexOf('metadata structure') > -1; })).toBe(true);
+        expect(_.any(allHeaderNames, function(h){ return h.indexOf('rest api') > -1; })).toBe(true);
+        expect(_.any(allHeaderNames, function(h){ return h.indexOf('data submission via spreadsheet') > -1; })).toBe(true);
 
     });
 

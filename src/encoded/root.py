@@ -1,4 +1,3 @@
-import os
 import json
 import requests
 from re import escape
@@ -12,7 +11,6 @@ from snovault import (
 from snovault.interfaces import STORAGE
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from .schema_formats import is_accession
-from .types.page import get_local_file_contents
 from .search import make_search_subreq
 from pyramid.security import (
     ALL_PERMISSIONS,
@@ -285,19 +283,17 @@ class EncodedRoot(Root):
 
     @calculated_property(schema={
         "title": "Static Page Content",
-        "type": "object",
+        "type": "object"
     })
-    def content(self):
+    def content(self, request):
         '''Returns -object- with pre-named sections'''
-        return_obj = {}
+        sections_to_get = ['home.introduction']
+        #url_to_request = '/search/?type=StaticSection&' + '&'.join([ 'name=' + s for s in sections_to_get])
+        #url_to_request = '/static-sections/home.introduction/@@embedded'
         try:
-            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-            contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return_obj = { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
-        except FileNotFoundError as e:
-            print("No content files found for Root object (aka Home, '/').")
-        # Maybe TODO: fetch announcements and add to return_obj. No request to make subrequest from?
-        return return_obj
+            return [ request.embed('/static-sections', section_name, '@@embedded', as_user=True) for section_name in sections_to_get ]
+        except KeyError:
+            return [ ]
 
     @calculated_property(schema={
         "title": "Application version",
