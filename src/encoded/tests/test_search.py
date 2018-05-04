@@ -425,7 +425,7 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
     res = testapp.post_json('/bar_plot_aggregations', {
         "search_query_params" : { "type" : ['ExperimentSetReplicate'] },
         "fields_to_aggregate_for" : ["experiments_in_set.experiment_type", "award.project"]
-    })
+    }).json
 
     # Our total count for experiment_sets should match # of exp_set_replicate inserts.abs
 
