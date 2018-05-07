@@ -279,7 +279,13 @@ export default class StaticPage extends React.PureComponent {
     }
 
     render(){
-        var parsedContent = parseSectionsContent(this.props.context);
+        var parsedContent;
+        try {
+            parsedContent = parseSectionsContent(this.props.context);
+        } catch (e) {
+            console.dir(e);
+            parsedContent = _.extend({}, this.props.context, { 'content' : [ { 'content' : '<h4>Error - ' + e.message + '</h4>Check Page content/sections.', 'name' : 'error' } ] });
+        }
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
