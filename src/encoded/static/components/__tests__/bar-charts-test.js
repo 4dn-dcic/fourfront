@@ -27,19 +27,10 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         sinon = require('sinon');
         server = sinon.fakeServer.create();
 
-        //if (typeof context === 'object'){
-        //    context = JSON.stringify(context);
-        //}
-
         // We let ChartDataController request the data and feed it in rather than feeding it directly to the BarPlotChart (via prop 'barplot_data_unfiltered') so as to test ChartDataController.
-        var chartRequestHref = (
-            "/bar_plot_aggregations/type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN/" +
-            "?" + _.map(propInitialFields, function(f){ return 'field=' + f; }).join('&')
-        );
-
         server.respondWith(
-            "GET",
-            chartRequestHref,
+            "POST",
+            "/bar_plot_aggregations",
             [
                 200,
                 { "Content-Type" : "application/json" },

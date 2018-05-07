@@ -516,7 +516,7 @@ def process(rows):
         pass
 
 
-def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=None):
+def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=None, method=None):
     """smth."""
     pipeline = [
         skip_rows_with_all_key_value(test='skip'),
@@ -541,6 +541,8 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=Non
     # special case for incremental ontology updates
     if phase == 'patch_ontology':
         method = 'PATCH'
+    elif phase is None and method is not None:
+        method = method
     elif phase == 1:
         method = 'POST'
         pipeline.extend(PHASE1_PIPELINES.get(item_type, []))

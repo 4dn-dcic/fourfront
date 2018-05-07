@@ -144,7 +144,7 @@ describe('Testing about.js', function() {
 
     // Example of something which would be present on About page.
     it("Has Burak and Nils' names", function() {
-        var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
+        var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "section-content");
         expect(contentParagraphs.length).toBeGreaterThan(1); // At least 1 paragraph.
 
         var fullContentParagraphsText = contentParagraphs.map(function(v){ return v.innerHTML; }).join('\n');

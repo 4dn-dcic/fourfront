@@ -13,30 +13,32 @@ This page outlines and describes the types of metadata that is requested for bio
 
 ## Basic Biosample Metadata
 
-```description```  - **Required**
+### Biosample Fields
+
+#### ```description```  - **Required** {:.text-400}
 
 * A brief specific description of the biosample
 * example "K562 cells prepared for in situ Hi-C experiments"
 * example "GM12878 cells modified using Crispr to delete CTCF sites in the PARK2 region prepared for chromatin capture experiments"
 
-```biosource``` - **Required**
+#### ```biosource``` - **Required** {:.text-400}
 
 * The value of this field is a reference to usually one **Biosource** object whose metadata is submitted separately.
 * This **Biosource** object refers to a cell line, tissue or primary cell and has its own associated metadata.
    * **NOTE**: The tiered cell lines all have an existing biosource in the database that can be re-used and referenced by it's accession, alias or uuid - while other biosources may require you to submit metadata for them.
 * It is possible, though rare, for a single biosample to consist of more than one biosource - eg. pooling of two different cell lines - in these cases you can reference multiple biosources in this field.
 
-```cell_culture_details``` - **Required only for cultured cell lines**
+#### ```cell_culture_details``` - **Required only for cultured cell lines** {:.text-400}
 
 * The value of this field is a reference to a _BiosampleCellCulture_ object whose metadata is submitted separately and is detailed in the *Cell Culture Metadata section below*.
 
-```modifications``` - **Required** if cells have been genomically modified
+#### ```modifications``` - **Required** if cells have been genomically modified {:.text-400}
 
 * **Genetic modifications** - this field is **required** when a Biosample has been genomically modified eg. Crispr modification of a cell line.
 * The value of this field is a list of one or more references to a **Modification** object whose metadata is submitted separately.
 * Modifications include information on expression or targeting vectors stably transfected to generate Crispr'ed or other genomically modified samples.
 
-```treatments``` - **Required** if cells have been treated 'transiently' with drugs or by transfection.
+#### ```treatments``` - **Required** if cells have been treated 'transiently' with drugs or by transfection. {:.text-400}
 
 * This field is used when a Biosample has been treated with a chemical/drug or transiently altered using RNA interference techniques.
 * The value of this field is a reference to a **Treatment** object whose metadata is submitted separately.
@@ -44,7 +46,7 @@ This page outlines and describes the types of metadata that is requested for bio
   1. Addition of a drug or chemical
   2. Transient or inducible RNA interference
 
-```biosample_protocols``` - Optional
+#### ```biosample_protocols``` - Optional {:.text-400}
 
 * Protocols used in Biosample Preparation - this is distinct from SOPs and protocol for cell cultures.
 * example protocol description "Preparation of isolated brain tissue from BALB/c adult mice for chromatin capture experiments"
@@ -71,30 +73,30 @@ The biosample cell culture metadata fields that can be submitted are described b
 
 ### BiosampleCellCulture fields
 
-```description``` - Strongly Encouraged
+#### ```description``` - Strongly Encouraged {:.text-400}
 
 * A short description of the cell culture procedure
 * example "Details on culturing a preparation of K562 cells"
 
-```morphology_image``` - **Required**
+#### ```morphology_image``` - **Required** {:.text-400}
 
 * Phase Contrast or DIC Image of at least 50 cells showing morphology at the time of collection
 * This is an authentication standard particularly relevant to Tiered cell lines.
 * The value of this field is a reference to an **Image** object that needs to be submitted separately.
 
-```culture_start_date``` - **Required**
+#### ```culture_start_date``` - **Required** {:.text-400}
 
 * The date the the cells were most recently thawed and cultured for the submitted experiment
 * Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).
 * example Date only (most common use case) - "2017-01-01"
 * example Date and Time (uncommonly used) -"2017-01-01T17:00:00+00:00" - note for time; hours, minutes, seconds and offset are required but may be 00 filled.
 
-```culture_harvest_date``` - **Required**
+#### ```culture_harvest_date``` - **Required** {:.text-400}
 
 * The date the culture was harvested for biosample preparation.
 * Date format as above.
 
-```culture_duration``` - **Required**
+#### ```culture_duration``` - **Required** {:.text-400}
 
 * Total Days in Culture.
 * Total number of culturing days since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date.
@@ -102,12 +104,12 @@ The biosample cell culture metadata fields that can be submitted are described b
 * example "5"
 * example "3.5"
 
-```passage_number``` - **Required**
+#### ```passage_number``` - **Required** {:.text-400}
 
 * Number of passages since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date.
 * Only integer values are allowed in this field eg. 3, 5, 11
 
-```doubling_number``` - **Required**
+#### ```doubling_number``` - **Required** {:.text-400}
 
 * The number of times the population has doubled since the time of thaw (culture start date) until harvest.
 * This may be determined and reported in different ways
@@ -117,19 +119,19 @@ The biosample cell culture metadata fields that can be submitted are described b
 * example "7.88"
 * example "5 passages split 1:4"
 
-```follows_sop``` - **Required**
+#### ```follows_sop``` - **Required** {:.text-400}
 
 * Flag to indicate if the 4DN SOP for the specified cell line was followed - options '**Yes**' or '**No**'
 * If a cell line is not one of the 'Tiered' 4DN lines this field should be set to 'No'
 
-```protocols_additional``` - **Required** if 'follows_sop' is 'No'
+#### ```protocols_additional``` - **Required** if 'follows_sop' is 'No' {:.text-400}
 
 * Protocols used in Cell Culture when there is deviation from a 4DN approved SOP.
 * Protocols describing non-4DN protocols or deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs
 * The value of this field is a list of references to a **Protocol** object - an alias or uuid.
 * The **Protocol** object can include an attachment to the pdf document.
 
-```doubling_time``` - Optional
+#### ```doubling_time``` - Optional {:.text-400}
 
 * Population Doubling Time
 * The average time from thaw (culture start date) until harvest it takes for the population to double.
@@ -137,7 +139,7 @@ The biosample cell culture metadata fields that can be submitted are described b
 * eg. '2 days'
 
 
-```authentication_protocols``` - Optional
+#### ```authentication_protocols``` - Optional {:.text-400}
 
 * References to one or more **Protocol** objects can be submitted in this field.
 * The **Protocol** objects should be of the type 'Authentication document'
@@ -147,7 +149,7 @@ The biosample cell culture metadata fields that can be submitted are described b
   * example "images of FoxA2 and Sox17 expression in differentiated endoderm cells"
 * The **Protocol** object can include an attachment to the pdf or image document.
 
-```karyotype``` - Optional description of cell ploidy and karyotype
+#### ```karyotype``` - Optional description of cell ploidy and karyotype {:.text-400}
 
 * Description of cell Ploidy - a textual description of the population ploidy and/or karyotype.
 * Important for potentially genomically unstable lines and strongly encouraged if the passage number of an unstable line is greater than 10.
@@ -159,20 +161,20 @@ The biosample cell culture metadata fields that can be submitted are described b
 * Using this field allows this information to be queried in searches.
 * **NOTE** An image or authentication document (see above) may be submitted in place or in addition to this.
 
-```differentiation_state``` - Optional
+#### ```differentiation_state``` - Optional {:.text-400}
 
 * For cells that have undergone differentiation a description of the differention state and markers used to determine the state.
 * Using this field allows this information to be queried in searches.
 * example 'Definitive endoderm as determined by the expression of Sox17 and FoxA2'
 * **NOTE** An authentication document (see above) can be submitted in place or in addition to this.
 
-```synchronization_stage``` - Optional
+#### ```synchronization_stage``` - Optional {:.text-400}
 
 * If a culture is synchronized then the cell cycle stage or description of the point from which the biosample used in an experiment is prepared.
 * Using this field allows this information to be queried in searches.
 * example 'M-phase metaphase arrested cells'
 * **NOTE** An authentication document (see above) can be submitted in place or in addition to this.
 
-```cell_line_lot_number``` - Strongly Suggested for non-Tier 1 cells
+#### ```cell_line_lot_number``` - Strongly Suggested for non-Tier 1 cells {:.text-400}
 
 * For 4DN Tier2 or unclassified cell lines - a lot number or other information to uniquely identify the source/lot of the cells

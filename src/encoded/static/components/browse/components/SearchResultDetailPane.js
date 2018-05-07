@@ -33,7 +33,7 @@ export class SearchResultDetailPane extends React.Component {
                 <FlexibleDescriptionBox
                     description={ description }
                     fitTo="self"
-                    textClassName="text-medium"
+                    textClassName="text-normal"
                     dimensions={null}
                 />
                 <hr className="desc-separator" />

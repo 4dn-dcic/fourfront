@@ -208,7 +208,7 @@ export default class PageTitle extends React.Component {
     }
 
     static getStyles(context, href, mounted){
-        var style = { marginTop : 55 };
+        var style = { 'marginTop' : 0 };
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
             var gridSize = mounted && layout.responsiveGridState();
@@ -219,9 +219,9 @@ export default class PageTitle extends React.Component {
             }
         }
 
-        if (PageTitle.isStaticPage(context)){
-            style.marginLeft = 10; // Indent slightly to match content.
-        }
+        //if (PageTitle.isStaticPage(context)){
+        //    style.paddingLeft = 10; // Indent slightly to match content.
+        //}
 
         return style;
     }
@@ -242,7 +242,10 @@ export default class PageTitle extends React.Component {
         if (PageTitle.isHomePage(href)){
             return (
                 <layout.WindowResizeUpdateTrigger>
-                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
+                    <div id="page-title-container" className="container">
+                        <div className="breadcrumb-placeholder" key="breadcrumbs" />
+                        <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
+                    </div>
                 </layout.WindowResizeUpdateTrigger>
             );
         }
@@ -264,7 +267,10 @@ export default class PageTitle extends React.Component {
 
         return (
             <layout.WindowResizeUpdateTrigger>
-                <PageTitleElement {... { title, subtitle, context, href, calloutTitle } } mounted={this.state.mounted} />
+                <div id="page-title-container" className="container">
+                    <StaticPageBreadcrumbs {...{ context }} key="breadcrumbs" />
+                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle } } mounted={this.state.mounted} />
+                </div>
             </layout.WindowResizeUpdateTrigger>
         );
     }
@@ -308,4 +314,48 @@ class HomePageTitleElement extends React.Component {
         );
     }
 }
+
+
+export class StaticPageBreadcrumbs extends React.Component {
+
+    static getAncestors(context){
+        if (!context.parent || !context.parent.display_title) return null;
+        var list = [];
+        var node = context.parent;
+        while (node){
+            list.push(node);
+            node = node.parent;
+        }
+        list.reverse();
+        list.push(context);
+        return list;
+    }
+
+    constructor(props){
+        super(props);
+        this.renderCrumb = this.renderCrumb.bind(this);
+    }
+
+    renderCrumb(ancestor, index, all){
+        var inner;
+        if (ancestor['@id'] === this.props.context['@id']){
+            inner = null;//ancestor.display_title;
+        } else {
+            inner = <a href={ancestor['@id']}>{ ancestor.display_title }</a>;
+        }
+        return (
+            <div className="static-breadcrumb" data-name={ancestor.name} key={ancestor['@id']}>
+                { index > 0 ? <i className="icon icon-fw icon-angle-right"/> : null }
+                { inner }
+            </div>
+        );
+    }
+
+    render(){
+        var ancestors = StaticPageBreadcrumbs.getAncestors(this.props.context);
+        if (!ancestors) return <div className="static-page-breadcrumbs clearfix empty"/>;
+        return  <div className="static-page-breadcrumbs clearfix" children={_.map(ancestors, this.renderCrumb)} />;
+    }
+}
+
 

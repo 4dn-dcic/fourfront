@@ -16,7 +16,6 @@ requires = [
     'SQLAlchemy>=1.0.0b1',
     'WSGIProxy2',
     'WebTest',
-    'boto',
     'botocore',
     'jmespath',
     'boto3',
@@ -102,6 +101,7 @@ setup(
         generate-ontology = encoded.commands.generate_ontology:main
         load-ontology = encoded.commands.load_ontology_terms:main
         import-data = encoded.commands.import_data:main
+        export-data = encoded.commands.export_data:main
         jsonld-rdf = encoded.commands.jsonld_rdf:main
         migrate-files-aws = encoded.commands.migrate_files_aws:main
         profile = encoded.commands.profile:main

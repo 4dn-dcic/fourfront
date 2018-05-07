@@ -45,7 +45,7 @@ _app_settings = {
     'tm.attempts': 3,
     'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
     # some file specific stuff for testing
-    'file_upload_bucket': 'test-bucket',
+    'file_upload_bucket': 'test-wfout-bucket',
     'file_wfout_bucket': 'test-wfout-bucket',
     'file_upload_profile_name': 'test-profile',
 }

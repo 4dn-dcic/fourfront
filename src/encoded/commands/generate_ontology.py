@@ -20,7 +20,7 @@ from encoded.commands.owltools import (
     IntersectionOf,
     OnProperty
 )
-from wranglertools.fdnDCIC import (
+from dcicutils.submit_utils import (
     FDN_Key,
     FDN_Connection,
     get_FDN

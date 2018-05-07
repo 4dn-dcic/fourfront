@@ -33,8 +33,8 @@ from urllib.parse import (
     parse_qs,
     urlparse,
 )
-import boto
-from boto.exception import BotoServerError
+import boto3
+from botocore.exceptions import ClientError
 import datetime
 import json
 import pytz
@@ -45,7 +45,7 @@ from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
 
 import logging
-logging.getLogger('boto').setLevel(logging.CRITICAL)
+logging.getLogger('boto3').setLevel(logging.CRITICAL)
 log = logging.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
@@ -90,12 +90,8 @@ def force_beanstalk_env(profile_name, config_file=None):
                 os.environ[key] = value[:-1]
 
             proc.communicate()
-
-        conn = boto.connect_sts(aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
-    else:
-        conn = boto.connect_sts(profile_name=profile_name)
-
+    conn = boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
     return conn
 
 
@@ -107,7 +103,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
     '''
 
     import logging
-    logging.getLogger('boto').setLevel(logging.CRITICAL)
+    logging.getLogger('boto3').setLevel(logging.CRITICAL)
     credentials = {}
     if name is not None:
         policy = {
@@ -120,16 +116,16 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        # boto.set_stream_logger('boto')
+        # boto.set_stream_logger('boto3')
         conn = force_beanstalk_env(profile_name)
-        token = conn.get_federation_token(name, policy=json.dumps(policy))
+        token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
-        credentials = token.credentials.to_dict()
+        credentials = token.get('Credentials')
         credentials.update({
             'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
-            'federated_user_arn': token.federated_user_arn,
-            'federated_user_id': token.federated_user_id,
-            'request_id': token.request_id,
+            'federated_user_arn': token.get('FederatedUser').get('Arn'),
+            'federated_user_id': token.get('FederatedUser').get('FederatedUserId'),
+            'request_id': token.get('ResponseMetadata').get('RequestId'),
             'key': key
         })
     return {
@@ -298,7 +294,6 @@ class File(Item):
         # return '{}{}'.format(accession, file_extension)
         return outString
 
-
     def _update(self, properties, sheets=None):
         if not properties:
             return
@@ -351,10 +346,9 @@ class File(Item):
             if old_creds.get('key') != new_creds.get('key'):
                 try:
                     # delete the old sumabeach
-                    conn = boto.connect_s3()
+                    conn = boto3.client('s3')
                     bname = old_creds['bucket']
-                    bucket = boto.s3.bucket.Bucket(conn, bname)
-                    bucket.delete_key(old_creds['key'])
+                    conn.delete_object(Bucket=bname, Key=old_creds['key'])
                 except Exception as e:
                     print(e)
 
@@ -441,7 +435,7 @@ class File(Item):
         if not external:
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except BotoServerError as e:
+            except ClientError:
                 log.error(os.environ)
                 log.error(self.properties)
                 return 'UPLOAD KEY FAILED'
@@ -675,6 +669,7 @@ class FileProcessed(File):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
 
+
 @collection(
     name='files-reference',
     unique_key='accession',
@@ -824,9 +819,7 @@ def is_file_to_download(properties, mapping, expected_filename=None):
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
 
-    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries 
-    proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers \
-                                                or 'Range' in request.headers
+    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
@@ -860,12 +853,19 @@ def download(context, request):
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto.connect_s3()
-        location = conn.generate_url(
-            36*60*60, request.method, external['bucket'], external['key'],
-            force_http=proxy or use_download_proxy, response_headers={
-                'response-content-disposition': "attachment; filename=" + filename,
-            })
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if 'Range' in request.headers:
+            param_get_object.update({'Range': request.headers.get('Range')})
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
     else:
         raise ValueError(external.get('service'))
     if asbool(request.params.get('soft')):
@@ -876,8 +876,20 @@ def download(context, request):
             'expires': datetime.datetime.fromtimestamp(expires, pytz.utc).isoformat(),
         }
 
-    if proxy:
-        return Response(headers={'X-Accel-Redirect': '/_proxy/' + str(location)})
+    if 'Range' in request.headers:
+        try:
+            response_body = conn.get_object(**param_get_object)
+        except Exception as e:
+            raise e
+        response_dict = {
+            'body': response_body.get('Body').read(),
+            # status_code : 206 if partial, 200 if the ragne covers whole file
+            'status_code': response_body.get('ResponseMetadata').get('HTTPStatusCode'),
+            'accept_ranges': response_body.get('AcceptRanges'),
+            'content_length': response_body.get('ContentLength'),
+            'content_range': response_body.get('ContentRange')
+        }
+        return Response(**response_dict)
 
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
@@ -935,16 +947,15 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
             # already got this md5
             found = search_resp.json['@graph'][0]['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
-                                              (data['md5sum'], found))
-    else: # find it in the database
-       conn = request.registry['connection']
-       res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
-       if res is not None:
+                               (data['md5sum'], found))
+    else:  # find it in the database
+        conn = request.registry['connection']
+        res = conn.get_by_json('md5sum', data['md5sum'], 'file_processed')
+        if res is not None:
             # md5 already exists
             found = res.properties['accession']
             request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
-                                              (data['md5sum'], found))
-
+                               (data['md5sum'], found))
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',

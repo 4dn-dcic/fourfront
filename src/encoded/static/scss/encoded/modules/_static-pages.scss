@@ -44,11 +44,95 @@ h5.fourDN-header {
 	}
 }
 
-.fourDN-section{
-	padding-bottom: 10px;
-	margin-top: 20px;
 
-	&.announcement {
+.fourDN-content-panel{
+	margin-top: 0px !important;
+}
+
+
+.static-section-entry,
+.home-content-area {
+
+	font-size: 15px;
+	font-size: 15.75px;
+	line-height: 1.65rem;
+
+	h1, h2, h3, h4, h5, h6 {
+		> i.icon-link {
+			font-size: 1rem;
+			opacity: 0;
+			vertical-align: middle;
+			margin-left: 7px;
+		}
+
+		&:hover > i.icon-link {
+			opacity: 0.3;
+			cursor: pointer;
+		}
+	}
+
+	h2 {
+		font-weight: 400;
+		margin-top: 30px;
+		margin-bottom: 15px;
+	}
+
+	&:first-child {
+		h2:first-child, h3:first-child, h4:first-child {
+			margin-top: 0px;
+		}
+	}
+
+	h3 {
+		margin-top: 25px;
+    	margin-bottom: 15px;
+	}
+
+	h4 {
+		margin-top: 20px;
+	}
+
+	.heading-with-bottom-border,
+	.homepage-section-title,
+	.section-title {
+		margin-bottom: 20px;
+		margin-top: 20px;
+		padding-bottom: 15px;
+		border-bottom: 1px solid #f4f4f4;
+
+		&h5 { font-size: 20px; margin-bottom: 10px; padding-bottom: 8px; }
+
+		> i.icon-link {
+			opacity: 0.15;
+		}
+	}
+
+	h2.section-title, h2.homepage-section-title {
+		font-size: 32px; line-height: 38px;
+	}
+
+	h3.section-title, h3.homepage-section-title {
+		font-size: 24px; margin-bottom: 10px; padding-bottom: 8px;
+	}
+
+	img {
+		max-width: 100%;
+	}
+
+}
+
+.static-section-entry {
+
+	&:not([id]) .section-title > i.icon-link {
+		display: none;
+	}
+
+}
+
+
+.home-content-area {
+
+	.announcement {
 		padding-bottom: 10px;
 		margin-top: 20px;
 
@@ -71,63 +155,26 @@ h5.fourDN-header {
 		}
 
 		.announcement-content {
-			margin-top: 10px;
-			font-size: 1.25rem;
+			margin-top: 3px;
 		}
 	}
-}
 
 
-
-.fourDN-section-toggle{
-	color: #555;
-	text-decoration: none !important;
-	&:hover,
-	&:focus {
-		color: #000000;
-	}
-}
-
-.fourDN-section-info{
-	color: #999 !important;
-	font-weight: 300;
-	font-size: 1.2em;
-}
-
-
-.fourDN-content{
-	line-height: 130%;
-	font-size: 1.375rem;
-
-	> h2, > div > h2 {
-		font-weight: 400;
-		margin: 30px 0;
+	.fourDN-section-toggle{
+		color: #555;
+		text-decoration: none !important;
+		&:hover,
+		&:focus {
+			color: #000000;
+		}
 	}
 
-	> h3, > div > h3 {
-		margin-top: 25px;
-    	margin-bottom: 15px;
+	.fourDN-section-info{
+		color: #999 !important;
+		font-weight: 300;
+		font-size: 1.2em;
 	}
 
-	> h4, > div > h4 {
-		margin-top: 20px;
-	}
-
-	img {
-		max-width: 100%;
-	}
-
-}
-
-.help-entry.static-section-entry {
-	// Revert eventually & adjust HTML of static pages, then style up.
-	.fourDN-content{
-		font-family: $font-family-serif;
-	}
-}
-
-.fourDN-content-panel{
-	margin-top: 0px !important;
 }
 
 
@@ -144,11 +191,31 @@ h5.fourDN-header {
 		position: fixed;
 		margin: 0 -10px;
 		padding: 0 10px;
-		top: 115px;
-		transition: top .75s, max-height .75s, margin-top .75s ease-out;
+		padding-bottom: 60px;
+		top: 82px;
+		transition: top .3s ease-out, margin-top .5s ease-out, max-width .5s ease-out;
 		overflow-y: auto;
+		right: 10px;
+		//max-width: 340px;
+		border-left: 1px solid #eee;
+		padding-left: 16px;
 		body.scrolled-past-top & {
-			top : 70px;
+			top : 42px;
+		}
+
+		max-width: 650px;
+		&.width-bounded {
+			max-width: 340px;
+		}
+
+		//ol, .next-previous-pages-section {
+		//	max-width: 320px;
+		//}
+	}
+
+	@media screen and (max-width : $screen-md-max){
+		> ol.inner {
+			border-top: 1px solid #eee;
 		}
 	}
 
@@ -159,13 +226,14 @@ h5.fourDN-header {
 		margin-bottom: 0;
 	}
 
-	ol { 
+	ol {
 		padding-left: 20px;
 		> li {
 			line-height: 1.25rem;
-			transition: font-weight .5s .25s, color .5s .25s;
+			transition: color .5s 0s;
 			color: #888;
 			position: relative;
+			font-weight: 400;
 			
 			&[data-depth="0"] {
 				padding-top: 0;
@@ -187,15 +255,15 @@ h5.fourDN-header {
 			}
 			.top-of-page {
 				display: block;
-				border-bottom: 1px solid #eee;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
 				color: #999;
-
-				> a {
-					padding-top: 10px;
-					padding-bottom: 10px;
+				margin-bottom: 3px;
+				&.with-border-bottom {
+					padding-bottom: 7px;
+					margin-bottom: 7px;
+					border-bottom: 1px solid #eee;
 				}
 				
 				> small {
@@ -207,13 +275,13 @@ h5.fourDN-header {
 						color: #ccc;
 					}
 				}
-				&:hover {
-					> small {
-						display: inline;
-						opacity: 1;
-					}
+
+				.expand-button-container {
+					padding-top: 2px;
 				}
-				i.icon {
+				
+				i.icon-angle-up {
+					display: none;
 					color: #888;
 					text-align: center;
 					width: 20px;
@@ -222,16 +290,24 @@ h5.fourDN-header {
 					float: left;
 					padding-top: 0px;
 					padding-bottom: 0px;
-					height: 33px;
-					line-height: 33px;
+					margin-right: 2px;
+					line-height: 24px;
+				}
+				&:hover {
+					> small {
+						display: inline;
+						opacity: 1;
+					}
+					i.icon {
+						color: #000;
+					}
 				}
 			}
 
 			a {
 				display: block;
-				transition: color .5s .25s;
-				font-weight: 400;
-				padding: 5px 0px 7px 22px;
+				transition: color .5s 0s;
+				padding: 5px 0px 5px 22px;
 				border-top: 1px dotted transparent;
 				border-bottom: 1px dotted transparent;
 				margin-bottom: 0;
@@ -257,7 +333,7 @@ h5.fourDN-header {
 				}
 				> i.icon {
                     position: absolute;
-					left: -40px;
+					//left: -40px;
 					top: 50%;
 					margin-top: -9px;
 					font-size: 0.85rem;
@@ -271,8 +347,9 @@ h5.fourDN-header {
 					transform: scale3d(1,1,1);
 					transition: transform .3s, color .3s;
 
-					left: -70px;
-					margin-left: 14%;
+					//left: -70px;
+					//margin-left: 14%;
+					left: -36px;
 					
 					&:hover {
 						cursor: pointer;
@@ -283,11 +360,25 @@ h5.fourDN-header {
 				}
 			}
 
+			&[data-recursion-depth="1"] > div.title-link-wrapper {
+				> a {
+					padding-bottom: 7px;
+				}
+			}
+
 			&.active {
 				font-weight: 700;
 				color: #000;
 				> * {
 					font-weight: 400;
+				}
+				&.top[data-depth="0"] > .top-of-page > div.title-link-wrapper {
+					> a {
+						color: #000;
+					}
+				}
+				> div.title-link-wrapper > a{
+					color: #000;
 				}
 			}
 
@@ -302,7 +393,15 @@ h5.fourDN-header {
 
 	}
 
+	.next-previous-pages-section {
+		margin-top: 5px;
+		&:not(:first-child){
+			border-top: 1px solid #eee;
+		}
+	}
+
 	> ol.inner {
+		margin-bottom: 6px;
 		> li:first-child {
 			margin-top: 8px;
 			a { border-top: none; }
@@ -310,6 +409,274 @@ h5.fourDN-header {
 	}
 
 }
+
+/***** Static Page Breadcrumbs ******/
+
+.breadcrumb-placeholder, .static-page-breadcrumbs {
+	min-height: 55px;
+}
+
+.static-page-breadcrumbs {
+	padding-top: 29px; 
+
+	@media screen and (min-width: $screen-lg-min) {
+		width: 75%;
+	}
+
+	> .static-breadcrumb {
+		display: inline-block;
+		vertical-align: middle;
+		font-size: 0.875rem;
+	}
+}
+
+
+
+/**********************************************************
+		Directory of Static Pages or Sections
+***********************************************************/
+
+.static-page.static-directory-page {
+
+	.grid-of-sections.row {
+
+		> .grid-item > .inner {
+			display: block;
+			position: relative;
+			text-decoration: none;
+			margin-bottom: 20px;
+			border: 1px solid #f0f0f0;
+			padding: 8px 16px;
+			background-color: #f8f8f8;
+			transition: border-color .25s;
+			color: $text-color;
+
+			.title-link {
+				color: $link-color;
+				transition: color .25s;
+			}
+
+			&:hover {
+				border-color: #ccc;
+				cursor: pointer;
+				.title-link {
+					//text-decoration: underline;
+					color: $link-hover-color;
+					text-shadow: 0px 0px $link-hover-color;
+				}
+			}
+		}
+
+		&.with-sub-children {
+			> .grid-item > .inner {
+
+				.section-page-count {
+					display: none;
+				}
+
+				@media screen and (min-width: $screen-sm-min) {
+					height: 98px;
+					.section-page-count {
+						display: block;
+						position: absolute;
+						right: 9px;
+						bottom: 5px;
+						transition: opacity .25s;
+						opacity: 0.33;
+					}
+				}
+
+
+				&:hover {
+					@media screen and (min-width: $screen-sm-min) {
+						.section-page-count {
+							opacity: 1;
+						}
+					}
+				}
+
+			}
+		}
+
+	}
+
+	.next-previous-pages-section {
+		.previous-section > h6:first-child,
+		.next-section > h6:first-child {
+			border-top: 1px solid #eee;
+			padding-top: 15px;
+		}
+		
+		h6 > a {
+			font-size: 1rem;
+		}
+	}
+
+}
+
+/**********************************************************
+		Big NavBar DropDown Menu
+***********************************************************/
+
+.navbar-container {
+
+	.big-dropdown-menu {
+		z-index: -100;
+		border-top: 2px solid #333;
+		//border-bottom: 1px solid transparent;
+		margin-bottom: -1px;
+		transform: translate3d(0px,0px,0px);
+		color: #ddd;
+		left: 0;
+		right: 0;
+		position: absolute;
+		transition: opacity 0.1s linear, z-index 0s .2s, visibility 0s .3s, background-color .2s linear;
+		visibility: hidden;
+		opacity: 0;
+		background-color: transparent;
+
+		h1,h2,h3,h4,h5,h6 { color: #eee; }
+
+		> .container {
+			padding-bottom: 25px;
+
+			> .intro-section {
+				margin-bottom: 10px;
+				padding-bottom: 18px;
+				border-bottom: 1px solid #5d5d5d;
+				h4 {
+					font-weight: 300;
+					margin-top: 20px;
+					margin-bottom: 0px;
+					> a {
+						display: inline-block;
+						color: #fff;
+						&:after {
+							content: "\f105";
+							font-family: FontAwesome;
+							opacity: 0;
+							margin-left: 5px;
+						}
+						&:hover {
+							color: #5d8a8e;
+							text-shadow: 0 0 0;
+							text-decoration: none;
+							&:after {
+								opacity: 1;
+							}
+						}
+					}
+				}
+			}
+
+			> .row.help-menu-row {
+				margin-top: 10px;
+				> .help-menu-tree {
+
+					> .level-1-title-container > a.level-1-title,
+					> a.level-2-title {
+						display: block;
+					}
+
+					> .level-1-title-container{
+						border-bottom: 1px solid #ddd;
+						margin-top: 0;
+						margin-bottom: 7px;
+						> a.level-1-title {
+							//border: 1px solid transparent;
+							display: inline-block;
+							color: #333;
+							color: #fff;
+							font-weight: 500;
+							padding: 8px 0 6px 0;
+							//margin-left: -12px;
+							//margin-right: -11px;
+							border-radius: 2px;
+							//margin-bottom: -1px;
+							&:hover {
+								border-color: #5d8a8e; 
+								//background-color: #e7e7e7;
+								//color: #fff;
+								text-decoration: none;
+								color: #000;
+								color: #5d8a8e; 
+								text-shadow: 0 0 0;
+							}
+						}
+					}
+
+					> a.level-2-title {
+						//color: #333;
+						position: relative;
+						color: #eee;
+						font-weight: 400;
+						padding: 5px 10px 4px;
+						margin-bottom: -4px;
+						margin-top: -4px;
+						z-index: 2;
+						&:hover {
+							z-index: 5;
+							background-color: #5d8a8e;
+							color: #fff;
+							text-decoration: none;
+						}
+						&.active {
+							z-index: 1;
+							//background-color: #34959d;
+							color: #fff;
+							font-weight: 600;
+							text-decoration: none;
+							background-color: #484848;
+							&:before {
+								font-family: "FontAwesome";
+								content: "\f105";
+								position: absolute;
+								left: 0px;
+								top: 4px;
+							}
+						}
+					}
+
+				}
+
+			}
+		}
+	}
+
+	> .big-dropdown-menu-background {
+		content: '';
+		width: 100%;
+		background-color: rgba(28,28,30,.7);
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		opacity: 0;
+		z-index: -1000;
+		transition: opacity .2s linear, z-index 0s .25s;
+		transform: translate3d(0px,0px,0px);
+	}
+
+	&.big-menu-open > .big-dropdown-menu-background {
+		opacity: 1;
+		z-index: 100;
+		transition: opacity .2s ease-out;
+	}
+
+	&.big-menu-open .big-dropdown-menu {
+		transition: opacity 0.2s linear, background-color .2s linear;
+		visibility: visible;
+		z-index: 5;
+		opacity: 1;
+		background-color: #444;
+		&.fade.in {
+			overflow-y: auto;
+		}
+	}
+
+}
+
 
 /**********************************************************
 		Misc Static Pages

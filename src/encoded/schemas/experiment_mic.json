@@ -47,7 +47,8 @@
                 "FiSH",
                 "Immunofluorescence",
                 "Fluorescence",
-                "Cryo-EM"
+                "Cryo-EM",
+                "SPT"
             ]
         },
         "microscopy_technique": {
@@ -63,7 +64,8 @@
                 "STED",
                 "STORM",
                 "Light sheet",
-                "EM"
+                "EM",
+                "TIRF"
             ]
         },
         "microscope_qc":{

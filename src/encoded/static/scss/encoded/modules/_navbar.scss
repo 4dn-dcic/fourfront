@@ -207,7 +207,8 @@ $navbar-transition-easing: ease-out;
         }
 
         > a:focus,
-        > a:hover {
+        > a:hover,
+        &.dropdown-open-for > a {
             color: $navbar-link-hover-color; /* Set in _base.scss */
             text-shadow: 0 0 0px $navbar-link-hover-color;
             background-color: $navbar-default-link-active-bg;
@@ -244,13 +245,14 @@ $navbar-transition-easing: ease-out;
             border-top-width: 0;
             .inner.container {
                 height: 0px;
+                transition: height .35s .2s ease;
             }
         }
         .inner.container {
             text-align: left;
             display: block;
             height : 37px;
-            transition: height .3s;
+            transition: height .35s ease;
             overflow: hidden;
             &.showing {
                 &.showing-filters {
@@ -343,6 +345,13 @@ $navbar-transition-easing: ease-out;
                 }
             }
         }
+
+        .navbar-container.big-menu-open & {
+            .inner.container {
+                transition: height 0s;
+            }
+        }
+
     }
 
 }

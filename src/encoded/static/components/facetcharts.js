@@ -37,7 +37,6 @@ export class FacetCharts extends React.Component {
             return false;
         },
         'views' : ['small', 'large'],
-        'baseSearchPath' : '/bar_plot_aggregations/',
         'colWidthPerScreenSize' : {
             'small' : [
                 //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
@@ -66,6 +65,7 @@ export class FacetCharts extends React.Component {
     }
 
     componentDidMount(){
+        var { debug, browseBaseState, initialFields } = this.props;
 
         if (!isServerSide() && typeof window !== 'undefined'){
             var _this = this;
@@ -77,16 +77,15 @@ export class FacetCharts extends React.Component {
 
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
-                this.props.baseSearchPath,
-                this.props.browseBaseState,
-                this.props.initialFields,
+                browseBaseState,
+                initialFields,
                 ()=>{
-                    if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
+                    if (debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     setTimeout(() => this.setState({ 'mounted' : true }), 100);
                 }
             );
         } else {
-            if (this.props.debug) console.log('Mounted FacetCharts');
+            if (debug) console.log('Mounted FacetCharts');
             setTimeout(() => this.setState({ 'mounted' : true }), 100);
         }
 
