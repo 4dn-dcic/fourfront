@@ -600,7 +600,7 @@ export const ChartDataController = {
 
         if (filtersSet){
             var filteredSearchParams = navigate.mergeObjectsOfLists(
-                { 'q' : (searchQuery && encodeURIComponent(searchQuery)) || null },
+                { 'q' : searchQuery || null },
                 baseSearchParams,
                 Filters.expSetFiltersToJSON(currentExpSetFilters)
             );
@@ -640,7 +640,7 @@ export const ChartDataController = {
         var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
 
         var filteredSearchParams = navigate.mergeObjectsOfLists(
-            { 'q' : (searchQuery && encodeURIComponent(searchQuery)) || null },
+            { 'q' : searchQuery || null },
             navigate.getBrowseBaseParams(opts.browseBaseState || null),
             Filters.expSetFiltersToJSON(currentExpSetFilters)
         );

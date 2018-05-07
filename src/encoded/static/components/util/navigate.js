@@ -190,7 +190,7 @@ navigate.deregisterCallbackFunction = function(fxn){
 /** Useful for param lists */
 navigate.mergeObjectsOfLists = function(){
     if (arguments.length < 2) throw Error('Expecting multiple objects as params');
-    const targetObj = arguments[1];
+    const targetObj = arguments[0];
     const sourceObjs = Array.prototype.slice.call(arguments, 1);
     _.forEach(sourceObjs, function(o){
         _.forEach(_.keys(o), function(oKey){
