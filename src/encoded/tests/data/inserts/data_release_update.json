@@ -19,11 +19,11 @@
         "update_items": [
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b222",
-                "secondary_id": "431106bc-8535-4448-903e-854af460b222"
+                "secondary_ids": ["431106bc-8535-4448-903e-854af460b222"]
             },
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b292",
-                "secondary_id": "431106bc-8535-4448-903e-854af460b292"
+                "secondary_ids": ["431106bc-8535-4448-903e-854af460b292"]
             }
         ]
     },
@@ -71,12 +71,12 @@
         "update_items": [
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b113",
-                "secondary_id": "66661e2f-3e43-4388-8bbb-e861f209c444"
+                "secondary_ids": ["66661e2f-3e43-4388-8bbb-e861f209c444"]
             }
         ]
     },
     {
-        "summary": "(TEST) New unreleased file has been added to a Replicate Experiment.",
+        "summary": "(TEST) New unreleased files have been added to a Replicate Experiment.",
         "uuid": "b0b9c607-8811-2202-1122-9895b461224b",
         "award": "Test-4DN",
         "update_tag": "TEST2",
@@ -95,7 +95,11 @@
         "update_items": [
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b121",
-                "secondary_id": "47e82a90-49e5-4c33-afab-9ec90d65fab9"
+                "secondary_ids": [
+                    "47e82a90-49e5-4c33-afab-9ec90d65fab9",
+                    "47e82a90-49e5-4c33-afab-9ec90d65fcd9",
+                    "47e82a90-49e5-4c33-afab-9ec90d65fef9"
+                ]
             }
         ]
     }

@@ -18,7 +18,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "severity": {
             "title": "Severity",
@@ -47,11 +47,18 @@
                         "description": "linkTo for the primary object of the update.",
                         "linkTo": "ExperimentSetReplicate"
                     },
-                    "secondary_id":{
-                        "title": "Secondary ID",
-                        "type": "string",
-                        "description": "linkTo of the secondary (explanatory) item of the update. May be the same as the primary",
-                        "linkTo": "Item"
+                    "secondary_ids":{
+                        "title": "Secondary IDs",
+                        "description": "Array of the secondary (explanatory) items of the update. May be the same as the primary.",
+                        "type": "array",
+                        "default": [],
+                        "uniqueItems": true,
+                        "items": {
+                            "title": "Secondary ID",
+                            "type": "string",
+                            "description": "linkTo for the secondary item",
+                            "linkTo": "Item"
+                        }
                     }
                 }
             }
