@@ -153,6 +153,7 @@ class SingleUpdate extends React.Component {
         };
         this.toggle = _.throttle(this.toggle.bind(this), 500);
         this.buildItem = this.buildItem.bind(this);
+        this.buildSecondary = this.buildSecondary.bind(this);
     }
 
     toggle(){
@@ -174,10 +175,20 @@ class SingleUpdate extends React.Component {
                     {item.primary_id.experiments_in_set[0].experiment_categorizer.value === null ? null :  item.primary_id.experiments_in_set[0].experiment_categorizer.field + ': ' + item.primary_id.experiments_in_set[0].experiment_categorizer.value}
                 </td>
                 <td>
-                    {item.primary_id['@id'] === item.secondary_id['@id'] ? null : <a href={item.secondary_id['@id']}>{item.secondary_id.display_title}</a>}
+                    {this.buildSecondary(item.primary_id['@id'], item.secondary_ids)}
                 </td>
             </tr>
         );
+    }
+
+    buildSecondary(set_id, secondary_list){
+        // create a div that contains a list of secondary @ids or
+        // nothing if the only secondary id == set_id (primary)
+        if (secondary_list.length == 1 && set_id === secondary_list[0]['@id']){
+            return null;
+        }else{
+            return secondary_list.map((item) => <div key={item['@id']}><a  href={item['@id']}>{item.display_title}</a></div>);
+        }
     }
 
     render(){

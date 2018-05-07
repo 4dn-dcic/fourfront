@@ -33,7 +33,6 @@ def test_data_release_updates_secondary_id_to_secondary_ids(
         app, data_release_update_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('data_release_update', data_release_update_1, current_version='1', target_version='2')
-    import pdb; pdb.set_trace()
     assert value['schema_version'] == '2'
     update_items = value['update_items']
     assert len(update_items) == 1
