@@ -446,7 +446,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     "in_path"       : original_file_in_output   # Whether this file is directly in tracing path (True) or just an extra output file (False). Used for 'show more context' UI control.
                 },
                 "run_data"  : {
-                    "file"          : file_items,               # Partially-psuedo-embedded file Items
+                    "file"          : file_items,               # Partially-pseudo-embedded file Items
                     "type"          : "input",                  # Unused?
                     "meta"          : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in output_files_for_arg ] # A
                 }
@@ -773,8 +773,12 @@ def pseudo_run(context, request):
     # for testing
     if not env:
         env = 'fourfront-webdev'
+    if env == 'fourfront-webprod2':
+        input_json['output_bucket'] = 'elasticbeanstalk-fourfront-webprod-wfoutput'
+    else:
+        input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
+
     input_json['env_name'] = env
-    input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
     if input_json.get('app_name', None) is None:
         input_json['app_name'] = 'pseudo-workflow-run'
 
