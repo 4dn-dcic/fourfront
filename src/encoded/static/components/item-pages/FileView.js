@@ -8,7 +8,7 @@ import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HiGlassContainer } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
@@ -292,7 +292,7 @@ export class QualityControlResults extends React.Component {
         qualityMetric['@type'] = [qcType, 'QualityMetric', 'Item'];
         var metricTips = object.tipsFromSchema(schemas || Schemas.get(), qualityMetric);
 
-        function renderMetric(prop, title){
+        function renderMetric(prop, title, renderPercent = false){
             if (!qualityMetric[prop]) return null;
             return (
                 <div className="overview-list-element">
@@ -302,7 +302,7 @@ export class QualityControlResults extends React.Component {
                         </div>
                         <div className="col-xs-8">
                             <div className="inner value">
-                                { Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
+                                { renderPercent ? ProcessedFilesQCStackedTable.percentOfTotalReads(file, property + '.' + prop) : Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
                             </div>
                         </div>
                     </div>
@@ -312,9 +312,13 @@ export class QualityControlResults extends React.Component {
 
         var itemsToReturn = [
             renderMetric("Total reads", "Total Reads"),
-            renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
-            renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
+            //renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
+            //renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
             renderMetric("Total Sequences", "Total Sequences"),
+            renderMetric("Sequence length", "Sequence length"),
+            renderMetric("Cis reads (>20kb)", "Cis reads (>20kb)", true),
+            renderMetric("Short cis reads (<20kb)", "Short cis reads (<20kb)", true),
+            renderMetric("Trans reads", "Trans Reads", true),
             renderMetric("Sequence length", "Sequence length"),
             renderMetric("overall_quality_status", "Overall Quality"),
             renderMetric("url", "Link to Report")

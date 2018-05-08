@@ -16,5 +16,5 @@ export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 export { SearchResultDetailPane } from './SearchResultDetailPane';
 export { FacetList, onFilterHandlerMixin } from './FacetList';
 export { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockListViewMoreButton, StackedBlockTable } from './StackedBlockTable';
-export { RawFilesStackedTable, ProcessedFilesStackedTable, RawFilesQCStackedTable, ProcessedFilesQCStackedTable } from './file-tables';
+export { RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './file-tables';
 
