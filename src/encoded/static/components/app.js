@@ -233,13 +233,11 @@ export default class App extends React.Component {
         if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
 
         this.state = {
-            'errors': [],
-            'dropdownComponent': undefined,
-            'content': undefined,
             'session': session,
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
             'isSubmitting': false,
+            //'isLoading' : false,
             'mounted' : false
         };
 
@@ -319,7 +317,13 @@ export default class App extends React.Component {
 
         this.setState({ 'mounted' : true });
     }
-
+/*
+    componentWillReceiveProps(nextProps){
+        if (this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState === 4 && !this.requestCurrent){
+            this.setState({ 'isLoading' : false });
+        }
+    }
+*/
     componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
@@ -823,6 +827,8 @@ export default class App extends React.Component {
                 return null;
             }
 
+            //this.setState({ isLoading : true });
+
             var request = ajax.fetch(
                 href,
                 {
@@ -1034,10 +1040,6 @@ export default class App extends React.Component {
             context = context.default_page;
         }
 
-        var errors = this.state.errors.map(function (error) {
-            return <div className="alert alert-error"></div>;
-        });
-
         var appClass = 'done';
         if (this.props.slow) {
             appClass = 'communicating';
@@ -1191,6 +1193,10 @@ export default class App extends React.Component {
         // Set current path for per-page CSS rule targeting.
         var hrefParts = url.parse(canonical || base);
 
+        console.log(this.state.isLoading );
+
+        var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4;
+
         return (
             <html lang="en">
                 <head>
@@ -1213,7 +1219,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname}>
+                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname} className={this.state.isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
@@ -1256,7 +1262,6 @@ export default class App extends React.Component {
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>
-                                {errors}
                                 <div id="layout-footer"></div>
                             </div>
                             <Footer version={this.props.context.app_version} />
@@ -1281,3 +1286,4 @@ export default class App extends React.Component {
     }
 
 }
+

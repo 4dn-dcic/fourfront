@@ -55,6 +55,22 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         var tabs = [];
 
+        if (processedFiles && processedFiles.length > 0){
+
+            // Processed Files Table Tab
+            tabs.push({
+                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
+                key : 'processed-files',
+                content : <ProcessedFilesStackedTableSection
+                    processedFiles={processedFiles}
+                    width={width} context={context}
+                    {..._.pick(this.props, 'schemas')}
+                    {...this.state}
+                />
+            });
+
+        }
+
         // Raw files tab, if have experiments
         if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
             tabs.push({
@@ -69,18 +85,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         if (processedFiles && processedFiles.length > 0){
-
-            // Processed Files Table Tab
-            tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
-                key : 'processed-files',
-                content : <ProcessedFilesStackedTableSection
-                    processedFiles={processedFiles}
-                    width={width} context={context}
-                    {..._.pick(this.props, 'schemas')}
-                    {...this.state}
-                />
-            });
 
             // Graph Section Tab
             if (Array.isArray(context.processed_files) && context.processed_files.length > 0){

@@ -245,7 +245,10 @@ $navbar-transition-easing: ease-out;
             border-top-width: 0;
             .inner.container {
                 height: 0px;
-                transition: height .35s .2s ease;
+                transition: height .35s ease;
+                body.loading-request & {
+                    transition: height 0s;
+                }
             }
         }
         .inner.container {
