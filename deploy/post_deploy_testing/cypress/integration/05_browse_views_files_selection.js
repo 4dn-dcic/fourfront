@@ -76,9 +76,11 @@ describe('Browse Views - Files Selection', function () {
                     if (idx > 7) return;
                     return cy.wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end()
                         .get('.search-results-container .search-result-row.open').then(($resultRow)=>{
-                            return cy.get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container h4 i.toggle-open-icon').scrollToCenterElement().click({ 'force' : true }).wait(300).end()
+                            return cy.get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container h4 i.toggle-open-icon').each(($toggleFilesOpenButton, idx)=>{
+                                cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end()
                                 .get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container .stacked-block-table input[type="checkbox"]').each(checkUncheckFileCheckbox.bind(this, origSelectedCount)).end()
-                                .get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container h4 i.toggle-open-icon').scrollToCenterElement().click({ 'force' : true }).wait(300).end();
+                                .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end();
+                            });    
                         }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end();
                 });
             });
