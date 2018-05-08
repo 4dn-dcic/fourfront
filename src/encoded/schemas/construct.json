@@ -51,7 +51,8 @@
               "crispr construct",
               "rnai construct",
               "tagging construct",
-              "retroviral construct"
+              "retroviral construct",
+              "expression construct"
             ]
           },
           "protein_tags": {

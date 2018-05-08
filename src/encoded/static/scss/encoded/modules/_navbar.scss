@@ -245,13 +245,14 @@ $navbar-transition-easing: ease-out;
             border-top-width: 0;
             .inner.container {
                 height: 0px;
+                transition: height .35s .2s ease;
             }
         }
         .inner.container {
             text-align: left;
             display: block;
             height : 37px;
-            transition: height .35s .4s ease;
+            transition: height .35s ease;
             overflow: hidden;
             &.showing {
                 &.showing-filters {

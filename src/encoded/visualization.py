@@ -17,7 +17,8 @@ from urllib.parse import (
 from datetime import datetime
 from .search import (
     _ASSEMBLY_MAPPER,
-    get_iterable_search_results
+    get_iterable_search_results,
+    DEFAULT_BROWSE_PARAM_LISTS
 )
 #from .types.file import File
 from .types.base import Item
@@ -33,7 +34,7 @@ def includeme(config):
     config.add_route('batch_hub', '/batch_hub/{search_params}/{txt}')
     config.add_route('batch_hub:trackdb', '/batch_hub/{search_params}/{assembly}/{txt}')
     config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
-    config.add_route('bar_plot_chart', '/bar_plot_aggregations/{search_params}/')
+    config.add_route('bar_plot_chart', '/bar_plot_aggregations')
     config.scan(__name__)
 
 
@@ -473,15 +474,20 @@ def trace_workflow_runs(context, request):
 
 
 
-
-@view_config(route_name='bar_plot_chart', request_method='GET')
+@view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 def bar_plot_chart(request):
 
     TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
-    search_path = '/browse/'
-    param_lists = parse_qs(request.matchdict['search_params'])
-    fields_to_aggregate_for = request.params.getall('field')
-    collect_value_from = request.params.get('collect_value')
+
+    try:
+        json_body = request.json_body
+        search_param_lists      = json_body.get('search_query_params',      DEFAULT_BROWSE_PARAM_LISTS)
+        fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
+        collect_value_from      = json_body.get('collect_value',            request.params.get('collect_value'))
+    except JSONDecodeError:
+        search_param_lists      = DEFAULT_BROWSE_PARAM_LISTS
+        fields_to_aggregate_for = request.params.getall('field')
+        collect_value_from      = request.params.get('collect_value')
 
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
@@ -609,7 +615,7 @@ def bar_plot_chart(request):
         return experiment_set
 
     # Aggregate/add counts to each field.terms.total+./child-field.terms.total+./../child-field.total+.terms bucket from each exp_set matching search query
-    for exp_set in get_iterable_search_results(request, search_path, param_lists):
+    for exp_set in get_iterable_search_results(request, "/browse/", search_param_lists):
         aggregegate_term_counts_for_fields_from_experiment_set(exp_set, return_fields)
 
     # Add time fetched so we can use this to compare/detect if new data (currently unused)
