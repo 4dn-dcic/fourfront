@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
-import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 
@@ -402,7 +401,7 @@ class ArrayField extends React.Component{
     }
 
     static shouldPushArrayValue(currentArr, field = null){
-        if (!currentArr || 
+        if (!currentArr ||
             (
                 Array.isArray(currentArr) && (
                     currentArr.length === 0 || !isValueNull(currentArr[currentArr.length - 1])
@@ -421,7 +420,7 @@ class ArrayField extends React.Component{
     constructor(props){
         super(props);
     }
-    
+
     /**
      * If empty array, add initial 'null' element. On Mount & Update.
      */
@@ -442,7 +441,7 @@ class ArrayField extends React.Component{
             }
         }
     }
-    
+
     initiateArrayField = (arrayInfo, index, allItems) => {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
@@ -1028,7 +1027,7 @@ class InfoIcon extends React.Component{
 
     fieldTypeDescriptor(){
         if (typeof this.props.fieldType !== 'string' || this.props.fieldType.length === 0) return null;
-        
+
         var type = Schemas.Term.capitalizeSentence(this.props.fieldType === 'array' ? ArrayField.typeOfItems(this.props.schema.items) : this.props.fieldType);
         if (this.props.fieldType === 'array'){
             type = type + ' <span class="array-indicator">[]</span>';
