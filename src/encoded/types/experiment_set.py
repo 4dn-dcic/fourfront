@@ -129,11 +129,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.extra_files",
         "experiments_in_set.files.extra_files.href",
         "experiments_in_set.files.extra_files.file_format",
-        "experiments_in_set.files.quality_metric.Total reads",
-        "experiments_in_set.files.quality_metric.Cis/Trans ratio",
         "experiments_in_set.files.quality_metric.Total Sequences",
         "experiments_in_set.files.quality_metric.Sequence length",
-        "experiments_in_set.files.quality_metric.% Long-range intrachromosomal reads",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
 
@@ -156,13 +153,17 @@ class ExperimentSet(Item):
         "processed_files.extra_files",
         "processed_files.extra_files.href",
         "processed_files.extra_files.file_format",
-        "processed_files.quality_metric.Total reads",
-        "processed_files.quality_metric.Cis/Trans ratio",
-        "processed_files.quality_metric.Total Sequences",
-        "processed_files.quality_metric.Sequence length",
-        "processed_files.quality_metric.% Long-range intrachromosomal reads",
+
+        #"processed_files.quality_metric.Total reads",
+        #"processed_files.quality_metric.Total Sequences",
+        #"processed_files.quality_metric.Sequence length",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
+
+        "processed_files.quality_metric.Total reads",
+        "processed_files.quality_metric.Trans reads",
+        "processed_files.quality_metric.Cis reads (>20kb)",
+        "processed_files.quality_metric.Short cis reads (<20kb)",
         #"processed_files.@type",
 
         "experiments_in_set.processed_files.href",
@@ -179,13 +180,12 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
         "experiments_in_set.processed_files.extra_files.file_format",
-        "experiments_in_set.processed_files.quality_metric.Total reads",
-        "experiments_in_set.processed_files.quality_metric.Cis/Trans ratio",
-        "experiments_in_set.processed_files.quality_metric.Total Sequences",
-        "experiments_in_set.processed_files.quality_metric.Sequence length",
-        "experiments_in_set.processed_files.quality_metric.% Long-range intrachromosomal reads",
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
+        "experiments_in_set.processed_files.quality_metric.Total reads",
+        "experiments_in_set.processed_files.quality_metric.Trans reads",
+        "experiments_in_set.processed_files.quality_metric.Cis reads (>20kb)",
+        "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
         #"experiments_in_set.processed_files.@type"
     ]
 

@@ -114,8 +114,7 @@ export class ExperimentSetDetailPane extends React.Component {
                                 <RawFilesStackedTable
                                     key='experiments-table'
                                     columnHeaders={[
-                                        { columnClass: 'file-detail', title : 'File Type'},
-                                        { columnClass: 'file-detail', title : 'File Info'},
+                                        { columnClass: 'file-detail', title: 'File Type'},
                                         { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
                                     ]}
                                     experimentSetAccession={expSet.accession || null}

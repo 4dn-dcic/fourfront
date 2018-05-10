@@ -8,7 +8,7 @@ import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-import { FacetList, RawFilesStackedTable, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable, RawFilesQCStackedTable } from './../browse/components';
+import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 
 
 /**
@@ -55,6 +55,22 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         var tabs = [];
 
+        if (processedFiles && processedFiles.length > 0){
+
+            // Processed Files Table Tab
+            tabs.push({
+                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
+                key : 'processed-files',
+                content : <ProcessedFilesStackedTableSection
+                    processedFiles={processedFiles}
+                    width={width} context={context}
+                    {..._.pick(this.props, 'schemas')}
+                    {...this.state}
+                />
+            });
+
+        }
+
         // Raw files tab, if have experiments
         if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
             tabs.push({
@@ -69,18 +85,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         if (processedFiles && processedFiles.length > 0){
-
-            // Processed Files Table Tab
-            tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
-                key : 'processed-files',
-                content : <ProcessedFilesStackedTableSection
-                    processedFiles={processedFiles}
-                    width={width} context={context}
-                    {..._.pick(this.props, 'schemas')}
-                    {...this.state}
-                />
-            });
 
             // Graph Section Tab
             if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
@@ -198,7 +202,7 @@ export class RawFilesStackedTableSection extends React.Component {
         var files = expFxn.allFilesFromExperimentSet(context, false);
         var fileCount = files.length;
         var expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0;
-        var filesWithMetrics = RawFilesQCStackedTable.filterFiles(files);
+        var filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(files);
         return (
             <div className="exp-table-section">
                 { expSetCount ? 
@@ -207,9 +211,10 @@ export class RawFilesStackedTableSection extends React.Component {
                 </h3>
                 : null }
                 <div className="exp-table-container">
-                    <RawFilesStackedTable
+                    <RawFilesStackedTableExtendedColumns
                         width={this.props.width}
                         experimentSetType={this.props.context.experimentset_type}
+                        showMetricColumns={filesWithMetrics.length > 0}
                         facets={ this.props.facets }
                         experimentSetAccession={this.props.context.accession || null}
                         experimentArray={this.props.context.experiments_in_set}
@@ -220,7 +225,7 @@ export class RawFilesStackedTableSection extends React.Component {
                         collapseLimit={10}
                         collapseShow={7}
                     />
-                    { filesWithMetrics.length ? [
+                    {/* filesWithMetrics.length ? [
                         <h3 className="tab-section-title mt-12">
                             <span>Quality Metrics</span>
                         </h3>,
@@ -232,7 +237,7 @@ export class RawFilesStackedTableSection extends React.Component {
                             replicateExpsArray={this.props.context.replicate_exps}
                             collapseLongLists={true}
                         />
-                    ] : null }
+                    ] : null */}
                 </div>
             </div>
         );
@@ -241,7 +246,7 @@ export class RawFilesStackedTableSection extends React.Component {
 
 export class ProcessedFilesStackedTableSection extends React.Component {
     render(){
-        var filesWithMetrics = RawFilesQCStackedTable.filterFiles(this.props.processedFiles);
+        var filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(this.props.processedFiles);
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">

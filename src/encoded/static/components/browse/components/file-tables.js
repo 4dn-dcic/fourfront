@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock, FileEntryBlockPairColumn } from './StackedBlockTable';
-import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
 
 
 /**
@@ -73,10 +73,11 @@ export class RawFilesStackedTable extends React.Component {
         'columnHeaders'     : [
             { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
+            //{ columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ],
-        'collapseLongLists' : true
+        'collapseLongLists' : true,
+        'showMetricColumns' : null
     }
 
     constructor(props){
@@ -90,6 +91,11 @@ export class RawFilesStackedTable extends React.Component {
         this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
         this.renderers.replicate = this.renderers.replicate.bind(this);
         this.renderers.default = this.renderers.default.bind(this);
+        this.showMetricColumns = typeof props.showMetricColumns === 'boolean' ? props.showMetricColumns : (
+            ProcessedFilesQCStackedTable.filterFiles(
+                expFxn.allFilesFromExperiments(props.experimentArray, false, false, true), true
+            ) ? true : false
+        );
 
 
         this.cache = {
@@ -124,9 +130,16 @@ export class RawFilesStackedTable extends React.Component {
         return this.cache.customColumnHeaders;
     }
 
+    metricColumnHeaders(){
+        if (!this.showMetricColumns) return [];
+        return [
+            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" }
+        ];
+    }
+
     /* Combined top row of headers */
     columnHeaders(){
-        return this.staticColumnHeaders().concat(this.customColumnHeaders());
+        return this.staticColumnHeaders().concat(this.customColumnHeaders()).concat(this.metricColumnHeaders());
     }
 
 
@@ -382,12 +395,16 @@ export class ProcessedFilesStackedTable extends React.Component {
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
-        'titleForFiles'     : 'Processed Files'
+        'titleForFiles'     : 'Processed Files',
+        'showMetricColumns' : null
     };
 
     constructor(props){
         super(props);
         this.oddExpRow = false;
+        this.showMetricColumns = typeof props.showMetricColumns === 'boolean' ? props.showMetricColumns : (
+            ProcessedFilesQCStackedTable.filterFiles(props.files).length > 0 ? true : false
+        );
     }
 
     componentWillUpdate(nextProps, nextState){
@@ -518,12 +535,38 @@ export class ProcessedFilesStackedTable extends React.Component {
 
 
 
+export class RawFilesStackedTableExtendedColumns extends RawFilesStackedTable {
+
+    metricColumnHeaders(){
+        if (!this.showMetricColumns) return [];
+        var origMetricHeaders = super.metricColumnHeaders();
+        return origMetricHeaders.concat([
+            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
+            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" }
+        ]);
+    }
+
+}
+
 export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
 
-    static filterFiles(files){
-        return _.filter(files.slice(0), function(f){
+    static filterFiles(files, checkAny=false){
+        var func = checkAny ? _.any : _.filter;
+        return func(files.slice(0), function(f){
             return f.quality_metric && f.quality_metric.overall_quality_status;
         });
+    }
+
+    static percentOfTotalReads(file, field, colIndex, props){
+        var numVal = object.getNestedProperty(file, field);
+        if (numVal && typeof numVal === 'number' && file.quality_metric && file.quality_metric['Total reads']){
+            var percentVal = Math.round((numVal / file.quality_metric['Total reads']) * 100 * 1000) / 1000;
+            var numValRounded = Schemas.Term.roundLargeNumber(numVal);
+            return (
+                <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
+            );
+        }
+        return '-';
     }
 
     static defaultProps = {
@@ -533,32 +576,14 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
             { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
             { columnClass: 'file-detail', title: 'Total Reads', initialWidth: 80, field : "quality_metric.Total reads" },
-            { columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
-            { columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
+            //{ columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
+            //{ columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
+            { columnClass: 'file-detail', title: 'Cis reads (>20kb)',   initialWidth: 80, field : "quality_metric.Cis reads (>20kb)", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
+            { columnClass: 'file-detail', title: 'Short cis reads',     initialWidth: 80, field : "quality_metric.Short cis reads (<20kb)", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
+            { columnClass: 'file-detail', title: 'Trans Reads',         initialWidth: 80, field : "quality_metric.Trans reads", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
             { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 80, field : "quality_metric.url" }
         ],
         'titleForFiles' : "Processed File Metrics"
     }
 
 }
-
-export class RawFilesQCStackedTable extends ProcessedFilesQCStackedTable {
-
-    static defaultProps = {
-        'columnHeaders' : [
-            //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'For File',          initialWidth: 120   },
-            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" },
-            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
-            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" },
-            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 145, field : "quality_metric.url" },
-            //{ columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 80, field : "quality_metric.overall_quality_status" }
-        ],
-        'titleForFiles' : "Raw File Metrics"
-    }
-
-}
-
-

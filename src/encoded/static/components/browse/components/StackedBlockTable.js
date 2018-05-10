@@ -728,7 +728,6 @@ export class FileEntryBlock extends React.Component {
     }
 
     filledFileRow (file = this.props.file){
-
         var row = [];
         var cols = _.filter(this.props.columnHeaders, (col)=>{
             if (col.columnClass === 'file-detail') return true;
@@ -745,6 +744,11 @@ export class FileEntryBlock extends React.Component {
             var title = col.valueTitle || col.title;
             var baseStyle = this.props.colWidthStyles ? this.props.colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
+            if (typeof col.render === 'function'){
+                row.push(<div key={col.field} className={className} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
+                continue;
+            }
+
             if (!file || !object.atIdFromObject(file)) {
                 row.push(<div key={"file-detail-empty-" + i} className={className} style={baseStyle}></div>);
                 continue;
@@ -756,10 +760,25 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (typeof col.field === 'string'){
-                let val = Schemas.Term.toName(col.field, object.getNestedProperty(file, col.field), true) || '-';
+                let val = object.getNestedProperty(file, col.field);
+                val = (val && Schemas.Term.toName(col.field, val, true)) || '-';
                 if (col.field === 'quality_metric.overall_quality_status'){
-                    if (val === 'PASS') val = (<span><i className="icon icon-check success" style={{ 'color' : 'green' }}/>&nbsp; Pass</span>);
-                    else if (val === 'FAIL') val = (<span><i className="icon icon-times" style={{ 'color' : 'red' }}/>&nbsp; Fail</span>);
+                    var linkToReport = (file.quality_metric && file.quality_metric.url) || null;
+                    if (val === 'PASS'){
+                        val = (
+                            <span>
+                                <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
+                                &nbsp; { linkToReport ? <a href={linkToReport} target="_blank">Pass</a> : "Pass"}
+                            </span>
+                        );
+                    } else if (val === 'FAIL'){
+                        val = (
+                            <span>
+                                <i className="icon icon-times" style={{ 'color' : 'red' }}/>
+                                &nbsp; { linkToReport ? <a href={linkToReport} target="_blank">Fail</a> : "Fail"}
+                            </span>
+                        );
+                    }
                 }
                 row.push(<div key={col.field} className={className} style={baseStyle} children={val} />);
                 continue;
