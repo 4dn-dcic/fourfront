@@ -3,8 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, layout } from'./../util';
-import { Collapse } from 'react-bootstrap';
+import { console, layout, navigate } from'./../util';
+import { requestAnimationFrame } from './../viz/utilities';
+import { Collapse, Button } from 'react-bootstrap';
 import * as store from '../../store';
 import * as globals from './../globals';
 import { Announcements } from './components';
@@ -16,7 +17,7 @@ import { Announcements } from './components';
  * @module {Component} static-pages/home
  * @prop {Object} context - Should have properties typically needed for any static page.
  */
-export default class HomePage extends React.Component {
+export default class HomePage extends React.PureComponent {
 
     static propTypes = {
         "context" : PropTypes.shape({
@@ -27,7 +28,22 @@ export default class HomePage extends React.Component {
         }).isRequired
     }
 
-    intro(){
+    midHeader(){
+        return (
+            <div className="homepage-mid-header row mb-4 mt-2">
+                <div className="col-md-6">
+                    <BigBrowseButton />
+                </div>
+                <div className="col-md-6">
+                    <Button className="btn-block btn-lg text-300" href="/help/user-guide/data-organization">
+                        Guide to Getting Started
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    introText(){
         var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
         return (
             <div className="col-md-6 col-xs-12">
@@ -38,29 +54,75 @@ export default class HomePage extends React.Component {
         );
     }
 
+    announcements(){
+        return (
+            <div className="col-xs-12 col-md-6 pull-right">
+                <h2 className="homepage-section-title">Announcements</h2>
+                <Announcements loaded session={this.props.session} announcements={this.props.context.announcements} />
+            </div>
+        );
+    }
+
     /**
      * The render function. Renders homepage contents.
      * @returns {Element} A React <div> element.
      */
     render() {
-        var intro = this.intro();
         return (
             <div className="home-content-area">
+                { this.midHeader() }
                 <div className="row">
-                    { intro }
-                    <div className="col-xs-12 col-md-6 pull-right">
-                        <h2 className="homepage-section-title">Announcements</h2>
-                        <Announcements loaded session={this.props.session} announcements={this.props.context.announcements} />
-                    </div>
+                    { this.introText() }
+                    { this.announcements() }
                 </div>
             </div>
         );
     }
 
-
 }
 
-class LinksRow extends React.Component {
+
+class BigBrowseButton extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.onMouseEnter = this.onMouseEnter.bind(this);
+        this.onMouseLeave = this.onMouseLeave.bind(this);
+    }
+
+    onMouseEnter(){
+        requestAnimationFrame(function(){
+            var topMenuBrowseButton = document.getElementById('browse-menu-item');
+            if (topMenuBrowseButton){
+                topMenuBrowseButton.style.textShadow = "0 0 0 #000";
+                topMenuBrowseButton.style.color = "#000";
+                topMenuBrowseButton.style.backgroundColor = "#e7e7e7";
+            }
+        });
+    }
+
+    onMouseLeave(e){
+        requestAnimationFrame(function(){
+            var topMenuBrowseButton = document.getElementById('browse-menu-item');
+            if (topMenuBrowseButton){
+                topMenuBrowseButton.style.textShadow = '';
+                topMenuBrowseButton.style.color = '';
+                topMenuBrowseButton.style.backgroundColor = '';
+            }
+        });
+    }
+
+    render(){
+        return (
+            <Button className="btn-block btn-primary btn-lg text-400" href={navigate.getBrowseBaseHref()} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} onClick={this.onMouseLeave}>
+                Browse 4DN Data
+            </Button>
+        );
+    }
+}
+
+
+class LinksRow extends React.PureComponent {
 
     static defaultProps = {
         'linkBoxVerticalPaddingOffset' : 22
