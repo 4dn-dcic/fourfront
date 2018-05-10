@@ -24,6 +24,11 @@ describe('Deployment/CI Search View Tests', function () {
             cy.visit('/pages'); // We should get redirected to ?type=Page
         });
 
+        beforeEach(function(){
+            // Ensure we preserve search session cookie for proper ordering.
+            Cypress.Cookies.preserveOnce("searchSessionID");
+        });
+
         it('Should redirect to /search/?type=Page correctly', function(){
             cy.location('search').should('include', 'type=Page').end()
                 .location('pathname').should('include', '/search/');
@@ -42,6 +47,11 @@ describe('Deployment/CI Search View Tests', function () {
 
         before(function(){ // beforeAll
             cy.visit('/'); // Start at home page
+        });
+
+        beforeEach(function(){
+            // Ensure we preserve search session cookie for proper ordering.
+            Cypress.Cookies.preserveOnce("searchSessionID");
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){

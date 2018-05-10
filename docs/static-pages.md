@@ -94,19 +94,22 @@ It will be the word "placeholder", followed by a colon, followed by any string y
     bin/export-data "https://data.4dnucleome.org/search/?type=Page&limit=all" -u ACCESS_KEY_ID -p ACCESS_KEY_SECRET > new_page_inserts_file.json
     bin/export-data "https://data.4dnucleome.org/search/?type=StaticSection&limit=all" -u ACCESS_KEY_ID -p ACCESS_KEY_SECRET > new_static_section_inserts_file.json
     ```
+- For images which desire to host externally (e.g. outside of repository or third-party URL), then it is suggested to upload images into a relevanet *sub-folder* (perhaps create an "/images/" folder for auxiliary images) of the **"4dn-dcic-public"** public S3 bucket. This bucket could also be used to host Markdown (.md) or other files, probably in the "/static-pages/" sub-folder, the URL of which can be used in the "file" field of StaticSections (will require a PATCH to Page or StaticSection to update 4DN Item content from file).
 
 # Permissions
 
-### TODO
 
-Currently may set a `status` of "draft", "published", or "deleted" for any Page or StaticSection and permissions will work accordingly.
+Currently may set a `status` of "draft", "published", or "deleted" for any Page or StaticSection and permissions will work accordingly. Permissions by lab/user should work in same way as for other Items, but this hasn't yet been tested.
 
 # StaticSections Above Search Results
 
-### TODO
+## **Simplification & Future** \< THIS WILL SUPERCEDE SYSINFOS MAPPING \>
+
+If we like this structure of having a static page or block for (almost) each `@type`, we could simplify greatly by getting rid of the Sysinfo Item & just having search.py look-up if any page w/ name `’/search-info-header/’ + @type` exists and then including its contents into a ‘search_header_content’ property as part of search results/response JSON.
 
 
 ## **BELOW SYSINFOS APPROACH WILL BE DEPRECATED SOON BUT FOR NOW STILL FUNCTIONAL**
+
 
 
 ## Static Section Header `@type` Mapping
@@ -148,10 +151,6 @@ Here these static sections are referenced by their name (rather than UUID).
 In order to allow such a link to your StaticSection, ensure the 'name' of it doesn't have any slashes (`/`) or hashes (`#`).
 For example, in the case above the names are `search-info-header.WorkflowRun`, `search-info-header.Workflow`, & `search-info-header.FileSetMicroscopeQc`. 
 
-
-## **Simplification & Future** <- THIS WILL SUPERCEDE SYSINFOS MAPPING
-
-If we like this structure of having a static page or block for (almost) each `@type`, we could simplify greatly by getting rid of the Sysinfo Item & just having search.py look-up if any page w/ name `’/search-info-header/’ + @type` exists and then including its contents into a ‘search_header_content’ property as part of search results/response JSON.
 
 # Auto-Generated Help Dropdown Menu
 
