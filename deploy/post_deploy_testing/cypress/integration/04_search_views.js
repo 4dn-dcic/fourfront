@@ -11,6 +11,11 @@ describe('Post-Deployment Search View Tests', function () {
             cy.visit('/search/');
         });
 
+        beforeEach(function(){
+            // Ensure we preserve search session cookie for proper ordering.
+            Cypress.Cookies.preserveOnce("searchSessionID");
+        });
+
         it('Load as you scroll works for ?type=Item', function () {
 
             cy.location('search').should('include', 'type=Item');
@@ -35,6 +40,11 @@ describe('Post-Deployment Search View Tests', function () {
 
         before(function(){
             cy.visit('/search/');
+        });
+
+        beforeEach(function(){
+            // Ensure we preserve search session cookie for proper ordering.
+            Cypress.Cookies.preserveOnce("searchSessionID");
         });
 
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function(){
