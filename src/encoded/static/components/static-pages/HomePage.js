@@ -50,7 +50,7 @@ export default class HomePage extends React.Component {
                     { intro }
                     <div className="col-xs-12 col-md-6 pull-right">
                         <h2 className="homepage-section-title">Announcements</h2>
-                        <Announcements loaded session={this.props.session} />
+                        <Announcements loaded session={this.props.session} announcements={this.props.context.announcements} />
                     </div>
                 </div>
             </div>
