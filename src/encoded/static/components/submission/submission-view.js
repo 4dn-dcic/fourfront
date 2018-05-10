@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
 import moment from 'moment';
-import {getS3UploadUrl, s3UploadFile} from '../util/aws';
+import { s3UploadFile } from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import SearchView from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
@@ -1137,13 +1137,18 @@ export default class SubmissionView extends React.Component{
                                 // that is not added from /types/file.py get_upload
                                 var creds = responseData['upload_credentials'];
                                 var upload_manager = s3UploadFile(this.state.file, creds);
-                                // this will set off a chain of aync events.
-                                // first, md5 will be calculated and then the
-                                // file will be uploaded to s3. If all of this
-                                // is succesful, call finishRoundTwo.
-                                stateToSet.uploadStatus = null;
-                                this.setState(stateToSet);
-                                this.updateUpload(upload_manager);
+                                if (upload_manager === null){
+                                    // bad upload manager. Cause an alert
+                                    alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
+                                }else{
+                                    // this will set off a chain of aync events.
+                                    // first, md5 will be calculated and then the
+                                    // file will be uploaded to s3. If all of this
+                                    // is succesful, call finishRoundTwo.
+                                    stateToSet.uploadStatus = null;
+                                    this.setState(stateToSet);
+                                    this.updateUpload(upload_manager);
+                                }
                             }else{
                                 // state cleanup for this key
                                 this.finishRoundTwo();
