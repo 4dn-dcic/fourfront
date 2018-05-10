@@ -24,7 +24,7 @@ import {
 
 
 
-class ResultRowColumnBlock extends React.Component {
+class ResultRowColumnBlock extends React.PureComponent {
 
     render(){
         var { result, columnDefinition, mounted } = this.props;
@@ -69,7 +69,7 @@ class DefaultDetailPane extends React.Component {
 }
 
 
-class ResultDetail extends React.Component{
+class ResultDetail extends React.PureComponent{
 
     static propTypes = {
         'result'    : PropTypes.object.isRequired,
@@ -128,7 +128,7 @@ class ResultDetail extends React.Component{
 }
 
 
-class ResultRow extends React.Component {
+class ResultRow extends React.PureComponent {
 
     static fullRowWidth(columnDefinitions, mounted=true, dynamicWidths=null){
         return _.reduce(columnDefinitions, function(fw, colDef, i){
@@ -258,7 +258,7 @@ class ResultRow extends React.Component {
 }
 
 
-class LoadMoreAsYouScroll extends React.Component {
+class LoadMoreAsYouScroll extends React.PureComponent {
 
     static propTypes = {
         'href' : PropTypes.string.isRequired,
@@ -577,7 +577,7 @@ class ShadowBorderLayer extends React.Component {
     }
 }
 
-class DimensioningContainer extends React.Component {
+class DimensioningContainer extends React.PureComponent {
 
     static resetHeaderColumnWidths(length){
         return [].fill(0, 0, length);
@@ -987,7 +987,7 @@ class DimensioningContainer extends React.Component {
  * @prop {boolean}          sortReverse         Whether current sort column is reversed, as fed by SortController.
  * @prop {function}         sortBy              Callback function for performing a sort, acceping 'sortColumn' and 'sortReverse' as params. As fed by SortController.
  */
-export class SearchResultTable extends React.Component {
+export class SearchResultTable extends React.PureComponent {
 
     static defaultColumnDefinitionMap = defaultColumnDefinitionMap
 

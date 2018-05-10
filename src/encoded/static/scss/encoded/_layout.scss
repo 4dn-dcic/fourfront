@@ -66,6 +66,7 @@
 #content {
 
 	padding-top: 0px;
+	position: relative;
 	
 	@media (min-width: $navbar-fixed-breakpoint) {
 		padding-bottom: 20px;
@@ -317,12 +318,18 @@ h1.page-title + .page-subtitle {
 .text-uppercase 	{ text-transform: uppercase; }
 .text-justify 		{ text-align: justify; }
 
-
+.text-100 { font-weight: 100; }
+a.text-100, button.text-100 { font-weight: 100 !important; }
 .text-200 { font-weight: 200; }
+a.text-200, button.text-200 { font-weight: 200 !important; }
 .text-300 { font-weight: 300; }
+a.text-300, button.text-300 { font-weight: 300 !important; }
 .text-400 { font-weight: 400; }
+a.text-400, button.text-400 { font-weight: 400 !important; }
 .text-500 { font-weight: 500; }
+a.text-500, button.text-500 { font-weight: 500 !important; }
 .text-600 { font-weight: 600; }
+a.text-600, button.text-600 { font-weight: 600 !important; }
 
 .text-normal { font-size: 1rem; } // Reset to default size.
 .text-small { font-size: 0.9rem; }

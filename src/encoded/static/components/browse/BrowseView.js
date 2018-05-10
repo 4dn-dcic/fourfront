@@ -31,7 +31,7 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
 ], defaultColumnDefinitionMap);
 
 
-export class ExperimentSetCheckBox extends React.Component {
+export class ExperimentSetCheckBox extends React.PureComponent {
 
     static isDisabled(files: Array){ return files.length === 0; }
 
@@ -61,7 +61,7 @@ export class ExperimentSetCheckBox extends React.Component {
  * @class ResultTableContainer
  * @extends {React.Component}
  */
-class ResultTableContainer extends React.Component {
+class ResultTableContainer extends React.PureComponent {
 
     static propTypes = {
         // Props' type validation based on contents of this.props during render.

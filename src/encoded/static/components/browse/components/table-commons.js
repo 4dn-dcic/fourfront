@@ -93,7 +93,7 @@ export function extendColumnDefinitions(columnDefinitions: Array<Object>, column
 }
 
 
-export class TableRowToggleOpenButton extends React.Component {
+export class TableRowToggleOpenButton extends React.PureComponent {
     render(){
         return (
             <div className="inline-block toggle-detail-button-container">
@@ -334,7 +334,7 @@ export class ResultRowColumnBlockValue extends React.Component {
 
 
 
-export class HeadersRow extends React.Component {
+export class HeadersRow extends React.PureComponent {
 
     static propTypes = {
         'columnDefinitions' : PropTypes.array.isRequired,//ResultRow.propTypes.columnDefinitions,
