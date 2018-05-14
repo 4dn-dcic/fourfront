@@ -64,12 +64,15 @@ If you would like to directly interact with the REST API for data submission see
 
 * The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with
     * In excel workbooks bioreplicate and technical replicate numbers are entered in the Experiment sheet
+
     * Using the API you directly associate the replicate information (*i.e. replicate number and the experiment identifier*) with the  ExperimentSetReplicate objects.
+
     * Using the web submission interface the replicate numbers and linked experiments are added from the ExperimentSetReplicate page
+    
 
 * In the database the information will always end up directly associated with ExperimentSetReplicate objects.  
 * Specific details on formatting information regarding replicates is given in the [Spreadsheet Submission](/help/submitter-guide/spreadsheet#experimental-replicate-information) page.  
-* When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/user-guide/rest-api). 
+* When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/user-guide/rest-api).
 
 
 ## Referencing existing objects
