@@ -7,7 +7,7 @@ These pages are designed to
 * show you how to find out what kind of metadata we collect for your particular type of experiment
 * introduce the mechanisms by which you can submit your metadata and data to the 4DN data portal.
 
-For an overview of the metadata structure and relationships between different items please see [the slides](/help#metadata-structure) available on the [introductory page](/help).
+For an overview of the metadata structure and relationships between different items please see [the slides](/help/user-guide/data-organization#metadata-structure) available on the [metadata introductory page](/help/user-guide/data-organization).
 
 We have three primary ways that you can submit data to the 4DN data portal.
 
