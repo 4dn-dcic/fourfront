@@ -127,7 +127,7 @@ and enter a valid *relationship\_type* term and *experiment* identifier to each 
 
 * In some cases information for existing items will be present in the Excel Work Sheets provided for your submission.  
 * You can also check the existing items from *collection* pages that list all of them.   
-* The links for item lists can be constructed by ```https://data.4dnucleome.org/ + plural object name``` and the identifiers that can be used for collections are referenced in [this table](schema_info.md).
+* The links for item lists can be constructed by ```https://data.4dnucleome.org/ + plural-object-name``` and the identifiers that can be used for collections are referenced in [this table](schema_info.md).
 
 <span id="excel_reps"></span>
 
@@ -143,9 +143,9 @@ The path should be the full path to the supplementary file.
 ![ExperimentSetReplicate example](/static/img/docs/submitting-metadata/repsets_w_desc.png)
 
 
-* Then when entering information about individual experiments on the specific Experiment_ sheet you should
+* Then when entering information about individual experiments on the specific Experiment_ sheet you should:
     1. enter the alias for the replicate set to which the experiment belongs
-    * indicate the bioreplicate and technical replicate number for that experiment.
+    2. indicate the bioreplicate and technical replicate number for that experiment.
 
 * In the example below the replicate set consists of five experiments categorized into one of two bioreplicates - bio\_rep\_no 1 and bio\_rep\_no 2, each of which contains three and two technical replicates, respectively.
 
