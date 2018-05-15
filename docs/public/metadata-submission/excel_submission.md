@@ -45,6 +45,7 @@
     * array/list
     * Item
 
+
 * The type will be indicated in the second row.
 
 <span id="basic-field"></span>
@@ -122,9 +123,7 @@ and enter a valid *relationship\_type* term and *experiment* identifier to each 
 ### Referencing existing items
 
 * Ways that you can reference items that already exist in the 4DN database in your spreadsheet submission is described [here](/help/submitter-guide/getting-started#referencing-existing-objects).
-
 <span id="supp_files"></span>
-
 * In some cases information for existing items will be present in the Excel Work Sheets provided for your submission.  
 * You can also check the existing items from *collection* pages that list all of them.   
 * The links for item lists can be constructed by ```https://data.4dnucleome.org/ + plural-object-name``` and the identifiers that can be used for collections are referenced in [this table](schema_info.md).
@@ -146,6 +145,7 @@ The path should be the full path to the supplementary file.
 * Then when entering information about individual experiments on the specific Experiment_ sheet you should:
     1. enter the alias for the replicate set to which the experiment belongs
     2. indicate the bioreplicate and technical replicate number for that experiment.
+
 
 * In the example below the replicate set consists of five experiments categorized into one of two bioreplicates - bio\_rep\_no 1 and bio\_rep\_no 2, each of which contains three and two technical replicates, respectively.
 
