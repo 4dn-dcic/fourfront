@@ -101,7 +101,7 @@ More information about these four identifiers is provided in [Using aliases](/he
 
 * If the Item field is designed to store a list of embedded sub-objects, you can enter multiple sub-objects by manually creating new columns and appending incremented integers to the fields names for each new sub-object.
 
-    For example, to submit a total of three related experiments to an ExperimentHiC Item you would find the *experimen\_relations.relationship\_type* and *experiment\_relations.experiment* columns, copy them and have total of 6 columns named:
+    For example, to submit a total of three related experiments to an ExperimentHiC Item you would find the *experiment\_relations.relationship\_type* and *experiment\_relations.experiment* columns, copy them and have total of 6 columns named:
 
 >     experiment_relations.relationship_type
 >     experiment_relations.experiment
@@ -126,7 +126,7 @@ and enter a valid *relationship\_type* term and *experiment* identifier to each 
 <span id="supp_files"></span>
 * In some cases information for existing items will be present in the Excel Work Sheets provided for your submission.  
 * You can also check the existing items from *collection* pages that list all of them.   
-* The links for item lists can be constructed by ```https://data.4dnucleome.org/ + plural-object-name``` and the identifiers that can be used for collections are referenced in [this table](schema_info.md).
+* The links for item lists can be constructed by ```https://data.4dnucleome.org/ + plural-object-name``` \(e.g. <https://data.4dnucleome.org/biosamples/> \) and the identifiers that can be used for collections are referenced in [this table](schema_info.md).
 
 <span id="excel_reps"></span>
 
