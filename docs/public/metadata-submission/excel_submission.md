@@ -163,15 +163,15 @@ The path should be the full path to the supplementary file.
 ### Installing the Submit4DN software
 The Submit4DN package is registered with Pypi so installation is as simple as:
 
-
-```pip3 install submit4dn```
-
+```console
+pip3 install submit4dn
+```
 
 If it is already installed upgrade to the latest version:
 
-
-```pip3 install submit4dn --upgrade```
-
+```console
+pip3 install submit4dn --upgrade
+```
 
 #### Submit4DN Source code
 The source code for the submission scripts is available on [github](https://github.com/4dn-dcic/Submit4DN).
@@ -179,8 +179,9 @@ The source code for the submission scripts is available on [github](https://gith
 
 **Note** if you are attempting to run the scripts in the wranglertools directory without installing the package, then in order to get the correct sys.path you need to run the scripts from the parent directory as modules using the -m flag.
 
-```python3 -m wranglertools.import_data  filename.xls```
-
+```console
+python3 -m wranglertools.import_data  filename.xls
+```
 
 ### Using import_data script for submission
 
@@ -202,16 +203,18 @@ You will need to generate access keys to submit data.  How to get these is descr
 * When you run the import_data  script on your metadata excel workbook without the `--update` or `--patchall` arguments the system will test your data for compatibility with our metadata structure and report back to you any problems.
 * The metadata will not be submitted to the database, so you can take advantage of this feature to test your excel workbook.
 
-```import_data My_metadata.xls```
+```console
+import_data My_metadata.xls
+```
 
 #### Uploading (posting) & Modifying (patching) Metadata
 
 * When you submit your metadata, if a row in any sheet corresponds to a new item that has not previously been submitted to the 4DN database you will be POSTing that data via the REST API.
 * Most of your entries in the first submission will be POSTs. To activate posting you need to include the ```--update``` argument to ```import_data```.
 
-
-```import_data My_metadata.xls --update```
-
+```console
+import_data My_metadata.xls --update
+```
 
 * If you need to modify an existing item, you can use the patch function.
 * To be able to match your item to the one on the server, a pre-existing identifier must be used in the spreadsheet.
@@ -219,7 +222,9 @@ You will need to generate access keys to submit data.  How to get these is descr
 * If you don't use the `--patchall` argument when you run ```import_data``` and an existing entry is encountered, the script will prompt you ‘Do you wish to PATCH this item?’. You will be prompted for every existing item that is found in your workbook.
 * The ```--patchall``` argument will allow automatic patching of each existing item, bypassing the prompts.
 
-```import_data My_metadata.xls --patchall```
+```console
+import_data My_metadata.xls --patchall
+```
 
 #### When your upload is aborted
 
@@ -227,7 +232,9 @@ You will need to generate access keys to submit data.  How to get these is descr
 * When you fix the problem that caused the process to terminate, you can rerun the script using both the ```--patchall``` and ```--update``` arguments.
 * Those items that had already been posted will be ‘patched’ using the data in the sheet and the items that had not been posted yet will be loaded.
 
-```import_data My_metadata.xls --patchall --update```
+```console
+import_data My_metadata.xls --patchall --update
+```
 
 * Functionality that will allow the deletion of all the data in a single field of an existing Item exists - however this can be a potentially dangerous operation.  If you determine that you need this functionality please contact us at the DCIC for more information.
 
