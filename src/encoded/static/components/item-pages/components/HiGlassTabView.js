@@ -52,7 +52,7 @@ export class HiGlassContainer extends React.Component {
      * @param {number} [options.index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
      * @returns {{ views : { uid : string, initialXDomain : number[], initialYDomain: number[], tracks: { top: {}[], bottom: {}[], left: {}[], center: {}[], right: {}[], bottom: {}[] } }[], trackSourceServers: string[] }} - The ViewConfig for HiGlass.
      */
-    static generateViewConfig(tilesetUid, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    static generateViewConfig(tilesetUid, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
         options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
 
@@ -87,6 +87,17 @@ export class HiGlassContainer extends React.Component {
         supplementaryTracksBaseUrl = supplementaryTracksBaseUrl || baseUrl;
 
         const centerTrackHeight = height - 50;
+
+        //track definitions, default to human
+        var annotation = {'name':'Gene Annotations (hg38)', 'tilesetUid': 'P0PLbQMwTYGy-5uPIQid7A'};
+        var chromosome = {'name':'Chromosome Axis', 'tilesetUid': 'NyITQvZsS_mOFNlz5C2LJg', 'infoid': 'hg38'}
+        if (genomeAssembly == 'GRCm38'){
+            // mouse
+            annotation.name = 'Gene Annotation (mm10)';
+            annotation.tilesetUid = 'QDutvmyiSrec5nX4pA5WGQ';
+            chromosome.tilesetUid = 'EtrWT0VtScixmsmwFSd7zg';
+            chromosome.infoid = 'mm10';
+        }
 
         function generateCenterTrack(){
             return {
@@ -129,16 +140,16 @@ export class HiGlassContainer extends React.Component {
                     "autocompleteServer": supplementaryTracksBaseUrl + "/api/v1",
                     "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
                     "chromInfoServer": supplementaryTracksBaseUrl + "/api/v1",
-                    "chromInfoId": "hg38",
+                    "chromInfoId": chromosome.infoid,
                     "visible": true
                 },
                 "tracks": {
                     "top": [
                         {
-                            "name": "Gene Annotations (hg38)",
+                            "name": annotation.name,
                             "created": "2017-07-14T15:27:46.989053Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
-                            "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
+                            "tilesetUid": annotation.tilesetUid,
                             "type": "horizontal-gene-annotations",
                             "options": {
                                 "labelColor": "black",
@@ -155,10 +166,10 @@ export class HiGlassContainer extends React.Component {
                             "position": "top"
                         },
                         {
-                            "name": "Chromosome Axis",
+                            "name": chromosome.name,
                             "created": "2017-07-17T14:16:45.346835Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
-                            "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
+                            "tilesetUid": chromosome.tilesetUid,
                             "type": "horizontal-chromosome-labels",
                             "options": {},
                             "width": 20,
@@ -168,10 +179,10 @@ export class HiGlassContainer extends React.Component {
                     ],
                     "left": [
                         {
-                            "name": "Gene Annotations (hg38)",
+                            "name": annotation.name,
                             "created": "2017-07-14T15:27:46.989053Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
-                            "tilesetUid": "P0PLbQMwTYGy-5uPIQid7A",
+                            "tilesetUid": annotation.tilesetUid,
                             "uid": "faxvbXweTle5ba4ESIlZOg",
                             "type": "vertical-gene-annotations",
                             "options": {
@@ -181,7 +192,7 @@ export class HiGlassContainer extends React.Component {
                                 "minusStrandColor": "red",
                                 "trackBorderWidth": 0,
                                 "trackBorderColor": "black",
-                                "name": "Gene Annotations (hg38)"
+                                "name": annotation.name
                             },
                             "width": 55,
                             "height": 20,
@@ -189,10 +200,10 @@ export class HiGlassContainer extends React.Component {
                             "position": "left"
                         },
                         {
-                            "name": "Chromosome Axis",
+                            "name": chromosome.name,
                             "created": "2017-07-17T14:16:45.346835Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
-                            "tilesetUid": "NyITQvZsS_mOFNlz5C2LJg",
+                            "tilesetUid": chromosome.tilesetUid,
                             "uid": "aXbmQTsMR2ao85gzBVJeRw",
                             "type": "vertical-chromosome-labels",
                             "options": {},
@@ -299,7 +310,7 @@ export class HiGlassContainer extends React.Component {
     }
 
     render(){
-        var { disabled, isValidating, viewConfig, tilesetUid, height, options } = this.props;
+        var { disabled, isValidating, viewConfig, tilesetUid, genomeAssembly, height, options } = this.props;
         let hiGlassInstance = null;
         const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
         if (isValidating || !mounted){
@@ -316,7 +327,7 @@ export class HiGlassContainer extends React.Component {
                 </div>
             );
         } else {
-            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
+            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, genomeAssembly, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
             hiGlassInstance = (
                 <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={(r)=>{
                     if (r){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
@@ -423,7 +434,7 @@ export class HiGlassTabView extends React.Component {
          */
         return (
             <div className="higlass-tab-view-contents">
-                <HiGlassContainer {...{ disabled, isValidating, viewConfig, height }} mounted={this.state.mounted} tilesetUid={context.higlass_uid} />
+                <HiGlassContainer {...{ disabled, isValidating, viewConfig, height }} mounted={this.state.mounted} tilesetUid={context.higlass_uid} genomeAssembly={context.genome_assembly} />
             </div>
         );
     }

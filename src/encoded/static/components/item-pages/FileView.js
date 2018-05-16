@@ -58,7 +58,7 @@ export default class FileView extends WorkflowRunTracingView {
         HiGlassContainer.validateHiGlassData(
             // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
             // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
-            HiGlassContainer.generateViewConfig(this.props.context.higlass_uid),
+            HiGlassContainer.generateViewConfig(this.props.context.higlass_uid, this.props.context.genome_assembly),
             () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),
             () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })
         );
