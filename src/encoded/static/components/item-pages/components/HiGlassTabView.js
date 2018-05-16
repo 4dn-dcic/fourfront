@@ -327,7 +327,7 @@ export class HiGlassContainer extends React.Component {
                 </div>
             );
         } else {
-            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
+            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, genomeAssembly, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
             hiGlassInstance = (
                 <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={(r)=>{
                     if (r){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
