@@ -301,7 +301,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
-                <HiGlassSection disabled={!this.state.higlassVisible} />
+                <HiGlassSection disabled={!this.state.higlassVisible} results={resultList4DN} />
             </StaticPage.Wrapper>
         );
     }
@@ -316,6 +316,29 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
 class HiGlassSection extends React.Component {
     render(){
         if (this.props.disabled) return null;
+
+        //defaults --
+        var tileset_h1 = 'VSIstZwyRIO0qx58rN2wLw';
+        var tileset_hff = 'PkEatkZ3SUqwjmI6cRIF_g';
+        const h1_access = '4DNES2M5JIGV';
+        const hff_access = '4DNES2R6PUEK';
+        if (this.props.results){
+            var found = _.map(_.filter(this.props.results, function(item) {
+                return [h1_access, hff_access].indexOf(item.accession) > -1;
+            }), function(val){
+                var mcool = val.processed_files.find(function(val) { return val.file_format == 'mcool';});
+                var retval = {};
+                retval[val.accession] = mcool.uuid;
+                if (val.accession == h1_access) {
+                    tileset_h1 = mcool.uuid;
+                } else if (val.accession == hff_access) {
+                    tileset_hff = mcool.uuid;
+                }
+                return retval;
+            });
+            console.log(found);
+        }
+        
         return (
             <div>
                 <h3 className="mt-4 mb-1 text-300" style={{ paddingBottom : 10, borderBottom : '1px solid #ddd' }}>
