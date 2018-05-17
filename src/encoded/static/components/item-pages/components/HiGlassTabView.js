@@ -59,7 +59,7 @@ export class HiGlassContainer extends React.Component {
         if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){
             return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string');
         })){ // Merge views into 1 array
-            var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps })); });
+            var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid,genomeAssembly,  _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps })); });
             var primaryConf = allConfigs[0];
             var locationLockID = 'LOCATION_LOCK_ID';
             var zoomLockID = 'ZOOM_LOCK_ID';
