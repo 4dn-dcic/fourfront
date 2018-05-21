@@ -966,6 +966,13 @@ def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
 
+@view_config(context=File, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_file_filename],
+             decorator=if_match_tid)
+def file_edit(context, request, render=None):
+    return item_edit(context, request, render)
+
+
 @view_config(context=FileProcessed, permission='edit', request_method='PUT',
              validators=[validate_item_content_put,
                          validate_processed_file_unique_md5_with_bypass], decorator=if_match_tid)
