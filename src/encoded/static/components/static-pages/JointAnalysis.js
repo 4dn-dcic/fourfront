@@ -322,17 +322,20 @@ class HiGlassSection extends React.Component {
         var tileset_hff = 'PkEatkZ3SUqwjmI6cRIF_g';
         const h1_access = '4DNES2M5JIGV';
         const hff_access = '4DNES2R6PUEK';
+        //ideally get tilesets from experiment sets
         if (this.props.results){
             var found = _.map(_.filter(this.props.results, function(item) {
                 return [h1_access, hff_access].indexOf(item.accession) > -1;
             }), function(val){
                 var mcool = val.processed_files.find(function(val) { return val.file_format == 'mcool';});
                 var retval = {};
-                retval[val.accession] = mcool.uuid;
-                if (val.accession == h1_access) {
-                    tileset_h1 = mcool.uuid;
-                } else if (val.accession == hff_access) {
-                    tileset_hff = mcool.uuid;
+                retval[val.accession] = mcool.higlass_uid;
+                if (mcool.higlass_uid) {
+                    if (val.accession == h1_access) {
+                        tileset_h1 = mcool.higlass_uid;
+                    } else if (val.accession == hff_access) {
+                        tileset_hff = mcool.higlass_uid;
+                    }
                 }
                 return retval;
             });
@@ -357,8 +360,8 @@ class HiGlassSection extends React.Component {
                         <HiGlassContainer
                             height={600}
                             tilesetUid={[
-                                { "tilesetUid" : "VSIstZwyRIO0qx58rN2wLw", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
-                                { "tilesetUid" : "PkEatkZ3SUqwjmI6cRIF_g", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
+                                { "tilesetUid" : tileset_h1, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
+                                { "tilesetUid" : tileset_hff, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
                             ]}
                         />
                     </div>
