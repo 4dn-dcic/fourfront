@@ -171,7 +171,7 @@
             "title": "Biosource type"
         },
         "experiments_in_set.biosample.biosource_summary": {
-            "title": "Biosource"
+            "title": "Sample"
         },
         "experiments_in_set.biosample.modifications.modification_type": {
             "title": "Modifications"
@@ -188,7 +188,7 @@
             "title" : "Organism"
         },
         "experiments_in_set.biosample.biosource_summary": {
-            "title": "Biosource Summary"
+            "title": "Sample"
         },
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"
