@@ -144,7 +144,7 @@
             "title": "Lab"
         },
         "biosource_summary": {
-            "title": "Sample"
+            "title": "Sample Type"
         },
         "biosource.individual.organism.name": {
             "title": "Organism"
@@ -164,7 +164,7 @@
             "title": "Biosource Type"
         },
         "biosource_summary": {
-            "title": "Sample"
+            "title": "Sample Type"
         },
         "modifications.display_title": {
             "title": "Modifications"
