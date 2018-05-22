@@ -76,8 +76,7 @@ class ResultTableContainer extends React.Component {
         'debug'     : false,
         'columnDefinitionOverrides' : {
             'experiments_in_set.biosample.biosource_summary' : {
-                'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
-                'title' : "Biosource"
+                'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }
             },
             'experiments_in_set.experiment_type' : {
                 'title' : "Exp Type"
