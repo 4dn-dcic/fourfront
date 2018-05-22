@@ -106,7 +106,7 @@
             }
         },
         "differentiation_tissue": {
-            "title": "Differentiation Tissue/Cell",
+            "title": "Differentiation Tissue/Cell Type",
             "description": "The resulting tissue or cell type for cells that have undergone differentiation.",
             "type": "string",
             "linkTo": "OntologyTerm",
