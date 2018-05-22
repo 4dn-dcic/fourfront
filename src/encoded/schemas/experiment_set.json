@@ -193,16 +193,16 @@
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"
         },
-        "experiments_in_set.digestion_enzyme.name": {
-            "title" : "Enzyme",
-            "default_hidden" : true
-        },
         "experiments_in_set.biosample.modifications.display_title": {
             "title" : "Modifications",
             "default_hidden" : true
         },
         "experiments_in_set.biosample.treatments.display_title": {
             "title" : "Treatments",
+            "default_hidden" : true
+        },
+        "public_release": {
+            "title" : "Public Release",
             "default_hidden" : true
         }
     }
