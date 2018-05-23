@@ -66,8 +66,8 @@ const CELL_TYPE_NAME_MAP = {
 export default class JointAnalysisPlansPage extends React.Component {
 
     static standardizeEncodeResult(result, idx){
-        var cellType = result.biosample_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
-        var experimentType = result.assay_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
+        var cellType = result.biosample_term_name || FALLBACK_NAME_FOR_UNDEFINED;
+        var experimentType = result.assay_term_name || FALLBACK_NAME_FOR_UNDEFINED;
         var experimentCategory = _.uniq(result.assay_slims || []);
         if (experimentCategory.length > 1){
             console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);

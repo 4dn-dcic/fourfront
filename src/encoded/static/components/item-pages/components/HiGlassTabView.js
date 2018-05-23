@@ -39,6 +39,37 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
 
 export class HiGlassContainer extends React.Component {
 
+
+    static generateViewConfigForMultipleViews(tilesetUidObjects, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+
+        var allConfigs = _.map(tilesetUidObjects, function(uidObj, idx){
+            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, genomeAssembly, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
+        });
+
+        var primaryConf = allConfigs[0];
+        var locationLockID = 'LOCATION_LOCK_ID';    // Arbitrary unique ID.
+        var zoomLockID = 'ZOOM_LOCK_ID';            // Arbitrary unique ID.
+
+        primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = locationLockID;
+        primaryConf.zoomLocks.locksByViewUid[primaryConf.views[0].uid] = zoomLockID;
+
+        for (var i = 1; i < allConfigs.length; i++){
+            primaryConf.views.push(allConfigs[i].views[0]);
+            primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = locationLockID;
+            primaryConf.zoomLocks.locksByViewUid[allConfigs[i].views[0].uid] = zoomLockID;
+        }
+
+        primaryConf.locationLocks.locksDict[locationLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
+            return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
+        })), { 'uid' : locationLockID });
+
+        primaryConf.zoomLocks.locksDict[zoomLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
+            return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
+        })), { 'uid' : zoomLockID });
+
+        return primaryConf;
+    }
+
     /**
      * This function is used to generate a full viewConfig for the HiGlassComponent.
      * Only the "center" view/track is dynamically generated, with other tracks currently being hard-coded to higlass.io data (e.g. hg38 tracks).
@@ -56,29 +87,12 @@ export class HiGlassContainer extends React.Component {
 
         options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
 
-        if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){
-            return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string');
-        })){ // Merge views into 1 array
-            var allConfigs = _.map(tilesetUid, function(uidObj, idx){ return HiGlassContainer.generateViewConfig(uidObj.tilesetUid,genomeAssembly,  _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps })); });
-            var primaryConf = allConfigs[0];
-            var locationLockID = 'LOCATION_LOCK_ID';
-            var zoomLockID = 'ZOOM_LOCK_ID';
-            primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = locationLockID;
-            primaryConf.zoomLocks.locksByViewUid[primaryConf.views[0].uid] = zoomLockID;
-            for (var i = 1; i < allConfigs.length; i++){
-                primaryConf.views.push(allConfigs[i].views[0]);
-                primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = locationLockID;
-                primaryConf.zoomLocks.locksByViewUid[allConfigs[i].views[0].uid] = zoomLockID;
-            }
-            primaryConf.locationLocks.locksDict[locationLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
-                return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
-            })), { 'uid' : locationLockID });
-            primaryConf.zoomLocks.locksDict[zoomLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
-                return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
-            })), { 'uid' : zoomLockID });
-
-            return primaryConf;
+        // If we're provided a list of { tilesetUid[, extraViewProps] } objects instead of string, generate HiGlass view w/ multiple panels/views.
+        if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){  return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string'); })){
+            return HiGlassContainer.generateViewConfigForMultipleViews(tilesetUid, genomeAssembly, options); // Merge views into 1 array
         }
+
+        // Continuing code assumes a string for tilesetUid.
 
         if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
 
@@ -88,11 +102,18 @@ export class HiGlassContainer extends React.Component {
 
         const centerTrackHeight = height - 50;
 
-        //track definitions, default to human
-        var annotation = {'name':'Gene Annotations (hg38)', 'tilesetUid': 'P0PLbQMwTYGy-5uPIQid7A'};
-        var chromosome = {'name':'Chromosome Axis', 'tilesetUid': 'NyITQvZsS_mOFNlz5C2LJg', 'infoid': 'hg38'}
-        if (genomeAssembly == 'GRCm38'){
-            // mouse
+        // Track definitions, default to human. Potential ToDos: Move outside of function into dictionary (? low priority)
+        var annotation = {
+            'name':         'Gene Annotations (hg38)',
+            'tilesetUid':   'P0PLbQMwTYGy-5uPIQid7A'
+        };
+        var chromosome = {
+            'name':         'Chromosome Axis',
+            'tilesetUid':   'NyITQvZsS_mOFNlz5C2LJg',
+            'infoid':       'hg38'
+        };
+
+        if (genomeAssembly == 'GRCm38'){ // mouse
             annotation.name = 'Gene Annotation (mm10)';
             annotation.tilesetUid = 'QDutvmyiSrec5nX4pA5WGQ';
             chromosome.tilesetUid = 'EtrWT0VtScixmsmwFSd7zg';
