@@ -153,6 +153,8 @@ class ExperimentSet(Item):
         "processed_files.extra_files",
         "processed_files.extra_files.href",
         "processed_files.extra_files.file_format",
+        #for joint analysis page
+        "processed_files.higlass_uid",
 
         #"processed_files.quality_metric.Total reads",
         #"processed_files.quality_metric.Total Sequences",
