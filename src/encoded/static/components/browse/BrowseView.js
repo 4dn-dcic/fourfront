@@ -128,7 +128,17 @@ class ResultTableContainer extends React.PureComponent {
         this.isTermSelected = this.isTermSelected.bind(this);
         this.onFilter = onFilterHandlerMixin.bind(this);
         this.hiddenColumns = this.hiddenColumns.bind(this);
+        this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
+        this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
         this.render = this.render.bind(this);
+        this.doForceUpdateOnContainer = this.forceUpdate.bind(this);
+
+        // Primarily used here for caching some values re: PureComponents further down rendering tree.
+        this.state = {
+            'hiddenColumns' : this.hiddenColumns(),
+            'columnDefinitions' : this.getColumnDefinitions(),
+            'colDefOverrides' : this.colDefOverrides()
+        };
     }
     
     /*
@@ -146,19 +156,43 @@ class ResultTableContainer extends React.PureComponent {
     }
     */
 
+    componentWillReceiveProps(nextProps){
+        var stateChange = {};
+        if (nextProps.context !== this.props.context || this.props.constantHiddenColumns !== nextProps.constantHiddenColumns){
+            stateChange.columnDefinitions = this.getColumnDefinitions(nextProps);
+        }
+        if (nextProps.constantHiddenColumns !== this.props.constantHiddenColumns || this.props.hiddenColumns !== nextProps.hiddenColumns){
+            stateChange.hiddenColumns = this.hiddenColumns(nextProps);
+        }
+        if (nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides || this.props.selectedFiles !== nextProps.selectedFiles ){
+            stateChange.colDefOverrides = this.colDefOverrides(nextProps);
+        }
+        if (_.keys(stateChange).length > 0){
+            this.setState(stateChange);
+        }
+    }
+
+    getColumnDefinitions(props = this.props){
+        return CustomColumnSelector.buildColumnDefinitions(
+            browseTableConstantColumnDefinitions,
+            props.context.columns || {},
+            {},
+            props.constantHiddenColumns
+        );
+    }
+
     isTermSelected(term, facet){
         return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
     }
 
-    colDefOverrides(){
-        if (!this.props.selectedFiles) return this.props.columnDefinitionOverrides || null;
-        var selectedFiles = this.props.selectedFiles;
+    colDefOverrides(props = this.props){
+        if (!props.selectedFiles) return props.columnDefinitionOverrides || null;
 
         function getSelectedFileForSet(allFilesForSet){
             var max = allFilesForSet.length;
             var selected = [];
             for (var i = 0; i < max; i++){
-                if (typeof selectedFiles[allFilesForSet[i]] !== 'undefined'){
+                if (typeof props.selectedFiles[allFilesForSet[i]] !== 'undefined'){
                     selected.push(allFilesForSet[i]);
                 }
             }
@@ -166,11 +200,11 @@ class ResultTableContainer extends React.PureComponent {
         }
 
         // Add Checkboxes
-        return _.extend({}, this.props.columnDefinitionOverrides, {
+        return _.extend({}, props.columnDefinitionOverrides, {
             'display_title' : _.extend({}, defaultColumnDefinitionMap.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
-                'render' : (expSet, columnDefinition, props, width) => {
-                    var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
+                'render' : (expSet, columnDefinition, paneProps, width) => {
+                    var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, paneProps, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
                     var allFiles = expFxn.allFilesFromExperimentSet(expSet, true);
                     var allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true);
@@ -190,7 +224,7 @@ class ResultTableContainer extends React.PureComponent {
                             onChange={(evt)=>{
                                 if (!isAllFilesChecked){
                                     var fileTriplesToSelect = _.difference(allFileAccessionTriples, selectedFilesForSet);
-                                    this.props.selectFile(fileTriplesToSelect.map(function(triple){
+                                    props.selectFile(fileTriplesToSelect.map(function(triple){
                                         var fileAccession = (allFileAccessionTriples[triple] || {}).accession || null;
                                         //var experiment = null;
                                         //if (fileAccession){
@@ -202,7 +236,7 @@ class ResultTableContainer extends React.PureComponent {
                                         ];
                                     }));
                                 } else if (isAllFilesChecked) {
-                                    this.props.unselectFile(allFileAccessionTriples);
+                                    props.unselectFile(allFileAccessionTriples);
                                 }
                             }}
                         />
@@ -213,15 +247,30 @@ class ResultTableContainer extends React.PureComponent {
         });
     }
 
-    hiddenColumns(){
+    hiddenColumns(props = this.props){
         var cols = [];
-        if (Array.isArray(this.props.constantHiddenColumns)){
-            cols = cols.concat(this.props.constantHiddenColumns);
+        if (Array.isArray(props.constantHiddenColumns)){
+            cols = cols.concat(props.constantHiddenColumns);
         }
-        if (Array.isArray(this.props.hiddenColumns)){
-            cols = cols.concat(this.props.hiddenColumns);
+        if (Array.isArray(props.hiddenColumns)){
+            cols = cols.concat(props.hiddenColumns);
         }
         return _.uniq(cols);
+    }
+
+    browseExpSetDetailPane(result, rowNumber, containerWidth, toggleExpandCallback){
+        return (
+            <ExperimentSetDetailPane
+                result={result}
+                containerWidth={containerWidth}
+                href={this.props.href || this.props.searchBase}
+                selectedFiles={this.props.selectedFiles}
+                selectFile={this.props.selectFile}
+                unselectFile={this.props.unselectFile}
+                toggleExpandCallback={toggleExpandCallback}
+                paddingWidth={47}
+            />
+        );
     }
 
     render() {
@@ -263,41 +312,24 @@ class ResultTableContainer extends React.PureComponent {
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href',
                             'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles'
                         )}
-                        parentForceUpdate={this.forceUpdate.bind(this)}
-                        columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                            browseTableConstantColumnDefinitions,
-                            this.props.context.columns || {},
-                            {},
-                            this.props.constantHiddenColumns
-                        )}
+                        parentForceUpdate={this.doForceUpdateOnContainer}
+                        columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount
                     />
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
-                        renderDetailPane={(result, rowNumber, containerWidth, toggleExpandCallback)=>
-                            <ExperimentSetDetailPane
-                                result={result}
-                                containerWidth={containerWidth}
-                                href={this.props.href || this.props.searchBase}
-                                selectedFiles={this.props.selectedFiles}
-                                selectFile={this.props.selectFile}
-                                unselectFile={this.props.unselectFile}
-                                toggleExpandCallback={toggleExpandCallback}
-                                paddingWidth={47}
-                            />
-                        }
+                        renderDetailPane={this.browseExpSetDetailPane}
                         stickyHeaderTopOffset={-78}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions}
-                        hiddenColumns={this.hiddenColumns()}
-                        columnDefinitionOverrideMap={this.colDefOverrides()}
+                        hiddenColumns={this.state.hiddenColumns}
+                        columnDefinitionOverrideMap={this.state.colDefOverrides}
                         href={this.props.href}
                         totalExpected={this.props.totalExpected}
 
                         sortBy={this.props.sortBy}
                         sortColumn={this.props.sortColumn}
                         sortReverse={this.props.sortReverse}
-
                     />
                 </div>
             </div>

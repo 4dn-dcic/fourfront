@@ -225,22 +225,24 @@ class ResultRow extends React.PureComponent {
                 }
             }}*/>
                 <div className="columns clearfix">
-                { columnDefinitions.map((colDef, i) =>
-                    <ResultRowColumnBlock
-                        columnNumber={i}
-                        rowNumber={rowNumber}
-                        key={colDef.field}
-                        columnDefinition={colDef}
-                        result={result}
-                        toggleDetailOpen={this.toggleDetailOpen}
-                        detailOpen={detailOpen}
-                        mounted={mounted}
-                        headerColumnWidths={headerColumnWidths}
-                        schemas={schemas}
-                        href={href}
-                        // rowFullHeight={this.rowFullHeight}
-                    />
-                ) }
+                { _.map(columnDefinitions, (colDef, i) => {
+                    return (
+                        <ResultRowColumnBlock
+                            columnNumber={i}
+                            rowNumber={rowNumber}
+                            key={colDef.field}
+                            columnDefinition={colDef}
+                            result={result}
+                            toggleDetailOpen={this.toggleDetailOpen}
+                            detailOpen={detailOpen}
+                            mounted={mounted}
+                            headerColumnWidths={headerColumnWidths}
+                            schemas={schemas}
+                            href={href}
+                            // rowFullHeight={this.rowFullHeight}
+                        />
+                    );
+                } ) }
                 </div>
                 <ResultDetail
                     result={result}
@@ -1029,6 +1031,13 @@ export class SearchResultTable extends React.PureComponent {
         'fullWidthContainerSelectorString' : '.browse-page-container'
     }
 
+    constructor(props){
+        super(props);
+        this.state = {
+            'columnDefinitions' : null
+        };
+    }
+
     /**
      * Grab loaded results.
      *
@@ -1058,9 +1067,9 @@ export class SearchResultTable extends React.PureComponent {
 
         if (columnDefinitionOverrideMap) columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
         return (
-                <layout.WindowResizeUpdateTrigger>
-                    <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions} ref="container"/>
-                </layout.WindowResizeUpdateTrigger>
+            <layout.WindowResizeUpdateTrigger>
+                <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions} ref="container"/>
+            </layout.WindowResizeUpdateTrigger>
         );
     }
 }
