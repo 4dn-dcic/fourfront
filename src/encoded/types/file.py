@@ -317,6 +317,9 @@ class File(Item):
             at_id = resource_path(self)
         except:
             at_id = "/" + str(uuid) + "/"
+        # ensure at_id ends with a slash
+        if not at_id.endswith('/'):
+            at_id += '/'
         for idx, xfile in enumerate(properties.get('extra_files', [])):
             # ensure a file_format (identifier for extra_file) is given and non-null
             if not('file_format' in xfile and bool(xfile['file_format'])):
