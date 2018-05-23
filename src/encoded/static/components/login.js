@@ -15,7 +15,7 @@ export default class Login extends React.Component {
     static propTypes = {
         updateUserInfo      : PropTypes.func.isRequired,
         session             : PropTypes.bool.isRequired,
-        navCloseMobileMenu  : PropTypes.func.isRequired,
+        closeMobileMenu     : PropTypes.func.isRequired,
         href                : PropTypes.string.isRequired
     }
 
@@ -61,7 +61,7 @@ export default class Login extends React.Component {
         JWT.remove();
         console.log('Logging out');
         if (!this.props.session) return;
-        if (typeof this.props.navCloseMobileMenu === 'function') this.props.navCloseMobileMenu();
+        if (typeof this.props.closeMobileMenu === 'function') this.props.closeMobileMenu();
 
         this.props.setIsLoadingIcon(true);
         ajax.fetch('/logout?redirect=false')
@@ -89,6 +89,8 @@ export default class Login extends React.Component {
 
         this.props.setIsLoadingIcon(true);
         this.lock.hide();
+
+        if (typeof this.props.closeMobileMenu === 'function') this.props.closeMobileMenu();
 
         // Second stage: get this valid OAuth account (Google or w/e) auth'd from our end.
         Promise.race([

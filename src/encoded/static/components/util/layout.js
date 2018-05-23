@@ -389,7 +389,7 @@ export class WindowResizeUpdateTrigger extends React.Component {
     }
 
     render(){
-        return React.cloneElement(this.props.children, _.omit(this.props, 'children'));
+        return React.cloneElement(this.props.children, _.omit(this.props, 'children', 'delay'));
     }
 
 }
