@@ -93,18 +93,6 @@ export function listFromTips(tips){
     });
 }
 
-// Found on SO. TODO: Propagate into places where it could be used for DRYness.
-export function serializeObjectToURLQuery(obj){
-    var str = [];
-    for(var p in obj)
-        if (obj.hasOwnProperty(p)) {
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-        }
-    return str.join("&");
-}
-
-
-
 /**
  * Find property within an object using a propertyName in object dot notation.
  * Recursively travels down object tree following dot-delimited property names.

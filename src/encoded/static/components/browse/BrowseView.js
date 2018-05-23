@@ -370,15 +370,10 @@ export default class BrowseView extends React.Component {
         navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
     }
 
-    renderNoResultsView(currentHrefQuery = null){
-        if (!currentHrefQuery) currentHrefQuery = url.parse(this.props.href, true).query;
+    renderNoResultsView(hrefParts = null){
         var context = this.props.context;
-        var hrefParts = url.parse(this.props.href, true);
-        var seeSearchResults = null;
-        var strippedQuery = (_.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ));
-        if (_.keys(strippedQuery).length > 0){
-            seeSearchResults = <li><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all Items</a> (advanced).</li>;
-        }
+        if (!hrefParts) hrefParts = url.parse(this.props.href, true);
+
 
         // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
         var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
@@ -386,29 +381,33 @@ export default class BrowseView extends React.Component {
         var setsExistInExternalData = this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1;
         var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
 
+        var browseBaseHref = navigate.getBrowseBaseHref();
+
+        var queryForSearchAllItems = _.extend( _.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ), { 'type' : 'Item' } );
+
         return (
             <div className="error-page mt-4">
                 <div className="clearfix">
                     <hr/>
-                    <h3 className="text-500 mb-15 mt-42">{ context.notification }</h3>
+                    { React.createElement(countExternalSets > 0 ? 'h4' : 'h3', { 'className' : "text-400 mb-05 mt-42" }, 'No results found for current filter selection.') }
                     { countExternalSets > 0 ?
-                        <h4 className="text-400 mt-2 mb-05">
-                            However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External data.
-                        </h4>
+                        <h3 className="text-500 mt-05 mb-05">
+                            However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External Data.
+                        </h3>
                     : null}
-                    <h4 className="mt-1 mb-05 text-400">Suggestions:</h4>
+                    <h4 className="mt-2 mb-05 text-400">Suggestions:</h4>
                     <ul className="mb-45 mt-1">
                         { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
                             <li>
-                                Keep filters and <a href="#" onClick={(e)=>{
+                                Keep current filters and <a href="#" onClick={(e)=>{
                                     e.preventDefault();
                                     e.stopPropagation();
                                     navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
                                 }}>browse <strong>all Experiment Sets</strong></a>, including External data.
                             </li>
                         : null }
-                        <li>Unset filters and <a href={navigate.getBrowseBaseHref()}>browse <strong>all 4DN Experiment Sets</strong></a>.</li>
-                        { seeSearchResults }
+                        { hrefParts.path !== browseBaseHref ? <li>Unset filters and <a href={browseBaseHref}>browse <strong>all 4DN Experiment Sets</strong></a>.</li> : null }
+                        <li><a href={'/search/?' + queryString.stringify(queryForSearchAllItems)}>Search <strong>all Items</strong></a> (advanced).</li>
                     </ul>
                     <hr/>
                 </div>
@@ -424,7 +423,7 @@ export default class BrowseView extends React.Component {
         var searchBase = hrefParts.search || '';
 
         // no results found!
-        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts.query);
+        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts);
 
         // browse is only for experiment sets
         if(!navigate.isValidBrowseQuery(hrefParts.query)){
