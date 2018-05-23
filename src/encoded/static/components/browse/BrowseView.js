@@ -75,9 +75,10 @@ class ResultTableContainer extends React.Component {
         'href'      : '/browse/',
         'debug'     : false,
         'columnDefinitionOverrides' : {
+            // TODO: Extend defaultColumnDefinitionMap perhaps? Get rid of (most of) browseTableConstantColumnDefinitions and move to schema (?).
+            // Also TODO: Add "description" property to be used for tooltips when hover over column title/label (?) (to be set in schemas or overrides).
             'experiments_in_set.biosample.biosource_summary' : {
-                'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
-                'title' : "Biosource"
+                'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }
             },
             'experiments_in_set.experiment_type' : {
                 'title' : "Exp Type"
@@ -114,7 +115,9 @@ class ResultTableContainer extends React.Component {
                     return <span>{ number_of_files }</span>;
                 }
             },
-            'experiments_in_set.experiment_categorizer.combined' : defaultColumnDefinitionMap['experiments_in_set.experiment_categorizer.combined']
+            'experiments_in_set.experiment_categorizer.combined' : defaultColumnDefinitionMap['experiments_in_set.experiment_categorizer.combined'],
+            'public_release' : defaultColumnDefinitionMap['public_release'],
+            'date_created' : defaultColumnDefinitionMap['date_created']
         },
         'constantHiddenColumns' : ['experimentset_type']
     }
