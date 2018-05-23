@@ -320,7 +320,7 @@ class HiGlassSection extends React.Component {
 
         //defaults --
         let tileset_h1 = 'VSIstZwyRIO0qx58rN2wLw';
-        let tileset_hff = 'PkEatkZ3SUqwjmI6cRIF_';
+        let tileset_hff = 'PkEatkZ3SUqwjmI6cRIF_g';
 
         const h1_access = '4DNES2M5JIGV';   // Override tileset_h1 with higlass_uid from mcool processed file from this expset, if found in results.
         const hff_access = '4DNES2R6PUEK';  // Override tileset_hff with higlass_uid from mcool processed file from this expset, if found.
