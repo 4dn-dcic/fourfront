@@ -128,6 +128,7 @@ class ResultTableContainer extends React.PureComponent {
         this.isTermSelected = this.isTermSelected.bind(this);
         this.onFilter = onFilterHandlerMixin.bind(this);
         this.hiddenColumns = this.hiddenColumns.bind(this);
+        this.filterSelectedFilesToOnesInExpSet = this.filterSelectedFilesToOnesInExpSet.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
         this.render = this.render.bind(this);
@@ -164,12 +165,23 @@ class ResultTableContainer extends React.PureComponent {
         if (nextProps.constantHiddenColumns !== this.props.constantHiddenColumns || this.props.hiddenColumns !== nextProps.hiddenColumns){
             stateChange.hiddenColumns = this.hiddenColumns(nextProps);
         }
-        if (nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides || this.props.selectedFiles !== nextProps.selectedFiles ){
+        if (nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
             stateChange.colDefOverrides = this.colDefOverrides(nextProps);
         }
         if (_.keys(stateChange).length > 0){
             this.setState(stateChange);
         }
+    }
+
+    filterSelectedFilesToOnesInExpSet(allFilesForSet, selectedFiles = this.props.selectedFiles){
+        var max = allFilesForSet.length;
+        var selected = [];
+        for (var i = 0; i < max; i++){
+            if (typeof selectedFiles[allFilesForSet[i]] !== 'undefined'){
+                selected.push(allFilesForSet[i]);
+            }
+        }
+        return selected;
     }
 
     getColumnDefinitions(props = this.props){
@@ -188,16 +200,7 @@ class ResultTableContainer extends React.PureComponent {
     colDefOverrides(props = this.props){
         if (!props.selectedFiles) return props.columnDefinitionOverrides || null;
 
-        function getSelectedFileForSet(allFilesForSet){
-            var max = allFilesForSet.length;
-            var selected = [];
-            for (var i = 0; i < max; i++){
-                if (typeof props.selectedFiles[allFilesForSet[i]] !== 'undefined'){
-                    selected.push(allFilesForSet[i]);
-                }
-            }
-            return selected;
-        }
+        var _this = this;
 
         // Add Checkboxes
         return _.extend({}, props.columnDefinitionOverrides, {
@@ -212,7 +215,7 @@ class ResultTableContainer extends React.PureComponent {
                     var allFilesKeyedByTriples = _.object(_.zip(allFileAccessionTriples, allFiles));
                     allFileAccessionTriples = allFileAccessionTriples.sort();
 
-                    var selectedFilesForSet = getSelectedFileForSet(allFileAccessionTriples); //getSelectedFileForSet(allFileIDs);
+                    var selectedFilesForSet = _this.filterSelectedFilesToOnesInExpSet(allFileAccessionTriples); //getSelectedFileForSet(allFileIDs);
                     newChildren[2] = newChildren[1];
                     newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
                     var isAllFilesChecked = ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFileAccessionTriples);
@@ -326,6 +329,7 @@ class ResultTableContainer extends React.PureComponent {
                         columnDefinitionOverrideMap={this.state.colDefOverrides}
                         href={this.props.href}
                         totalExpected={this.props.totalExpected}
+                        selectedFiles={this.props.selectedFiles} // Passed only to trigger re-render on PureComponent further down tree.
 
                         sortBy={this.props.sortBy}
                         sortColumn={this.props.sortColumn}

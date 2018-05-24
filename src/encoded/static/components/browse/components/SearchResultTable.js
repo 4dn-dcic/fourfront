@@ -41,7 +41,7 @@ class ResultRowColumnBlock extends React.PureComponent {
             <div className="search-result-column-block" style={{ width : blockWidth }} data-field={columnDefinition.field}>
                 <ResultRowColumnBlockValue
                     width={blockWidth} result={result} columnDefinition={columnDefinition} columnNumber={this.props.columnNumber}
-                    mounted={mounted} schemas={this.props.schemas} toggleDetailOpen={this.props.toggleDetailOpen} detailOpen={this.props.detailOpen}
+                    mounted={mounted} schemas={Schemas.get()} toggleDetailOpen={this.props.toggleDetailOpen} detailOpen={this.props.detailOpen}
                 />
             </div>
         );
@@ -182,7 +182,17 @@ class ResultRow extends React.PureComponent {
         //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.toggleDetailOpen = _.throttle(this.toggleDetailOpen.bind(this), 250);
         this.isOpen = this.isOpen.bind(this);
+        this.setDetailHeight = props.setDetailHeight.bind(props.setDetailHeight, props['data-key']);
         this.render = this.render.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps){
+        //_.keys(nextProps).map((k)=>{
+        //    if (nextProps[k] !== this.props[k]) console.log('CHANGED:' + k, nextProps[k], this.props[k]);
+        //});
+        if (nextProps['data-key'] !== this.props['data-key']){
+            this.setDetailHeight = nextProps.setDetailHeight.bind(nextProps.setDetailHeight, nextProps['data-key']);
+        }
     }
     /*
     shouldComponentUpdate(nextProps, nextState){
@@ -237,9 +247,8 @@ class ResultRow extends React.PureComponent {
                             detailOpen={detailOpen}
                             mounted={mounted}
                             headerColumnWidths={headerColumnWidths}
-                            schemas={schemas}
                             href={href}
-                            // rowFullHeight={this.rowFullHeight}
+                            selectedFiles={i === 0 ? this.props.selectedFiles : null} // Passed to trigger update/re-render on PureComponent
                         />
                     );
                 } ) }
@@ -252,7 +261,8 @@ class ResultRow extends React.PureComponent {
                     tableContainerWidth={tableContainerWidth}
                     tableContainerScrollLeft={tableContainerScrollLeft}
                     toggleDetailOpen={this.toggleDetailOpen}
-                    setDetailHeight={setDetailHeight.bind(setDetailHeight, this.props['data-key'])}
+                    setDetailHeight={this.setDetailHeight}
+                    selectedFiles={this.props.selectedFiles}
                 />
             </div>
         );
@@ -435,7 +445,7 @@ class ShadowBorderLayer extends React.Component {
     }
 
     static defaultProps = {
-        'horizontalScrollRateOnEdgeBUtton' : 10
+        'horizontalScrollRateOnEdgeButton' : 10
     }
 
     static isWindowPastTableTop(tableContainerElement, windowHeight = null, scrollTop = null, tableTopOffset = null){
@@ -542,7 +552,7 @@ class ShadowBorderLayer extends React.Component {
 
     performScrollAction(direction = "right", depth = 0){
         vizUtil.requestAnimationFrame(()=>{
-            var change = (direction === 'right' ? 1 : -1) * this.props.horizontalScrollRateOnEdgeBUtton;
+            var change = (direction === 'right' ? 1 : -1) * this.props.horizontalScrollRateOnEdgeButton;
             var maxScrollLeft = this.props.fullRowWidth - this.props.tableContainerWidth;
             var leftOffset = this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
             var detailPanes = DimensioningContainer.findDetailPaneElements();
@@ -581,8 +591,11 @@ class ShadowBorderLayer extends React.Component {
 
 class DimensioningContainer extends React.PureComponent {
 
-    static resetHeaderColumnWidths(length){
-        return [].fill(0, 0, length);
+    static resetHeaderColumnWidths(columnDefinitions, mounted = false){
+        //const listOfZeroes = [].fill(0, 0, columnDefinitions.length);
+        return _.map(columnDefinitions, function(colDef, i){
+            return getColumnWidthFromDefinition(colDef, mounted);
+        });
     }
 
     static findLargestBlockWidth(columnField){
@@ -614,9 +627,8 @@ class DimensioningContainer extends React.PureComponent {
     static findAndDecreaseColumnWidths(columnDefinitions, padding = 30){
         return columnDefinitions.map(function(colDef){
             var w = DimensioningContainer.findLargestBlockWidth(colDef.field);
-            if (typeof w !== 'number') return 0;
-            if (w < colDef.widthMap.lg) return w + padding;
-            return 0;
+            if (typeof w === 'number' && w < colDef.widthMap.lg) return w + padding;
+            return getColumnWidthFromDefinition(colDef, true);
         });
     }
 
@@ -653,12 +665,11 @@ class DimensioningContainer extends React.PureComponent {
         this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 200);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.setResults = this.setResults.bind(this);
+        this.renderHeadersRow = this.renderHeadersRow.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'mounted'   : false,
-            'widths'    : DimensioningContainer.resetHeaderColumnWidths(
-                            props.columnDefinitions.length
-                        ),
+            'widths'    : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions),
             'results'   : props.results.slice(0),
             'isWindowPastTableTop' : false,
             'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
@@ -700,7 +711,7 @@ class DimensioningContainer extends React.PureComponent {
             this.setState({
                 'results' : nextProps.results.slice(0),
                 'openDetailPanes' : {},
-                'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
+                'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted)
             }, ()=>{
                 vizUtil.requestAnimationFrame(()=>{
                     this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
@@ -713,7 +724,7 @@ class DimensioningContainer extends React.PureComponent {
                 this.lastResponsiveGridSize = responsiveGridSize;
                 // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
                 this.setState({
-                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
+                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted)
                 }, ()=>{
                     vizUtil.requestAnimationFrame(()=>{
                         // 2. Upon render into DOM, decrease col sizes.
@@ -866,46 +877,41 @@ class DimensioningContainer extends React.PureComponent {
         }, cb);
     }
 
-    renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled, props = this.props){
-        var { columnDefinitions, results, href, renderDetailPane } = props;
-        return this.state.results.map((r, rowNumber)=>
-            <ResultRow
-                result={r}
-                rowNumber={rowNumber}
-                data-key={DimensioningContainer.getKeyForGraphResult(r, rowNumber)}
-                key={DimensioningContainer.getKeyForGraphResult(r, rowNumber)}
-                columnDefinitions={columnDefinitions}
-                rowWidth={fullRowWidth}
-                mounted={this.state.mounted || false}
-                headerColumnWidths={headerColumnWidthsFilled}
-                schemas={Schemas.get()}
-                renderDetailPane={renderDetailPane}
-                toggleDetailPaneOpen={this.toggleDetailPaneOpen}
-                openDetailPanes={this.state.openDetailPanes}
-                setDetailHeight={this.setDetailHeight}
-
-                tableContainerWidth={tableContainerWidth}
-                tableContainerScrollLeft={tableContainerScrollLeft}
-
-                href={href}
-            />
+    renderHeadersRow({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}){
+        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.cachedTableDims || this.getTableDims();
+        return (
+            <HeadersRow
+                {..._.pick(this.props, 'columnDefinitions', 'sortBy', 'sortColumn', 'sortReverse', 'defaultMinColumnWidth', 'rowHeight', 'stickyHeaderTopOffset', 'renderDetailPane')}
+                {..._.pick(this.state, 'mounted', 'results')}
+                headerColumnWidths={this.state.widths} setHeaderWidths={this.setHeaderWidths}
+                tableLeftOffset={tableLeftOffset} tableContainerWidth={tableContainerWidth}
+                stickyStyle={style} isSticky={isSticky} />
         );
     }
 
+    renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, props = this.props){
+        return _.map(this.state.results, (r, idx)=>{
+            var key = DimensioningContainer.getKeyForGraphResult(r, idx);
+            return (
+                <ResultRow
+                    {..._.pick(props, 'columnDefinitions', 'renderDetailPane', 'href', 'selectedFiles')} // selectedFiles passed to trigger re-render on PureComponent further down tree (DetailPane).
+                    result={r} rowNumber={idx} data-key={key} key={key} mounted={this.state.mounted || false}
+                    rowWidth={fullRowWidth} headerColumnWidths={this.state.widths}
+                    toggleDetailPaneOpen={this.toggleDetailPaneOpen} openDetailPanes={this.state.openDetailPanes} setDetailHeight={this.setDetailHeight}
+                    tableContainerWidth={tableContainerWidth} tableContainerScrollLeft={tableContainerScrollLeft} />
+            );
+        });
+    }
+
     render(){
-        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, href, limit, defaultMinColumnWidth, stickyHeaderTopOffset } = this.props;
+        var { columnDefinitions, stickyHeaderTopOffset } = this.props;
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
         var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
 
-        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.getTableDims();
+        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.cachedTableDims = this.getTableDims();
 
         var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
             typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
-
-        var headerColumnWidthsFilled = this.state.widths.map((w, i)=>{
-            if (typeof w === 'number' && w > 0) return w;
-            return getColumnWidthFromDefinition(columnDefinitions[i], this.state.mounted);
-        });
 
         if (responsiveGridSize === 'xs' || responsiveGridSize === 'sm') stickyHeaderTopOffset = 0;
 
@@ -915,57 +921,30 @@ class DimensioningContainer extends React.PureComponent {
                     <div className={"search-results-container" + (canLoadMore === false ? ' fully-loaded' : '')}>
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
-                                    <Sticky topOffset={stickyHeaderTopOffset} >{
-                                        ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
-                                        <HeadersRow
-                                            columnDefinitions={columnDefinitions}
-                                            mounted={this.state.mounted}
-                                            headerColumnWidths={headerColumnWidthsFilled}
-                                            setHeaderWidths={this.setHeaderWidths}
-                                            sortBy={sortBy}
-                                            sortColumn={sortColumn}
-                                            sortReverse={sortReverse}
-                                            defaultMinColumnWidth={defaultMinColumnWidth}
-                                            tableLeftOffset={tableLeftOffset}
-                                            tableContainerWidth={tableContainerWidth}
-                                            rowHeight={this.props.rowHeight}
-                                            results={this.state.results}
-                                            stickyHeaderTopOffset={stickyHeaderTopOffset}
-                                            renderDetailPane={this.props.renderDetailPane}
-
-                                            stickyStyle={style}
-                                            isSticky={isSticky}
-                                        />
-                                    }</Sticky>
+                                <Sticky topOffset={stickyHeaderTopOffset} children={this.renderHeadersRow} />
                                 <LoadMoreAsYouScroll
-                                    results={this.state.results}
-                                    mounted={this.state.mounted}
-                                    href={href}
-                                    limit={limit}
+                                    {..._.pick(this.props, 'href', 'limit', 'rowHeight', 'totalExpected')}
+                                    {..._.pick(this.state, 'results', 'mounted', 'openDetailPanes')}
                                     setResults={this.setResults}
                                     tableContainerWidth={tableContainerWidth}
                                     tableContainerScrollLeft={tableContainerScrollLeft}
                                     ref="loadMoreAsYouScroll"
-                                    openDetailPanes={this.state.openDetailPanes}
-                                    rowHeight={this.props.rowHeight}
                                     innerContainerElem={this.refs && this.refs.innerContainer}
                                     //onVerticalScroll={this.onVerticalScroll}
-                                    totalExpected={this.props.totalExpected}
-                                >
-                                { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled) }
-                                </LoadMoreAsYouScroll>
+                                    children={this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft)}
+                                />
                             </div>
                         </div>
                         <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} innerContainerElem={this.refs && this.refs.innerContainer} isWindowPastTableTop={this.state.isWindowPastTableTop} />
                     </div>
                 </StickyContainer>
                 { canLoadMore === false ?
-                    <div className="fin search-result-row">
+                    <div key="can-load-more" className="fin search-result-row">
                         <div className="inner">
                             - <span>fin</span> -
                         </div>
                     </div>
-                : <div className="search-result-row empty-block"/> }
+                : <div key="can-load-more" className="search-result-row empty-block"/> }
             </div>
         );
     }
@@ -1033,9 +1012,37 @@ export class SearchResultTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.fullColumnDefinitions = this.fullColumnDefinitions.bind(this);
         this.state = {
-            'columnDefinitions' : null
+            'columnDefinitions' : this.fullColumnDefinitions(props)
         };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.columns !== this.props.columns || nextProps.columnDefinitionOverrideMap !== this.props.columnDefinitionOverrideMap || nextProps.defaultWidthMap !== this.props.defaultWidthMap ||
+            nextProps.hiddenColumns !== this.props.hiddenColumns || nextProps.constantColumnDefinitions !== this.props.constantColumnDefinitions) {
+            this.setState({ 'columnDefinitions' : this.fullColumnDefinitions(nextProps) });
+        }
+    }
+
+    fullColumnDefinitions(props = this.props){
+        var columnDefinitions = columnsToColumnDefinitions(props.columns, props.constantColumnDefinitions, props.defaultWidthMap);
+
+        _.forEach(columnDefinitions, function(colDef){
+            if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
+                colDef.widthMap.xs = colDef.widthMap.sm;
+            }
+        });
+
+        if (Array.isArray(props.hiddenColumns)){ // Remove hidden columns, if any defined
+            columnDefinitions = _.filter(columnDefinitions, function(colDef){
+                if (props.hiddenColumns.indexOf(colDef.field) > -1) return false;
+                return true;
+            });
+        }
+
+        if (props.columnDefinitionOverrideMap) columnDefinitions = extendColumnDefinitions(columnDefinitions, props.columnDefinitionOverrideMap);
+        return columnDefinitions;
     }
 
     /**
@@ -1049,26 +1056,11 @@ export class SearchResultTable extends React.PureComponent {
     }
 
     render(){
-        var { columns, constantColumnDefinitions, defaultWidthMap, hiddenColumns, columnDefinitionOverrideMap } = this.props;
-        var columnDefinitions = columnsToColumnDefinitions(columns, constantColumnDefinitions, defaultWidthMap);
-
-        columnDefinitions.forEach(function(colDef){
-            if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
-                colDef.widthMap.xs = colDef.widthMap.sm;
-            }
-        });
-
-        if (Array.isArray(hiddenColumns)){ // Remove hidden columns, if any defined
-            columnDefinitions = columnDefinitions.filter(function(colDef){
-                if (hiddenColumns.indexOf(colDef.field) > -1) return false;
-                return true;
-            });
-        }
-
-        if (columnDefinitionOverrideMap) columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
         return (
             <layout.WindowResizeUpdateTrigger>
-                <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions} ref="container"/>
+                <DimensioningContainer
+                    {..._.omit(this.props, 'hiddenColumns', 'columnDefinitionOverrideMap', 'constantColumnDefinitions', 'defaultWidthMap')}
+                    columnDefinitions={this.state.columnDefinitions} ref="container" />
             </layout.WindowResizeUpdateTrigger>
         );
     }
