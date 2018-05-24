@@ -317,6 +317,9 @@ class File(Item):
             at_id = resource_path(self)
         except:
             at_id = "/" + str(uuid) + "/"
+        # ensure at_id ends with a slash
+        if not at_id.endswith('/'):
+            at_id += '/'
         for idx, xfile in enumerate(properties.get('extra_files', [])):
             # ensure a file_format (identifier for extra_file) is given and non-null
             if not('file_format' in xfile and bool(xfile['file_format'])):
@@ -964,6 +967,13 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
                          validate_processed_file_unique_md5_with_bypass])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
+
+
+@view_config(context=File, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_file_filename],
+             decorator=if_match_tid)
+def file_edit(context, request, render=None):
+    return item_edit(context, request, render)
 
 
 @view_config(context=FileProcessed, permission='edit', request_method='PUT',
