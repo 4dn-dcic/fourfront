@@ -24,6 +24,16 @@ def expt_data(lab, award, human_biosample):
 
 
 @pytest.fixture
+def mic_data(lab, award, human_biosample):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'DNA-FiSH'
+    }
+
+
+@pytest.fixture
 def fastq(testapp, file_data):
     return testapp.post_json('/file_fastq', file_data).json['@graph'][0]
 
@@ -38,6 +48,13 @@ def processed(testapp, file_data):
 def test_audit_experiments_have_raw_files_w_file(testapp, fastq, expt_data):
     expt_data['files'] = [fastq['@id']]
     expt = testapp.post_json('/experiment_hi_c', expt_data).json['@graph'][0]
+    res = testapp.get(expt['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert not any(errors)
+
+
+def test_audit_mic_exp_no_file(testapp, mic_data):
+    expt = testapp.post_json('/experiment_mic', mic_data).json['@graph'][0]
     res = testapp.get(expt['@id'] + '/@@audit-self')
     errors = res.json['audit']
     assert not any(errors)
