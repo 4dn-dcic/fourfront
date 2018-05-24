@@ -63,15 +63,6 @@
                 "time-series"
             ]
         },
-        "file_classification": {
-            "title": "General Classification",
-            "type": "string",
-            "default": "Microscopy",
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "enum": [
-                "Microscopy"
-              ]
-        },
         "microscope_settings": {
             "type": "string",
             "lookup": 50,
