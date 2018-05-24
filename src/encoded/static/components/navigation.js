@@ -75,7 +75,7 @@ export default class Navigation extends React.Component {
         return (
             <MenuItem
                 key={action.id}
-                id={action.sid || action.id}
+                id={action.id}
                 href={Navigation.getMenuItemURL(action, mounted, currentHref)}
                 onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                 className="global-entry"
@@ -90,7 +90,7 @@ export default class Navigation extends React.Component {
     static buildDropdownMenu(action, mounted, currentHref){
         if (action.children){
             return (
-                <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
+                <NavDropdown key={action.id} id={action.id} label={action.id} title={action.title}>
                     { _.map(action.children, function(actionChild){ return Navigation.buildMenuItem(actionChild, mounted, currentHref); }) }
                 </NavDropdown>
             );
@@ -98,7 +98,7 @@ export default class Navigation extends React.Component {
             return (
                 <NavItem
                     key={action.id}
-                    id={action.sid || action.id}
+                    id={action.id}
                     href={Navigation.getMenuItemURL(action, mounted, currentHref)}
                     active={Navigation.isMenuItemActive(action, mounted, currentHref)}
                     children={action.title}
@@ -309,7 +309,7 @@ export default class Navigation extends React.Component {
                                 { browseMenuItemOpts ?
                                     <NavItem
                                         key={browseMenuItemOpts.id}
-                                        id={browseMenuItemOpts.sid || browseMenuItemOpts.id}
+                                        id={browseMenuItemOpts.id}
                                         href={Navigation.getMenuItemURL(browseMenuItemOpts, mounted, href)}
                                         active={Navigation.isMenuItemActive(browseMenuItemOpts, mounted, href)}
                                         children={browseMenuItemOpts.title || "Browse"}

@@ -66,8 +66,8 @@ const CELL_TYPE_NAME_MAP = {
 export default class JointAnalysisPlansPage extends React.Component {
 
     static standardizeEncodeResult(result, idx){
-        var cellType = result.biosample_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
-        var experimentType = result.assay_term_name ||FALLBACK_NAME_FOR_UNDEFINED;
+        var cellType = result.biosample_term_name || FALLBACK_NAME_FOR_UNDEFINED;
+        var experimentType = result.assay_term_name || FALLBACK_NAME_FOR_UNDEFINED;
         var experimentCategory = _.uniq(result.assay_slims || []);
         if (experimentCategory.length > 1){
             console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
@@ -243,7 +243,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
     render() {
 
-        var isLoading = _.any(_.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')), (pair)=>   pair[1] === null && this.props[pair[0] + '_url'] !== null   );
+        var isLoading = _.any(_.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')), ([key, resultsForKey]) => resultsForKey === null && this.props[key + '_url'] !== null );
 
         if (isLoading){
             return (
@@ -301,7 +301,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
-                <HiGlassSection disabled={!this.state.higlassVisible} />
+                <HiGlassSection disabled={!this.state.higlassVisible} results={resultList4DN} />
             </StaticPage.Wrapper>
         );
     }
@@ -315,7 +315,25 @@ globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
 
 class HiGlassSection extends React.Component {
     render(){
-        if (this.props.disabled) return null;
+        var { disabled, results } = this.props;
+        if (disabled) return null;
+
+        //defaults --
+        let tileset_h1 = 'VSIstZwyRIO0qx58rN2wLw';
+        let tileset_hff = 'PkEatkZ3SUqwjmI6cRIF_g';
+
+        const h1_access = '4DNES2M5JIGV';   // Override tileset_h1 with higlass_uid from mcool processed file from this expset, if found in results.
+        const hff_access = '4DNES2R6PUEK';  // Override tileset_hff with higlass_uid from mcool processed file from this expset, if found.
+
+        if (Array.isArray(results) && results.length > 0){
+            var h1_expset = _.findWhere(results, { 'accession' : h1_access });
+            var h1_mcool = h1_expset && Array.isArray(h1_expset.processed_files) && _.findWhere(h1_expset.processed_files, { 'file_format' : 'mcool' });
+            tileset_h1 = (h1_mcool && h1_mcool.higlass_uid) || tileset_h1;
+            var hff_expset = _.findWhere(results, { 'accession' : hff_access });
+            var hff_mcool = hff_expset && Array.isArray(hff_expset.processed_files) && _.findWhere(hff_expset.processed_files, { 'file_format' : 'mcool' });
+            tileset_hff = (hff_mcool && hff_mcool.higlass_uid) || tileset_hff;
+        }
+
         return (
             <div>
                 <h3 className="mt-4 mb-1 text-300" style={{ paddingBottom : 10, borderBottom : '1px solid #ddd' }}>
@@ -334,8 +352,8 @@ class HiGlassSection extends React.Component {
                         <HiGlassContainer
                             height={600}
                             tilesetUid={[
-                                { "tilesetUid" : "IjCacHbQQjGQgiSvOiInVg", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
-                                { "tilesetUid" : "OTLi4ALbSxmJ6ttrCvNqrQ", "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
+                                { "tilesetUid" : tileset_h1, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
+                                { "tilesetUid" : tileset_hff, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
                             ]}
                         />
                     </div>

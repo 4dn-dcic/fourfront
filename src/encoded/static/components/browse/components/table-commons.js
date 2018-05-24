@@ -93,7 +93,7 @@ export function extendColumnDefinitions(columnDefinitions: Array<Object>, column
 }
 
 
-export class TableRowToggleOpenButton extends React.Component {
+export class TableRowToggleOpenButton extends React.PureComponent {
     render(){
         return (
             <div className="inline-block toggle-detail-button-container">
@@ -173,7 +173,14 @@ export const defaultColumnDefinitionMap = {
         }
     },
     'date_created' : {
-        'title' : 'Created',
+        'title' : 'Date Created',
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+        'render' : function(result, columnDefinition, props, width){
+            return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
+        },
+        'order' : 500
+    },
+    'public_release' : {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
             return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
@@ -200,7 +207,7 @@ export const defaultColumnDefinitionMap = {
     'status' : {
         'title' : 'Status',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120},
-        'order' : 500
+        'order' : 501
     },
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
@@ -334,7 +341,7 @@ export class ResultRowColumnBlockValue extends React.Component {
 
 
 
-export class HeadersRow extends React.Component {
+export class HeadersRow extends React.PureComponent {
 
     static propTypes = {
         'columnDefinitions' : PropTypes.array.isRequired,//ResultRow.propTypes.columnDefinitions,

@@ -66,7 +66,7 @@ class AnnouncementsLoaded extends React.Component {
         this.fetchAnnouncements = this.fetchAnnouncements.bind(this);
         this.handleAnnouncementsSearchResponse = this.handleAnnouncementsSearchResponse.bind(this);
         this.state = {
-            'announcements' : null,
+            'announcements' : props.announcements || null,
             'loading' : false,
             'mounted' : false,
             'loadedAll' : false // TODO when have more announcements in system : create 'see more' function at this level and pass it down to Announcements to load in more.

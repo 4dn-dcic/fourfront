@@ -10,6 +10,7 @@
            {"replicate_exp": "4DNEXO67APT1", "bio_rep_no": 1, "tec_rep_no": 2},
            {"replicate_exp": "4DNEXO67APV1", "bio_rep_no": 2, "tec_rep_no": 1}
         ],
+        "public_release" : "2018-04-04",
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
         "status": "in review by lab",
@@ -21,6 +22,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "description": "This is a Hi-C replicate set that should fail some audits",
         "experimentset_type": "replicate",
+        "public_release" : "2017-11-04",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67APY1", "bio_rep_no": 1, "tec_rep_no":1},
            {"replicate_exp": "4DNEXO67APZ1", "bio_rep_no": 1, "tec_rep_no":2},
@@ -34,6 +36,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b222",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2017-12-04",
         "description": "Test replicate experiment set for Repliseq experiments",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -49,6 +52,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b292",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2017-12-27",
         "description": "Test replicate experiment set for Repliseq with only a single experiment no replicates",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -61,6 +65,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b112",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-01-04",
         "description": "Test replicate experiment set for Capture Hi-C experiments",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -75,6 +80,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b113",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-01-27",
         "description": "Test replicate experiment set for ATAC-seq - single experiment",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -87,6 +93,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b223",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-02-27",
         "description": "Test replicate experiment set for DAM-ID seq - single experiment",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -99,6 +106,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b114",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-03-04",
         "description": "Test replicate experiment set for PLAC-seq",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -112,6 +120,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b115",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-03-14",
         "description": "Test replicate experiment set for CHIA-pet",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -125,6 +134,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b116",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-02-23",
         "description": "Test replicate experiment set for CHIP-seq",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -138,6 +148,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b121",
         "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2018-02-24",
         "description": "Test replicate experiment set for Microscopy",
         "accession": "4DNESMICAAA1",
         "experimentset_type": "replicate",
@@ -151,6 +162,7 @@
     {
         "uuid": "331106bc-8535-3338-903e-854af460b544",
         "description": "HiC Replicates with OtherProcessedFiles",
+        "public_release" : "2018-02-25",
         "experimentset_type": "replicate",
         "submitted_by": "wrangler@wrangler.com",
         "replicate_exps": [

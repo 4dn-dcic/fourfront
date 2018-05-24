@@ -146,7 +146,7 @@ export const SERVER_4DN = {
     "editable": true,
     "zoomFixed": false,
     "trackSourceServers": [
-        "https://54.86.58.34/api/v1"
+        "https://higlass.4dnucleome.org/api/v1"
     ],
     "exportViewUrl": "/api/v1/viewconfs",
     "views": [
@@ -166,7 +166,7 @@ export const SERVER_4DN = {
                         "height": 551,
                         "contents": [
                             {
-                                "server": "https://54.86.58.34/api/v1",
+                                "server": "https://higlass.4dnucleome.org/api/v1",
                                 "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
                                 "type": "heatmap",
                                 "position": "center",

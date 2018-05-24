@@ -283,13 +283,24 @@ class EncodedRoot(Root):
 
     @calculated_property(schema={
         "title": "Static Page Content",
-        "type": "object"
+        "type": "array"
     })
     def content(self, request):
         '''Returns -object- with pre-named sections'''
         sections_to_get = ['home.introduction']
         try:
             return [ request.embed('/static-sections', section_name, '@@embedded', as_user=True) for section_name in sections_to_get ]
+        except KeyError:
+            return [ ]
+
+    @calculated_property(schema={
+        "title": "Announcements",
+        "type": "array"
+    })
+    def announcements(self, request):
+        '''Returns list of latest announcements'''
+        try:
+            return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=True).get('@graph', [])
         except KeyError:
             return [ ]
 

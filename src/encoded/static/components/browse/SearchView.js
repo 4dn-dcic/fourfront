@@ -11,7 +11,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
 
-class InfoIcon extends React.Component{
+class InfoIcon extends React.PureComponent{
     render() {
         if (!this.props.children) return null;
         return (
@@ -48,7 +48,7 @@ export function getSearchType(facets){
  * @class ResultTableHandlersContainer
  * @extends {React.Component}
  */
-export class ResultTableHandlersContainer extends React.Component {
+export class ResultTableHandlersContainer extends React.PureComponent {
 
     static defaultProps = {
         restrictions : {},
@@ -87,7 +87,7 @@ export class ResultTableHandlersContainer extends React.Component {
 
 
 
-class ControlsAndResults extends React.Component {
+class ControlsAndResults extends React.PureComponent {
 
     static defaultProps = {
         restrictions : {}
@@ -251,7 +251,7 @@ class ControlsAndResults extends React.Component {
 
 }
 
-export default class SearchView extends React.Component {
+export default class SearchView extends React.PureComponent {
 
     static defaultProps = {
         restrictions : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
