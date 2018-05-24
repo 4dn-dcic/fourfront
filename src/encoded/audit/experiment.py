@@ -18,6 +18,8 @@ def audit_experiments_have_raw_files(value, system):
     warning is generated if files are missing and status is not 'released'
     error is generated if files are missing and status is 'released'
     '''
+    if "ExperimentMic" in value.get('@type'):
+        return
     ok_stati = ['uploaded', 'released', 'submission in progress', 'released to project']
     raw_types = ['fastq']
     files = value.get('files', None)
