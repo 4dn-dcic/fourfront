@@ -74,6 +74,7 @@ class ResultTableContainer extends React.PureComponent {
     static defaultProps = {
         'href'      : '/browse/',
         'debug'     : false,
+        'navigate'  : navigate,
         'columnDefinitionOverrides' : {
             // TODO: Extend defaultColumnDefinitionMap perhaps? Get rid of (most of) browseTableConstantColumnDefinitions and move to schema (?).
             // Also TODO: Add "description" property to be used for tooltips when hover over column title/label (?) (to be set in schemas or overrides).
@@ -261,49 +262,38 @@ class ResultTableContainer extends React.PureComponent {
         return _.uniq(cols);
     }
 
+    handleClearFilters(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.props.navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true, 'dontScrollToTop' : true });
+    }
+
     browseExpSetDetailPane(result, rowNumber, containerWidth, toggleExpandCallback){
         return (
             <ExperimentSetDetailPane
-                result={result}
-                containerWidth={containerWidth}
-                href={this.props.href || this.props.searchBase}
-                selectedFiles={this.props.selectedFiles}
-                selectFile={this.props.selectFile}
-                unselectFile={this.props.unselectFile}
-                toggleExpandCallback={toggleExpandCallback}
-                paddingWidth={47}
+                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile')}
+                {...{ result, containerWidth, toggleExpandCallback }}
+                href={this.props.href || this.props.searchBase} paddingWidth={47}
             />
         );
     }
 
     render() {
-        var context = this.props.context;
-        var facets = context.facets;
-        var results = context['@graph'];
+        var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas, totalExpected, selectedFiles, sortBy, sortColumn, sortReverse } = this.props;
         
         return (
             <div className="row">
-                { facets.length > 0 ?
+                { context.facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
-                        <div className="above-results-table-row"/>{/* <-- temporary-ish */}
+                        <ExternaDataExpSetsCount countExternalSets={countExternalSets} browseBaseState={browseBaseState} href={href} />
                         <FacetList
-                            orientation="vertical"
-                            facets={facets}
-                            filters={context.filters}
-                            className="with-header-bg"
-                            isTermSelected={this.isTermSelected}
-                            onFilter={this.onFilter}
-                            itemTypeForSchemas="ExperimentSetReplicates"
-                            session={this.props.session}
-                            href={this.props.href || this.props.searchBase}
-                            browseBaseState={this.props.browseBaseState}
-                            schemas={this.props.schemas}
+                            orientation="vertical" className="with-header-bg"
+                            facets={context.facets} filters={context.filters}
+                            isTermSelected={this.isTermSelected} onFilter={this.onFilter}
+                            itemTypeForSchemas="ExperimentSetReplicates" session={session}
+                            href={href || searchBase} browseBaseState={browseBaseState} schemas={schemas}
                             showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
-                            onClearFilters={(evt)=>{
-                                evt.preventDefault();
-                                evt.stopPropagation();
-                                this.props.navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true, 'dontScrollToTop' : true });
-                            }}
+                            onClearFilters={this.handleClearFilters}
                         />
                     </div>
                     :
@@ -315,27 +305,46 @@ class ResultTableContainer extends React.PureComponent {
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href',
                             'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles'
                         )}
-                        parentForceUpdate={this.doForceUpdateOnContainer}
-                        columnDefinitions={this.state.columnDefinitions}
+                        parentForceUpdate={this.doForceUpdateOnContainer} columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount
                     />
                     <SearchResultTable
-                        results={results}
-                        columns={this.props.context.columns || {}}
-                        renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78}
-                        constantColumnDefinitions={browseTableConstantColumnDefinitions}
-                        hiddenColumns={this.state.hiddenColumns}
-                        columnDefinitionOverrideMap={this.state.colDefOverrides}
-                        href={this.props.href}
-                        totalExpected={this.props.totalExpected}
-                        selectedFiles={this.props.selectedFiles} // Passed only to trigger re-render on PureComponent further down tree.
-
-                        sortBy={this.props.sortBy}
-                        sortColumn={this.props.sortColumn}
-                        sortReverse={this.props.sortReverse}
+                        results={context['@graph']} columns={context.columns || {}}
+                        renderDetailPane={this.browseExpSetDetailPane} href={href} totalExpected={totalExpected}
+                        constantColumnDefinitions={browseTableConstantColumnDefinitions} hiddenColumns={this.state.hiddenColumns}
+                        columnDefinitionOverrideMap={this.state.colDefOverrides} stickyHeaderTopOffset={-78}
+                        sortBy={sortBy} sortColumn={sortColumn} sortReverse={sortReverse}
+                        selectedFiles={selectedFiles} // Passed only to trigger re-render on PureComponent further down tree.
                     />
                 </div>
+            </div>
+        );
+    }
+
+}
+
+
+class ExternaDataExpSetsCount extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.onBrowseStateToggle = this.onBrowseStateToggle.bind(this);
+    }
+
+    onBrowseStateToggle(e){
+        e.preventDefault();
+        e.stopPropagation();
+        navigate.setBrowseBaseStateAndRefresh(this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', this.props.href, this.props.context);
+    }
+
+    render(){
+        var { countExternalSets, browseBaseState } = this.props;
+        if (countExternalSets < 1) return <div className="above-results-table-row" />;
+        return (
+            <div className="above-results-table-row text-right">
+                <small className="inline-block mt-18">
+                    <span className="text-500">{ countExternalSets }</span> { browseBaseState === 'all' ? 'fewer' : 'more' } { "set" + (countExternalSets > 1 ? 's' : '') }{ browseBaseState === 'all' ? '' : ' available' } in <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
+                </small>
             </div>
         );
     }
@@ -439,12 +448,16 @@ export default class BrowseView extends React.Component {
         navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
     }
 
-    renderNoResultsView(hrefParts = null){
+    /**
+     * Fallback view for no results found.
+     * If no 4DN projects available in this query but there are External Items, let user know.
+     * And, show list of suggested actions.
+     * 
+     * @param {{ query: Object.<string|string[]>, pathname: string }} hrefParts - Parsed props.href, including parsed query.
+     * @param {number} countExternalSets - Count of ExpSets available in External Data, as determined via `BrowseView.externalDataSetsCount(context)`.
+     */
+    renderNoResultsView(hrefParts, countExternalSets){
         var context = this.props.context;
-        if (!hrefParts) hrefParts = url.parse(this.props.href, true);
-
-        // If no 4DN projects available in this query but there are External Items, let user know.
-        var countExternalSets = BrowseView.externalDataSetsCount(context);
 
         var browseBaseHref = navigate.getBrowseBaseHref();
 
@@ -486,9 +499,10 @@ export default class BrowseView extends React.Component {
         var results = context['@graph'];
         var hrefParts = url.parse(href, true);
         var searchBase = hrefParts.search || '';
+        var countExternalSets = BrowseView.externalDataSetsCount(context);
 
         // no results found!
-        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts);
+        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts, countExternalSets);
 
         // browse is only for experiment sets
         if(!navigate.isValidBrowseQuery(hrefParts.query)){
@@ -517,7 +531,7 @@ export default class BrowseView extends React.Component {
                 <SelectedFilesController href={href}>
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} totalExpected={context && context.total} />
+                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} totalExpected={context && context.total} countExternalSets={countExternalSets} />
                         </SortController>
                     </CustomColumnController>
                 </SelectedFilesController>
