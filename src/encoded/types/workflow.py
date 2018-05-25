@@ -372,15 +372,17 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
 
         # If we've already traced inputs of this workflowrun, lets skip tracing it.
-        # But, lets loop over its outputs and extend them with proper target to next step if our current file matches one of this already-traced runs output files.
+        # But, lets loop over its outputs and extend them with proper target reference to next step if our current file matches one of this already-traced runs output files.
         if uuidCacheTracedHistory.get(last_workflow_run_uuid):
+            if uuidCacheTracedHistory[last_workflow_run_uuid] is True:
+                raise WorkflowRunTracingException("Error -- WorkflowRun with UUID '" + last_workflow_run_uuid + "' has been RE-ENCOUNTERED while tracing file with UUID '" + current_file_model_object['uuid'] + "'. Likely this file appears on both input and output -side of a WorkflowRun (or chain of WorkflowRuns).")
             add_next_targets_to_step_from_file(uuidCacheTracedHistory[last_workflow_run_uuid], current_file_model_object)
             return
 
         if uuidCacheGroupSourcesByRun.get(last_workflow_run_uuid) is not None:
             return
 
-        uuidCacheTracedHistory[last_workflow_run_uuid] = True
+        uuidCacheTracedHistory[last_workflow_run_uuid] = True # Placeholder, becomes reference to real step (dictionary defined below as variable 'step') upon completing tracing of files being input into this step/workflow_run.
 
         workflow_run_model_obj = get_model_obj(last_workflow_run_uuid)
         if not workflow_run_model_obj:
@@ -485,7 +487,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 }
             })
 
-        steps.append(step)
+        steps.append(step) # Added to 'steps' output list in chronological order.
         uuidCacheTracedHistory[last_workflow_run_uuid] = step
         return step
 

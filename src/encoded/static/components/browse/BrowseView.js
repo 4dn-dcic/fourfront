@@ -348,6 +348,26 @@ class ResultTableContainer extends React.PureComponent {
 
 export default class BrowseView extends React.Component {
 
+    static externalDataSetsCount(context){
+        var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
+        var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
+        var setsExistInExternalData = availableProjectsInResults.indexOf('External') > -1;
+        var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
+        return countExternalSets;
+    }
+
+    /** Combines props.defaultHiddenColumns with list of facets/columns which have `"default_hidden" : true` in schema. */
+    static fullDefaultHiddenColumns(props){
+        if (props.context && props.context.columns){
+            return (props.defaultHiddenColumns || []).concat(_.map(
+                _.filter(_.pairs(props.context.columns), function([facet, columnInfo]){ return columnInfo.default_hidden; }),
+                function([facet, columnInfo]){ return facet; }
+            ));
+        } else {
+            return props.defaultHiddenColumns || [];
+        }
+    }
+
     static propTypes = {
         'context' : PropTypes.object.isRequired,
         'session' : PropTypes.bool,
@@ -357,6 +377,13 @@ export default class BrowseView extends React.Component {
 
     static defaultProps = {
         'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'status', 'number_of_files']
+    }
+
+    constructor(props){
+        super(props);
+        this.state = {
+            'defaultHiddenColumns' : BrowseView.fullDefaultHiddenColumns(props)
+        };
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -371,6 +398,12 @@ export default class BrowseView extends React.Component {
         var hrefParts = url.parse(this.props.href, true);
         if (!navigate.isValidBrowseQuery(hrefParts.query)){
             this.redirectToCorrectBrowseView(hrefParts);
+        }
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.context !== nextProps.context || this.props.defaultHiddenColumns !== nextProps.defaultHiddenColumns){
+            this.setState({ 'defaultHiddenColumns' : BrowseView.fullDefaultHiddenColumns(nextProps) });
         }
     }
 
@@ -410,12 +443,8 @@ export default class BrowseView extends React.Component {
         var context = this.props.context;
         if (!hrefParts) hrefParts = url.parse(this.props.href, true);
 
-
-        // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
-        var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
-        var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
-        var setsExistInExternalData = this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1;
-        var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
+        // If no 4DN projects available in this query but there are External Items, let user know.
+        var countExternalSets = BrowseView.externalDataSetsCount(context);
 
         var browseBaseHref = navigate.getBrowseBaseHref();
 
@@ -475,11 +504,6 @@ export default class BrowseView extends React.Component {
             );
         }
 
-        var defaultHiddenColumnsFromSchemas = [];
-        if (context.columns){
-            defaultHiddenColumnsFromSchemas = _.map(_.filter(_.pairs(context.columns), function(p){ return p[1].default_hidden; }), function(p){ return p[0]; });
-        }
-
         return (
             <div className="browse-page-container search-page-container" id="browsePageContainer">
                 {/*
@@ -491,7 +515,7 @@ export default class BrowseView extends React.Component {
                 />
                 */}
                 <SelectedFilesController href={href}>
-                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns.concat(defaultHiddenColumnsFromSchemas)}>
+                    <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} totalExpected={context && context.total} />
                         </SortController>
