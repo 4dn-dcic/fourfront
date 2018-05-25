@@ -804,7 +804,15 @@ export class FileEntryBlock extends React.Component {
 
         function titleString(){
             if (!file) return 'No Files';
-            return file.accession || file.uuid || object.atIdFromObject(file) || (file.error && <em>{ file.error }</em>) || 'N/A';
+            if (file.accession) return file.accession;
+            var atId = object.atIdFromObject(file);
+            if (atId){
+                var idParts = _.filter(atId.split('/'));
+                if (idParts[1].slice(0,5) === '4DNFI'){
+                    return idParts[1];
+                }
+            }
+            return file.uuid || atId || (file.error && <em>{ file.error }</em>) || 'N/A';
         }
 
         function title(){
