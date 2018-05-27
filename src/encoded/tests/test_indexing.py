@@ -69,7 +69,6 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
 @pytest.mark.slow
 def test_indexing_simple(app, testapp, indexer_testapp):
     import time
-    import pdb; pdb.set_trace()
     es = app.registry['elasticsearch']
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
     assert doc_count == 0
