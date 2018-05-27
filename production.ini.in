@@ -16,6 +16,7 @@ env.name = ${env_name}
 encoded_version = ${encoded_version}
 mpindexer = ${mpindexer} 
 indexer = ${indexer} 
+production = true
 
 snovault.load_test_data = ${load_test_data}
 sqlalchemy.url = ${sqlalchemy_url}
@@ -82,4 +83,4 @@ level = NOTSET
 formatter = generic
 
 [formatter_generic]
-format = %(levelname)s [%(name)s][%(threadName)s] %(message)s
+format = %(message)s
