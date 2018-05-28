@@ -24,6 +24,7 @@ load_test_data = encoded.loadxl:{load_function}
 mpindexer = {should_index}
 indexer = {should_index}
 indexer_processes = {procs}
+structlog.dir = {log_dir}
 '''
 # TODO: add in indexer.processes
 
@@ -53,6 +54,7 @@ def build_cfg_file():
     data['load_function'] = 'load_test_data'
     data['procs'] = str(multiprocessing.cpu_count())
     data['es_server'] = os.environ.get("ES_URL")
+    data['log_dir'] = '/var/log/'
     if os.environ.get("LOAD_FUNCTION"):
         data['load_function'] = os.environ.get("LOAD_FUNCTION")
 
