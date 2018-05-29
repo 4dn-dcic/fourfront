@@ -404,7 +404,7 @@ export class CopyWrapper extends React.Component {
         var elemsToWrap = [];
         if (children)               elemsToWrap.push(children);
         if (children && isMounted)  elemsToWrap.push(' ');
-        if (isMounted)              elemsToWrap.push(<i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
+        if (isMounted)              elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
 
         var wrapperProps = _.extend(
             { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },

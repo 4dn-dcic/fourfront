@@ -164,7 +164,7 @@ export function genChartBarDims(
  * @prop {string} aggregateType - Set by UIControlsWrapper. Controls whether Y-Axis has 'experiment_sets', 'experiments', or 'files'.
  * @prop {string} showType - Set by UIControlsWrapper. Controls whether showing "all" experiments or only the selected or "filtered"-in experiments.
  */
-export class Chart extends React.Component {
+export class Chart extends React.PureComponent {
 
     static shouldPerformManualTransitions(nextProps, pastProps){
         //return false;

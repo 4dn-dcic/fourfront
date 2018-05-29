@@ -40,7 +40,7 @@ export class StackedBlockNameLabel extends React.Component {
                     className : "ext" + (accession ? ' is-accession' : ''),
                     ref : 'subtitle'
                 },
-                <object.CopyWrapper value={accession} children={accession || subtitle} />
+                <object.CopyWrapper value={accession} children={accession || subtitle} key="copy-accession" />
             );
         }
 
@@ -574,7 +574,7 @@ export class FilePairBlock extends React.Component {
         return (
             <div className="name col-file-pair" style={this.props.colWidthStyles ? _.clone(this.props.colWidthStyles['file-pair']) : null}>
                 { label }
-                <div className="name-title">
+                <div className="name-title" key="name-title">
                     { this.renderCheckBox() }
                     { this.props.name }
                 </div>
@@ -665,7 +665,7 @@ export class FileEntryBlockPairColumn extends React.Component {
                 className={this.props.isSingleItem ? 'single-item' : null}
             >
                 { tableHasFilePairColumn ? <StackedBlockName passProps={false}>{ this.renderCheckBox() }</StackedBlockName> : null }
-                <StackedBlockList title="Files" className="files">
+                <StackedBlockList title="Files" className="files" collapseLongLists={false}>
                     <FileEntryBlock
                         file={this.props.file}
                         experiment={this.props.experiment}
@@ -921,9 +921,8 @@ export class StackedBlockTable extends React.Component {
             'className' : PropTypes.string,
             'title' : PropTypes.string.isRequired,
             'visibleTitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.func]),
-            'initialWidth' : PropTypes.number.isRequired
-        })),
-        'children' : PropTypes.arrayOf(PropTypes.element)
+            'initialWidth' : PropTypes.number
+        }))
     };
 
     static defaultProps = {

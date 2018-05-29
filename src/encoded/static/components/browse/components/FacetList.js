@@ -30,7 +30,7 @@ import ReactTooltip from 'react-tooltip';
  * @type {Component}
  */
 
-class Term extends React.Component {
+class Term extends React.PureComponent {
 
     /**
      * For non-AJAX filtration.
@@ -62,7 +62,6 @@ class Term extends React.Component {
         return numPassed;
     }
 
-
     static propTypes = {
         'facet'             : PropTypes.shape({
             'field'             : PropTypes.string.isRequired
@@ -73,7 +72,6 @@ class Term extends React.Component {
         }).isRequired,
         'isTermSelected'    : PropTypes.func.isRequired
     }
-
 
     static defaultProps = {
         'getHref' : function(){ return '#'; }
@@ -291,7 +289,7 @@ class FacetTermsList extends React.Component {
  * @class Facet
  * @type {Component}
  */
-class Facet extends React.Component {
+class Facet extends React.PureComponent {
 
     static isStatic(facet){
         return (
@@ -457,7 +455,7 @@ export function onFilterHandlerMixin(field, term, callback){
     setTimeout(callback, 100);
 }
 
-export class FacetList extends React.Component {
+export class FacetList extends React.PureComponent {
 
     /**
      * @deprecated

@@ -16,7 +16,7 @@ import { boundActions } from './ViewContainer';
  * 
  * @type {Component}
  */
-export class UIControlsWrapper extends React.Component {
+export class UIControlsWrapper extends React.PureComponent {
 
     static canShowChart(chartData){
         if (!chartData) return false;

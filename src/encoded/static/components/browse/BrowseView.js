@@ -128,6 +128,7 @@ class ResultTableContainer extends React.PureComponent {
         this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.onFilter = onFilterHandlerMixin.bind(this);
+        this.handleClearFilters = this.handleClearFilters.bind(this);
         this.hiddenColumns = this.hiddenColumns.bind(this);
         this.filterSelectedFilesToOnesInExpSet = this.filterSelectedFilesToOnesInExpSet.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);

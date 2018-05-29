@@ -29,7 +29,7 @@ export class SelectedFilesOverview extends React.Component {
 }
 
 
-export class SelectedFilesDownloadButton extends React.Component {
+export class SelectedFilesDownloadButton extends React.PureComponent {
 
     static encodePlainText(text){
         return 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
@@ -143,7 +143,7 @@ export class SelectedFilesDownloadButton extends React.Component {
         }
 
         return (
-            <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "secondary" : "primary"}>
+            <Button key="download" onClick={this.handleClick} disabled={disabled} className={disabled ? "btn-secondary" : "btn-primary"}>
                 <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> Selected Files</span>
                 { this.renderModal(countSelectedFiles) }
             </Button>
@@ -151,7 +151,7 @@ export class SelectedFilesDownloadButton extends React.Component {
     }
 }
 
-export class SelectAllFilesButton extends React.Component {
+export class SelectAllFilesButton extends React.PureComponent {
 
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
@@ -188,10 +188,12 @@ export class SelectAllFilesButton extends React.Component {
         return false;
     }
 
-    handleSelect(isAllSelected = false){
+    handleSelect(evt){
         if (typeof this.props.selectFile !== 'function' || typeof this.props.resetSelectedFiles !== 'function'){
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
+
+        var isAllSelected = this.isAllSelected();
 
         this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
             if (!isAllSelected){
@@ -235,18 +237,18 @@ export class SelectAllFilesButton extends React.Component {
     }
 
     render(){
-        var isAllSelected = this.isAllSelected();
+        var isAllSelected = this.isAllSelected(), selecting = this.state.selecting;
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button id="select-all-files-button" disabled={this.state.selecting} bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)} children={this.buttonContent(isAllSelected)} />
+                    <Button id="select-all-files-button" disabled={selecting} className="btn-secondary" onClick={this.handleSelect} children={this.buttonContent(isAllSelected)} />
                 </ButtonGroup>
             </div>
         );
     }
 }
 
-export class SelectedFilesFilterByContent extends React.Component {
+export class SelectedFilesFilterByContent extends React.PureComponent {
 
     /**
      * @param {Object} format_buckets - File Type Details (keys) + lists of files (values)
@@ -365,14 +367,14 @@ export class SelectedFilesFilterByButton extends React.Component {
         var currentFiltersLength = this.props.currentFileTypeFilters.length;
 
         return (
-            <Button id="selected-files-file-type-filter-button" key="filter-selected-files-by" bsStyle="secondary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} active={this.props.currentOpenPanel === 'filterFilesBy'}>
+            <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} active={this.props.currentOpenPanel === 'filterFilesBy'}>
                 <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.5 }}/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
             </Button>
         );
     }
 }
 
-export class SelectedFilesControls extends React.Component {
+export class SelectedFilesControls extends React.PureComponent {
 
     static filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters){
         if (Array.isArray(fileTypeFilters) && fileTypeFilters.length === 0) return selectedFiles;
