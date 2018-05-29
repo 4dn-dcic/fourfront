@@ -930,11 +930,11 @@ class DimensioningContainer extends React.PureComponent {
                         <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} innerContainerElem={this.refs && this.refs.innerContainer} isWindowPastTableTop={this.state.isWindowPastTableTop} />
                     </div>
                 </StickyContainer>
-                    { canLoadMore === false ?
-                        <div key="can-load-more" className="fin search-result-row">
-                            <div className="inner">- <span>fin</span> -</div>
-                        </div>
-                    : <div key="can-load-more" className="search-result-row empty-block"/> }
+                { canLoadMore === false ?
+                    <div key="can-load-more" className="fin search-result-row">
+                        <div className="inner">- <span>fin</span> -</div>
+                    </div>
+                : <div key="can-load-more" className="search-result-row empty-block"/> }
             </div>
         );
     }
