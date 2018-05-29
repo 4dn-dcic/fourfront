@@ -31,6 +31,9 @@ from snovault.elasticsearch.interfaces import SNP_SEARCH_ES
 from snovault.json_renderer import json_renderer
 from elasticsearch import Elasticsearch
 STATIC_MAX_AGE = 0
+from snovault import set_logging
+import structlog
+import logging
 
 
 def json_asset(spec, **kw):
@@ -283,6 +286,8 @@ def main(global_config, **local_config):
 
     settings = global_config
     settings.update(local_config)
+
+    set_logging(settings.get('production'))
 
     settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'

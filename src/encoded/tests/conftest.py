@@ -40,6 +40,7 @@ _app_settings = {
     'testing': True,
     'indexer': True,
     'mpindexer': True,
+    'production': True,
     'pyramid.debug_authorization': True,
     'postgresql.statement_timeout': 20,
     'tm.attempts': 3,
@@ -63,7 +64,7 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):
 
 def pytest_configure():
     import logging
-    logging.basicConfig()
+    logging.basicConfig(format='%(message)s')
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
     logging.getLogger('selenium').setLevel(logging.DEBUG)
 
