@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -342,6 +342,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
     render(){
         const { collection, index, context, width } = this.props;
         const { open, files } = this.state;
+        var t = 'adasdasd adsasdsd awdawdawddaw awawdawdwda awawdwadaw awddawdwawddaw awdawdwda awdawd dawawd dwda adwdawdwadw awddawdawd awddwadw dwadawda dawdwadawd awdwadaw awddawdawd awdawdaw awdawdawd awdawddadw';
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
@@ -350,7 +351,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                         { collection.title || "Collection " + index }
                     </span>
                 </h4>
-                <div className="description"><p>{ collection.description }</p></div>
+                <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" />
                 <Collapse in={open}>
                     <div className="table-for-collection">
                         <ProcessedFilesStackedTable
