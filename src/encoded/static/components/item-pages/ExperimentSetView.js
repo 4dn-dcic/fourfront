@@ -41,7 +41,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     getTabViewContents(){
 
-        var context = this.props.context;
+        var context = this.props.context, schemas = this.props.schemas;
 
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [{ 'columnClass' : 'file-detail', 'title' : 'File Info'}];
@@ -66,8 +66,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 key : 'processed-files',
                 content : <ProcessedFilesStackedTableSection
                     processedFiles={processedFiles}
-                    width={width} context={context}
-                    {..._.pick(this.props, 'schemas')}
+                    width={width} context={context} schemas={schemas}
                     {...this.state}
                 />
             });
@@ -80,8 +79,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
                 content : <RawFilesStackedTableSection
-                    width={width} context={context}
-                    {..._.pick(this.props, 'schemas', 'facets')}
+                    width={width} context={context} schemas={schemas}
                     {...this.state}
                 />
             });
@@ -118,8 +116,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 key : 'other-processed-files',
                 content : <OtherProcessedFilesStackedTableSection
                     otherProcessedFilesSets={otherProcessedFilesSets}
-                    width={width} context={context}
-                    {..._.pick(this.props, 'schemas', 'facets')}
+                    width={width} context={context} schemas={schemas}
                     {...this.state}
                 />
             });
@@ -138,7 +135,10 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        return [<Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />, <OverviewHeading context={this.props.context} />];
+        return [
+            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} schemas={this.props.schemas} />,
+            <OverviewHeading context={this.props.context} schemas={this.props.schemas} />
+        ];
     }
 
     itemFooter(){
@@ -151,7 +151,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 globals.content_views.register(ExperimentSetView, 'ExperimentSet');
 globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
-class OverviewHeading extends React.Component {
+class OverviewHeading extends React.PureComponent {
     render(){
         var expSet = this.props.context;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), expSet);
@@ -211,7 +211,7 @@ class ExperimentSetHeader extends React.PureComponent {
 }
 
 
-export class RawFilesStackedTableSection extends React.Component {
+export class RawFilesStackedTableSection extends React.PureComponent {
     render(){
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
@@ -269,7 +269,7 @@ export class RawFilesStackedTableSection extends React.Component {
     }
 }
 
-export class ProcessedFilesStackedTableSection extends React.Component {
+export class ProcessedFilesStackedTableSection extends React.PureComponent {
     render(){
         var filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(this.props.processedFiles);
         return (
@@ -305,6 +305,15 @@ export class ProcessedFilesStackedTableSection extends React.Component {
 
 export class OtherProcessedFilesStackedTableSectionPart extends React.PureComponent {
 
+    /** @param {{ 'collection' : { 'files': { 'accession' : string, '@id' : string }[] }, 'context' : { 'accession' : string, '@id' : string } }} props - Object with 'collection', 'context' (expSet) properties. */
+    static filesWithFromExpAndExpSetProperty(props){
+        return _.map(props.collection.files, (origFile)=>{
+            var file = _.extend({ 'from_experiment' : { 'accession' : "NONE" } }, origFile); // Extend w/ dummy experiment to make accession triples with (these will have NONE in place of (middle) exp accession).
+            file.from_experiment_set = file.from_experiment.from_experiment_set = file.from_experiment.from_experiment_set || props.context;
+            return file;
+        });
+    }
+
     static defaultProps = {
         'defaultOpen' : false
     };
@@ -313,8 +322,15 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.state = {
-            'open' : props.defaultOpen
+            'open' : props.defaultOpen,
+            'files' : OtherProcessedFilesStackedTableSectionPart.filesWithFromExpAndExpSetProperty(props)
         };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.context !== this.props.context || nextProps.collection !== this.props.collection){
+            this.setState({ 'files' : OtherProcessedFilesStackedTableSectionPart.filesWithFromExpAndExpSetProperty(nextProps) });
+        }
     }
 
     toggleOpen(e){
@@ -324,37 +340,22 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
     }
 
     render(){
-        var { collection, index, context, width } = this.props;
-        _.forEach(collection.files, (f)=>{
-            f.from_experiment = {
-                // Extend w/ dummy experiment to make accession triples with (these will have NONE in place of (middle) exp accession).
-                'accession' : "NONE",
-                'from_experiment_set' : context
-            };
-            f.from_experiment_set = context;
-        });
-
+        const { collection, index, context, width } = this.props;
+        const { open, files } = this.state;
         return (
-            <div data-open={this.state.open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
+            <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        <i className={"text-normal icon icon-fw icon-" + (this.state.open ? 'minus' : 'plus')} />
+                        <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
                         { collection.title || "Collection " + index }
                     </span>
                 </h4>
-                <div className="description">
-                    <p>{ collection.description }</p>
-                </div>
-                <Collapse in={this.state.open}>
+                <div className="description"><p>{ collection.description }</p></div>
+                <Collapse in={open}>
                     <div className="table-for-collection">
                         <ProcessedFilesStackedTable
-                            files={collection.files}
-                            width={width - 21}
-                            experimentSetAccession={context.accession || null}
-                            experimentArray={context.experiments_in_set}
-                            replicateExpsArray={context.replicate_exps}
-                            collapseLongLists={false}
-                        />
+                            files={files} width={width - 21} experimentSetAccession={context.accession || null}
+                            experimentArray={context.experiments_in_set} replicateExpsArray={context.replicate_exps} collapseLongLists={true} />
                     </div>
                 </Collapse>
             </div>
@@ -371,12 +372,11 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
-                    <span><span className="text-400">{ otherProcessedFilesSets.length }</span> Collections of Supplementary Files</span>
+                    <span className="text-400">{ otherProcessedFilesSets.length }</span> Collections of Supplementary Files
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { _.map(otherProcessedFilesSets, (collection, index, all) =>
-                    <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width }}
-                        key={index} defaultOpen={(all.length < 4) || (index < 3)} />
+                    <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width }} key={index} defaultOpen={(all.length < 4) || (index < 3)} />
                 ) }
             </div>
         );
