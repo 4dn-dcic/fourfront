@@ -235,23 +235,15 @@ class ResultRow extends React.PureComponent {
                 }
             }}*/>
                 <div className="columns clearfix">
-                { _.map(columnDefinitions, (colDef, i) => {
-                    return (
+                    { _.map(columnDefinitions, (colDef, i) =>
                         <ResultRowColumnBlock
-                            columnNumber={i}
-                            rowNumber={rowNumber}
-                            key={colDef.field}
-                            columnDefinition={colDef}
-                            result={result}
-                            toggleDetailOpen={this.toggleDetailOpen}
-                            detailOpen={detailOpen}
-                            mounted={mounted}
-                            headerColumnWidths={headerColumnWidths}
-                            href={href}
+                            columnNumber={i} rowNumber={rowNumber} key={colDef.field}
+                            columnDefinition={colDef} result={result}
+                            toggleDetailOpen={this.toggleDetailOpen} detailOpen={detailOpen}
+                            mounted={mounted} headerColumnWidths={headerColumnWidths} href={href}
                             selectedFiles={i === 0 ? this.props.selectedFiles : null} // Passed to trigger update/re-render on PureComponent
                         />
-                    );
-                } ) }
+                    ) }
                 </div>
                 <ResultDetail
                     result={result}
@@ -938,13 +930,11 @@ class DimensioningContainer extends React.PureComponent {
                         <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} innerContainerElem={this.refs && this.refs.innerContainer} isWindowPastTableTop={this.state.isWindowPastTableTop} />
                     </div>
                 </StickyContainer>
-                { canLoadMore === false ?
-                    <div key="can-load-more" className="fin search-result-row">
-                        <div className="inner">
-                            - <span>fin</span> -
+                    { canLoadMore === false ?
+                        <div key="can-load-more" className="fin search-result-row">
+                            <div className="inner">- <span>fin</span> -</div>
                         </div>
-                    </div>
-                : <div key="can-load-more" className="search-result-row empty-block"/> }
+                    : <div key="can-load-more" className="search-result-row empty-block"/> }
             </div>
         );
     }

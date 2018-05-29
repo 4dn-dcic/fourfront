@@ -348,7 +348,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                 <h4>
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
-                        { collection.title || "Collection " + index }
+                        { collection.title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
                 </h4>
                 <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" />
