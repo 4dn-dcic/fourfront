@@ -1,10 +1,10 @@
 {
-    "title": "Generic Treatment",
+    "title": "Agent-based Treatment",
     "description": "A Chemical or Physical Treatment on Biosample.",
-    "id": "/profiles/treatment_generic.json",
+    "id": "/profiles/treatment_agent.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["lab", "award"],
+    "required": ["treatment_type", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [

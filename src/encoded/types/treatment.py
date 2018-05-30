@@ -63,6 +63,49 @@ class TreatmentChemical(Treatment):
 
 
 @collection(
+    name='treatments-generic',
+    properties={
+        'title': 'Treatments-Generic',
+        'description': 'Listing Physical or Chemical Treatments',
+    })
+class TreatmentGeneric(Treatment):
+    """Subclass of treatment for physical/chemical treatments."""
+
+    item_type = 'treatment_generic'
+    schema = load_schema('encoded:schemas/treatment_generic.json')
+    embedded_list = Treatment.embedded_list
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, treatment_type=None, chemical=None,
+                      duration=None, duration_units=None, concentration=None,
+                      concentration_units=None, temperature=None):
+        d_t = []
+        conditions = ""
+        if concentration and concentration_units:
+            d_t.extend([str(concentration), ' ' + concentration_units])
+        if duration and duration_units:
+            if d_t:
+                d_t[-1] += ', '
+            d_t.extend([str(duration) + duration_units[0]])
+        if temperature:
+            d_t.append(" at " + str(temperature) + "°C")
+        if d_t:
+            conditions = " (" + "".join(d_t) + ")"
+
+        if chemical:
+            dis_tit = chemical + " treatment" + conditions
+        elif treatment_type == 'Other':
+            dis_tit = "Other treatment" + conditions
+        else:
+            dis_tit = treatment_type + conditions
+        return dis_tit
+
+
+@collection(
     name='treatments-rnai',
     properties={
         'title': 'Treatments-RNAi',
