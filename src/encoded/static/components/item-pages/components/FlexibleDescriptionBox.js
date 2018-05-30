@@ -102,13 +102,13 @@ class FlexibleCharacterCountString extends React.Component {
  * @class FlexibleDescriptionBox
  * @extends {React.Component}
  */
-export class FlexibleDescriptionBox extends React.Component {
+export class FlexibleDescriptionBox extends React.PureComponent {
 
     static defaultDimensions = {
         'paddingWidth'  : 0,
         'paddingHeight' : 0,
         'buttonWidth'   : 30,
-        'initialHeight' : 20
+        'initialHeight' : 19
     }
 
     static propTypes = {
@@ -138,7 +138,7 @@ export class FlexibleDescriptionBox extends React.Component {
         'textStyle' : null,
         'debug' : false,
         'linesOfText' : 1,
-        'lineHeight' : 21,
+        'lineHeight' : 19,
         'defaultExpanded' : false
     }
 

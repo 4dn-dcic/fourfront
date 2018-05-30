@@ -20,7 +20,7 @@ import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } fr
  */
 
 
-export class RawFilesStackedTable extends React.Component {
+export class RawFilesStackedTable extends React.PureComponent {
 
     static StackedBlock = StackedBlock
 
@@ -237,6 +237,7 @@ export class RawFilesStackedTable extends React.Component {
                     className={contentsClassName}
                     collapseLimit={this.props.collapseLimit || 3}
                     collapseShow={this.props.collapseShow || 2}
+                    collapseLongLists={this.props.collapseLongLists}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                     children={contents}
                 />
@@ -273,6 +274,7 @@ export class RawFilesStackedTable extends React.Component {
                     children={_.map(expsWithBiosample, this.renderExperimentBlock)}
                     collapseLimit={this.props.collapseLimit || 3}
                     collapseShow={this.props.collapseShow || 2}
+                    collapseLongLists={this.props.collapseLongLists}
                     showMoreExtTitle={
                         expsWithBiosample.length > 5 ?
                             'with ' + (
@@ -317,6 +319,7 @@ export class RawFilesStackedTable extends React.Component {
                 title="Biosamples"
                 children={experimentsGroupedByBiosample.map(this.renderBiosampleStackedBlockOfExperiments)}
                 rootList={true}
+                collapseLongLists={this.props.collapseLongLists}
                 showMoreExtTitle={
                     experimentsGroupedByBiosample.length > 5 ?
                         'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
@@ -377,7 +380,7 @@ export class RawFilesStackedTable extends React.Component {
 }
 
 
-export class ProcessedFilesStackedTable extends React.Component {
+export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static propTypes = {
         'experimentSetAccession' : PropTypes.string.isRequired, // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
@@ -476,7 +479,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                     }}>
                     { nameBlock }
                     <StackedBlockList
-                        className="files"
+                        className="files" collapseLongLists={this.props.collapseLongLists}
                         title={this.props.titleForFiles}
                         children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment, experimentObj) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
                         showMoreExtTitle={null} />
@@ -515,6 +518,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                     className="sets"
                     title="Experiments"
                     children={this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal)}
+                    collapseLongLists={collapseLongLists}
                     rootList={true}
                     //showMoreExtTitle={
                         //experimentsGroupedByBiosample.length > 5 ?

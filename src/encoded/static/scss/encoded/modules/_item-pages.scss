@@ -1115,6 +1115,45 @@ $download-button-width : 100px;
 			}
 		}
 	}
+	
+	.supplementary-files-section-part {
+		//margin-top: 10px;
+		padding-top: 5px;
+		padding-bottom: 0px;
+		border-bottom: 1px solid #ccc;
+		> h4 {
+			padding-top: 10px;
+			padding-bottom: 2px;
+			margin-top: 0;
+			margin-bottom: 0;
+			font-weight: 500;
+			i.icon-fw {
+				width: 16px;
+				margin-right: 5px;
+			}
+		}
+
+		> .description {
+			margin-left: 21px;
+			margin-bottom: 15px;
+			> p {
+				margin: 0;
+			}
+		}
+
+		> .table-for-collection {
+			margin-left: 21px;
+		}
+
+		&[data-open="false"]{
+			border-bottom-color: #eee;
+			padding-top: 5px;
+			padding-bottom: 0px;
+			> h4 {
+				font-weight: 400;
+			}
+		}
+	}
 
 	.overview-blocks {
 		> div {

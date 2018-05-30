@@ -59,8 +59,27 @@ export class ResultTableHandlersContainer extends React.PureComponent {
     constructor(props){
         super(props);
         this.onFilter = onFilterHandlerMixin.bind(this);
+        this.defaultHiddenColumns = this.defaultHiddenColumns.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.render = this.render.bind(this);
+        this.state = {
+            'defaultHiddenColumns' : this.defaultHiddenColumns(props)
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.context !== nextProps.context){
+            this.setState({ 'defaultHiddenColumns' : this.defaultHiddenColumns(nextProps) });
+        }
+    }
+
+    /** Check in schemas for columns which are to be hidden by default. */
+    defaultHiddenColumns(props = this.props){
+        var defaultHiddenColumnsFromSchemas = [];
+        if (props.context.columns){
+            defaultHiddenColumnsFromSchemas = _.map(_.filter(_.pairs(props.context.columns), function(p){ return p[1].default_hidden; }), function(p){ return p[0]; });
+        }
+        return ['status'].concat(defaultHiddenColumnsFromSchemas);
     }
 
     isTermSelected(term, facet){
@@ -68,14 +87,8 @@ export class ResultTableHandlersContainer extends React.PureComponent {
     }
 
     render(){
-
-        var defaultHiddenColumnsFromSchemas = [];
-        if (this.props.context.columns){
-            defaultHiddenColumnsFromSchemas = _.map(_.filter(_.pairs(this.props.context.columns), function(p){ return p[1].default_hidden; }), function(p){ return p[0]; });
-        }
-
         return (
-            <CustomColumnController defaultHiddenColumns={['status'].concat(defaultHiddenColumnsFromSchemas)}>
+            <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                 <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
                     <ControlsAndResults {...this.props} isTermSelected={this.isTermSelected} onFilter={this.onFilter} />
                 </SortController>
@@ -257,30 +270,39 @@ export default class SearchView extends React.PureComponent {
         restrictions : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
     }
 
+    constructor(props){
+        super(props);
+        this.filterFacets = this.filterFacets.bind(this);
+        this.state = {
+            'filteredFacets' : this.filterFacets()
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.context !== nextProps.context){
+            this.setState({ 'filteredFacets' : this.filterFacets(nextProps) });
+        }
+    }
+
     componentDidMount(){
         ReactTooltip.rebuild();
     }
 
-    render() {
-        var context = this.props.context;
-        var results = context['@graph'];
-        var notification = context['notification'];
-        var searchBase;
-        // submissionBase is supplied when using Search through frontend
-        // submission. this switch controls several things, including
-        // pagination, clear filter, and types filter.
-        if(this.props.submissionBase){
-            searchBase = this.props.submissionBase || '';
-        }else{
-            searchBase = url.parse(this.props.href).search || '';
+    searchBase(props = this.props){
+        if (props.submissionBase){
+            return props.submissionBase || '';
+        } else {
+            return url.parse(props.href).search || '';
         }
+    }
 
-        // Filter Facets down to abstract types only (if none selected) for Search. Do something about restrictions(?)
-        var facets = context.facets.map((facet)=>{
+    filterFacets(props = this.props){ // Filter Facets down to abstract types only (if none selected) for Search. Do something about restrictions(?)
+        var searchBase = this.searchBase(props);
+        return props.context.facets.map((facet)=>{
 
-            if (this.props.restrictions[facet.field] !== undefined) {
+            if (props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
-                facet.restrictions = this.props.restrictions[facet.field];
+                facet.restrictions = props.restrictions[facet.field];
                 facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
             }
 
@@ -313,6 +335,18 @@ export default class SearchView extends React.PureComponent {
 
             return facet;
         });
+    }
+
+    render() {
+        var context = this.props.context;
+        var results = context['@graph'];
+        var notification = context['notification'];
+        // submissionBase is supplied when using Search through frontend
+        // submission. this switch controls several things, including
+        // pagination, clear filter, and types filter.
+        var searchBase = this.searchBase();
+
+        var facets = this.state.filteredFacets;
 
         return (
             <div className="search-page-container" ref="container">
