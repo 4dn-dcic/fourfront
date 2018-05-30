@@ -47,7 +47,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
     });
 
-    context.only('BarPlotChart & QuickInfoBar - filtering using visualization elements', function(){
+    context('BarPlotChart & QuickInfoBar - filtering using visualization elements', function(){
 
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
