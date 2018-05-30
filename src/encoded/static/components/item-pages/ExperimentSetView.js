@@ -92,13 +92,13 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tabs.push(FileViewGraphSection.getTabObject(
                     _.extend({}, this.props, {
                         'isNodeCurrentContext' : function(node){
-                            var context = this.props.context;
-                            if (!context) return false;
+                            var ctx = this.props.context;
+                            if (!ctx) return false;
                             if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
                             if (Array.isArray(node.meta.run_data.file)) return false;
                             if (typeof node.meta.run_data.file.accession !== 'string') return false;
-                            if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files.length === 0) return false;
-                            if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
+                            if (!ctx.processed_files || !Array.isArray(ctx.processed_files) || ctx.processed_files.length === 0) return false;
+                            if (_.contains(_.pluck(ctx.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
                             return false;
                         }.bind(this)
                     }),

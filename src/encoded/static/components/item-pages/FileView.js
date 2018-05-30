@@ -18,7 +18,8 @@ import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData,
 import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING
-//import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
+// import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
+// import { test_file } from './../testdata/file/fastq-unreleased-expset';
 
 
 
