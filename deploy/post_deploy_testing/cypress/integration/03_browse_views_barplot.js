@@ -59,17 +59,19 @@ describe('Browse Views - Redirection & Visualization', function () {
             // A likely-to-be-here Bar Section - ATAC-seq x mouse
             cy.window().then((w)=>{ w.scrollTo(0,0); }).end().get('#select-barplot-field-1').should('contain', 'Organism').end()
                 .get('#select-barplot-field-0').should('contain', 'Experiment Type').end()
-                .get('.bar-plot-chart .chart-bar[data-term="ATAC-seq"] .bar-part[data-term="mouse"]').scrollToCenterElement().then(($barPart)=>{
+                .get('.bar-plot-chart .chart-bar[data-term="Repli-seq"] .bar-part[data-term="human"]').then(($barPart)=>{
                     const expectedFilteredResults = parseInt($barPart.attr('data-count'));
                     expect(expectedFilteredResults).to.be.greaterThan(3);
                     expect(expectedFilteredResults).to.be.lessThan(25);
-                    return cy.wait(500).wrap($barPart).scrollToCenterElement().hoverIn().scrollToCenterElement().wait(100).end()
-                        .get('.cursor-component-root .details-title').should('contain', 'mouse').end()
-                        .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'ATAC-seq').end()
+                    return cy.window().scrollTo('top').wait(200).end()
+                        .get('.bar-plot-chart .chart-bar[data-term="dilution Hi-C"] .bar-part[data-term="human"]').should('have.attr', 'data-count').wait(300).end()
+                        .wrap($barPart).hoverIn().wait(100).end()
+                        .get('.cursor-component-root .details-title').should('contain', 'human').end()
+                        .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'Repli-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
                             return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').wait(300).click({ force : true }).wait(200).end()
                                 .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click().end()
-                                .location('search').should('include', 'experiments_in_set.experiment_type=ATAC-seq').should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse').wait(300).end()
+                                .location('search').should('include', 'experiments_in_set.experiment_type=Repli-seq').should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=human').wait(300).end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                                 .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
                                 .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
@@ -83,18 +85,18 @@ describe('Browse Views - Redirection & Visualization', function () {
             cy.getQuickInfoBarCounts().then((origCounts)=>{
                 cy.get('#stats .any-filters.glance-label').hoverIn().wait(100).end()
                     .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 2).end()
-                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="mouse"] i.icon-times').should('have.length', 1).click().wait(10).end()
-                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="mouse"] i.icon-times').should('have.length', 0).end()
+                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="human"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="human"] i.icon-times').should('have.length', 0).end()
                     .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 1).end()
                     .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', 1).then(($allBarParts)=>{
                         const unfilteredOnceBarPartCount = $allBarParts.length;
                         cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', origCounts.experiment_sets).then((unfilteredOnceExpSetCount)=>{
-                            cy.get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="ATAC-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
-                                .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="ATAC-seq"] i.icon-times').should('have.length', 0).end()
+                            cy.get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="Repli-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                                .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="Repli-seq"] i.icon-times').should('have.length', 0).end()
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
                                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
                                 .location('search').should('include', 'award.project=4DN')
-                                .should('not.include', 'experiments_in_set.experiment_type=ATAC-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=mouse');
+                                .should('not.include', 'experiments_in_set.experiment_type=Repli-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=human');
                         });
                     });
             });

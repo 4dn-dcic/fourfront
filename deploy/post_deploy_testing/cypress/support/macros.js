@@ -121,3 +121,17 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
 
     });
 }
+
+export function testGraphTabClick(){
+
+    it("Has functional 'graph' tab which is loaded & clickable.", function(){
+        cy.get('.tab-view-container .rc-tabs-nav').within(($tabNav)=>{
+            cy.contains('Graph').should('have.length', 1).then(($tabInnerElem)=>{
+                const $tab = $tabInnerElem.closest('.rc-tabs-tab');
+                return cy.wrap($tab).should('not.have.class', 'rc-tabs-tab-disabled').end()
+                    .wrap($tabInnerElem).click().wait(200).end();
+            });
+        }).end();
+    });
+
+}
