@@ -1,0 +1,106 @@
+{
+    "title": "Fly Individual",
+    "description": "Schema for submitting a fly individual.",
+    "id": "/profiles/individual_fly.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "individual.json#/properties" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/notes" }
+    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
+    "dependencies": {
+      "age": [ "age_units"]
+    },
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "fly_life_stage": {
+            "title": "Fly Life Stage",
+            "type": "string",
+            "lookup": 20,
+            "enum": [
+              "egg",
+              "larva",
+              "L1",
+              "L2",
+              "L3",
+              "pupa",
+              "adult"
+            ]
+        },
+        "organism": {
+            "default": "3413218c-3d86-498b-a0a2-9a406638e786",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "lookup": 1,
+            "linkEnum": ["3413218c-3d86-498b-a0a2-9a406638e786"]
+        },
+        "fly_strain":{
+          "title": "Fly Strain",
+          "lookup": 30,
+          "type": "string",
+          "description": "Can be an object of straing with dbxref for strain"
+        },
+        "fly_vendor":{
+          "title": "Vendor for the Fly Individual",
+          "type": "string",
+          "linkTo": "Vendor",
+          "lookup": 40
+        },
+        "dbxrefs": {
+            "@type": "@id",
+            "rdfs:subPropertyOf": "rdfs:seeAlso",
+            "title": "External identifiers",
+            "description": "Unique identifiers from external resources.",
+            "type": "array",
+            "default": [],
+            "lookup": 1000,
+            "uniqueItems": true,
+            "items": {
+                "title": "External identifier",
+                "description": "A unique identifier from external resource.",
+                "type":  "string",
+                "pattern": "^(GEO:SAMN\\d+)$"
+            }
+        }
+    },
+    "columns": {
+        "sex": {
+            "title" : "Sex"
+        },
+        "mouse_life_stage": {
+            "title" : "Fly Life Stage"
+        },
+        "mouse_strain": {
+            "title" : "Fly Strain"
+        }
+    },
+    "facets": {
+        "sex": {
+            "title" : "Sex"
+        },
+        "mouse_life_stage": {
+            "title" : "Fly Life Stage"
+        },
+        "mouse_strain": {
+            "title" : "Fly Strain"
+        }
+    }
+}
