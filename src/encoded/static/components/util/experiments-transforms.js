@@ -248,15 +248,17 @@ export function experimentSetsFromFile(file){
             return m;
         }, {}),
 
-        _.reduce(ensureArray(file.experiments), function(sets, exp){ // ExpSets by @id from file.experiment, with 'experiments_in_set' added.
+        _.reduce(ensureArray(file.experiments), function(sets, exp){ // ExpSets by @id from file.experiments, with 'experiments_in_set' added.
             
             var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
                 var id = atIdFromObject(expSet);
-                if (id && typeof m[id] === 'undefined'){
+                if (!id) {
+                    return m; // Skip, in case of no id, no permission to view, etc.
+                } else if (id && typeof m[id] === 'undefined'){
                     m[id] = _.extend({ 'experiments_in_set' : [exp] }, expSet);
                 } else {
-                    if (Array.isArray(m[id].experiments_in_set) && _.pluck(m[id].experiments_in_set, 'link_id').indexOf(expSet.link_id) === -1){
-                        m[id].experiments_in_set.push(expSet);
+                    if (Array.isArray(m[id].experiments_in_set) && _.map(m[id].experiments_in_set, atIdFromObject).indexOf(atIdFromObject(exp)) === -1){
+                        m[id].experiments_in_set.push(exp);
                     }
                 }
                 return m;

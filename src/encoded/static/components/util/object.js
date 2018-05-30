@@ -93,18 +93,6 @@ export function listFromTips(tips){
     });
 }
 
-// Found on SO. TODO: Propagate into places where it could be used for DRYness.
-export function serializeObjectToURLQuery(obj){
-    var str = [];
-    for(var p in obj)
-        if (obj.hasOwnProperty(p)) {
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-        }
-    return str.join("&");
-}
-
-
-
 /**
  * Find property within an object using a propertyName in object dot notation.
  * Recursively travels down object tree following dot-delimited property names.
@@ -416,7 +404,7 @@ export class CopyWrapper extends React.Component {
         var elemsToWrap = [];
         if (children)               elemsToWrap.push(children);
         if (children && isMounted)  elemsToWrap.push(' ');
-        if (isMounted)              elemsToWrap.push(<i {...iconProps} className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
+        if (isMounted)              elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
 
         var wrapperProps = _.extend(
             { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },

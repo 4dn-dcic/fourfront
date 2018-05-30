@@ -189,6 +189,10 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Cis reads (>20kb)",
         "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
         #"experiments_in_set.processed_files.@type"
+
+        "other_processed_files.files.accession",
+        "other_processed_files.files.file_type_detailed",
+        "other_processed_files.files.file_size"
     ]
 
     @calculated_property(schema={
