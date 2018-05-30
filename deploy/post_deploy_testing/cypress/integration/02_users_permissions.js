@@ -47,7 +47,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                     return cy.visit(currUrl + '?datastore=database').end() // Edit last name ON DATASTORE=DATABASE TO PREVENT ERRORS DUE TO INDEXING NOT BEING CAUGHT UP FROM PRIOR TEST
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').clear().type('SuperTest').then((inputfield)=>{
-                            return cy.wait(100).screenshot().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
+                            return cy.wait(100).window().screenshot().end().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
                                 .should('have.length', 0).wait(100).end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
                                 .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").wait(500).end()
