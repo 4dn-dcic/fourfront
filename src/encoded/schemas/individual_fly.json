@@ -47,10 +47,10 @@
             ]
         },
         "organism": {
-            "default": "3413218c-3d86-498b-a0a2-9a406638e786",
+            "default": "b3911449-1b28-44cf-af23-084ae4eff147",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "lookup": 1,
-            "linkEnum": ["3413218c-3d86-498b-a0a2-9a406638e786"]
+            "linkEnum": ["b3911449-1b28-44cf-af23-084ae4eff147"]
         },
         "fly_strain":{
           "title": "Fly Strain",
