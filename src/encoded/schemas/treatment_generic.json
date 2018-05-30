@@ -33,7 +33,7 @@
             "title": "Treatment Type",
             "description": "The method used to make the treatment.",
             "type": "string",
-            "lookup": 21,
+            "lookup": 20,
             "enum" : [
             "Chemical",
             "Heat Shock",
