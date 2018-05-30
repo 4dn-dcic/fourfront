@@ -22,6 +22,8 @@
             "exclude_from" : ["submit4dn", "FFedit-create"],
             "enum" : [
               "Chemical",
+              "Heat Shock",
+              "Cold Shock",
               "RNAi",
               "Other"
             ]
