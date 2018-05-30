@@ -37,7 +37,7 @@
             "type": "string",
             "lookup": 20,
             "enum": [
-              "egg",
+              "embryo",
               "larva",
               "L1",
               "L2",
