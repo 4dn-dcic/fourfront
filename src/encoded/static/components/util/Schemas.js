@@ -35,10 +35,10 @@ export const itemTypeHierarchy = {
         'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
     ],
     'Individual': [
-        'IndividualHuman', 'IndividualMouse'
+        'IndividualHuman', 'IndividualMouse', 'IndividualFly'
     ],
     'Treatment': [
-        'TreatmentChemical', 'TreatmentRnai'
+        'TreatmentChemical', 'TreatmentAgent', 'TreatmentRnai'
     ],
     'QualityMetric' : [
         'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
@@ -210,7 +210,7 @@ export const Field = {
         if (field.slice(0,5) === 'audit') return null;
         var fieldParts = field.split('.');
 
-        
+
 
         function getNextSchemaProperties(linkToName){
 
