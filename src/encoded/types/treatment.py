@@ -63,16 +63,16 @@ class TreatmentChemical(Treatment):
 
 
 @collection(
-    name='treatments-generic',
+    name='treatments-agent',
     properties={
-        'title': 'Treatments-Generic',
+        'title': 'Treatments-Agentbased',
         'description': 'Listing Physical or Chemical Treatments',
     })
-class TreatmentGeneric(Treatment):
+class TreatmentAgent(Treatment):
     """Subclass of treatment for physical/chemical treatments."""
 
-    item_type = 'treatment_generic'
-    schema = load_schema('encoded:schemas/treatment_generic.json')
+    item_type = 'treatment_agent'
+    schema = load_schema('encoded:schemas/treatment_agent.json')
     embedded_list = Treatment.embedded_list
 
     @calculated_property(schema={
