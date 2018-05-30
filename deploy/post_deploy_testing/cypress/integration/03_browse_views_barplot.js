@@ -47,7 +47,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
     });
 
-    context('BarPlotChart & QuickInfoBar - filtering using visualization elements', function(){
+    context.only('BarPlotChart & QuickInfoBar - filtering using visualization elements', function(){
 
         before(()=>{
             cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
@@ -63,7 +63,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                     const expectedFilteredResults = parseInt($barPart.attr('data-count'));
                     expect(expectedFilteredResults).to.be.greaterThan(3);
                     expect(expectedFilteredResults).to.be.lessThan(25);
-                    return cy.wrap($barPart).scrollToCenterElement().hoverIn().wait(10).end()
+                    return cy.wait(500).wrap($barPart).scrollToCenterElement().hoverIn().scrollToCenterElement().wait(100).end()
                         .get('.cursor-component-root .details-title').should('contain', 'mouse').end()
                         .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'ATAC-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
@@ -73,7 +73,8 @@ describe('Browse Views - Redirection & Visualization', function () {
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                                 .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
                                 .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
-                                .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end().screenshot("ATAC-seq x mouse BrowseView results, filtered via BarPlot section hover & click.");
+                                .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end()
+                                .window().screenshot("ATAC-seq x mouse BrowseView results, filtered via BarPlot section hover & click.").end();
                         });
                 });
         });
@@ -111,7 +112,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
                 .end().window().scrollTo(0, 200)
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(1000).end()
-                .screenshot().end()
+                .window().screenshot().end()
                 .then(()=>{
                     compareQuickInfoCountsVsBarPlotCounts();
                 });
@@ -128,7 +129,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                         .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
                         .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
                         .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
-                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end().screenshot().end().then(()=>{
+                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end().window().screenshot().end().then(()=>{
                             compareQuickInfoCountsVsBarPlotCounts();
                         });
                 });
@@ -163,7 +164,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
-                        cy.screenshot();
+                        cy.window().screenshot();
                         compareQuickInfoCountsVsBarPlotCounts();
                     }).end();
             });
@@ -181,7 +182,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
                         return cy.wait(100).end().get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).wait(100).end().then(()=>{ // Wait until bars have transitioned.
-                            cy.screenshot();
+                            cy.window().screenshot().end();
                             compareQuickInfoCountsVsBarPlotCounts();
                         });
                     }).end();

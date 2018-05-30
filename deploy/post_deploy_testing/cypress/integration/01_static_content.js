@@ -144,7 +144,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                     expect(nextTotalCount).to.be.greaterThan(origTotalCount);
                     expect(nextTotalCount).to.be.greaterThan(49);
                 });
-            }).wait(250).end().screenshot().end().wait(250).end().logout4DN();
+            }).wait(250).end().window().screenshot().end().wait(250).end().logout4DN();
         });
 
 

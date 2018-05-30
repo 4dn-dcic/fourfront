@@ -82,14 +82,14 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('date_created:[* TO 2018-01-01] returns 3 =< x < all results.', function(){
-            cy.screenshot('Before text search "date_created:[* TO 2018-01-01]"').end().searchPageTotalResultCount().then((origTotalResults)=>{
+            cy.window().screenshot('Before text search "date_created:[* TO 2018-01-01]"').end().searchPageTotalResultCount().then((origTotalResults)=>{
                 cy.get('input[name="q"]').focus().clear().type('date_created:[* TO 2018-01-01]').wait(10).end()
                     .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                     .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end() // Select 'All Items'
                     //.get('form.navbar-search-form-container').submit().end()
                     .location('search').should('include', '2018-01-01').wait(300).end()
                     .get('#slow-load-container').should('not.have.class', 'visible').end()
-                    .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults).end().screenshot('After text search "date_created:[* TO 2018-01-01]"').end();
+                    .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults).end().window().screenshot('After text search "date_created:[* TO 2018-01-01]"').end();
             });
         });
 
