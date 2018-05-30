@@ -118,23 +118,19 @@ after_success:
            git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
            git fetch --no-tags
            git checkout master
-           if [ -z "$tibanna_deploy" ]; then
-              echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
-              eb use fourfront-mastertest --debug
-           else
+           
+           if [ -n "$tibanna_deploy" ]; then
               echo "Job succeeded! PUBLISHING to ${tibanna_deploy} environment..."
               eb use ${tibanna_deploy} --debug
+              python deploy/deploy_beanstalk.py
            fi
-           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-           if [ -z "$tibanna_deploy" ]; then
-               echo "Job succeeded! PUBLISHING to fourfront-webprod environment..."
-           else
+           if [ -n "$tibanna_deploy" ]; then
                echo "Job succeeded! PUBLISHing to ${tibanna_deploy} environment..."
                eb use ${tibanna_deploy} --debug
+               python deploy/deploy_beanstalk.py --prod
            fi
-            python deploy/deploy_beanstalk.py --prod
           fi
         fi
      fi
