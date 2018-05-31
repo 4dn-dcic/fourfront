@@ -19,7 +19,6 @@
             "title": "Treatment Type",
             "description": "The method used to make the treatment.",
             "type": "string",
-            "exclude_from" : ["submit4dn", "FFedit-create"],
             "enum" : [
               "Chemical",
               "Heat Shock",
