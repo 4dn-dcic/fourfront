@@ -39,7 +39,7 @@ describe('Browse Views - Files Selection', function () {
         it('"Select All Files" button works & becomes "Deselect All" after.', function(){
 
             cy.getSelectAllFilesButton().click().should('contain', "Deselect All").end()
-                .getDownloadButton().should('not.have.attr', 'disabled').end().screenshot();
+                .getDownloadButton().should('not.have.attr', 'disabled').end().window().screenshot();
 
         });
 
