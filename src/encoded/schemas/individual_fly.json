@@ -1,6 +1,6 @@
 {
-    "title": "Fly Individual",
-    "description": "Schema for submitting a fly individual.",
+    "title": "Fly Line",
+    "description": "Schema for submitting a fly line/strain.",
     "id": "/profiles/individual_fly.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -66,8 +66,7 @@
         "fly_strain":{
           "title": "Fly Strain",
           "lookup": 30,
-          "type": "string",
-          "description": "Can be an object of strain with dbxref for strain"
+          "type": "string"
         },
         "fly_vendor":{
           "title": "Vendor for the Fly Individual",
@@ -96,10 +95,10 @@
         "sex": {
             "title" : "Sex"
         },
-        "mouse_life_stage": {
+        "fly_life_stage": {
             "title" : "Fly Life Stage"
         },
-        "mouse_strain": {
+        "fly_strain": {
             "title" : "Fly Strain"
         }
     },
@@ -107,10 +106,10 @@
         "sex": {
             "title" : "Sex"
         },
-        "mouse_life_stage": {
+        "fly_life_stage": {
             "title" : "Fly Life Stage"
         },
-        "mouse_strain": {
+        "fly_strain": {
             "title" : "Fly Strain"
         }
     }
