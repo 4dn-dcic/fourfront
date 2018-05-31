@@ -10,5 +10,11 @@
         "scientific_name": "Mus musculus",
         "taxon_id": "10090",
         "uuid": "3413218c-3d86-498b-a0a2-9a406638e786"
+    },
+    {
+        "name": "fly",
+        "scientific_name": "Drosophila melanogaster",
+        "taxon_id": "7227",
+        "uuid": "b3911449-1b28-44cf-af23-084ae4eff147"
     }
 ]
