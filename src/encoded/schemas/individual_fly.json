@@ -47,6 +47,16 @@
                 "adult stage"
             ]
         },
+        "age": {
+            "title": "Age of the Individual",
+            "type": "number",
+            "exclude_from": ["FFedit-create", "submit4dn"]
+        },
+        "age_units": {
+            "title": "Age units",
+            "type": "string",
+            "exclude_from": ["FFedit-create", "submit4dn"]
+        },
         "organism": {
             "default": "b3911449-1b28-44cf-af23-084ae4eff147",
             "exclude_from": ["submit4dn", "FFedit-create"],
@@ -57,7 +67,7 @@
           "title": "Fly Strain",
           "lookup": 30,
           "type": "string",
-          "description": "Can be an object of straing with dbxref for strain"
+          "description": "Can be an object of strain with dbxref for strain"
         },
         "fly_vendor":{
           "title": "Vendor for the Fly Individual",
