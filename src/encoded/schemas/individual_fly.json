@@ -36,14 +36,15 @@
             "title": "Fly Life Stage",
             "type": "string",
             "lookup": 20,
-            "enum": [
-              "embryo",
-              "larva",
-              "L1",
-              "L2",
-              "L3",
-              "pupa",
-              "adult"
+            "suggested_enum": [
+                "oogenesis",
+                "egg stage",
+                "embryonic stage",
+                "larval stage",
+                "prepupal stage",
+                "pupal stage",
+                "pharate adult stage",
+                "adult"
             ]
         },
         "organism": {
