@@ -15,7 +15,6 @@ from snovault import (
 from .base import (
     Item
 )
-import string
 import re
 
 
