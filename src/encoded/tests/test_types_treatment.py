@@ -10,7 +10,7 @@ def drug_treatment(testapp, lab, award):
         'treatment_type': 'Chemical',
         'chemical': 'Drug',
     }
-    return testapp.post_json('/treatment_chemical', item).json['@graph'][0]
+    return testapp.post_json('/treatment_agent', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def heatshock_treatment(testapp, lab, award):
     return testapp.post_json('/treatment_agent', item).json['@graph'][0]
 
 
-def test_calculated_chemical_treatment_display_title(testapp, heatshock_treatment):
+def test_calculated_agent_treatment_display_title(testapp, heatshock_treatment):
     # import pdb; pdb.set_trace()
     assert heatshock_treatment['display_title'] == 'Heat Shock'
     res = testapp.patch_json(
@@ -34,16 +34,16 @@ def test_calculated_chemical_treatment_display_title(testapp, heatshock_treatmen
     assert res.json['@graph'][0]['display_title'] == 'Heat Shock (3.5h at 42°C)'
 
 
-def test_calculated_agent_treatment_display_title(testapp, drug_treatment):
+def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
     # import pdb; pdb.set_trace()
     assert drug_treatment['display_title'] == 'Drug treatment'
     res = testapp.patch_json(
         drug_treatment['@id'],
-        {'concentration': 3.5, 'concentration_units': 'M'})
-    assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5 M)'
+        {'duration': 3.5, 'duration_units': 'hour'})
+    assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5h)'
     res = testapp.patch_json(
         drug_treatment['@id'],
-        {'duration': 3.5, 'duration_units': 'hour'})
+        {'concentration': 3.5, 'concentration_units': 'M'})
     assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5 M, 3.5h)'
     res = testapp.patch_json(drug_treatment['@id'], {'temperature': 3.5})
     assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5 M, 3.5h at 3.5°C)'
