@@ -98,6 +98,16 @@
             "description": "URL of the directory that contains main and other CWL files needed for the workflow",
             "type": "string"
         },
+        "cwl_directory_url_draft3": {
+            "title": "CWL directory url for CWL draft3",
+            "description": "URL of the directory that contains main and other CWL files needed for the workflow",
+            "type": "string"
+        },
+        "cwl_directory_url_v1": {
+            "title": "CWL directory url for CWL v1.0",
+            "description": "URL of the directory that contains main and other CWL files needed for the workflow",
+            "type": "string"
+        },
         "cwl_main_filename": {
             "title": "CWL main file name",
             "description": "Name of the main CWL file for the workflow",
