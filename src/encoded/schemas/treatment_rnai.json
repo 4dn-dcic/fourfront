@@ -30,7 +30,8 @@
             "default": "1"
         },
         "treatment_type": {
-            "default": "RNAi"
+            "default": "RNAi",
+            "exlude_from": ["submit4dn", "FFedit-create"]
         },
         "rnai_type": {
             "title": "Type of RNAi",
