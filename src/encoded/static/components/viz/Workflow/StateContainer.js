@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { console, isServerSide } from './../../util';
+import { requestAnimationFrame } from './../../viz/utilities';
 import { windowHref } from './../../globals';
 
 
@@ -83,7 +84,13 @@ export default class StateContainer extends React.Component {
     }
 
     defaultOnNodeClick(node, selectedNode, evt){
-        this.setState({ 'selectedNode' : node });
+        this.setState(function(prevState){
+            if (prevState.selectedNode === node){
+                return { 'selectedNode' : null };
+            } else {
+                return { 'selectedNode' : node };
+            }
+        });
     }
 
     href(
@@ -112,7 +119,7 @@ export default class StateContainer extends React.Component {
     render(){
         var detailPane = null;
         return (
-            <div className="state-container">
+            <div className="state-container" data-is-node-selected={!!(this.state.selectedNode)}>
                 {
                     React.Children.map(this.props.children, (child)=>{
                         return React.cloneElement(child, _.extend(

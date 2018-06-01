@@ -151,19 +151,31 @@ export default class Edge extends React.Component {
     static isDistantlyRelated(edge, selectedNode, isNodeDisabled){
         if (Edge.isDisabled(edge, isNodeDisabled)) return false;
         if (!selectedNode) return false;
-        if (selectedNode.column < edge.source.column) return false;
-        var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
 
-        function check(node, prevNode, nextNodes){
+        function checkInput(node, prevNode, nextNodes){
             return Node.isSelected(edge.target, node);
         }
 
-        if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
-            var results = _.flatten(_.map(selectedInputs, (sI)=>{
-                return traceNodePathAndRun(sI, check, 'input', selectedNode);
-            }), false);
+        function checkOutput(node, prevNode, nextNodes){
+            return Node.isSelected(edge.source, node);
+        }
 
-            return _.any(results);
+        var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
+
+        if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
+            var resultsHistory = _.flatten(_.map(selectedInputs, (sI)=>{
+                return traceNodePathAndRun(sI, checkInput, 'input', selectedNode);
+            }), false);
+            if (_.any(resultsHistory)) return true;
+        }
+
+        var selectedOutputs = (selectedNode && (selectedNode.outputNodes || (selectedNode.inputOf && selectedNode.inputOf))) || null;
+
+        if (Array.isArray(selectedOutputs) && selectedOutputs.length > 0){
+            var resultsFuture =  _.flatten(_.map(selectedOutputs, (sO)=>{
+                return traceNodePathAndRun(sO, checkOutput, 'output', selectedNode);
+            }), false);
+            if (_.any(resultsFuture)) return true;
         }
         return false;
     }
@@ -217,9 +229,9 @@ export default class Edge extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.generatePathDimension = this.generatePathDimension.bind(this);
-        this.state = {
+        this.state = _.extend({
             'pathDimension' : this.generatePathDimension(props.edge, props.edgeStyle)
-        };
+        }, Edge.getComputedProperties(props));
     }
 
     /**
@@ -244,18 +256,31 @@ export default class Edge extends React.Component {
             }
         }
     }
-    
+
     shouldComponentUpdate(nextProps, nextState){
-        var oldProps = Edge.getComputedProperties(this.props);
-        var newProps = Edge.getComputedProperties(nextProps);
-        var propKeys = _.keys(oldProps);
-        for (var i = 0; i < propKeys.length; i++){
-            if (oldProps[propKeys[i]] !== newProps[propKeys[i]]) return true;
+        var propKeys = _.without(_.keys(nextProps), 'scrollContainerWrapperElement', 'scrollContainerWrapperMounted', 'nodes', 'edges', 'href', 'renderDetailPane');
+        var stateKeys = _.keys(nextState);
+        var i;
+        for (i = 0; i < propKeys.length; i++){
+            if (this.props[propKeys[i]] !== nextProps[propKeys[i]]){
+                return true;
+            }
         }
-        if (this.didNodeCoordinatesChange(nextProps, this.props) || nextState.pathDimension !== this.state.pathDimension){
+        for (i = 0; i < stateKeys.length; i++){
+            if (this.state[stateKeys[i]] !== nextState[stateKeys[i]]){
+                return true;
+            }
+        }
+        if (this.didNodeCoordinatesChange(nextProps, this.props)){
             return true;
         }
         return false;
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.selectedNode !== this.props.selectedNode){
+            this.setState(Edge.getComputedProperties(nextProps));
+        }
     }
 
     doTransitionOfEdge(props = this.props){
@@ -341,10 +366,10 @@ export default class Edge extends React.Component {
 
     render(){
         var edge = this.props.edge;
-        var { disabled, selected, related } = Edge.getComputedProperties(this.props);
+        var { disabled, selected, related, pathDimension } = this.state;
         return (
             <path
-                d={this.state.pathDimension}
+                d={pathDimension}
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
                 data-edge-selected={selected}
                 data-edge-related={related}

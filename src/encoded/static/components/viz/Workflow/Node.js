@@ -6,6 +6,7 @@ import { console } from './../../util';
 import { requestAnimationFrame } from './../utilities';
 import _ from 'underscore';
 import { Fade } from 'react-bootstrap';
+import { traceNodePathAndRun } from './parsing-functions';
 
 
 export class DefaultNodeElement extends React.Component {
@@ -93,7 +94,7 @@ export class DefaultNodeElement extends React.Component {
 }
 
 
-export default class Node extends React.Component {
+export default class Node extends React.PureComponent {
 
     /**
      * @param {Object} currentNode - Current node, e.g. node calling this function
@@ -114,6 +115,34 @@ export default class Node extends React.Component {
             }
             return false;
         }
+        return false;
+    }
+
+    static isInSelectionPath(currentNode, selectedNode){
+        if (!selectedNode) return false;
+
+        function check(nodeBeingTraversed, prevNode, nextNodes){
+            return Node.isSelected(currentNode, nodeBeingTraversed);
+        }
+
+        var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null,
+            selectedOutputs = (selectedNode && (selectedNode.outputNodes || selectedNode.inputOf)) || null,
+            results;
+
+        if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
+            results = _.flatten(_.map(selectedInputs, (sI)=>{
+                return traceNodePathAndRun(sI, check, 'input', selectedNode);
+            }), false);
+            if (_.any(results)) return true;
+        }
+
+        if (Array.isArray(selectedOutputs) && selectedOutputs.length > 0){
+            results = _.flatten(_.map(selectedOutputs, (sO)=>{
+                return traceNodePathAndRun(sO, check, 'output', selectedNode);
+            }), false);
+            if (_.any(results)) return true;
+        }
+
         return false;
     }
 
@@ -183,6 +212,7 @@ export default class Node extends React.Component {
 
     constructor(props){
         super(props);
+        this.updateNodeElementData = this.updateNodeElementData.bind(this);
         this.render = this.render.bind(this);
         this.isSelected = this.isSelected.bind(this);
     }
@@ -203,10 +233,30 @@ export default class Node extends React.Component {
                 scrollWrapper.scrollLeft = (nodeXEnd - containerWidth);
             }
         }
+        this.updateNodeElementData();
+    }
+
+    componentDidUpdate(prevProps){
+        if (this.props.node !== prevProps.node){
+            this.updateNodeElementData();
+        }
+    }
+
+    updateNodeElementData(props = this.props){
+        if (this.refs && this.refs.nodeOuterElem){
+            this.refs.nodeOuterElem.nodeData = {
+                'node' : props.node,
+                'reactInstance' : this
+            };
+        }
     }
 
     isSelected(){ return Node.isSelected(this.props.node, this.props.selectedNode); }
     isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
+    isInSelectionPath(){
+        if (!this.props.selectedNode) return false;
+        return Node.isInSelectionPath(this.props.node, this.props.selectedNode);
+    }
 
     render(){
         var node             = this.props.node,
@@ -224,17 +274,17 @@ export default class Node extends React.Component {
 
         var selected = this.isSelected() || false;
         var related = this.isRelated() || false;
+        var inSelectionPath = selected || this.isInSelectionPath();
 
         if      (disabled)                                   classNameList.push('disabled');
         if      (isCurrentContext)                           classNameList.push('current-context');
         if      (typeof this.props.className === 'function') classNameList.push(this.props.className(node));
         else if (typeof this.props.className === 'string'  ) classNameList.push(this.props.className);
 
-        var visibleNodeProps = _.extend(_.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'), {
-            'disabled' : disabled,
-            'selected' : selected,
-            'related' : related
-        });
+        var visibleNodeProps = _.extend(
+            _.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'),
+            { disabled, selected, related, isCurrentContext, inSelectionPath }
+        );
 
         return (
             <div
@@ -243,6 +293,7 @@ export default class Node extends React.Component {
                 data-node-type={node.nodeType}
                 data-node-global={node.meta && node.meta.global === true}
                 data-node-selected={selected}
+                data-node-in-selection-path={inSelectionPath}
                 data-node-related={related}
                 data-node-type-detail={node.ioType && node.ioType.toLowerCase()}
                 data-node-column={node.column}
@@ -252,13 +303,10 @@ export default class Node extends React.Component {
                     'width' : this.props.columnWidth || 100,
                     'zIndex' : 2 + (node.indexInColumn || 0)
                 }}
+                ref="nodeOuterElem"
             >
-                <div
-                    className="inner"
-                    onMouseEnter={this.props.onMouseEnter}
-                    onMouseLeave={this.props.onMouseLeave}
-                    onClick={disabled ? null : this.props.onClick}
-                >{ this.props.renderNodeElement(node, visibleNodeProps) }</div>
+                <div className="inner" children={this.props.renderNodeElement(node, visibleNodeProps)}
+                    onMouseEnter={this.props.onMouseEnter} onMouseLeave={this.props.onMouseLeave} onClick={disabled ? null : this.props.onClick} />
             </div>
         );
     }
