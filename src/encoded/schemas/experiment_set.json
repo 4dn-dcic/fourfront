@@ -152,6 +152,9 @@
         }
     },
     "facets": {
+        "award.center_title": {
+            "title": "Center"
+        },
         "publications_of_set.display_title": {
             "title": "Publication"
         },
