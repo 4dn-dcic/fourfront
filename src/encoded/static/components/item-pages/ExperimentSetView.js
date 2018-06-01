@@ -30,6 +30,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.isWorkflowNodeCurrentContext = this.isWorkflowNodeCurrentContext.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         var state = {
             'selectedFiles': new Set(),
@@ -37,6 +38,17 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         };
         if (!this.state) this.state = state; // May inherit from WorkfowRunTracingView
         else _.extend(this.state, state);
+    }
+
+    isWorkflowNodeCurrentContext(node){
+        var ctx = this.props.context;
+        if (!ctx) return false;
+        if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
+        if (Array.isArray(node.meta.run_data.file)) return false;
+        if (typeof node.meta.run_data.file.accession !== 'string') return false;
+        if (!ctx.processed_files || !Array.isArray(ctx.processed_files) || ctx.processed_files.length === 0) return false;
+        if (_.contains(_.pluck(ctx.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
+        return false;
     }
 
     getTabViewContents(){
@@ -90,18 +102,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             // Graph Section Tab
             if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
                 tabs.push(FileViewGraphSection.getTabObject(
-                    _.extend({}, this.props, {
-                        'isNodeCurrentContext' : function(node){
-                            var ctx = this.props.context;
-                            if (!ctx) return false;
-                            if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
-                            if (Array.isArray(node.meta.run_data.file)) return false;
-                            if (typeof node.meta.run_data.file.accession !== 'string') return false;
-                            if (!ctx.processed_files || !Array.isArray(ctx.processed_files) || ctx.processed_files.length === 0) return false;
-                            if (_.contains(_.pluck(ctx.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
-                            return false;
-                        }.bind(this)
-                    }),
+                    _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
                     this.state,
                     this.handleToggleAllRuns
                 ));

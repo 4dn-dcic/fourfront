@@ -46,9 +46,9 @@ export function commonGraphPropsFromProps(props){
         },
         'rowSpacingType' : 'wide',
         'nodeClassName' : null,
-        'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : onItemPageNodeClick,
-        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : true,
-        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : true
+        'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
+        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : false,
+        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false
     };
 }
 
@@ -339,12 +339,14 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     parseAnalysisSteps(context = this.props.context){
-        var opts = _.extend({}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters'));
+        var parsingOptions = _.extend(
+            {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters')
+        );
         return (
             this.state.showChart === 'basic' ?
-                parseBasicIOAnalysisSteps(context.steps, context, opts)
+                parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
                 :
-                parseAnalysisSteps(context.steps, opts)
+                parseAnalysisSteps(context.steps, parsingOptions)
         );
     }
 
