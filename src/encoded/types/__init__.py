@@ -2,12 +2,6 @@
 
 from snovault.attachment import ItemWithAttachment
 
-from pyramid.security import (
-    Allow,
-    Deny,
-    Everyone,
-)
-
 from snovault import (
     # calculated_property,
     collection,
@@ -38,49 +32,6 @@ class AnalysisStep(Item):
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded_list = ['software_used.*', 'qa_stats_generated.*']
-
-
-@collection(
-    name='awards',
-    unique_key='award:name',
-    properties={
-        'title': 'Awards (Grants)',
-        'description': 'Listing of awards (aka grants)',
-    })
-class Award(Item):
-    """Award class."""
-
-    item_type = 'award'
-    schema = load_schema('encoded:schemas/award.json')
-    name_key = 'name'
-    embedded_list = ['pi.*']
-
-    # define some customs acls; awards can only be created/edited by admin
-    ONLY_ADMIN_VIEW = [
-        (Allow, 'group.admin', ['view', 'edit']),
-        (Allow, 'group.read-only-admin', ['view']),
-        (Allow, 'remoteuser.INDEXER', ['view']),
-        (Allow, 'remoteuser.EMBED', ['view']),
-        (Deny, Everyone, ['view', 'edit'])
-    ]
-
-    SUBMITTER_CREATE = []
-
-    ALLOW_EVERYONE_VIEW = [
-        (Allow, Everyone, 'view'),
-    ]
-
-    ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT = [
-        (Allow, Everyone, 'view'),
-    ] + ONLY_ADMIN_VIEW
-
-    STATUS_ACL = {
-        'current': ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT,
-        'deleted': ONLY_ADMIN_VIEW,
-        'revoked': ALLOW_EVERYONE_VIEW,
-        'replaced': ALLOW_EVERYONE_VIEW,
-        'inactive': ALLOW_EVERYONE_VIEW
-    }
 
 
 @collection(

@@ -102,6 +102,12 @@
                 "External"
             ]
         },
+        "center": {
+            "title": "Center",
+            "description": "The name of the center associated with the award",
+            "type": "string",
+            "lookup": 95
+        },
         "viewing_group": {
             "title": "View access group",
             "description": "The group that determines which set of data the user has permission to view.",

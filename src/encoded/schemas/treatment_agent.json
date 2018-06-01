@@ -1,0 +1,95 @@
+{
+    "title": "Agent-based Treatment",
+    "description": "A Chemical or Physical Treatment on Biosample.",
+    "id": "/profiles/treatment_agent.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["treatment_type", "lab", "award"],
+    "identifyingProperties": ["uuid","aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "treatment.json#/properties" },
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/documents" }
+    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "treatment_type": {
+            "title": "Treatment Type",
+            "description": "The method used to make the treatment.",
+            "type": "string",
+            "lookup": 20,
+            "enum" : [
+            "Chemical",
+            "Heat Shock",
+            "Cold Shock",
+            "Other"
+            ]
+        },
+        "chemical": {
+            "title": "Drug or Chemical",
+            "type": "string",
+            "lookup": 25,
+            "internal_comment": "restricted to chEBI terms - validate against IDs?"
+        },
+        "concentration": {
+            "title": "Concentration",
+            "type": "number",
+            "lookup": 30
+        },
+        "concentration_units": {
+            "title": "Concentration units",
+            "type": "string",
+            "lookup": 40,
+            "enum": [
+                "pM",
+                "nM",
+                "μM",
+                "μg/mL",
+                "mM",
+                "mg/mL",
+                "ng/mL",
+                "M",
+                "percent",
+                "units",
+                "U/mL"
+              ]
+        },
+        "duration": {
+            "title": "Duration",
+            "type": "number",
+            "lookup": 50
+        },
+        "duration_units": {
+            "title": "Duration units",
+            "type": "string",
+            "lookup": 60,
+            "enum": [
+                "second",
+                "minute",
+                "hour",
+                "day"
+            ]
+        },
+        "temperature": {
+            "title": "Temperature (°C)",
+            "type": "number",
+            "lookup": 70
+        }
+    }
+}
