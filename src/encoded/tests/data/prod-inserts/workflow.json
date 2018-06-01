@@ -524,6 +524,7 @@
             "fastqc-0-11-4.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "fastqc-0-11-4-1.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0",
         "data_types": [
@@ -661,6 +662,7 @@
         "category": "QC",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "pairsqc-single.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/pairsqc-0-11-4/0",
         "data_types": [
@@ -855,6 +857,7 @@
         "category": "QC",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
         "cwl_main_filename": "md5.cwl",
         "data_types": [
             "Hi-C",
@@ -933,6 +936,7 @@
         "category": "QC",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_main_filename": "md5.cwl",
         "data_types": [
             "Hi-C",
@@ -2910,6 +2914,7 @@
             "cooler.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-partb.cwl",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_sbg/hi-c-processing-partb.44.cwl",
         "data_types": [
@@ -3656,6 +3661,7 @@
         "category": "alignment",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -3795,6 +3801,7 @@
         "category": "alignment",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -3925,6 +3932,7 @@
         "category": "annotation+sorting",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-parse-sort.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4036,6 +4044,7 @@
         "category": "merging",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-merge.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4129,6 +4138,7 @@
         "category": "annotating",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-markasdup.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4222,6 +4232,7 @@
         "category": "filtering",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-filter.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4341,6 +4352,7 @@
         "category": "format conversion",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "addfragtopairs.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4441,6 +4453,7 @@
         "category": "format conversion",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairs-patch.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4548,6 +4561,7 @@
             "pairsam-filter.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
         "data_types": [
             "Hi-C"
@@ -4875,6 +4889,7 @@
             "count.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
         "cwl_main_filename": "repliseq-parta.cwl",
         "data_types": [
             "Repli-seq"
@@ -5314,6 +5329,7 @@
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
         "data_types": [
             "Hi-C"
@@ -6004,6 +6020,7 @@
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-pairs-nore.cwl",
         "data_types": [
             "DNase Hi-C",
@@ -6622,6 +6639,7 @@
             "cool2mcool.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-pairs-nonorm.cwl",
         "data_types": [
             "Capture Hi-C"
@@ -7176,6 +7194,7 @@
             "cool2mcool.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-pairs-nore-nonorm.cwl",
         "data_types": [
             "ChIA-PET"
