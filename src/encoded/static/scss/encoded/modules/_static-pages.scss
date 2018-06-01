@@ -419,8 +419,10 @@ h5.fourDN-header {
 .static-page-breadcrumbs {
 	padding-top: 29px; 
 
-	@media screen and (min-width: $screen-lg-min) {
-		width: 75%;
+	&.page-has-toc {
+		@media screen and (min-width: $screen-lg-min) {
+			width: 75%;
+		}
 	}
 
 	> .static-breadcrumb {
