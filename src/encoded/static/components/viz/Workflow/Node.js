@@ -253,6 +253,7 @@ export default class Node extends React.PureComponent {
 
     isSelected(){ return Node.isSelected(this.props.node, this.props.selectedNode); }
     isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
+
     isInSelectionPath(){
         if (!this.props.selectedNode) return false;
         return Node.isInSelectionPath(this.props.node, this.props.selectedNode);

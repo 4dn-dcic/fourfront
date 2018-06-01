@@ -1506,8 +1506,14 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 @mixin workflow-edge-layer {
     path.pathArrow-marker {
-        fill: #333;
+        fill: #000;
         stroke: none;
+        &.marker-color-gray {
+            fill: rgba(58,58,58,0.75);
+        }
+        &.marker-color-light-gray {
+            fill: rgba(0,0,0,0.33);
+        }
     }
 
     path {
@@ -1523,18 +1529,19 @@ $workflow-node-color-type-global-context: #ffb3b3;
             stroke: #000;
             stroke-width: 2px;
         }
+        &.disabled:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
+            stroke-width: 1px;
+            //stroke: #bbb;
+            stroke: rgba(0,0,0,0.33);
+        }
         &[data-edge-selected="true"]{
             stroke-width: 3px;
             stroke: #000;
         }
         &[data-edge-related="true"]:not([data-edge-selected="true"]){
             stroke-width: 3px;
-            stroke: rgba(0,0,0,0.75);
-        }
-        &.disabled {
-            stroke-width: 1px;
-            //stroke: #bbb;
-            stroke: rgba(0,0,0,0.33);
+            stroke: #000;
+            //stroke: rgba(0,0,0,0.75);
         }
     }
 }
@@ -1687,6 +1694,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         margin: 0;
                         input[type="checkbox"]{
                             margin-top: 3px;
+                        }
+                        &.disabled{
+                            color: #999;
                         }
                     }
                 }

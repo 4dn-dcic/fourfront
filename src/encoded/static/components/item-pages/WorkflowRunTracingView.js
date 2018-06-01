@@ -9,7 +9,7 @@ import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './component
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection } from './WorkflowView';
+import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
@@ -216,20 +216,6 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         ) || false;
     }
 
-    static checkIfIndirectOrReferenceNodesExist(steps){
-        var graphData = parseAnalysisSteps(steps, _.extend(
-            {}, DEFAULT_PARSING_OPTIONS, { 'showIndirectFiles' : true, 'showReferenceFiles' : true }
-        ));
-        var anyIndirectPathIONodes = _.any(graphData.nodes, function(n){
-            return (n.nodeType === 'output' && n.meta && n.meta.in_path === false);
-        });
-        var anyReferenceFileNodes = _.any(graphData.nodes, function(n){
-            return (n.ioType === 'reference file');
-        });
-        return { anyIndirectPathIONodes, anyReferenceFileNodes };
-
-    }
-
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
@@ -246,12 +232,12 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'showParameters' : false,
             'anyIndirectPathIONodes' : true, // Overriden
             'anyReferenceFileNodes' : true // Overriden
-        }, FileViewGraphSection.checkIfIndirectOrReferenceNodesExist(props.steps));
+        }, checkIfIndirectOrReferenceNodesExist(props.steps));
     }
 
     componentWillReceiveProps(nextProps){
         if (this.props.steps !== nextProps.steps){
-            this.setState(FileViewGraphSection.checkIfIndirectOrReferenceNodesExist(nextProps.steps));
+            this.setState(checkIfIndirectOrReferenceNodesExist(nextProps.steps));
         }
     }
 

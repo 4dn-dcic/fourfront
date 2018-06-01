@@ -138,18 +138,18 @@ export default class Edge extends React.Component {
         return (
             Node.isSelected(edge.source, selectedNode) ||
             Node.isSelected(edge.target, selectedNode)
-        ) && !Edge.isDisabled(edge, isNodeDisabled);
+        );
     }
 
     static isRelated(edge, selectedNode, isNodeDisabled = null){
         return (
             Node.isRelated(edge.source, selectedNode) ||
             Node.isRelated(edge.target, selectedNode)
-        ) && !Edge.isDisabled(edge, isNodeDisabled);
+        );
     }
 
     static isDistantlyRelated(edge, selectedNode, isNodeDisabled){
-        if (Edge.isDisabled(edge, isNodeDisabled)) return false;
+        //if (Edge.isDisabled(edge, isNodeDisabled)) return false;
         if (!selectedNode) return false;
 
         function checkInput(node, prevNode, nextNodes){
@@ -209,17 +209,26 @@ export default class Edge extends React.Component {
         'curveRadius' : 12
     }
 
-    static pathArrowsMarker(){
+    static pathArrowsMarkers(){
         return (
             <defs>
                 <marker
-                    id="pathArrow"
-                    viewBox="0 0 15 15" refX="0" refY="5"
-                    markerUnits="strokeWidth"
-                    markerWidth="6" markerHeight="5"
-                    orient="auto"
-                >
-                    <path d="M 0 0 L 10 5 L 0 10 Z" className="pathArrow-marker" />
+                    id="pathArrowBlack"
+                    viewBox="0 0 15 15" refX="0" refY="5" orient="auto"
+                    markerUnits="strokeWidth" markerWidth="6" markerHeight="5">
+                    <path d="M 0 0 L 10 5 L 0 10 Z" className="pathArrow-marker marker-color-black" />
+                </marker>
+                <marker
+                    id="pathArrowGray"
+                    viewBox="0 0 15 15" refX="0" refY="5" orient="auto"
+                    markerUnits="strokeWidth" markerWidth="6" markerHeight="5">
+                    <path d="M 0 0 L 10 5 L 0 10 Z" className="pathArrow-marker marker-color-gray" />
+                </marker>
+                <marker
+                    id="pathArrowLightGray"
+                    viewBox="0 0 15 15" refX="0" refY="5" orient="auto"
+                    markerUnits="strokeWidth" markerWidth="6" markerHeight="5">
+                    <path d="M 0 0 L 10 5 L 0 10 Z" className="pathArrow-marker marker-color-light-gray" />
                 </marker>
             </defs>
         );
@@ -367,6 +376,13 @@ export default class Edge extends React.Component {
     render(){
         var edge = this.props.edge;
         var { disabled, selected, related, pathDimension } = this.state;
+
+        var markerEnd;
+        if (!this.props.pathArrows)     markerEnd = null;
+        else if (selected || related)   markerEnd = 'pathArrowBlack';
+        else if (disabled)              markerEnd = 'pathArrowLightGray';
+        else                            markerEnd = 'pathArrowGray';
+
         return (
             <path
                 d={pathDimension}
@@ -375,7 +391,7 @@ export default class Edge extends React.Component {
                 data-edge-related={related}
                 data-source={edge.source.name}
                 data-target={edge.target.name}
-                markerEnd={this.props.pathArrows ? "url(#pathArrow)" : null}
+                markerEnd={markerEnd && "url(#" + markerEnd + ")"}
             />
         );
     }
