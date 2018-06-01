@@ -125,14 +125,7 @@ after_success:
               python deploy/deploy_beanstalk.py
            fi
         fi
-        if [ "$TRAVIS_BRANCH" = "production" ]; then
-           if [ -n "$tibanna_deploy" ]; then
-               echo "Job succeeded! PUBLISHing to ${tibanna_deploy} environment..."
-               eb use ${tibanna_deploy} --debug
-               python deploy/deploy_beanstalk.py --prod
-           fi
-          fi
-        fi
+       fi
      fi
     fi
 after_failure:
