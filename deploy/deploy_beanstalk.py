@@ -132,52 +132,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="update version if relevant and deploy"
     )
-    parser.add_argument('--prod', action="store_true", help="deploy to prod")
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
     merge_to = os.environ.get("tibanna_merge", "").strip()
     deploy_to = os.environ.get("tibanna_deploy", "").strip()
 
-    if not args.prod:
-        print("not production")
-        try:
-            if deploy_to in ['fourfront-staging', 'fourfront-webprod', 'fourfront-webprod2']:
-                print("deploy to staging")
-                ver = get_git_version()
-                # checkout correct branch
-                print("checkout master")
-                subprocess.check_output(
-                    ['git', 'checkout', branch])
-
-                print("update version")
-                update_version(ver, branch)
-                if merge_to:
-                    print("merge from %s to %s" % (branch, merge_to))
-                    merge(branch, merge_to)
-                    print("tag it")
-                    tag(ver)
-        except Exception as e:
-            # this can all go wrong if somebody pushes during the build
-            # or what not, in which case we just won't update the tag / merge
-            print("got the following expection but we will ignore it")
-            print(e)
-            print("switching back to source branch")
+    try:
+        if deploy_to in ['fourfront-staging', 'fourfront-webprod', 'fourfront-webprod2']:
+            print("deploy to staging")
+            ver = get_git_version()
+            # checkout correct branch
+            print("checkout master")
             subprocess.check_output(
                 ['git', 'checkout', branch])
 
-        print("now let's deploy")
-        deploy(deploy_to)
-    if args.prod:
-        print("args production")
-        # only deploy if commint message has tibanna-deploy in it
-        msg = os.environ.get("TRAVIS_COMMIT_MESSAGE", "")
-        print("commit message", msg)
-        if not msg:
-            print("I don't have a message")
-        if "tibanna-deploy" in msg:
-            deploy()
-        elif os.environ.get("tibanna_deploy", False):
-            print("Deploying to environment %s" % os.environ.get("tibanna-deploy"))
-            deploy()
-        else:
-            print("not deploying you didn't say the magic words...")
+            print("update version")
+            update_version(ver, branch)
+            if merge_to:
+                print("merge from %s to %s" % (branch, merge_to))
+                merge(branch, merge_to)
+                print("tag it")
+                tag(ver)
+    except Exception as e:
+        # this can all go wrong if somebody pushes during the build
+        # or what not, in which case we just won't update the tag / merge
+        print("got the following expection but we will ignore it")
+        print(e)
+        print("switching back to source branch")
+        subprocess.check_output(
+            ['git', 'checkout', branch])
+
+    print("now let's deploy")
+    deploy(deploy_to)
