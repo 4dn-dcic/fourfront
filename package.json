@@ -61,7 +61,7 @@
     "babel-preset-react": "^6.5.0",
     "codacy-coverage": "^2.1.1",
     "coveralls": "^2.13.3",
-    "cypress": "^3.0.0",
+    "cypress": "^3.0.1",
     "eslint": "^3.19.0",
     "eslint-plugin-class-property": "^1.1.0",
     "eslint-plugin-cypress": "^2.0.1",

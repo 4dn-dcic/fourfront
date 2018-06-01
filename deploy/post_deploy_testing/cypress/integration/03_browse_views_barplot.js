@@ -10,7 +10,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
             cy.visit('/');
 
-            cy.get('#sBrowse').click().then(()=>{
+            cy.get('#browse-menu-item').click().then(()=>{
                 cy.get('#page-title-container .page-title span.title').should('have.text', 'Data Browser');
             });
 
@@ -54,9 +54,9 @@ describe('Browse Views - Redirection & Visualization', function () {
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
         });
 
-        it('Hover over & click "ATAC-seq, mouse" bar part + popover button--> matching filtered /browse/ results', function(){
+        it('Hover over & click "Repli-seq, human" bar part + popover button--> matching filtered /browse/ results', function(){
 
-            // A likely-to-be-here Bar Section - ATAC-seq x mouse
+            // A likely-to-be-here Bar Section - Repli-seq x human
             cy.window().then((w)=>{ w.scrollTo(0,0); }).end().get('#select-barplot-field-1').should('contain', 'Organism').end()
                 .get('#select-barplot-field-0').should('contain', 'Experiment Type').end()
                 .get('.bar-plot-chart .chart-bar[data-term="Repli-seq"] .bar-part[data-term="human"]').then(($barPart)=>{
