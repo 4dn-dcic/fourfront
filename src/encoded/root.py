@@ -300,7 +300,7 @@ class EncodedRoot(Root):
 #    def announcements(self, request):
 #        '''Returns list of latest announcements'''
 #        try:
-#            ## Doesn't go thru permissions correctly (status:draft visible to non-logged-in-users) 
+#            ## Doesn't go thru permissions correctly (status:draft visible to non-logged-in-users)
 #            return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=True).get('@graph', [])
 #        except KeyError:
 #            return [ ]
