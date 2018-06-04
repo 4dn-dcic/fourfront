@@ -4,6 +4,7 @@ import logging
 
 from pyramid.paster import get_app
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
+from snovault import set_logging
 from dcicutils.beanstalk_utils import whodaman
 
 log = structlog.getLogger(__name__)
