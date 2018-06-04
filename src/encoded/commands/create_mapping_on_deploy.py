@@ -1,6 +1,6 @@
 import argparse
 import structlog
-import loggin
+import logging
 
 from pyramid.paster import get_app
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
