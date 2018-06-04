@@ -367,7 +367,7 @@ export class StaticPageBreadcrumbs extends React.Component {
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right">
-                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href}>Edit</a>
+                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
                 }
