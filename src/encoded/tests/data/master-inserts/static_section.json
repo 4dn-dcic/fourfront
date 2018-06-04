@@ -43,7 +43,10 @@
         "title" : "The 4D Nucleome Perspective is Published",
         "date_created" : "2017-09-13",
         "submitted_by" : "4dndcic@gmail.com",
-        "body" : "The 4D Nucleome Project perspective paper is online in <a href=\"http://www.nature.com/nature/journal/v549/n7671/full/nature23884.html?foxtrotcallback=true\" target=\"_blank\"><em>Nature</em></a> today. If you use any <a href=\"/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN\">4DN data</a>, please cite this paper. A more extensive data release and use policy will be available soon."
+        "body" : "The 4D Nucleome Project perspective paper is online in <a href=\"http://www.nature.com/nature/journal/v549/n7671/full/nature23884.html?foxtrotcallback=true\" target=\"_blank\"><em>Nature</em></a> today. If you use any <a href=\"/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN\">4DN data</a>, please cite this paper. A more extensive data release and use policy will be available soon.",
+        "options" : {
+            "filetype" : "html"
+        }
     },
     {
         "name" : "announcements.reference-repliseq-data-released",
@@ -52,7 +55,10 @@
         "title" : "Reference Repli-seq Data Released",
         "date_created" : "2017-09-05",
         "submitted_by" : "4dndcic@gmail.com",
-        "body" : "Part of the goals of 4DN involves generating reference data sets for selected cell types to study how different experiment types complement each other in our understanding of nucleome dynamics. Today, 4DN released <a href='/browse/?type=ExperimentSetReplicate&experiments_in_set.experiment_type=repliseq'>reference Repli-seq data</a> for the selected Tiered cell lines."
+        "body" : "Part of the goals of 4DN involves generating reference data sets for selected cell types to study how different experiment types complement each other in our understanding of nucleome dynamics. Today, 4DN released <a href='/browse/?type=ExperimentSetReplicate&experiments_in_set.experiment_type=repliseq'>reference Repli-seq data</a> for the selected Tiered cell lines.",
+        "options" : {
+            "filetype" : "html"
+        }
     },
     {
         "name" : "announcements.first-4dn-experiments-released",
@@ -61,7 +67,10 @@
         "title" : "First 4DN Experiments Released",
         "date_created" : "2017-06-30",
         "submitted_by" : "4dndcic@gmail.com",
-        "body" : "The first <a href='/browse/?type=ExperimentSetReplicate&accession=4DNES2M5JIGV&accession=4DNESYUYFD6H&accession=4DNESTAPSPUC&accession=4DNES4GSP9S4&accession=4DNESJ1VX52C&accession=4DNESJIYRA44&accession=4DNESI2UKI7P&accession=4DNESHGL976U&accession=4DNESE3ICNE1&accession=4DNESVKLYDOH'>4DN Funded Hi-C experiments</a> have been released to public on the portal."
+        "body" : "The first <a href='/browse/?type=ExperimentSetReplicate&accession=4DNES2M5JIGV&accession=4DNESYUYFD6H&accession=4DNESTAPSPUC&accession=4DNES4GSP9S4&accession=4DNESJ1VX52C&accession=4DNESJIYRA44&accession=4DNESI2UKI7P&accession=4DNESHGL976U&accession=4DNESE3ICNE1&accession=4DNESVKLYDOH'>4DN Funded Hi-C experiments</a> have been released to public on the portal.",
+        "options" : {
+            "filetype" : "html"
+        }
     },
     {
         "name" : "announcements.ontology-utilization-updated",
@@ -70,7 +79,10 @@
         "title" : "Ontology Utilization Updated",
         "date_created" : "2017-04-26",
         "submitted_by" : "4dndcic@gmail.com",
-        "body" : "<a href='/search/?type=OntologyTerm'>Ontology Terms</a> from OBI, Uberon, and EFO are now represented on our database. Ontology terms can be internally used to describe cell lines and tissues. We will implement ontology utilization for other appropriate fields in the coming months."
+        "body" : "<a href='/search/?type=OntologyTerm'>Ontology Terms</a> from OBI, Uberon, and EFO are now represented on our database. Ontology terms can be internally used to describe cell lines and tissues. We will implement ontology utilization for other appropriate fields in the coming months.",
+        "options" : {
+            "filetype" : "html"
+        }
     },
     {
         "name" : "announcements.data-submission-open-beta",
@@ -79,7 +91,10 @@
         "title" : "Data Submission Open (Beta)",
         "date_created" : "2016-09-19",
         "submitted_by" : "4dndcic@gmail.com",
-        "body" : "The 4DN Data Portal is open for beta-testers for data submission for Hi-C and related experiments."
+        "body" : "The 4DN Data Portal is open for beta-testers for data submission for Hi-C and related experiments.",
+        "options" : {
+            "filetype" : "html"
+        }
     },
 
 

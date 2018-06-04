@@ -871,8 +871,6 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
 
     return { 'nodes' : sortedNodes, 'edges' : graphData.edges };
 
-    //return correctColumnAssignments({ 'nodes' : sortedNodes , 'edges' : graphData.edges });
-
 }
 
 /**
