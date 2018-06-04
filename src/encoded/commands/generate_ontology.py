@@ -20,10 +20,10 @@ from encoded.commands.owltools import (
     IntersectionOf,
     OnProperty
 )
-from dcicutils.submit_utils import (
-    FDN_Key,
-    FDN_Connection,
-    get_FDN
+from dcicutils.ff_utils import (
+    get_authentication_with_server,
+    get_metadata,
+    search_metadata
 )
 import mimetypes
 from pyramid.paster import get_app
@@ -372,14 +372,12 @@ def get_slim_terms(connection):
     search_suffix = 'search/?type=OntologyTerm&limit=all&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
-        terms = get_FDN(None, connection, None, search_suffix + cat)
         try:
-            # a notification indicates a problem like a bad response so only
-            # add extend slim_terms if not present
-            terms.get('notification')
-            pass
-        except AttributeError:
+            terms = search_metadata(search_suffix + cat, connection)
             slim_terms.extend(terms)
+        except TypeError as e:
+            print(e)
+            continue
     return slim_terms
 
 
@@ -387,7 +385,7 @@ def get_existing_ontology_terms(connection):
     '''Retrieves all existing ontology terms from the db
     '''
     search_suffix = 'search/?type=OntologyTerm&limit=all'
-    return get_FDN(None, connection, None, search_suffix)
+    return search_metadata(search_suffix, connection)
 
 
 def get_ontologies(connection, ont_list):
@@ -396,10 +394,9 @@ def get_ontologies(connection, ont_list):
     '''
     ontologies = []
     if ont_list == 'all':
-        ontologies = get_FDN(None, connection, None, 'ontologys')
+        ontologies = search_metadata('search/?type=Ontology&limit=all', connection)
     else:
-        ontologies = [get_FDN('ontologys/' + ontology, connection, frame='embedded') for ontology in ont_list]
-
+        ontologies = [get_metadata('ontologys/' + ontology, connection) for ontology in ont_list]
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
         print("we must not have got ontolgies... bailing")
@@ -411,24 +408,24 @@ def get_ontologies(connection, ont_list):
     return ontologies
 
 
-def connect2server(keyfile, keyname, app=None):
+def connect2server(env=None, key=None, app=None):
     '''Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
        reached with that key.
        Also handles keyfiles stored in s3'''
-    if keyfile == 's3':
+    if key == 's3':
         assert app is not None
         s3bucket = app.registry.settings['system_bucket']
         keyfile = get_key(bucket=s3bucket)
 
-    key = FDN_Key(keyfile, keyname)
-    connection = FDN_Connection(key)
-    print("Running on: {server}".format(server=connection.server))
-    # test connection
-    if connection.check:
-        return connection
-    print("CONNECTION ERROR: Please check your keys.")
-    return None
+    try:
+        auth = get_authentication_with_server(key, env)
+    except Exception:
+        print("Authentication failed")
+        sys.exit(1)
+
+    print("Running on: {server}".format(server=auth.get('server')))
+    return auth
 
 
 def remove_obsoletes_and_unnamed(terms):
@@ -706,15 +703,14 @@ def parse_args(args):
                         default=False,
                         action='store_true',
                         help="Default False - set True to generate full file to load - do not filter out existing unchanged terms")
+    parser.add_argument('--env',
+                        default='data',
+                        help="The environment to use i.e. data, webdev, mastertest.\
+                        Default is 'data')")
     parser.add_argument('--key',
-                        default='default',
-                        help="The keypair identifier from the keyfile.  \
-                        Default is --key=default")
-    parser.add_argument('--keyfile',
-                        default=os.path.expanduser("~/keypairs.json"),
-                        help="The keypair file.  Default is --keyfile=%s" %
-                             (os.path.expanduser("~/keypairs.json")))
-
+                        default=None,
+                        help="An access key dictionary including key, secret and server.\
+                        {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
 
@@ -769,7 +765,7 @@ def main():
             return
 
     # fourfront connection
-    connection = connect2server(args.keyfile, args.key, app)
+    connection = connect2server(args.env, args.key, app)
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):
