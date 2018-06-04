@@ -209,9 +209,9 @@ export default class PageTitle extends React.Component {
 
     static getStyles(context, href, mounted, hasToc){
         var style = { 'marginTop' : 0 };
+        var gridSize = mounted && layout.responsiveGridState();
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
-            var gridSize = mounted && layout.responsiveGridState();
             if (mounted && (gridSize === 'xs' || gridSize === 'sm')) {
                 // don't do it; but do by default if not mounted (aka serverside) since desktop is more common than mobile for us
             } else {
@@ -219,11 +219,7 @@ export default class PageTitle extends React.Component {
             }
         }
 
-        if (hasToc) style.width = '75%';
-
-        //if (PageTitle.isStaticPage(context)){
-        //    style.paddingLeft = 10; // Indent slightly to match content.
-        //}
+        if (hasToc && (gridSize === 'md' || gridSize === 'lg' || !mounted)) style.width = '75%';
 
         return style;
     }
