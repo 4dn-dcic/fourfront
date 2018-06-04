@@ -22,7 +22,7 @@ export class BasicStaticSectionBody extends React.PureComponent {
 
     render(){
         var { content, filetype, element, compileOptions } = this.props;
-        var passedProps = _.omit(this.props, 'content', 'filetype', 'children', 'element');
+        var passedProps = _.omit(this.props, 'content', 'filetype', 'children', 'element', 'compileOptions');
         if (filetype === 'md'){
             return React.createElement(element, passedProps, compiler(content, compileOptions || undefined) );
         } else if (filetype === 'html'){
