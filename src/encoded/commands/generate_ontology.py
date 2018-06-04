@@ -396,7 +396,7 @@ def get_ontologies(connection, ont_list):
     if ont_list == 'all':
         ontologies = search_metadata('search/?type=Ontology&limit=all', connection)
     else:
-        ontologies = [get_metadata('ontologys/' + ontology, connection, add_on="frame='embedded'") for ontology in ont_list]
+        ontologies = [get_metadata('ontologys/' + ontology, connection) for ontology in ont_list]
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
         print("we must not have got ontolgies... bailing")
