@@ -7,6 +7,7 @@ import { store } from '../../../store';
 import * as globals from './../../globals';
 import { Collapse, Button } from 'react-bootstrap';
 import { PartialList } from './../../item-pages/components';
+import { BasicStaticSectionBody } from './BasicStaticSectionBody';
 
 /**
  * A single Announcement block/view.
@@ -37,15 +38,16 @@ class Announcement extends React.Component {
     render() {
         var title = this.props.content.title || "";
         var content = this.props.content.content || "";
+        var filetype = this.props.content.filetype || 'html';
 
         return (
             <div className="announcement">
                 <div className="announcement-title">
-                    <span dangerouslySetInnerHTML={{__html: title}}/>
+                    <span dangerouslySetInnerHTML={{__html: title }}/>
                 </div>
                 { this.subtitle() }
                 <div className="announcement-content">
-                    <p dangerouslySetInnerHTML={{__html: content}}></p>
+                    <BasicStaticSectionBody content={content} filetype={filetype} />
                 </div>
             </div>
         );
