@@ -76,11 +76,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
-                content : <ProcessedFilesStackedTableSection
-                    processedFiles={processedFiles}
-                    width={width} context={context} schemas={schemas}
-                    {...this.state}
-                />
+                content : <ProcessedFilesStackedTableSection processedFiles={processedFiles} width={width} context={context} schemas={schemas} {...this.state} />
             });
 
         }
@@ -90,10 +86,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
-                content : <RawFilesStackedTableSection
-                    width={width} context={context} schemas={schemas}
-                    {...this.state}
-                />
+                content : <RawFilesStackedTableSection width={width} context={context} schemas={schemas} {...this.state} />
             });
         }
 
@@ -117,9 +110,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 key : 'other-processed-files',
                 content : <OtherProcessedFilesStackedTableSection
                     otherProcessedFilesSets={otherProcessedFilesSets}
-                    width={width} context={context} schemas={schemas}
-                    {...this.state}
-                />
+                    width={width} context={context} schemas={schemas} {...this.state} />
             });
         }
 
