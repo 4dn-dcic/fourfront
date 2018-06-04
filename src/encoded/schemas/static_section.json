@@ -30,6 +30,7 @@
             "default": "released",
             "enum" : [
                 "released",
+                "released to project",
                 "draft",
                 "deleted"
             ]
