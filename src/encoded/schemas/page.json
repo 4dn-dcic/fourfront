@@ -23,7 +23,8 @@
             "default": "released",
             "enum" : [
                 "released",
-                "draft",
+                "released to project",
+                "in review by lab",
                 "deleted"
             ]
         },
