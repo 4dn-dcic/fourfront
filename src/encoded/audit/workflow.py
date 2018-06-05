@@ -40,7 +40,7 @@ def audit_workflow_steps(value, system):
             yield AuditFailure('No meta property', 'Workflow {} step {} has no softwares in its `step.meta.software_used field` (list).'.format(value['@id'], step_name), level='WARNING')
 
         input_names = set()
-        input_source_names = set()
+        input_source_names = {}
         for input_idx, input in enumerate(inputs):
             input_name = input.get('name')
             if input_name is None:
@@ -63,15 +63,15 @@ def audit_workflow_steps(value, system):
                 if source.get('name') is None:
                     yield AuditFailure('Missing name', 'Workflow {} step {} input {} source with index {} has no name defined.'.format(value['@id'], step_name, input_name, str(source_idx)), level='ERROR')
                     continue
-                if source['name'] in input_source_names:
+                if input_source_names.get(source['name']) == source.get('step', 'GLOBAL'):
                     yield AuditFailure('Duplicate name', 'Workflow {} step {} input {} has sources with duplicate name "{}".'.format(value['@id'], step_name, input_name, source['name']), level='ERROR')
-                input_source_names.add(source['name'])
+                input_source_names[source['name']] = source.get('step', 'GLOBAL')
                 if input.get('meta', {}).get('global') == False:
                     if source.get('step') is None:
                         yield AuditFailure('Missing source step', 'Workflow {} step {} non-global input {} source "{}" is missing `step` field/name.'.format(value['@id'], step_name, input_name, source['name']), level='ERROR')
 
         output_names = set()
-        output_target_names = set()
+        output_target_names = {}
         for output_idx, output in enumerate(outputs):
             output_name = output.get('name')
             if output_name is None:
@@ -94,9 +94,9 @@ def audit_workflow_steps(value, system):
                 if target.get('name') is None:
                     yield AuditFailure('Missing name', 'Workflow {} step {} output {} target with index {} has no name defined.'.format(value['@id'], step_name, output_name, str(target_idx)), level='ERROR')
                     continue
-                if target['name'] in output_target_names:
+                if output_target_names.get(target['name']) == target.get('step', 'GLOBAL'):
                     yield AuditFailure('Duplicate name', 'Workflow {} step {} output {} has targets with duplicate name "{}".'.format(value['@id'], step_name, output_name, target['name']), level='ERROR')
-                output_target_names.add(target['name'])
+                output_target_names[target['name']] = target.get('step', 'GLOBAL')
                 if output.get('meta', {}).get('global') == False:
                     if target.get('step') is None:
                         yield AuditFailure('Missing target step', 'Workflow {} step {} non-global output {} target "{}" is missing `step` field/name.'.format(value['@id'], step_name, output_name, target['name']), level='ERROR')
