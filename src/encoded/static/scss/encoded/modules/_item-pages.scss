@@ -255,27 +255,28 @@ h3.submission-subtitle {
 			border-radius: 50%;
 		}
 
-		&.expset-status[data-status="released"]:before {
+		&.expset-status[data-status="released"]:before,
+		&.expset-status[data-status="current"]:before,
+		&.expset-status[data-status="uploaded"]:before {
 			color: #fff;
 			background-color: #308756;
 		}
 
-		&.expset-status[data-status="current"]:before {
-			color: #fff;
-			background-color: #308756;
-		}
-
-		&.expset-status[data-status="revoked"]:before {
+		&.expset-status[data-status="revoked"]:before,
+		&.expset-status[data-status="obsolete"]:before {
 			color: #fff;
 			background-color: #812423;
 		}
 
-		&.expset-status[data-status="deleted"]:before {
+		&.expset-status[data-status="deleted"]:before,
+		&.expset-status[data-status="upload failed"]:before {
 			color: #fff;
 			background-color: #a90d0b;
 		}
 
-		&.expset-status[data-status="replaced"]:before {
+		&.expset-status[data-status="replaced"]:before,
+		&.expset-status[data-status="planned"]:before,
+		&.expset-status[data-status="to be uplodaded by workflow"]:before {
 			color: #fff;
 			background-color: #47419a;
 		}
@@ -285,7 +286,9 @@ h3.submission-subtitle {
 			background-color: #d8bd22;
 		}
 
-		&.expset-status[data-status="submission in progress"]:before {
+		&.expset-status[data-status="submission in progress"]:before,
+		&.expset-status[data-status="uploading"]:before,
+		&.expset-status[data-status="draft"]:before {
 			color: #fff;
 			background-color: #d8bd22;
 		}
@@ -295,10 +298,12 @@ h3.submission-subtitle {
 			background-color: #397855;
 		}
 
-		&.expset-status[data-status="unspecified"]:before {
+		&.expset-status[data-status="unspecified"]:before,
+		&.expset-status[data-status="archived"]:before,
+		&.expset-status[data-status="archived to project"]:before {
 			color: #fff;
 			background-color: #7b7b7b;
-			display: none;
+			//display: none;
 		}
 
 		/*
