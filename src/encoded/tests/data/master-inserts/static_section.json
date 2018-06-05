@@ -24,7 +24,8 @@
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b002",
         "section_type" : "Search Info Header",
         "title" : "Basic Protocol",
-        "body" : "<div><p>This page contains the Microscope Optical QC recordings from 4DN labs. 4DN Imaging Group strongly advices this QC to be performed once a month, and uploaded to this page. To produce this data,</p><ol><li>Please use the <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">TetraSpeckTM</a> Fluorescent Microspheres from Thermo Fisher Scientific (catalog number <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">T14792</a>)</li><li>Follow the simple step in this <a href=\"http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/protocols/fbc19c00-d377-461c-98a4-9c3c32544d40/\">Protocol</a> to produce a PSFj report.</li></ol></div>"
+        "body" : "<div><p>This page contains the Microscope Optical QC recordings from 4DN labs. 4DN Imaging Group strongly advices this QC to be performed once a month, and uploaded to this page. To produce this data,</p><ol><li>Please use the <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">TetraSpeckTM</a> Fluorescent Microspheres from Thermo Fisher Scientific (catalog number <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">T14792</a>)</li><li>Follow the simple step in this <a href=\"http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/protocols/fbc19c00-d377-461c-98a4-9c3c32544d40/\">Protocol</a> to produce a PSFj report.</li></ol></div>",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -33,7 +34,8 @@
         "name" : "home.introduction",
         "title": "Introduction",
         "uuid" : "10000000-0000-0000-0000-fffff1000000",
-        "file" : "/src/encoded/static/data/home/description.html"
+        "file" : "/src/encoded/static/data/home/description.html",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
     {
@@ -46,7 +48,8 @@
         "body" : "The 4D Nucleome Project perspective paper is online in <a href=\"http://www.nature.com/nature/journal/v549/n7671/full/nature23884.html?foxtrotcallback=true\" target=\"_blank\"><em>Nature</em></a> today. If you use any <a href=\"/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN\">4DN data</a>, please cite this paper. A more extensive data release and use policy will be available soon.",
         "options" : {
             "filetype" : "html"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "announcements.reference-repliseq-data-released",
@@ -70,7 +73,8 @@
         "body" : "The first <a href='/browse/?type=ExperimentSetReplicate&accession=4DNES2M5JIGV&accession=4DNESYUYFD6H&accession=4DNESTAPSPUC&accession=4DNES4GSP9S4&accession=4DNESJ1VX52C&accession=4DNESJIYRA44&accession=4DNESI2UKI7P&accession=4DNESHGL976U&accession=4DNESE3ICNE1&accession=4DNESVKLYDOH'>4DN Funded Hi-C experiments</a> have been released to public on the portal.",
         "options" : {
             "filetype" : "html"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "announcements.ontology-utilization-updated",
@@ -82,7 +86,8 @@
         "body" : "<a href='/search/?type=OntologyTerm'>Ontology Terms</a> from OBI, Uberon, and EFO are now represented on our database. Ontology terms can be internally used to describe cell lines and tissues. We will implement ontology utilization for other appropriate fields in the coming months.",
         "options" : {
             "filetype" : "html"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "announcements.data-submission-open-beta",
@@ -94,7 +99,8 @@
         "body" : "The 4DN Data Portal is open for beta-testers for data submission for Hi-C and related experiments.",
         "options" : {
             "filetype" : "html"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -103,17 +109,20 @@
     {
         "name" : "about.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b008",
-        "file" : "/src/encoded/static/data/about/introduction.html"
+        "file" : "/src/encoded/static/data/about/introduction.html",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "about.dcic",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b009",
         "title" : "Team",
-        "file" : "/src/encoded/static/data/about/dcic.html"
+        "file" : "/src/encoded/static/data/about/dcic.html",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "about.acknowledgements",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b010",
         "title" : "Acknowledgements",
-        "file" : "/src/encoded/static/data/about/acknowledgements.html"
+        "file" : "/src/encoded/static/data/about/acknowledgements.html",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -124,14 +133,16 @@
         "name" : "reusable-dummy-sections.lorem-ipsum-0",
         "uuid" : "10000000-0000-0000-0000-fffff0000000",
         "body" : "Lorem ipsum block with no titles, just plaintext body and dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "reusable-dummy-sections.lorem-ipsum-1",
         "uuid" : "10000000-0000-0000-0000-fffff0000001",
         "title" : "Some Lorem Ipsum Text",
         "body" : "Lorem ipsum block with a title and plaintext body and dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "reusable-dummy-sections.lorem-ipsum-2",
@@ -140,7 +151,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "reusable-dummy-sections.lorem-ipsum-3",
@@ -149,14 +161,16 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "reusable-dummy-sections.lorem-ipsum-overview",
         "uuid" : "10000000-0000-0000-0000-ffff00000000",
         "title" : "Overview",
         "body" : "This is an overview block of something, it has title defined in its section, and plaintext in body. Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -165,7 +179,8 @@
         "uuid" : "10000000-0000-0000-0000-ffff00000001",
         "title" : "FastQ",
         "body" : "This is a static block with plaintext body (`options.filetype === 'md'`) and title of 'fastq'. Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.file-formats.bam",
@@ -175,7 +190,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.file-formats.pairs",
@@ -185,7 +201,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.file-formats.cool-and-mcool",
@@ -195,7 +212,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.file-formats.hic",
@@ -205,7 +223,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -218,7 +237,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.hi-c-pipeline.step-ii",
@@ -228,7 +248,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.hi-c-pipeline.step-iii-options",
@@ -238,7 +259,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -252,7 +274,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.reference-files.mouse-genome-bwa",
@@ -262,7 +285,8 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.analysis.reference-files.rest-enzyme-file",
@@ -272,14 +296,16 @@
         "options" : {
             "filetype" : "md"
         },
-        "status" : "draft"
+        "status" : "draft",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
     {
         "name" : "help.analysis.cwl-docker.data-processing-pipelines",
         "uuid" : "9a0afb37-2605-4c0c-9a12-4a28882583a8",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/data_processing_pipelines.md"
+        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/data_processing_pipelines.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -288,60 +314,70 @@
     {
         "name" : "help.user-guide.data-organization.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b011",
-        "file" : "/docs/public/help/introduction.md"
+        "file" : "/docs/public/help/introduction.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "help.user-guide.data-organization.carousel-place-holder",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b012",
-        "body" : "placeholder: <SlideCarousel />"
+        "body" : "placeholder: <SlideCarousel />",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "help.user-guide.data-organization.introduction2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b013",
-        "file" : "/docs/public/help/introduction2.md"
+        "file" : "/docs/public/help/introduction2.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
     {
         "name" : "help.user-guide.account-creation.account_creation",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b014",
-        "file" : "/docs/public/metadata-submission/account_creation.md"
+        "file" : "/docs/public/metadata-submission/account_creation.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
     {
         "name" : "help.user-guide.getting-started.getting_started",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b015",
-        "file" : "/docs/public/metadata-submission/getting_started.md"
+        "file" : "/docs/public/metadata-submission/getting_started.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
     {
         "name" : "help.submitter-guide.biosample-metadata.metadata",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b016",
-        "file" : "/docs/public/metadata-submission/biosample_metadata.md"
+        "file" : "/docs/public/metadata-submission/biosample_metadata.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
     {
         "name" : "help.submitter-guide.web-submission.web_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b017",
-        "file" : "/docs/public/metadata-submission/web_submission.md"
+        "file" : "/docs/public/metadata-submission/web_submission.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
     {
         "name" : "help.submitter-guide.spreadsheet.excel_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b018",
-        "file" : "/docs/public/metadata-submission/excel_submission.md"
+        "file" : "/docs/public/metadata-submission/excel_submission.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.submitter-guide.spreadsheet.schema_info",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b019",
-        "file" : "/docs/public/metadata-submission/schema_info.md"
+        "file" : "/docs/public/metadata-submission/schema_info.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.submitter-guide.rest-api.rest_api_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020",
-        "file" : "/docs/public/metadata-submission/rest_api_submission.md"
+        "file" : "/docs/public/metadata-submission/rest_api_submission.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -353,7 +389,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.dnase-hi-c-micro-c",
@@ -362,7 +399,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.chia-pet-plac-seq",
@@ -371,7 +409,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.chip-seq-cut-run",
@@ -380,7 +419,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.atac-seq",
@@ -389,7 +429,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.trac-loop",
@@ -398,7 +439,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.rna-seq",
@@ -407,7 +449,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.nad-seq",
@@ -416,7 +459,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.dam-id-seq",
@@ -434,7 +478,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.repli-seq",
@@ -443,7 +488,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.capture-hi-c",
@@ -452,7 +498,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.dna-fish",
@@ -461,7 +508,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.sci-hi-c",
@@ -470,7 +518,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.dna-sprite",
@@ -479,7 +528,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.protocols.experiment-types.gam",
@@ -488,7 +538,8 @@
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -498,7 +549,8 @@
     {
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b021",
         "name" : "error.login-failed.no_account",
-        "body" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium.<br/><b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>."
+        "body" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium.<br/><b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>.",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -508,7 +560,8 @@
         "name" : "nofic-matrix.2017-05.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b022",
         "title" : "Introduction",
-        "body" : "This matrix shows a cross-section of experiment methods & groups vs cell lines."
+        "body" : "This matrix shows a cross-section of experiment methods & groups vs cell lines.",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "nofic-matrix.2017-05.nofic-matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b023",
@@ -522,7 +575,8 @@
             "endCell":[8,21],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "nofic-matrix.2017-05.nofic-matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b024",
@@ -536,7 +590,8 @@
             "endCell":[8,32],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -556,7 +611,8 @@
             "startCell":[4,5],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b027",
@@ -569,7 +625,8 @@
             "startCell":[4,59],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b028",
@@ -582,7 +639,8 @@
             "startCell":[4,78],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b029",
@@ -595,7 +653,8 @@
             "startCell":[4,96],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -611,7 +670,8 @@
             "startCell":[4,5],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.dev.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b031",
@@ -624,7 +684,8 @@
             "startCell":[4,59],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.dev.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b032",
@@ -637,7 +698,8 @@
             "startCell":[4,78],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b033",
@@ -650,7 +712,8 @@
             "startCell":[4,96],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -666,7 +729,8 @@
             "startCell":[4,5],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.jan2018.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b035",
@@ -679,7 +743,8 @@
             "startCell":[4,59],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.jan2018.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b036",
@@ -692,7 +757,8 @@
             "startCell":[4,78],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.jan2018.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b037",
@@ -705,7 +771,8 @@
             "startCell":[4,96],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -721,7 +788,8 @@
             "startCell":[4,5],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.jan2018.dev.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b039",
@@ -734,7 +802,8 @@
             "startCell":[4,59],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.jan2018.dev.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b040",
@@ -747,7 +816,8 @@
             "startCell":[4,78],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.jan2018.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b041",
@@ -760,7 +830,8 @@
             "startCell":[4,96],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -776,7 +847,8 @@
             "startCell":[4,5],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.july2018.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b043",
@@ -789,7 +861,8 @@
             "startCell":[4,59],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.july2018.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b044",
@@ -802,7 +875,8 @@
             "startCell":[4,78],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.july2018.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b045",
@@ -815,7 +889,8 @@
             "startCell":[4,96],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -831,7 +906,8 @@
             "startCell":[4,5],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.july2018.dev.matrix-2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b047",
@@ -844,7 +920,8 @@
             "startCell":[4,59],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.july2018.dev.matrix-3",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b048",
@@ -857,7 +934,8 @@
             "startCell":[4,78],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "joint-analysis-data-plans.july2018.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b049",
@@ -870,7 +948,8 @@
             "startCell":[4,96],
             "yaxisTitle":"Method",
             "xaxisTitle":"Cell Line"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -888,7 +967,8 @@
             "startCell":[4,4],
             "yaxisTitle":"Lab",
             "xaxisTitle":"Experiment Type"
-        }
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
 
@@ -896,18 +976,21 @@
     {
         "name" : "privacy-policy.policy-content",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b051",
-        "file" : "/src/encoded/static/data/privacy-policy.md"
+        "file" : "/src/encoded/static/data/privacy-policy.md",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
     {
         "name" : "release-updates.TEST1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b987",
-        "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All data released to public between 2018-02-13 and 2018-02-14 with tag 4DN Joint Analysis 2018</h4>"
+        "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All data released to public between 2018-02-13 and 2018-02-14 with tag 4DN Joint Analysis 2018</h4>",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
     {
         "name" : "release-updates.TEST2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b787",
-        "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All 4DN data released to network members between 2018-02-11 and 2018-02-18</h4>"
+        "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All 4DN data released to network members between 2018-02-11 and 2018-02-18</h4>",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }
 ]
