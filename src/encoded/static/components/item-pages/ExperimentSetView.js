@@ -40,6 +40,17 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         else _.extend(this.state, state);
     }
 
+    static anyOtherProcessedFilesExist(context){
+        if (Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0) return true;
+        if (!Array.isArray(context.experiments_in_set) || context.experiments_in_set.length === 0) return false;
+        var exp, i;
+        for (i = 0; i < context.experiments_in_set.length; i++){
+            exp = context.experiments_in_set[i];
+            if (Array.isArray(exp.other_processed_files) && exp.other_processed_files.length > 0) return true;
+        }
+        return false;
+    }
+
     isWorkflowNodeCurrentContext(node){
         var ctx = this.props.context;
         if (!ctx) return false;
@@ -103,14 +114,11 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         // Other Files Tab
-        var otherProcessedFilesSets = Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0 && context.other_processed_files;
-        if (otherProcessedFilesSets){
+        if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Supplementary Files</span>,
                 key : 'other-processed-files',
-                content : <OtherProcessedFilesStackedTableSection
-                    otherProcessedFilesSets={otherProcessedFilesSets}
-                    width={width} context={context} schemas={schemas} {...this.state} />
+                content : <OtherProcessedFilesStackedTableSection width={width} context={context} schemas={schemas} {...this.state} />
             });
         }
 
@@ -334,7 +342,6 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
     render(){
         const { collection, index, context, width } = this.props;
         const { open, files } = this.state;
-        var t = 'adasdasd adsasdsd awdawdawddaw awawdawdwda awawdwadaw awddawdwawddaw awdawdwda awdawd dawawd dwda adwdawdwadw awddawdawd awddwadw dwadawda dawdwadawd awdwadaw awddawdawd awdawdaw awdawdawd awdawddadw';
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
@@ -343,7 +350,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                         { collection.title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
                 </h4>
-                <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" />
+                <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" expanded={open} />
                 <Collapse in={open}>
                     <div className="table-for-collection">
                         <ProcessedFilesStackedTable
@@ -360,17 +367,72 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
 
 export class OtherProcessedFilesStackedTableSection extends React.PureComponent {
 
+    constructor(props){
+        super(props);
+        this.extendCollectionsWithExperimentFiles = this.extendCollectionsWithExperimentFiles.bind(this);
+        this.state = {
+            'otherProcessedFileSetsCombined' : this.extendCollectionsWithExperimentFiles(props)
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.context !== nextProps.context){
+            this.setState({ 'otherProcessedFileSetsCombined' : this.extendCollectionsWithExperimentFiles(nextProps) });
+        }
+    }
+
+    extendCollectionsWithExperimentFiles(props){
+
+        // Clone -- so we don't modify props.context in place
+        var collectionsFromExpSet = _.map(props.context.other_processed_files, function(opfCollection){
+            return _.extend({}, opfCollection, {
+                'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment_set' : props.context }, opf); })
+            });
+        });
+        var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
+        var collectionsFromExpSetObject = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
+        
+        // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
+        var collectionsFromExps = _.reduce(props.context.experiments_in_set || [], function(m, exp){
+            if (Array.isArray(exp.other_processed_files) && exp.other_processed_files.length > 0){
+                return m.concat(
+                    _.map(exp.other_processed_files, function(opfCollection){
+                        return _.extend({}, opfCollection, {
+                            'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment' : exp, 'from_experiment_set' : props.context }, opf); })
+                        });
+                    })
+                );
+            }
+            return m;
+        }, []);
+
+        var collectionsFromExpsUnBubbled = [];
+        _.forEach(collectionsFromExps, function(collection){
+            if (collectionsFromExpSetObject[collection.title]){
+                _.forEach(collection.files, function(f){
+                    var duplicateExistingFile = _.find(collectionsFromExpSetObject[collection.title].files, function(existFile){ return object.itemUtil.atId(existFile) === object.itemUtil.atId(f); });
+                    if (duplicateExistingFile){
+                        console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
+                    } else {
+                        collectionsFromExpSetObject[collection.title].files.push(f);
+                    }
+                });
+            } else {
+                collectionsFromExpsUnBubbled = collectionsFromExpSetTitles.concat(collection.files);
+            }
+        });
+        return _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled);
+    }
+
     render(){
-        var { otherProcessedFilesSets, context, width } = this.props;
+        var { context, width } = this.props;
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
-                    <span className="text-400">{ otherProcessedFilesSets.length }</span> Collections of Supplementary Files
+                    <span className="text-400">{ this.state.otherProcessedFileSetsCombined.length }</span> Collections of Supplementary Files
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { _.map(otherProcessedFilesSets, (collection, index, all) =>
-                    <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width }} key={index} defaultOpen={(all.length < 4) || (index < 3)} />
-                ) }
+                { _.map(this.state.otherProcessedFileSetsCombined, (collection, index, all) => <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width }} key={index} defaultOpen={(all.length < 4) || (index < 3)} />) }
             </div>
         );
     }
