@@ -20,7 +20,7 @@ from .base import (
     Item,
     item_edit,
     get_item_if_you_can,
-    ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW
+    ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
 )
 from snovault.resource_views import item_view_page
 
@@ -193,7 +193,7 @@ class StaticSection(Item):
         'released': ALLOW_CURRENT,
         'archived': ALLOW_CURRENT,
         'deleted': DELETED,
-        'draft': ALLOW_LAB_SUBMITTER_EDIT,
+        'draft': ONLY_ADMIN_VIEW,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         'archived to project': ALLOW_VIEWING_GROUP_VIEW
     }

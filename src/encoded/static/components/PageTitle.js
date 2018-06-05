@@ -264,7 +264,8 @@ export default class PageTitle extends React.Component {
         }
 
         var hasToc = (
-            context['@type'].indexOf('StaticPage') > -1
+            context && Array.isArray(context['@type'])
+            && context['@type'].indexOf('StaticPage') > -1
             && context['table-of-contents']
             && context['table-of-contents'].enabled
         );
