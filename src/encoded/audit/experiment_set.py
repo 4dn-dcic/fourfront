@@ -2,7 +2,6 @@ from snovault import (
     AuditFailure,
     audit_checker,
 )
-from collections import defaultdict
 
 
 @audit_checker(
@@ -31,7 +30,7 @@ def audit_experiment_sets_unique_titles_in_other_processed_files_list(value, sys
             continue
         titles_set.add(collection_title)
 
-    return 
+    return
 
 
 @audit_checker(

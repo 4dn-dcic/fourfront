@@ -2,7 +2,6 @@ from snovault import (
     AuditFailure,
     audit_checker,
 )
-from collections import defaultdict
 
 @audit_checker(
     'Workflow',
@@ -41,8 +40,8 @@ def audit_workflow_steps(value, system):
 
         input_names = set()
         input_source_names = {}
-        for input_idx, input in enumerate(inputs):
-            input_name = input.get('name')
+        for input_idx, input_ in enumerate(inputs):
+            input_name = input_.get('name')
             if input_name is None:
                 yield AuditFailure('Missing name', 'Workflow {} step {} input has no name defined.'.format(value['@id'], step_name), level='ERROR')
                 input_name = "UNNAMED at index " + str(input_idx)
@@ -51,22 +50,22 @@ def audit_workflow_steps(value, system):
             if input_name in input_names:
                 yield AuditFailure('Duplicate name', 'Workflow {} step {} has outputs with duplicate name "{}".'.format(value['@id'], step_name, input_name), level='ERROR')
             input_names.add(input_name)
-            input_type = input.get('meta', {}).get('type')
+            input_type = input_.get('meta', {}).get('type')
             if input_type is None:
                 yield AuditFailure('Missing meta property', 'Workflow {} step {} input {} is missing `meta.type` (should be "data file", "reference file", "parameter", etc.).'.format(value['@id'], step_name, input_name), level='WARNING')
-            if input_type != 'parameter' and input.get('meta', {}).get('file_format') is None:
+            if input_type != 'parameter' and input_.get('meta', {}).get('file_format') is None:
                 yield AuditFailure('Missing meta property', 'Workflow {} step {} input {} is missing `meta.file_format`.'.format(value['@id'], step_name, input_name), level='WARNING')
-            if input.get('source') is None:
+            if input_.get('source') is None:
                 yield AuditFailure('Missing input source', 'Workflow {} step {} input {} is missing `source` (list).'.format(value['@id'], step_name, input_name), level='ERROR')
                 continue
-            for source_idx, source in enumerate(input['source']):
+            for source_idx, source in enumerate(input_['source']):
                 if source.get('name') is None:
                     yield AuditFailure('Missing name', 'Workflow {} step {} input {} source with index {} has no name defined.'.format(value['@id'], step_name, input_name, str(source_idx)), level='ERROR')
                     continue
                 if input_source_names.get(source['name']) == source.get('step', 'GLOBAL'):
                     yield AuditFailure('Duplicate name', 'Workflow {} step {} input {} has sources with duplicate name "{}".'.format(value['@id'], step_name, input_name, source['name']), level='ERROR')
                 input_source_names[source['name']] = source.get('step', 'GLOBAL')
-                if input.get('meta', {}).get('global') == False:
+                if input_.get('meta', {}).get('global') == False:
                     if source.get('step') is None:
                         yield AuditFailure('Missing source step', 'Workflow {} step {} non-global input {} source "{}" is missing `step` field/name.'.format(value['@id'], step_name, input_name, source['name']), level='ERROR')
 

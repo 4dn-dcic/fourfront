@@ -401,7 +401,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
         });
         var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
         var collectionsFromExpSetObject = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
-        
+
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         var collectionsFromExps = _.reduce(props.context.experiments_in_set || [], function(m, exp){
             if (Array.isArray(exp.other_processed_files) && exp.other_processed_files.length > 0){
@@ -447,6 +447,3 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
         );
     }
 }
-
-
-

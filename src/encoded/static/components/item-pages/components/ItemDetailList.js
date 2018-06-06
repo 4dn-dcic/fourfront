@@ -637,18 +637,8 @@ class DetailRow extends React.PureComponent {
                 <div className="array-group" data-length={item.length}>
                 { React.Children.map(value.props.children, (c, i)=>
                     <DetailRow
-                        {...this.props}
-                        label={
-                            i === 0 ? label : <span className="dim-duplicate">{ label }</span>
-                        }
-                        labelNumber={i + 1}
-                        className={
-                            ("array-group-row item-index-" + i) +
-                            (i === item.length - 1 ? ' last-item' : '') +
-                            (i === 0 ? ' first-item' : '')
-                        }
-                        item={item[i]}
-                    />
+                        {...this.props} label={i === 0 ? label : <span className="dim-duplicate">{ label }</span>} labelNumber={i + 1} item={item[i]}
+                        className={("array-group-row item-index-" + i) + (i === item.length - 1 ? ' last-item' : '') + (i === 0 ? ' first-item' : '')} />
                 ) }
                 </div>
             );
