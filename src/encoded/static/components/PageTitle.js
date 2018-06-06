@@ -264,7 +264,8 @@ export default class PageTitle extends React.Component {
         }
 
         var hasToc = (
-            context['@type'].indexOf('StaticPage') > -1
+            context && Array.isArray(context['@type'])
+            && context['@type'].indexOf('StaticPage') > -1
             && context['table-of-contents']
             && context['table-of-contents'].enabled
         );
@@ -356,10 +357,11 @@ export class StaticPageBreadcrumbs extends React.Component {
     }
 
     editButton(){
-        if (this.props.session && this.props.context['@type'].indexOf('StaticPage') > -1){
+        var { session, context } = this.props;
+        if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
 
-            if (Array.isArray(this.props.context.actions)){
-                var editAction = _.findWhere(this.props.context.actions, { 'name' : 'edit' });
+            if (Array.isArray(context.actions)){
+                var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right">
