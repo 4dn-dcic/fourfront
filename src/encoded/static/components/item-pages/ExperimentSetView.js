@@ -116,7 +116,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         // Other Files Tab
         if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
             tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> Supplementary Files</span>,
+                tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
                 key : 'other-processed-files',
                 content : <OtherProcessedFilesStackedTableSection width={width} context={context} schemas={schemas} {...this.state} />
             });
@@ -305,11 +305,21 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
 export class OtherProcessedFilesStackedTableSectionPart extends React.PureComponent {
 
-    /** @param {{ 'collection' : { 'files': { 'accession' : string, '@id' : string }[] }, 'context' : { 'accession' : string, '@id' : string } }} props - Object with 'collection', 'context' (expSet) properties. */
+    /**
+     * Most likely deprecated as `OtherProcessedFilesStackedTableSection.extendCollectionsWithExperimentFiles` performs the same task(s) as part of its execution.
+     * Eventually can remove function and state.files, instead using 
+     * @deprecated
+     * @param {{ 'collection' : { 'files': { 'accession' : string, '@id' : string }[] }, 'context' : { 'accession' : string, '@id' : string } }} props - Object with 'collection', 'context' (expSet) properties.
+     */
     static filesWithFromExpAndExpSetProperty(props){
         return _.map(props.collection.files, (origFile)=>{
-            var file = _.extend({ 'from_experiment' : { 'accession' : "NONE" } }, origFile); // Extend w/ dummy experiment to make accession triples with (these will have NONE in place of (middle) exp accession).
-            file.from_experiment_set = file.from_experiment.from_experiment_set = file.from_experiment.from_experiment_set || props.context;
+            if (origFile.from_experiment && origFile.from_experiment.from_experiment_set && origFile.from_experiment_set){ // This will most likely execute as these files pass through `extendCollectionsWithExperimentFiles`
+                // console.info(origFile.accession + ' is well-formed already.');
+                return origFile;
+            }
+            var file = _.clone(origFile); // Extend w/ dummy experiment to make accession triples with (these will have NONE in place of (middle) exp accession).
+            file.from_experiment_set = (file.from_experiment && file.from_experiment.from_experiment_set) || props.context;
+            file.from_experiment = _.extend({ 'accession' : "NONE" , 'from_experiment_set' : file.from_experiment_set }, file.from_experiment || {});
             return file;
         });
     }
@@ -386,7 +396,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
         // Clone -- so we don't modify props.context in place
         var collectionsFromExpSet = _.map(props.context.other_processed_files, function(opfCollection){
             return _.extend({}, opfCollection, {
-                'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment_set' : props.context }, opf); })
+                'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment_set' : props.context, 'from_experiment' : { 'from_experiment_set' : props.context, 'accession' : 'NONE' } }, opf); })
             });
         });
         var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
@@ -398,7 +408,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
                 return m.concat(
                     _.map(exp.other_processed_files, function(opfCollection){
                         return _.extend({}, opfCollection, {
-                            'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment' : exp, 'from_experiment_set' : props.context }, opf); })
+                            'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : props.context }, exp), 'from_experiment_set' : props.context }, opf); })
                         });
                     })
                 );
@@ -418,7 +428,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
                     }
                 });
             } else {
-                collectionsFromExpsUnBubbled = collectionsFromExpSetTitles.concat(collection.files);
+                collectionsFromExpsUnBubbled = collectionsFromExpsUnBubbled.concat(collection.files);
             }
         });
         return _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled);
