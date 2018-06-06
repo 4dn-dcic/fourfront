@@ -424,7 +424,7 @@ export default class App extends React.Component {
             console.info('Schemas available already.');
             return this.state.schemas;
         }
-        ajax.promise('/profiles/').then(data => {
+        ajax.promise('/profiles/?format=json').then(data => {
             if (object.isValidJSON(data)){
                 this.setState({
                     schemas: data
