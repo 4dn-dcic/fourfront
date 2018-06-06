@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -136,8 +136,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     itemMidSection(){
         return [
-            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} schemas={this.props.schemas} />,
-            <OverviewHeading context={this.props.context} schemas={this.props.schemas} />
+            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} schemas={this.props.schemas} key="publication-info" />,
+            <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview" />
         ];
     }
 
@@ -270,34 +270,86 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 }
 
 export class ProcessedFilesStackedTableSection extends React.PureComponent {
+    
+    constructor(props){
+        super(props);
+        this.mcoolFile = this.mcoolFile.bind(this);
+        this.state = {
+            'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.processedFiles !== this.props.processedFiles){
+            this.setState({ 'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(nextProps.processedFiles) });
+        }
+    }
+
+    mcoolFile(){
+        var context = this.props.context;
+        if (context && Array.isArray(context.processed_files)){
+            return _.find(context.processed_files, function(f){
+                return f.file_format === 'mcool' && f.higlass_uid;
+            }) || null;
+        }
+        return null;
+    }
+
     render(){
-        var filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(this.props.processedFiles);
+        var { mounted, width, processedFiles, context } = this.props;
+        if (!this.props.mounted) return null;
+        var mcoolFile = mounted && this.mcoolFile();
+        var layoutSize = (mcoolFile && layout.responsiveGridState()) || null;
+        var gridStateWidth = 'lg';
+        var adjWidth = width;
+
+        var hiGlassView = null;
+
+        if (mcoolFile){
+            if (layoutSize === 'md' || layoutSize === 'lg') adjWidth = adjWidth * (7/12);
+            hiGlassView = (
+                <div className="expset-higlass-panel col-xs-12 col-md-5">
+                    <HiGlassContainer tilesetUid={mcoolFile.higlass_uid} />
+                </div>
+            );
+        }
+
         return (
-            <div className="processed-files-table-section">
+            <div className="processed-files-table-section exp-table-section">
                 <h3 className="tab-section-title">
-                    <span><span className="text-400">{ this.props.processedFiles.length }</span> Processed Files</span>
+                    <span><span className="text-400">{ processedFiles.length }</span> Processed Files</span>
                 </h3>
-                <ProcessedFilesStackedTable
-                    files={this.props.processedFiles}
-                    width={this.props.width}
-                    experimentSetAccession={this.props.context.accession || null}
-                    experimentArray={this.props.context.experiments_in_set}
-                    replicateExpsArray={this.props.context.replicate_exps}
-                    collapseLongLists={false}
-                />
-                { filesWithMetrics.length ? [
-                    <h3 className="tab-section-title mt-12">
-                        <span>Quality Metrics</span>
-                    </h3>,
-                    <ProcessedFilesQCStackedTable
-                        files={filesWithMetrics}
-                        width={this.props.width}
-                        experimentSetAccession={this.props.context.accession || null}
-                        experimentArray={this.props.context.experiments_in_set}
-                        replicateExpsArray={this.props.context.replicate_exps}
-                        collapseLongLists={false}
-                    />
-                ] : null }
+                <div className="row">
+                    { hiGlassView }
+                    <div className={"exp-table-container col-xs-12" + (mcoolFile ? ' col-md-7' : '')}>
+                        <ProcessedFilesStackedTable
+                            files={processedFiles}
+                            width={adjWidth}
+                            experimentSetAccession={context.accession || null}
+                            experimentArray={context.experiments_in_set}
+                            replicateExpsArray={context.replicate_exps}
+                            collapseLimit={10} collapseShow={7}
+                        />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="exp-table-container col-xs-12">
+                        { this.state.filesWithMetrics.length ? [
+                            <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
+                                <span>Quality Metrics</span>
+                            </h3>,
+                            <ProcessedFilesQCStackedTable
+                                key="metrics-table"
+                                files={this.state.filesWithMetrics}
+                                width={width}
+                                experimentSetAccession={context.accession || null}
+                                experimentArray={context.experiments_in_set}
+                                replicateExpsArray={context.replicate_exps}
+                                collapseLimit={10} collapseShow={7}
+                            />
+                        ] : null }
+                    </div>
+                </div>
             </div>
         );
     }

@@ -37,15 +37,17 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
 };
 
 
-export class HiGlassContainer extends React.Component {
+export class HiGlassContainer extends React.PureComponent {
 
 
     static generateViewConfigForMultipleViews(tilesetUidObjects, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
+        // Generate all configs normally
         var allConfigs = _.map(tilesetUidObjects, function(uidObj, idx){
             return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, genomeAssembly, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
         });
 
+        // Then merge them into one primary config, locking their views/zooms together
         var primaryConf = allConfigs[0];
         var locationLockID = 'LOCATION_LOCK_ID';    // Arbitrary unique ID.
         var zoomLockID = 'ZOOM_LOCK_ID';            // Arbitrary unique ID.
@@ -53,12 +55,13 @@ export class HiGlassContainer extends React.Component {
         primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = locationLockID;
         primaryConf.zoomLocks.locksByViewUid[primaryConf.views[0].uid] = zoomLockID;
 
-        for (var i = 1; i < allConfigs.length; i++){
+        for (var i = 1; i < allConfigs.length; i++){ // Skip first one (== primaryConf), merge into it
             primaryConf.views.push(allConfigs[i].views[0]);
             primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = locationLockID;
             primaryConf.zoomLocks.locksByViewUid[allConfigs[i].views[0].uid] = zoomLockID;
         }
 
+        // Forgot what this is for but is in viewConfigs after UI-initiated locking
         primaryConf.locationLocks.locksDict[locationLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
             return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
         })), { 'uid' : locationLockID });
@@ -315,6 +318,7 @@ export class HiGlassContainer extends React.Component {
     constructor(props){
         super(props);
         this.hiGlassElement = null;
+        this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
         if (typeof props.mounted !== 'boolean'){
             this.state = { 'mounted' : false };
         }
@@ -325,9 +329,24 @@ export class HiGlassContainer extends React.Component {
             return;
         }
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            if (!HiGlassComponent) HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
             this.setState({ 'mounted' : true });
         }, 500);
+    }
+
+    /**
+     * Fade in div element containing HiGlassComponent after HiGlass initiates & loads in first tile etc. (about 500ms).
+     * For prettiness only.
+     */
+    instanceContainerRefFunction(element){
+        if (element){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
+            setTimeout(function(){
+                requestAnimationFrame(function(){
+                    element.style.transition = null; // Use transition as defined in stylesheet
+                    element.style.opacity = 1;
+                });
+            }, 500);
+        }
     }
 
     render(){
@@ -348,23 +367,10 @@ export class HiGlassContainer extends React.Component {
                 </div>
             );
         } else {
-            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, genomeAssembly, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
+            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, genomeAssembly, { height }); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
             hiGlassInstance = (
-                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={(r)=>{
-                    if (r){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
-                        setTimeout(function(){
-                            requestAnimationFrame(function(){
-                                r.style.transition = null; // Use transition as defined in stylesheet
-                                r.style.opacity = 1;
-                            });
-                        }, 500);
-                    }
-                }}>
-                    <HiGlassComponent
-                        //ref={(r)=>{ this.hiGlassElement = r; }}
-                        options={options}
-                        viewConfig={viewConfig}
-                    />
+                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={this.instanceContainerRefFunction}>
+                    <HiGlassComponent options={options} viewConfig={viewConfig} />
                 </div>
             );
         }
@@ -413,7 +419,6 @@ export class HiGlassTabView extends React.Component {
     constructor(props){
         super(props);
         this.state = { 'mounted' : false };
-        this.hiGlassElement = null;
     }
 
     componentDidMount(){
@@ -442,7 +447,7 @@ export class HiGlassTabView extends React.Component {
         });*/
 
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            if (!HiGlassComponent) HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
             this.setState({ 'mounted' : true });
         }, 500);
     }

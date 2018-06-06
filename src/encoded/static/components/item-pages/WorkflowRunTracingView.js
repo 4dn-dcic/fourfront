@@ -222,6 +222,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
         this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
         this.render = this.render.bind(this);
         this.state = _.extend({
             'showChart' : 'detail',
@@ -239,6 +240,10 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         if (this.props.steps !== nextProps.steps){
             this.setState(checkIfIndirectOrReferenceNodesExist(nextProps.steps));
         }
+    }
+
+    isNodeCurrentContext(node){
+        return FileViewGraphSection.isNodeCurrentContext(node, this.props.context);
     }
 
     commonGraphProps(){
@@ -270,15 +275,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         );
         var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
 
-
-
         return _.extend(commonGraphPropsFromProps(_.extend({ legendItems }, this.props)), {
-            'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
-            'nodes' : nodes,
-            'edges' : graphData.edges,
-            'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
-            'rowSpacingType' : this.state.rowSpacingType,
-            'isNodeCurrentContext' : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || (node => FileViewGraphSection.isNodeCurrentContext(node, this.props.context))
+            'isNodeDisabled'        : FileViewGraphSection.isNodeDisabled,
+            'nodes'                 : nodes,
+            'edges'                 : graphData.edges,
+            'columnSpacing'         : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
+            'rowSpacingType'        : this.state.rowSpacingType,
+            'isNodeCurrentContext'  : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || this.isNodeCurrentContext
 
         });
     }

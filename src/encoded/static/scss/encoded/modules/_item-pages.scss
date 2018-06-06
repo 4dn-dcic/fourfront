@@ -345,6 +345,7 @@ h3.submission-subtitle {
     }
 
 	.rc-tabs-tabpane {
+		overflow-x: hidden;
 		.info-area {
 			overflow: hidden;
 			border-bottom: none;
@@ -1343,6 +1344,14 @@ $download-button-width : 100px;
 	.exp-table-container {
 		overflow-x: auto;
 		display: block;
+	}
+
+	.expset-higlass-panel {
+		.higlass-view-container {
+			.higlass-instance {
+				margin-top: -15px;
+			}
+		}
 	}
 
 	/*
