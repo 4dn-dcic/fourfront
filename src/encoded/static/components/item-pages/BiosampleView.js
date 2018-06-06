@@ -6,14 +6,14 @@ import _ from 'underscore';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
-import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
+import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 
 
 
-export default class BiosampleView extends ItemBaseView {
+export default class BiosampleView extends DefaultItemView {
 
     getTabViewContents(){
 
@@ -34,7 +34,7 @@ globals.content_views.register(BiosampleView, 'Biosample');
 
 
 
-export class BiosourcesTable extends React.Component {
+export class BiosourcesTable extends React.PureComponent {
 
     static defaultProps = {
         'columns' : {

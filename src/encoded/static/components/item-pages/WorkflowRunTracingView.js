@@ -6,7 +6,7 @@ import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout } from './../util';
 import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './components';
-import { ItemBaseView } from './DefaultItemView';
+import DefaultItemView from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
@@ -45,7 +45,7 @@ export function isGraphSectionOpen(href, hash){
 }
 
 
-export class WorkflowRunTracingView extends ItemBaseView {
+export class WorkflowRunTracingView extends DefaultItemView {
     
     constructor(props){
         super(props);
