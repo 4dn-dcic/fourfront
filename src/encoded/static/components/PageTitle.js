@@ -27,6 +27,9 @@ var TITLE_PATHNAME_MAP = {
     '/health' : {
         'title' : "Health"
     },
+    '/indexing_status' : {
+        'title' : "Indexing Status"
+    },
     '/users/\*' : {
         'title' : function(pathName, context){
             var myDetails = JWT.getUserDetails();
@@ -61,7 +64,7 @@ export function getSchemaTypeFromSearchContext(context){
     return null;
 }
 
-export default class PageTitle extends React.Component {
+export default class PageTitle extends React.PureComponent {
 
     static isStaticPage(context){
         if (Array.isArray(context['@type'])){
