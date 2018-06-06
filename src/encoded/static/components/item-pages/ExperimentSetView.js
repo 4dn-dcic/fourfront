@@ -359,7 +359,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
 
     /**
      * Most likely deprecated as `OtherProcessedFilesStackedTableSection.extendCollectionsWithExperimentFiles` performs the same task(s) as part of its execution.
-     * Eventually can remove function and state.files, instead using 
+     * Eventually can remove function and state.files, instead using props.collection.files directly.
      * @deprecated
      * @param {{ 'collection' : { 'files': { 'accession' : string, '@id' : string }[] }, 'context' : { 'accession' : string, '@id' : string } }} props - Object with 'collection', 'context' (expSet) properties.
      */
