@@ -31,11 +31,6 @@ export class HealthView extends React.Component {
         'href' : PropTypes.string
     }
 
-    static defaultProps = {
-        'pollCountsInterval': 10000,
-        'pollDataInterval'  : 5000
-    }
-
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
@@ -49,10 +44,10 @@ export class HealthView extends React.Component {
     }
 
     componentDidMount(){
-        this.setState({ 'mounted' : true }, this.getCounts.bind(this, true));
+        this.setState({ 'mounted' : true }, this.getCounts);
     }
 
-    getCounts(initialCall = false){
+    getCounts(){
         var pastState = _.clone(this.state);
         this.setState({
             'db_es_total' : "loading...",
@@ -61,10 +56,6 @@ export class HealthView extends React.Component {
                 this.setState({
                     'db_es_total' : resp.db_es_total,
                     'db_es_compare': resp.db_es_compare,
-                }, ()=>{
-                    if (initialCall && HealthView.notFinishedIndexing(resp.db_es_total)) {
-                        setTimeout(this.getCounts.bind(this, initialCall), this.props.pollCountsInterval);
-                    }
                 });
             }, 'GET', (resp)=>{
                 this.setState({
@@ -77,17 +68,16 @@ export class HealthView extends React.Component {
     }
 
     render() {
-        var context = this.props.context;
+        var { context, schemas, session } = this.props;
+        var { db_es_compare, db_es_total, mounted } = this.state;
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
-
-        var notFinishedIndexing = HealthView.notFinishedIndexing(this.state.db_es_total);
 
         return (
             <div className="view-item">
                 <hr/>
                 <h3 className="text-400 mb-2 mt-3">Configuration</h3>
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={context} schemas={this.props.schemas} keyTitleDescriptionMap={{
+                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={context} schemas={schemas} keyTitleDescriptionMap={{
                     'blob_bucket' : {
                         title : "Blob Bucket",
                         description : "Name of S3 bucket used for blob data."
@@ -129,10 +119,12 @@ export class HealthView extends React.Component {
                     }
                 }} />
 
-                <Button className="refresh-counts-button pull-right mt-2" onClick={this.getCounts.bind(this, false)}><i className="icon icon-refresh"/>&nbsp; Refresh Counts</Button>
+                <Button className="refresh-counts-button pull-right mt-2" onClick={this.getCounts} disabled={db_es_total === 'loading...'}>
+                    <i className={"icon icon-fw icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
+                </Button>
                 <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
 
-                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={_.pick(this.state, 'db_es_total', 'db_es_compare')} schemas={this.props.schemas} keyTitleDescriptionMap={{
+                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={_.pick(this.state, 'db_es_total', 'db_es_compare')} schemas={schemas} keyTitleDescriptionMap={{
                     'db_es_total' : {
                         title : "DB and ES Counts",
                         description : "Total counts of items in database and elasticsearch."
@@ -145,7 +137,7 @@ export class HealthView extends React.Component {
 
                 <layout.WindowResizeUpdateTrigger>
                     <layout.WidthProvider ref="widthProvider">
-                        <HealthChart db_es_compare={this.state.db_es_compare} mounted={this.state.mounted} session={this.props.session} context={context} height={600} notFinishedIndexing={notFinishedIndexing} pollDataInterval={this.props.pollDataInterval} />
+                        <HealthChart db_es_compare={db_es_compare} mounted={mounted} session={session} context={context} height={600} />
                     </layout.WidthProvider>
                 </layout.WindowResizeUpdateTrigger>
 
@@ -156,7 +148,8 @@ export class HealthView extends React.Component {
 
 content_views.register(HealthView, 'Health');
 
-class HealthChart extends React.Component {
+
+class HealthChart extends React.PureComponent {
 
     static es_compare_to_d3_hierarchy(es_compare){
         if (!es_compare || typeof es_compare !== 'object') return null;

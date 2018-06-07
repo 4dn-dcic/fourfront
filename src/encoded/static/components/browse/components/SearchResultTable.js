@@ -15,6 +15,7 @@ import { Sticky, StickyContainer } from 'react-sticky';
 import { Detail } from './../../item-pages/components';
 import { console, isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
+import { ChartDataController } from './../../viz/chart-data-controller';
 import Alerts from './../../alerts';
 import {
     defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
@@ -355,6 +356,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                     console.error('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
                     this.setState({ 'isLoading' : false }, ()=>{
                         navigate('', { 'inPlace' : true }, ()=>{
+                            ChartDataController.isInitializaed() && ChartDataController.sync();
                             Alerts.queue({ 'title' : 'Results Refreshed', 'message' : 'Results have changed while loading and have been refreshed.', 'navigateDisappearThreshold' : 1 });
                         });
                     });

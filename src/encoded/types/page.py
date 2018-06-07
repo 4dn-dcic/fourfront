@@ -19,7 +19,8 @@ from encoded.search import get_iterable_search_results
 from .base import (
     Item,
     item_edit,
-    get_item_if_you_can
+    get_item_if_you_can,
+    ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
 )
 from snovault.resource_views import item_view_page
 
@@ -188,6 +189,15 @@ class StaticSection(Item):
     schema = load_schema('encoded:schemas/static_section.json')
     embedded_list = ["submitted_by.display_title"]
 
+    STATUS_ACL = {
+        'released': ALLOW_CURRENT,
+        'archived': ALLOW_CURRENT,
+        'deleted': DELETED,
+        'draft': ONLY_ADMIN_VIEW,
+        'released to project': ALLOW_VIEWING_GROUP_VIEW,
+        'archived to project': ALLOW_VIEWING_GROUP_VIEW
+    }
+
     @calculated_property(schema={
         "title": "Content",
         "description": "Content for the page",
@@ -242,6 +252,8 @@ class Page(Item):
     item_type = 'page'
     schema = load_schema('encoded:schemas/page.json')
     embedded_list = ['content.*']
+
+    STATUS_ACL = StaticSection.STATUS_ACL
 
     class Collection(Item.Collection):
         pass

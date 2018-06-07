@@ -389,7 +389,9 @@ class BigDropDownMenu extends React.PureComponent {
 
 
     handleMenuItemClick(e){
-        setTimeout(this.props.setOpenDropdownID.bind(this.props.setOpenDropdownID, null), 100);
+        if (!e.metaKey){
+            setTimeout(this.props.setOpenDropdownID.bind(this.props.setOpenDropdownID, null), 100);
+        }
         // TODO: Google Analytics Hook-In
     }
 

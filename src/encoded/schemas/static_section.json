@@ -30,9 +30,17 @@
             "default": "released",
             "enum" : [
                 "released",
+                "released to project",
                 "draft",
                 "deleted"
             ]
+        },
+        "award": {
+            "title": "Grant",
+            "description": "Grant associated with the submission.",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "type": "string",
+            "linkTo": "Award"
         },
         "section_type": {
             "title": "Section Type",
