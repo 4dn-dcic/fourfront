@@ -111,6 +111,16 @@
             ]
         }
      },
+     "produced_from": {
+         "title": "Produced From",
+         "description": "Files that were input in a software or pipeline to produce this file",
+         "type": "array",
+         "lookup": 35,
+         "items": {
+             "title": "Input File",
+             "type": "string"
+         }
+    },
      "file_format_file_extension": {
         "bam": ".bam",
         "bai": ".bam.bai",

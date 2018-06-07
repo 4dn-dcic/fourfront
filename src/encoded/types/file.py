@@ -962,9 +962,38 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
                                (data['md5sum'], found))
 
 
+def validate_processed_file_produced_from_field(context, request):
+    '''validator to make sure that the values in the produced_from field are valid file identifiers'''
+    data = request.json
+    if 'produced_from' not in data:
+        return
+    files_ok = True
+    files2chk = data['produced_from']
+    bad_files = []
+    for f in files2chk:
+        try:
+            fid = get_item_if_you_can(request, f, 'files').get('uuid')
+        except AttributeError:
+            files_ok = False
+            bad_files.append(f)
+        else:
+            if not fid:
+                files_ok = False
+                bad_files.append(f)
+
+    if not files_ok:
+        err_string = "some values in produced_from field are not valid file identifiers"
+        if bad_files:
+            err_string = err_string + '\n\t' + '\n\t'.join(bad_files)
+        request.errors.add('body', None, err_string)
+    else:
+        request.validated.update({})
+
+
 @view_config(context=File.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_file_filename,
-                         validate_processed_file_unique_md5_with_bypass])
+                         validate_processed_file_unique_md5_with_bypass,
+                         validate_processed_file_produced_from_field])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -978,9 +1007,11 @@ def file_edit(context, request, render=None):
 
 @view_config(context=FileProcessed, permission='edit', request_method='PUT',
              validators=[validate_item_content_put,
-                         validate_processed_file_unique_md5_with_bypass], decorator=if_match_tid)
+                         validate_processed_file_unique_md5_with_bypass,
+                         validate_processed_file_produced_from_field], decorator=if_match_tid)
 @view_config(context=FileProcessed, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch,
-                         validate_processed_file_unique_md5_with_bypass], decorator=if_match_tid)
+                         validate_processed_file_unique_md5_with_bypass,
+                         validate_processed_file_produced_from_field], decorator=if_match_tid)
 def procesed_edit(context, request, render=None):
     return item_edit(context, request, render)
