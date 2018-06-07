@@ -558,3 +558,37 @@ def test_force_beanstalk_env(mocker):
     # ensure boto called with correct arguments
     mock_boto.client.assert_called_once_with('sts', aws_access_key_id='its a secret id',
                                              aws_secret_access_key='its a secret')
+
+
+@pytest.fixture
+def processed_file_data(award, lab):
+    return {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': 'bed',
+    }
+
+
+def test_validate_produced_from_files_no_produced_by(testapp, processed_file_data):
+    res = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_produced_from_files_invalid_post(testapp, processed_file_data):
+    processed_file_data['produced_from'] = ['not_a_file_id']
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res.json['errors']
+    assert 'some values in produced_from field are not valid file identifiers' in errors[0]['description']
+    assert 'not_a_file_id' in errors[0]['description']
+
+
+def test_validate_produced_from_files_valid_post(testapp, processed_file_data, file, mcool_file):
+    processed_file_data['produced_from'] = [file['@id'], mcool_file['@id']]
+    res = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_produced_from_files_valid_patch(testapp, processed_file_data, file, mcool_file):
+    res = testapp.post_json('/files-processed', processed_file_data, status=201).json['@graph'][0]
+    pres = testapp.patch_json(res['@id'], {'produced_from': [file['@id'], mcool_file['@id']]}, status=200)
+    assert not pres.json.get('errors')
