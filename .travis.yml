@@ -79,8 +79,6 @@ install:
 - pip show pytest
 - pip install pytest==2.9.1
 - pip show pytest
-# turn on colored logs
-- if test -n "$TRAVIS"; then sed 's/production.*/production \= false/' production.ini; fi
 script:
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not bdd and setone" --durations=10 --cov
