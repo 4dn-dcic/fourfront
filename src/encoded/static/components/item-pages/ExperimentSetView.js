@@ -42,14 +42,21 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     static anyOtherProcessedFilesExist(context){
-        if (Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0) return true;
-        if (!Array.isArray(context.experiments_in_set) || context.experiments_in_set.length === 0) return false;
-        var exp, i;
-        for (i = 0; i < context.experiments_in_set.length; i++){
-            exp = context.experiments_in_set[i];
-            if (Array.isArray(exp.other_processed_files) && exp.other_processed_files.length > 0) return true;
+        var otherProcessedFilesFromExpSetExist = (Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0);
+
+        if (otherProcessedFilesFromExpSetExist){ // Ensure have permissions
+            otherProcessedFilesFromExpSetExist = OtherProcessedFilesStackedTableSection.checkOPFCollectionsPermissions(context.other_processed_files);
         }
-        return false;
+        console.log('OPF', otherProcessedFilesFromExpSetExist);
+        var expsInSetExist = (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0);
+        if (!otherProcessedFilesFromExpSetExist && !expsInSetExist) return false;
+
+        if (expsInSetExist){
+            var expsOPFCollections = _.pluck(context.experiments_in_set, 'other_processed_files');
+            var otherProcessedFilesFromExpsExist = _.any(expsOPFCollections || [], OtherProcessedFilesStackedTableSection.checkOPFCollectionsPermissions);
+            if (!otherProcessedFilesFromExpSetExist && !otherProcessedFilesFromExpsExist) return false;
+        }
+        return true;
     }
 
     isWorkflowNodeCurrentContext(node){
@@ -476,6 +483,16 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
 
 export class OtherProcessedFilesStackedTableSection extends React.PureComponent {
 
+    static checkOPFCollectionPermission(opfCollection){
+        return _.any(opfCollection.files || [], function(opf){
+            return opf && object.itemUtil.atId(opf) && !opf.error;
+        });
+    }
+
+    static checkOPFCollectionsPermissions(opfCollections){
+        return _.any(opfCollections || [], OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
+    }
+
     constructor(props){
         super(props);
         this.extendCollectionsWithExperimentFiles = this.extendCollectionsWithExperimentFiles.bind(this);
@@ -493,11 +510,14 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
     extendCollectionsWithExperimentFiles(props){
 
         // Clone -- so we don't modify props.context in place
-        var collectionsFromExpSet = _.map(props.context.other_processed_files, function(opfCollection){
-            return _.extend({}, opfCollection, {
-                'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment_set' : props.context, 'from_experiment' : { 'from_experiment_set' : props.context, 'accession' : 'NONE' } }, opf); })
-            });
-        });
+        var collectionsFromExpSet = _.map(
+            props.context.other_processed_files,
+            function(opfCollection){
+                return _.extend({}, opfCollection, {
+                    'files' : _.map(opfCollection.files || [], function(opf){ return _.extend({ 'from_experiment_set' : props.context, 'from_experiment' : { 'from_experiment_set' : props.context, 'accession' : 'NONE' } }, opf); })
+                });
+            }
+        );
         var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
         var collectionsFromExpSetObject = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
 
@@ -519,7 +539,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
         _.forEach(collectionsFromExps, function(collection){
             if (collectionsFromExpSetObject[collection.title]){
                 _.forEach(collection.files, function(f){
-                    var duplicateExistingFile = _.find(collectionsFromExpSetObject[collection.title].files, function(existFile){ return object.itemUtil.atId(existFile) === object.itemUtil.atId(f); });
+                    var duplicateExistingFile = _.find(collectionsFromExpSetObject[collection.title].files, function(existFile){ return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b'); });
                     if (duplicateExistingFile){
                         console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
                     } else {
@@ -530,7 +550,11 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
                 collectionsFromExpsUnBubbled = collectionsFromExpsUnBubbled.concat(collection.files);
             }
         });
-        return _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled);
+
+        return _.filter(
+            _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled),
+            OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission
+        );
     }
 
     render(){
