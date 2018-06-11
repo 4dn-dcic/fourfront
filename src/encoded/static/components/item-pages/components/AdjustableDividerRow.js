@@ -40,22 +40,27 @@ export class AdjustableDividerRow extends React.PureComponent {
         'minRightPanelWidth'        : 170,
         'rightPanelClassName'       : null,
         'handleDragThrottleLimit'   : 100,
-        'leftPanelDefaultCollapsed' : false
+        'leftPanelDefaultCollapsed' : false,
+        'height'                    : 200
     };
 
     static propTypes = {
         'renderLeftPanel'               : PropTypes.func,
         'renderRightPanel'              : PropTypes.func,
-        'renderLeftPanelPlaceHolder'    : PropTypes.func
+        'renderLeftPanelPlaceHolder'    : PropTypes.func,
+        'height'                        : PropTypes.number, // Pre-define this.
+        'width'                         : PropTypes.number  // Wrap in a WidthProvider if don't have
     };
 
     constructor(props){
         super(props);
+        this.getRightPanelHeight = this.getRightPanelHeight.bind(this);
         this.handleStopDrag = this.handleStopDrag.bind(this);
         this.handleDrag = _.throttle(this.handleDrag.bind(this), props.handleDragThrottleLimit);
         this.resetXOffset = this.resetXOffset.bind(this);
         this.state = {
-            'xOffset' : 0
+            'xOffset' : 0,
+            'rightPanelHeight' : null
         };
         if (props.mounted && props.leftPanelDefaultCollapsed && props.width){
             var leftPanelCollapseWidth = Math.max(props.leftPanelCollapseWidth || 0, props.minLeftPanelWidth);
@@ -72,10 +77,29 @@ export class AdjustableDividerRow extends React.PureComponent {
         }
     }
 
+    componentDidMount(){
+        if (typeof this.props.leftPanelCollapseHeight !== 'number'){
+            setTimeout(()=>{
+                this.setState({ 'rightPanelHeight' : this.getRightPanelHeight() });
+            }, 0);
+        }
+    }
+
     componentWillReceiveProps(nextProps){
         if (nextProps.width !== this.props.width){
             this.setState({ 'xOffset' : 0 });
         }
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.width !== this.props.width || this.props.renderRightPanel !== pastProps.renderRightPanel){
+            this.setState({ 'rightPanelHeight' : this.getRightPanelHeight() });
+        }
+    }
+
+    getRightPanelHeight(){
+        var rightPanelChild = (this.refs && this.refs.rightPanel && this.refs.rightPanel.childNodes && this.refs.rightPanel.childNodes[0]);
+        return (rightPanelChild && rightPanelChild.clientHeight) || null;
     }
 
     handleStopDrag(evt, data){
@@ -99,7 +123,7 @@ export class AdjustableDividerRow extends React.PureComponent {
 
     render(){
         var { mounted, width, height, leftPanelCollapseWidth, minRightPanelWidth, minLeftPanelWidth, leftPanelDefaultSizeMD, leftPanelDefaultSizeLG,
-            className, rightPanelClassName, leftPanelClassName, renderLeftPanel, renderRightPanel } = this.props;
+            className, rightPanelClassName, leftPanelClassName, renderLeftPanel, renderRightPanel, leftPanelCollapseHeight } = this.props;
 
         if (!mounted) return null;
 
@@ -128,15 +152,20 @@ export class AdjustableDividerRow extends React.PureComponent {
             'right' : this.rightPanelWidth - minRightPanelWidth
         };
         var leftPanelCollapsed = xOffset - (leftPanelCollapseWidth - minLeftPanelWidth) <= this.draggableBounds.left;
+        if (leftPanelCollapsed && typeof leftPanelCollapseHeight === 'number'){
+            height = leftPanelCollapseHeight;
+        } else if (leftPanelCollapsed && typeof this.state.rightPanelHeight === 'number'){
+            height = this.state.rightPanelHeight;
+        }
 
         return (
             <div className={"row" + (className ? ' ' + className : '')}>
                 <div className={"left-panel col-xs-12 col-md-" + leftPanelDefaultSizeMD + " col-lg-" + leftPanelDefaultSizeMD + (leftPanelClassName ? ' ' + leftPanelClassName : '')}
                     style={{ 'width' : (layoutSize === 'lg' || layoutSize === 'md') ? this.leftPanelWidth + xOffset : width + 20, 'height' : height || null }}>
-                    { renderLeftPanel((layoutSize === 'md' || layoutSize === 'lg') ? this.leftPanelWidth + xOffset : width, this.resetXOffset, leftPanelCollapsed) }
-                    { (layoutSize === 'lg' || layoutSize === 'md') ? <DraggableVerticalBorder xOffset={xOffset} height={height} left={this.leftPanelWidth} onStop={this.handleStopDrag} onDrag={this.handleDrag} bounds={this.draggableBounds} /> : null }
+                    { renderLeftPanel((layoutSize === 'md' || layoutSize === 'lg') ? this.leftPanelWidth + xOffset : width, this.resetXOffset, leftPanelCollapsed, height) }
+                    { (layoutSize === 'lg' || layoutSize === 'md') ? <DraggableVerticalBorder xOffset={xOffset} height={height || null} left={this.leftPanelWidth} onStop={this.handleStopDrag} onDrag={this.handleDrag} bounds={this.draggableBounds} /> : null }
                 </div>
-                <div className={"right-panel col-xs-12 col-md-" + rightPanelDefaultSizeMD + " col-lg-" + rightPanelDefaultSizeLG + (rightPanelClassName ? ' ' + rightPanelClassName : '')}
+                <div className={"right-panel col-xs-12 col-md-" + rightPanelDefaultSizeMD + " col-lg-" + rightPanelDefaultSizeLG + (rightPanelClassName ? ' ' + rightPanelClassName : '')} ref="rightPanel"
                     style={(layoutSize === 'lg' || layoutSize === 'md') ? { width : (this.rightPanelWidth + 30) - xOffset } : null}
                     children={renderRightPanel((layoutSize === 'md' || layoutSize === 'lg') ? this.rightPanelWidth + 10 - xOffset : width, this.resetXOffset)} />
             </div>

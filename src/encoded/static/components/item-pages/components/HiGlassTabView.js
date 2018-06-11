@@ -121,8 +121,6 @@ export class HiGlassContainer extends React.PureComponent {
             'infoid':       'hg38'
         };
 
-        console.log('GENOME ASSEMBLY IS', options.genomeAssembly);
-
         if (options.genomeAssembly == 'GRCm38'){ // mouse
             annotation.name = 'Gene Annotation (mm10)';
             annotation.tilesetUid = 'QDutvmyiSrec5nX4pA5WGQ';
@@ -376,7 +374,9 @@ export class HiGlassContainer extends React.PureComponent {
         if (isValidating || !mounted){
             hiGlassInstance = (
                 <div className="col-sm-12 text-center mt-4">
-                    <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
+                    <h3>
+                        <i className="icon icon-lg icon-television"/>
+                    </h3>
                     Initializing
                 </div>
             );

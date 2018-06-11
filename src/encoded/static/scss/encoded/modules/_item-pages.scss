@@ -1149,6 +1149,7 @@ $download-button-width : 100px;
 
 		> .table-for-collection {
 			margin-left: 21px;
+			overflow: hidden;
 		}
 
 		&[data-open="false"]{
@@ -1341,72 +1342,11 @@ $download-button-width : 100px;
 
 	}
 
-	.exp-table-container {
-		overflow-x: auto;
-		display: block;
-	}
-
 	.expset-higlass-panel {
-		position: relative;
-		margin-bottom: -20px;
-		.higlass-view-container {
-
-			&.disabled {
-				opacity: 0.25;
-				pointer-events: none;
-				> *,
-				> * > * {
-					pointer-events: none;
-				}
-			}
-
-			// Adjustments for when HiGlass inside ExpSet view as mini preview thingy
-			.higlass-instance {
-				margin-top: -15px;
-				.ViewHeader-module_multitrack-header-nav-list-2nvcu {
-					.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(1),
-					.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(1),
-					.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(3),
-					.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3),
-					.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(4),
-					.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(4) {
-						display: none;
-					}
-				}
-			}
-		}
-	}
-
-	.draggable-border {
-		height: 100%;
-		padding-left: 5px;
-		padding-right: 5px;
-		position: absolute;
-		top: 0px;
-		margin-top: -10px;
-		cursor: ew-resize;
-		z-index: 5;
-		> .inner {
-			height: 100%;
-			width: 0;
-			border-left: 1px solid #eee;
-			> .drag-handle {
-				position: absolute;
-				left: 3px;
-    			width: 5px;
-				background-color: transparent;
-				border-left: 1px solid #ddd;
-				border-right: 1px solid #ddd;
-			}
-		}
-		&:hover,
-		&.react-draggable-dragging {
-			> .inner {
-				border-color: #888;
-				box-shadow: 0 0 1px #999;
-				> .drag-handle {
-					border-color: #999;
-				}
+		@media screen and (min-width: $screen-md-min) {
+			margin-bottom: -20px;
+			.draggable-border {
+				margin-top: -10px;
 			}
 		}
 	}
@@ -1422,6 +1362,74 @@ $download-button-width : 100px;
 	*/
 }
 
+
+.exp-table-container {
+	overflow-x: auto;
+	display: block;
+}
+
+.expset-higlass-panel {
+	position: relative;
+	.higlass-view-container {
+
+		&.disabled {
+			opacity: 0.25;
+			pointer-events: none;
+			> *,
+			> * > * {
+				pointer-events: none;
+			}
+		}
+
+		// Adjustments for when HiGlass inside ExpSet view as mini preview thingy
+		.higlass-instance {
+			margin-top: -15px;
+			.ViewHeader-module_multitrack-header-nav-list-2nvcu {
+				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(1),
+				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(1),
+				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(3),
+				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3),
+				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(4),
+				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(4) {
+					display: none;
+				}
+			}
+		}
+	}
+}
+
+.draggable-border {
+	height: 100%;
+	padding-left: 5px;
+	padding-right: 5px;
+	position: absolute;
+	top: 0px;
+	cursor: ew-resize;
+	z-index: 5;
+	> .inner {
+		height: 100%;
+		width: 0;
+		border-left: 1px solid #eee;
+		> .drag-handle {
+			position: absolute;
+			left: 3px;
+			width: 5px;
+			background-color: transparent;
+			border-left: 1px solid #ddd;
+			border-right: 1px solid #ddd;
+		}
+	}
+	&:hover,
+	&.react-draggable-dragging {
+		> .inner {
+			border-color: #888;
+			box-shadow: 0 0 1px #999;
+			> .drag-handle {
+				border-color: #999;
+			}
+		}
+	}
+}
 
 /**********************************************************
 					Graph Tab Section
