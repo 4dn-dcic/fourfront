@@ -354,7 +354,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 
 export class ProcessedFilesStackedTableSection extends React.PureComponent {
-    
+
     constructor(props){
         super(props);
         this.mcoolFile = this.mcoolFile.bind(this);
@@ -517,7 +517,6 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
     render(){
         const { collection, index, context, width, mounted } = this.props;
         const { open, files, mcoolFile } = this.state;
-
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
@@ -535,7 +534,6 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
             </div>
         );
     }
-
 }
 
 

@@ -18,7 +18,7 @@ import { console, object, DateUtility, Filters, layout, Schemas, fileUtil } from
 
 /**
  * The DefaultItemView class extends React.Component to provide some helper functions to be used from an Item View page.
- * 
+ *
  * It provides a 'template' which can be extended further by Item page views such as ExperimentSetView, BiosourceView, etc. which can override/extend individual functions defined here.
  * Look at the render method to see how the functions are brought in together -- there shouldn't be a need to create own 'render' function from some Item view.
  */
