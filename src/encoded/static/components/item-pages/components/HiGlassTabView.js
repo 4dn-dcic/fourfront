@@ -33,6 +33,7 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
         'y' : [31114340, 31201073]
     },
     'extraViewProps' : {},
+    'genomeAssembly' : 'GRCh38',
     'index' : 0
 };
 
@@ -40,11 +41,11 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
 export class HiGlassContainer extends React.PureComponent {
 
 
-    static generateViewConfigForMultipleViews(tilesetUidObjects, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    static generateViewConfigForMultipleViews(tilesetUidObjects, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
         // Generate all configs normally
         var allConfigs = _.map(tilesetUidObjects, function(uidObj, idx){
-            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, genomeAssembly, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
+            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
         });
 
         // Then merge them into one primary config, locking their views/zooms together
@@ -86,13 +87,17 @@ export class HiGlassContainer extends React.PureComponent {
      * @param {number} [options.index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
      * @returns {{ views : { uid : string, initialXDomain : number[], initialYDomain: number[], tracks: { top: {}[], bottom: {}[], left: {}[], center: {}[], right: {}[], bottom: {}[] } }[], trackSourceServers: string[] }} - The ViewConfig for HiGlass.
      */
-    static generateViewConfig(tilesetUid, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    static generateViewConfig(tilesetUid, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
         options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
+        // Make sure to override non-falsy-allowed values with defaults.
+        _.forEach(['baseUrl', 'supplementaryTracksBaseUrl', 'initialDomains', 'genomeAssembly', 'extraViewProps'], function(k){
+            options[k] = options[k] || DEFAULT_GEN_VIEW_CONFIG_OPTIONS[k];
+        });
 
         // If we're provided a list of { tilesetUid[, extraViewProps] } objects instead of string, generate HiGlass view w/ multiple panels/views.
         if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){  return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string'); })){
-            return HiGlassContainer.generateViewConfigForMultipleViews(tilesetUid, genomeAssembly, options); // Merge views into 1 array
+            return HiGlassContainer.generateViewConfigForMultipleViews(tilesetUid, options); // Merge views into 1 array
         }
 
         // Continuing code assumes a string for tilesetUid.
@@ -116,7 +121,9 @@ export class HiGlassContainer extends React.PureComponent {
             'infoid':       'hg38'
         };
 
-        if (genomeAssembly == 'GRCm38'){ // mouse
+        console.log('GENOME ASSEMBLY IS', options.genomeAssembly);
+
+        if (options.genomeAssembly == 'GRCm38'){ // mouse
             annotation.name = 'Gene Annotation (mm10)';
             annotation.tilesetUid = 'QDutvmyiSrec5nX4pA5WGQ';
             chromosome.tilesetUid = 'EtrWT0VtScixmsmwFSd7zg';
@@ -171,7 +178,7 @@ export class HiGlassContainer extends React.PureComponent {
                     "top": [
                         {
                             "name": annotation.name,
-                            "created": "2017-07-14T15:27:46.989053Z",
+                            //"created": "2017-07-14T15:27:46.989053Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": annotation.tilesetUid,
                             "type": "horizontal-gene-annotations",
@@ -184,19 +191,19 @@ export class HiGlassContainer extends React.PureComponent {
                                 "trackBorderColor": "black",
                                 "name": "Gene Annotations (hg38)"
                             },
-                            "width": 20,
+                            //"width": 20,
                             "height": 55,
                             "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                             "position": "top"
                         },
                         {
                             "name": chromosome.name,
-                            "created": "2017-07-17T14:16:45.346835Z",
+                            //"created": "2017-07-17T14:16:45.346835Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": chromosome.tilesetUid,
                             "type": "horizontal-chromosome-labels",
                             "options": {},
-                            "width": 20,
+                            //"width": 20,
                             "height": 30,
                             "position": "top"
                         }
@@ -204,7 +211,7 @@ export class HiGlassContainer extends React.PureComponent {
                     "left": [
                         {
                             "name": annotation.name,
-                            "created": "2017-07-14T15:27:46.989053Z",
+                            //"created": "2017-07-14T15:27:46.989053Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": annotation.tilesetUid,
                             "uid": "faxvbXweTle5ba4ESIlZOg",
@@ -219,20 +226,20 @@ export class HiGlassContainer extends React.PureComponent {
                                 "name": annotation.name
                             },
                             "width": 55,
-                            "height": 20,
+                            //"height": 20,
                             "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                             "position": "left"
                         },
                         {
                             "name": chromosome.name,
-                            "created": "2017-07-17T14:16:45.346835Z",
+                            //"created": "2017-07-17T14:16:45.346835Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": chromosome.tilesetUid,
                             "uid": "aXbmQTsMR2ao85gzBVJeRw",
                             "type": "vertical-chromosome-labels",
                             "options": {},
                             "width": 20,
-                            "height": 30,
+                            //"height": 30,
                             "position": "left"
                         }
                     ],
@@ -312,16 +319,23 @@ export class HiGlassContainer extends React.PureComponent {
         'options' : { 'bounded' : true },
         'isValidating' : false,
         'disabled' : false,
-        'height' : 400
+        'height' : 400,
+        'viewConfig' : null
     }
 
     constructor(props){
         super(props);
-        this.hiGlassElement = null;
         this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
+        this.state = {
+            'viewConfig' : props.viewConfig || HiGlassContainer.generateViewConfig(props.tilesetUid, _.pick(props, 'height', 'genomeAssembly'))
+        };
+
         if (typeof props.mounted !== 'boolean'){
-            this.state = { 'mounted' : false };
+            this.state.mounted = false;
         }
+
+        console.log('HIGLASSCONTAINER CONSTRUCTOR CALLED');
+
     }
 
     componentDidMount(){
@@ -332,6 +346,12 @@ export class HiGlassContainer extends React.PureComponent {
             if (!HiGlassComponent) HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
             this.setState({ 'mounted' : true });
         }, 500);
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.tilesetUid !== this.props.tilesetUid || nextProps.genomeAssembly !== this.props.genomeAssembly || nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
+            this.setState({ 'viewConfig' : nextProps.viewConfig || HiGlassContainer.generateViewConfig(nextProps.tilesetUid, _.pick(nextProps, 'height', 'genomeAssembly')) });
+        }
     }
 
     /**
@@ -350,7 +370,7 @@ export class HiGlassContainer extends React.PureComponent {
     }
 
     render(){
-        var { disabled, isValidating, viewConfig, tilesetUid, genomeAssembly, height, options } = this.props;
+        var { disabled, isValidating, tilesetUid, height, width, options, style, className } = this.props;
         let hiGlassInstance = null;
         const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
         if (isValidating || !mounted){
@@ -367,10 +387,9 @@ export class HiGlassContainer extends React.PureComponent {
                 </div>
             );
         } else {
-            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, genomeAssembly, { height }); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
             hiGlassInstance = (
-                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={this.instanceContainerRefFunction}>
-                    <HiGlassComponent options={options} viewConfig={viewConfig} />
+                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
+                    <HiGlassComponent options={options} viewConfig={this.state.viewConfig} width={width} ref="hiGlassComponent" />
                 </div>
             );
         }
@@ -379,7 +398,7 @@ export class HiGlassContainer extends React.PureComponent {
          * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
          */
         return (
-            <div className="higlass-view-container">
+            <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
                 <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
@@ -465,4 +484,5 @@ export class HiGlassTabView extends React.Component {
         );
     }
 }
+
 

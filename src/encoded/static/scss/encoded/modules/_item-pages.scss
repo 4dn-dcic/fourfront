@@ -1347,9 +1347,66 @@ $download-button-width : 100px;
 	}
 
 	.expset-higlass-panel {
+		position: relative;
+		margin-bottom: -20px;
 		.higlass-view-container {
+
+			&.disabled {
+				opacity: 0.25;
+				pointer-events: none;
+				> *,
+				> * > * {
+					pointer-events: none;
+				}
+			}
+
+			// Adjustments for when HiGlass inside ExpSet view as mini preview thingy
 			.higlass-instance {
 				margin-top: -15px;
+				.ViewHeader-module_multitrack-header-nav-list-2nvcu {
+					.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(1),
+					.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(1),
+					.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(3),
+					.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3),
+					.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(4),
+					.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(4) {
+						display: none;
+					}
+				}
+			}
+		}
+	}
+
+	.draggable-border {
+		height: 100%;
+		padding-left: 5px;
+		padding-right: 5px;
+		position: absolute;
+		top: 0px;
+		margin-top: -10px;
+		cursor: ew-resize;
+		z-index: 5;
+		> .inner {
+			height: 100%;
+			width: 0;
+			border-left: 1px solid #ddd;
+			> .drag-handle {
+				position: absolute;
+				left: 3px;
+    			width: 5px;
+				background-color: transparent;
+				border-left: 1px solid #ddd;
+				border-right: 1px solid #ddd;
+			}
+		}
+		&:hover,
+		&.react-draggable-dragging {
+			> .inner {
+				border-color: #888;
+				box-shadow: 0 0 1px #999;
+				> .drag-handle {
+					border-color: #999;
+				}
 			}
 		}
 	}
@@ -1605,12 +1662,30 @@ $download-button-width : 100px;
 
 	.higlass-instance {
 
-		.TrackControl-module_track-control-2zDf3 {
-			display: none;
+		.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
+			.TrackControl-module_track-control-button-2fdIb { // Hide "add track" & "move" buttons.
+				display: none;
+				&:nth-child(2),
+				&:last-child {
+					display: block;
+				}
+			}
+		}
+
+		.CenterTrack-module_center-track-container-2ELhp {
+			.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
+				.TrackControl-module_track-control-button-2fdIb { // Hide "add track", "close", & "move" buttons.
+					display: none;
+					&:first-child {
+						display: block;
+					}
+				}
+			}
 		}
 
 		.ViewHeader-module_multitrack-header-3XnZx .ViewHeader-module_multitrack-header-nav-list-2nvcu {
-			.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3){
+			.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(3), // Hide 'plus' button in header.
+			.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3),{
 				display: none;
 			}
 		}

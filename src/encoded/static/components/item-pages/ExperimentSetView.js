@@ -6,10 +6,11 @@ import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer, AdjustableDividerRow } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
+import { requestAnimationFrame } from './../viz/utilities';
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
 
@@ -269,24 +270,40 @@ export class RawFilesStackedTableSection extends React.PureComponent {
     }
 }
 
+
 export class ProcessedFilesStackedTableSection extends React.PureComponent {
     
     constructor(props){
         super(props);
         this.mcoolFile = this.mcoolFile.bind(this);
+        this.correctHiGlassTrackDimensions = this.correctHiGlassTrackDimensions.bind(this);
         this.state = {
+            'mcoolFile' : this.mcoolFile(props) || null,
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)
         };
     }
 
     componentWillReceiveProps(nextProps){
+        var nextState = {};
         if (nextProps.processedFiles !== this.props.processedFiles){
-            this.setState({ 'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(nextProps.processedFiles) });
+            nextState.filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(nextProps.processedFiles);
+        }
+        if (nextProps.context !== this.props.context){
+            nextState.mcoolFile = this.mcoolFile(nextProps) || null;
+        }
+        if (_.keys(nextState).length > 0){
+            this.setState(nextState);
         }
     }
 
-    mcoolFile(){
-        var context = this.props.context;
+    componentDidUpdate(pastProps){
+        if (this.state.mcoolFile && pastProps.width !== this.props.width){
+            this.correctHiGlassTrackDimensions();
+        }
+    }
+
+    mcoolFile(props = this.props){
+        var context = props.context;
         if (context && Array.isArray(context.processed_files)){
             return _.find(context.processed_files, function(f){
                 return f.file_format === 'mcool' && f.higlass_uid;
@@ -295,43 +312,72 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         return null;
     }
 
-    render(){
-        var { mounted, width, processedFiles, context } = this.props;
-        if (!this.props.mounted) return null;
-        var mcoolFile = mounted && this.mcoolFile();
-        var layoutSize = (mcoolFile && layout.responsiveGridState()) || null;
-        var gridStateWidth = 'lg';
-        var adjWidth = width;
+    correctHiGlassTrackDimensions(){
+        // This is required because HiGlass doesn't always update all of own tracks' widths (always updates header, tho)
+        var hiGlassContainer = this.refs && this.refs.adjustableRow && this.refs.adjustableRow.refs && this.refs.adjustableRow.refs.hiGlassContainer;
+        var internalHiGlassComponent = hiGlassContainer && hiGlassContainer.refs && hiGlassContainer.refs.hiGlassComponent;
+        if (!internalHiGlassComponent) {
+            console.error('Internal HiGlass Component not accessible.');
+            return;
+        }
+        setTimeout(()=>{
+            requestAnimationFrame(()=>{
+                _.forEach(internalHiGlassComponent.tiledPlots, (tp) => tp.measureSize());
+            });
+        }, 10);
+    }
 
-        var hiGlassView = null;
+    renderTopRow(){
+        var { mounted, width, processedFiles, context } = this.props;
+        if (!mounted) return null;
+
+        var mcoolFile = this.state.mcoolFile;
+        var commonProcessedFilesStackedTableProps = {
+            'files' : processedFiles, 'experimentSetAccession' : context.accession || null,
+            'experimentArray' : context.experiments_in_set, 'replicateExpsArray' : context.replicate_exps,
+            'collapseLimit' : 10, 'collapseShow' : 7
+        };
 
         if (mcoolFile){
-            if (layoutSize === 'md' || layoutSize === 'lg') adjWidth = adjWidth * (7/12);
-            hiGlassView = (
-                <div className="expset-higlass-panel col-xs-12 col-md-5">
-                    <HiGlassContainer tilesetUid={mcoolFile.higlass_uid} />
-                </div>
+            var hiGlassHeight = HiGlassContainer.defaultProps.height;
+            return (
+                <AdjustableDividerRow
+                    width={width} mounted={mounted} height={hiGlassHeight}
+                    leftPanelClassName="expset-higlass-panel"
+                    renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed)=>{
+                        if (collapsed){
+                            return (
+                                <div style={{ height: 200 }} className="higlass-hidden-placeholder">
+                                    <h4 className="text-center text-300 clickable" style={{ transform: 'rotate(-90deg) translateX(' + (-hiGlassHeight + 20) + 'px)', transformOrigin : '0 0', width: hiGlassHeight, paddingTop : leftPanelWidth - 45 }} onClick={resetXOffset}>
+                                        Visualization for <span className="text-400">{ mcoolFile.display_title }</span> &nbsp;&nbsp;<i className="icon icon-angle-down" />
+                                    </h4>
+                                </div>
+                            );
+                        } else {
+                            return <HiGlassContainer className={collapsed ? 'disabled' : null} tilesetUid={mcoolFile.higlass_uid} height={hiGlassHeight} ref="hiGlassContainer" />;
+                        }
+                    }}
+                    rightPanelClassName="exp-table-container"
+                    renderRightPanel={(rightPanelWidth, resetXOffset)=> <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={Math.max(rightPanelWidth, 320)} /> }
+                    onDrag={this.correctHiGlassTrackDimensions}
+                    ref="adjustableRow"
+                />
             );
+        } else {
+            return <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={width}/>;
         }
+    }
+
+    render(){
+        var { mounted, width, processedFiles, context, leftPanelCollapseWidth } = this.props;
+        if (!mounted) return null;
 
         return (
             <div className="processed-files-table-section exp-table-section">
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ processedFiles.length }</span> Processed Files</span>
                 </h3>
-                <div className="row">
-                    { hiGlassView }
-                    <div className={"exp-table-container col-xs-12" + (mcoolFile ? ' col-md-7' : '')}>
-                        <ProcessedFilesStackedTable
-                            files={processedFiles}
-                            width={adjWidth}
-                            experimentSetAccession={context.accession || null}
-                            experimentArray={context.experiments_in_set}
-                            replicateExpsArray={context.replicate_exps}
-                            collapseLimit={10} collapseShow={7}
-                        />
-                    </div>
-                </div>
+                { this.renderTopRow() }
                 <div className="row">
                     <div className="exp-table-container col-xs-12">
                         { this.state.filesWithMetrics.length ? [
@@ -346,6 +392,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                                 experimentArray={context.experiments_in_set}
                                 replicateExpsArray={context.replicate_exps}
                                 collapseLimit={10} collapseShow={7}
+                                collapseLongLists={true}
                             />
                         ] : null }
                     </div>
