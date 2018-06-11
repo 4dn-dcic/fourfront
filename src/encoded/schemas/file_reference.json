@@ -38,6 +38,7 @@
             "enum": [
                 "bwaIndex",
                 "chromsizes",
+                "barcode_file",
                 "compressed_fasta",
                 "fasta",
                 "juicer_format_restriction_site_file",
@@ -51,6 +52,7 @@
                 "genome reference",
                 "genome index",
                 "index",
+                "barcodes",
                 "oligo sequences",
                 "restriction sites",
                 "blacklisted regions",
@@ -80,6 +82,7 @@
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
         "chromsizes": ".chrom.sizes",
+        "barcode_file": ".txt",
         "compressed_fasta": ".fasta.gz",
         "fasta": ".fasta",
         "juicer_format_restriction_site_file": ".txt",
