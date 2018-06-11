@@ -276,7 +276,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.mcoolFile = this.mcoolFile.bind(this);
-        this.correctHiGlassTrackDimensions = this.correctHiGlassTrackDimensions.bind(this);
+        this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions.bind(this), 100);
         this.state = {
             'mcoolFile' : this.mcoolFile(props) || null,
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)

@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
 import { console, layout } from './../../util';
+import { requestAnimationFrame } from './../../viz/utilities';
+
 
 export class DraggableVerticalBorder extends React.Component {
 
@@ -30,13 +32,15 @@ export class DraggableVerticalBorder extends React.Component {
 export class AdjustableDividerRow extends React.PureComponent {
 
     static defaultProps = {
-        'leftPanelCollapseWidth'    : 320,
+        'leftPanelCollapseWidth'    : 240,
         'leftPanelDefaultSizeMD'    : 5,
         'leftPanelDefaultSizeLG'    : 4,
         'leftPanelClassName'        : null,
         'minLeftPanelWidth'         : 60,
         'minRightPanelWidth'        : 170,
-        'rightPanelClassName'       : null
+        'rightPanelClassName'       : null,
+        'handleDragThrottleLimit'   : 100,
+        'leftPanelDefaultCollapsed' : false
     };
 
     static propTypes = {
@@ -48,11 +52,24 @@ export class AdjustableDividerRow extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleStopDrag = this.handleStopDrag.bind(this);
-        this.handleDrag = _.debounce(this.handleDrag.bind(this), 50);
+        this.handleDrag = _.throttle(this.handleDrag.bind(this), props.handleDragThrottleLimit);
         this.resetXOffset = this.resetXOffset.bind(this);
         this.state = {
             'xOffset' : 0
         };
+        if (props.mounted && props.leftPanelDefaultCollapsed && props.width){
+            var leftPanelCollapseWidth = Math.max(props.leftPanelCollapseWidth || 0, props.minLeftPanelWidth);
+            var layoutSize = layout.responsiveGridState() || null;
+            if (layoutSize === 'md' || layoutSize === 'lg'){
+                var leftPanelWidth;
+                if (layoutSize === 'md'){
+                    leftPanelWidth = props.width * ( props.leftPanelDefaultSizeMD / 12 );
+                } else {
+                    leftPanelWidth = props.width * ( props.leftPanelDefaultSizeLG / 12 );
+                }
+                this.state.xOffset = - leftPanelWidth + props.minLeftPanelWidth;
+            }
+        }
     }
 
     componentWillReceiveProps(nextProps){
@@ -66,15 +83,14 @@ export class AdjustableDividerRow extends React.PureComponent {
         var leftPanelCollapseWidth = Math.max(this.props.leftPanelCollapseWidth || 0, this.props.minLeftPanelWidth);
         if (this.leftPanelWidth + xOffset < leftPanelCollapseWidth){ // If in "collapse" width size lower half
             xOffset = this.draggableBounds.left;
-        }/* else if (this.hiGlassWidth + xOffset < leftPanelCollapseWidth && this.hiGlassWidth + xOffset >= leftPanelCollapseWidth * (2/3)) {
-            // If in "collapse" width size upper half
-            xOffset = this.draggableBounds.left + leftPanelCollapseWidth - AdjustableDividerRow.MIN_LEFT_PANEL_WIDTH + 1;
-        }*/
+        }
         this.setState({ xOffset }, () => this.handleDrag(evt, { 'x' : xOffset }));
     }
 
     handleDrag(evt, data){
-        this.setState({ 'xOffset' : data.x }, (this.props && this.props.onDrag));
+        requestAnimationFrame(()=>{
+            this.setState({ 'xOffset' : data.x }, (this.props && this.props.onDrag));
+        });
     }
 
     resetXOffset(){
@@ -84,7 +100,9 @@ export class AdjustableDividerRow extends React.PureComponent {
     render(){
         var { mounted, width, height, leftPanelCollapseWidth, minRightPanelWidth, minLeftPanelWidth, leftPanelDefaultSizeMD, leftPanelDefaultSizeLG,
             className, rightPanelClassName, leftPanelClassName, renderLeftPanel, renderRightPanel } = this.props;
-        if (!this.props.mounted) return null;
+
+        if (!mounted) return null;
+
         leftPanelCollapseWidth = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
 
         var xOffset = this.state.xOffset;

@@ -77826,7 +77826,7 @@ var ViewHeader = exports.ViewHeader = function (_React$Component) {
               _react2['default'].createElement('div', null),
               _react2['default'].createElement('div', null)
             ),
-            this.state.width > _configs.VIEW_HEADER_MIN_WIDTH_SEARCH_BAR && _react2['default'].createElement(
+            _react2['default'].createElement(
               'div',
               { className: 'ViewHeader-module_multitrack-header-search-1X_3_' },
               this.props.isGenomePositionSearchBoxVisible && GenomePositionSearchBox
@@ -77907,7 +77907,7 @@ var ViewHeader = exports.ViewHeader = function (_React$Component) {
 }(_react2['default'].Component);
 
 ViewHeader.defaultProps = {
-  isGenomePositionSearchBoxVisible: false
+  isGenomePositionSearchBoxVisible: true
 };
 
 ViewHeader.propTypes = {
