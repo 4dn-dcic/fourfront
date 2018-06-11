@@ -8,6 +8,7 @@ import {  Collapse, Table } from 'react-bootstrap';
 import { console, object, ajax, JWT } from'./../util';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
+import { BasicStaticSectionBody } from './components';
 
 
 export default class ReleaseUpdates extends React.Component {
@@ -115,19 +116,22 @@ export default class ReleaseUpdates extends React.Component {
     render() {
         var subtitle = null;
         if (this.state.sectionData){
+            var section = this.state.sectionData;
             var editLink = null;
             if(this.state.isAdmin){
                 editLink = <a href={this.state.sectionData['@id'] + '#!edit'}>Edit</a>;
             }
-            subtitle = (<div className="row">
-                            <div className="col-sm-11" dangerouslySetInnerHTML={{__html: this.state.sectionData['content']}}></div>
-                            <div className="col-sm-1 text-right">{editLink}</div>
-                       </div>);
+            subtitle = (
+                <div className="row release-update-static-section">
+                    <BasicStaticSectionBody className="col-sm-11" content={section.content} filetype={section.options && section.options.filetype} />
+                    <div className="col-sm-1 text-right">{editLink}</div>
+                </div>
+            );
         }
         return (
             <StaticPage.Wrapper>
                 {subtitle}
-                <hr/>
+                <hr className="mt-0" />
                 {this.viewUpdates()}
             </StaticPage.Wrapper>
         );

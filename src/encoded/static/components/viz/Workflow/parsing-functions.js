@@ -126,7 +126,8 @@ export const DEFAULT_PARSING_OPTIONS = {
     'nodesInColumnSortFxn'      : nodesInColumnSortFxn,
     'nodesInColumnPostSortFxn'  : nodesInColumnPostSortFxn,
     'showReferenceFiles'        : true,
-    'showParameters'            : true
+    'showParameters'            : true,
+    'showIndirectFiles'         : true
 };
 
 
@@ -820,6 +821,10 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
         graphData = filterOutReferenceFilesFromGraphData(graphData);
     }
 
+    if (!parsingOptions.showIndirectFiles){
+        graphData = filterOutIndirectFilesFromGraphData(graphData);
+    }
+
     var sortedNodes = _.sortBy(graphData.nodes, 'column');
 
     if (typeof parsingOptions.nodesPreSortFxn === 'function'){
@@ -830,45 +835,41 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     var nodesByColumnPairs = _.pairs(_.groupBy(correctColumnAssignments(sortedNodes), 'column'));
 
     // Add prelim index for each node, over-written in sorting if any.
-    nodesByColumnPairs = _.map(nodesByColumnPairs, function(columnGroup){
-        _.forEach(columnGroup[1], function(n, i){
+    nodesByColumnPairs = _.map(nodesByColumnPairs, function(columnGroupPair){
+        _.forEach(columnGroupPair[1], function(n, i){
             n.origIndexInColumn = i;
         });
-        return [ parseInt(columnGroup[0]), columnGroup[1] ];
+        return [ parseInt(columnGroupPair[0]), columnGroupPair[1] ];
     });
 
     // Sort nodes within columns.
     if (typeof parsingOptions.nodesInColumnSortFxn === 'function'){
-        nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
+        nodesByColumnPairs = _.map(nodesByColumnPairs, function([columnGroupIdx, columnGroupNodes]){
             var nodesInColumn;
             // Sort
-            if (Array.isArray(parsingOptions.skipSortOnColumns) && parsingOptions.skipSortOnColumns.indexOf(columnGroup[0]) > -1){
-                nodesInColumn = columnGroup[1].slice(0);
+            if (Array.isArray(parsingOptions.skipSortOnColumns) && parsingOptions.skipSortOnColumns.indexOf(columnGroupIdx) > -1){
+                nodesInColumn = columnGroupNodes.slice(0);
             } else {
-                nodesInColumn = columnGroup[1].sort(parsingOptions.nodesInColumnSortFxn);
+                nodesInColumn = columnGroupNodes.sort(parsingOptions.nodesInColumnSortFxn);
             }
 
             _.forEach(nodesInColumn, function(n, i){ n.indexInColumn = i; }); // Update w/ new index in column
 
             // Run post-sort fxn, e.g. to manually re-arrange nodes within columns. If avail.
             if (typeof parsingOptions.nodesInColumnPostSortFxn === 'function'){
-                nodesInColumn = parsingOptions.nodesInColumnPostSortFxn(nodesInColumn, columnGroup[0]);
+                nodesInColumn = parsingOptions.nodesInColumnPostSortFxn(nodesInColumn, columnGroupIdx);
                 _.forEach(nodesInColumn, function(n, i){ n.indexInColumn = i; }); // Update w/ new index in column
             }
 
-            return [ columnGroup[0], nodesInColumn ];
+            return [ columnGroupIdx, nodesInColumn ];
         });
     }
 
-    sortedNodes = _.reduce(nodesByColumnPairs, function(m,colPair){
-        return m.concat(colPair[1]);
+    sortedNodes = _.reduce(nodesByColumnPairs, function(m, [colIdx, nodesInColumn]){
+        return m.concat(nodesInColumn);
     }, []);
 
-    if (parsingOptions.dontCorrectColumns){
-        return { 'nodes' : sortedNodes, 'edges' : graphData.edges };
-    }
-
-    return correctColumnAssignments({ 'nodes' : sortedNodes , 'edges' : graphData.edges });
+    return { 'nodes' : sortedNodes, 'edges' : graphData.edges };
 
 }
 
@@ -996,7 +997,23 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem, parsingO
 
 /** Functions for post-processing, used as defaults but may be overriden. */
 
+function cleanEdgesByDeletedNodes(edges, deletedNodesObj){
+    return _.filter(edges, function(e,i){
+        return !(deletedNodesObj[e.source.id] === true || deletedNodesObj[e.target.id] === true);
+    });
+}
 
+function cleanNodeReferencesByDeletedNodes(nodes, deletedNodesObj){
+    _.forEach(nodes, function(n, i){
+        if (Array.isArray(n.inputNodes) && n.inputNodes.length > 0){
+            n.inputNodes = _.filter(n.inputNodes, function(iN){ return deletedNodesObj[iN.id] !== true; });
+        }
+        if (Array.isArray(n.outputNodes) && n.outputNodes.length > 0){
+            n.outputNodes = _.filter(n.outputNodes, function(oN){ return deletedNodesObj[oN.id] !== true; });
+        }
+    });
+    return nodes;
+}
 
 /**
  * For when "Show Parameters" UI setting === false.
@@ -1013,10 +1030,7 @@ export function filterOutParametersFromGraphData(graphData){
         }
         return true;
     });
-    var edges = _.filter(graphData.edges, function(e,i){
-        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
-    });
-    return { nodes, edges };
+    return { 'nodes' : cleanNodeReferencesByDeletedNodes(nodes, deleted) , 'edges' : cleanEdgesByDeletedNodes(graphData.edges, deleted) };
 }
 
 
@@ -1037,10 +1051,24 @@ export function filterOutReferenceFilesFromGraphData(graphData){
 
         return true;
     });
-    var edges = _.filter(graphData.edges, function(e,i){
-        return !(deleted[e.source.id] === true || deleted[e.target.id] === true);
+    return { 'nodes' : cleanNodeReferencesByDeletedNodes(nodes, deleted) , 'edges' : cleanEdgesByDeletedNodes(graphData.edges, deleted) };
+}
+
+
+
+export function filterOutIndirectFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+        if (n.nodeType === 'input' || n.nodeType === 'output'){
+            if (n && n.meta && n.meta.in_path === true){
+                return true;
+            }
+            deleted[n.id] = true;
+            return false;
+        }
+        return true;
     });
-    return { nodes, edges };
+    return { 'nodes' : cleanNodeReferencesByDeletedNodes(nodes, deleted) , 'edges' : cleanEdgesByDeletedNodes(graphData.edges, deleted) };
 }
 
 
@@ -1081,17 +1109,31 @@ export function nodesInColumnSortFxn(node1, node2){
         //return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
     }
 
-    function getNodeFromListForComparison(nodeList, highestColumn = true){
+    function getNodeFromListForComparison(nodeList, averaged = true, highestColumn = true, ownColumnFilter=null){
         if (!Array.isArray(nodeList) || nodeList.length === 0) return null;
-        var sortedList = _.sortBy(nodeList.slice(0), function(n){
-            return (typeof n.indexInColumn === 'number' ? n.indexInColumn : n.origIndexInColumn);
-        });
-        sortedList = _.sortBy(sortedList, function(n){ return highestColumn ? -n.column : n.column; });
-        return (
-            _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number' || typeof n.origIndexInColumn === 'number'; })
-            || sortedList[0]
-            || null
-        );
+        if (nodeList.length === 1) return nodeList[0];
+        if (averaged){
+            if (typeof ownColumnFilter === 'number' && ownColumnFilter > 1){
+                var nodeListFiltered = _.filter(nodeList, function(n){
+                    return n.column === ownColumnFilter;
+                });
+                if (nodeListFiltered.length > 0) nodeList = nodeListFiltered;
+            }
+            return _.extend({}, nodeList[0], { // Dummy node with averaged indexInColumn
+                'indexInColumn' : _.reduce(nodeList, function(m,n){ return m + (typeof n.indexInColumn === 'number' ? n.indexInColumn : n.origIndexInColumn); }, 0) / nodeList.length
+            });
+
+        } else {
+            var sortedList = _.sortBy(nodeList.slice(0), function(n){
+                return (typeof n.indexInColumn === 'number' ? n.indexInColumn : n.origIndexInColumn);
+            });
+            sortedList = _.sortBy(sortedList, function(n){ return highestColumn ? -n.column : n.column; });
+            return (
+                _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number' || typeof n.origIndexInColumn === 'number'; })
+                || sortedList[0]
+                || null
+            );
+        }
     }
 
     function compareNodesBySameColumnIndex(n1, n2){
@@ -1109,8 +1151,8 @@ export function nodesInColumnSortFxn(node1, node2){
     }
 
     function compareNodeInputOf(n1, n2){
-        var n1InputOf = getNodeFromListForComparison(n1.nodeType === 'step' ? n1.outputNodes : n1.inputOf, false);
-        var n2InputOf = getNodeFromListForComparison(n2.nodeType === 'step' ? n2.outputNodes : n2.inputOf, false);
+        var n1InputOf = getNodeFromListForComparison(n1.nodeType === 'step' ? n1.outputNodes : n1.inputOf, true, false);
+        var n2InputOf = getNodeFromListForComparison(n2.nodeType === 'step' ? n2.outputNodes : n2.inputOf, true, false);
 
         var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
         if (ioResult !== 0) return ioResult;
@@ -1162,11 +1204,17 @@ export function nodesInColumnSortFxn(node1, node2){
         if (!node1.inputNodes && node2.inputNodes) return 1;
         if (node1.inputNodes && node2.inputNodes){
             ioResult = compareNodesBySameColumnIndex(
-                getNodeFromListForComparison(node1.inputNodes),
-                getNodeFromListForComparison(node2.inputNodes)
+                getNodeFromListForComparison(node1.inputNodes, true, true, node1.column - 1),
+                getNodeFromListForComparison(node2.inputNodes, true, true, node1.column - 1)
             );
-            console.log(node1, node2, ioResult, _.clone(getNodeFromListForComparison(node1.inputNodes)), _.clone(getNodeFromListForComparison(node2.inputNodes)));
             if (ioResult !== 0) return ioResult;
+            else {
+                ioResult = compareNodesBySameColumnIndex(
+                    getNodeFromListForComparison(node1.inputNodes, false),
+                    getNodeFromListForComparison(node2.inputNodes, false)
+                );
+                if (ioResult !== 0) return ioResult;
+            }
         }
         
         return nonIOStepCompare(node1,node2);
@@ -1219,6 +1267,7 @@ export function nodesInColumnSortFxn(node1, node2){
 }
 
 export function nodesInColumnPostSortFxn(nodesInColumn, columnNumber){
+
     var groupNodes = _.filter(nodesInColumn, { 'nodeType' : 'input-group' });
     if (groupNodes.length > 0){
         _.forEach(groupNodes, function(gN){
@@ -1238,7 +1287,8 @@ export function nodesInColumnPostSortFxn(nodesInColumn, columnNumber){
             }
         });
     }
-    
+
+    /*
     if (nodesInColumn.length > 2 && _.every(nodesInColumn, function(n){ return n.nodeType === 'step'; })){
         // If all step nodes, move those with more inputs toward the middle.
         var nodesByNumberOfInputs = _.groupBy(nodesInColumn.slice(0), function(n){ return n.inputNodes.length; });
@@ -1263,6 +1313,7 @@ export function nodesInColumnPostSortFxn(nodesInColumn, columnNumber){
             
         }
     }
+    */
 
     /* TODO: later
     if (columnNumber === 0){

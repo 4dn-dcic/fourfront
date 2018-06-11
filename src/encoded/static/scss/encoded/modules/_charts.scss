@@ -1192,7 +1192,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 @mixin workflow-node {
     pointer-events: all;
     position: absolute;
-    transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out;
+    transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s ease-out;
     transform: translate3d(0,0,0);
     cursor: pointer;
 
@@ -1278,9 +1278,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
     &.node-type-step {
         margin-top: - ($workflow-step-node-height / 2);
-        outline: 2px solid transparent;
+        outline: 3px solid transparent;
         outline-offset: 4px;
-        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out, outline-color .2s;
+        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s ease-out, outline-color .2s;
 
         > .inner {
             
@@ -1346,7 +1346,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             background-color: $workflow-node-color-type-io-default;
             transform: skewX(25deg);
             z-index: 1;
-            outline: 2px solid transparent;
+            outline: 3px solid transparent;
             outline-offset: 4px;
             transition: outline-color .2s, outline-width .2s;
         }
@@ -1506,8 +1506,14 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 @mixin workflow-edge-layer {
     path.pathArrow-marker {
-        fill: #333;
+        fill: #000;
         stroke: none;
+        &.marker-color-gray {
+            fill: rgba(58,58,58,0.75);
+        }
+        &.marker-color-light-gray {
+            fill: rgba(0,0,0,0.33);
+        }
     }
 
     path {
@@ -1523,18 +1529,19 @@ $workflow-node-color-type-global-context: #ffb3b3;
             stroke: #000;
             stroke-width: 2px;
         }
+        &.disabled:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
+            stroke-width: 1px;
+            //stroke: #bbb;
+            stroke: rgba(0,0,0,0.33);
+        }
         &[data-edge-selected="true"]{
             stroke-width: 3px;
             stroke: #000;
         }
         &[data-edge-related="true"]:not([data-edge-selected="true"]){
             stroke-width: 3px;
-            stroke: rgba(0,0,0,0.75);
-        }
-        &.disabled {
-            stroke-width: 1px;
-            //stroke: #bbb;
-            opacity: 0.33;
+            stroke: #000;
+            //stroke: rgba(0,0,0,0.75);
         }
     }
 }
@@ -1548,43 +1555,56 @@ $workflow-node-color-type-global-context: #ffb3b3;
         overflow-y: hidden;
         overflow-x: visible;
 
-        .scroll-container-wrapper {
-            overflow-x: auto;
-            overflow-y: visible;
-        }
+        .state-container {
 
-        .scroll-container {
-
-            overflow: hidden;
-            position: relative;
-            transition: height .5s ease-out;
-
-            .nodes-layer-wrapper,
-            .edges-layer-wrapper {
-                position: absolute;
-                left: 0;
-                top: 0;
+            &[data-is-node-selected="true"] {
+                .nodes-layer-wrapper .nodes-layer .node:not([data-node-selected="true"]):not([data-node-in-selection-path="true"]) {
+                    opacity: 0.15;
+                }
+                .edges-layer-wrapper .edges-layer path.edge-path:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
+                    opacity: 0.15;
+                }
             }
 
-            .nodes-layer-wrapper {
-                pointer-events: none;
-                .nodes-layer {
-                    pointer-events: inherit;
-                    position: relative;
-                    
-                    .node {
-                        @include workflow-node;
+            .scroll-container-wrapper {
+                overflow-x: auto;
+                overflow-y: visible;
+            }
+
+            .scroll-container {
+
+                overflow: hidden;
+                position: relative;
+                transition: height .5s ease-out;
+
+                .nodes-layer-wrapper,
+                .edges-layer-wrapper {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                }
+
+                .nodes-layer-wrapper {
+                    pointer-events: none;
+                    .nodes-layer {
+                        pointer-events: inherit;
+                        position: relative;
+                        
+                        .node {
+                            @include workflow-node;
+                        }
+
                     }
-
                 }
-            }
 
-            .edges-layer-wrapper {
-                pointer-events: none;
-                .edges-layer {
-                    pointer-events: inherit;
-                    @include workflow-edge-layer;
+                .edges-layer-wrapper {
+                    pointer-events: none;
+                    .edges-layer {
+                        pointer-events: inherit;
+                        @include workflow-edge-layer;
+                    }
                 }
+
             }
 
         }
@@ -1674,6 +1694,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         margin: 0;
                         input[type="checkbox"]{
                             margin-top: 3px;
+                        }
+                        &.disabled{
+                            color: #999;
                         }
                     }
                 }

@@ -23,25 +23,30 @@
             "default": "released",
             "enum" : [
                 "released",
+                "released to project",
                 "draft",
                 "deleted"
-            ]
+            ],
+            "lookup" : 55
         },
         "name": {
             "title": "Path Name",
             "comment": "Unique route/pathname of this page.",
             "type": "string",
-            "uniqueKey": "page:name"
+            "uniqueKey": "page:name",
+            "lookup" : 40
         },
         "title": {
             "title": "Title",
             "comment": "Title for the Page",
-            "type": "string"
+            "type": "string",
+            "lookup" : 50
         },
         "description": {
             "title": "Description",
             "description" : "Internal description of page.",
-            "type": "string"
+            "type": "string",
+            "lookup" : 85
         },
         "table-of-contents": {
             "title": "Table of Contents",
@@ -84,7 +89,8 @@
             "items": {
                 "type": "string",
                 "linkTo" : "StaticSection"
-            }
+            },
+            "lookup" : 70
         },
         "children" : {
             "title": "Child Pages",
@@ -92,7 +98,8 @@
             "items": {
                 "type": "string",
                 "linkTo" : "Page"
-            }
+            },
+            "lookup" : 60
         },
         "redirect" : {
             "title" : "Redirect",
@@ -116,7 +123,8 @@
                     "default" : 307,
                     "enum" : [301, 302, 303, 307]
                 }
-            }
+            },
+            "lookup" : 80
         }
     },
     "columns" : {

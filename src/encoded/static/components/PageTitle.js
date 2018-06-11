@@ -207,11 +207,11 @@ export default class PageTitle extends React.Component {
         return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
     }
 
-    static getStyles(context, href, mounted){
+    static getStyles(context, href, mounted, hasToc){
         var style = { 'marginTop' : 0 };
+        var gridSize = mounted && layout.responsiveGridState();
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
-            var gridSize = mounted && layout.responsiveGridState();
             if (mounted && (gridSize === 'xs' || gridSize === 'sm')) {
                 // don't do it; but do by default if not mounted (aka serverside) since desktop is more common than mobile for us
             } else {
@@ -219,9 +219,7 @@ export default class PageTitle extends React.Component {
             }
         }
 
-        //if (PageTitle.isStaticPage(context)){
-        //    style.paddingLeft = 10; // Indent slightly to match content.
-        //}
+        if (hasToc && (gridSize === 'md' || gridSize === 'lg' || !mounted)) style.width = '75%';
 
         return style;
     }
@@ -237,7 +235,7 @@ export default class PageTitle extends React.Component {
     }
 
     render(){
-        var { context, href } = this.props;
+        var { context, href, session } = this.props;
 
         if (PageTitle.isHomePage(href)){
             return (
@@ -265,11 +263,18 @@ export default class PageTitle extends React.Component {
             subtitle = <div className={"page-subtitle smaller" + (subtitleEllipsis ? ' text-ellipsis-container' : '')}>{ subtitlePrepend }{ subtitle }{ subtitleAppend }</div>;
         }
 
+        var hasToc = (
+            context && Array.isArray(context['@type'])
+            && context['@type'].indexOf('StaticPage') > -1
+            && context['table-of-contents']
+            && context['table-of-contents'].enabled
+        );
+
         return (
             <layout.WindowResizeUpdateTrigger>
                 <div id="page-title-container" className="container">
-                    <StaticPageBreadcrumbs {...{ context }} key="breadcrumbs" />
-                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle } } mounted={this.state.mounted} />
+                    <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
+                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} />
                 </div>
             </layout.WindowResizeUpdateTrigger>
         );
@@ -288,10 +293,10 @@ export default class PageTitle extends React.Component {
 class PageTitleElement extends React.Component {
 
     render(){
-        var { title, calloutTitle, subtitle, context, href, mounted } = this.props;
+        var { title, calloutTitle, subtitle, context, href, mounted, hasToc } = this.props;
 
         return ((title || subtitle) && (
-            <h1 className="page-title top-of-page" style={PageTitle.getStyles(context, href, mounted)} >
+            <h1 className="page-title top-of-page" style={PageTitle.getStyles(context, href, mounted, hasToc)} >
                 { title }{ calloutTitle }{ subtitle }
             </h1>
         )) || <br/>;
@@ -301,9 +306,9 @@ class PageTitleElement extends React.Component {
 
 class HomePageTitleElement extends React.Component {
     render(){
-        var { title, calloutTitle, subtitle, context, href, mounted } = this.props;
+        var { title, calloutTitle, subtitle, context, href, mounted, hasToc } = this.props;
 
-        var style = PageTitle.getStyles(context, href, mounted);
+        var style = PageTitle.getStyles(context, href, mounted, hasToc);
         style.marginTop ? style.marginTop -= 3 : null;
 
         return (
@@ -351,10 +356,34 @@ export class StaticPageBreadcrumbs extends React.Component {
         );
     }
 
+    editButton(){
+        var { session, context } = this.props;
+        if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
+
+            if (Array.isArray(context.actions)){
+                var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
+                if (editAction && editAction.href){
+                    return (
+                        <div className="static-edit-button pull-right">
+                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
+                        </div>
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
     render(){
-        var ancestors = StaticPageBreadcrumbs.getAncestors(this.props.context);
-        if (!ancestors) return <div className="static-page-breadcrumbs clearfix empty"/>;
-        return  <div className="static-page-breadcrumbs clearfix" children={_.map(ancestors, this.renderCrumb)} />;
+        var { context, hasToc } = this.props;
+        var ancestors = StaticPageBreadcrumbs.getAncestors(context);
+        var crumbs = ancestors && _.map(ancestors, this.renderCrumb);
+        return  (
+            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? 'empty' : '') + (hasToc ? ' page-has-toc' : '')}>
+                { crumbs }
+                { this.editButton() }
+            </div>
+        );
     }
 }
 

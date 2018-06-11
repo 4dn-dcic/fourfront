@@ -153,13 +153,9 @@ class GraphSection extends WorkflowGraphSection {
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.render = this.render.bind(this);
-        this.state = {
-            'showChart' : 'detail',
-            'showParameters' : false,
-            'showReferenceFiles' : false,
-            'rowSpacingType' : 'compact',
-            'fullscreenViewEnabled' : false
-        };
+        this.state = _.extend(this.state, {
+            'showChart' : 'detail'
+        });
     }
 
     commonGraphProps(){

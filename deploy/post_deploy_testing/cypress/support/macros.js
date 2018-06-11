@@ -135,3 +135,23 @@ export function testGraphTabClick(){
     });
 
 }
+
+export function testNodesTextGlobalInputs(listOfNodeTextNames){
+    return testNodesText(listOfNodeTextNames, '.graph-wrapper .nodes-layer .node[data-node-type="input"][data-node-global="true"]');
+}
+
+export function testNodesText(listOfNodeTextNames, nodesListSelector = '.graph-wrapper .nodes-layer .node'){
+
+    it('Has ' + listOfNodeTextNames.length + '+ global input nodes - starting with ' + listOfNodeTextNames[0], function(){
+        cy.get(nodesListSelector).should('have.length.gte', listOfNodeTextNames.length).then(($nodes)=>{
+            var already_encountered_accessions = [];
+            Cypress._.forEach($nodes, function(n, idx){
+                var nodeText = Cypress.$(n).find('.node-name').text();
+                expect(nodeText).to.be.oneOf(listOfNodeTextNames);
+                expect(nodeText).to.not.be.oneOf(already_encountered_accessions);
+                already_encountered_accessions.push(nodeText);
+            });
+        });
+    });
+
+}

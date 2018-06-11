@@ -9,8 +9,17 @@ def test_parse_args_defaults():
     args = ['development.ini', '--app-name', 'app']
     args = go.parse_args(args)
     assert args.ontologies == 'all'
-    assert args.keyfile == os.path.expanduser('~/keypairs.json')
-    assert args.key == 'default'
+    assert args.key is None
+    assert args.env == 'data'
+
+
+@pytest.fixture
+def connection():
+    return {
+        "server": "https://data.4dnucleome.org/",
+        "key": "testkey",
+        "secret": "testsecret"
+    }
 
 
 @pytest.fixture
@@ -32,22 +41,16 @@ def slim_terms():
     ]
 
 
-@pytest.fixture
-def connection(mocker):
-    return mocker.patch.object(go, 'FDN_Connection')
+#@pytest.fixture
+#def connection(mocker):
+#    return mocker.patch.object(go, 'FDN_Connection')
 
 
-def test_connect2server(mocker):
-    # mock submit4dn stuff
-    mocker.patch.object(go, 'FDN_Key')
-    mocker.patch.object(go, 'FDN_Connection')
-    go.FDN_Connection.server.return_value = 'test_server'
-    go.FDN_Connection.check.return_value = True
-
-    # run the test, we mocked everything so
+def test_connect2server(mocker, connection):
     # parameters we pass in don't really matter
-    retval = go.connect2server('dummy-keyfile', 'dummy-keyname')
-    assert retval is not None
+    with mocker.patch('encoded.commands.generate_ontology.get_authentication_with_server', return_value=connection):
+        retval = go.connect2server(None, connection)
+        assert retval == connection
 
 
 # see ontology schema for full schema
@@ -121,7 +124,7 @@ def get_fdn_ontology_side_effect(*args, **kwargs):
 
 def test_get_ontologies_all(mocker, connection):
     prefixes = ['EFO', 'UBERON', 'OBI']
-    with mocker.patch('encoded.commands.generate_ontology.get_FDN', side_effect=get_fdn_ontology_side_effect):
+    with mocker.patch('encoded.commands.generate_ontology.search_metadata', return_value=all_ontology):
         ont_list = 'all'
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 3
@@ -131,7 +134,7 @@ def test_get_ontologies_all(mocker, connection):
 
 def test_get_ontologies_one(mocker, connection):
     prefix = 'EFO'
-    with mocker.patch('encoded.commands.generate_ontology.get_FDN', side_effect=get_fdn_ontology_side_effect):
+    with mocker.patch('encoded.commands.generate_ontology.get_metadata', side_effect=get_fdn_ontology_side_effect):
         ont_list = ['EFO']
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 1
@@ -141,7 +144,7 @@ def test_get_ontologies_one(mocker, connection):
 def test_get_ontologies_not_in_db(mocker, connection):
     prefix = 'EFO'
     all_ontology.append({'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'})
-    with mocker.patch('encoded.commands.generate_ontology.get_FDN',
+    with mocker.patch('encoded.commands.generate_ontology.get_metadata',
                       side_effect=[all_ontology[0],
                                    {'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}]):
         ont_list = ['EFO', 'FAKE']
@@ -166,9 +169,9 @@ def slim_terms_by_ont(slim_term_list):
         [slim_term_list[0],
          slim_term_list[1]],
         [slim_term_list[2]],
-        {'notification': 'No result found'},
-        {'notification': 'No result found'},
-        {'notification': 'No result found'}
+        None,
+        None,
+        None
     ]
 
 
@@ -284,7 +287,7 @@ def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
     present = ['developmental', 'assay']
     absent = ['organ', 'system', 'cell']
     test_slim_terms = slim_terms_by_ont
-    with mocker.patch('encoded.commands.generate_ontology.get_FDN',
+    with mocker.patch('encoded.commands.generate_ontology.search_metadata',
                       side_effect=test_slim_terms):
         terms = go.get_slim_terms(connection)
         assert len(terms) == 3

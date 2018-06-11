@@ -35,6 +35,19 @@ export function onItemPageNodeClick(node, selectedNode, evt){
     }
 }
 
+export function checkIfIndirectOrReferenceNodesExist(steps){
+    var graphData = parseAnalysisSteps(steps, _.extend(
+        {}, DEFAULT_PARSING_OPTIONS, { 'showIndirectFiles' : true, 'showReferenceFiles' : true }
+    ));
+    var anyIndirectPathIONodes = _.any(graphData.nodes, function(n){
+        return (n.nodeType === 'output' && n.meta && n.meta.in_path === false);
+    });
+    var anyReferenceFileNodes = _.any(graphData.nodes, function(n){
+        return (n.ioType === 'reference file');
+    });
+    return { anyIndirectPathIONodes, anyReferenceFileNodes };
+}
+
 export function commonGraphPropsFromProps(props){
     return {
         'href'        : props.href,
@@ -46,9 +59,9 @@ export function commonGraphPropsFromProps(props){
         },
         'rowSpacingType' : 'wide',
         'nodeClassName' : null,
-        'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : onItemPageNodeClick,
-        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : true,
-        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : true
+        'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
+        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : false,
+        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false
     };
 }
 
@@ -120,7 +133,7 @@ export class WorkflowView extends ItemBaseView {
 }
 
 
-export class WorkflowGraphSectionControls extends React.Component {
+export class WorkflowGraphSectionControls extends React.PureComponent {
 
     static analysisStepsSet(context){
         if (!Array.isArray(context.steps)) return false;
@@ -213,7 +226,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
         return (
             <div className="inline-block checkbox-container for-state-showReferenceFiles" key="show-reference-files">
-                <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles}>
+                <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles} disabled={this.props.isReferenceFilesCheckboxDisabled}>
                     Show Reference Files
                 </Checkbox>
             </div>
@@ -323,13 +336,13 @@ export class WorkflowGraphSection extends React.Component {
         this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
         this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
         this.render = this.render.bind(this);
-        this.state = {
+        this.state = _.extend({
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'compact',
-            'fullscreenViewEnabled' : false
-        };
+            'fullscreenViewEnabled' : false,
+        }, props.context && props.context.steps ? checkIfIndirectOrReferenceNodesExist(props.context.steps) : {});
     }
 
     componentWillUnmount(){
@@ -339,12 +352,14 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     parseAnalysisSteps(context = this.props.context){
-        var opts = _.extend({}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters'));
+        var parsingOptions = _.extend(
+            {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters')
+        );
         return (
             this.state.showChart === 'basic' ?
-                parseBasicIOAnalysisSteps(context.steps, context, opts)
+                parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
                 :
-                parseAnalysisSteps(context.steps, opts)
+                parseAnalysisSteps(context.steps, parsingOptions)
         );
     }
 
@@ -368,15 +383,7 @@ export class WorkflowGraphSection extends React.Component {
 
     basicGraph(){
         if (!Array.isArray(this.props.context.steps)) return null;
-        return (
-            <Graph
-                { ...this.commonGraphProps() }
-                edgeStyle="curve"
-                columnWidth={this.props.mounted && this.refs.container ?
-                    (this.refs.container.offsetWidth - 180) / 3
-                : 180}
-            />
-        );
+        return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={this.props.mounted && this.refs.container ? (this.refs.container.offsetWidth - 180) / 3 : 180} />;
     }
 
     detailGraph(){
@@ -442,6 +449,7 @@ export class WorkflowGraphSection extends React.Component {
                         onToggleReferenceFiles={this.onToggleReferenceFiles}
                         fullscreenViewEnabled={this.state.fullscreenViewEnabled}
                         onToggleFullScreenView={this.onToggleFullScreenView}
+                        isReferenceFilesCheckboxDisabled={!this.state.anyReferenceFileNodes}
                     />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>

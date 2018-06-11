@@ -50,11 +50,12 @@ class TableEntry extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         if (
-            nextProps.mounted !== this.props.mounted ||
-            nextProps.pageScrollTop !== this.props.pageScrollTop ||
-            nextState.open !== this.state.open
-            //this.determineIfActive(nextProps) !== this.determineIfActive(this.props)
-        ){
+            this && this.state && (
+                nextProps.mounted !== this.props.mounted ||
+                nextProps.pageScrollTop !== this.props.pageScrollTop ||
+                nextState.open !== this.state.open
+                //this.determineIfActive(nextProps) !== this.determineIfActive(this.props)
+        )){
             return true;
         }
         return false;
