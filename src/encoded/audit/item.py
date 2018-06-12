@@ -55,8 +55,8 @@ STATUS_LEVEL = {
     'current': 3,
     'revoked': 3,
     'planned': 2,
-    'released to project': 2,
-    'submission in progress': 2,
+    'released to project': 3,
+    'submission in progress': 1,
     'archived to project': 2,
     'in review by lab': 1,
     'deleted': 0,
@@ -86,7 +86,7 @@ def audit_item_status(value, system):
     request = system['request']
     linked = set()
     for schema_path in context.type_info.schema_links:
-        if schema_path in ['supercedes', 'step_run']:
+        if schema_path in ['supercedes', 'step_run', 'other_processed_files']:
             continue
         linked.update(simple_path_ids(value, schema_path))
 
