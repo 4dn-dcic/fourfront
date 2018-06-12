@@ -5,7 +5,6 @@ import random
 from encoded.commands.upgrade_test_inserts import get_inserts
 import json
 import time
-import os
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 ### IMPORTANT
