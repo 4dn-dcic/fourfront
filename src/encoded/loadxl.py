@@ -578,7 +578,7 @@ PHASE1_PIPELINES = {
         remove_keys('related_files'),
     ],
     'file_processed': [
-        remove_keys('related_files', "workflow_run", "source_experiments"),
+        remove_keys('related_files', "workflow_run", "source_experiments", 'produced_from'),
     ],
     'file_reference': [
         remove_keys('related_files'),
@@ -655,7 +655,7 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [
-        skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments"),
+        skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments", 'produced_from'),
     ],
     'file_reference': [
         skip_rows_missing_all_keys('related_files'),
