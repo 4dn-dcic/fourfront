@@ -245,7 +245,7 @@ export default class Graph extends React.Component {
         if (!widthAndHeightSet && !this.state.mounted){
             return (
                 <div ref="outerContainer">
-                    <Fade transitionAppear in>
+                    <Fade appear in>
                         <div>&nbsp;</div>
                     </Fade>
                 </div>
@@ -276,7 +276,7 @@ export default class Graph extends React.Component {
 
         return (
             <div ref="outerContainer" className="worfklow-chart-outer-container">
-                <Fade transitionAppear in>
+                <Fade appear in>
                     <div className="workflow-chart-inner-container">
                         <StateContainer
                             nodes={nodes}

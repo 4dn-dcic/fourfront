@@ -148,10 +148,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         ];
     }
 
-    itemFooter(){
-        return null; //<ItemFooterRow context={this.props.context} schemas={this.props.schemas} />;
+    tabbedView(){
+        return <TabbedView contents={this.getTabViewContents} />;
     }
-
 }
 
 // Register ExperimentSetView to be the view for these @types.
@@ -311,7 +310,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         }
         setTimeout(()=>{
             requestAnimationFrame(()=>{
-                _.forEach(internalHiGlassComponent.tiledPlots, (tp) => tp.measureSize());
+                _.forEach(internalHiGlassComponent.tiledPlots, (tp) => tp && tp.measureSize());
             });
         }, 10);
     }
@@ -328,17 +327,25 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                 leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
                 renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
                     if (collapsed){
-                        var useHeight = Math.max(leftPanelCollapseHeight || rightPanelHeight || hiGlassHeight, 350);
+                        var useHeight = leftPanelCollapseHeight || rightPanelHeight || hiGlassHeight;
                         if (typeof renderLeftPanelPlaceholder === 'function'){
                             return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
+                        } else {
+                            return (
+                                <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset} data-tip={"Open HiGlass Visualization for file " + file.display_title}>
+                                    <i className="icon icon-fw icon-television"/>
+                                </h5>
+                            );
                         }
+                        /*
                         return (
-                            <div style={{ height: leftPanelCollapseHeight || 200 }} className="higlass-hidden-placeholder">
+                            <div style={{ height: useHeight || 200 }} className="higlass-hidden-placeholder">
                                 <h4 className="text-right text-300 clickable" style={{ transform: 'rotate(-90deg) translateX(' + (-useHeight + 20) + 'px)', transformOrigin : '0 0', width: useHeight, paddingTop : leftPanelWidth - 45, paddingRight : 25 }} onClick={resetXOffset}>
                                     Visualization for <span className="text-400">{ file.display_title }</span> &nbsp;&nbsp;<i className="icon icon-angle-down" />
                                 </h4>
                             </div>
                         );
+                        */
                     } else {
                         return <HiGlassContainer className={collapsed ? 'disabled' : null} tilesetUid={file.higlass_uid} height={hiGlassHeight} ref="hiGlassContainer" />;
                     }
@@ -439,7 +446,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 }
 
-export class OtherProcessedFilesStackedTableSectionPart extends React.PureComponent {
+export class OtherProcessedFilesStackedTableSectionPart extends React.Component {
 
     /**
      * Most likely deprecated as `OtherProcessedFilesStackedTableSection.extendCollectionsWithExperimentFiles` performs the same task(s) as part of its execution.
@@ -469,7 +476,6 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         this.toggleOpen = this.toggleOpen.bind(this);
         this.mcoolFile = this.mcoolFile.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
-        this.renderLeftPanelPlaceholder = this.renderLeftPanelPlaceholder.bind(this);
 
         var files = OtherProcessedFilesStackedTableSectionPart.filesWithFromExpAndExpSetProperty(props);
         this.state = {
@@ -506,14 +512,6 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         );
     }
 
-    renderLeftPanelPlaceholder(width, resetXOffset, collapsed, height){
-        return (
-            <h5 className="placeholder-for-higlass text-center clickable" style={{ lineHeight: '93px', height: 93 }} onClick={resetXOffset} data-tip={"Open HiGlass Visualization for file " + (this.state.mcoolFile && this.state.mcoolFile.display_title)}>
-                <i className="icon icon-fw icon-television"/>
-            </h5>
-        );
-    }
-
     render(){
         const { collection, index, context, width, mounted } = this.props;
         const { open, files, mcoolFile } = this.state;
@@ -525,10 +523,10 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                         { collection.title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
                 </h4>
-                <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" expanded={open} />
-                <Collapse in={open}>
+                { collection.description ? <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" expanded={open} /> : <div className="mb-15"/> }
+                <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                        { mcoolFile ? <HiGlassAdjustableWidthRow file={mcoolFile} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} renderLeftPanelPlaceholder={this.renderLeftPanelPlaceholder} leftPanelDefaultCollapsed /> : this.renderFilesTable(width - 21) }
+                        { mcoolFile ? <HiGlassAdjustableWidthRow file={mcoolFile} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} /> : this.renderFilesTable(width - 21) }
                     </div>
                 </Collapse>
             </div>
@@ -603,25 +601,27 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
                     }
                 });
             } else {
-                collectionsFromExpsUnBubbled = collectionsFromExpsUnBubbled.concat(collection.files);
+                collectionsFromExpsUnBubbled.push(collection);
             }
         });
 
-        return _.filter(
-            _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled),
-            OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission
-        );
+        var combinedCollections = _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled);
+        return _.filter(combinedCollections, OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
     }
 
     render(){
         var { context, width, mounted } = this.props;
+        var gridState = mounted && layout.responsiveGridState();
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     <span className="text-400">{ this.state.otherProcessedFileSetsCombined.length }</span> Collections of Supplementary Files
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { _.map(this.state.otherProcessedFileSetsCombined, (collection, index, all) => <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width, mounted }} key={index} defaultOpen={(all.length < 4) || (index < 3)} />) }
+                { _.map(this.state.otherProcessedFileSetsCombined, (collection, index, all) => {
+                    var defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 3));
+                    return <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width, mounted }} key={index} defaultOpen={defaultOpen} />;
+                }) }
             </div>
         );
     }

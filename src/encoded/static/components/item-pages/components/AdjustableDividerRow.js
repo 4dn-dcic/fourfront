@@ -87,13 +87,18 @@ export class AdjustableDividerRow extends React.PureComponent {
 
     componentWillReceiveProps(nextProps){
         if (nextProps.width !== this.props.width){
-            this.setState({ 'xOffset' : 0 });
+            if (!(nextProps.leftPanelDefaultCollapsed && this.draggableBounds && (this.state.xOffset - (nextProps.leftPanelCollapseWidth || nextProps.minLeftPanelWidth)) <= this.draggableBounds.left)){
+                this.setState({ 'xOffset' : 0 });
+            }
         }
     }
 
     componentDidUpdate(pastProps, pastState){
-        if (pastProps.width !== this.props.width || this.props.renderRightPanel !== pastProps.renderRightPanel){
-            this.setState({ 'rightPanelHeight' : this.getRightPanelHeight() });
+        if (typeof this.props.leftPanelCollapseHeight !== 'number' && pastProps.width !== this.props.width || this.props.renderRightPanel !== pastProps.renderRightPanel){
+            var newRightPanelHeight = this.getRightPanelHeight();
+            if (!(newRightPanelHeight === null && this.state.rightPanelHeight !== null)) { // newRightPanelHeight may be 0 if currently invisible or something. For now, lets just skip over it.
+                this.setState({ 'rightPanelHeight' : newRightPanelHeight });
+            }
         }
     }
 

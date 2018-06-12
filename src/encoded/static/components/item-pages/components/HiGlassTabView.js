@@ -331,9 +331,6 @@ export class HiGlassContainer extends React.PureComponent {
         if (typeof props.mounted !== 'boolean'){
             this.state.mounted = false;
         }
-
-        console.log('HIGLASSCONTAINER CONSTRUCTOR CALLED');
-
     }
 
     componentDidMount(){
@@ -372,8 +369,9 @@ export class HiGlassContainer extends React.PureComponent {
         let hiGlassInstance = null;
         const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
         if (isValidating || !mounted){
+            var placeholderStyle = (typeof height === 'number' && height >= 140) ? { 'paddingTop' : (height / 2) - 70 } : null;
             hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
+                <div className="col-sm-12 text-center mt-4" style={placeholderStyle}>
                     <h3>
                         <i className="icon icon-lg icon-television"/>
                     </h3>
