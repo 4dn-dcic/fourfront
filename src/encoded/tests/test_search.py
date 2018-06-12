@@ -373,6 +373,8 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     from snovault.elasticsearch import create_mapping
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
+    # TODO: NAMESPACE - here, passed in list to create_mapping
+    # turn of logging for a bit
     create_mapping.run(app, sync_index=True)
     for item_type in TYPE_LENGTH.keys():
         print('\n\n--> %s' % item_type)
@@ -381,20 +383,15 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
             if item_len != None:
                 create_mapping.run(app, collections=[item_type], strict=True, sync_index=True)
-                time.sleep(3)
-            es_count = es.count(index=item_type, doc_type=item_type).get('count')
-            print('... ES COUNT: %s' % str(es_count))
-            res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
-            if res.status_code == 404:  # no items found
-                item_len = 0
-            else:
-                res = res.follow()
-                item_len = len(res.json['@graph'])
-            print('... RES COUNT: %s' % str(item_len))
+                es.indices.refresh(index=item_type)
+            item_len = es.count(index=item_type, doc_type=item_type).get('count')
+            print('... ES COUNT: %s' % item_len)
             print('... TYPE COUNT: %s' % TYPE_LENGTH[item_type])
             tries += 1
         assert item_len == TYPE_LENGTH[item_type]
         if item_len > 0:
+            res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
+            res = res.follow()
             random_id = random.choice(res.json['@graph'])['@id']
             indexer_testapp.get(random_id + '@@index-data', status=200)
             # previously test_html_pages
