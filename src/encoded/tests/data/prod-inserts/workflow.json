@@ -768,7 +768,7 @@
         "accession": "4DNWFHB26CID",
         "app_name": "pairsqc-single",
         "app_version": "0.2.6",
-        "previous_version": "/workflow/ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
+        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
         "version_change_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
@@ -3925,6 +3925,8 @@
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
         "app_version": "0.2.5",
+        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
+        "version_change_log": "use of official release of bwa",
         "arguments": [
             {
                 "argument_format": "fastq",
