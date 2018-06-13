@@ -32,10 +32,10 @@
         "schema_version": {
             "default": "1"
         },
-		"higlass_uid": {
-			"title": "Higlass UID",
-			"type": "string"
-		},
+        "higlass_uid": {
+            "title": "Higlass UID",
+            "type": "string"
+        },
         "file_format": {
             "title": "File Format",
             "type": "string",
@@ -109,6 +109,16 @@
                 "GRCh38",
                 "GRCm38"
             ]
+        },
+        "produced_from": {
+            "title": "Produced From",
+            "description": "Files that were input in a software or pipeline to produce this file",
+            "type": "array",
+            "lookup": 35,
+            "items": {
+                "title": "Input File",
+                "type": "string"
+            }
         }
      },
      "file_format_file_extension": {
