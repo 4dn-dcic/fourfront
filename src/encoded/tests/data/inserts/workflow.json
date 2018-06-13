@@ -768,7 +768,7 @@
         "accession": "4DNWFHB26CID",
         "app_name": "pairsqc-single",
         "app_version": "0.2.6",
-        "previous_version": "/workflow/ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
+        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
         "version_change_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
