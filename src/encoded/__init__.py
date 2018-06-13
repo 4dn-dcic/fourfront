@@ -31,7 +31,7 @@ from snovault.elasticsearch.interfaces import SNP_SEARCH_ES
 from snovault.json_renderer import json_renderer
 from elasticsearch import Elasticsearch
 STATIC_MAX_AGE = 0
-from snovault import set_logging
+from dcicutils.log_utils import set_logging
 import structlog
 import logging
 
