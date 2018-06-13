@@ -35,13 +35,13 @@ def main():
                 return
         # handle mastertest ... by blowing away all data first
         if 'mastertest' in env:
-            logger.info("looks like we are on mastertest, run create mapping without check first")
+            log.info("looks like we are on mastertest, run create mapping without check first")
             run_create_mapping(app, check_first=False, purge_queue=True)
             return
-        logger.info("looks like we are NOT on staging or mastertest so run create mapping with check first")
+        log.info("looks like we are NOT on staging or mastertest so run create mapping with check first")
     except Exception:
         import traceback
-        logger.warning("error checking whodaman: %s " % traceback.format_exc())
-        logger.warning("couldn't get wodaman, so assuming NOT staging")
-    logger.info("... using default create mapping case")
+        log.warning("error checking whodaman: %s " % traceback.format_exc())
+        log.warning("couldn't get wodaman, so assuming NOT staging")
+    log.info("... using default create mapping case")
     run_create_mapping(app, check_first=True, purge_queue=True)
