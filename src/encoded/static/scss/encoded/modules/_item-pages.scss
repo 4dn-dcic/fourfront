@@ -1722,14 +1722,25 @@ $download-button-width : 100px;
 	}
 }
 
+/* Disabled for now - can't reliably target menu items (same classNames)
+.hg-popup {
 
-.hg-popup .context-menu-item > div {
-	> .ContextMenu-module_context-menu-hr-3yapb:nth-child(4),
-	> .ContextMenu-module_context-menu-item-1HeVv:nth-child(5) {
-		display: none;
+	.context-menu-item > div {
+		> .ContextMenu-module_context-menu-hr-3yapb:nth-child(4),
+		> .ContextMenu-module_context-menu-item-1HeVv:nth-child(5) {
+			display: none;
+		}
+	}
+
+	> .ContextMenu-module_context-menu-2OwvL {
+		.ContextMenu-module_context-menu-item-1HeVv:nth-child(6),
+		.ContextMenu-module_context-menu-item-1HeVv:nth-child(8) {
+			display: none;
+		}
 	}
 
 }
+*/
 
 
 

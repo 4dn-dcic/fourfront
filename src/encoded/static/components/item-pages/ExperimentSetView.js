@@ -316,7 +316,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, file, children, renderRightPanel, renderLeftPanelPlaceholder, leftPanelDefaultCollapsed, leftPanelCollapseHeight } = this.props;
+        var { mounted, width, file, children, renderRightPanel, renderLeftPanelPlaceholder, leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
         if (!file || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
 
         var hiGlassHeight = HiGlassContainer.defaultProps.height;
@@ -325,6 +325,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                 width={width} mounted={mounted} height={hiGlassHeight} leftPanelCollapseHeight={leftPanelCollapseHeight}
                 leftPanelClassName="expset-higlass-panel"
                 leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
+                leftPanelCollapseWidth={leftPanelCollapseWidth || 320} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
                     if (collapsed){
                         var useHeight = leftPanelCollapseHeight || rightPanelHeight || hiGlassHeight;

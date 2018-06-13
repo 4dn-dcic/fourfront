@@ -24,6 +24,77 @@ function loadJS(src){
 */
 
 
+/**
+ * Singleton class used for communicating with LocalStorage
+ */
+export class HiGlassLocalStorage {
+
+    static instances = {}
+
+    static DEFAULT_PREFIX = "higlass_4dn_data_";
+
+    static validators = {
+        'domains' : function(val){
+            if (!val || !Array.isArray(val.x) || !Array.isArray(val.y)) return false;
+            if (val.x.length != 2) return false;
+            if (val.y.length != 2) return false;
+            return true;
+        }
+    }
+
+    constructor(prefix = HiGlassLocalStorage.DEFAULT_PREFIX){
+        if (HiGlassLocalStorage.instances[prefix]){
+            return HiGlassLocalStorage.instances[prefix];
+        }
+
+        if (!this.doesLocalStorageExist()){
+            return null;
+        }
+
+        this.prefix = prefix;
+        HiGlassLocalStorage.instances[prefix] = this;
+
+        return HiGlassLocalStorage.instances[prefix];
+    }
+
+    doesLocalStorageExist(){
+        var someVariable = 'helloworld';
+        try {
+            localStorage.setItem(someVariable, someVariable);
+            localStorage.removeItem(someVariable);
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }
+
+    getDomains(){
+        var localStorageKey = this.prefix + 'domains';
+        var domains = localStorage.getItem(localStorageKey);
+        if (domains) domains = JSON.parse(domains);
+        if (!HiGlassLocalStorage.validators.domains(domains)){
+            localStorage.removeItem(localStorageKey);
+            console.error('Domains failed validation, removing key & value - ' + localStorageKey, domains);
+            return null;
+        }
+        return domains || null;
+    }
+
+    /**
+     * Save domain range location to localStorage.
+     *
+     * @param {{ 'x' : number[], 'y' : number[] }} domains - Domains to save from viewConfig.
+     */
+    saveDomains(domains){
+        if (!HiGlassLocalStorage.validators.domains(domains)){
+            console.error('Invalid value for domains passed in', domains);
+            return false;
+        }
+        localStorage.setItem(this.prefix + 'domains', JSON.stringify(domains));
+        return true;
+    }
+}
+
 export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'height' : 600,
     'baseUrl' : "https://higlass.4dnucleome.org",
@@ -34,7 +105,9 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     },
     'extraViewProps' : {},
     'genomeAssembly' : 'GRCh38',
-    'index' : 0
+    'index' : 0,
+    'storagePrefix' : HiGlassLocalStorage.DEFAULT_PREFIX,
+    'groupID' : null
 };
 
 
@@ -104,7 +177,14 @@ export class HiGlassContainer extends React.PureComponent {
 
         if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
 
-        var { height, baseUrl, supplementaryTracksBaseUrl, initialDomains, extraViewProps, index } = options;
+        var { height, baseUrl, supplementaryTracksBaseUrl, initialDomains, extraViewProps, index, storagePrefix } = options;
+
+        if (typeof options.groupID === 'string'){ // Handle groupID w/o needing to rename/transform prior to this function.
+            storagePrefix = HiGlassLocalStorage.DEFAULT_PREFIX + options.groupID + '_';
+        }
+
+        var storage = new HiGlassLocalStorage(storagePrefix);
+        initialDomains = (storage && storage.getDomains()) || initialDomains;
 
         supplementaryTracksBaseUrl = supplementaryTracksBaseUrl || baseUrl;
 
@@ -318,14 +398,22 @@ export class HiGlassContainer extends React.PureComponent {
         'isValidating' : false,
         'disabled' : false,
         'height' : 400,
-        'viewConfig' : null
+        'viewConfig' : null,
+        'groupID' : null
     }
 
     constructor(props){
         super(props);
+        this.initializeStorage = this.initializeStorage.bind(this);
         this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
+        this.getPrimaryViewID = this.getPrimaryViewID.bind(this);
+        this.bindLocationChangeHandler = this.bindLocationChangeHandler.bind(this);
+        this.updateCurrentDomainsInStorage = _.debounce(this.updateCurrentDomainsInStorage.bind(this), 200);
+
+        this.initializeStorage(props); // Req'd before this.storagePrefix can be referenced.
+
         this.state = {
-            'viewConfig' : props.viewConfig || HiGlassContainer.generateViewConfig(props.tilesetUid, _.pick(props, 'height', 'genomeAssembly'))
+            'viewConfig' : props.viewConfig || HiGlassContainer.generateViewConfig(props.tilesetUid, _.pick(props, 'height', 'genomeAssembly', 'groupID'))
         };
 
         if (typeof props.mounted !== 'boolean'){
@@ -333,20 +421,46 @@ export class HiGlassContainer extends React.PureComponent {
         }
     }
 
+    initializeStorage(props = this.props){
+        this.storagePrefix = props.groupID ? HiGlassLocalStorage.DEFAULT_PREFIX + props.groupID + '_' : HiGlassLocalStorage.DEFAULT_PREFIX; // Cache it
+        this.storage = new HiGlassLocalStorage(this.storagePrefix);
+    }
+
     componentDidMount(){
         if (typeof this.props.mounted === 'boolean'){
             return;
         }
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            if (!HiGlassComponent) HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            if (!HiGlassComponent) {
+                window.fetch = window.fetch || ajax.fetch; // Browser compatibility
+                HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
+            }
             this.setState({ 'mounted' : true });
         }, 500);
     }
 
     componentWillReceiveProps(nextProps){
-        if (nextProps.tilesetUid !== this.props.tilesetUid || nextProps.genomeAssembly !== this.props.genomeAssembly || nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
-            this.setState({ 'viewConfig' : nextProps.viewConfig || HiGlassContainer.generateViewConfig(nextProps.tilesetUid, _.pick(nextProps, 'height', 'genomeAssembly')) });
+        var nextState = {};
+
+        if (nextProps.groupID !== this.props.groupID) {
+            this.initializeStorage(nextProps); // Doesn't update own HiGlassComponent (or its viewConfig), but starts saving location to new groupID instance. May change depending on requirements.
         }
+
+        if (nextProps.tilesetUid !== this.props.tilesetUid || nextProps.genomeAssembly !== this.props.genomeAssembly || nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
+            nextState.viewConfig = nextProps.viewConfig || HiGlassContainer.generateViewConfig(nextProps.tilesetUid, _.pick(nextProps, 'height', 'genomeAssembly', 'groupID'));
+        }
+        if (_.keys(nextState).length > 0){
+            this.setState(nextState);
+        }
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        var hiGlassComponentExists = !!(this.refs.hiGlassComponent);
+        if (!this.hiGlassComponentExists && hiGlassComponentExists){
+            this.bindLocationChangeHandler();
+            console.log('Binding "updateCurrentDomainsInStorage" to HiGlassComponent "location" change event.');
+        }
+        this.hiGlassComponentExists = hiGlassComponentExists;
     }
 
     /**
@@ -361,6 +475,34 @@ export class HiGlassContainer extends React.PureComponent {
                     element.style.opacity = 1;
                 });
             }, 500);
+        }
+    }
+
+    getPrimaryViewID(){
+        if (!this.state.viewConfig || !Array.isArray(this.state.viewConfig.views) || this.state.viewConfig.views.length === 0){
+            return null;
+        }
+        return _.uniq(_.pluck(this.state.viewConfig.views, 'uid'))[0];
+    }
+
+    updateCurrentDomainsInStorage(){
+        if (this.storage && this.refs.hiGlassComponent){
+            var hiGlassComponent = this.refs.hiGlassComponent;
+            var viewID = this.getPrimaryViewID();
+            var hiGlassDomains = hiGlassComponent.api.getLocation(viewID);
+            if (hiGlassDomains && Array.isArray(hiGlassDomains.xDomain) && Array.isArray(hiGlassDomains.yDomain) && hiGlassDomains.xDomain.length === 2 && hiGlassDomains.yDomain.length === 2){
+                this.storage.saveDomains({ 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain });
+            }
+        }
+    }
+
+    bindLocationChangeHandler(){
+        if (this.state.viewConfig && this.refs.hiGlassComponent){
+            var hiGlassComponent = this.refs.hiGlassComponent;
+            var viewID = this.getPrimaryViewID();
+            hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
+        } else {
+            console.warn('No HiGlass instance available.');
         }
     }
 
@@ -391,13 +533,14 @@ export class HiGlassContainer extends React.PureComponent {
                 </div>
             );
         }
+
         /**
          * TODO: Some state + UI functions to make higlass view full screen.
          * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.0.0/dist/styles/hglib.css" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
             </div>
@@ -464,7 +607,10 @@ export class HiGlassTabView extends React.Component {
         });*/
 
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            if (!HiGlassComponent) HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            window.fetch = window.fetch || ajax.fetch; // Browser compatibility
+            if (!HiGlassComponent) {
+                HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
+            }
             this.setState({ 'mounted' : true });
         }, 500);
     }
