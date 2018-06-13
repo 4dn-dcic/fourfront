@@ -525,6 +525,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "fastqc-0-11-4-1.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0",
         "data_types": [
@@ -764,6 +765,159 @@
         "workflow_type": "Data QC"
     },
     {
+        "accession": "4DNWFHB26CID",
+        "app_name": "pairsqc-single",
+        "app_version": "0.2.6",
+        "arguments": [
+            {
+                "argument_format": "pairs",
+                "argument_type": "Input file",
+                "secondary_file_formats": [
+                    "pairs_px2"
+                ],
+                "workflow_argument_name": "input_pairs"
+            },
+            {
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsizes"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "enzyme"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "sample_name"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "max_distance"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "report"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "QC",
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_main_filename": "pairsqc-single.cwl",
+        "data_types": [
+            "Hi-C",
+            "Capture Hi-C"
+        ],
+        "description": "PairsQC quality control step for pairs files",
+        "lab": "4dn-dcic-lab",
+        "name": "pairsqc-single",
+        "status": "released",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "input_pairs",
+                        "source": [
+                            {
+                                "name": "input_pairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chromsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "enzyme",
+                        "source": [
+                            {
+                                "name": "enzyme"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "sample_name",
+                        "source": [
+                            {
+                                "name": "sample_name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "max_distance",
+                        "source": [
+                            {
+                                "name": "max_distance"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ],
+                    "description": "PairsQC QC for pairs files",
+                    "software_used": [
+                        "/softwares/15731f58-868f-44ab-b4ed-77b82ecd032b/"
+                    ]
+                },
+                "name": "PairsQC",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "report"
+                        },
+                        "name": "report",
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "PairsQC",
+        "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3",
+        "workflow_diagram": "",
+        "workflow_type": "Data QC"
+    },
+    {
         "accession": "4DNWF6DUSPTF",
         "arguments": [
             {
@@ -937,6 +1091,7 @@
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "md5.cwl",
         "data_types": [
             "Hi-C",
@@ -3802,6 +3957,7 @@
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4562,6 +4718,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
         "data_types": [
             "Hi-C"
@@ -4890,6 +5047,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/repliseq",
         "cwl_main_filename": "repliseq-parta.cwl",
         "data_types": [
             "Repli-seq"
@@ -5330,6 +5488,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
         "data_types": [
             "Hi-C"
@@ -6021,6 +6180,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore.cwl",
         "data_types": [
             "DNase Hi-C",
@@ -6640,6 +6800,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nonorm.cwl",
         "data_types": [
             "Capture Hi-C"
@@ -7195,6 +7356,7 @@
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore-nonorm.cwl",
         "data_types": [
             "ChIA-PET"
