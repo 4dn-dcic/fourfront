@@ -97,7 +97,7 @@ class ResultTableContainer extends React.PureComponent {
                     }
 
                     
-                    return <span>{ number_of_experiments }</span>;
+                    return <span key="val">{ number_of_experiments }</span>;
                 }
             },
             'number_of_files' : {
@@ -113,7 +113,7 @@ class ResultTableContainer extends React.PureComponent {
                         number_of_files = 0;
                     }
                     
-                    return <span>{ number_of_files }</span>;
+                    return <span key="val">{ number_of_files }</span>;
                 }
             },
             'experiments_in_set.experiment_categorizer.combined' : defaultColumnDefinitionMap['experiments_in_set.experiment_categorizer.combined'],
@@ -223,6 +223,7 @@ class ResultTableContainer extends React.PureComponent {
                     var isAllFilesChecked = ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFileAccessionTriples);
                     newChildren[1] = (
                         <ExperimentSetCheckBox
+                            key="checkbox"
                             checked={isAllFilesChecked}
                             indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFileAccessionTriples)}
                             disabled={ExperimentSetCheckBox.isDisabled(allFileAccessionTriples)}
