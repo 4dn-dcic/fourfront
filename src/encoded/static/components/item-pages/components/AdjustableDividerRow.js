@@ -39,7 +39,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         'minLeftPanelWidth'         : 60,
         'minRightPanelWidth'        : 170,
         'rightPanelClassName'       : null,
-        'handleDragThrottleLimit'   : 100,
+        'handleDragThrottleLimit'   : 50,
         'leftPanelDefaultCollapsed' : false,
         'height'                    : 200
     };

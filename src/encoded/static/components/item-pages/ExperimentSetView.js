@@ -311,8 +311,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         return (
             <AdjustableDividerRow
                 width={width} mounted={mounted} height={hiGlassHeight} leftPanelCollapseHeight={leftPanelCollapseHeight}
-                leftPanelClassName="expset-higlass-panel"
-                leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
+                leftPanelClassName="expset-higlass-panel" leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 320} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
                     if (collapsed){
@@ -327,24 +326,12 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                                 </h5>
                             );
                         }
-                        /*
-                        return (
-                            <div style={{ height: useHeight || 200 }} className="higlass-hidden-placeholder">
-                                <h4 className="text-right text-300 clickable" style={{ transform: 'rotate(-90deg) translateX(' + (-useHeight + 20) + 'px)', transformOrigin : '0 0', width: useHeight, paddingTop : leftPanelWidth - 45, paddingRight : 25 }} onClick={resetXOffset}>
-                                    Visualization for <span className="text-400">{ file.display_title }</span> &nbsp;&nbsp;<i className="icon icon-angle-down" />
-                                </h4>
-                            </div>
-                        );
-                        */
                     } else {
                         return <HiGlassContainer className={collapsed ? 'disabled' : null} tilesetUid={file.higlass_uid} height={hiGlassHeight} ref="hiGlassContainer" />;
                     }
                 }}
-                rightPanelClassName="exp-table-container"
-                renderRightPanel={renderRightPanel}
-                onDrag={this.correctHiGlassTrackDimensions}
-                ref="adjustableRow"
-            />
+                rightPanelClassName="exp-table-container" renderRightPanel={renderRightPanel}
+                onDrag={this.correctHiGlassTrackDimensions} ref="adjustableRow" />
         );
     }
 }
