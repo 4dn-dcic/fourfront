@@ -70,23 +70,12 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
-
-        var context = this.props.context, schemas = this.props.schemas;
-
-        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
-        var expTableColumnHeaders = [{ 'columnClass' : 'file-detail', 'title' : 'File Info'}];
-
-        if (context.experimentset_type === 'replicate') {
-            expTableColumnHeaders.unshift({ 'columnClass' : 'file-detail', 'title' : 'File Type'});
-        }
-
-        var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context);
-
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        var { context, schemas } = this.props;
+        var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
+            width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null,
+            tabs = [];
 
         if (width) width -= 20;
-
-        var tabs = [];
 
         if (processedFiles && processedFiles.length > 0){
 
@@ -219,21 +208,18 @@ class ExperimentSetHeader extends React.PureComponent {
 
 export class RawFilesStackedTableSection extends React.PureComponent {
     render(){
+
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
             { columnClass: 'file-detail', title: 'File Info'},
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ];
 
-        if (this.props.context.experimentset_type === 'replicate') {
-            expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
-        }
-
         var context = this.props.context;
         var files = expFxn.allFilesFromExperimentSet(context, false);
         var fileCount = files.length;
         var expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0;
-        var filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(files);
+        var anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
         return (
             <div className="exp-table-section">
                 { expSetCount ? 
@@ -245,13 +231,13 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                     <RawFilesStackedTableExtendedColumns
                         width={this.props.width}
                         experimentSetType={this.props.context.experimentset_type}
-                        showMetricColumns={filesWithMetrics.length > 0}
+                        showMetricColumns={anyFilesWithMetrics}
                         facets={ this.props.facets }
                         experimentSetAccession={this.props.context.accession || null}
                         experimentArray={this.props.context.experiments_in_set}
                         replicateExpsArray={this.props.context.replicate_exps}
                         keepCounts={false}
-                        columnHeaders={expTableColumnHeaders}
+                        //columnHeaders={expTableColumnHeaders}
                         collapseLongLists={true}
                         collapseLimit={10}
                         collapseShow={7}
@@ -304,8 +290,10 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     correctHiGlassTrackDimensions(){
         var hiGlassContainer = this.refs && this.refs.adjustableRow && this.refs.adjustableRow.refs && this.refs.adjustableRow.refs.hiGlassContainer;
         var internalHiGlassComponent = hiGlassContainer && hiGlassContainer.refs && hiGlassContainer.refs.hiGlassComponent;
-        if (!internalHiGlassComponent) {
-            console.error('Internal HiGlass Component not accessible.');
+        if (hiGlassContainer && !internalHiGlassComponent) {
+            console.warn('Internal HiGlass Component not accessible.');
+            return;
+        } else if (!hiGlassContainer) {
             return;
         }
         setTimeout(()=>{
@@ -333,7 +321,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
                         } else {
                             return (
-                                <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset} data-tip={"Open HiGlass Visualization for file " + file.display_title}>
+                                <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
+                                    data-html data-position="right" data-tip={"Open HiGlass Visualization for file&nbsp; <span class='text-600'>" + (file.accession || file.display_title) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>"}>
                                     <i className="icon icon-fw icon-television"/>
                                 </h5>
                             );
