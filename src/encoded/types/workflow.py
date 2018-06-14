@@ -587,7 +587,7 @@ class WorkflowRun(Item):
         'input_files.value.accession',
         'input_files.value.@type',
         'input_files.value.file_size',
-        'input_files.value.status'
+        'input_files.value.status',
         'output_files.workflow_argument_name',
         'output_files.*',
         'output_files.value.file_format',
