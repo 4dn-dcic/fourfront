@@ -67,9 +67,7 @@ STATUS_LEVEL = {
     'uploading': 1,
     'uploaded': 1,
     'upload failed': 1,
-
-    # publication
-    'published': 3,
+    'draft': 1,
 }
 
 
