@@ -514,7 +514,7 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
      * Filter a list of files down to those with a quality_metric && quality_metric.overall_quality_status;
      *
      * @param {{ '@id' : string, 'quality_metric' : { "overall_quality_status" : string, '@id' : string } }} files - List of files, potentially with quality_metric.
-     * @param {boolean} [checkAny=false] - Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves. 
+     * @param {boolean} [checkAny=false] - Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
      */
     static filterFiles(files, checkAny=false){
         var func = checkAny ? _.any : _.filter;
