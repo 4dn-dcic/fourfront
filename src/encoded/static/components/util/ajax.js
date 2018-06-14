@@ -41,7 +41,7 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
 
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE ) {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 if (typeof callback === 'function'){
                     callback(JSON.parse(xhr.responseText));
@@ -79,6 +79,7 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
             // response SHOULD be json
             try {
                 response = JSON.parse(xhr.responseText);
+                response.json = function(){ return response; };
                 if (debugResponse) console.info('Received data from ' + method + ' ' + url + ':', response);
             } catch (e) {
                 console.log(xhr);

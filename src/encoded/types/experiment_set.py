@@ -193,7 +193,16 @@ class ExperimentSet(Item):
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
-        "other_processed_files.files.file_size"
+        "other_processed_files.files.file_size",
+        "other_processed_files.files.higlass_uid",
+
+        "experiments_in_set.other_processed_files.title",
+        "experiments_in_set.other_processed_files.description",
+        "experiments_in_set.other_processed_files.type",
+        "experiments_in_set.other_processed_files.files.accession",
+        "experiments_in_set.other_processed_files.files.file_type_detailed",
+        "experiments_in_set.other_processed_files.files.file_size",
+        "experiments_in_set.other_processed_files.files.higlass_uid"
     ]
 
     @calculated_property(schema={

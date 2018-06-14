@@ -24,6 +24,77 @@ function loadJS(src){
 */
 
 
+/**
+ * Singleton class used for communicating with LocalStorage
+ */
+export class HiGlassLocalStorage {
+
+    static instances = {}
+
+    static DEFAULT_PREFIX = "higlass_4dn_data_";
+
+    static validators = {
+        'domains' : function(val){
+            if (!val || !Array.isArray(val.x) || !Array.isArray(val.y)) return false;
+            if (val.x.length != 2) return false;
+            if (val.y.length != 2) return false;
+            return true;
+        }
+    }
+
+    constructor(prefix = HiGlassLocalStorage.DEFAULT_PREFIX){
+        if (HiGlassLocalStorage.instances[prefix]){
+            return HiGlassLocalStorage.instances[prefix];
+        }
+
+        if (!this.doesLocalStorageExist()){
+            return null;
+        }
+
+        this.prefix = prefix;
+        HiGlassLocalStorage.instances[prefix] = this;
+
+        return HiGlassLocalStorage.instances[prefix];
+    }
+
+    doesLocalStorageExist(){
+        var someVariable = 'helloworld';
+        try {
+            localStorage.setItem(someVariable, someVariable);
+            localStorage.removeItem(someVariable);
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }
+
+    getDomains(){
+        var localStorageKey = this.prefix + 'domains';
+        var domains = localStorage.getItem(localStorageKey);
+        if (domains) domains = JSON.parse(domains);
+        if (!HiGlassLocalStorage.validators.domains(domains)){
+            localStorage.removeItem(localStorageKey);
+            console.error('Domains failed validation, removing key & value - ' + localStorageKey, domains);
+            return null;
+        }
+        return domains || null;
+    }
+
+    /**
+     * Save domain range location to localStorage.
+     *
+     * @param {{ 'x' : number[], 'y' : number[] }} domains - Domains to save from viewConfig.
+     */
+    saveDomains(domains){
+        if (!HiGlassLocalStorage.validators.domains(domains)){
+            console.error('Invalid value for domains passed in', domains);
+            return false;
+        }
+        localStorage.setItem(this.prefix + 'domains', JSON.stringify(domains));
+        return true;
+    }
+}
+
 export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'height' : 600,
     'baseUrl' : "https://higlass.4dnucleome.org",
@@ -33,19 +104,24 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
         'y' : [31114340, 31201073]
     },
     'extraViewProps' : {},
-    'index' : 0
+    'genomeAssembly' : 'GRCh38',
+    'index' : 0,
+    'storagePrefix' : HiGlassLocalStorage.DEFAULT_PREFIX,
+    'groupID' : null
 };
 
 
-export class HiGlassContainer extends React.Component {
+export class HiGlassContainer extends React.PureComponent {
 
 
-    static generateViewConfigForMultipleViews(tilesetUidObjects, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    static generateViewConfigForMultipleViews(tilesetUidObjects, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
+        // Generate all configs normally
         var allConfigs = _.map(tilesetUidObjects, function(uidObj, idx){
-            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, genomeAssembly, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
+            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
         });
 
+        // Then merge them into one primary config, locking their views/zooms together
         var primaryConf = allConfigs[0];
         var locationLockID = 'LOCATION_LOCK_ID';    // Arbitrary unique ID.
         var zoomLockID = 'ZOOM_LOCK_ID';            // Arbitrary unique ID.
@@ -53,12 +129,13 @@ export class HiGlassContainer extends React.Component {
         primaryConf.locationLocks.locksByViewUid[primaryConf.views[0].uid] = locationLockID;
         primaryConf.zoomLocks.locksByViewUid[primaryConf.views[0].uid] = zoomLockID;
 
-        for (var i = 1; i < allConfigs.length; i++){
+        for (var i = 1; i < allConfigs.length; i++){ // Skip first one (== primaryConf), merge into it
             primaryConf.views.push(allConfigs[i].views[0]);
             primaryConf.locationLocks.locksByViewUid[allConfigs[i].views[0].uid] = locationLockID;
             primaryConf.zoomLocks.locksByViewUid[allConfigs[i].views[0].uid] = zoomLockID;
         }
 
+        // Forgot what this is for but is in viewConfigs after UI-initiated locking
         primaryConf.locationLocks.locksDict[locationLockID] = _.extend(_.object(_.map(_.pluck(primaryConf.views, 'uid'), function(uid){
             return [uid, [1550000000, 1550000000, 3030000]]; // TODO: Put somewhere else, figure out what these values should be.
         })), { 'uid' : locationLockID });
@@ -83,20 +160,31 @@ export class HiGlassContainer extends React.Component {
      * @param {number} [options.index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
      * @returns {{ views : { uid : string, initialXDomain : number[], initialYDomain: number[], tracks: { top: {}[], bottom: {}[], left: {}[], center: {}[], right: {}[], bottom: {}[] } }[], trackSourceServers: string[] }} - The ViewConfig for HiGlass.
      */
-    static generateViewConfig(tilesetUid, genomeAssembly = 'GRCh38', options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    static generateViewConfig(tilesetUid, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
         options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
+        // Make sure to override non-falsy-allowed values with defaults.
+        _.forEach(['baseUrl', 'supplementaryTracksBaseUrl', 'initialDomains', 'genomeAssembly', 'extraViewProps'], function(k){
+            options[k] = options[k] || DEFAULT_GEN_VIEW_CONFIG_OPTIONS[k];
+        });
 
         // If we're provided a list of { tilesetUid[, extraViewProps] } objects instead of string, generate HiGlass view w/ multiple panels/views.
         if (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uid){  return (uid && typeof uid === 'object' && typeof uid.tilesetUid === 'string'); })){
-            return HiGlassContainer.generateViewConfigForMultipleViews(tilesetUid, genomeAssembly, options); // Merge views into 1 array
+            return HiGlassContainer.generateViewConfigForMultipleViews(tilesetUid, options); // Merge views into 1 array
         }
 
         // Continuing code assumes a string for tilesetUid.
 
         if (!tilesetUid || typeof tilesetUid !== 'string') throw new Error('No tilesetUid param supplied.');
 
-        var { height, baseUrl, supplementaryTracksBaseUrl, initialDomains, extraViewProps, index } = options;
+        var { height, baseUrl, supplementaryTracksBaseUrl, initialDomains, extraViewProps, index, storagePrefix } = options;
+
+        if (typeof options.groupID === 'string'){ // Handle groupID w/o needing to rename/transform prior to this function.
+            storagePrefix = HiGlassLocalStorage.DEFAULT_PREFIX + options.groupID + '_';
+        }
+
+        var storage = new HiGlassLocalStorage(storagePrefix);
+        initialDomains = (storage && storage.getDomains()) || initialDomains;
 
         supplementaryTracksBaseUrl = supplementaryTracksBaseUrl || baseUrl;
 
@@ -113,7 +201,7 @@ export class HiGlassContainer extends React.Component {
             'infoid':       'hg38'
         };
 
-        if (genomeAssembly == 'GRCm38'){ // mouse
+        if (options.genomeAssembly == 'GRCm38'){ // mouse
             annotation.name = 'Gene Annotation (mm10)';
             annotation.tilesetUid = 'QDutvmyiSrec5nX4pA5WGQ';
             chromosome.tilesetUid = 'EtrWT0VtScixmsmwFSd7zg';
@@ -168,7 +256,7 @@ export class HiGlassContainer extends React.Component {
                     "top": [
                         {
                             "name": annotation.name,
-                            "created": "2017-07-14T15:27:46.989053Z",
+                            //"created": "2017-07-14T15:27:46.989053Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": annotation.tilesetUid,
                             "type": "horizontal-gene-annotations",
@@ -181,19 +269,19 @@ export class HiGlassContainer extends React.Component {
                                 "trackBorderColor": "black",
                                 "name": "Gene Annotations (hg38)"
                             },
-                            "width": 20,
+                            //"width": 20,
                             "height": 55,
                             "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                             "position": "top"
                         },
                         {
                             "name": chromosome.name,
-                            "created": "2017-07-17T14:16:45.346835Z",
+                            //"created": "2017-07-17T14:16:45.346835Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": chromosome.tilesetUid,
                             "type": "horizontal-chromosome-labels",
                             "options": {},
-                            "width": 20,
+                            //"width": 20,
                             "height": 30,
                             "position": "top"
                         }
@@ -201,7 +289,7 @@ export class HiGlassContainer extends React.Component {
                     "left": [
                         {
                             "name": annotation.name,
-                            "created": "2017-07-14T15:27:46.989053Z",
+                            //"created": "2017-07-14T15:27:46.989053Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": annotation.tilesetUid,
                             "uid": "faxvbXweTle5ba4ESIlZOg",
@@ -216,20 +304,20 @@ export class HiGlassContainer extends React.Component {
                                 "name": annotation.name
                             },
                             "width": 55,
-                            "height": 20,
+                            //"height": 20,
                             "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                             "position": "left"
                         },
                         {
                             "name": chromosome.name,
-                            "created": "2017-07-17T14:16:45.346835Z",
+                            //"created": "2017-07-17T14:16:45.346835Z",
                             "server": supplementaryTracksBaseUrl + "/api/v1",
                             "tilesetUid": chromosome.tilesetUid,
                             "uid": "aXbmQTsMR2ao85gzBVJeRw",
                             "type": "vertical-chromosome-labels",
                             "options": {},
                             "width": 20,
-                            "height": 30,
+                            //"height": 30,
                             "position": "left"
                         }
                     ],
@@ -309,15 +397,33 @@ export class HiGlassContainer extends React.Component {
         'options' : { 'bounded' : true },
         'isValidating' : false,
         'disabled' : false,
-        'height' : 400
+        'height' : 400,
+        'viewConfig' : null,
+        'groupID' : null
     }
 
     constructor(props){
         super(props);
-        this.hiGlassElement = null;
+        this.initializeStorage = this.initializeStorage.bind(this);
+        this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
+        this.getPrimaryViewID = this.getPrimaryViewID.bind(this);
+        this.bindLocationChangeHandler = this.bindLocationChangeHandler.bind(this);
+        this.updateCurrentDomainsInStorage = _.debounce(this.updateCurrentDomainsInStorage.bind(this), 200);
+
+        this.initializeStorage(props); // Req'd before this.storagePrefix can be referenced.
+
+        this.state = {
+            'viewConfig' : props.viewConfig || HiGlassContainer.generateViewConfig(props.tilesetUid, _.pick(props, 'height', 'genomeAssembly', 'groupID'))
+        };
+
         if (typeof props.mounted !== 'boolean'){
-            this.state = { 'mounted' : false };
+            this.state.mounted = false;
         }
+    }
+
+    initializeStorage(props = this.props){
+        this.storagePrefix = props.groupID ? HiGlassLocalStorage.DEFAULT_PREFIX + props.groupID + '_' : HiGlassLocalStorage.DEFAULT_PREFIX; // Cache it
+        this.storage = new HiGlassLocalStorage(this.storagePrefix);
     }
 
     componentDidMount(){
@@ -325,19 +431,92 @@ export class HiGlassContainer extends React.Component {
             return;
         }
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            if (!HiGlassComponent) {
+                window.fetch = window.fetch || ajax.fetch; // Browser compatibility
+                HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
+            }
             this.setState({ 'mounted' : true });
         }, 500);
     }
 
+    componentWillReceiveProps(nextProps){
+        var nextState = {};
+
+        if (nextProps.groupID !== this.props.groupID) {
+            this.initializeStorage(nextProps); // Doesn't update own HiGlassComponent (or its viewConfig), but starts saving location to new groupID instance. May change depending on requirements.
+        }
+
+        if (nextProps.tilesetUid !== this.props.tilesetUid || nextProps.genomeAssembly !== this.props.genomeAssembly || nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
+            nextState.viewConfig = nextProps.viewConfig || HiGlassContainer.generateViewConfig(nextProps.tilesetUid, _.pick(nextProps, 'height', 'genomeAssembly', 'groupID'));
+        }
+        if (_.keys(nextState).length > 0){
+            this.setState(nextState);
+        }
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        var hiGlassComponentExists = !!(this.refs.hiGlassComponent);
+        if (!this.hiGlassComponentExists && hiGlassComponentExists){
+            this.bindLocationChangeHandler();
+            console.log('Binding "updateCurrentDomainsInStorage" to HiGlassComponent "location" change event.');
+        }
+        this.hiGlassComponentExists = hiGlassComponentExists;
+    }
+
+    /**
+     * Fade in div element containing HiGlassComponent after HiGlass initiates & loads in first tile etc. (about 500ms).
+     * For prettiness only.
+     */
+    instanceContainerRefFunction(element){
+        if (element){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
+            setTimeout(function(){
+                requestAnimationFrame(function(){
+                    element.style.transition = null; // Use transition as defined in stylesheet
+                    element.style.opacity = 1;
+                });
+            }, 500);
+        }
+    }
+
+    getPrimaryViewID(){
+        if (!this.state.viewConfig || !Array.isArray(this.state.viewConfig.views) || this.state.viewConfig.views.length === 0){
+            return null;
+        }
+        return _.uniq(_.pluck(this.state.viewConfig.views, 'uid'))[0];
+    }
+
+    updateCurrentDomainsInStorage(){
+        if (this.storage && this.refs.hiGlassComponent){
+            var hiGlassComponent = this.refs.hiGlassComponent;
+            var viewID = this.getPrimaryViewID();
+            var hiGlassDomains = hiGlassComponent.api.getLocation(viewID);
+            if (hiGlassDomains && Array.isArray(hiGlassDomains.xDomain) && Array.isArray(hiGlassDomains.yDomain) && hiGlassDomains.xDomain.length === 2 && hiGlassDomains.yDomain.length === 2){
+                this.storage.saveDomains({ 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain });
+            }
+        }
+    }
+
+    bindLocationChangeHandler(){
+        if (this.state.viewConfig && this.refs.hiGlassComponent){
+            var hiGlassComponent = this.refs.hiGlassComponent;
+            var viewID = this.getPrimaryViewID();
+            hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
+        } else {
+            console.warn('No HiGlass instance available.');
+        }
+    }
+
     render(){
-        var { disabled, isValidating, viewConfig, tilesetUid, genomeAssembly, height, options } = this.props;
+        var { disabled, isValidating, tilesetUid, height, width, options, style, className } = this.props;
         let hiGlassInstance = null;
         const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
         if (isValidating || !mounted){
+            var placeholderStyle = (typeof height === 'number' && height >= 140) ? { 'paddingTop' : (height / 2) - 70 } : null;
             hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h3><i className="icon icon-fw icon-circle-o-notch icon-spin"/></h3>
+                <div className="col-sm-12 text-center mt-4" style={placeholderStyle}>
+                    <h3>
+                        <i className="icon icon-lg icon-television"/>
+                    </h3>
                     Initializing
                 </div>
             );
@@ -348,33 +527,20 @@ export class HiGlassContainer extends React.Component {
                 </div>
             );
         } else {
-            if (!viewConfig) viewConfig = HiGlassContainer.generateViewConfig(tilesetUid, genomeAssembly, height); // We should generate on-the-fly majority of the time. Allow viewconfig to be passed in mostly only for testing against sample viewconfigs.
             hiGlassInstance = (
-                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height }} ref={(r)=>{
-                    if (r){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
-                        setTimeout(function(){
-                            requestAnimationFrame(function(){
-                                r.style.transition = null; // Use transition as defined in stylesheet
-                                r.style.opacity = 1;
-                            });
-                        }, 500);
-                    }
-                }}>
-                    <HiGlassComponent
-                        //ref={(r)=>{ this.hiGlassElement = r; }}
-                        options={options}
-                        viewConfig={viewConfig}
-                    />
+                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
+                    <HiGlassComponent options={options} viewConfig={this.state.viewConfig} width={width} ref="hiGlassComponent" />
                 </div>
             );
         }
+
         /**
          * TODO: Some state + UI functions to make higlass view full screen.
          * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
          */
         return (
-            <div className="higlass-view-container">
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@0.10.19/dist/styles/hglib.css" />
+            <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.0.0/dist/styles/hglib.css" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
             </div>
@@ -413,7 +579,6 @@ export class HiGlassTabView extends React.Component {
     constructor(props){
         super(props);
         this.state = { 'mounted' : false };
-        this.hiGlassElement = null;
     }
 
     componentDidMount(){
@@ -442,7 +607,10 @@ export class HiGlassTabView extends React.Component {
         });*/
 
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            HiGlassComponent = require('./../../lib/hglib').HiGlassComponent; //require('higlass/dist/scripts/hglib').HiGlassComponent;
+            window.fetch = window.fetch || ajax.fetch; // Browser compatibility
+            if (!HiGlassComponent) {
+                HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
+            }
             this.setState({ 'mounted' : true });
         }, 500);
     }
@@ -460,4 +628,5 @@ export class HiGlassTabView extends React.Component {
         );
     }
 }
+
 

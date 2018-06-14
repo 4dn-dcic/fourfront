@@ -17,19 +17,19 @@ import { console, object, DateUtility, Filters, layout, Schemas, fileUtil } from
 
 
 /**
- * The ItemBaseView class extends React.Component to provide some helper functions to be used from an Item View page.
- * Notably, a componentDidMount and this.state is created, where upon mounting, details of submitter, lab, and award are AJAXed in.
- * These can then be used from your Item view render method via this.state.details_submitted_by or this.props.context.submitted_by (if not fetched), etc.
+ * The DefaultItemView class extends React.Component to provide some helper functions to be used from an Item View page.
  *
- * Alternatively, a this.renderAttributionColumn function is available to render out a Bootstrap column (provide own className containing col sizes) containing all 3 attributions.
+ * It provides a 'template' which can be extended further by Item page views such as ExperimentSetView, BiosourceView, etc. which can override/extend individual functions defined here.
+ * Look at the render method to see how the functions are brought in together -- there shouldn't be a need to create own 'render' function from some Item view.
  */
-export class ItemBaseView extends React.Component {
+export default class DefaultItemView extends React.PureComponent {
 
     constructor(props){
         super(props);
         this.getCommonTabs = this.getCommonTabs.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.itemHeader = this.itemHeader.bind(this);
+        this.render = this.render.bind(this);
         this.state = {};
     }
 
@@ -103,30 +103,6 @@ export class ItemBaseView extends React.Component {
             </div>
         );
     }
-
-}
-
-/**
- * @alias module:item-pages/DefaultItemView
- */
-export default class DefaultItemView extends ItemBaseView {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-    /*
-    topRightHeaderSection(){
-        var r = [];
-        // TODO: EDIT ACTIONS
-        return r;
-    }
-    */
-    /* Not even needed.
-    render() {
-        return super.render();
-    }
-    */
 
 }
 

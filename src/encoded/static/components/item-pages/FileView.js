@@ -41,7 +41,7 @@ export default class FileView extends WorkflowRunTracingView {
         super(props);
         this.validateHiGlassData = this.validateHiGlassData.bind(this);
         if (FileView.shouldHiGlassViewExist(props.context)){
-            this.state = _.extend(this.state, {
+            this.state = _.extend(this.state || {}, {
                 'validatingHiGlassTileData' : true,
                 'isValidHiGlassTileData' : false
             });
@@ -60,8 +60,8 @@ export default class FileView extends WorkflowRunTracingView {
             // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
             // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
             HiGlassContainer.generateViewConfig(this.props.context.higlass_uid, this.props.context.genome_assembly),
-            () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),
-            () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })
+            () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),     // Callback
+            () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })      // Fallback
         );
     }
 

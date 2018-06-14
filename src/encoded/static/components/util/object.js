@@ -7,6 +7,7 @@ import ReactTooltip from 'react-tooltip';
 import { Field } from './Schemas';
 import * as analytics from './analytics';
 import { isServerSide } from './misc';
+import url from 'url';
 
 
 /**
@@ -440,7 +441,20 @@ export const itemUtil = {
      * @returns {string} Title string to use.
      */
     titleFromProps : function(props) {
-        var context = props.context;
+        var title = itemUtil.getTitleStringFromContext(props.context || {});
+        if (!title && props.href){
+            title = url.parse(props.href).path;
+        }
+        return title || null;
+    },
+
+    /**
+     * Get Item title string from a context object (JSON representation of Item).
+     * 
+     * @param {Object} context - JSON representation of an Item object.
+     * @returns {string} The title.
+     */
+    getTitleStringFromContext : function(context){
         return (
             context.display_title   ||
             context.title           ||
@@ -452,16 +466,6 @@ export const itemUtil = {
                 null //: 'No title found'
             )
         );
-    },
-
-    /**
-     * Get Item title string from a context object (JSON representation of Item).
-     * 
-     * @param {Object} context - JSON representation of an Item object.
-     * @returns {string} The title.
-     */
-    getTitleStringFromContext : function(context){
-        return itemUtil.titleFromProps({'context' : context});
     },
 
     /**

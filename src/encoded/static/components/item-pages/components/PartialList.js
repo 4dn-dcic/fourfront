@@ -21,7 +21,7 @@ import { console } from './../../util';
  * @prop {Component|Element|string} title - Alias for props.label.
  * @prop {Component|Element|string} children - Alias for props.value.
  */
-class Row extends React.Component {
+class Row extends React.PureComponent {
 
     constructor(props){
         super(props);

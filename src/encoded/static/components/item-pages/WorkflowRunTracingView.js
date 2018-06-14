@@ -6,7 +6,7 @@ import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout } from './../util';
 import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './components';
-import { ItemBaseView } from './DefaultItemView';
+import DefaultItemView from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
@@ -45,7 +45,7 @@ export function isGraphSectionOpen(href, hash){
 }
 
 
-export class WorkflowRunTracingView extends ItemBaseView {
+export class WorkflowRunTracingView extends DefaultItemView {
     
     constructor(props){
         super(props);
@@ -222,6 +222,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
         this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
         this.render = this.render.bind(this);
         this.state = _.extend({
             'showChart' : 'detail',
@@ -239,6 +240,10 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         if (this.props.steps !== nextProps.steps){
             this.setState(checkIfIndirectOrReferenceNodesExist(nextProps.steps));
         }
+    }
+
+    isNodeCurrentContext(node){
+        return FileViewGraphSection.isNodeCurrentContext(node, this.props.context);
     }
 
     commonGraphProps(){
@@ -270,15 +275,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         );
         var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
 
-
-
         return _.extend(commonGraphPropsFromProps(_.extend({ legendItems }, this.props)), {
-            'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
-            'nodes' : nodes,
-            'edges' : graphData.edges,
-            'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
-            'rowSpacingType' : this.state.rowSpacingType,
-            'isNodeCurrentContext' : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || (node => FileViewGraphSection.isNodeCurrentContext(node, this.props.context))
+            'isNodeDisabled'        : FileViewGraphSection.isNodeDisabled,
+            'nodes'                 : nodes,
+            'edges'                 : graphData.edges,
+            'columnSpacing'         : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
+            'rowSpacingType'        : this.state.rowSpacingType,
+            'isNodeCurrentContext'  : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || this.isNodeCurrentContext
 
         });
     }

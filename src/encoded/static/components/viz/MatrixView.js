@@ -300,7 +300,7 @@ export class MatrixContainer extends React.Component {
         );
         this.postUpdateFxns = [];
         return (
-            <Fade in={true} transitionAppear={true}>
+            <Fade in appear>
 				<div className="matrix-view-container-wrapper" style={{ minHeight : totalHeight }}>
                     { this.body() }
                 </div>

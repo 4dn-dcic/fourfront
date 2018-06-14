@@ -581,7 +581,7 @@ class SubItemTable extends React.Component {
 }
 
 
-class DetailRow extends React.Component {
+class DetailRow extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -604,15 +604,9 @@ class DetailRow extends React.Component {
     }
 
     render(){
-        var value = Detail.formValue(
-            this.props.item,
-            this.props.popLink,
-            this.props['data-key'],
-            this.props.itemType,
-            this.props.columnDefinitions
-        );
-        var label = this.props.label;
-        if (this.props.labelNumber) {
+        var { label, labelNumber, item, popLink, itemType, columnDefinitions, className, schemas } = this.props;
+        var value = Detail.formValue(item, popLink, this.props['data-key'], itemType, columnDefinitions);
+        if (labelNumber) {
             label = (
                 <span>
                     <span className={"label-number right inline-block" + (this.state.isOpen ? ' active' : '')}><span className="number-icon text-200">#</span> { this.props.labelNumber }</span>
@@ -623,17 +617,14 @@ class DetailRow extends React.Component {
 
         if (value.type === SubItemTitle) {
             // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
-            value = React.cloneElement(value, { onToggle : this.handleToggle, isOpen : this.state.isOpen });
+            value = React.cloneElement(value, { 'onToggle' : this.handleToggle, 'isOpen' : this.state.isOpen });
 
             return (
                 <div>
-                    <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />
+                    <PartialList.Row label={label} children={value} className={(className || '') + (this.state.isOpen ? ' open' : '')} />
                     <SubItemListView
-                        popLink={this.props.popLink}
-                        content={this.props.item}
-                        schemas={this.props.schemas}
+                        popLink={popLink} content={item} schemas={schemas} isOpen={this.state.isOpen}
                         columnDefinitions={value.props.columnDefinitions || this.props.columnDefinitions} // Recursively pass these down
-                        isOpen={this.state.isOpen}
                     />
                 </div>
             );
@@ -643,27 +634,17 @@ class DetailRow extends React.Component {
             value.props.children[0].props.children && value.props.children[0].props.children.type === SubItemTitle) {
             // What we have here is a list of embedded objects. Render them out recursively and adjust some styles.
             return (
-                <div className="array-group" data-length={this.props.item.length}>
+                <div className="array-group" data-length={item.length}>
                 { React.Children.map(value.props.children, (c, i)=>
                     <DetailRow
-                        {...this.props}
-                        label={
-                            i === 0 ? label : <span className="dim-duplicate">{ label }</span>
-                        }
-                        labelNumber={i + 1}
-                        className={
-                            ("array-group-row item-index-" + i) +
-                            (i === this.props.item.length - 1 ? ' last-item' : '') +
-                            (i === 0 ? ' first-item' : '')
-                        }
-                        item={this.props.item[i]}
-                    />
+                        {...this.props} label={i === 0 ? label : <span className="dim-duplicate">{ label }</span>} labelNumber={i + 1} item={item[i]}
+                        className={("array-group-row item-index-" + i) + (i === item.length - 1 ? ' last-item' : '') + (i === 0 ? ' first-item' : '')} />
                 ) }
                 </div>
             );
         }
         // Default / Pass-Thru
-        return <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />;
+        return <PartialList.Row label={label} children={value} className={(className || '') + (this.state.isOpen ? ' open' : '')} />;
     }
 
 }
@@ -676,7 +657,7 @@ class DetailRow extends React.Component {
  * @class Detail
  * @type {Component}
  */
-export class Detail extends React.Component {
+export class Detail extends React.PureComponent {
 
     /**
      * Formats the correct display for each metadata field.
@@ -879,48 +860,72 @@ export class Detail extends React.Component {
         'open' : null
     }
 
-    render(){
-        var context = this.props.context;
-        var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
-        var schemas = this.props.schemas || Schemas.get();
+    static columnDefinitions(props){
+        var schemas = props.schemas || Schemas.get();
+        var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, props.context) : {});
+        return _.extend(colDefsFromSchema, props.columnDefinitions || Detail.defaultColumnDefinitions || {}); // { <property> : { 'title' : ..., 'description' : ... } }
+    }
 
-        var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, context) : {});
-        var columnDefinitions = _.extend(colDefsFromSchema, this.props.columnDefinitions || Detail.defaultColumnDefinitions || {}); // { <property> : { 'title' : ..., 'description' : ... } }
+    static generatedKeyLists(props){
+        var sortKeys = _.difference(_.keys(props.context).sort(), props.excludedKeys.sort());
 
         // Sort applicable persistent keys by original persistent keys sort order.
         var stickyKeysObj = _.object(
-            _.intersection(sortKeys, this.props.stickyKeys.slice(0).sort()).map(function(key){
+            _.intersection(sortKeys, props.stickyKeys.slice(0).sort()).map(function(key){
                 return [key, true];
             })
         );
         var orderedStickyKeys = [];
-        this.props.stickyKeys.forEach(function (key) {
+        props.stickyKeys.forEach(function (key) {
             if (stickyKeysObj[key] === true) orderedStickyKeys.push(key);
         });
 
-        var extraKeys = _.difference(sortKeys, this.props.stickyKeys.slice(0).sort());
-        var collapsibleKeys = _.intersection(extraKeys.sort(), this.props.alwaysCollapsibleKeys.slice(0).sort());
+        var extraKeys = _.difference(sortKeys, props.stickyKeys.slice(0).sort());
+        var collapsibleKeys = _.intersection(extraKeys.sort(), props.alwaysCollapsibleKeys.slice(0).sort());
         extraKeys = _.difference(extraKeys, collapsibleKeys);
-        var popLink = this.props.popLink || false; // determines whether links should be opened in a new tab
+
+        return {
+            'persistentKeys' : orderedStickyKeys.concat(extraKeys),
+            'collapsibleKeys' : collapsibleKeys
+        };
+    }
+
+    constructor(props){
+        super(props);
+        this.renderDetailRow = this.renderDetailRow.bind(this);
+        this.state = _.extend({
+            'columnDefinitions' : Detail.columnDefinitions(props)
+        }, Detail.generatedKeyLists(props));
+    }
+
+    componentWillReceiveProps(nextProps){
+        var newState = {};
+
+        if (this.props.schemas !== nextProps.schemas || this.props.columnDefinitions !== nextProps.columnDefinitions || this.props.context !== nextProps.context){
+            newState.columnDefinitions = Detail.columnDefinitions(nextProps);
+        }
+
+        if (this.props.context !== nextProps.context || this.props.excludedKeys !== nextProps.excludedKeys || this.props.stickyKeys !== nextProps.stickyKeys || this.props.alwaysCollapsibleKeys !== nextProps.alwaysCollapsibleKeys){
+            _.extend(newState, Detail.generatedKeyLists(nextProps));
+        }
+
+        if (_.keys(newState).length > 0){
+            this.setState(newState);
+        }
+
+    }
+
+    renderDetailRow(key, idx){
+        var context = this.props.context,
+            popLink = this.props.popLink || false; // determines whether links should be opened in a new tab
+
         return (
-            <PartialList
-                persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
-                    <DetailRow key={key} label={Detail.formKey(columnDefinitions,key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} columnDefinitions={columnDefinitions}/>
-                )}
-                collapsible={ collapsibleKeys.map((key,i) =>
-                    <PartialList.Row key={key} label={Detail.formKey(columnDefinitions,key)}>
-                        { Detail.formValue(
-                            context[key],
-                            popLink,
-                            key,
-                            context['@type'] && context['@type'][0],
-                            columnDefinitions
-                        ) }
-                    </PartialList.Row>
-                )}
-                open={this.props.open}
-            />
+            <DetailRow key={key} label={Detail.formKey(this.state.columnDefinitions, key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} columnDefinitions={this.state.columnDefinitions}/>
         );
+    }
+
+    render(){
+        return <PartialList persistent={_.map(this.state.persistentKeys, this.renderDetailRow)} collapsible={ _.map(this.state.collapsibleKeys, this.renderDetailRow)} open={this.props.open} />;
     }
 
 }
