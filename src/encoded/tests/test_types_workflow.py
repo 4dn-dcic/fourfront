@@ -1,4 +1,6 @@
 import pytest
+import json
+from dcicutils.ff_utils import patch_metadata
 pytestmark = [pytest.mark.working]
 
 
@@ -56,5 +58,9 @@ def workflow(testapp, software, award, lab):
 
 def test_pseudo_run(testapp, input_json):
     res = testapp.post_json('/WorkflowRun/pseudo-run', input_json)
-    print(res)
     assert(res)
+
+    # cleanup
+    output = json.loads(res.json['output'])
+    patch_metadata({'status':'deleted'}, output['ff_meta']['uuid'], ff_env='fourfront-webdev')
+
