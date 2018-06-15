@@ -360,9 +360,9 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',                                      title: 'File',          initialWidth: 100   },
-            { columnClass: 'file-detail', title: 'File Type', initialWidth: 90 },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
+            { columnClass: 'file',                                      title: 'File',          initialWidth: 110   },
+            { columnClass: 'file-detail', title: 'File Type', initialWidth: 120 },
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],

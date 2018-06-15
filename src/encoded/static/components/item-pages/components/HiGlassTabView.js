@@ -118,7 +118,7 @@ export class HiGlassContainer extends React.PureComponent {
 
         // Generate all configs normally
         var allConfigs = _.map(tilesetUidObjects, function(uidObj, idx){
-            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, _.extend({}, options, { 'index' : idx, 'extraViewProps' : uidObj.extraViewProps }));
+            return HiGlassContainer.generateViewConfig(uidObj.tilesetUid, _.extend({}, options, _.omit(uidObj, 'tilesetUid'), { 'index' : idx }));
         });
 
         // Then merge them into one primary config, locking their views/zooms together
