@@ -1,8 +1,0 @@
-{
-    "baseUrl" : "http://localhost:6543",
-    "projectId": "bj6vhb",
-    "defaultCommandTimeout" : 60000,
-    "pageLoadTimeout" : 120000,
-    "requestTimeout" : 40000,
-    "responseTimeout" : 120000
-}
