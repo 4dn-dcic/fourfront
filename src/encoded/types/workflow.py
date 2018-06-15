@@ -571,7 +571,6 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
-        #'workflow.*',
         'award.project',
         'workflow.title',
         'workflow.steps.name',
@@ -588,6 +587,7 @@ class WorkflowRun(Item):
         'input_files.value.accession',
         'input_files.value.@type',
         'input_files.value.file_size',
+        'input_files.value.status',
         'output_files.workflow_argument_name',
         'output_files.*',
         'output_files.value.file_format',
@@ -644,7 +644,7 @@ class WorkflowRun(Item):
             #    return False # Skip. We only care about global arguments.
 
             value_field_name = 'value' if io_type == 'parameter' else 'file'
-            
+
             global_pointing_source_target = get_global_source_or_target(step_io_arg.get('source', step_io_arg.get('target', [])))
             if not global_pointing_source_target:
                 return False
