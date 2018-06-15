@@ -432,7 +432,7 @@ export class HiGlassContainer extends React.PureComponent {
         }
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
             if (!HiGlassComponent) {
-                window.fetch = window.fetch || ajax.fetch; // Browser compatibility
+                window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
                 HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
             }
             this.setState({ 'mounted' : true });
@@ -607,7 +607,7 @@ export class HiGlassTabView extends React.Component {
         });*/
 
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            window.fetch = window.fetch || ajax.fetch; // Browser compatibility
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
             if (!HiGlassComponent) {
                 HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
             }
