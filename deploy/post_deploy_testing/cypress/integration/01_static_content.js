@@ -1,9 +1,4 @@
 
-
-// Run static CI (Travis) tests first.
-const staticContentTestsDeploy = require('./../../../../cypress/integration/01_static_content_common');
-
-
 describe('Post-Deployment Static Page & Content Tests', function () {
 
     it.skip('Every help page has links which return success status codes', function(){
@@ -110,7 +105,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
         });
 
         it("HiGlass initializes (very basic)", function(){
-            cy.get('div.CenterTrack-module_center-track-3ptRW').wait(500);
+            cy.wait(1000).end().get('div.CenterTrack-module_center-track-3ptRW').wait(500);
         });
 
         it('Have more (>50) sets depicted when logged in', function(){
