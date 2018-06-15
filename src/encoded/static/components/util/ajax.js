@@ -79,7 +79,6 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
             // response SHOULD be json
             try {
                 response = JSON.parse(xhr.responseText);
-                response.json = function(){ return response; };
                 if (debugResponse) console.info('Received data from ' + method + ' ' + url + ':', response);
             } catch (e) {
                 console.log(xhr);
@@ -134,4 +133,13 @@ export function fetch(url, options){
         request.xhr_end = 1 * new Date();
     });
     return request;
+}
+
+/** Calls ajax.fetch() internally, but adds 'json' function to return self. */
+export function fetchPolyfill(url, options){
+    var req = fetch(url, options);
+    req.then((resp) => {
+        resp.json = function(){ return resp; };
+    });
+    return req;
 }

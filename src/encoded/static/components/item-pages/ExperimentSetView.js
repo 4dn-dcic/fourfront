@@ -321,7 +321,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                         } else {
                             return (
                                 <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
-                                    data-html data-position="right" data-tip={"Open HiGlass Visualization for file&nbsp; <span class='text-600'>" + (file.accession || file.display_title) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>"}>
+                                    data-html data-place="right" data-tip={"Open HiGlass Visualization for file&nbsp; <span class='text-600'>" + (file.accession || file.display_title) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>"}>
                                     <i className="icon icon-fw icon-television"/>
                                 </h5>
                             );
