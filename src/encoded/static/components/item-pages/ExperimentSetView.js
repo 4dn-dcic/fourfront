@@ -71,6 +71,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     getTabViewContents(){
         var { context, schemas } = this.props;
+
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
             width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null,
             tabs = [];
@@ -327,7 +328,10 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        return <HiGlassContainer className={collapsed ? 'disabled' : null} tilesetUid={file.higlass_uid} height={hiGlassHeight} ref="hiGlassContainer" />;
+                        return (
+                            <HiGlassContainer tilesetUid={file.higlass_uid} genomeAssembly={file.genome_assembly}
+                            className={collapsed ? 'disabled' : null} height={hiGlassHeight} ref="hiGlassContainer" />
+                        );
                     }
                 }}
                 rightPanelClassName="exp-table-container" renderRightPanel={renderRightPanel}
