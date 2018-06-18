@@ -69,14 +69,15 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         return false;
     }
 
+    /**
+     * Executed on width change, as well as this ItemView's prop change.
+     */
     getTabViewContents(){
         var { context, schemas } = this.props;
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
-            width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null,
+            width = this.getTabViewWidth(),
             tabs = [];
-
-        if (width) width -= 20;
 
         if (processedFiles && processedFiles.length > 0){
 

@@ -6,7 +6,7 @@ import { panel_views, itemClass, content_views } from './../globals';
 import { Button, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters, layout, Schemas, fileUtil } from './../util';
+import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -28,6 +28,8 @@ export default class DefaultItemView extends React.PureComponent {
         super(props);
         this.getCommonTabs = this.getCommonTabs.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
+        this.getTabViewWidth = this.getTabViewWidth.bind(this);
+        this.setTabViewKey = this.setTabViewKey.bind(this);
         this.itemHeader = this.itemHeader.bind(this);
         this.render = this.render.bind(this);
         this.state = {};
@@ -48,11 +50,32 @@ export default class DefaultItemView extends React.PureComponent {
         returnArr.push(AuditTabView.getTabObject(context));
         return returnArr;
     }
+
+    getTabViewWidth(){
+        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        if (typeof width === 'number' && width) width -= 20;
+        return width;
+    }
+
+    setTabViewKey(nextKey){
+        if (this.refs.tabbedView && typeof this.refs.tabbedView.setActiveKey === 'function'){
+            try {
+                this.refs.tabbedView.setActiveKey(nextKey);
+            } catch (e) {
+                console.warn('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
+            }
+        } else {
+            console.error('Cannot access refs.tabbedView.setActiveKey()');
+        }
+    }
     
     itemClassName(){
         return itemClass(this.props.context, 'view-detail item-page-container');
     }
 
+    /**
+     * Executed on width change, as well as this ItemView's prop change.
+     */
     getTabViewContents(){
         return this.getDefaultTabs();
     }
@@ -79,7 +102,7 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} />;
+        return <TabbedView contents={this.getTabViewContents} key="tabbedView" />;
     }
 
     itemFooter(){

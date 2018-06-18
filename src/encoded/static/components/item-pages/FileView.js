@@ -67,15 +67,12 @@ export default class FileView extends WorkflowRunTracingView {
 
     getTabViewContents(){
 
-        var initTabs = [];
-        var context = this.props.context;
-
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (width) width -= 20;
+        var initTabs = [],
+            context = this.props.context,
+            width = this.getTabViewWidth(),
+            steps = this.state.steps;
 
         initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
-        
-        var steps = this.state.steps;
 
         if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
