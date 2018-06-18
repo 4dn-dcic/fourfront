@@ -93,6 +93,17 @@
             "description": "The version of the workflow app.",
             "type": "string"
         },
+        "previous_version": {
+            "title": "Previous version",
+            "description": "Link to the previous version of the workflow.",
+            "type": "string",
+            "linkTo": "Workflow"
+        },
+        "version_upgrade_log": {
+            "title": "Version upgrade log",
+            "description": "Version upgrade log",
+            "type": "string"
+        },
         "cwl_directory_url": {
             "title": "CWL directory url",
             "description": "URL of the directory that contains main and other CWL files needed for the workflow",
