@@ -466,6 +466,25 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    @calculated_property(schema={
+        "title": "Visualization Link",
+        "description": "Link to Visualization Tool for the File",
+        "type": "string"
+    })
+    def visualization_link(self, request, file_format, upload_key=None):
+        if file_format is 'hic':
+            baseurl = 'http://aidenlab.org/juicebox?hicUrl=https://s3.amazonaws.com/'
+            bucketname = 'elasticbeanstalk-fourfront-webdev-wfoutput'
+            normvectorbase = '&normVectorFiles=https://s3.amazonaws.com/'
+
+            # upload key of an associated normvector file
+            # (output of same workflow run that created this hic file that has file_format = 'normvector_juicerformat')
+            # normvector_upload_key = '78dcbf4c-f04b-437e-aa09-9d478e8ca234/4DNFIQ4X3LRZ.normvector.juicerformat.gz' 
+            normvector_upload_key = [f for f in self.workflow_run_outputs[0].output_files if f['workflow_argument_name'] == 'cooler_normvector'][0]
+
+            url = baseurl + bucketname + '/' + upload_key + normvectorbase + bucketname + '/' + normvector_upload_key
+            return(url)
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
