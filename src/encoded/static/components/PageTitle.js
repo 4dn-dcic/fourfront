@@ -27,6 +27,9 @@ var TITLE_PATHNAME_MAP = {
     '/health' : {
         'title' : "Health"
     },
+    '/indexing_status' : {
+        'title' : "Indexing Status"
+    },
     '/users/\*' : {
         'title' : function(pathName, context){
             var myDetails = JWT.getUserDetails();
@@ -61,7 +64,7 @@ export function getSchemaTypeFromSearchContext(context){
     return null;
 }
 
-export default class PageTitle extends React.Component {
+export default class PageTitle extends React.PureComponent {
 
     static isStaticPage(context){
         if (Array.isArray(context['@type'])){
@@ -165,7 +168,7 @@ export default class PageTitle extends React.Component {
                 if (context.title && context.short_attribution){
                     return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
                 }
-                return { 'title' : itemTypeTitle, 'subtitle' : context.title || title, 'subtitleEllipsis' : true };
+                return { 'title' : itemTypeTitle, 'subtitle' : title, 'subtitleEllipsis' : true };
             }
 
             // Don't show Accessions in titles.
@@ -201,10 +204,13 @@ export default class PageTitle extends React.Component {
                 return { 'title' : itemTypeTitle, 'calloutTitle' : title };
             }
 
-            
-
         }
-        return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
+
+        // Fallback-ish stuff.
+        title = object.itemUtil.getTitleStringFromContext(context);
+        if (!title) title = currentHrefParts.path;
+
+        return { title };
     }
 
     static getStyles(context, href, mounted, hasToc){

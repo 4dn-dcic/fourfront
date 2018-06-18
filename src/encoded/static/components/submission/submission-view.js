@@ -1497,7 +1497,7 @@ class DetailTitleBanner extends React.Component {
             } catch (e){ console.warn('Couldnt get property name for', keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i]); }
         }
         return (
-            <Collapse in transitionAppear={(hierarchyKeyList.length !== 1)} key={i}>
+            <Collapse in appear={(hierarchyKeyList.length !== 1)} key={i}>
                 <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')}>
                     <div className="submission-working-title">
                         <span onClick={this.handleClick.bind(this, numKey)}>
@@ -1666,7 +1666,7 @@ class SelectExistingItemModal extends React.Component {
         */
 
         return(
-            <Fade in transitionAppear>
+            <Fade in appear>
                 <div>
                     <div className="text-right">
                         <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
@@ -2098,7 +2098,7 @@ class IndividualObjectView extends React.Component{
                     selectData={this.state.selectData}
                     selectObj={this.selectObj}
                 />
-                <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
+                <Fade in={!selecting || this.state.fadeState} appear>
                     <div>
                         <FormFieldsContainer children={fieldComponents} currKey={this.props.currKey}/>
                         {

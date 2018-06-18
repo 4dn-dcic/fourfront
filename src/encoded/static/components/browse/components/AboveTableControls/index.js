@@ -186,7 +186,7 @@ export class AboveTableControls extends React.Component {
         var { open, reallyOpen } = this.state;
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
-                <Collapse in={!!(open)} transitionAppear>
+                <Collapse in={!!(open)} appear>
                     { wrapInAboveTablePanel(
                         <CustomColumnSelector
                             hiddenColumns={this.props.hiddenColumns}
@@ -202,7 +202,7 @@ export class AboveTableControls extends React.Component {
             );
         } else if (open === 'filterFilesBy' || reallyOpen === 'filterFilesBy') {
             return (
-                <Collapse in={!!(open)} transitionAppear>
+                <Collapse in={!!(open)} appear>
                     <div>
                         <SelectedFilesFilterByContent
                             selectedFiles={this.props.selectedFiles}

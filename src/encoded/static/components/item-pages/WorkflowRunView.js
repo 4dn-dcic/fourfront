@@ -5,7 +5,7 @@ import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, WorkflowDetailPane } from './components';
-import { ItemBaseView } from './DefaultItemView';
+import DefaultItemView from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStepsExist, WorkflowGraphSection } from './WorkflowView';
@@ -90,7 +90,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
 }
 
 
-export class WorkflowRunView extends ItemBaseView {
+export class WorkflowRunView extends DefaultItemView {
 
     constructor(props){
         super(props);

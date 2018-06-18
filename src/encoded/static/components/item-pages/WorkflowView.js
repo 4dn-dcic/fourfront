@@ -9,7 +9,7 @@ import {
     ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
     WorkflowNodeElement
 } from './components';
-import { ItemBaseView } from './DefaultItemView';
+import DefaultItemView from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
@@ -80,13 +80,7 @@ export function doValidAnalysisStepsExist(steps){
 }
 
 
-/**
- * @export
- * @class WorkflowView
- * @memberof module:item-pages
- * @extends module:item-pages/DefaultItemView.ItemBaseView
- */
-export class WorkflowView extends ItemBaseView {
+export class WorkflowView extends DefaultItemView {
 
     static defaultProps = {
         'checkHrefForSelectedNode' : true,

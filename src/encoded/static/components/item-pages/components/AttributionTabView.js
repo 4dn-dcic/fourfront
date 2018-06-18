@@ -11,7 +11,7 @@ import { ItemFooterRow } from './ItemFooterRow';
 
 
 
-export class AttributionTabView extends React.Component {
+export class AttributionTabView extends React.PureComponent {
 
     static getTabObject(context){
         return {

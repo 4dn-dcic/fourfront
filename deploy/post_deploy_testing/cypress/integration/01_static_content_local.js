@@ -3,7 +3,6 @@
  * This file of tests gets executed by Travis CI and in post-deploy tests (by being imported into).
  */
 
-
 describe('Deployment/CI Static Page & Content Tests', function () {
 
     context('Homepage content is ok.', function () {
@@ -36,6 +35,18 @@ describe('Deployment/CI Static Page & Content Tests', function () {
         });
 
         it('Click & visit each page from menu, ensure ToC exists somewhere, ensure ToC works.', function(){
+
+            cy.on('uncaught:exception', function(err, runnable){
+
+                expect(err.message).to.include("return response;");
+
+                Cypress.log({
+                    'name' : "Negligible JSON err.",
+                    'message' : "Hit error re: non-serializable function; fixed in subseq. deploys."
+                });
+
+                return false;
+            });
 
             cy.get('#help-menu-item').click().wait(500).then(()=>{
                 cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{

@@ -106,7 +106,9 @@ export class WorkflowNodeElement extends React.Component {
     tooltip(){
         var node = this.props.node;
         var output = '';
+        var hasRunDataFile = false;
 
+        // Titles
         // Node Type -specific
         if (node.nodeType === 'step'){
             if (node.meta && node.meta.workflow){
@@ -116,42 +118,49 @@ export class WorkflowNodeElement extends React.Component {
             }
             // Step Title
             output += '<h5 class="text-600 tooltip-title">' + ((node.meta && node.meta.display_title) || node.title || node.name) + '</h5>';
-        } else if (node.nodeType === 'input-group'){
+        }
+
+        if (node.nodeType === 'input-group'){
             output += '<small>Input Argument</small>';
-        } else {
-            var title = node.nodeType;
-            title = title.charAt(0).toUpperCase() + title.slice(1);
-            if (title === 'Input' || title === 'Output'){
-                title += ' Argument &nbsp; <b>' + node.name + '</b>';
+        }
+
+        if (node.nodeType === 'input' || node.nodeType === 'output'){
+            var argumentName = node.nodeType;
+            argumentName = argumentName.charAt(0).toUpperCase() + argumentName.slice(1);
+            hasRunDataFile = WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node);
+            var fileTitle = hasRunDataFile && (node.meta.run_data.file.display_title || node.meta.run_data.file.accession);
+            if (fileTitle) {
+                output += '<small>' + argumentName + ' File</small>';
+                output += '<h5 class="text-600 tooltip-title">' + fileTitle + '</h5>';
             }
-            output += '<small>' + title + '</small>';
+            if (argumentName === 'Input' || argumentName === 'Output'){
+                argumentName += ' Argument &nbsp; <span class="text-500 mono-text">' + node.name + '</span>';
+            }
+            output += '<hr class="mt-08 mb-05"/><small class="mb-03 inline-block">' + argumentName + '</small>';
         }
 
         // If file, and has file-size, add it (idk, why not)
-        if (
-            (node.nodeType === 'input' || node.nodeType === 'output') &&
-            WorkflowNodeElement.isNodeFile(node) &&
-            WorkflowNodeElement.doesRunDataExist(node) &&
-            typeof node.meta.run_data.file.file_size === 'number'
-        ){
-            output += '<div><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
+        var fileSize = hasRunDataFile && typeof node.meta.run_data.file.file_size === 'number' && node.meta.run_data.file.file_size;
+        if (fileSize){
+            output += '<div class="mb-05"><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
         }
 
         // Workflow name, if any
         if (node.nodeType === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
             //title 
-            output += '<hr class="mt-08 mb-05"/><div><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
-        }
-
-        if (node.nodeType === 'input'){ // Old/deprecated -- remove?
-            if (node.meta && node.meta['sbg:toolDefaultValue']){
-                output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
-            }
+            output += '<hr class="mt-08 mb-05"/><div class="mb-05 mt-08"><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
         // Description
-        if (typeof node.description === 'string' || (node.meta && typeof node.meta.description === 'string')){
-            output += '<div>' + (node.description || node.meta.description) + '</div>';
+        var description = (
+            (typeof node.description === 'string' && node.description)
+            || (node.meta && typeof node.meta.description === 'string' && typeof node.meta.description)
+            || (node.meta.run_data && node.meta.run_data.meta && node.meta.run_data.meta.description)
+            || (node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file === 'object' && node.meta.run_data.file.description)
+        );
+        if (description){
+            output += '<hr class="mt-05 mb-05"/>';
+            output += '<small class="mb-05 inline-block">' + description + '</small>';
         }
 
         return output; 
@@ -263,7 +272,15 @@ export class WorkflowNodeElement extends React.Component {
 
 
         if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
-            return <div {...elemProps}>{ node.name }</div>;
+            var belowTitle;
+            if (node.meta && node.meta.file_type){
+                belowTitle = node.meta.file_type;
+            } else if (node.meta && node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file === 'object' && node.meta.run_data.file.file_type){
+                belowTitle = node.meta.run_data.file.file_type;
+            } else {
+                belowTitle = <small className="mono-text" style={{ 'bottom' : -15, 'color' : '#888' }}>{ node.name }</small>;
+            }
+            return <div {...elemProps}>{ belowTitle }</div>;
         }
 
         return null;

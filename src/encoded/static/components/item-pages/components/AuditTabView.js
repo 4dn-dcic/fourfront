@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 
 
-export class AuditTabView extends React.Component {
+export class AuditTabView extends React.PureComponent {
 
     static getTabObject(context){
         var auditIconClass = AuditTabView.getItemIndicatorIcon(context);
