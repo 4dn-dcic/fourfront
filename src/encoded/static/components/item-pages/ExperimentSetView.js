@@ -363,7 +363,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
         if (file && ((file.file_format && file.file_format === 'hic') || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1) ) && file.href){
             var onClick = function(evt){
-                    var pageHref = tableProps.href || (store && store.getState().href),
+                    var pageHref = tableProps.href || tb.href || (store && store.getState().href),
                         hrefParts = url.parse(pageHref),
                         host = hrefParts.protocol + '//' + hrefParts.host,
                         targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
@@ -372,7 +372,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                     win.focus();
                 },
                 juiceBoxExternalLinkBtn = (
-                    <Button bsSize="xs" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                    <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
                         <i className="icon icon-fw icon-external-link text-smaller"/>
                     </Button>
                 );

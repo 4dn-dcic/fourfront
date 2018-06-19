@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { panel_views, itemClass, content_views } from './../globals';
-import { Button, Collapse } from 'react-bootstrap';
+import { Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide } from './../util';
@@ -372,7 +372,8 @@ export class OverViewBodyItem extends React.Component {
         'columnExtraClassName'          : null,
         'singleItemClassName'           : null,
         'fallbackTitle'                 : null,
-        'propertyForLabel'              : null
+        'propertyForLabel'              : null,
+        'property'                      : null
     }
 
     /** Feeds params + props into static function */
@@ -387,6 +388,7 @@ export class OverViewBodyItem extends React.Component {
         } = this.props;
         
         function fallbackify(val){
+            if (!property) return titleRenderFxn(property, result, true, addDescriptionTipForLinkTos, null, 'div', result);
             return val || fallbackValue || 'None';
         }
 
@@ -399,9 +401,9 @@ export class OverViewBodyItem extends React.Component {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
-        var resultPropertyValue = this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
+        var resultPropertyValue = property && this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
 
-        if (this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
+        if (property && this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
             return null;
         }
 
@@ -428,7 +430,7 @@ export class OverViewBodyItem extends React.Component {
             innerBlockReturned = (
                 <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} title={this.props.overrideTitle} />
-                        <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + (!resultPropertyValue ? ' no-value' : '')}>
+                        <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + ((!resultPropertyValue && property) ? ' no-value' : '')}>
                             { fallbackify(resultPropertyValue) }
                         </div>
                 </div>
