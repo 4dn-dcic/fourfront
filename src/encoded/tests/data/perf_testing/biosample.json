@@ -1,0 +1,262 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "uuid": "9ff939d4-83ae-40e0-a73f-e3f7d572f6c2", 
+        "schema_version": "1", 
+        "description": "Untreated F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF prepared for in situ Hi-C - Preparation 2", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSN6CO9FS", 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:36.193380+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "95e9d330-f285-4a0c-9fd6-9ebd383877d1", 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "date_created": "2018-05-27T04:46:16.031406+00:00", 
+        "aliases": [
+            "ren:untreated_F123AIDCTCF_bioRep_2"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "uuid": "f127b496-8f8b-4aab-a4c9-6e24d516a15e", 
+        "schema_version": "1", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSS1RY3UI", 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:35.906120+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "032cb6e7-02e5-4713-9ba0-1ab4e6af9360", 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "aliases": [
+            "ren:untreated_F123AIDCTCF_bioRep_1"
+        ], 
+        "date_created": "2018-05-27T04:46:15.078052+00:00", 
+        "description": "Untreated F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF prepared for in situ Hi-C - Preparation 1"
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 24 hours and then prepared for in situ Hi-C - Preparation 2", 
+        "schema_version": "1", 
+        "accession": "4DNBSKCTX7IJ", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "treatments": [
+            "0c22303f-2fe9-4556-866a-0b5db91fd814"
+        ], 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:39.653411+00:00"
+        }, 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "54a124db-abe4-4525-a0c5-750755486bd4", 
+        "date_created": "2018-05-27T04:46:17.907150+00:00", 
+        "uuid": "f3a54565-7287-4084-aae5-c6342bb9be45", 
+        "aliases": [
+            "ren:24h_F123AIDCTCF_bioRep_2"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "uuid": "8b2107ba-ce86-4115-8a6d-b60d0dce7eae", 
+        "schema_version": "1", 
+        "treatments": [
+            "0c22303f-2fe9-4556-866a-0b5db91fd814"
+        ], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSHG5816I", 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:39.382624+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "e2b940fc-75da-44cb-a244-8b1d6200f752", 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "aliases": [
+            "ren:24h_F123AIDCTCF_bioRep_1"
+        ], 
+        "date_created": "2018-05-27T04:46:16.961371+00:00", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 24 hours and then prepared for in situ Hi-C - Preparation 1"
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "uuid": "bdd26c42-52b2-4f69-aca1-977eab857c05", 
+        "schema_version": "1", 
+        "treatments": [
+            "17b3f532-060e-409c-85d2-0ddda423fcc4"
+        ], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBS8OV52KV", 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:43.267196+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "e6997d1f-f8e9-49ff-ac3a-f565a10e52de", 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "aliases": [
+            "ren:48h_F123AIDCTCF_bioRep_2"
+        ], 
+        "date_created": "2018-05-27T04:46:19.890491+00:00", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 48 hours and then prepared for in situ Hi-C - Preparation 2"
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "uuid": "c8961d71-0935-4c63-a67f-e6048c7e1db3", 
+        "schema_version": "1", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 48 hours and then prepared for in situ Hi-C - Preparation 1", 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "treatments": [
+            "17b3f532-060e-409c-85d2-0ddda423fcc4"
+        ], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSI9Z3YN4", 
+        "date_created": "2018-05-27T04:46:18.861798+00:00", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:42.986680+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "c490c874-9565-48c4-8701-1568f328ba46", 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "aliases": [
+            "ren:48h_F123AIDCTCF_bioRep_1"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 96 hours and then prepared for in situ Hi-C - Preparation 2", 
+        "schema_version": "1", 
+        "accession": "4DNBSRIBBPGK", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "treatments": [
+            "759ea3f7-59e1-4811-93b1-ab875335a771"
+        ], 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:29.784167+00:00"
+        }, 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "b7c73963-ae1b-4032-876c-7b442d42d31d", 
+        "date_created": "2018-05-27T04:46:21.878523+00:00", 
+        "uuid": "f4e5c8cd-6d39-4a4b-b79f-211795997739", 
+        "aliases": [
+            "ren:96h_F123AIDCTCF_bioRep_2"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "modifications": [
+            "611a9b95-8d81-40bc-9a16-1d13c01708fe", 
+            "185be935-a30d-44e6-af70-ddea9f3d061b"
+        ], 
+        "biosample_protocols": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 96 hours and then prepared for in situ Hi-C - Preparation 1", 
+        "treatments": [
+            "759ea3f7-59e1-4811-93b1-ab875335a771"
+        ], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSRZJAPN3", 
+        "biosource": [
+            "f8ddbc70-a311-490b-b0ef-7549868a059c"
+        ], 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:30.186131+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "schema_version": "1", 
+        "public_release": "2018-05-31", 
+        "cell_culture_details": "f5fc400a-4d7f-4916-99a9-ffbc82132efe", 
+        "date_created": "2018-05-27T04:46:20.830475+00:00", 
+        "uuid": "f1d42039-fa49-402d-8b6c-f036919aabff", 
+        "aliases": [
+            "ren:96h_F123AIDCTCF_bioRep_1"
+        ]
+    }
+]

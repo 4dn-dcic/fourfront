@@ -849,7 +849,7 @@ def run_workflow(context, request):
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)
-        if res_dict['status'] != 'RUNNING':
+        if res_dict['status'] == 'RUNNING':
             break
         sleep(2)
 

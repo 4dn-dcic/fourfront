@@ -1,0 +1,228 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "809df7e4-54ee-452e-9534-d112d2da834f", 
+        "description": "Custom Set: HAP-1 wild-type in situ Hi-C", 
+        "accession": "4DNES1NCTCB9", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:36.066313+00:00", 
+        "experiments_in_set": [
+            "0663f600-10d0-40b2-8014-326959241018", 
+            "ef858972-2523-4b28-913e-a5ce1d9e8de6", 
+            "d212b9f2-c01e-4dc3-b512-03ab88ca5c4b", 
+            "b0cb3e12-fcdb-4d9d-83a3-276b6be9b776", 
+            "e3c92a72-ec36-4165-b04d-72b827d454df"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set1"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "f19af488-c9ff-4ef3-8d0b-3c93476ce14c", 
+        "description": "Custom Set: GM12878 crosslinking titration in situ Hi-C", 
+        "accession": "4DNES53X6NA3", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:36.823801+00:00", 
+        "experiments_in_set": [
+            "efe7ab23-6dd3-4359-b926-90980c69ebe6", 
+            "a30f9fd1-f7ff-492f-8345-87854c72051d", 
+            "48096548-32f7-4177-8673-5afcb6cab251", 
+            "d90ab2c4-2699-4e30-99d3-e02fab0270e6", 
+            "f911ee8a-091a-4cdc-b309-52c442141925", 
+            "2ebbf625-e942-41ff-a6ca-e77ad7bacdad"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set2"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "77636927-34f4-4cdf-95c1-caed521dd721", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with deletion of region 1 B-forward CTCF site", 
+        "accession": "4DNESI7TK79L", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:37.333404+00:00", 
+        "experiments_in_set": [
+            "bfc51a53-78ac-4a7f-8168-bd5974361986", 
+            "75399a2e-1da9-4f0c-a643-f42dca7a2760", 
+            "40ae331d-eed4-450a-857a-3680a2069827", 
+            "beec7578-c102-404d-9a17-2103b034970f", 
+            "f1532ed3-058d-4e27-8a97-abcc86a26621"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set3"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "f2075c48-1ba6-4464-af7f-bbffcfc2609b", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with inversion of region 1 B-forward CTCF site", 
+        "accession": "4DNES17YC6VK", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:37.854473+00:00", 
+        "experiments_in_set": [
+            "068ba623-6e82-4864-b510-e64746df65d8", 
+            "e05e5fb5-b254-4048-a8e4-ad244a7ab792", 
+            "880cc792-b37e-42e6-b38c-0b4c91ab12d7", 
+            "3c89b3eb-09ca-42e7-970f-b8525976abdc", 
+            "79245f7e-35cb-4492-8045-1e56ef15393a"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set4"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "165f3d53-29c0-4d80-becb-36a2424956ef", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with deletion of region 2 E-forward CTCF site", 
+        "accession": "4DNES1WJGQEG", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:38.344574+00:00", 
+        "experiments_in_set": [
+            "30efbd21-1aa6-43d3-ae27-c6bd0e96003e", 
+            "252212d2-c59f-4d23-aff4-4ca636649851", 
+            "664a43c2-88c1-410d-bde5-33743f530a21", 
+            "b06d9ff3-1553-4235-a201-8e1efe0f0ff4", 
+            "1052435c-6fa2-4536-9e20-593202a3868f"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set5"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "bd180a8b-58be-45da-9f76-bbf3580c7ef1", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with deletion of region 2 E-reverse CTCF site", 
+        "accession": "4DNESCTABFXV", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:38.827327+00:00", 
+        "experiments_in_set": [
+            "d20e2f0f-25f3-42d1-a03e-836a00888e26", 
+            "53882fda-ae4f-4635-809c-85df0be8082c", 
+            "8c599182-b684-4234-8b61-bbfb5f0299fb", 
+            "a1180fe6-b3a6-4a35-bdb8-eb3574fecf0e", 
+            "ca9a9884-c73a-46b5-91cf-4fae8a5e31ce", 
+            "462629e5-1604-434f-ba76-883731add2d3"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set6"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "03d14254-75b1-4459-b9c4-71b6ac43c572", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with deletion of region 2 E-forward and reverse CTCF sites", 
+        "accession": "4DNESKPWEYJV", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:39.287646+00:00", 
+        "experiments_in_set": [
+            "a5f90a73-a463-4dc1-9fca-7987afa5e479", 
+            "790a9b87-3fef-471e-9ed2-1911b7e83ca6", 
+            "82ae7197-4503-475d-b428-fd91c3fc03e2", 
+            "345d8de7-80f0-4cef-a66f-e183ab7dfe1b", 
+            "00f7ee11-e8e3-41c7-8749-b74857a02158", 
+            "930e39dc-7c2a-4734-87f7-c02c0d776405", 
+            "d11e47b0-aa46-4eed-b47d-c88b21963667", 
+            "362593a7-a19e-4fa7-aef4-5328d528c819", 
+            "9c63d67f-54e9-4f63-9e28-58df78cd7b79"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set7"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "a403150b-0428-46a6-afe6-5c7e5a461bad", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with region 3 CTCF site G insertion", 
+        "accession": "4DNES9KMYIKW", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:39.887640+00:00", 
+        "experiments_in_set": [
+            "068255cc-5d0e-4d56-bc2e-4c86a19c2ec6", 
+            "349c1679-603c-48e4-91af-c5046175e9fc", 
+            "470548c0-d76b-476a-82d6-4a15cf105d74"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set8"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "experimentset_type": "custom", 
+        "uuid": "99601ba6-9c26-4c86-a4b2-c68b5ca91b47", 
+        "description": "Custom Set: Capture Hi-C on HAP-1 cells with region 3 H-forward CTCF site deletion", 
+        "accession": "4DNESJ8X1A2B", 
+        "schema_version": "1", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "alternate_accessions": [], 
+        "date_created": "2017-04-10T01:11:40.551332+00:00", 
+        "experiments_in_set": [
+            "a2faae45-d98b-4d77-a2b3-c939a30fd29d", 
+            "da30a030-b932-40c8-b350-37af46727073"
+        ], 
+        "date_released": "2017-04-10", 
+        "aliases": [
+            "dciclab:sanborn_set9"
+        ]
+    }
+]
