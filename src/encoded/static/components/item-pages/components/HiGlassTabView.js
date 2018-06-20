@@ -407,7 +407,7 @@ export class HiGlassContainer extends React.PureComponent {
         this.initializeStorage = this.initializeStorage.bind(this);
         this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
         this.getPrimaryViewID = this.getPrimaryViewID.bind(this);
-        this.bindLocationChangeHandler = this.bindLocationChangeHandler.bind(this);
+        this.bindHiGlassEventHandlers = this.bindHiGlassEventHandlers.bind(this);
         this.updateCurrentDomainsInStorage = _.debounce(this.updateCurrentDomainsInStorage.bind(this), 200);
 
         this.initializeStorage(props); // Req'd before this.storagePrefix can be referenced.
@@ -457,8 +457,8 @@ export class HiGlassContainer extends React.PureComponent {
     componentDidUpdate(pastProps, pastState){
         var hiGlassComponentExists = !!(this.refs.hiGlassComponent);
         if (!this.hiGlassComponentExists && hiGlassComponentExists){
-            this.bindLocationChangeHandler();
-            console.log('Binding "updateCurrentDomainsInStorage" to HiGlassComponent "location" change event.');
+            this.bindHiGlassEventHandlers();
+            console.log('Binding event handlers to HiGlassComponent.');
         }
         this.hiGlassComponentExists = hiGlassComponentExists;
     }
@@ -496,10 +496,16 @@ export class HiGlassContainer extends React.PureComponent {
         }
     }
 
-    bindLocationChangeHandler(){
+    /**
+     * Binds functions to HiGlass events.
+     * 
+     * - this.updateCurrentDomainsInStorage is bound to 'location' change event.
+     * - TODO: onDrag/Drop stuff.
+     */
+    bindHiGlassEventHandlers(){
         if (this.state.viewConfig && this.refs.hiGlassComponent){
-            var hiGlassComponent = this.refs.hiGlassComponent;
-            var viewID = this.getPrimaryViewID();
+            var hiGlassComponent = this.refs.hiGlassComponent,
+                viewID = this.getPrimaryViewID();
             hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
         } else {
             console.warn('No HiGlass instance available.');

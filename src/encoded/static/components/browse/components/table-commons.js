@@ -122,17 +122,17 @@ export const defaultColumnDefinitionMap = {
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
                 var linkProps = { 'href' : link || '#', 'target' : (popLink ? '_blank' : null) };
-                title = <a {...linkProps}>{ title }</a>;
+                title = <a key="title" {...linkProps}>{ title }</a>;
                 if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
                     hasPhoto = true;
-                    title = <span>{ object.itemUtil.User.gravatar(result.email, 32, { 'className' : 'in-search-table-title-image', 'data-tip' : result.email }, 'mm') }{ title }</span>;
+                    title = <span key="title">{ object.itemUtil.User.gravatar(result.email, 32, { 'className' : 'in-search-table-title-image', 'data-tip' : result.email }, 'mm') }{ title }</span>;
                 }
             }
 
             return (
                 <span>
                     <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
-                    <div className={"title-block" + (hasPhoto ? ' has-photo' : " text-ellipsis-container")} data-tip={tooltip}>{ title }</div>
+                    <div key="title-container" className={"title-block" + (hasPhoto ? ' has-photo' : " text-ellipsis-container")} data-tip={tooltip}>{ title }</div>
                 </span>
             );
         }
@@ -162,11 +162,7 @@ export const defaultColumnDefinitionMap = {
             }
             return (
                 <span>
-                    <i
-                        className="icon icon-fw icon-user-o user-icon"
-                        data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title}
-                        data-html
-                    />
+                    <i className="icon icon-fw icon-user-o user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
                     { labLink }
                 </span>
             );

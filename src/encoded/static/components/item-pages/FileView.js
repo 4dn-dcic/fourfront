@@ -3,8 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox } from 'react-bootstrap';
+import url from 'url';
+import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
+import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HiGlassContainer } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
@@ -43,7 +45,8 @@ export default class FileView extends WorkflowRunTracingView {
         if (FileView.shouldHiGlassViewExist(props.context)){
             this.state = _.extend(this.state || {}, {
                 'validatingHiGlassTileData' : true,
-                'isValidHiGlassTileData' : false
+                'isValidHiGlassTileData' : false,
+                'tips' : object.tipsFromSchema(props.schemas || Schemas.get(), props.context)
             });
         }
     }
@@ -51,6 +54,12 @@ export default class FileView extends WorkflowRunTracingView {
     componentDidMount(){
         super.componentDidMount();
         this.validateHiGlassData();
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.schemas !== this.props.schemas || nextProps.context !== this.props.context){
+            this.setState({ 'tips' : object.tipsFromSchema(nextProps.schemas || Schemas.get(), nextProps.context) });
+        }
     }
 
     /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
@@ -67,15 +76,12 @@ export default class FileView extends WorkflowRunTracingView {
 
     getTabViewContents(){
 
-        var initTabs = [];
-        var context = this.props.context;
-
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (width) width -= 20;
+        var initTabs = [],
+            context = this.props.context,
+            width = this.getTabViewWidth(),
+            steps = this.state.steps;
 
         initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
-        
-        var steps = this.state.steps;
 
         if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
@@ -89,7 +95,7 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} /></layout.WindowResizeUpdateTrigger>;
+        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} tips={this.state.tips} /></layout.WindowResizeUpdateTrigger>;
     }
 
 }
@@ -101,7 +107,7 @@ globals.content_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, schemas, width){
+    static getTabObject(context, tips, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'file-overview',
@@ -112,7 +118,7 @@ class FileViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} schemas={schemas} width={width} />
+                    <FileViewOverview context={context} tips={tips} width={width} />
                 </div>
             )
         };
@@ -151,7 +157,7 @@ class FileViewOverview extends React.Component {
 
         return (
             <div>
-                <FileOverViewBody result={context} schemas={this.props.schemas} />
+                <FileOverViewBody result={context} tips={this.props.tips} />
                 { table }
             </div>
         );
@@ -189,29 +195,32 @@ export class FileOverviewHeading extends React.Component {
     constructor(props){
         super(props);
         this.onTransition = this.onTransition.bind(this);
+        this.onTransitionSetOpen = this.onTransition.bind(this, true);
+        this.onTransitionUnsetOpen = this.onTransition.bind(this, false);
         this.overviewBlocks = this.overviewBlocks.bind(this);
         this.state = {
-            isPropertiesOpen : true,
-            mounted : false
+            'isPropertiesOpen' : true,
+            'mounted' : false
         };
     }
 
     componentDidMount(){
-        this.setState({ mounted : true });
+        this.setState({ 'mounted' : true });
     }
 
     onTransition(isOpen = false){
-        this.setState({ isPropertiesOpen : isOpen });
+        this.setState({ 'isPropertiesOpen' : isOpen });
     }
 
     overviewBlocks(){
-        var file = this.props.context;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+        var file = this.props.context,
+            tips = this.props.tips,    // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+            commonProps = { tips, 'result' : file, 'wrapInColumn' : "col-sm-3 col-lg-3" };
         return [
-            <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-3 col-lg-3" />,
-            <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-3 col-lg-3" />,
-            <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-3 col-lg-3" />,
-            <OverViewBodyItem tips={tips} result={file} property='file_size' fallbackTitle="File Size" wrapInColumn="col-sm-3 col-lg-3" titleRenderFxn={(field, size)=>
+            <OverViewBodyItem {...commonProps} key="file_format" property='file_format' fallbackTitle="File Format" />,
+            <OverViewBodyItem {...commonProps} key="file_type" property='file_type' fallbackTitle="File Type" />,
+            <OverViewBodyItem {...commonProps} key="file_classification" property='file_classification' fallbackTitle="General Classification" />,
+            <OverViewBodyItem {...commonProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={(field, size)=>
                 <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName('file_size', size) }</span>
             } />
         ];
@@ -223,7 +232,7 @@ export class FileOverviewHeading extends React.Component {
         return (
             <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
                 <div className="col-xs-12 col-md-9 col-lg-8">
-                    <OverviewHeadingContainer onStartClose={this.onTransition.bind(this, false)} onFinishOpen={this.onTransition.bind(this, true)} children={this.overviewBlocks()}/>
+                    <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen} children={this.overviewBlocks()}/>
                 </div>
                 <div className={"col-xs-12 col-md-3 col-lg-4 mt-1" + (this.state.isPropertiesOpen || isSmallerSize ? ' mb-3' : '')}>
                     <FileViewDownloadButtonContainer file={this.props.context} size="lg" verticallyCentered={!isSmallerSize && this.state.isPropertiesOpen} />
@@ -254,22 +263,47 @@ export class FileViewDownloadButtonContainer extends React.Component {
 
 export class FileOverViewBody extends React.Component {
 
-    render(){
-        var file = this.props.result;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file);
+    constructor(props){
+        super(props);
+        this.handleJuiceBoxVizClick = this.handleJuiceBoxVizClick.bind(this);
+    }
 
+    handleJuiceBoxVizClick(evt){
+        var file = this.props.result,
+            pageHref = this.props.href || (store && store.getState().href),
+            hrefParts = url.parse(pageHref),
+            host = hrefParts.protocol + '//' + hrefParts.host,
+            targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+
+        if (isServerSide()) return null;
+        var win = window.open(targetLocation, '_blank');
+        win.focus();
+    }
+
+    visualizeExternallyButton(){
+        var file = this.props.result, tips = this.props.tips;
+        if (!file || file.file_format !== 'hic') return null;
         return (
-            <div className="row">
+            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
+                <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
+                    <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                </Button>
+            } />
+        );
+    }
 
-                <div className="col-xs-12">
-                    <div className="row overview-blocks">
+    render(){
+        var file = this.props.result, tips = this.props.tips;
+        var extVizButton = this.visualizeExternallyButton();
+        console.log('sdfsdf', this.props, extVizButton);
+        return (
+            <div className="row overview-blocks">
 
-                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn="col-md-6" />
+                { extVizButton }
 
-                        <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn="col-md-6" schemas={this.props.schemas} />
+                <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn="col-md-6 pull-right" schemas={this.props.schemas} />
+                <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn="col-md-6" />
 
-                    </div>
-                </div>
             </div>
         );
 
@@ -277,7 +311,7 @@ export class FileOverViewBody extends React.Component {
 }
 
 
-export class QualityControlResults extends React.Component {
+export class QualityControlResults extends React.PureComponent {
 
     static defaultProps = { 'property' : 'quality_metric', 'hideIfNoValue' : false };
 

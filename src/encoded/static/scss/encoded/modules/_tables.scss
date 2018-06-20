@@ -1070,6 +1070,29 @@ $small-label-accession-font-size : 0.75rem;
 						margin-top: -2px;
 					}
 
+					.in-stacked-table-button {
+						&.btn-xs {
+							margin-right : -33px;
+							margin-left: 6px;
+							margin-top: -2px;
+							margin-bottom: -1px;
+							padding-top: 3px;
+						}
+					}
+
+					.in-stacked-table-icon-indicator {
+						display: inline-block;
+						margin-left: 12px;
+						margin-right: -27px;
+						&.indicator-higlass-available {
+							margin-right: -30px;
+							margin-left: 7px;
+						}
+						&.disabled {
+							color: #999;
+						}
+					}
+
 				}
 
 			}

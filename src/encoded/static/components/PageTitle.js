@@ -245,17 +245,16 @@ export default class PageTitle extends React.PureComponent {
 
         if (PageTitle.isHomePage(href)){
             return (
-                <layout.WindowResizeUpdateTrigger>
-                    <div id="page-title-container" className="container">
-                        <div className="breadcrumb-placeholder" key="breadcrumbs" />
+                <div id="page-title-container" className="container">
+                    <div className="breadcrumb-placeholder" key="breadcrumbs" />
+                    <layout.WindowResizeUpdateTrigger>
                         <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
-                    </div>
-                </layout.WindowResizeUpdateTrigger>
+                    </layout.WindowResizeUpdateTrigger>
+                </div>
             );
         }
 
         var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
-        
 
         if (title) {
             title = <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>{ title }</span>;
@@ -277,12 +276,12 @@ export default class PageTitle extends React.PureComponent {
         );
 
         return (
-            <layout.WindowResizeUpdateTrigger>
-                <div id="page-title-container" className="container">
-                    <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
+            <div id="page-title-container" className="container">
+                <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
+                <layout.WindowResizeUpdateTrigger>
                     <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} />
-                </div>
-            </layout.WindowResizeUpdateTrigger>
+                </layout.WindowResizeUpdateTrigger>
+            </div>
         );
     }
 
