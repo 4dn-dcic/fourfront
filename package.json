@@ -86,7 +86,7 @@
     "d3": "^4.13.0",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
-    "higlass": "^1.0.0",
+    "higlass": "^1.0.1",
     "js-md5": "^0.4.2",
     "jsonwebtoken": "^7.4.3",
     "lodash": "^4.17.10",

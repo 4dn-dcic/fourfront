@@ -61,27 +61,21 @@ export class WorkflowRunTracingView extends DefaultItemView {
         };
     }
 
-    componentDidMount(inclState = {}){
-
-        var changeTabToGraphSectionIfHaveHash = function(){
-            if (isGraphSectionOpen(this.props.href)){
-                if (this.refs.tabbedView && this.refs.tabbedView.refs && this.refs.tabbedView.refs.tabs && typeof this.refs.tabbedView.refs.tabs.setActiveKey === 'function'){
-                    try {
-                        this.refs.tabbedView.refs.tabs.setActiveKey(TabbedView.getDefaultActiveKeyFromContents(this.getTabViewContents()));
-                    } catch (e) {
-                        console.warn('Could not automatically switch tabs to Graph section, perhaps no longer supported by rc-tabs.');
-                    }
-                }
-            }
-        }.bind(this);
-
-        var state = _.extend(inclState || {}, { 'mounted' : true });
+    componentDidMount(){
+        var nextState = { 'mounted' : true };
 
         if (!this.state.steps){
-            state.loadingGraphSteps = true;
+            nextState.loadingGraphSteps = true;
             this.loadGraphSteps();
         }
-        this.setState(state, function(){ setTimeout(changeTabToGraphSectionIfHaveHash, 750); });
+        this.setState(nextState);
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (this.props.context !== pastProps.context && !_testing_data){
+            console.info('Updated WorkflowRunTracingView -- re-loading steps.');
+            this.setState({ 'steps' : null, 'loadingGraphSteps' : true }, () => this.loadGraphSteps() );
+        }
     }
 
     loadGraphSteps(force = false, cb = null, cache = false){
@@ -139,7 +133,7 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
     indirectFilesCheckbox(){
         if (typeof this.props.showIndirectFiles !== 'boolean' || typeof this.props.onToggleIndirectFiles !== 'function') return null;
         return (
-            <div className="inline-block checkbox-container">
+            <div className="inline-block checkbox-container" key="show-indirect-files-checkbox">
                 <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles} disabled={this.props.isShowMoreContextCheckboxDisabled}>
                     Show More Context
                 </Checkbox>
@@ -149,7 +143,7 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
     allRunsCheckbox(){
         if (typeof this.props.allRuns !== 'boolean' || typeof this.props.onToggleAllRuns !== 'function') return null;
         return (
-            <div className="inline-block checkbox-container">
+            <div className="inline-block checkbox-container" key="show-all-runs-checkbox">
                 <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns} disabled={this.props.isAllRunsCheckboxDisabled}>
                     { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
                 </Checkbox>
@@ -182,7 +176,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
         return {
             'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
-            'key'       : 'graph',
+            'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
             'isDefault' : isGraphSectionOpen(parentItemViewProps.href, hash),
             'content'   : (
@@ -295,37 +289,23 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     render(){
-        var graphProps = null;
-        if (Array.isArray(this.props.steps)){
-            graphProps = this.commonGraphProps();
-        }
-
-        var isReferenceFilesCheckboxDisabled = !this.state.anyReferenceFileNodes;
-        var isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false);
-        var isShowMoreContextCheckboxDisabled = !this.state.showIndirectFiles && !this.state.anyIndirectPathIONodes;
+        var graphProps = Array.isArray(this.props.steps) ? this.commonGraphProps() : null,
+            isReferenceFilesCheckboxDisabled = !this.state.anyReferenceFileNodes,
+            isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false),
+            isShowMoreContextCheckboxDisabled = !this.state.showIndirectFiles && !this.state.anyIndirectPathIONodes;
 
         return (
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <TracedGraphSectionControls
-                        {...this.state}
-                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')}
-                        loading={this.props.loadingGraphSteps}
-                        onToggleReferenceFiles={this.onToggleReferenceFiles}
-                        onToggleIndirectFiles={this.onToggleIndirectFiles}
-                        onChangeRowSpacingType={this.onChangeRowSpacingType}
-                        onToggleFullScreenView={this.onToggleFullScreenView}
-                        onToggleShowParameters={this.onToggleShowParameters}
-                        isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}
-                        isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled}
-                        isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled}
-                    />
+                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')} loading={this.props.loadingGraphSteps}
+                        onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles}
+                        onChangeRowSpacingType={this.onChangeRowSpacingType} onToggleFullScreenView={this.onToggleFullScreenView} onToggleShowParameters={this.onToggleShowParameters}
+                        isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>
-                    { graphProps ? <Graph { ...graphProps } /> : null }
-                </div>
+                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }} children={graphProps ? <Graph { ...graphProps } /> : null} />
             </div>
         );
 

@@ -74,10 +74,9 @@ export default class ExperimentView extends WorkflowRunTracingView {
      */
     getTabViewContents(){
 
-        var initTabs = [];
-        var context = this.props.context;
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (width) width -= 20;
+        var initTabs = [],
+            context = this.props.context,
+            width = this.getTabViewWidth();
 
         if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));

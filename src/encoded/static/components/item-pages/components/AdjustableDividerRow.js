@@ -163,6 +163,8 @@ export class AdjustableDividerRow extends React.PureComponent {
             height = this.state.rightPanelHeight;
         }
 
+        var rightPanel = renderRightPanel(  (layoutSize === 'md' || layoutSize === 'lg') ? this.rightPanelWidth + 10 - xOffset : width,  this.resetXOffset,  !!(leftPanelCollapsed)  );
+
         return (
             <div className={"row" + (className ? ' ' + className : '')}>
                 <div className={"left-panel col-xs-12 col-md-" + leftPanelDefaultSizeMD + " col-lg-" + leftPanelDefaultSizeMD + (leftPanelClassName ? ' ' + leftPanelClassName : '')}
@@ -172,7 +174,7 @@ export class AdjustableDividerRow extends React.PureComponent {
                 </div>
                 <div className={"right-panel col-xs-12 col-md-" + rightPanelDefaultSizeMD + " col-lg-" + rightPanelDefaultSizeLG + (rightPanelClassName ? ' ' + rightPanelClassName : '')} ref="rightPanel"
                     style={(layoutSize === 'lg' || layoutSize === 'md') ? { width : (this.rightPanelWidth + 30) - xOffset } : null}
-                    children={renderRightPanel((layoutSize === 'md' || layoutSize === 'lg') ? this.rightPanelWidth + 10 - xOffset : width, this.resetXOffset)} />
+                    children={rightPanel} />
             </div>
         );
     }
