@@ -430,9 +430,9 @@ export class OverViewBodyItem extends React.Component {
             innerBlockReturned = (
                 <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} title={this.props.overrideTitle} />
-                        <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + ((!resultPropertyValue && property) ? ' no-value' : '')}>
-                            { fallbackify(resultPropertyValue) }
-                        </div>
+                    <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + ((!resultPropertyValue && property) ? ' no-value' : '')}>
+                        { fallbackify(resultPropertyValue) }
+                    </div>
                 </div>
             );
         }
