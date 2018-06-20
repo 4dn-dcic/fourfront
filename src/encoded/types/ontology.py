@@ -25,12 +25,25 @@ class OntologyTerm(Item):
     embedded_list = ['slim_terms.is_slim_for', 'slim_terms.term_name', 'source_ontology.ontology_name']
     name_key = 'term_id'
 
+    def _update(self, properties, sheets=None):
+        '''set preferred_name field to term_name if it's not already populated
+        '''
+        # import pdb; pdb.set_trace()
+        if properties.get('preferred_name', None) is None:
+            termname = properties.get('term_name')
+            if termname:
+                properties['preferred_name'] = termname
+
+        super(OntologyTerm, self)._update(properties, sheets)
+
     @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, term_id, term_name=None):
+    def display_title(self, request, term_id, preferred_name=None, term_name=None):
+        if preferred_name is not None:
+            return preferred_name
         if term_name is not None:
             return term_name
         return term_id
