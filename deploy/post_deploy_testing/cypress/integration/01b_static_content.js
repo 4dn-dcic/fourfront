@@ -105,7 +105,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
         });
 
         it("HiGlass initializes (very basic)", function(){
-            cy.wait(1000).end().get('div.CenterTrack-module_center-track-3ptRW').wait(500);
+            cy.wait(2000).end().get('div.CenterTrack-module_center-track-3ptRW', { 'timeout' : (3 * 60 * 1000) }).wait(500);
         });
 
         it('Have more (>50) sets depicted when logged in', function(){
