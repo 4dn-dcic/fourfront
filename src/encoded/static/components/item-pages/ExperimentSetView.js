@@ -361,6 +361,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             tb = (tableProps && tableProps.expTable && tableProps.expTable.props) || {},
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
+        // HiC File External Link/Button to JuiceBox
         if (file && ((file.file_format && file.file_format === 'hic') || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1) ) && file.href){
             var onClick = function(evt){
                     var pageHref = tableProps.href || tb.href || (store && store.getState().href),
@@ -377,17 +378,29 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                     </Button>
                 );
             return <span>{ title } { juiceBoxExternalLinkBtn }</span>;
-        } else if (file && ((file.file_format && file.file_format === 'mcool') || (file.file_type_detailed && file.file_type_detailed.indexOf('(mcool)') > -1) ) && file.higlass_uid ){
-            var hiGlassIndicatorProps = _.extend({
-                    'className' : "indicator-higlass-available" + (collapsibleAndCollapsed ? ' clickable in-stacked-table-button' : ' in-stacked-table-icon-indicator')
-                }, collapsibleAndCollapsed ? {
-                    'onClick' : tb.resetDivider,
-                    'bsSize' : 'xs',
-                    'bsStyle' : 'primary'
-                } : {}),
-                childIcon = <i className="icon icon-fw icon-television text-smaller" data-tip={"This file " + (!collapsibleAndCollapsed && typeof tb.leftPanelCollapsed === 'boolean' ? "is being" : "may be") + " visualized with the HiGlass browser."} />,
-                hiGlassIndicator = collapsibleAndCollapsed ? <Button {...hiGlassIndicatorProps} children={childIcon}/> : <span {...hiGlassIndicatorProps}><i className="icon icon-angle-left" style={{ marginRight : 4 }}/>{ childIcon }</span>;
-            return <span>{ title } { hiGlassIndicator }</span>;
+
+        } else if (file && file.higlass_uid && ((file.file_format && file.file_format === 'mcool') || (file.file_type_detailed && file.file_type_detailed.indexOf('(mcool)') > -1) ) ) {
+
+            var onDragStart = function(evt){
+                if (!evt || !evt.dataTransfer) return;
+                // evt.dataTransfer.setData('text/4dn-item-context', JSON.stringify(file));
+                evt.dataTransfer.setData('text/higlass-tileset-info', JSON.stringify({ 'tilesetUid' : file.higlass_uid, 'genome_assembly' : file.genome_assembly }));
+            };
+
+            // Currently-visualized MCOOL File HiGlass Indicator
+            if (tb.currentlyVisualizedFile && object.itemUtil.atId(tb.currentlyVisualizedFile) === fileAtId){
+                var hiGlassIndicatorProps = _.extend({
+                        'className' : "indicator-higlass-available" + (collapsibleAndCollapsed ? ' clickable in-stacked-table-button' : ' in-stacked-table-icon-indicator')
+                    }, collapsibleAndCollapsed ? {
+                        'onClick' : tb.resetDivider,
+                        'bsSize' : 'xs',
+                        'bsStyle' : 'primary'
+                    } : {}),
+                    childIcon = <i className="icon icon-fw icon-television text-smaller" data-tip={"This file " + (!collapsibleAndCollapsed && typeof tb.leftPanelCollapsed === 'boolean' ? "is being" : "may be") + " visualized with the HiGlass browser."} />,
+                    hiGlassIndicator = collapsibleAndCollapsed ? <Button {...hiGlassIndicatorProps} children={childIcon}/> : <span {...hiGlassIndicatorProps}><i className="icon icon-angle-left" style={{ marginRight : 4 }}/>{ childIcon }</span>;
+                return <span onDragStart={onDragStart}>{ title } { hiGlassIndicator }</span>;
+            }
+            return <span onDragStart={onDragStart}>{title}</span>; // TODO: Buttons to make this actively-visualized file.
         }
         return null; // Fallback to default title renderer.
     }
@@ -447,7 +460,8 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             'experimentArray' : context.experiments_in_set,
             'replicateExpsArray' : context.replicate_exps,
             'collapseLimit' : 10, 'collapseShow' : 7,
-            'columnHeaders' : this.columnHeaders
+            'columnHeaders' : this.columnHeaders,
+            'currentlyVisualizedFile' : this.state.mcoolFile
         };
 
         if (this.state.mcoolFile){
@@ -623,7 +637,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
             }
         );
         var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
-        var collectionsFromExpSetObject = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
+        var collectionsByTitle = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         var collectionsFromExps = _.reduce(props.context.experiments_in_set || [], function(m, exp){
@@ -641,22 +655,21 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
 
         var collectionsFromExpsUnBubbled = [];
         _.forEach(collectionsFromExps, function(collection){
-            if (collectionsFromExpSetObject[collection.title]){
+            if (collectionsByTitle[collection.title]){
                 _.forEach(collection.files, function(f){
-                    var duplicateExistingFile = _.find(collectionsFromExpSetObject[collection.title].files, function(existFile){ return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b'); });
+                    var duplicateExistingFile = _.find(collectionsByTitle[collection.title].files, function(existFile){ return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b'); });
                     if (duplicateExistingFile){
                         console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
                     } else {
-                        collectionsFromExpSetObject[collection.title].files.push(f);
+                        collectionsByTitle[collection.title].files.push(f);
                     }
                 });
             } else {
-                collectionsFromExpsUnBubbled.push(collection);
+                collectionsByTitle[collection.title] = collection;
             }
         });
 
-        var combinedCollections = _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled);
-        return _.filter(combinedCollections, OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
+        return _.filter(_.values(collectionsByTitle), OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
     }
 
     render(){
