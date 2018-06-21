@@ -844,7 +844,7 @@ def run_workflow(context, request):
     res_dict = json.loads(res_decode)
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
-    for i in range(2):
+    for _ in range(2):
         res = aws_lambda.invoke(FunctionName='status_wfr',
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
