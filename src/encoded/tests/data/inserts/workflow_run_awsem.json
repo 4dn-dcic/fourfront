@@ -146,5 +146,30 @@
         "run1.sh param1 param2 param3",
         "run2.sh param4 param5 param6"
     ]
-}
+},
+{
+    "uuid":"a2b21fdd-c4b9-4dac-b32e-8fa704dbd9f2",
+    "lab":"4dn-dcic-lab",
+    "award":"1U01CA200059-01",
+    "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3",
+    "run_status": "complete",
+    "status": "in review by lab",
+    "metadata_only": true,
+    "input_files": [
+        {
+            "ordinal": 1,
+            "value": "7f9eb396-5c1a-1112-aebf-28ea39d6a50f",
+            "workflow_argument_name": "inputs"
+        }
+    ],
+    "title": "File Provenance Tracking Workflow run on 2018-06-18 16:32:48.374270",
+    "output_files": [
+        {
+            "value": "d273d710-6b6d-4e43-a84c-5658a891c032",
+            "type": "Output processed file",
+            "workflow_argument_format": "bw",
+            "workflow_argument_name": "outputs"
+        }
+    ]
+  }
 ]
