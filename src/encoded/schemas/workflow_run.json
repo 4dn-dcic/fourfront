@@ -42,6 +42,11 @@
 		        "type": "boolean",
 			      "default": false
         },
+        "description_only": {
+            "title": "File Provenance Graph",
+            "description": "When True the file provenance graph was generated without a run of a 4dn-dcic pipeline.",
+            "type": "boolean"
+        },
         "input_files": {
             "title": "Input files",
             "description": "The files used as initial input for the workflow.",
