@@ -358,16 +358,15 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     static defaultProps = {
         'columnHeaders' : [
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',                                      title: 'File',          initialWidth: 110   },
+            {  columnClass: 'file', title: 'File', initialWidth: 130 },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 120 },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
-        'titleForFiles'     : 'Processed Files',
-        'showMetricColumns' : null
+        'titleForFiles'     : 'Processed Files'
     };
 
     constructor(props){
@@ -405,7 +404,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         return filesGroupedByExperimentOrGlobal;
     }
 
-    renderFileBlocksForExperiment(experimentAccession, filesForExperiment, experimentObj){
+    renderFileBlocksForExperiment(experimentAccession, filesForExperiment){
         return _.map(filesForExperiment, (file) => {
             this.oddExpRow = !this.oddExpRow;
             return (
@@ -439,12 +438,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
             var repsExist = experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no;
             var nameBlock = (
-                <StackedBlockName
-                    style={
-                        repsExist ? { paddingTop : 19, paddingBottom: 19 }
-                        : null
-                    }
-                >
+                <StackedBlockName style={repsExist ? { paddingTop : 19, paddingBottom: 19 } : null}>
                     { repsExist ?
                         <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div>
                     : <div/> }
@@ -453,7 +447,6 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                         :
                         <div className={"name-title" + (nameTitle === this.props.experimentSetAccession ? ' mono-text' : '')}>{ nameTitle }</div>
                     }
-                    
                 </StackedBlockName>
             );
             return (
@@ -463,16 +456,16 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                     key={experimentAccession}
                     id={'exp-' + experimentAccession}
                     label={{
-                        title : experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment',
-                        //subtitle : visibleBiosampleTitle,
-                        subtitleVisible : true,
-                        accession : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
+                        'title' : experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment',
+                        //'subtitle' : visibleBiosampleTitle,
+                        'subtitleVisible' : true,
+                        'accession' : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
                     }}>
                     { nameBlock }
                     <StackedBlockList
                         className="files" collapseLongLists={this.props.collapseLongLists}
                         title={this.props.titleForFiles}
-                        children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment, experimentObj) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
+                        children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
                         showMoreExtTitle={null} />
                 </StackedBlock>
             );
@@ -483,9 +476,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     render(){
         return (
-            <StackedBlockTable
-                {..._.pick(this.props, 'columnHeaders', 'selectedFiles', 'selectFile', 'unselectFile', 'experimentSetAccession', 'width', 'collapseLongLists')}
-                className="expset-processed-files" fadeIn >
+            <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn>
                 <StackedBlockList className="sets" title="Experiments" collapseLongLists={this.props.collapseLongLists} children={this.state.renderedExperimentBlocks} rootList />
             </StackedBlockTable>
         );

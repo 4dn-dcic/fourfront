@@ -656,23 +656,10 @@ export class FileEntryBlockPairColumn extends React.Component {
     render(){
         var tableHasFilePairColumn = _.pluck(this.props.columnHeaders || [], 'title').indexOf('File Pair') > -1;
         return (
-            <StackedBlock
-                {...this.props}
-                label={{ 'title' : 'File' }}
-                hideNameOnHover={false}
-                keepLabelOnHover={!tableHasFilePairColumn || !this.hasCheckbox()}
-                columnClass={this.props.columnClass || 'file-pair'}
-                className={this.props.isSingleItem ? 'single-item' : null}
-            >
-                { tableHasFilePairColumn ? <StackedBlockName passProps={false}>{ this.renderCheckBox() }</StackedBlockName> : null }
+            <StackedBlock {...this.props} label={{ 'title' : 'File' }} hideNameOnHover={false} keepLabelOnHover={!tableHasFilePairColumn || !this.hasCheckbox()} columnClass={this.props.columnClass || 'file-pair'} className={this.props.isSingleItem ? 'single-item' : null}>
+                { tableHasFilePairColumn ? <StackedBlockName passProps={false} children={this.renderCheckBox()}/> : null }
                 <StackedBlockList title="Files" className="files" collapseLongLists={false}>
-                    <FileEntryBlock
-                        file={this.props.file}
-                        experiment={this.props.experiment}
-                        isSingleItem={this.props.isSingleItem}
-                        excludeCheckbox={tableHasFilePairColumn}
-                        label={tableHasFilePairColumn ? null : FileEntryBlock.defaultProps.label}
-                    />
+                    <FileEntryBlock {..._.pick(this.props, 'file', 'experiment', 'isSingleItem')} excludeCheckbox={tableHasFilePairColumn} label={tableHasFilePairColumn ? null : FileEntryBlock.defaultProps.label} />
                 </StackedBlockList>
             </StackedBlock>
         );
@@ -727,35 +714,36 @@ export class FileEntryBlock extends React.Component {
         return summary;
     }
 
-    filledFileRow (file = this.props.file){
-        var row = [];
-        var cols = _.filter(this.props.columnHeaders, (col)=>{
-            if (col.columnClass === 'file-detail') return true;
-            return false;
-            //if (this.props.nonFileHeaderCols.indexOf(col.columnClass) > -1) return false;
-            //return true;
-        });
-        var baseClassName = (this.props.className || '') + " col-file-detail item";
+    filledFileRow(file = this.props.file){
+        var { columnHeaders, className, colWidthStyles } = this.props,
+            row = [],
+            cols = _.filter(columnHeaders, (col)=>{
+                if (col.columnClass === 'file-detail') return true;
+                return false;
+                //if (this.props.nonFileHeaderCols.indexOf(col.columnClass) > -1) return false;
+                //return true;
+            }),
+            baseClassName = (className || '') + " col-file-detail item";
         
         for (var i = 0; i < cols.length; i++){
 
-            var col = cols[i];
-            var className = baseClassName + ' col-' + col.columnClass + ' detail-col-' + i;
-            var title = col.valueTitle || col.title;
-            var baseStyle = this.props.colWidthStyles ? this.props.colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
+            var col = cols[i],
+                colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + i,
+                title = col.valueTitle || col.title,
+                baseStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (typeof col.render === 'function'){
-                row.push(<div key={col.field} className={className} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
+                row.push(<div key={col.field} className={colClassName} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
                 continue;
             }
 
             if (!file || !object.atIdFromObject(file)) {
-                row.push(<div key={"file-detail-empty-" + i} className={className} style={baseStyle}></div>);
+                row.push(<div key={"file-detail-empty-" + i} className={colClassName} style={baseStyle}></div>);
                 continue;
             }
 
             if (title === 'File Type'){
-                row.push(<div key="file-type" className={className} style={baseStyle}>{ this.fileTypeSummary() }</div>);
+                row.push(<div key="file-type" className={colClassName} style={baseStyle}>{ this.fileTypeSummary() }</div>);
                 continue;
             }
 
@@ -780,17 +768,17 @@ export class FileEntryBlock extends React.Component {
                         );
                     }
                 }
-                row.push(<div key={col.field} className={className} style={baseStyle} children={val} />);
+                row.push(<div key={col.field} className={colClassName} style={baseStyle} children={val} />);
                 continue;
             }
 
             if (title === 'File Info'){ // AKA Paired Info
                 if (typeof file.paired_end !== 'undefined') {
-                    row.push(<div key="file-info" className={className} style={baseStyle}>Paired end {file.paired_end}</div>);
+                    row.push(<div key="file-info" className={colClassName} style={baseStyle}>Paired end {file.paired_end}</div>);
                 } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
-                    row.push(<div key="file-info" className={className} style={baseStyle}>Unpaired</div>);
+                    row.push(<div key="file-info" className={colClassName} style={baseStyle}>Unpaired</div>);
                 } else {
-                    row.push(<div key="file-info" className={className} style={baseStyle}></div>);
+                    row.push(<div key="file-info" className={colClassName} style={baseStyle}></div>);
                 }
                 continue;
             }
@@ -798,99 +786,89 @@ export class FileEntryBlock extends React.Component {
         return row;
     }
 
-    renderName(){
+    renderNameInnerTitle(){
 
-        var file = this.props.file;
+        var { file, columnHeaders } = this.props,
+            colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null,
+            fileAtId = file && object.atIdFromObject(file),
+            fileError = (file && file.error) || false,
+            fileTitleString;
 
-        function titleString(){
-            if (!file) return 'No Files';
-            if (file.accession) return file.accession;
-            var atId = object.atIdFromObject(file);
-            if (atId){
-                var idParts = _.filter(atId.split('/'));
-                if (idParts[1].slice(0,5) === '4DNFI'){
-                    return idParts[1];
-                }
-            }
-            return file.uuid || atId || (file.error && <em>{ file.error }</em>) || 'N/A';
+        if (fileError) {
+            return <div className="name-title"><em>{ fileError }</em></div>;
         }
 
-        function title(){
-            if (!file || !object.atIdFromObject(file)) return <div className="name-title">{ titleString.call(this) }</div>;
-            return (
-                <a className="name-title mono-text" href={ object.atIdFromObject(file) || '#' }>
-                    { titleString.call(this) }
-                </a>
-            );
+        if (!file)                              fileTitleString = 'No Files';
+        if (!fileTitleString && file.accession) fileTitleString = file.accession;
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0,5) === '4DNFI'){
+                fileTitleString = idParts[1];
+            }
         }
+        if (!fileTitleString)                   fileTitleString = file.uuid || fileAtId || 'N/A';
+        if (typeof colForFile.render === 'function') {
+            var renderedName = colForFile.render(file, this.props, { fileAtId, fileTitleString });
+            if (renderedName) return <div className="name-title" children={renderedName} />;
+        }
+        if (!fileAtId) {
+            return <div className="name-title" children={fileTitleString}/>;
+        }
+        return <a className="name-title mono-text" href={fileAtId} children={fileTitleString}/>;
+    }
 
-        function label(){
-            if (!file) return null;
+    renderLabel(){
+        var { file, label, type, sequenceNum, columnHeaders } = this.props;
 
-            var commonProperties = {
-                'title'     : this.props.label && this.props.label.title,
-                'inline'    : false,
-                'className' : 'col-file',
-                'subtitle'  : this.props.label && this.props.label.subtitle
-            };
+        if (!file) return null;
 
-            if (this.props.label) {
-                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label)} />;
-            } else if (this.props.type === 'sequence-replicate') {
-                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label, { 'subtitle' : (this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null) })} />;
-            } else if (this.props.type === 'paired-end') {
-                return <StackedBlock.Name.Label {...commonProperties} />;
-                //return RawFilesStackedTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
-                //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
-                //}));
-            }
+        var commonProperties = {
+            'title'     : label && label.title,
+            'inline'    : false,
+            'className' : 'col-file',
+            'subtitle'  : label && label.subtitle
+        };
 
-            if (Array.isArray(this.props.columnHeaders)) {
-                var headerTitles = _.pluck(this.props.columnHeaders, 'title');
-                if (
-                    (file.file_type || file.file_format) &&
-                    _.intersection(headerTitles,['File Type', 'File Format']).length === 0
-                ){
-                    return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || file.file_format} />;
-                }
-                if (
-                    file.instrument &&
-                    _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
-                ){
-                    return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
-                }
-            }
-
+        if (label) {
+            return <StackedBlock.Name.Label {..._.extend(commonProperties, label)} />;
+        } else if (type === 'sequence-replicate') {
+            return <StackedBlock.Name.Label {..._.extend(commonProperties, label, { 'subtitle' : (sequenceNum ? 'Seq Replicate ' + sequenceNum : null) })} />;
+        } else if (type === 'paired-end') {
             return <StackedBlock.Name.Label {...commonProperties} />;
+            //return RawFilesStackedTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+            //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
+            //}));
         }
 
-        return (
-            <div
-                className={"name col-file" + (this.props.file && this.props.file.accession ? ' mono-text' : '')}
-                style={this.props.colWidthStyles ? this.props.colWidthStyles.file : null}
-            >
-                { label.call(this) }
-                { this.renderCheckBox() }
-                { title.call(this) }
-            </div>
-        );
+        if (Array.isArray(columnHeaders)) {
+            var headerTitles = _.pluck(columnHeaders, 'title');
+            if ( (file.file_type || file.file_format) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0 ){
+                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || file.file_format} />;
+            }
+            if ( file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0 ){
+                return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
+            }
+        }
+
+        return <StackedBlock.Name.Label {...commonProperties} />;
+    }
+
+    renderName(){
+        var { file, colWidthStyles } = this.props;
+        return <div className={"name col-file" + (file && file.accession ? ' mono-text' : '')} style={colWidthStyles ? colWidthStyles.file : null} children={[this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle()]}/>;
     }
 
     render(){
-        var sBlockClassName = "s-block file";
-        if (this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
-        if (this.props.keepLabelOnHover) sBlockClassName += ' keep-label-on-name-hover';
-        if (this.props.isSingleItem) sBlockClassName += ' single-item';
-        if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
-            if (this.props.stripe === true || this.props.stripe === 'even') sBlockClassName += ' even';
-            else sBlockClassName += ' odd';
+        var { hideNameOnHover, keepLabelOnHover, isSingleItem, stripe } = this.props,
+            sBlockClassName = "s-block file";
+
+        if (hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
+        if (keepLabelOnHover) sBlockClassName += ' keep-label-on-name-hover';
+        if (isSingleItem) sBlockClassName += ' single-item';
+        if (typeof stripe !== 'undefined' && stripe !== null){
+            sBlockClassName += (stripe === true || stripe === 'even') ? ' even' : ' odd';
         }
-        return (
-            <div className={sBlockClassName}>
-                { this.renderName() }
-                { this.filledFileRow() }
-            </div>
-        );
+        return <div className={sBlockClassName} children={[this.renderName(), this.filledFileRow()]}/>;
     }
 }
 

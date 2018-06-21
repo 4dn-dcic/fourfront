@@ -3,7 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+import url from 'url';
+import { Collapse, Button } from 'react-bootstrap';
+import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer, AdjustableDividerRow } from './components';
@@ -69,14 +71,15 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         return false;
     }
 
+    /**
+     * Executed on width change, as well as this ItemView's prop change.
+     */
     getTabViewContents(){
         var { context, schemas } = this.props;
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
-            width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null,
+            width = this.getTabViewWidth(),
             tabs = [];
-
-        if (width) width -= 20;
 
         if (processedFiles && processedFiles.length > 0){
 
@@ -313,7 +316,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
             <AdjustableDividerRow
                 width={width} mounted={mounted} height={hiGlassHeight} leftPanelCollapseHeight={leftPanelCollapseHeight}
                 leftPanelClassName="expset-higlass-panel" leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
-                leftPanelCollapseWidth={leftPanelCollapseWidth || 320} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
+                leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
                     if (collapsed){
                         var useHeight = leftPanelCollapseHeight || rightPanelHeight || hiGlassHeight;
@@ -343,6 +346,77 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
+    /**
+     * Renderer for "columnClass" : "file" column definition.
+     *
+     * columnClass : 'file' render method takes different params than ordinary file-detail columns.
+     *
+     * @param {{ '@id' : string, 'file_format' : string, 'higlass_uid' : string }} file - File for row/column
+     * @param {{ 'expTable' : { 'props' : { 'leftPanelCollapsed' : boolean, 'resetDivider' : function } } }} tableProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
+     * @param {{ 'fileAtId' : string, 'fileTitleString' : string }} param2 - Some properties calculated by StackedTable FileEntryBlock and passed in to help cut down on JS calculation.
+     */
+    static renderFileColumn(file, tableProps, { fileAtId, fileTitleString }){
+        var className = file.accession ? 'mono-text' : null,
+            title = fileAtId ? <a href={fileAtId} className={className} children={fileTitleString}/> : <div className={className} children={fileTitleString}/>,
+            tb = (tableProps && tableProps.expTable && tableProps.expTable.props) || {},
+            collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
+
+        // HiC File External Link/Button to JuiceBox
+        if (file && ((file.file_format && file.file_format === 'hic') || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1) ) && file.href){
+            var onClick = function(evt){
+                    var pageHref = tableProps.href || tb.href || (store && store.getState().href),
+                        hrefParts = url.parse(pageHref),
+                        host = hrefParts.protocol + '//' + hrefParts.host,
+                        targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+                    if (isServerSide()) return null;
+                    var win = window.open(targetLocation, '_blank');
+                    win.focus();
+                },
+                juiceBoxExternalLinkBtn = (
+                    <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                        <i className="icon icon-fw icon-external-link text-smaller"/>
+                    </Button>
+                );
+            return <span>{ title } { juiceBoxExternalLinkBtn }</span>;
+
+        } else if (file && file.higlass_uid && ((file.file_format && file.file_format === 'mcool') || (file.file_type_detailed && file.file_type_detailed.indexOf('(mcool)') > -1) ) ) {
+
+            var onDragStart = function(evt){
+                if (!evt || !evt.dataTransfer) return;
+                // evt.dataTransfer.setData('text/4dn-item-context', JSON.stringify(file));
+                evt.dataTransfer.setData('text/higlass-tileset-info', JSON.stringify({ 'tilesetUid' : file.higlass_uid, 'genome_assembly' : file.genome_assembly }));
+            };
+
+            // Currently-visualized MCOOL File HiGlass Indicator
+            if (tb.currentlyVisualizedFile && object.itemUtil.atId(tb.currentlyVisualizedFile) === fileAtId){
+                var hiGlassIndicatorProps = _.extend({
+                        'className' : "indicator-higlass-available" + (collapsibleAndCollapsed ? ' clickable in-stacked-table-button' : ' in-stacked-table-icon-indicator')
+                    }, collapsibleAndCollapsed ? {
+                        'onClick' : tb.resetDivider,
+                        'bsSize' : 'xs',
+                        'bsStyle' : 'primary'
+                    } : {}),
+                    childIcon = <i className="icon icon-fw icon-television text-smaller" data-tip={"This file " + (!collapsibleAndCollapsed && typeof tb.leftPanelCollapsed === 'boolean' ? "is being" : "may be") + " visualized with the HiGlass browser."} />,
+                    hiGlassIndicator = collapsibleAndCollapsed ? <Button {...hiGlassIndicatorProps} children={childIcon}/> : <span {...hiGlassIndicatorProps}><i className="icon icon-angle-left" style={{ marginRight : 4 }}/>{ childIcon }</span>;
+                return <span onDragStart={onDragStart}>{ title } { hiGlassIndicator }</span>;
+            }
+            return <span onDragStart={onDragStart}>{title}</span>; // TODO: Buttons to make this actively-visualized file.
+        }
+        return null; // Fallback to default title renderer.
+    }
+
+    static extendedColumnHeaders(){
+        /** Add in extended 'file' column render fxn */
+        var columnHeaders, fileColumnIndex = _.findIndex(ProcessedFilesStackedTable.defaultProps.columnHeaders, { 'columnClass' : 'file' });
+        if (typeof fileColumnIndex !== 'number') {
+            columnHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders;
+        } else {
+            columnHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice(0);
+            columnHeaders[fileColumnIndex] = _.extend({}, columnHeaders[fileColumnIndex], { 'render' : ProcessedFilesStackedTableSection.renderFileColumn, 'initialWidth' : columnHeaders[fileColumnIndex].initialWidth + 20 });
+        }
+        return columnHeaders;
+    }
+
     constructor(props){
         super(props);
         this.mcoolFile = this.mcoolFile.bind(this);
@@ -350,6 +424,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             'mcoolFile' : this.mcoolFile(props) || null,
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)
         };
+        this.columnHeaders = ProcessedFilesStackedTableSection.extendedColumnHeaders();
     }
 
     componentWillReceiveProps(nextProps){
@@ -380,14 +455,21 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         if (!mounted) return null;
 
         var commonProcessedFilesStackedTableProps = {
-            'files' : processedFiles, 'experimentSetAccession' : context.accession || null,
-            'experimentArray' : context.experiments_in_set, 'replicateExpsArray' : context.replicate_exps,
-            'collapseLimit' : 10, 'collapseShow' : 7
+            'files' : processedFiles,
+            'experimentSetAccession' : context.accession || null,
+            'experimentArray' : context.experiments_in_set,
+            'replicateExpsArray' : context.replicate_exps,
+            'collapseLimit' : 10, 'collapseShow' : 7,
+            'columnHeaders' : this.columnHeaders,
+            'currentlyVisualizedFile' : this.state.mcoolFile
         };
 
         if (this.state.mcoolFile){
-            return <HiGlassAdjustableWidthRow width={width} mounted={mounted} file={this.state.mcoolFile}
-                renderRightPanel={(rightPanelWidth, resetXOffset)=> <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={Math.max(rightPanelWidth, 320)} /> } />;
+            return (
+                <HiGlassAdjustableWidthRow width={width} mounted={mounted} file={this.state.mcoolFile} renderRightPanel={(rightPanelWidth, resetDividerFxn, leftPanelCollapsed)=>
+                    <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={Math.max(rightPanelWidth, 320)} leftPanelCollapsed={leftPanelCollapsed} resetDivider={resetDividerFxn} />
+                } />
+            );
         } else {
             return <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={width}/>;
         }
@@ -464,6 +546,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
             'files'     : files,
             'mcoolFile' : this.mcoolFile(files)
         };
+        this.columnHeaders = ProcessedFilesStackedTableSection.extendedColumnHeaders();
     }
 
     componentWillReceiveProps(nextProps){
@@ -485,11 +568,11 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
         });
     }
 
-    renderFilesTable(width){
+    renderFilesTable(width, resetDividerFxn, leftPanelCollapsed){
         var context = this.props.context;
         return (
-            <ProcessedFilesStackedTable files={this.state.files} width={width} experimentSetAccession={context.accession || null}
-                experimentArray={context.experiments_in_set} replicateExpsArray={context.replicate_exps} collapseLongLists={true} />
+            <ProcessedFilesStackedTable files={this.state.files} width={width} experimentSetAccession={context.accession || null} columnHeaders={this.columnHeaders} resetDivider={resetDividerFxn}
+                experimentArray={context.experiments_in_set} replicateExpsArray={context.replicate_exps} collapseLongLists={true} leftPanelCollapsed={leftPanelCollapsed} />
         );
     }
 
@@ -554,7 +637,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
             }
         );
         var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
-        var collectionsFromExpSetObject = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
+        var collectionsByTitle = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         var collectionsFromExps = _.reduce(props.context.experiments_in_set || [], function(m, exp){
@@ -572,22 +655,21 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
 
         var collectionsFromExpsUnBubbled = [];
         _.forEach(collectionsFromExps, function(collection){
-            if (collectionsFromExpSetObject[collection.title]){
+            if (collectionsByTitle[collection.title]){
                 _.forEach(collection.files, function(f){
-                    var duplicateExistingFile = _.find(collectionsFromExpSetObject[collection.title].files, function(existFile){ return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b'); });
+                    var duplicateExistingFile = _.find(collectionsByTitle[collection.title].files, function(existFile){ return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b'); });
                     if (duplicateExistingFile){
                         console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
                     } else {
-                        collectionsFromExpSetObject[collection.title].files.push(f);
+                        collectionsByTitle[collection.title].files.push(f);
                     }
                 });
             } else {
-                collectionsFromExpsUnBubbled.push(collection);
+                collectionsByTitle[collection.title] = collection;
             }
         });
 
-        var combinedCollections = _.values(collectionsFromExpSetObject).concat(collectionsFromExpsUnBubbled);
-        return _.filter(combinedCollections, OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
+        return _.filter(_.values(collectionsByTitle), OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
     }
 
     render(){

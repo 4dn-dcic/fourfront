@@ -24,6 +24,19 @@ export class TabbedView extends React.Component {
         return null;
     }
 
+    static renderTabPane(tabObj, tabIndex = 0){
+        return (
+            <Tabs.TabPane
+                key={tabObj.key || tabObj.tab || tabObj.title || tabIndex}
+                tab={<span className="tab">{ tabObj.tab || tabObj.title }</span>}
+                children={tabObj.content}
+                placeholder={tabObj.placeholder}
+                disabled={tabObj.disabled}
+                style={tabObj.style}
+            />
+        );
+    }
+
     static propTypes = {
         'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
             'tab' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
@@ -41,47 +54,35 @@ export class TabbedView extends React.Component {
 
     constructor(props){
         super(props);
+        this.setActiveKey = this.setActiveKey.bind(this);
         this.render = this.render.bind(this);
     }
 
-    render(){
-        var contents = this.props.contents;
-        if (typeof contents === 'function') contents = contents();
-        if (!Array.isArray(contents)) {
-            return null;
+    setActiveKey(nextKey){
+        if (this.refs.tabs && typeof this.refs.tabs.setActiveKey === 'function'){
+            return this.refs.tabs.setActiveKey(nextKey);
+        } else {
+            console.error('Manually setting active tab key not currently supported...');
+            return false;
         }
+    }
+
+    render(){
+        var { contents, onTabClick, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, renderTabContent } = this.props;
+        if (typeof contents === 'function') contents = contents();
+        if (!Array.isArray(contents)) return null;
+
         var tabsProps = {
-            'renderTabBar'          : () => 
-                <ScrollableInkTabBar
-                    onTabClick={this.props.onTabClick}
-                    extraContent={this.props.extraTabContent}
-                    className="extra-style-2"
-                />,
-            'renderTabContent'      : () => <TabContent animated={this.props.animated} />,
-            'onChange'              : this.props.onChange,
-            'destroyInactiveTabPane': this.props.destroyInactiveTabPane,
-            'ref' : 'tabs',
-            'defaultActiveKey' : TabbedView.getDefaultActiveKeyFromContents(contents)
+            'renderTabBar'          : () => <ScrollableInkTabBar onTabClick={onTabClick} extraContent={extraTabContent} className="extra-style-2" />,
+            'renderTabContent'      : () => <TabContent animated={animated} />,
+            'onChange'              : onChange,
+            'destroyInactiveTabPane': destroyInactiveTabPane,
+            'ref'                   : 'tabs',
+            'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents)
         };
-        if (this.props.activeKey) tabsProps.activeKey = this.props.activeKey;
-        return (
-            <Tabs {...tabsProps} >
-                {
-                    contents.map(function(t){
-                        return (
-                            <Tabs.TabPane
-                                key={t.key || t.tab || t.title}
-                                tab={<span className="tab">{ t.tab || t.title }</span>}
-                                children={t.content}
-                                placeholder={t.placeholder}
-                                disabled={t.disabled}
-                                style={t.style}
-                            />
-                        );
-                    })
-                }
-            </Tabs>
-        );
+
+        if (activeKey) tabsProps.activeKey = activeKey;
+        return <Tabs {...tabsProps} children={_.map(contents, TabbedView.renderTabPane)}/>;
     }
 
 }
