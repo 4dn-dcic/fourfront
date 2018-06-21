@@ -1,0 +1,194 @@
+[
+    {
+        "status": "released", 
+        "culture_duration": 7.0, 
+        "culture_start_date": "2016-09-10", 
+        "description": "", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "aliases": [
+            "ren:untreated_F123AIDCTCF_bioRep_2_culture"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:36.624250+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "date_created": "2018-05-27T04:46:08.852221+00:00", 
+        "culture_harvest_date": "2016-09-17", 
+        "uuid": "95e9d330-f285-4a0c-9fd6-9ebd383877d1"
+    }, 
+    {
+        "status": "released", 
+        "culture_duration": 7.0, 
+        "culture_start_date": "2016-09-10", 
+        "description": "", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "aliases": [
+            "ren:untreated_F123AIDCTCF_bioRep_1_culture"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:36.453057+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "date_created": "2018-05-27T04:46:08.020045+00:00", 
+        "culture_harvest_date": "2016-09-17", 
+        "uuid": "032cb6e7-02e5-4713-9ba0-1ab4e6af9360"
+    }, 
+    {
+        "status": "released", 
+        "culture_duration": 6.0, 
+        "culture_start_date": "2017-01-25", 
+        "description": "", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "aliases": [
+            "ren:24h_F123AIDCTCF_bioRep_2_culture"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:40.091441+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "date_created": "2018-05-27T04:46:10.521968+00:00", 
+        "culture_harvest_date": "2017-01-31", 
+        "uuid": "54a124db-abe4-4525-a0c5-750755486bd4"
+    }, 
+    {
+        "status": "released", 
+        "culture_duration": 7.0, 
+        "culture_start_date": "2016-09-10", 
+        "description": "", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "aliases": [
+            "ren:24h_F123AIDCTCF_bioRep_1_culture"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:39.916451+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "date_created": "2018-05-27T04:46:09.643685+00:00", 
+        "culture_harvest_date": "2016-09-17", 
+        "uuid": "e2b940fc-75da-44cb-a244-8b1d6200f752"
+    }, 
+    {
+        "status": "released", 
+        "culture_duration": 9.0, 
+        "culture_harvest_date": "2016-09-17", 
+        "culture_start_date": "2016-09-10", 
+        "uuid": "e6997d1f-f8e9-49ff-ac3a-f565a10e52de", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:43.776226+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "date_created": "2018-05-27T04:46:12.182810+00:00", 
+        "aliases": [
+            "ren:48h_F123AIDCTCF_bioRep_2_culture"
+        ], 
+        "description": ""
+    }, 
+    {
+        "status": "released", 
+        "culture_duration": 7.0, 
+        "culture_harvest_date": "2016-09-17", 
+        "culture_start_date": "2016-09-10", 
+        "uuid": "c490c874-9565-48c4-8701-1568f328ba46", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:43.598537+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "date_created": "2018-05-27T04:46:11.363485+00:00", 
+        "aliases": [
+            "ren:48h_F123AIDCTCF_bioRep_1_culture"
+        ], 
+        "description": ""
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "b7c73963-ae1b-4032-876c-7b442d42d31d", 
+        "culture_start_date": "2017-01-25", 
+        "description": "", 
+        "culture_duration": 6.0, 
+        "aliases": [
+            "ren:96h_F123AIDCTCF_bioRep_2_culture"
+        ], 
+        "schema_version": "1", 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:30.655468+00:00"
+        }, 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "public_release": "2018-05-31", 
+        "date_created": "2018-05-27T04:46:13.989044+00:00", 
+        "culture_harvest_date": "2017-01-31", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "culture_duration": 7.0, 
+        "culture_harvest_date": "2016-09-17", 
+        "culture_start_date": "2016-09-10", 
+        "uuid": "f5fc400a-4d7f-4916-99a9-ffbc82132efe", 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "protocols_additional": [
+            "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
+        ], 
+        "schema_version": "1", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+            "date_modified": "2018-05-31T14:26:30.868874+00:00"
+        }, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "public_release": "2018-05-31", 
+        "date_created": "2018-05-27T04:46:13.079592+00:00", 
+        "aliases": [
+            "ren:96h_F123AIDCTCF_bioRep_1_culture"
+        ], 
+        "description": ""
+    }
+]

@@ -1,0 +1,23 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "catalog_number": "R0147", 
+        "aliases": [
+            "dcic:mboI_neb"
+        ], 
+        "site_length": 4, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "name": "MboI", 
+        "enzyme_source": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "public_release": "2017-04-10", 
+        "url": "https://www.neb.com/products/r0147-mboi", 
+        "date_created": "2017-04-09T17:24:16.590926+00:00", 
+        "cut_position": 0, 
+        "recognition_sequence": "GATC", 
+        "uuid": "d8da42d0-bc20-40e5-bacf-c263b8603e03"
+    }
+]

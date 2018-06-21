@@ -1,0 +1,36 @@
+[
+    {
+        "status": "released", 
+        "uuid": "530006bc-8535-4448-903e-854af460b254", 
+        "namespace_url": "http://www.ebi.ac.uk/efo/", 
+        "notes": "The download link also downloads all of CL cell type ontology which will get split into it's own ontology during processing", 
+        "schema_version": "1", 
+        "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw", 
+        "definition_terms": [
+            "111115bc-8535-4448-903e-854af460a233", 
+            "111116bc-8535-4448-903e-854af460a233"
+        ], 
+        "references": [], 
+        "ontology_url": "http://www.ebi.ac.uk/efo/", 
+        "synonym_terms": [
+            "111111bc-8535-4448-903e-854af460a233", 
+            "111112bc-8535-4448-903e-854af460a233", 
+            "111113bc-8535-4448-903e-854af460a233", 
+            "111114bc-8535-4448-903e-854af460a233"
+        ], 
+        "date_created": "2017-04-26T07:22:26.648253+00:00", 
+        "ontology_prefix": "EFO", 
+        "ontology_name": "Experimental Factor Ontology", 
+        "description": "The Experimental Factor Ontology (EFO) provides a systematic description of many experimental variables available in EBI databases, and for external projects such as the NHGRI GWAS catalog."
+    }, 
+    {
+        "status": "released", 
+        "uuid": "540026bc-8535-4448-903e-854af460b254", 
+        "schema_version": "1", 
+        "references": [], 
+        "date_created": "2017-04-26T07:22:23.128845+00:00", 
+        "ontology_prefix": "4DN", 
+        "ontology_name": "4DN Controlled Vocabulary", 
+        "description": "These are controlled terms that are not yet part of one of the formal ontologies imported into our system"
+    }
+]
