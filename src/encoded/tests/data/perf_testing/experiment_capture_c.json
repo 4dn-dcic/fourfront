@@ -1,0 +1,3573 @@
+[
+    {
+        "files": [
+            "4b035b90-03fe-4ca3-9baf-ab9186b0ccf2", 
+            "f724fbd3-04eb-4863-8057-ded8e46adb81", 
+            "6f6b7c5c-75f6-4591-919c-73252ad172cf", 
+            "e3ab2e8a-ce6f-4cab-96bc-328640cc779d", 
+            "aa9974b2-a411-4a73-b12b-604e470e096b", 
+            "41183d31-873a-4ee5-ae63-d825745c1a81", 
+            "e72e848b-000f-454b-ad3f-3733abbe2f49", 
+            "ec4a1ee9-5a39-4004-8216-6f85a7a65817"
+        ], 
+        "accession": "4DNEXAF8PXDJ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic005-2"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "86282445-f149-4021-9061-204d0dae2388", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "2540f762-23d5-4c87-b7ea-9ec3fa2db855", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 005", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341944"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:27.559848+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "5e71a40c-9a6f-48f0-8d57-aa238f825cbb", 
+            "d89747e3-38db-496c-9fcd-c4807a12b987", 
+            "56b24bef-b912-46df-be55-d63b3b84f319", 
+            "3bca8ab1-366c-4909-bf15-3b11705a0c27", 
+            "1d568f88-ae9d-4640-b830-51ee75523753", 
+            "90e2f197-6505-4472-9ac5-ee46225771b0", 
+            "b71c412f-0b9d-4032-9876-41d8ea6407db", 
+            "2310f68f-8034-436c-ba73-982376e77c29"
+        ], 
+        "accession": "4DNEX5H8FKJV", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic012"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "76d17d89-189a-4305-a326-94f575751ff3", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "d44edb38-a675-4143-a479-6b2ed007f865", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 012", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341882"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:28.604353+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "7e761b81-03c4-4f8d-8d5c-c861a8ddbf44", 
+            "bedb7ce0-7704-4220-9d56-f702b83922bf", 
+            "7e3fd25f-efb3-4611-8979-25fe7786e060", 
+            "e7598cd0-1c38-49a4-bcab-5055216bd8d8", 
+            "f5382640-1a27-4543-9746-fe518546d15a", 
+            "44fd7ef2-6166-436e-a363-768172a97592", 
+            "c0ff02ec-9432-46fc-8014-239fad61a043", 
+            "1cb81947-86f5-4bc9-a006-f7a2b7dfc0ed"
+        ], 
+        "accession": "4DNEX9UG6UO9", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic013"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "0a00020b-367f-457f-b894-7764a2518a26", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "3c6433b1-21eb-4b6b-8a94-416916a50cca", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 013", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341883"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:29.323382+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "48c7d0fe-4e7a-4d9d-b175-025fd54bbd74", 
+            "e9417ce7-7690-45a9-b8f1-053d113d79fd", 
+            "5dc2f8ea-709c-4698-baa3-14808ad40770", 
+            "626bb4c5-3faf-4a5d-b835-30f377a75a19", 
+            "26f1297d-33e7-478b-b5f8-644d4e089bf9", 
+            "3c5925aa-d1c9-482d-968d-9fc2ad6dbe0e", 
+            "b4967b26-5c25-4669-97dc-8cc87e7bea05", 
+            "9e93e37a-e713-4c41-b689-babee259a4b7"
+        ], 
+        "accession": "4DNEXTIGW52V", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic014"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "f4e32b26-42d8-4b74-a598-bdceb0d6da16", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "2540f762-23d5-4c87-b7ea-9ec3fa2db855", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 014", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341884"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:31.000730+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "63569e76-cbc4-4ecd-818e-2b038b630205", 
+            "e1991f95-a5f6-4ebd-a174-702eaa70a4c1", 
+            "f46001d6-0015-4c82-9473-679c0b9a90b1", 
+            "a959b4ee-248e-479f-a0cf-29c6a09b3da8", 
+            "f2f0f468-6fd1-451e-b34a-e9f71bcff409", 
+            "fa3abba6-da72-4f56-af3b-daab7656151b", 
+            "433771ee-677b-44cf-81d7-2bf6fddddc0d", 
+            "56bf13d4-d3ed-4921-bf2a-cdfcb2a615ed"
+        ], 
+        "accession": "4DNEX8VI8Q77", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic015"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "b34b5662-e853-47e6-92f9-60d03b76bbce", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a0740ba1-c0e0-45b7-bfac-b939ba2f8a95", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 015", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341885"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:31.705105+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEX4RF5AW7", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic016"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "3ad439dd-a35c-40c4-b8ec-ccaabd064fdf", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a0740ba1-c0e0-45b7-bfac-b939ba2f8a95", 
+        "files": [
+            "4490350a-3eed-4247-9c25-66b07a0e059a", 
+            "a779fba6-73d9-48b9-aeb4-9e75f8239e3a", 
+            "0dd7731e-8e52-4c44-b68c-30ad1f7cad19", 
+            "4b6fe57a-66c3-40cd-8cab-c24200401fc3", 
+            "969998db-7417-46be-bfa0-9ef1241baacf", 
+            "8c481980-7bd6-4aa0-b4eb-2ece9dc616c1", 
+            "ca22d060-9a85-4ca7-ab39-8fcc95b681bb", 
+            "e2c2fcf2-0151-4fe4-b292-08886406e6aa"
+        ], 
+        "description": "Hap1 capture Hi-C 016", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341886"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:32.461321+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "f52c2984-52a2-4b58-9196-7e0072f9d62a", 
+            "5286cfab-be08-4fd5-8757-acf410410dfb", 
+            "7d2a4469-b235-4249-9e0c-949d65439076", 
+            "2bb75d15-d786-4269-8579-c5e5c8f864ea", 
+            "b245c416-508e-4d5a-b229-726c31394a44", 
+            "c7869405-12c0-4c08-b24e-5fefa437c7ab", 
+            "cb597023-89be-4bfe-b018-e926819139af", 
+            "2464dcde-a47c-4fd3-a6f7-436c303c300d"
+        ], 
+        "accession": "4DNEXRIDF1WQ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic017"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "797095f5-1599-4844-8aad-3d4d18758073", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a0740ba1-c0e0-45b7-bfac-b939ba2f8a95", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 017", 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341887"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:33.270862+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "87f0efd7-e4cb-4e8c-9829-905535188a88", 
+            "9be4fa73-5600-48e0-b5cd-eedd890306b3", 
+            "220891cb-4b88-4322-9047-15227bdacb34", 
+            "e946e9b3-630e-47a7-9021-ccc03c6808f0", 
+            "5d980663-b5f6-4611-84b7-40e6ca64fdde", 
+            "5b6f5449-c57c-4da8-b8c8-fe8fe1e20e12", 
+            "3c0b0da6-e929-436c-8c86-e49f717ab5e4", 
+            "7228ccbf-2eb7-485b-8366-5ef553f0d66c"
+        ], 
+        "accession": "4DNEXV22N38P", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic018"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "74df6b9a-8347-4e54-a26e-937f6b9729e3", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "23c562fb-23bd-4b7c-a142-19a4a8d58f4e", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 018", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341888"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:34.031387+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "def1b1e4-fd18-4c63-a113-c8e36963ec7a", 
+            "3aca4b50-5c8e-47c1-8bc7-967959da3097", 
+            "b93b934b-70fd-43c0-829b-221bafc2ad9a", 
+            "a291f427-46f5-4f97-97c2-0829685a0a39", 
+            "c6b70ec2-ab84-4412-845d-bdb9908f504b", 
+            "8a009bf6-9b48-447f-bdcf-95e6b2e4b41b", 
+            "94dc13c8-5609-4bbf-9fc1-ffaab58e271f", 
+            "114f9b1b-f04c-4062-a155-16714ba973d5"
+        ], 
+        "accession": "4DNEX23TSUEX", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic019"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "2d7a4292-e4c3-44e7-9879-5a210ee3d83c", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "23c562fb-23bd-4b7c-a142-19a4a8d58f4e", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 019", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341889"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:35.265678+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "45441f5d-0330-44fb-a2ff-6e8bad764b42", 
+            "f29b1cb9-fcd2-475d-844c-9065915d07e8", 
+            "d040fc35-9145-4c85-b4b7-27b7b8ffbb0f", 
+            "27eb7cde-21c4-49ea-bbf6-b468193e1e95", 
+            "8884a25f-a7f3-494e-9bdc-c340b6591a17", 
+            "8a021a0d-24d9-48c6-8876-fe588e634a96", 
+            "b57f7824-3996-4830-9de8-44d32b90f75b", 
+            "3bb82ec8-b9c8-4b14-becb-bd0a5294d0fd"
+        ], 
+        "accession": "4DNEXFHWUX8H", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic020"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "4299e97c-8581-4e78-9acc-69598b0ba623", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "23c562fb-23bd-4b7c-a142-19a4a8d58f4e", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 020", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341890"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:36.238830+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXTJBAHTN", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic021"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "74fb6269-0308-4c5b-8f4e-8502eebd8691", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "23c562fb-23bd-4b7c-a142-19a4a8d58f4e", 
+        "files": [
+            "72adbfdf-cf06-466b-895c-27ac2b0e1244", 
+            "b6930d84-5b93-4940-8e77-fa68e0332a93", 
+            "c89535e2-b5ae-41af-8809-cc1adbd232ec", 
+            "2bcd8a9c-3b2f-4a6a-b759-ca9883e6d75f", 
+            "d17659dd-3057-4ba3-92c3-5a523b0f0362", 
+            "49bd3ecf-ddc0-4658-afb8-ae9791b5113d", 
+            "168817dc-5c1d-4db9-a817-7450a77383a6", 
+            "086cf908-486e-4bde-b131-c926f2459947"
+        ], 
+        "description": "Hap1 capture Hi-C 021", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341891"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:37.177276+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "63d26478-377e-413e-b49f-75e75b110cd0", 
+            "93c836d7-512f-4210-8053-e9069540b285", 
+            "56dd91e9-1bb1-47f9-bc9f-7d378dfb7e1c", 
+            "a5df24c5-4ace-4d4d-ad5c-a8edc7de6c56", 
+            "e26bb570-a047-4642-b0a4-58bf5a99651e", 
+            "f0fac124-be8a-4369-a838-e31c7900a845", 
+            "71900771-7da1-4da5-88bb-c2e10a9dcf99", 
+            "56abedde-3a8b-4d62-ab38-92ebc38eec1a", 
+            "d604a559-4a42-408e-8cf1-91599022b7e5", 
+            "a91a2d37-6084-4f15-9b43-cca61de9e3ec"
+        ], 
+        "accession": "4DNEXU67SGF3", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic022"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "ec9c9a52-cd5d-4a8b-aac3-403880bb84cf", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "fcb93a34-aeb6-4d75-82d2-0a5be001b929", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 022", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341892"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:39.036672+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "04aa0279-a213-4aa1-9059-615b9efb47b6", 
+            "81af9721-5793-4318-b002-c1fc08473c2d", 
+            "55440673-3577-4431-8dca-8630c0a9aaa4", 
+            "6db5b30d-076e-43de-ab76-feb3c8db7c9a", 
+            "efeaa53c-3f63-49d7-831c-c6f1a67cbcdc", 
+            "8d66a287-aad2-4cfb-b05b-f5078bb61d21", 
+            "a16f4c35-1e68-479f-8520-cec69efdc5e2", 
+            "d6b33d42-813e-4952-b621-f991e63b6f71", 
+            "a173675a-ce22-4fcc-89ef-8a6615a09e3b", 
+            "e5abbb79-d66b-4417-bd85-5adfba4baf4a"
+        ], 
+        "accession": "4DNEXPUK1J27", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic023"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "cd51d00c-6545-495b-99e1-6693eb441827", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "fcb93a34-aeb6-4d75-82d2-0a5be001b929", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 023", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341893"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:39.784401+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "98a9f37c-21f1-42f4-8311-8467501e40c3", 
+            "dfd7591f-8eab-41e4-b6f1-6edec4770bbc", 
+            "249b0a99-ecba-41a8-bbc5-32ef59f43a46", 
+            "fc479258-c672-46a8-8589-de8f97f263d7", 
+            "a69d3e8b-bfcc-41ba-82ca-1cee7ff28610", 
+            "e419861b-4143-4ee1-8156-bb7ea32ae21a", 
+            "47c0e36f-5d19-4768-886f-b5e6c1f77f59", 
+            "ea51929f-3bed-4725-a589-20c4c55f19d2", 
+            "e9eadb77-8aa6-4f81-8d4a-017422916f5f", 
+            "6370cc21-6800-4ce9-a4f6-e2ac26607f07"
+        ], 
+        "accession": "4DNEX5PPVGJN", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic024"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "677cfbf3-1e30-43d4-bd44-6a85be789def", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "fcb93a34-aeb6-4d75-82d2-0a5be001b929", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 024", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341894"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:41.217562+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "c72bff78-6280-489e-9de2-c78bc5d47229", 
+            "749609bb-f5aa-4112-893a-a2a355edfc9f", 
+            "5e83289f-751f-49e0-bbdf-67309bdbd741", 
+            "032eaad2-4680-45e8-82d4-4badb7fde914", 
+            "01832a27-e292-4763-b40d-21d2c1ad9eb9", 
+            "d53e6972-f5eb-40ba-a0a6-5120ad6ba56a", 
+            "9f33259d-1c07-49e3-982e-ddcbc9ed29d4", 
+            "b9772528-16a5-44a4-9b61-e2101f6b4f18", 
+            "13500ece-fb97-463a-aba9-af72cb2a2f37", 
+            "acf3e972-55ee-47a0-b6ea-fe5ddc58f5b0"
+        ], 
+        "accession": "4DNEX1BOSCUW", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic025"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "786f7494-447b-48c5-864b-c81d6f90e638", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "fcb93a34-aeb6-4d75-82d2-0a5be001b929", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 025", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341895"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:41.987874+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXQ9SRQJN", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic026"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "beec7578-c102-404d-9a17-2103b034970f", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "e4df58ac-13be-4ff8-99c6-c6aba1b8f661", 
+        "files": [
+            "04084ef9-7aa8-4f2f-a82f-15c87336ef48", 
+            "62832e79-4e6a-4399-b551-bc5eea181270", 
+            "9607d006-31da-409f-918d-650f6bec8e92", 
+            "eb450c7e-9eac-44e1-98aa-b0057d786b18", 
+            "3431879a-0291-485d-9f57-273fb05e42f6", 
+            "62e36479-501a-455d-8e6d-ebd201747385", 
+            "cdd26311-3c86-4729-b0a4-c511f672cf70", 
+            "4b11984a-c65a-4a5a-bde8-19d48abe2eab", 
+            "52c91d14-9935-4ce8-a709-0b339062ab1f", 
+            "3a1b417c-b089-4d54-906a-68f3f42e4026"
+        ], 
+        "description": "Hap1 capture Hi-C 026", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341896"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:43.122062+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXDG1ROVP", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic027"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "f1532ed3-058d-4e27-8a97-abcc86a26621", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "e4df58ac-13be-4ff8-99c6-c6aba1b8f661", 
+        "files": [
+            "ed97bead-29ea-4451-8e7b-212f5c2283dc", 
+            "edd41111-a8d1-4c9d-938b-634d459dfe17", 
+            "81d33f01-1e4d-4144-996c-b580e4a6915e", 
+            "f3bfd940-e591-489e-a58e-8c87527cab0e", 
+            "e117568a-0878-4619-9233-925055abd670", 
+            "6baf1072-18cd-454b-ae91-5f173ac7077a", 
+            "18d10b2e-e980-4600-a0eb-57c756ffc58b", 
+            "49fbef94-6706-4fd2-8d1a-dc0759bbbf7b", 
+            "48788021-6e65-4e98-82ea-814cda2927d1", 
+            "294a7ce5-1df9-4dc3-a19a-6fc67ade8161"
+        ], 
+        "description": "Hap1 capture Hi-C 027", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341897"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:43.877723+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "27d9908c-2913-41de-940d-1697626b501c", 
+            "495b4ad4-b3c5-4e0e-b92c-3e5d787cb9ae", 
+            "268a51b4-bdd2-4d58-a3a4-67179b52e6fe", 
+            "7a9ce027-d366-452d-987d-cdce11bde72f", 
+            "81febb2d-5cb6-4002-acdc-319f17de24c7", 
+            "1869da2a-7ba9-4ae6-96de-770597613933", 
+            "a775ef38-54c4-4c9b-a44c-334858d7ed82", 
+            "a112bae6-f45f-4f70-af37-ceceb3d7b491"
+        ], 
+        "accession": "4DNEX8SFWCYB", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic029"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "75399a2e-1da9-4f0c-a643-f42dca7a2760", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "341e24fe-9774-42bb-be0b-99fc9d7be8f8", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 029", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341899"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:47.435521+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXLWSXULR", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic030"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "bfc51a53-78ac-4a7f-8168-bd5974361986", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "341e24fe-9774-42bb-be0b-99fc9d7be8f8", 
+        "files": [
+            "42091b05-7e7c-4197-aa29-7f30a31002e4", 
+            "610d38f6-4394-4000-a1d3-f401f736cd40", 
+            "3cd3c293-194f-4195-ab01-9863ce337b79", 
+            "c7b56593-66ab-480f-9c34-b38b23047b0c", 
+            "754d9ef4-5f2a-4557-8b93-378196fb5553", 
+            "d377bc35-e5c7-4b93-8df0-4088c266eb85", 
+            "988625c5-7bb0-433e-82c7-c1bb69af36ec", 
+            "5bb2fe14-0523-4a78-be22-6d3783e859b2"
+        ], 
+        "description": "Hap1 capture Hi-C 030", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341900"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:48.190900+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXBAAXHZW", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic028"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "40ae331d-eed4-450a-857a-3680a2069827", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "341e24fe-9774-42bb-be0b-99fc9d7be8f8", 
+        "files": [
+            "c3799e1b-d7d0-4831-bbf9-d4aae24fec3c", 
+            "1c2ed239-c9a9-4487-8de3-6a6ebfaf5768", 
+            "61fb904e-ad84-483c-a176-a1c5cd8e8e18", 
+            "86ade7d9-586a-4b0a-bfed-27590eaa43fd", 
+            "ad1628fb-ae19-482a-b852-9f107763aeb8", 
+            "39d31a01-473a-4f34-a63f-14112812db68", 
+            "18577261-3a6a-4e72-aab8-4a68f657760e", 
+            "914475ac-4820-4358-95c9-a8247e557e78"
+        ], 
+        "description": "Hap1 capture Hi-C 028", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341898"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:45.278920+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEX8KPXKZE", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic031"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "3c89b3eb-09ca-42e7-970f-b8525976abdc", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "b154e7d5-7342-4442-bf95-918ece60f28a", 
+        "files": [
+            "aea5827c-0b87-4aa1-b348-77953974414a", 
+            "080a6b22-d75b-43ad-a81f-cf06e13f4b10", 
+            "30bac2d4-b6ed-42bf-93cd-136ab3223db8", 
+            "f245b0a2-0fea-463a-a47a-34eada1df4e4", 
+            "bc509cb4-11ba-4e4b-97c8-e5047a5a6b24", 
+            "fec18c5d-e797-41ca-bd88-a90caa958ad4", 
+            "f55f23eb-30de-47e1-8562-0fd9d8466d0c", 
+            "fbb68a90-f69d-409d-8d3c-5892152e049b", 
+            "98971c11-c42c-4f61-b4f7-4d1f9193643e", 
+            "9d9ae4a3-58e2-408c-b6ed-d034fd46e484"
+        ], 
+        "description": "Hap1 capture Hi-C 031", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341901"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:48.934719+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXK179IOV", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic032"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "068ba623-6e82-4864-b510-e64746df65d8", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "b154e7d5-7342-4442-bf95-918ece60f28a", 
+        "files": [
+            "84acc0cd-c57b-4cbd-add3-1ec76f0c6f9e", 
+            "96332fa4-af96-48c2-8167-2f8a620cc549", 
+            "3192d2e8-813c-4abb-ae84-b8d41b7b7fa1", 
+            "57c19b32-88e1-454d-baad-32643d4ff886", 
+            "a90ce4e5-0145-457c-9834-8997a1fb20b4", 
+            "c8bd5288-a37a-48c7-a971-e3175dfaba80", 
+            "e0c36e58-a58b-46fa-a587-0e8a9f86be3e", 
+            "f051bafe-f134-4410-a39c-7b0d5ad0eb82", 
+            "6bb00de0-cb02-4721-894e-f22beda9ed0c", 
+            "bc9819b0-4e7c-4d87-ab1d-ca790f9d8c02"
+        ], 
+        "description": "Hap1 capture Hi-C 032", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341902"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:49.689335+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXY744GG9", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic033"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "79245f7e-35cb-4492-8045-1e56ef15393a", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "b154e7d5-7342-4442-bf95-918ece60f28a", 
+        "files": [
+            "333bcfcb-3037-4754-8c59-c26afb37dbe2", 
+            "0722327b-3678-4c58-bb12-71694233b35f", 
+            "df1f7e13-e71d-48c4-ab01-ab9a2a945cc7", 
+            "de5da43a-322f-4f53-ab88-cfb43acea6d1", 
+            "7523ea3d-c2f5-464b-babd-317e88136286", 
+            "97230813-b02e-47ae-a1e8-0f60aefa68e2", 
+            "ed463204-c112-4786-96f9-9984de9ccba7", 
+            "cd209711-6ba7-4947-8b45-dad3616d5e2f", 
+            "05714749-7b0f-448a-8c64-60774076b846", 
+            "bb9be506-74b2-423c-8d25-60b28baea1d1"
+        ], 
+        "description": "Hap1 capture Hi-C 033", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341903"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:50.528410+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXU2KZRN9", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic034"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "880cc792-b37e-42e6-b38c-0b4c91ab12d7", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "b154e7d5-7342-4442-bf95-918ece60f28a", 
+        "files": [
+            "863a58fe-3d0c-4dbf-917d-e7939b0eea38", 
+            "5aa827d2-b9d9-4a5d-b9d3-979ed791596b", 
+            "c306a150-b52a-43d2-bd2a-c99d91d664ce", 
+            "b0ee4530-96fb-41dd-8656-f07ea19bcaa0", 
+            "effb6bc7-9534-4a71-bfcb-6ec521ce5ef7", 
+            "f3594fa2-fdda-40d0-883e-358288ccd432", 
+            "4aff0f23-1ea0-4869-ab10-a7a8cdbcf91e", 
+            "39019e8a-a25f-4974-9470-f9d69dbbccf6", 
+            "745ffa00-f8d2-4255-b974-9a4739c15c80", 
+            "4be4c417-091d-468d-81fb-b4c6fd37b259"
+        ], 
+        "description": "Hap1 capture Hi-C 034", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341904"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:51.290612+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "a55781da-58b0-486b-bbc7-6860c37556f8", 
+            "503c9e70-c493-4bc1-93be-71366510ac6e", 
+            "7822b7c6-9ac8-4dfb-8f7a-4d6a7806b071", 
+            "7c6450b3-5031-493a-9bf6-f9508deefb2b", 
+            "9aa3a652-dbdf-4a40-828c-87552292fe65", 
+            "e7caafd3-14a4-415e-b3cc-57eb2e2fc779", 
+            "8e8840de-2f9e-4c0e-b574-514baeb6b9e0", 
+            "0f90987c-ae4c-4496-84f9-153ac11a5867"
+        ], 
+        "accession": "4DNEX7FI4QSK", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic035"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "e05e5fb5-b254-4048-a8e4-ad244a7ab792", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "3d4e2bd8-2e97-4c85-a950-2153c4dfb0b5", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 035", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341905"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:52.754799+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "83e0f80d-80f5-4199-b370-293b581ffe15", 
+            "02bdce21-942c-4d64-b538-0711f384093a", 
+            "7e1f3caa-cecb-43c9-85f3-e2de3c98e6d3", 
+            "e4014bf6-3587-45cf-8dc0-addf1b4e4245", 
+            "3857b614-10c2-4463-a1d3-a819e0d4fdb0", 
+            "aa6f8420-4a6e-495c-9ecb-9ef84384b2af", 
+            "a64defce-789b-48ec-9ad4-f6e772c4e194", 
+            "59c8968c-3e80-4549-900b-0b0b1d0a90e5"
+        ], 
+        "accession": "4DNEXR4F5WJJ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic036"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "42c5692a-5878-4b86-b88a-820259b17337", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a786177e-3401-4a21-bd72-20a3c5871ad8", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 036", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341906"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:53.551462+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "ba780b02-a99c-49e5-91da-772ed12afbf0", 
+            "a506c084-f8a0-4347-8650-8748e14df994", 
+            "61c24ac6-df8c-4cb2-bab9-7b1e27c314ca", 
+            "cf82bec2-623e-4b05-a280-6fa70170968d", 
+            "5a007e8a-1dc9-4275-8e3b-e2c4c0e239bd", 
+            "62d973a8-52fa-4e17-96b3-e7f29081bd7d", 
+            "9d300ed4-27c2-4489-8ff7-a23955978131", 
+            "dc224a97-bfcd-42fd-9b64-a0c30f63ba4b"
+        ], 
+        "accession": "4DNEXGG59BQC", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic037"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "9f193527-21ff-494f-8c75-7be35ae401f2", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a786177e-3401-4a21-bd72-20a3c5871ad8", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 037", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341907"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:54.909562+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "fc63ddd1-2ea9-4e12-b086-8a4fba9ea61a", 
+            "b079610d-04a3-473f-8f8b-a699db8b8df3", 
+            "19c0f783-9961-4c4e-be0f-d9eaf96704c7", 
+            "520438fa-fd77-40e2-825f-dcc50603c7a9", 
+            "f0d27ddc-d4c0-48b4-88b6-0ef06194e5d1", 
+            "f12a1238-b67d-49b3-8bb0-3c6f3ea73a6c", 
+            "ac233bc7-0066-4cec-ba86-da8e34e85613", 
+            "28fce414-338d-47dc-8088-07bd452e795d"
+        ], 
+        "accession": "4DNEXJIB98HQ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic038"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "12c80d0e-cb73-4ed1-87f1-27f64efc7873", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a786177e-3401-4a21-bd72-20a3c5871ad8", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 038", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341908"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:55.759781+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "9bc725f3-bdb4-42d7-a19d-43d4a71d00df", 
+            "3eb31751-ec21-4058-b040-0e922aa591f6", 
+            "84816b38-f778-4952-845a-64a2a772d483", 
+            "a16b817a-7198-4e89-ab6f-cb5bbf532ab9", 
+            "b2c33b06-28d8-4fca-83a5-1be34cad7883", 
+            "e7c0ac69-6d2f-4aae-9c99-c3e2d8a4c62f", 
+            "c12a207d-1fab-4895-8aad-9b41431ccb1c", 
+            "d4374b18-6400-4eb4-8ab4-fa3b059db0a1"
+        ], 
+        "accession": "4DNEX4SJDB52", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic039"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "29426389-9d49-4279-b269-6f292653cd04", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a786177e-3401-4a21-bd72-20a3c5871ad8", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 039", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341909"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:57.292517+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "3981c186-caa5-43a1-8a30-d71360f29b06", 
+            "7ddb9486-f115-407d-8756-e99c65be441e", 
+            "fe04e673-4164-4275-ab73-6b1d2fbe710f", 
+            "38343861-1a61-4ed7-b227-1077ef881e27", 
+            "7c030fd4-19fe-40fa-87f5-e4b69ea4bcdf", 
+            "528fc37d-0a52-4a77-999a-a8f5077b904b", 
+            "b79ddfd3-21e0-40b8-add5-8d959bfc43fc", 
+            "698cea47-fdc5-4cd3-88f2-67c1aa5aa6d2"
+        ], 
+        "accession": "4DNEXCGG8BKP", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic040"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "18d7dd0c-79e2-449f-832c-0cc457f7905c", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "db748367-30eb-4904-be60-a8c5d4bdd964", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 040", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341910"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:58.061899+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "d1340966-9f39-44c3-abb2-5daf9a0724ba", 
+            "ac5358e7-ccbb-46f1-b5e3-f9e9ff4f78a2", 
+            "ea0a0263-2850-4afd-8796-bae91ce8abc9", 
+            "ac4ab7d4-58a3-4cb5-9693-9d1fdcfa2fba", 
+            "37e4e8b2-0b4e-4c0d-81da-73fe85afe3a3", 
+            "941cdb5b-1b31-4889-80fe-cb06514b0c84", 
+            "09c04db7-d4e6-484b-8ae5-2cf3dde00e14", 
+            "ec95b77f-4dbf-44a5-8dea-5c92bdb2f5d6"
+        ], 
+        "accession": "4DNEXMCKZQUA", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic041"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "3e65f3af-8d11-481b-98f3-5663dc7c2cdf", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "db748367-30eb-4904-be60-a8c5d4bdd964", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 041", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341911"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:10:58.852173+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXWQOA5OG", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic042"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "4cf84bc5-7b9f-4042-86a0-9fbc702de6c9", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "db748367-30eb-4904-be60-a8c5d4bdd964", 
+        "files": [
+            "ccbd389b-bb44-4a0c-ad37-866ed6f33ce5", 
+            "cff0473e-66f0-4df0-94b4-3fb0e9ef478f", 
+            "2926c7d1-7fd8-490d-8c77-752819497dfb", 
+            "658730dc-0ce8-4e00-9fcd-694c7a12f22b", 
+            "36155df8-b432-4bf9-b176-4f7afeb2a376", 
+            "74c56b83-65ff-4533-92d6-dbe7b0a61327", 
+            "928f6e6e-4514-4ec2-8453-84520c715a6c", 
+            "1c898b76-cdf1-48c0-b44e-01a5f24d9d94"
+        ], 
+        "description": "Hap1 capture Hi-C 042", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341912"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:10:59.615711+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "69c30f6b-7d0c-4bcb-bdb3-81ca117277a8", 
+            "6367112a-2875-4f4a-a0b5-4a077f2a7bc1", 
+            "72068c22-c45c-4802-bc38-b771fe3a7582", 
+            "fd4ac33c-92e4-4f8d-8b33-8b140eb91147", 
+            "32bdae13-b778-4b5a-97ed-3be5e75636ed", 
+            "84041369-6ad5-49cc-9792-c3d807482094", 
+            "ea7b9963-71b3-4dd4-bb57-be2f35e507eb", 
+            "df7adf53-9787-4d19-a3af-3e17df9b1006"
+        ], 
+        "accession": "4DNEXT66BJKO", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic043"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "21d9d1fb-21a3-48da-abbf-c63862bfef38", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "db748367-30eb-4904-be60-a8c5d4bdd964", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 043", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341913"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:00.412606+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "c77c3de6-ad96-407f-abe4-a5efe55121d7", 
+            "85d9988f-8cc8-4157-8771-1911cc52a7e9", 
+            "c7a97973-7848-4b08-b570-249cc22fd05d", 
+            "24972fa2-610a-430e-9f4b-4fd46837aad7"
+        ], 
+        "accession": "4DNEXHG5WSK5", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic044"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "664a43c2-88c1-410d-bde5-33743f530a21", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "1ad43fe0-41bd-491e-9439-211483443003", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 044", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341914"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:01.250416+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "78105dde-3920-437d-b2ff-e9c6ba57412d", 
+            "b70e893a-e95a-4707-b127-89f5f118dd8b", 
+            "b9ad6f6e-c28c-4653-976c-7f87cb25fb13", 
+            "4244c181-051c-498f-b3f3-e6872265532f", 
+            "980854c7-b02b-446b-a279-9322c787626c", 
+            "eb2b3c67-4447-4598-9d64-49ec24f2b536", 
+            "04527d10-816a-4095-8840-8381cfbac9d8", 
+            "ce210d1a-bf21-49fd-b9b7-b00d559dd653"
+        ], 
+        "accession": "4DNEX9GCPXZN", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic048"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "1052435c-6fa2-4536-9e20-593202a3868f", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "eff0ea74-0336-45c2-8574-537a413bebad", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 048", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341918"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:05.504274+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "a508702f-c0b2-4774-b865-07a3dfdb3657", 
+            "6de300ba-840d-4b45-bf91-98bab76a3294", 
+            "5fb1afa0-6256-4f6a-afde-25405c931631", 
+            "0daac204-aaeb-4e37-bf84-4b3d6f17d59a"
+        ], 
+        "accession": "4DNEXCVXZY97", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic045"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "30efbd21-1aa6-43d3-ae27-c6bd0e96003e", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "95f1251c-dab4-4b52-a105-2bedf72c748b", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 045", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341915"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:02.460715+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "6ccf7395-7fce-4272-82db-09a634c3d852", 
+            "cd0c5b74-8baa-4b4e-870d-51f9e71b82d9", 
+            "1e7ce9f9-d02a-4997-83ff-573d5d7bed89", 
+            "dacb6078-cd10-4977-b0f4-54496e5cb63a"
+        ], 
+        "accession": "4DNEXLFZA8EQ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic046"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "252212d2-c59f-4d23-aff4-4ca636649851", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "735c0111-54f8-4ce9-bb5a-636dfad19fff", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 046", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341916"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:03.256701+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "98e9d8bc-0500-45db-bca0-6d0e5e7ee725", 
+            "514a0633-7f92-4c5a-bfed-c427feb5b976", 
+            "7ae0df88-531b-439b-893b-a228898469eb", 
+            "6ec20199-ce57-4897-b0f4-c4ce6681fde8", 
+            "61a22f40-fbbe-45ef-85a5-857ee367dc9f", 
+            "ac7b6f23-b9c1-4c42-990e-5aaabb694fe6", 
+            "c9233afb-f5d5-4da6-878e-2d3b5a740dfe", 
+            "36f6988e-327c-479d-8e46-0dd29e71ce5c"
+        ], 
+        "accession": "4DNEX88KQH75", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic047"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "b06d9ff3-1553-4235-a201-8e1efe0f0ff4", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "6724a284-a2e4-4a23-b04f-1ab00e7db320", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 047", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341917"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:04.067870+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "0a110dd3-5cc8-474b-88ef-2769b6012349", 
+            "b1a6dfc9-4302-49e6-b003-16534e70e117", 
+            "316e48bf-fb5f-4fb1-a72b-f042fd60a55c", 
+            "b6dea64c-0a3b-4187-bb29-0947b87221fa", 
+            "76780f81-6a64-4e8b-9d37-616cf07f7333", 
+            "a72e3b9a-fb7f-4946-aefe-a976cdd50789", 
+            "e8ceea61-4a32-4c85-ac4e-47388040e44b", 
+            "68e97dc7-60ef-42f8-8a77-53d6dfe8236c"
+        ], 
+        "accession": "4DNEXJ9DMCWX", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic049"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "462629e5-1604-434f-ba76-883731add2d3", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "64d27435-20c0-401b-882e-4273d05a2561", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 049", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341919"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:06.419900+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEX4IKF8FY", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic051"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "d20e2f0f-25f3-42d1-a03e-836a00888e26", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "2c9ef693-c5e1-463d-8225-cec9d1d8ca75", 
+        "files": [
+            "5652e13f-2d2a-4990-8b82-6a346c5544db", 
+            "c9563f23-d52a-4dd7-acbd-67bfc5aa4499", 
+            "36bbe1d3-d687-43a6-bc75-ae48bec83f12", 
+            "543cf1a7-221e-43a0-a962-46890f2a4d59", 
+            "ce26f227-18c6-4ce6-aea8-9b27fe506152", 
+            "3cead3bd-740b-4bff-ae08-d3f6b2ede3b4", 
+            "763d3c4d-dc36-4dd1-92e8-8b0bfbafcb2b", 
+            "ab52950d-da51-46f6-b79d-95cd9150ddfe"
+        ], 
+        "description": "Hap1 capture Hi-C 051", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341921"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:08.968311+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXVKIGPTN", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic050"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "8c599182-b684-4234-8b61-bbfb5f0299fb", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "64d27435-20c0-401b-882e-4273d05a2561", 
+        "files": [
+            "ae34cf33-ece3-4b28-a8c5-fc8970c9c869", 
+            "1ec9cac2-144c-48f6-b1da-bdfe48529cb3", 
+            "c7ff81e6-2cd5-417d-998f-5fcbe13ab40e", 
+            "1e16e9ee-c8b9-4338-87a0-72408749f18a", 
+            "5cd18f66-d473-4590-8c5e-6412252d5bfa", 
+            "c968c3e0-b84b-404f-9f89-143b44e7c262", 
+            "405f23c1-3434-4745-b69e-45aeef7bde01", 
+            "e63039ad-f6b2-4728-9a21-a010d6542529"
+        ], 
+        "description": "Hap1 capture Hi-C 050", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341920"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:07.313123+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEX8KBUJ6S", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic052"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "a1180fe6-b3a6-4a35-bdb8-eb3574fecf0e", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "64d27435-20c0-401b-882e-4273d05a2561", 
+        "files": [
+            "e3b74380-3b4d-4caa-b619-629fb882da64", 
+            "60f9c88f-a7fb-401d-87a6-ca88b86af8a1", 
+            "ce4f552d-f7d0-4eed-9eeb-5b02aefee034", 
+            "e3e83792-9e99-408d-8208-27cd84d989c1", 
+            "48cab604-7b1b-4237-bb2d-9446254e6a1f", 
+            "9234573c-dde0-4865-927a-64d6b37e1377", 
+            "c5b6a08a-a915-415d-8438-3ced615d8032", 
+            "c7e24cca-290b-4e94-814b-6abc5a724772"
+        ], 
+        "description": "Hap1 capture Hi-C 052", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341922"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:09.723719+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXRZJ37CB", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic053"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "53882fda-ae4f-4635-809c-85df0be8082c", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "57134036-6e26-4348-b3d8-db0cbbf972cd", 
+        "files": [
+            "759aab38-39de-42e4-b69b-bc2b7fe2c993", 
+            "d34fbe36-09b4-4c44-84b1-c845c04a6d17", 
+            "57a48564-bac8-47cd-bbd4-e714e8724557", 
+            "07dfcb0a-c6f2-4cf2-ba3a-db920f0453a2", 
+            "9e675fc9-1dd9-423f-bca1-10f58432da2e", 
+            "a2370c3b-1e36-4324-8d53-a8a140140a85", 
+            "2c155180-00e3-4436-9e39-73c7c6f835e3", 
+            "10f1e43d-91fd-4eed-a43a-291902a9ff08"
+        ], 
+        "description": "Hap1 capture Hi-C 053", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341923"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:11.036033+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dCTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXURO3NJZ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic054"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "ca9a9884-c73a-46b5-91cf-4fae8a5e31ce", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "b6e2f2e7-3559-4bfa-975b-5427480ca04a", 
+        "files": [
+            "1c7414b2-981c-4e73-814f-dd92e3a33544", 
+            "2c9f01d4-aa95-4b30-95f4-4e1e479f90dc", 
+            "43707ef0-6e7a-48d6-b494-e9beb97448b7", 
+            "d7b1e5a2-e7ef-4066-bfc9-16154446d1a9", 
+            "6337ad4c-06a3-4143-b3e8-07ce9ab939fb", 
+            "f123d22e-73c6-4c2c-9019-480ed91d2214", 
+            "e106909c-1c6e-4dee-9cb5-303b1214cf70", 
+            "a7fa45f7-be53-4637-8f15-01b7a9ad9ca7"
+        ], 
+        "description": "Hap1 capture Hi-C 054", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341924"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:12.433526+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dCTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXR9SQK76", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic055"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "b2e77ae2-8d67-4fd6-a812-94f9bdfc9dd8", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "22be851d-3728-4cb9-b7fe-ab06ca6d1db8", 
+        "files": [
+            "d21c57a7-04ff-4455-a2e3-14da4fa72a4f", 
+            "b22d362a-936a-455c-98dd-e32ce94cfb07", 
+            "fa1462d0-21a1-4ba9-b2b2-b439c861a135", 
+            "5d59132c-d9b7-4628-819c-74dcaeb138c0", 
+            "1150b428-272b-4a0c-b3e6-4b405c148f7c", 
+            "f4864029-a8ad-4bb8-93e7-5108f462ccaa", 
+            "27205d26-2b23-4acc-8d30-34e7051d8116", 
+            "2db40e87-2d9d-41f7-a119-7703c7f0dddd"
+        ], 
+        "description": "Hap1 capture Hi-C 055", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341925"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:13.251371+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "status": "released", 
+        "accession": "4DNEXAJWZB18", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic056"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "272ad911-0b93-4141-b87f-6297f8a7e462", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "22be851d-3728-4cb9-b7fe-ab06ca6d1db8", 
+        "files": [
+            "3678fae0-4339-45ba-bf95-e3fbbe6987c1", 
+            "2427a113-7959-4034-a084-f690a165b501", 
+            "a32c067e-885f-4d21-99e8-59bc452c91c1", 
+            "414b1a67-47c8-40ce-9d03-1b63c4e33960", 
+            "8d925b5a-7c96-480a-a677-603aff9af8c7", 
+            "0013bdac-6893-4b7a-96cc-92ceabc5b3f0", 
+            "4904f735-7e2d-4569-9a4e-c86334862f4c", 
+            "9d1afb48-651f-45bb-878f-f61937d8a5d9"
+        ], 
+        "description": "Hap1 capture Hi-C 056", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341926"
+        ], 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "date_created": "2017-04-10T01:11:14.051151+00:00", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "tagging_method": "biotin-dUTP", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "3a0df01c-a793-4be7-a2ab-4bf4452363e7", 
+            "f09a3734-338a-42d5-8b3f-28d679af8aaf", 
+            "356c6c7f-0dd9-49ab-8636-28abdf0204a9", 
+            "51461373-367e-49da-8c24-9f382eb86a60", 
+            "ddb08c04-be0a-4e82-9113-ed3632fdbc54", 
+            "5ae26538-2f31-4d7f-81ec-fc119c2f0974", 
+            "c7315baa-f306-4aae-bbae-84288dbb3226", 
+            "a0a1a07a-5772-4dfc-90de-fdfbde006c05"
+        ], 
+        "accession": "4DNEX9WXSU5B", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic057"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "fda557cd-2a01-4dea-bdfe-e62f5355cdb0", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "22be851d-3728-4cb9-b7fe-ab06ca6d1db8", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 057", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341927"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:14.806449+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "a768f88c-80a1-404a-b02a-3f57d4f40412", 
+            "42cfe7bb-fb49-4521-85ae-a7e6853532e9", 
+            "f65971f6-62d9-4922-a923-d7ff6af7ff44", 
+            "1f29a6b1-427a-475c-ba44-5fe240fd95a7", 
+            "aafc614a-2978-4e98-b44a-0fbbed7f69a8", 
+            "b2f4f299-6702-4538-9dbb-446ae8dfac85", 
+            "e03f3bdc-4f9e-4f13-8259-7945ed9df5b2", 
+            "b74e51db-4ef1-40f8-aad3-a8b8de80d8c6"
+        ], 
+        "accession": "4DNEXMNAPSO2", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic058"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "345d8de7-80f0-4cef-a66f-e183ab7dfe1b", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a1b37605-3350-4b51-afcd-e5df323c03c2", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 058", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341928"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:17.084834+00:00", 
+        "rna_tag": "bio-dCTP"
+    }, 
+    {
+        "files": [
+            "22446aba-c03f-46af-8769-5f61002659c3", 
+            "7643d63f-4f64-469a-922f-0cbc33df3925", 
+            "9095acb4-260c-4434-a921-9eb6c8562ab8", 
+            "bcff9a6d-3b74-4492-81f9-6827c8729007", 
+            "f4e9dcca-9ff8-4399-8118-82abedf3087a", 
+            "a3390f4b-ad5a-407d-bf1a-5ace79120ad5", 
+            "88fc314a-568a-446f-a2b9-2a3bcdc6b84f", 
+            "1e806d58-ae7a-438a-a826-187203b9c97b"
+        ], 
+        "accession": "4DNEX914EZ8N", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic059"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "00f7ee11-e8e3-41c7-8749-b74857a02158", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "a1b37605-3350-4b51-afcd-e5df323c03c2", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 059", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341929"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:18.964633+00:00", 
+        "rna_tag": "bio-dCTP"
+    }, 
+    {
+        "files": [
+            "d5e9fbfa-7444-4a80-9751-4b4fd5f9006b", 
+            "86eceafb-18db-4214-8b71-0a51ae811441", 
+            "ef7141a0-356f-49f6-9617-20e48d716dc7", 
+            "470e9df8-21dd-4595-957b-36e5bcc60c6b", 
+            "6ea822d2-53fa-4727-a8f5-0797b8f71460", 
+            "b0dfc21e-654f-40c6-8020-a39b0ac32312", 
+            "f5e821ae-7e2a-46d4-8db8-4c0077fa7822", 
+            "86c49dfa-ce0c-4249-8750-7669386f3d57"
+        ], 
+        "accession": "4DNEXAKJPY9Y", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic060"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "d11e47b0-aa46-4eed-b47d-c88b21963667", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "aff5c9db-f9d2-447f-b40d-fb83616b668f", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 060", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341930"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:20.150628+00:00", 
+        "rna_tag": "bio-dCTP"
+    }, 
+    {
+        "files": [
+            "84e49531-48bf-4f2b-a641-32441a49c585", 
+            "01a55692-d9c2-424a-ba7b-10efc902bc3a", 
+            "64868a1d-660b-4c7b-ab2b-157f411ef1b4", 
+            "65fdbfee-807a-4dc7-8054-b59721c4fbea", 
+            "183a2887-62cd-4ccd-9e40-d24e8f13ac1f", 
+            "61c1c40f-a9f3-4915-a18b-b911fb8f9d4a", 
+            "1c04e09b-d0c0-4dd7-b6b0-5725188222ee", 
+            "d91eeefa-7a67-4538-bb31-0812fb5166af"
+        ], 
+        "accession": "4DNEXF6CEY13", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic061"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "790a9b87-3fef-471e-9ed2-1911b7e83ca6", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "aff5c9db-f9d2-447f-b40d-fb83616b668f", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 061", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341931"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:21.217630+00:00", 
+        "rna_tag": "bio-dCTP"
+    }, 
+    {
+        "files": [
+            "a1bbe022-e738-467f-80b4-ce4b0fa801eb", 
+            "63888fe1-2da1-4565-a72d-f189ed67a8b5", 
+            "124362b5-268b-4b5c-bd66-d1f79184be70", 
+            "1cf80c03-9baa-44c8-8f15-e533f8b5f036", 
+            "f7c0617c-b899-4435-9712-84786ce50766", 
+            "5707b7b1-4fe5-46f1-9557-feca202e3ca7", 
+            "d3fbdde4-b667-448c-bd1b-0d965dcc6987", 
+            "cc24469c-0be5-40eb-9f3a-2baace8bba30"
+        ], 
+        "accession": "4DNEXX33SRFJ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic062"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "a5f90a73-a463-4dc1-9fca-7987afa5e479", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "0cf2ec6c-4001-42d1-a556-f33890bbdbf4", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 062", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341932"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:22.392964+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "cc72bd77-94a6-492e-bf4a-c19e811943c3", 
+            "e44e06c3-d174-40e3-8e62-22950b483df0", 
+            "97c688de-78a8-46cb-bedd-16fc919d698b", 
+            "7accdcc9-3e30-405f-96e4-43abe1338e05", 
+            "e404764a-cfc3-45dd-bfdd-e7446765779f", 
+            "5e4184f8-9182-4828-8fd8-ba49323a967b", 
+            "4b00da9a-56b0-4f30-a79e-ca4ba5ecd5f4", 
+            "279b9129-abd5-4f78-82c4-b520631199d7"
+        ], 
+        "accession": "4DNEX47BWKZQ", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic063"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "82ae7197-4503-475d-b428-fd91c3fc03e2", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "0cf2ec6c-4001-42d1-a556-f33890bbdbf4", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 063", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341933"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:23.265239+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "45403a7f-0ed1-424f-91d9-e5a204a3ffe1", 
+            "cbcdc77c-16f0-439a-a9c3-f5c302e7af86", 
+            "a20cba08-953b-4d9d-87fe-e00972c6350a", 
+            "93b89709-ebed-4177-b99d-7868ecde38ee", 
+            "b63050ff-d15c-4386-8bdd-80d59c5620b4", 
+            "c4f2747c-d94d-4895-98f6-03705a38a029", 
+            "d3b1f45b-cf37-40fb-952c-092f2bc06c6a", 
+            "b148b8ea-5b2b-426c-846d-90551a959495"
+        ], 
+        "accession": "4DNEX1GEXL4R", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic064"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "9c63d67f-54e9-4f63-9e28-58df78cd7b79", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "0cf2ec6c-4001-42d1-a556-f33890bbdbf4", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 064", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341934"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:24.125836+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "8e499963-c749-4ef8-b9dd-eb9f059939d7", 
+            "0fddc193-1435-4ecc-bd80-81d9cbab84fd", 
+            "58e05e58-758a-4575-95b0-a3f78827a8ee", 
+            "fa9e421f-18fc-4ba4-8701-30e5eca961af", 
+            "11b233ee-b720-4868-a556-8446de4828f4", 
+            "781aaf8c-3408-4ccd-a2ba-5b23c41c2490", 
+            "0587366a-3a0b-48e5-93c2-e7fd5e2e7e80", 
+            "1e1b84b2-e20c-42c4-99aa-75f9362eabbc"
+        ], 
+        "accession": "4DNEX4XIH9I8", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic065"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "930e39dc-7c2a-4734-87f7-c02c0d776405", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "aff5c9db-f9d2-447f-b40d-fb83616b668f", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 065", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341935"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:26.479537+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "ae9a711a-fb0e-4f16-bc1a-095898f2c5ae", 
+            "42769728-b28f-40c2-a070-7e86a1bf0e68", 
+            "b7029554-d395-4efc-a071-6a01533cb5df", 
+            "8c5525ec-c4d6-4586-b104-4e4061d3e01a", 
+            "a5259c0e-a77f-4541-ad1a-d4a8ef4e90ef", 
+            "d106cfa7-0d00-47e4-89cc-e6a6913f70a3", 
+            "03707a1d-6d93-4e6b-adb7-f48f4c3526d0", 
+            "74ed6153-58bc-4c74-b5cc-d4b49d883063"
+        ], 
+        "accession": "4DNEX7JISNEA", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic066"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "362593a7-a19e-4fa7-aef4-5328d528c819", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "aff5c9db-f9d2-447f-b40d-fb83616b668f", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 066", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341936"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:27.551399+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "79abb0fa-9a47-4e67-b8bf-9a18aecf251c", 
+            "e796d0d6-7431-4b45-8192-40cb1540f72a", 
+            "bfb2f9bc-153b-49f8-8b54-f661f0e983c9", 
+            "53282126-d5fe-4455-9502-5a566c66a1cd", 
+            "3f615b50-300a-4c09-8667-d703dc86fb89", 
+            "24947d02-1110-427e-99cf-d7de0358e1ba", 
+            "5b6186fc-2073-43ab-a089-aad55c2e7e6f", 
+            "df6e1237-9fc7-4312-9272-faca4575b61b"
+        ], 
+        "accession": "4DNEXYUI9JCI", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic067"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "d22c951e-dc7e-4981-98bb-15d339f8ee26", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "aa2c5d9b-3a88-4f00-bd26-3b1dd5c93d9b", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 067", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341937"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:28.443852+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "cfee2ab1-57c1-455b-a0ef-53d04a60674d", 
+            "45ab91b4-a19e-446b-8dc7-d96500f803e7", 
+            "c62a84ab-4e87-4cc3-8262-462a7ab6878d", 
+            "e1691089-3a39-4aad-adb0-f36d208f5427", 
+            "ad12b936-fc85-4a15-875a-77df3c903f6c", 
+            "a1740999-207c-480a-850c-5707f968af4c", 
+            "7c2d749b-a406-417a-b686-5d0dc032ba41", 
+            "e769d86d-eee7-4139-858b-bc621b3132bd"
+        ], 
+        "accession": "4DNEXPSSVEUO", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic068"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "18f46030-f755-484f-86d6-8b3d12180ed1", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "aa2c5d9b-3a88-4f00-bd26-3b1dd5c93d9b", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 068", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341938"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:29.513739+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "f9ce4cfe-e93d-439a-b785-2b70a0588b0a", 
+            "d1832bfc-a76c-4e50-995a-16f2ff021d5d", 
+            "cbafc5e3-cc4d-426e-a8bd-24659b54cc50", 
+            "0163b4c9-431f-44fe-a15f-6b32f3b5de74", 
+            "1624311f-2780-4c1f-992c-183a2ac4a415", 
+            "6df357e0-8a47-4103-9b12-72d5fc2ea19e", 
+            "c37b62bc-ec0d-4c35-9aae-2eb4ca5d2928", 
+            "e5f1f757-1383-4503-a624-d29e733f2ebc"
+        ], 
+        "accession": "4DNEX83M7A57", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic069"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "068255cc-5d0e-4d56-bc2e-4c86a19c2ec6", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "f3b7e977-00da-4078-9e87-91e8580f0c32", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 069", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341939"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:30.415614+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "b65eca5b-f682-4aa4-a412-9ee197ed5505", 
+            "a9b21dda-8ed9-4e0b-b0c1-0d2f946018d9", 
+            "adc0a12d-0e1a-4673-b32b-9a37c4fe076e", 
+            "631fd1e0-ffe5-4064-a3e6-74a670bfa324", 
+            "1c04208d-8f5e-459e-85e3-a1553acb63b2", 
+            "81df73b5-e499-42e1-9c53-12672d1af4cf", 
+            "c8ea846d-dd6d-4f7b-b86f-c2b5b1e69877", 
+            "bd88431d-2b81-445d-8cdb-729d7b43e7db"
+        ], 
+        "accession": "4DNEXCQ2ZNXO", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic070"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "349c1679-603c-48e4-91af-c5046175e9fc", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "f3b7e977-00da-4078-9e87-91e8580f0c32", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 070", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341940"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:31.316189+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "5713301f-69b2-416d-98f5-d9e13a353aff", 
+            "de48f010-08bc-42ca-aab0-d25955c2363b", 
+            "4ffa5820-222d-4423-b253-a34a2a92615b", 
+            "d0ba79aa-6fa2-4db9-a127-1aba39114e98", 
+            "ff0377fc-1cd7-4910-87fd-6ff28d4fe276", 
+            "44d7d910-ae7e-4af6-bff6-0c8d0ce20dcb", 
+            "1d6aae32-c28c-4f09-badc-e8dd0c04cea1", 
+            "d139cf52-8347-4604-ac20-8b649d5fc33d"
+        ], 
+        "accession": "4DNEXFETO9VX", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic071"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "470548c0-d76b-476a-82d6-4a15cf105d74", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "1264e0b5-b422-4af0-a433-d006fac14bc3", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 071", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341941"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:32.107883+00:00", 
+        "rna_tag": "bio-dUTP"
+    }, 
+    {
+        "files": [
+            "b4d23156-48b9-4c68-877d-e17f1167027d", 
+            "7ba6705d-a9a0-4bb8-8079-e59743b736b2", 
+            "dd14481d-d3ac-4fda-b2db-be7ed10594bd", 
+            "d0cc784a-8812-4175-a76c-a66933115afc", 
+            "3906dc34-03a8-459d-972d-eea3538a513d", 
+            "11c80946-b0c6-4315-b9f0-842c26d45aeb", 
+            "74055931-5ae8-423b-bb54-14b1f16a58cd", 
+            "f4a8762c-c14f-4c42-9229-2316d47564e6"
+        ], 
+        "accession": "4DNEX2VTRKTP", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic072"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "a2faae45-d98b-4d77-a2b3-c939a30fd29d", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "9164dee9-00d2-4185-8332-9e4f20141c7a", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 072", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341942"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:32.959431+00:00", 
+        "rna_tag": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "e76a8c91-1b6d-4773-918f-2ad45d51c12e", 
+            "52d39d49-4bf9-4e68-9600-7b38deda89f8", 
+            "904455ef-5816-4a0c-9f77-9e1d0bf1d864", 
+            "2814f35d-d3bc-47cd-ae51-06a7d37ce449", 
+            "9bb9197a-5647-4d23-a2c9-093638dab023", 
+            "b2e93fa0-ab5b-43e3-8019-6668e836db47", 
+            "54eafd11-cca5-484d-8432-a507d631ee09", 
+            "03c060db-769c-4684-81af-ec6d1eebd3e9"
+        ], 
+        "accession": "4DNEXQXUGDXG", 
+        "references": [
+            "5427c34d-1ff4-409c-9ce1-97c7a5af2965"
+        ], 
+        "alternate_accessions": [], 
+        "crosslinking_temperature": 22.0, 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "dcic:SR15-hic073"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "da30a030-b932-40c8-b350-37af46727073", 
+        "schema_version": "1", 
+        "digestion_time": 120.0, 
+        "biosample": "9164dee9-00d2-4185-8332-9e4f20141c7a", 
+        "status": "released", 
+        "description": "Hap1 capture Hi-C 073", 
+        "targeted_regions": [
+            {
+                "target": "e2406013-1ea2-4978-bbb0-c451f3d6fad7", 
+                "oligo_file": "71694fd1-c205-4dee-9df8-3b7391db32b9"
+            }, 
+            {
+                "target": "f2c5562b-c00c-41bb-8d81-c18fb02b6f23", 
+                "oligo_file": "5204edf5-f951-40bc-b8ee-92f317aa75fe"
+            }, 
+            {
+                "target": "4bdcf493-8eb9-424a-878f-70c6aad3e055"
+            }
+        ], 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "5771d772-1d10-43ea-bec1-0ea8c5a58503", 
+        "digestion_temperature": 37.0, 
+        "dbxrefs": [
+            "SRA:SRX1341943"
+        ], 
+        "award": "36a06537-7831-494d-b10d-3e9fea931021", 
+        "tagging_method": "biotin-dUTP", 
+        "crosslinking_time": 10.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "experiment_type": "capture Hi-C", 
+        "date_created": "2017-04-10T01:11:34.010327+00:00", 
+        "rna_tag": "bio-dUTP"
+    }
+]
