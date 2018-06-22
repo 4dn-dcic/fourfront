@@ -347,6 +347,9 @@ def main(global_config, **local_config):
 
     app = config.make_wsgi_app()
 
+    # store this for use later
+    config.registry.settings['app'] = app
+
     workbook_filename = settings.get('load_workbook', '')
     load_test_only = asbool(settings.get('load_test_only', False))
     docsdir = settings.get('load_docsdir', None)

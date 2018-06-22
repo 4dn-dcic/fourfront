@@ -10,6 +10,7 @@ import boto3
 import os
 from datetime import datetime
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
+from pyramid.paster import get_app
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -108,7 +109,32 @@ IS_ATTACHMENT = [
 
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
-    return {'msg': 'thanks'}
+    '''
+    we expect to get posted data in the form of {'item_type': [items], 'item_type2': [items]}
+    then we just use load_all to load all that stuff in
+    '''
+
+    # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it 
+    app = request.registry.settings['app']
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+    request.response.status = 200
+    result = {
+        'status': 'success',
+        '@type': ['result'],
+    }
+    res = load_all(testapp, request.json, [], from_json=True)
+
+    if res:
+        request.response.status = 422
+        result['status'] = 'error'
+        result['@graph'] = res
+
+    return result
 
 
 ##############################################################################
@@ -240,7 +266,7 @@ def add_attachments(docsdir):
 
 
 def read_single_sheet(path, name=None):
-    """ Read an xlsx, csv or tsv from a zipfile or directory
+    """ Read an xlsx, csv, json, or tsv from a zipfile or directory
     """
     from zipfile import ZipFile
     from . import xlreader
@@ -722,10 +748,11 @@ PHASE2_PIPELINES = {
 }
 
 
-def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
+def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, from_json=False):
     """smth."""
     # exclude_list is for items that fail phase1 to be excluded from phase2
     exclude_list = []
+    errors = []
     order = list(ORDER)
     if itype is not None:
         if isinstance(itype, list):
@@ -734,7 +761,12 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
             order = [itype]
     for item_type in order:
         try:
-            source = read_single_sheet(filename, item_type)
+            if from_json:
+                source = filename.get(item_type)
+                if source == None:
+                    continue
+            else:
+                source = read_single_sheet(filename, item_type)
         except ValueError:
             logger.error('Opening %s %s failed.', filename, item_type)
             continue
@@ -750,6 +782,8 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         processed_data = combine(source, pipeline)
         for result in processed_data:
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+                errors.append({'uuid': result['uuid'],
+                               'error': result['_response'].json})
                 exclude_list.append(result['uuid'])
                 print("excluding uuid %s do to error" % result['uuid'])
     if force_return:
@@ -759,11 +793,23 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         if item_type not in PHASE2_PIPELINES:
             continue
         try:
-            source = read_single_sheet(filename, item_type)
+            if from_json:
+                source = filename.get(item_type)
+                if source == None:
+                    continue
+            else:
+                source = read_single_sheet(filename, item_type)
         except ValueError:
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2, exclude=exclude_list)
-        process(combine(source, pipeline))
+        processed_data = process(combine(source, pipeline))
+        if processed_data:
+            for result in processed_data:
+                if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+                    errors.append({'uuid': result['uuid'],
+                                   'response': result['_response'].json})
+                    print("excluding uuid %s do to error" % result['uuid'])
+    return errors
 
 
 def generate_access_key(testapp, store_access_key=None,
@@ -866,6 +912,7 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
+    import pdb; pdb.set_trace()
     if indir != 'master-inserts': # Load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
