@@ -4,18 +4,25 @@ from .typedsheets import cast_row_values
 from functools import reduce
 import io
 import json
-import logging
+import structlog
 import os.path
 import boto3
 import os
 from datetime import datetime
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
 
+from pyramid.view import view_config
+from pyramid.response import Response
+
 
 text = type(u'')
 
-logger = logging.getLogger('encoded')
-logger.setLevel(logging.INFO)  # doesn't work to shut off sqla INFO
+logger = structlog.getLogger('encoded')
+
+def includeme(config):
+    # provide an endpoint to do bulk uploading that just uses loadxl
+    config.add_route('load_data', '/load_data')
+    config.scan(__name__)
 
 ORDER = [
     'user',
@@ -96,6 +103,13 @@ IS_ATTACHMENT = [
     'IDR_parameters_pool_pr',
     'cross_correlation_plot'
 ]
+
+
+
+@view_config(route_name='load_data', request_method='POST', permission='add')
+def load_data_view(context, request):
+    return {'msg': 'thanks'}
+
 
 ##############################################################################
 # Pipeline components

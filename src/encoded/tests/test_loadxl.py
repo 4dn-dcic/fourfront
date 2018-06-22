@@ -42,3 +42,9 @@ def test_gen_access_keys_on_server(testapp, admin):
         assert res['default']['key']
 
         assert mocked_url.called_once()
+
+
+def test_load_data_endpoint(testapp):
+    res = testapp.post_json('/load_data', {}, status=200)
+    assert res.json['msg'] == 'thanks'
+
