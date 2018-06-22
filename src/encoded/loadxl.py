@@ -115,7 +115,8 @@ def load_data_view(context, request):
     '''
 
     # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it 
-    app = request.registry.settings['app']
+    # TODO: allow user to pass in config_uri below
+    app = get_app('productioni.ini', 'app')
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
