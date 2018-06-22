@@ -418,6 +418,10 @@ def connect2server(env=None, key=None, app=None):
         s3bucket = app.registry.settings['system_bucket']
         keyfile = get_key(bucket=s3bucket)
 
+    if all([v in key for v in ['key', 'secret', 'server']]):
+        import ast
+        key = ast.literal_eval(key)
+
     try:
         auth = get_authentication_with_server(key, env)
     except Exception:
@@ -745,7 +749,6 @@ def main():
     '''
 
     args = parse_args(sys.argv[1:])  # to facilitate testing
-
     s3_postfile = 'ontology_post.json'
     s3_patchfile = 'ontology_patch.json'
     from pkg_resources import resource_filename
