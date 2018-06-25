@@ -49,8 +49,10 @@ def test_load_data_endpoint(testapp):
     master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
     data = {}
     data['user'] = loadxl.read_single_sheet(master_inserts, 'user')
-    res = testapp.post_json('/load_data', data, status=200)
-    assert res.json['status'] == 'success'
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', data, status=200)
+        assert res.json['status'] == 'success'
 
 
 def test_load_data_endpoint_returns_error_if_incorrect_data(testapp):
@@ -59,7 +61,9 @@ def test_load_data_endpoint_returns_error_if_incorrect_data(testapp):
     data = {}
     data['user'] = loadxl.read_single_sheet(master_inserts, 'user')
     data['lab'] = loadxl.read_single_sheet(master_inserts, 'lab')
-    res = testapp.post_json('/load_data', data, status=422)
-    assert res.json['status'] == 'error'
-    assert res.json['@graph']
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', data, status=422)
+        assert res.json['status'] == 'error'
+        assert res.json['@graph']
 
