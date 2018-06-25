@@ -1,7 +1,6 @@
 [
     {
         "status": "current", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "first_name": "4dn", 
         "last_name": "DCIC", 
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
@@ -23,10 +22,6 @@
             "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
         ], 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-01T14:57:27.913576+00:00"
-        }, 
         "schema_version": "1", 
         "groups": [
             "admin"
@@ -42,7 +37,6 @@
     }, 
     {
         "status": "current", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "first_name": "Bin", 
         "last_name": "Li", 
         "uuid": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
@@ -91,7 +85,6 @@
     }, 
     {
         "status": "current", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "first_name": "Bing", 
         "last_name": "Ren", 
         "uuid": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 

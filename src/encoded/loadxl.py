@@ -54,6 +54,7 @@ ORDER = [
     'antibody',
     'enzyme',
     'treatment_rnai',
+    'treatment_agent',
     'treatment_chemical',
     'biosample',
     'quality_metric_fastqc',
@@ -784,10 +785,12 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
 
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase)
         processed_data = combine(source, pipeline)
+
         for result in processed_data:
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
                 errors.append({'uuid': result['uuid'],
                                'error': result['_response'].json})
+                import pdb; pdb.set_trace()
                 exclude_list.append(result['uuid'])
                 print("excluding uuid %s do to error" % result['uuid'])
     if force_return:

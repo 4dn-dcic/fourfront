@@ -67,3 +67,28 @@ def test_load_data_endpoint_returns_error_if_incorrect_data(testapp):
         assert res.json['status'] == 'error'
         assert res.json['@graph']
 
+
+def test_load_data_perf_data(testapp):
+    from pkg_resources import resource_filename
+    from os import listdir
+    from os.path import isfile, join
+    insert_dir = resource_filename('encoded', 'tests/data/perf-testing/')
+    inserts = [f for f in listdir(insert_dir) if isfile(join(insert_dir, f))]
+    json_inserts = {}
+    for insert in inserts:
+        type_name = insert.split('.')[0]
+        json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
+
+    from timeit import default_timer as timer
+    start = timer()
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', json_inserts, status=200)
+        assert res.json['status'] == 'success'
+    stop = timer()
+    import pdb; pdb.set_trace()
+    print("Time to insert is %s" % (stop - start))
+
+
+
+
