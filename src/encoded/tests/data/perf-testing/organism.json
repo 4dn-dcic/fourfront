@@ -2,23 +2,12 @@
     {
         "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "name": "mouse", 
+        "uuid": "3413218c-3d86-498b-a0a2-9a406638e786", 
         "scientific_name": "Mus musculus", 
         "schema_version": "1", 
         "public_release": "2017-04-09", 
         "taxon_id": "10090", 
         "date_created": "2017-04-09T17:24:06.100996+00:00", 
-        "uuid": "3413218c-3d86-498b-a0a2-9a406638e786"
-    },
-	{
-		"uuid": "7745b647-ff15-4ff3-9ced-b897d4e2983c",
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-		"taxon_id": "9606",
-		"schema_version": "1",
-		"public_release": "2017-04-10",
-		"name": "human",
-		"date_created": "2017-04-09T17:24:05.743724+00:00",
-		"status": "released",
-		"scientific_name": "Homo sapiens"
-	}
+        "name": "mouse"
+    }
 ]

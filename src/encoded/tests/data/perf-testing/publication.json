@@ -3,14 +3,9 @@
         "status": "current", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "b8aada45-1504-428d-91b5-355bc9d158af", 
-        "exp_sets_prod_in_pub": [
-            "6f052613-bdb4-4349-8444-0a743051b3d2", 
-            "98306c0d-fd1d-479b-b2d7-894c4d5d0ad4", 
-            "e0ff3dd1-0bc7-4c10-9976-95bbbe627277", 
-            "5dea39d8-4fb8-44d8-a3ea-f947e7010ebe"
-        ], 
+        "title": "Preservation of Chromatin Organization after Acute Loss of CTCF in Mouse Embryonic Stem Cells", 
         "url": "https://www.biorxiv.org/content/early/2017/03/20/118737", 
-        "journal": "bioRxiv", 
+        "abstract": "The CCCTC-binding factor (CTCF) is widely regarded as a key player in chromosome organization in mammalian cells, yet direct assessment of the impact of loss of CTCF on genome architecture has been difficult due to its essential role in cell proliferation and early embryogenesis. Here, using auxin-inducible degron techniques to acutely deplete CTCF in mouse embryonic stem cells, we show that cell growth is severely slowed yet chromatin organization remains largely intact after loss of CTCF. Depletion of CTCF reduces interactions between chromatin loop anchors, diminishes occupancy of cohesin complex genome-wide, and slightly weakens topologically associating domain (TAD) structure, but the active and inactive chromatin compartments are maintained and the vast majority of TAD boundaries persist. Furthermore, transcriptional regulation and histone marks associated with enhancers are broadly unchanged upon CTCF depletion. Our results suggest CTCF-independent mechanisms in maintenance of chromatin organization.", 
         "authors": [
             "Naoki Kubo", 
             "Haruhiko Ishii", 
@@ -26,20 +21,21 @@
             "Huimin Zhao", 
             "Bing Ren"
         ], 
-        "schema_version": "2", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "ID": "doi:10.1101/118737", 
-        "date_created": "2018-05-30T15:59:14.625869+00:00", 
-        "date_published": "2017-03-20", 
-        "published_by": "4DN", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T15:59:25.836336+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "ID": "doi:10.1101/118737", 
+        "exp_sets_prod_in_pub": [
+            "6f052613-bdb4-4349-8444-0a743051b3d2", 
+            "98306c0d-fd1d-479b-b2d7-894c4d5d0ad4", 
+            "e0ff3dd1-0bc7-4c10-9976-95bbbe627277", 
+            "5dea39d8-4fb8-44d8-a3ea-f947e7010ebe"
+        ], 
+        "published_by": "4DN", 
+        "schema_version": "2", 
         "public_release": "2018-05-30", 
-        "title": "Preservation of Chromatin Organization after Acute Loss of CTCF in Mouse Embryonic Stem Cells", 
-        "abstract": "The CCCTC-binding factor (CTCF) is widely regarded as a key player in chromosome organization in mammalian cells, yet direct assessment of the impact of loss of CTCF on genome architecture has been difficult due to its essential role in cell proliferation and early embryogenesis. Here, using auxin-inducible degron techniques to acutely deplete CTCF in mouse embryonic stem cells, we show that cell growth is severely slowed yet chromatin organization remains largely intact after loss of CTCF. Depletion of CTCF reduces interactions between chromatin loop anchors, diminishes occupancy of cohesin complex genome-wide, and slightly weakens topologically associating domain (TAD) structure, but the active and inactive chromatin compartments are maintained and the vast majority of TAD boundaries persist. Furthermore, transcriptional regulation and histone marks associated with enhancers are broadly unchanged upon CTCF depletion. Our results suggest CTCF-independent mechanisms in maintenance of chromatin organization.", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-05-30T15:59:14.625869+00:00", 
+        "journal": "bioRxiv", 
+        "date_published": "2017-03-20", 
         "aliases": [
             "dcic:kubo_biorxiv"
         ]

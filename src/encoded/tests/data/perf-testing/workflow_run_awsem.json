@@ -63,10 +63,6 @@
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:48.608084+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -122,10 +118,6 @@
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:37.579880+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -175,12 +167,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T10:34:28.630114+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -194,24 +182,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "bd5d8f6d-ce55-40c6-bebc-549a8727f0e8", 
         "parameters": [], 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "title": "md5 run 2018-05-29 16:17:03.246906", 
-        "aliases": [], 
         "description_only": false, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T19:12:33.175332+00:00"
-        }, 
+        "awsem_job_id": "", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/9otrz0LV86LQ.postrun.json", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "run_platform": "AWSEM", 
         "date_created": "2018-05-29T16:17:03.280484+00:00", 
         "run_status": "complete", 
+        "aliases": [], 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -219,7 +204,6 @@
                 "value": "83f36c27-c222-4745-8630-e1514aace964"
             }
         ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "output_files": [
             {
                 "type": "Output report file", 
@@ -255,12 +239,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T10:06:21.128583+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -274,29 +254,20 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "6f56549d-d916-4d6b-8656-3ed408840f7d", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 17:16:48.090186", 
-        "output_files": [
-            {
-                "type": "Output report file", 
-                "workflow_argument_name": "report"
-            }
-        ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T20:12:20.254811+00:00"
-        }, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "awsem_job_id": "", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/UAoryKSoFLNJ.postrun.json", 
         "date_created": "2018-05-29T17:16:48.112783+00:00", 
+        "run_platform": "AWSEM", 
+        "aliases": [], 
         "run_status": "complete", 
         "input_files": [
             {
@@ -305,7 +276,73 @@
                 "value": "c885c6d4-f25d-492c-92e3-6291d9dfbc60"
             }
         ], 
-        "aliases": []
+        "output_files": [
+            {
+                "type": "Output report file", 
+                "workflow_argument_name": "report"
+            }
+        ]
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "f0ee9c60-1658-4dd5-9180-085b65b00f42", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFICLCWWLH"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:56:56.977521", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFICLCWWLH", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "d048c98a-a370-4750-8356-e14b3f05d18a"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/d048c98a-a370-4750-8356-e14b3f05d18a/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "88793582-d8d5-4cef-89c6-88a973441791"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/TvtnPFQhPSTo.postrun.json", 
+        "date_created": "2018-06-22T17:56:57.185845+00:00"
     }, 
     {
         "awsem_app_name": "hi-c-processing-pairs", 
@@ -389,10 +426,6 @@
         "run_platform": "AWSEM", 
         "workflow": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:47.476646+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -483,10 +516,6 @@
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:46.525620+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -537,10 +566,6 @@
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:38.850237+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -590,12 +615,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T07:53:15.613763+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -609,30 +630,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "ba4a406b-9ba2-4018-b2f7-5f98ba5c3528", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 16:28:19.676986", 
         "description_only": false, 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "schema_version": "1", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T18:33:51.468281+00:00"
-        }, 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/bRDo6tioNI6C.postrun.json", 
         "date_created": "2018-05-29T16:28:19.737351+00:00", 
+        "run_platform": "AWSEM", 
+        "aliases": [], 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "type": "Output report file", 
-                "workflow_argument_name": "report"
-            }
-        ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -640,18 +652,17 @@
                 "value": "ad14b956-84d9-4ff8-8012-7996e1bbf38c"
             }
         ], 
-        "aliases": []
+        "output_files": [
+            {
+                "type": "Output report file", 
+                "workflow_argument_name": "report"
+            }
+        ]
     }, 
     {
         "awsem_app_name": "fastqc-0-11-4-1", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "value_qc": "/quality-metrics-fastqc/d254c8c1-1456-4123-a4df-ec8c0a95895d/", 
-                "type": "Output QC file", 
-                "workflow_argument_name": "report_zip"
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "b914b199-66e0-4762-a21e-bacf4669d099", 
         "parameters": [], 
@@ -666,15 +677,17 @@
                 "value": "d254c8c1-1456-4123-a4df-ec8c0a95895d"
             }
         ], 
-        "aliases": [], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-fastqc/d254c8c1-1456-4123-a4df-ec8c0a95895d/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report_zip"
+            }
+        ], 
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T07:35:08.629165+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -689,24 +702,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "37de39a5-869d-4da0-a9e0-ae9596c11020", 
         "parameters": [], 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "title": "md5 run 2018-05-29 17:31:13.554462", 
-        "aliases": [], 
         "description_only": false, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T19:36:41.124209+00:00"
-        }, 
+        "awsem_job_id": "", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/m5MSzyAqO3zZ.postrun.json", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "run_platform": "AWSEM", 
         "date_created": "2018-05-29T17:31:13.595919+00:00", 
         "run_status": "complete", 
+        "aliases": [], 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -714,7 +724,6 @@
                 "value": "0ba23514-445b-4f66-a8db-99693524f498"
             }
         ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "output_files": [
             {
                 "type": "Output report file", 
@@ -723,8 +732,90 @@
         ]
     }, 
     {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "6aa3de17-a7fd-470d-848c-6e1c90dbd84c", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIBDZ8KDQ"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:17.558963", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIBDZ8KDQce2e36ab-4d6f-47b5-9c7a-ad6f3656de2c", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "0397bc5c-1a4f-4370-959b-f39407d7e438"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/0397bc5c-1a4f-4370-959b-f39407d7e438/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "5154fc82-58f9-4f55-b592-64f008ba9033"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/ctZYRXV2pWzx.postrun.json", 
+        "date_created": "2018-06-22T17:58:17.721120+00:00"
+    }, 
+    {
         "awsem_app_name": "hi-c-processing-bam", 
         "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "6185ad50-a69a-4dc3-8cb8-7aca723a2b53", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_merge", 
+                "value": "16"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_parse_sort", 
+                "value": "16"
+            }
+        ], 
+        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:14:47.619428", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXLWC9JX7", 
+        "public_release": "2018-06-07", 
         "output_files": [
             {
                 "extension": ".bam", 
@@ -761,35 +852,10 @@
                 ]
             }
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "6185ad50-a69a-4dc3-8cb8-7aca723a2b53", 
-        "parameters": [
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_merge", 
-                "value": "16"
-            }, 
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_parse_sort", 
-                "value": "16"
-            }
-        ], 
-        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:14:47.619428", 
-        "description_only": false, 
-        "schema_version": "1", 
-        "awsem_job_id": "", 
-        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXLWC9JX7", 
-        "public_release": "2018-06-07", 
-        "aliases": [], 
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:45:34.419121+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -809,17 +875,7 @@
     {
         "awsem_app_name": "bwa-mem", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "extension": ".bam", 
-                "format": "bam", 
-                "workflow_argument_name": "out_bam", 
-                "value": "54d6d838-9139-4890-a04a-e8b7a6296b6e", 
-                "upload_key": "54d6d838-9139-4890-a04a-e8b7a6296b6e/4DNFIGP1QA62.bam", 
-                "type": "Output processed file", 
-                "extra_files": null
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "791f2e4a-0bbe-40ad-bb7f-892f473f05e0", 
         "parameters": [
@@ -835,15 +891,21 @@
         "awsem_job_id": "", 
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFI3C4KK9M_4DNFIZXMF559", 
         "public_release": "2018-06-07", 
-        "aliases": [], 
+        "output_files": [
+            {
+                "extension": ".bam", 
+                "format": "bam", 
+                "workflow_argument_name": "out_bam", 
+                "value": "54d6d838-9139-4890-a04a-e8b7a6296b6e", 
+                "upload_key": "54d6d838-9139-4890-a04a-e8b7a6296b6e/4DNFIGP1QA62.bam", 
+                "type": "Output processed file", 
+                "extra_files": null
+            }
+        ], 
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:45:35.387228+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -893,12 +955,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T01:11:51.299341+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -916,20 +974,17 @@
         "uuid": "7f29279f-cd8b-4fc7-b985-4e86f1702276", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 16:35:32.501568", 
-        "aliases": [], 
         "description_only": false, 
+        "schema_version": "1", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "awsem_job_id": "", 
         "awsem_app_name": "md5", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T17:00:56.404712+00:00"
-        }, 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/pysdmg7pG0ik.postrun.json", 
         "date_created": "2018-05-29T16:35:32.540867+00:00", 
         "run_status": "complete", 
+        "aliases": [], 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -937,7 +992,6 @@
                 "value": "c774c350-8333-4e5c-99fc-caafee8d5d58"
             }
         ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "output_files": [
             {
                 "type": "Output report file", 
@@ -974,10 +1028,6 @@
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T00:43:40.403278+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -996,34 +1046,91 @@
         "uuid": "c9eec19e-aa86-4156-9fb8-50d146b0ff0d", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 17:39:59.265466", 
-        "output_files": [
-            {
-                "type": "Output report file", 
-                "workflow_argument_name": "report"
-            }
-        ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
         "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "awsem_job_id": "", 
         "awsem_app_name": "md5", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T18:05:21.063970+00:00"
-        }, 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/0ZUTtft7vwZb.postrun.json", 
         "date_created": "2018-05-29T17:39:59.295466+00:00", 
         "run_status": "complete", 
         "aliases": [], 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "input_files": [
             {
                 "ordinal": 1, 
                 "workflow_argument_name": "input_file", 
                 "value": "d2b37f10-7acd-4d79-8be0-be53616073c6"
             }
+        ], 
+        "output_files": [
+            {
+                "type": "Output report file", 
+                "workflow_argument_name": "report"
+            }
         ]
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "7eae4a9c-83ab-4b3c-a4aa-8beb6d8b0d09", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIYRP9RLI"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:31.613665", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIYRP9RLI0eba4119-f80a-4c5a-b698-2a8f6555319c", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "8ce03740-0cd3-4469-9b86-a89bbe4afb46"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/8ce03740-0cd3-4469-9b86-a89bbe4afb46/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "58d4addc-5b87-48ab-9817-a9832db11549"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/vU8t57Z6mvZJ.postrun.json", 
+        "date_created": "2018-06-22T17:58:31.764425+00:00"
     }, 
     {
         "awsem_app_name": "hi-c-processing-pairs", 
@@ -1107,10 +1214,6 @@
         "run_platform": "AWSEM", 
         "workflow": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:45:36.609686+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1140,6 +1243,27 @@
     {
         "awsem_app_name": "hi-c-processing-bam", 
         "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "d43caec9-9b61-4d99-8b38-a7daf700860c", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_merge", 
+                "value": "16"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_parse_sort", 
+                "value": "16"
+            }
+        ], 
+        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:20:09.742391", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXU87YSSY", 
+        "public_release": "2018-06-07", 
         "output_files": [
             {
                 "extension": ".bam", 
@@ -1176,36 +1300,11 @@
                 ]
             }
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "d43caec9-9b61-4d99-8b38-a7daf700860c", 
-        "parameters": [
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_merge", 
-                "value": "16"
-            }, 
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_parse_sort", 
-                "value": "16"
-            }
-        ], 
-        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:20:09.742391", 
-        "description_only": false, 
-        "schema_version": "1", 
-        "awsem_job_id": "", 
-        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXU87YSSY", 
-        "public_release": "2018-06-07", 
-        "aliases": [], 
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:45:27.899759+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -1255,10 +1354,6 @@
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:45:32.341840+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1283,13 +1378,7 @@
     {
         "awsem_app_name": "fastqc-0-11-4-1", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "value_qc": "/quality-metrics-fastqc/7718010e-9675-42bc-9dc3-86c0c711f5b3/", 
-                "type": "Output QC file", 
-                "workflow_argument_name": "report_zip"
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "80e1c5cd-8ba1-4511-8e66-02a683750ddb", 
         "parameters": [], 
@@ -1304,15 +1393,17 @@
                 "value": "7718010e-9675-42bc-9dc3-86c0c711f5b3"
             }
         ], 
-        "aliases": [], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-fastqc/7718010e-9675-42bc-9dc3-86c0c711f5b3/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report_zip"
+            }
+        ], 
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T20:50:36.069775+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1331,32 +1422,28 @@
         "uuid": "9f65c034-4dd4-4015-9a0d-b7e0a7632e1e", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 16:38:59.314495", 
-        "output_files": [
-            {
-                "type": "Output report file", 
-                "workflow_argument_name": "report"
-            }
-        ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
         "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "awsem_job_id": "", 
         "awsem_app_name": "md5", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T16:54:20.930570+00:00"
-        }, 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/fc6EzPSIucPg.postrun.json", 
         "date_created": "2018-05-29T16:38:59.353457+00:00", 
         "run_status": "complete", 
         "aliases": [], 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "input_files": [
             {
                 "ordinal": 1, 
                 "workflow_argument_name": "input_file", 
                 "value": "be9d5167-dcad-45e8-a3d5-a5fd07d349d1"
+            }
+        ], 
+        "output_files": [
+            {
+                "type": "Output report file", 
+                "workflow_argument_name": "report"
             }
         ]
     }, 
@@ -1388,12 +1475,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T20:42:26.432957+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -1410,22 +1493,18 @@
         "run_platform": "AWSEM", 
         "uuid": "023c0d3f-8f46-447a-a712-335ac5171444", 
         "parameters": [], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
-        "description_only": false, 
         "title": "md5 run 2018-05-29 17:43:38.329105", 
+        "description_only": false, 
         "schema_version": "1", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "awsem_job_id": "", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T17:58:58.369728+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "awsem_job_id": "", 
+        "awsem_app_name": "md5", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/Aprkd2Vgj7Yu.postrun.json", 
         "date_created": "2018-05-29T17:43:38.354617+00:00", 
         "run_status": "complete", 
         "aliases": [], 
-        "awsem_app_name": "md5", 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -1441,8 +1520,151 @@
         ]
     }, 
     {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "738f5338-d8dc-4993-8b59-77f12713a73b", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIVPADLI2"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:59:09.245462", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIVPADLI265f31282-897b-485f-bce2-c6b1df193acb", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "9c40b49b-643f-4776-935a-a6f1d87fcb75"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/9c40b49b-643f-4776-935a-a6f1d87fcb75/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "b4b2c140-6cfc-425b-b973-997b8c5e9709"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/jmSsp2hfkuuY.postrun.json", 
+        "date_created": "2018-06-22T17:59:09.422375+00:00"
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "c3970447-faef-40d3-a010-990ea55c5e7c", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFI3Y5YTC6"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:57:25.721044", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFI3Y5YTC6", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "a194ac70-afc3-4dff-9f9c-becf221dec91"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/a194ac70-afc3-4dff-9f9c-becf221dec91/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "b2cfe4dd-561c-4ac8-96da-16dcdb569f6b"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/6JcpNlXSfPqB.postrun.json", 
+        "date_created": "2018-06-22T17:57:25.904474+00:00"
+    }, 
+    {
         "awsem_app_name": "hi-c-processing-bam", 
         "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "0568aaa4-3e12-4cb6-9c8b-fbef9d9e0175", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_merge", 
+                "value": "16"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_parse_sort", 
+                "value": "16"
+            }
+        ], 
+        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:14:05.069591", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXVGS8FQQ", 
+        "public_release": "2018-06-07", 
         "output_files": [
             {
                 "extension": ".bam", 
@@ -1479,35 +1701,10 @@
                 ]
             }
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "0568aaa4-3e12-4cb6-9c8b-fbef9d9e0175", 
-        "parameters": [
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_merge", 
-                "value": "16"
-            }, 
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_parse_sort", 
-                "value": "16"
-            }
-        ], 
-        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:14:05.069591", 
-        "description_only": false, 
-        "schema_version": "1", 
-        "awsem_job_id": "", 
-        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXVGS8FQQ", 
-        "public_release": "2018-06-07", 
-        "aliases": [], 
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:52.251231+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1558,10 +1755,6 @@
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:57.884004+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1586,13 +1779,7 @@
     {
         "awsem_app_name": "fastqc-0-11-4-1", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "value_qc": "/quality-metrics-fastqc/fc14cd1b-a253-40c2-81fb-999074745ad6/", 
-                "type": "Output QC file", 
-                "workflow_argument_name": "report_zip"
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "d95cfeda-cb01-432d-addd-c7d60915ffe5", 
         "parameters": [], 
@@ -1607,15 +1794,17 @@
                 "value": "fc14cd1b-a253-40c2-81fb-999074745ad6"
             }
         ], 
-        "aliases": [], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-fastqc/fc14cd1b-a253-40c2-81fb-999074745ad6/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report_zip"
+            }
+        ], 
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T00:39:47.403191+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1630,36 +1819,32 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "897ed3de-38ff-485f-829f-1336ec6ac37f", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 16:45:37.581359", 
-        "output_files": [
-            {
-                "type": "Output report file", 
-                "workflow_argument_name": "report"
-            }
-        ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "schema_version": "1", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "awsem_job_id": "", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T17:10:58.319644+00:00"
-        }, 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/NJsoFUX9gzJO.postrun.json", 
         "date_created": "2018-05-29T16:45:37.616218+00:00", 
-        "run_status": "complete", 
+        "run_platform": "AWSEM", 
         "aliases": [], 
+        "run_status": "complete", 
         "input_files": [
             {
                 "ordinal": 1, 
                 "workflow_argument_name": "input_file", 
                 "value": "2233a2d3-8e71-4656-ba32-6d2eb5db8895"
+            }
+        ], 
+        "output_files": [
+            {
+                "type": "Output report file", 
+                "workflow_argument_name": "report"
             }
         ]
     }, 
@@ -1692,10 +1877,6 @@
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T01:21:42.201455+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1710,23 +1891,20 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "967e7342-6295-41ca-89f3-f6bad9f57bea", 
         "parameters": [], 
         "title": "md5 run 2018-05-29 17:52:10.590438", 
-        "aliases": [], 
         "description_only": false, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T18:17:33.366157+00:00"
-        }, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "awsem_job_id": "", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/b32nFFXWyDjm.postrun.json", 
         "date_created": "2018-05-29T17:52:10.635902+00:00", 
+        "run_platform": "AWSEM", 
+        "aliases": [], 
         "run_status": "complete", 
         "input_files": [
             {
@@ -1735,13 +1913,73 @@
                 "value": "ee5089e9-53b2-4b80-8b73-0f3049e57780"
             }
         ], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "output_files": [
             {
                 "type": "Output report file", 
                 "workflow_argument_name": "report"
             }
         ]
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "8b2724d1-b7dd-497a-8771-1703c38ae48a", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIKYF3V7I"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:44.600953", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIKYF3V7If0a526f5-254a-4f1d-99d6-d9f647a75077", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "93451a27-04ea-4d62-84b9-b6c22253d0b2"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/93451a27-04ea-4d62-84b9-b6c22253d0b2/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "e8e5f2ab-032d-4ffb-aed1-2c9f4e1b74a0"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/PKa5glxTrDkE.postrun.json", 
+        "date_created": "2018-06-22T17:58:44.784032+00:00"
     }, 
     {
         "awsem_app_name": "hi-c-processing-pairs", 
@@ -1825,10 +2063,6 @@
         "run_platform": "AWSEM", 
         "workflow": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:45:02.080795+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1858,6 +2092,27 @@
     {
         "awsem_app_name": "hi-c-processing-bam", 
         "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "0a173c59-8d07-415c-916e-6dbf303ef38f", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_merge", 
+                "value": "16"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "nthreads_parse_sort", 
+                "value": "16"
+            }
+        ], 
+        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:19:31.454830", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXA7ZMMK3", 
+        "public_release": "2018-06-07", 
         "output_files": [
             {
                 "extension": ".bam", 
@@ -1894,35 +2149,10 @@
                 ]
             }
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "0a173c59-8d07-415c-916e-6dbf303ef38f", 
-        "parameters": [
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_merge", 
-                "value": "16"
-            }, 
-            {
-                "ordinal": 1, 
-                "workflow_argument_name": "nthreads_parse_sort", 
-                "value": "16"
-            }
-        ], 
-        "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:19:31.454830", 
-        "description_only": false, 
-        "schema_version": "1", 
-        "awsem_job_id": "", 
-        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXA7ZMMK3", 
-        "public_release": "2018-06-07", 
-        "aliases": [], 
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:51.171316+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -1942,17 +2172,7 @@
     {
         "awsem_app_name": "bwa-mem", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "extension": ".bam", 
-                "format": "bam", 
-                "workflow_argument_name": "out_bam", 
-                "value": "8d23e22d-96fe-4655-928f-ebcee057bdfb", 
-                "upload_key": "8d23e22d-96fe-4655-928f-ebcee057bdfb/4DNFIEESGFJH.bam", 
-                "type": "Output processed file", 
-                "extra_files": null
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "0078b155-31ca-4dec-86f0-4bd2ee54e4f9", 
         "parameters": [
@@ -1968,15 +2188,21 @@
         "awsem_job_id": "", 
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFI6CU7V24_4DNFI67MVM1D", 
         "public_release": "2018-06-07", 
-        "aliases": [], 
+        "output_files": [
+            {
+                "extension": ".bam", 
+                "format": "bam", 
+                "workflow_argument_name": "out_bam", 
+                "value": "8d23e22d-96fe-4655-928f-ebcee057bdfb", 
+                "upload_key": "8d23e22d-96fe-4655-928f-ebcee057bdfb/4DNFIEESGFJH.bam", 
+                "type": "Output processed file", 
+                "extra_files": null
+            }
+        ], 
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:56.538052+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -2001,13 +2227,7 @@
     {
         "awsem_app_name": "fastqc-0-11-4-1", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "value_qc": "/quality-metrics-fastqc/e2d46255-ae16-41f2-8b8d-3a727e9cdd3b/", 
-                "type": "Output QC file", 
-                "workflow_argument_name": "report_zip"
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "f99ccef2-9ce9-46ea-bfed-d58d4e38b949", 
         "parameters": [], 
@@ -2022,16 +2242,18 @@
                 "value": "e2d46255-ae16-41f2-8b8d-3a727e9cdd3b"
             }
         ], 
-        "aliases": [], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-fastqc/e2d46255-ae16-41f2-8b8d-3a727e9cdd3b/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report_zip"
+            }
+        ], 
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T21:38:36.167461+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2045,25 +2267,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "c8952d74-141f-4e76-bd5f-cec25009e7ea", 
-        "parameters": [], 
+        "run_platform": "AWSEM", 
         "title": "md5 run 2018-05-29 16:50:11.252982", 
+        "aliases": [], 
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T17:05:31.288700+00:00"
-        }, 
+        "awsem_job_id": "", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/sU7Jlrblbe58.postrun.json", 
         "date_created": "2018-05-29T16:50:11.292802+00:00", 
         "run_status": "complete", 
-        "aliases": [], 
+        "parameters": [], 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2081,13 +2299,7 @@
     {
         "awsem_app_name": "fastqc-0-11-4-1", 
         "run_status": "complete", 
-        "output_files": [
-            {
-                "value_qc": "/quality-metrics-fastqc/5ed9129d-ecef-47f0-abfc-883e0ce734df/", 
-                "type": "Output QC file", 
-                "workflow_argument_name": "report_zip"
-            }
-        ], 
+        "aliases": [], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "2fd4da21-5db2-40a6-a20e-2f425b823114", 
         "parameters": [], 
@@ -2102,15 +2314,17 @@
                 "value": "5ed9129d-ecef-47f0-abfc-883e0ce734df"
             }
         ], 
-        "aliases": [], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-fastqc/5ed9129d-ecef-47f0-abfc-883e0ce734df/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report_zip"
+            }
+        ], 
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T21:20:23.712697+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -2125,30 +2339,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "d726a3a4-5332-417a-b0a5-1764fc1d7fa2", 
-        "parameters": [], 
+        "run_platform": "AWSEM", 
         "title": "md5 run 2018-05-29 17:56:54.071741", 
-        "output_files": [
-            {
-                "type": "Output report file", 
-                "workflow_argument_name": "report"
-            }
-        ], 
+        "aliases": [], 
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "awsem_job_id": "", 
-        "awsem_app_name": "md5", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "schema_version": "1", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T18:12:14.756879+00:00"
-        }, 
+        "awsem_job_id": "", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/c4X93gNyenE5.postrun.json", 
         "date_created": "2018-05-29T17:56:54.116822+00:00", 
         "run_status": "complete", 
+        "parameters": [], 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2156,7 +2361,134 @@
                 "value": "c42e3984-ece0-4b57-8d2e-f5c007fdb3f5"
             }
         ], 
-        "aliases": []
+        "output_files": [
+            {
+                "type": "Output report file", 
+                "workflow_argument_name": "report"
+            }
+        ]
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "7e230bb8-7ed0-460a-8cad-c8b3715ad960", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIVMRIR5H"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:59:26.448952", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIVMRIR5Hb1be1eb1-0c71-4ccd-971c-689dbb9fcbba", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "6616d374-32bd-46a4-b8b3-5d12fe4e995c"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/6616d374-32bd-46a4-b8b3-5d12fe4e995c/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "d3460a87-fb51-4dd8-921d-ec9668c18318"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/HNTsxDgFlHpO.postrun.json", 
+        "date_created": "2018-06-22T17:59:26.623968+00:00"
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "ad361e83-43cd-4377-84a2-7940dd15c487", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIDHNCVEM"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:57:39.478999", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIDHNCVEM", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "5c24f96b-0d09-4d2d-8661-cac7f2d7eb0e"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/5c24f96b-0d09-4d2d-8661-cac7f2d7eb0e/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "5742cf29-7b84-4bee-a34d-3474bfe905b4"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/OiQUzaLNGQxY.postrun.json", 
+        "date_created": "2018-06-22T17:57:39.664029+00:00"
     }, 
     {
         "awsem_app_name": "hi-c-processing-bam", 
@@ -2221,12 +2553,8 @@
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:21.963945+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2275,12 +2603,8 @@
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:26.056776+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2329,12 +2653,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T00:37:49.024051+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2348,25 +2668,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "15f71f52-eef7-43b6-86ca-52f78dc6f6a2", 
+        "run_platform": "AWSEM", 
+        "title": "md5 run 2018-05-29 16:58:36.228327", 
         "parameters": [], 
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
-        "title": "md5 run 2018-05-29 16:58:36.228327", 
         "schema_version": "1", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_job_id": "", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T17:23:56.511300+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/ehEsmNoGzniq.postrun.json", 
         "date_created": "2018-05-29T16:58:36.258243+00:00", 
         "run_status": "complete", 
         "aliases": [], 
-        "awsem_app_name": "md5", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2409,12 +2725,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-31T01:17:20.519422+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2437,16 +2749,12 @@
         "schema_version": "1", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_job_id": "", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T18:29:58.143971+00:00"
-        }, 
+        "awsem_app_name": "md5", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/5DZsuZHWCtgu.postrun.json", 
         "date_created": "2018-05-29T18:04:37.571316+00:00", 
         "run_status": "complete", 
         "aliases": [], 
-        "awsem_app_name": "md5", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2460,6 +2768,67 @@
                 "workflow_argument_name": "report"
             }
         ]
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "3791ef77-90b9-46be-98d8-fce8d9414d48", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFI6S3I9XZ"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:57.058974", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFI6S3I9XZf0864eab-debf-4db7-a558-c5ae214f6cf3", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "8a5c7242-1f68-44bb-88a6-57595a7397e0"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/8a5c7242-1f68-44bb-88a6-57595a7397e0/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "63ed0e0c-2878-4b97-ac0f-9a6834ddf17a"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/OXriMmrmcCln.postrun.json", 
+        "date_created": "2018-06-22T17:58:57.225738+00:00"
     }, 
     {
         "awsem_app_name": "hi-c-processing-pairs", 
@@ -2543,10 +2912,6 @@
         "run_platform": "AWSEM", 
         "workflow": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:27.094753+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -2636,12 +3001,8 @@
         "status": "released", 
         "run_platform": "AWSEM", 
         "workflow": "023bfb3e-9a8b-42b9-a9d4-216079526f68", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:20.816744+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2691,10 +3052,6 @@
         "run_platform": "AWSEM", 
         "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-07T19:44:24.071154+00:00"
-        }, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
@@ -2744,12 +3101,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T20:46:31.483797+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2763,25 +3116,21 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
+        "awsem_app_name": "md5", 
         "uuid": "d29d8756-e8d5-453c-8b2e-a8ac223b8574", 
         "parameters": [], 
-        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "title": "md5 run 2018-05-29 17:01:19.784141", 
+        "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "description_only": false, 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "awsem_job_id": "", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-29T17:16:40.113425+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "schema_version": "1", 
+        "awsem_job_id": "", 
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/lmPohWnJHaUn.postrun.json", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "run_platform": "AWSEM", 
         "date_created": "2018-05-29T17:01:19.829775+00:00", 
         "run_status": "complete", 
         "aliases": [], 
-        "awsem_app_name": "md5", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2824,12 +3173,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T20:16:23.772713+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2868,12 +3213,8 @@
         "status": "in review by lab", 
         "run_platform": "AWSEM", 
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T20:01:25.052721+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2887,26 +3228,22 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
-        "uuid": "376abbf7-7ebb-4ec2-8710-d14a4759559b", 
-        "parameters": [], 
-        "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
-        "description_only": false, 
+        "awsem_app_name": "fastqc-0-11-4-1", 
         "description": "Error on step: run_task_awsem. Full traceback: Traceback (most recent call last):\n  File \"/var/task/core/utils.py\", line 356, in wrapper\n    return function(event, context)\n  File \"/var/task/service.py\", line 71, in handler\n    args['input_files'], args['input_parameters'])\n  File \"/var/task/core/ec2_utils.py\", line 290, in update_config\n    raise Exception(\"Benchmarking not working. : None\")\nException: Benchmarking not working. : None\n", 
+        "parameters": [], 
         "title": "fastqc-0-11-4-1  run 2018-05-30 19:32:13.976513", 
+        "description_only": false, 
+        "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
+        "uuid": "376abbf7-7ebb-4ec2-8710-d14a4759559b", 
         "schema_version": "1", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "awsem_job_id": "", 
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIK862O38aac38b13-b837-4984-a0eb-331726465bac", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T19:32:26.341316+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "date_created": "2018-05-30T19:32:14.147417+00:00", 
-        "run_status": "error", 
+        "run_platform": "AWSEM", 
         "aliases": [], 
-        "awsem_app_name": "fastqc-0-11-4-1", 
+        "run_status": "error", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2924,26 +3261,22 @@
     {
         "status": "in review by lab", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "run_platform": "AWSEM", 
-        "uuid": "944c7588-c8c6-4c6b-a306-550452979661", 
-        "parameters": [], 
-        "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
+        "awsem_app_name": "fastqc-0-11-4-1", 
         "description": "Error on step: run_task_awsem. Full traceback: Traceback (most recent call last):\n  File \"/var/task/core/utils.py\", line 356, in wrapper\n    return function(event, context)\n  File \"/var/task/service.py\", line 71, in handler\n    args['input_files'], args['input_parameters'])\n  File \"/var/task/core/ec2_utils.py\", line 290, in update_config\n    raise Exception(\"Benchmarking not working. : None\")\nException: Benchmarking not working. : None\n", 
+        "parameters": [], 
         "title": "fastqc-0-11-4-1  run 2018-05-30 19:31:25.584050", 
         "description_only": false, 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
+        "uuid": "944c7588-c8c6-4c6b-a306-550452979661", 
+        "schema_version": "1", 
         "awsem_job_id": "", 
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIK862O38", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-05-30T19:31:38.539859+00:00"
-        }, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "run_platform": "AWSEM", 
         "date_created": "2018-05-30T19:31:25.745358+00:00", 
         "run_status": "error", 
         "aliases": [], 
-        "awsem_app_name": "fastqc-0-11-4-1", 
         "input_files": [
             {
                 "ordinal": 1, 
@@ -2957,5 +3290,127 @@
                 "workflow_argument_name": "report_zip"
             }
         ]
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "6cea1201-79df-4a14-8fe7-5624599f1105", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIUZJOJW9"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:59:37.918968", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIUZJOJW9bc41cc3a-a045-4471-919e-bb2bc528a1b8", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "4cbe624e-c8ba-4793-ae92-c2d39f9c1af0"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/4cbe624e-c8ba-4793-ae92-c2d39f9c1af0/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "7a2b1417-b056-4eaf-a8d1-21b401b6b6d9"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/Pt8HekAFNCeE.postrun.json", 
+        "date_created": "2018-06-22T17:59:38.084536+00:00"
+    }, 
+    {
+        "awsem_app_name": "pairsqc-single", 
+        "run_status": "complete", 
+        "aliases": [], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "ea4081f7-83e2-4f2f-b18b-c1566d1595db", 
+        "parameters": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "max_distance", 
+                "value": "8.2"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "enzyme", 
+                "value": "4"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "sample_name", 
+                "value": "4DNFIW3YHQXS"
+            }
+        ], 
+        "title": "pairsqc-single 0.2.5 run 2018-06-22 17:57:50.329081", 
+        "description_only": false, 
+        "schema_version": "1", 
+        "awsem_job_id": "", 
+        "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIW3YHQXS", 
+        "output_quality_metrics": [
+            {
+                "name": "quality_metric_pairsqc", 
+                "value": "3fe85883-38ec-4161-8d93-8f22b5880ba2"
+            }
+        ], 
+        "output_files": [
+            {
+                "value_qc": "/quality-metrics-pairsqc/3fe85883-38ec-4161-8d93-8f22b5880ba2/", 
+                "type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "status": "in review by lab", 
+        "run_platform": "AWSEM", 
+        "workflow": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "input_files": [
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "chromsizes", 
+                "value": "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6"
+            }, 
+            {
+                "ordinal": 1, 
+                "workflow_argument_name": "input_pairs", 
+                "value": "8ed69ed6-724b-48b7-8ee2-66b471ff90a5"
+            }
+        ], 
+        "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/2FCqiJY1TQwZ.postrun.json", 
+        "date_created": "2018-06-22T17:57:50.503068+00:00"
     }
 ]

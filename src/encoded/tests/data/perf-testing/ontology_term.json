@@ -2,46 +2,105 @@
     {
         "status": "released", 
         "definition": "Hybrid mouse embryonic stem cell line - male line.", 
-        "uuid": "111202bc-8535-4448-903e-854af460a233", 
-        "submitted_by": "/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/", 
+        "term_name": "F123-CASTx129", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "term_id": "4DN:0000003", 
         "slim_terms": [
             "111189bc-8535-4448-903e-854af460a233"
         ], 
-        "schema_version": "1", 
-        "references": [], 
         "source_ontology": "540026bc-8535-4448-903e-854af460b254", 
+        "references": [], 
+        "schema_version": "1", 
         "date_created": "2017-05-18T15:23:07.511109+00:00", 
-        "term_name": "F123-CASTx129"
+        "uuid": "111202bc-8535-4448-903e-854af460a233"
     }, 
     {
         "status": "released", 
-        "definition": "A cell line is a population of cells cultured in vitro that are descended through one or more generations (and possible sub-cultures) from a single primary culture which was originally derived from part of an organism.", 
-        "term_name": "cell line", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "term_name": "cell line", 
+        "definition": "A cell line is a population of cells cultured in vitro that are descended through one or more generations (and possible sub-cultures) from a single primary culture which was originally derived from part of an organism.", 
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322", 
         "term_id": "EFO:0000322", 
         "namespace": "http://www.ebi.ac.uk/efo", 
         "slim_terms": [
             "111189bc-8535-4448-903e-854af460a233"
         ], 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "synonyms": [
-            "cell_line"
-        ], 
+        "schema_version": "1", 
         "parents": [
             "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
         ], 
-        "schema_version": "1", 
+        "synonyms": [
+            "cell_line"
+        ], 
         "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
         "date_created": "2017-04-26T07:22:26.586071+00:00", 
         "is_slim_for": "cell", 
         "uuid": "111189bc-8535-4448-903e-854af460a233"
     }, 
     {
         "status": "released", 
+        "definition": "A material entity is an entity that exists in full during the length of time of its existence, persists through this time while maintaining its identity and has no temporal parts. For example a heart, a human, a fly, a microarray.", 
+        "term_name": "material entity", 
+        "term_url": "http://www.ifomis.org/bfo/1.1/snap#MaterialEntity", 
+        "term_id": "MaterialEntity", 
+        "namespace": "http://www.ifomis.org/bfo/1.1/snap", 
+        "schema_version": "1", 
+        "parents": [
+            "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
+        ], 
+        "synonyms": [
+            "material type"
+        ], 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-05-11T17:30:41.711681+00:00", 
+        "uuid": "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
+    }, 
+    {
+        "status": "released", 
+        "definition": "An experimental factor in Array Express which are essentially the variable aspects of an experiment design which can be used to describe an experiment, or set of experiments, in an increasingly detailed manner. This upper level class is really used to give a root class from which applications can rely on and not be tied to upper ontology classses which do change.", 
+        "term_name": "experimental factor", 
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000001", 
+        "term_id": "EFO:0000001", 
+        "namespace": "http://www.ebi.ac.uk/efo", 
+        "schema_version": "1", 
+        "synonyms": [
+            "ExperimentalFactor"
+        ], 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-05-11T15:42:00.141073+00:00", 
+        "uuid": "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
+    }, 
+    {
+        "status": "released", 
+        "term_name": "definition", 
+        "term_url": "http://www.ebi.ac.uk/efo/definition", 
+        "term_id": "EFO:definition", 
+        "namespace": "http://www.ebi.ac.uk/efo", 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "references": [], 
+        "schema_version": "1", 
+        "date_created": "2017-04-26T07:22:23.300338+00:00", 
+        "uuid": "111115bc-8535-4448-903e-854af460a233"
+    }, 
+    {
+        "status": "released", 
+        "term_name": "definition", 
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115", 
+        "term_id": "IAO:0000115", 
+        "namespace": "http://purl.obolibrary.org/obo", 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "references": [], 
+        "schema_version": "1", 
+        "date_created": "2017-04-26T07:22:23.334452+00:00", 
+        "uuid": "111116bc-8535-4448-903e-854af460a233"
+    }, 
+    {
+        "status": "released", 
         "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.", 
-        "uuid": "111111bc-8535-4448-903e-854af460a233", 
+        "term_name": "alternative_term", 
         "term_url": "http://www.ebi.ac.uk/efo/alternative_term", 
         "term_id": "EFO:alternative_term", 
         "namespace": "http://www.ebi.ac.uk/efo", 
@@ -49,20 +108,20 @@
         "references": [], 
         "schema_version": "1", 
         "date_created": "2017-04-26T07:22:23.156086+00:00", 
-        "term_name": "alternative_term"
+        "uuid": "111111bc-8535-4448-903e-854af460a233"
     }, 
     {
         "status": "released", 
         "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.", 
-        "uuid": "111112bc-8535-4448-903e-854af460a233", 
+        "term_name": "has_exact_synonym", 
         "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym", 
         "term_id": "oboInOwl:hasExactSynonym", 
         "namespace": "http://www.geneontology.org/formats/oboInOwl", 
-        "schema_version": "1", 
-        "references": [], 
         "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "references": [], 
+        "schema_version": "1", 
         "date_created": "2017-04-26T07:22:23.197018+00:00", 
-        "term_name": "has_exact_synonym"
+        "uuid": "111112bc-8535-4448-903e-854af460a233"
     }, 
     {
         "status": "released", 
@@ -87,64 +146,5 @@
         "schema_version": "1", 
         "date_created": "2017-04-26T07:22:23.265915+00:00", 
         "uuid": "111114bc-8535-4448-903e-854af460a233"
-    }, 
-    {
-        "status": "released", 
-        "term_name": "definition", 
-        "term_url": "http://www.ebi.ac.uk/efo/definition", 
-        "term_id": "EFO:definition", 
-        "namespace": "http://www.ebi.ac.uk/efo", 
-        "schema_version": "1", 
-        "references": [], 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "date_created": "2017-04-26T07:22:23.300338+00:00", 
-        "uuid": "111115bc-8535-4448-903e-854af460a233"
-    }, 
-    {
-        "status": "released", 
-        "term_name": "definition", 
-        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115", 
-        "term_id": "IAO:0000115", 
-        "namespace": "http://purl.obolibrary.org/obo", 
-        "schema_version": "1", 
-        "references": [], 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "date_created": "2017-04-26T07:22:23.334452+00:00", 
-        "uuid": "111116bc-8535-4448-903e-854af460a233"
-    }, 
-    {
-        "status": "released", 
-        "definition": "A material entity is an entity that exists in full during the length of time of its existence, persists through this time while maintaining its identity and has no temporal parts. For example a heart, a human, a fly, a microarray.", 
-        "term_name": "material entity", 
-        "term_url": "http://www.ifomis.org/bfo/1.1/snap#MaterialEntity", 
-        "term_id": "MaterialEntity", 
-        "namespace": "http://www.ifomis.org/bfo/1.1/snap", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "parents": [
-            "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
-        ], 
-        "synonyms": [
-            "material type"
-        ], 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-05-11T17:30:41.711681+00:00", 
-        "uuid": "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
-    }, 
-    {
-        "status": "released", 
-        "definition": "An experimental factor in Array Express which are essentially the variable aspects of an experiment design which can be used to describe an experiment, or set of experiments, in an increasingly detailed manner. This upper level class is really used to give a root class from which applications can rely on and not be tied to upper ontology classses which do change.", 
-        "term_name": "experimental factor", 
-        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000001", 
-        "term_id": "EFO:0000001", 
-        "namespace": "http://www.ebi.ac.uk/efo", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "synonyms": [
-            "ExperimentalFactor"
-        ], 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-05-11T15:42:00.141073+00:00", 
-        "uuid": "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
     }
 ]

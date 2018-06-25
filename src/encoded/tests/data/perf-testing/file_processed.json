@@ -4,55 +4,43 @@
         "source_experiments": [
             "c6159041-a5d2-4a7c-af80-a0ff973ce149"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_format": "bam", 
         "md5sum": "0e604dca6c9ec840177b26635594546e", 
         "uuid": "bf543841-62f5-4bdc-baec-48660be53b06", 
-        "file_format": "bam", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "alignment", 
-        "file_size": 129940247638, 
+        "public_release": "2018-06-13", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIDUIS6ZP", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:48.900059+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
-        "public_release": "2018-06-13", 
+        "file_size": 129940247638, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-08T13:58:14.257361+00:00", 
         "aliases": [], 
+        "schema_version": "1", 
         "description": "This is an output file of the Hi-C processing pipeline"
     }, 
     {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "b7d697461f94c6e54a7b880baa5e22fc", 
-        "uuid": "88793582-d8d5-4cef-89c6-88a973441791", 
-        "source_experiments": [
-            "c6159041-a5d2-4a7c-af80-a0ff973ce149"
-        ], 
-        "file_format": "pairs", 
         "file_type": "contact list-replicate", 
-        "file_size": 8604952641, 
-        "file_classification": "processed file", 
         "accession": "4DNFICLCWWLH", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:41.519258+00:00"
-        }, 
-        "schema_version": "1", 
-        "public_release": "2018-06-13", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-08T13:58:14.556754+00:00", 
+        "file_size": 8604952641, 
         "aliases": [], 
+        "source_experiments": [
+            "c6159041-a5d2-4a7c-af80-a0ff973ce149"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "88793582-d8d5-4cef-89c6-88a973441791", 
+        "file_format": "pairs", 
+        "schema_version": "1", 
+        "file_classification": "processed file", 
+        "public_release": "2018-06-13", 
         "extra_files": [
             {
                 "status": "released", 
@@ -64,58 +52,59 @@
                 "href": "/files-processed/4DNFICLCWWLH/@@download/4DNFICLCWWLH.pairs.gz.px2"
             }
         ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-08T13:58:14.556754+00:00", 
+        "md5sum": "b7d697461f94c6e54a7b880baa5e22fc", 
+        "quality_metric": "d048c98a-a370-4750-8356-e14b3f05d18a", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
         "source_experiments": [
             "c6159041-a5d2-4a7c-af80-a0ff973ce149"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_format": "bam", 
         "md5sum": "6ad193a116459b0648b62686cbb4c63f", 
         "uuid": "a16786fd-e222-4749-9674-af6a6894f8e8", 
-        "file_format": "bam", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "intermediate file", 
-        "file_size": 162650843585, 
+        "description": "This is an intermediate file in the HiC processing pipeline", 
+        "public_release": "2018-06-13", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFI7LDNA5U", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:37.870738+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "file_size": 162650843585, 
         "schema_version": "1", 
-        "public_release": "2018-06-13", 
+        "genome_assembly": "GRCm38", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "date_created": "2018-06-07T19:38:54.296165+00:00", 
-        "aliases": [], 
-        "description": "This is an intermediate file in the HiC processing pipeline"
+        "aliases": []
     }, 
     {
         "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "c6159041-a5d2-4a7c-af80-a0ff973ce149", 
             "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
         ], 
         "uuid": "46a49b5d-f185-4e98-8747-c31a904bbc2f", 
-        "md5sum": "a6a782624b01b951d0fc592c13bdac10", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_format": "pairs", 
+        "aliases": [], 
         "file_size": 20149883203, 
         "accession": "4DNFIASLBBXV", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:47.994512+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
-        "public_release": "2018-06-13", 
         "date_created": "2018-06-11T17:10:40.442993+00:00", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "public_release": "2018-06-13", 
+        "genome_assembly": "GRCm38", 
+        "md5sum": "a6a782624b01b951d0fc592c13bdac10", 
         "extra_files": [
             {
                 "status": "released", 
@@ -127,62 +116,53 @@
                 "href": "/files-processed/4DNFIASLBBXV/@@download/4DNFIASLBBXV.pairs.gz.px2"
             }
         ], 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "schema_version": "1"
+    }, 
+    {
+        "status": "released", 
+        "source_experiments": [
+            "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
+        ], 
+        "file_format": "bam", 
+        "md5sum": "0b382c8366513c621b25f076ca36ddab", 
+        "uuid": "2f549fc0-a5bb-4eee-ab43-a1df8061d54b", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_type": "alignment", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "public_release": "2018-06-12", 
+        "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFIS2GCO8H", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 124788503384, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
+        "date_created": "2018-06-01T13:15:26.059945+00:00", 
+        "schema_version": "1", 
         "aliases": []
     }, 
     {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "source_experiments": [
-            "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
-        ], 
-        "uuid": "2f549fc0-a5bb-4eee-ab43-a1df8061d54b", 
-        "file_format": "bam", 
-        "file_type": "alignment", 
-        "md5sum": "0b382c8366513c621b25f076ca36ddab", 
-        "file_classification": "processed file", 
-        "accession": "4DNFIS2GCO8H", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:46.846134+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "file_size": 124788503384, 
-        "date_created": "2018-06-01T13:15:26.059945+00:00", 
-        "public_release": "2018-06-12", 
-        "aliases": [], 
-        "schema_version": "1", 
-        "description": "This is an output file of the Hi-C processing pipeline"
-    }, 
-    {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "b4499ed1e8c2c2b7be76e77da665682c", 
-        "uuid": "5154fc82-58f9-4f55-b592-64f008ba9033", 
-        "source_experiments": [
-            "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
-        ], 
-        "file_format": "pairs", 
         "file_type": "contact list-replicate", 
-        "file_size": 13059666962, 
-        "file_classification": "processed file", 
         "accession": "4DNFIBDZ8KDQ", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:45.800281+00:00"
-        }, 
-        "schema_version": "1", 
-        "public_release": "2018-06-12", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-01T13:15:26.320293+00:00", 
+        "file_size": 13059666962, 
         "aliases": [], 
+        "source_experiments": [
+            "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
+        ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "5154fc82-58f9-4f55-b592-64f008ba9033", 
+        "file_format": "pairs", 
+        "schema_version": "1", 
+        "file_classification": "processed file", 
+        "public_release": "2018-06-12", 
         "extra_files": [
             {
                 "status": "released", 
@@ -194,163 +174,155 @@
                 "href": "/files-processed/4DNFIBDZ8KDQ/@@download/4DNFIBDZ8KDQ.pairs.gz.px2"
             }
         ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T13:15:26.320293+00:00", 
+        "md5sum": "b4499ed1e8c2c2b7be76e77da665682c", 
+        "quality_metric": "0397bc5c-1a4f-4370-959b-f39407d7e438", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
         "source_experiments": [
             "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_format": "bam", 
         "md5sum": "f716a239ff16e70d161cfe29610525d9", 
         "uuid": "4f0202c8-7dd1-4009-a5ad-3e67818f75c8", 
-        "file_format": "bam", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "intermediate file", 
-        "file_size": 141162947092, 
+        "description": "This is an intermediate file in the HiC processing pipeline", 
+        "public_release": "2018-06-13", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIZ9E1I9Q", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:39.270492+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
-        "public_release": "2018-06-13", 
-        "date_created": "2018-05-31T17:21:55.429706+00:00", 
-        "aliases": [], 
-        "description": "This is an intermediate file in the HiC processing pipeline"
-    }, 
-    {
-        "source_experiments": [
-            "c6159041-a5d2-4a7c-af80-a0ff973ce149", 
-            "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
-        ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "93df02c6-1047-43f6-afae-d3598b61eeea", 
-        "file_format": "hic", 
-        "file_size": 5847370073, 
-        "md5sum": "6b127efa5d47210bb90e4b522e27cee2", 
-        "accession": "4DNFIBBKG9KD", 
+        "file_size": 141162947092, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "status": "released", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:44.684029+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "genome_assembly": "GRCm38", 
+        "date_created": "2018-05-31T17:21:55.429706+00:00", 
         "schema_version": "1", 
-        "public_release": "2018-06-13", 
-        "date_created": "2018-06-11T17:10:40.824700+00:00", 
         "aliases": []
     }, 
     {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "c6159041-a5d2-4a7c-af80-a0ff973ce149", 
             "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
         ], 
+        "uuid": "93df02c6-1047-43f6-afae-d3598b61eeea", 
+        "schema_version": "1", 
+        "file_format": "hic", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFIBBKG9KD", 
+        "file_classification": "processed file", 
+        "genome_assembly": "GRCm38", 
+        "file_size": 5847370073, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "public_release": "2018-06-13", 
+        "date_created": "2018-06-11T17:10:40.824700+00:00", 
+        "md5sum": "6b127efa5d47210bb90e4b522e27cee2", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "source_experiments": [
+            "c6159041-a5d2-4a7c-af80-a0ff973ce149", 
+            "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
+        ], 
         "uuid": "ef0eba47-ada0-42bc-9329-5145b57ff33a", 
         "file_format": "mcool", 
+        "aliases": [], 
         "file_size": 7033416901, 
         "md5sum": "18bd736467fd20ca0181698e119595e3", 
         "accession": "4DNFI5QJNFAT", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:43.699370+00:00"
-        }, 
-        "status": "released", 
+        "date_created": "2018-06-11T17:10:41.164346+00:00", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "public_release": "2018-06-13", 
-        "date_created": "2018-06-11T17:10:41.164346+00:00", 
+        "genome_assembly": "GRCm38", 
         "higlass_uid": "KCHOvc5vS5aBISfS5hL3jA", 
-        "schema_version": "1", 
-        "aliases": []
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "schema_version": "1"
     }, 
     {
         "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "c6159041-a5d2-4a7c-af80-a0ff973ce149", 
             "77ec51e4-1d4b-4718-b9b3-a6ccefde43af"
         ], 
-        "uuid": "d1b15a94-a3f4-4acb-87e8-01b118ea1311", 
         "file_format": "normvector_juicerformat", 
-        "md5sum": "bc5023783dd4a3d983f54ab97713c619", 
-        "accession": "4DNFIZKL7MEC", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "file_classification": "processed file", 
-        "schema_version": "1", 
-        "file_size": 37293443, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T18:06:40.443100+00:00"
-        }, 
+        "uuid": "d1b15a94-a3f4-4acb-87e8-01b118ea1311", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "public_release": "2018-06-13", 
+        "md5sum": "bc5023783dd4a3d983f54ab97713c619", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFIZKL7MEC", 
+        "file_classification": "processed file", 
+        "file_size": 37293443, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-11T17:10:41.405259+00:00", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
         "aliases": []
     }, 
     {
         "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "cce60ed8-83cf-484d-b24d-d989d3348a5f", 
         "source_experiments": [
             "d34b2505-bd84-45dd-9df7-f6340ec28b56"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "f03e5f6a9a0539d4418c01716bdfb40a", 
-        "uuid": "cce60ed8-83cf-484d-b24d-d989d3348a5f", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
         "file_format": "bam", 
-        "file_type": "alignment", 
-        "file_size": 51716853127, 
-        "file_classification": "processed file", 
+        "public_release": "2018-06-07", 
+        "md5sum": "f03e5f6a9a0539d4418c01716bdfb40a", 
         "accession": "4DNFIMH36HMT", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "file_type": "alignment", 
+        "file_classification": "processed file", 
+        "date_created": "2018-06-01T13:14:47.227149+00:00", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "file_size": 51716853127, 
+        "genome_assembly": "GRCm38", 
+        "aliases": [], 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:47:24.801201+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-01T13:14:47.227149+00:00", 
-        "aliases": [], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "schema_version": "1"
     }, 
     {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "e7f82b4bb61fcccf483061009dbe6f9f", 
-        "uuid": "58d4addc-5b87-48ab-9817-a9832db11549", 
+        "file_type": "contact list-replicate", 
+        "accession": "4DNFIYRP9RLI", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 4190695938, 
+        "aliases": [], 
         "source_experiments": [
             "d34b2505-bd84-45dd-9df7-f6340ec28b56"
         ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "58d4addc-5b87-48ab-9817-a9832db11549", 
         "file_format": "pairs", 
-        "file_type": "contact list-replicate", 
-        "file_size": 4190695938, 
-        "file_classification": "processed file", 
-        "accession": "4DNFIYRP9RLI", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:47:23.962743+00:00"
-        }, 
         "schema_version": "1", 
+        "file_classification": "processed file", 
         "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-01T13:14:47.480224+00:00", 
-        "aliases": [], 
         "extra_files": [
             {
                 "status": "released", 
@@ -362,63 +334,58 @@
                 "href": "/files-processed/4DNFIYRP9RLI/@@download/4DNFIYRP9RLI.pairs.gz.px2"
             }
         ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T13:14:47.480224+00:00", 
+        "md5sum": "e7f82b4bb61fcccf483061009dbe6f9f", 
+        "quality_metric": "8ce03740-0cd3-4469-9b86-a89bbe4afb46", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "6b7c9211b2b8862604d45802d4b6cfa8", 
         "uuid": "54d6d838-9139-4890-a04a-e8b7a6296b6e", 
         "source_experiments": [
             "d34b2505-bd84-45dd-9df7-f6340ec28b56"
         ], 
+        "description": "This is an intermediate file in the HiC processing pipeline", 
         "file_format": "bam", 
         "file_type": "intermediate file", 
-        "description": "This is an intermediate file in the HiC processing pipeline", 
-        "public_release": "2018-06-07", 
-        "file_classification": "processed file", 
+        "md5sum": "6b7c9211b2b8862604d45802d4b6cfa8", 
         "accession": "4DNFIGP1QA62", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
+        "file_classification": "processed file", 
+        "file_size": 62390500066, 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "public_release": "2018-06-07", 
+        "date_created": "2018-05-31T17:21:21.529695+00:00", 
+        "aliases": [], 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:49:58.808823+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
-        "file_size": 62390500066, 
-        "date_created": "2018-05-31T17:21:21.529695+00:00", 
-        "aliases": []
+        "schema_version": "1"
     }, 
     {
-        "status": "released", 
+        "file_type": "contact list-combined", 
+        "accession": "4DNFI3Y5YTC6", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 6729930320, 
+        "aliases": [], 
         "source_experiments": [
             "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
             "d34b2505-bd84-45dd-9df7-f6340ec28b56"
         ], 
-        "md5sum": "7a15b5f9f6c8cdf8f5c9002e6faada5f", 
-        "uuid": "b2cfe4dd-561c-4ac8-96da-16dcdb569f6b", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "file_type": "contact list-combined", 
+        "uuid": "b2cfe4dd-561c-4ac8-96da-16dcdb569f6b", 
         "file_format": "pairs", 
-        "file_classification": "processed file", 
-        "accession": "4DNFI3Y5YTC6", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:17.093903+00:00"
-        }, 
-        "file_size": 6729930320, 
         "schema_version": "1", 
+        "file_classification": "processed file", 
         "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-05T14:25:45.515314+00:00", 
-        "aliases": [], 
         "extra_files": [
             {
                 "status": "released", 
@@ -430,7 +397,14 @@
                 "href": "/files-processed/4DNFI3Y5YTC6/@@download/4DNFI3Y5YTC6.pairs.gz.px2"
             }
         ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-05T14:25:45.515314+00:00", 
+        "md5sum": "7a15b5f9f6c8cdf8f5c9002e6faada5f", 
+        "quality_metric": "a194ac70-afc3-4dff-9f9c-becf221dec91", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
@@ -441,51 +415,39 @@
         "uuid": "5bcc3414-09dd-421a-881b-c5ca8e764a38", 
         "file_format": "bam", 
         "file_type": "alignment", 
-        "md5sum": "e6ec3be3f48982f547689e9c3ba5ad12", 
-        "file_classification": "processed file", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "file_size": 30705468721, 
         "accession": "4DNFIQIQHM8G", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "aliases": [], 
+        "file_classification": "processed file", 
+        "date_created": "2018-06-01T01:20:09.301801+00:00", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "public_release": "2018-06-07", 
+        "genome_assembly": "GRCm38", 
+        "md5sum": "e6ec3be3f48982f547689e9c3ba5ad12", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:48:29.545174+00:00"
-        }, 
-        "file_size": 30705468721, 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-01T01:20:09.301801+00:00", 
-        "aliases": [], 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "schema_version": "1"
     }, 
     {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_type": "contact list-replicate", 
+        "accession": "4DNFIVPADLI2", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 2882830043, 
+        "aliases": [], 
         "source_experiments": [
             "4a3044c1-8b05-47a4-ae73-49cf9aa59053"
         ], 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "b4b2c140-6cfc-425b-b973-997b8c5e9709", 
         "file_format": "pairs", 
-        "file_type": "contact list-replicate", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
-        "md5sum": "1e1120b3eb877ae32e0c2af8259f9a16", 
-        "file_classification": "processed file", 
-        "accession": "4DNFIVPADLI2", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:48:28.534206+00:00"
-        }, 
-        "file_size": 2882830043, 
         "schema_version": "1", 
+        "file_classification": "processed file", 
         "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-01T01:20:09.605844+00:00", 
         "extra_files": [
             {
                 "status": "released", 
@@ -497,148 +459,62 @@
                 "href": "/files-processed/4DNFIVPADLI2/@@download/4DNFIVPADLI2.pairs.gz.px2"
             }
         ], 
-        "aliases": []
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T01:20:09.605844+00:00", 
+        "md5sum": "1e1120b3eb877ae32e0c2af8259f9a16", 
+        "quality_metric": "9c40b49b-643f-4776-935a-a6f1d87fcb75", 
+        "genome_assembly": "GRCm38"
     }, 
     {
-        "source_experiments": [
-            "4a3044c1-8b05-47a4-ae73-49cf9aa59053"
-        ], 
         "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "dc15b43a-1de9-49ce-b43d-2c209ff9db89", 
+        "source_experiments": [
+            "4a3044c1-8b05-47a4-ae73-49cf9aa59053"
+        ], 
+        "description": "This is an intermediate file in the HiC processing pipeline", 
         "file_format": "bam", 
         "file_type": "intermediate file", 
         "md5sum": "8993fb064b5b8184c16f63e84a43b2d3", 
-        "file_classification": "processed file", 
         "accession": "4DNFI6QHKY3S", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:49:59.861647+00:00"
-        }, 
+        "genome_assembly": "GRCm38", 
+        "file_classification": "processed file", 
         "file_size": 33441384216, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "public_release": "2018-06-07", 
         "date_created": "2018-05-31T17:20:49.009889+00:00", 
         "aliases": [], 
-        "schema_version": "1", 
-        "description": "This is an intermediate file in the HiC processing pipeline"
-    }, 
-    {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "ea82e8d75e9b5ca78b1c9710ed20b98c", 
-        "uuid": "5b480cb9-a80d-477b-a802-31077e25a993", 
-        "source_experiments": [
-            "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
-            "d34b2505-bd84-45dd-9df7-f6340ec28b56"
-        ], 
-        "file_format": "hic", 
-        "file_type": "contact matrix", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
-        "public_release": "2018-06-07", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "accession": "4DNFI746VI4P", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:16.707498+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "file_size": 2129694660, 
-        "date_created": "2018-06-05T14:25:45.828917+00:00", 
-        "schema_version": "1", 
-        "aliases": []
-    }, 
-    {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "source_experiments": [
-            "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
-            "d34b2505-bd84-45dd-9df7-f6340ec28b56"
-        ], 
-        "uuid": "054197e4-e715-404a-85ac-713a80209ce8", 
-        "file_format": "mcool", 
-        "file_type": "contact matrix", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
-        "md5sum": "2d36c29434e917186d1e2af2d9f5bc72", 
-        "accession": "4DNFI4P1U3CI", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "aliases": [], 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:16.405000+00:00"
-        }, 
-        "file_size": 2301848473, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-05T14:25:46.089025+00:00", 
-        "higlass_uid": "Gt2vHSoIQ9GRH9Y1iRbspA", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
         "schema_version": "1"
     }, 
     {
+        "status": "released", 
         "source_experiments": [
             "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
             "d34b2505-bd84-45dd-9df7-f6340ec28b56"
         ], 
-        "status": "released", 
+        "file_format": "hic", 
+        "md5sum": "ea82e8d75e9b5ca78b1c9710ed20b98c", 
+        "uuid": "5b480cb9-a80d-477b-a802-31077e25a993", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "dbc56306381f45bf39c4d3b60bc48147", 
-        "uuid": "de5821f0-7696-4828-b5d5-f61740a15169", 
-        "file_format": "normvector_juicerformat", 
-        "file_type": "juicebox norm vector", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
+        "file_type": "contact matrix", 
         "public_release": "2018-06-07", 
+        "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFI746VI4P", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
+        "file_size": 2129694660, 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "accession": "4DNFI89XI8R5", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:16.086419+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "file_size": 30940084, 
-        "date_created": "2018-06-05T14:25:46.368049+00:00", 
-        "schema_version": "1", 
-        "aliases": []
-    }, 
-    {
-        "source_experiments": [
-            "f048f178-131e-49f3-a393-5e265c90fa2d"
-        ], 
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "73505f08-0cfa-4e3d-8c97-5072eaf618ed", 
-        "file_format": "bam", 
-        "file_type": "alignment", 
-        "md5sum": "66673393a5e1e648012136810a6454ab", 
-        "file_classification": "processed file", 
-        "accession": "4DNFITTS8G64", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:47:32.767492+00:00"
-        }, 
-        "file_size": 65501287698, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-01T13:14:04.621411+00:00", 
+        "genome_assembly": "GRCm38", 
+        "date_created": "2018-06-05T14:25:45.828917+00:00", 
         "aliases": [], 
         "schema_version": "1", 
         "description": "This is an output file of the Hi-C processing pipeline"
@@ -646,26 +522,98 @@
     {
         "status": "released", 
         "source_experiments": [
+            "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
+            "d34b2505-bd84-45dd-9df7-f6340ec28b56"
+        ], 
+        "file_format": "mcool", 
+        "md5sum": "2d36c29434e917186d1e2af2d9f5bc72", 
+        "uuid": "054197e4-e715-404a-85ac-713a80209ce8", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_type": "contact matrix", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "public_release": "2018-06-07", 
+        "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFI4P1U3CI", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 2301848473, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
+        "date_created": "2018-06-05T14:25:46.089025+00:00", 
+        "higlass_uid": "Gt2vHSoIQ9GRH9Y1iRbspA", 
+        "schema_version": "1", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "source_experiments": [
+            "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
+            "d34b2505-bd84-45dd-9df7-f6340ec28b56"
+        ], 
+        "file_format": "normvector_juicerformat", 
+        "md5sum": "dbc56306381f45bf39c4d3b60bc48147", 
+        "uuid": "de5821f0-7696-4828-b5d5-f61740a15169", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_type": "juicebox norm vector", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "public_release": "2018-06-07", 
+        "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFI89XI8R5", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 30940084, 
+        "schema_version": "1", 
+        "genome_assembly": "GRCm38", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-05T14:25:46.368049+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "source_experiments": [
+            "f048f178-131e-49f3-a393-5e265c90fa2d"
+        ], 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "file_format": "bam", 
+        "file_type": "alignment", 
+        "file_size": 65501287698, 
+        "md5sum": "66673393a5e1e648012136810a6454ab", 
+        "accession": "4DNFITTS8G64", 
+        "schema_version": "1", 
+        "file_classification": "processed file", 
+        "genome_assembly": "GRCm38", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "public_release": "2018-06-07", 
+        "date_created": "2018-06-01T13:14:04.621411+00:00", 
+        "aliases": [], 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "uuid": "73505f08-0cfa-4e3d-8c97-5072eaf618ed"
+    }, 
+    {
+        "file_type": "contact list-replicate", 
+        "accession": "4DNFIKYF3V7I", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 5596801503, 
+        "aliases": [], 
+        "source_experiments": [
             "f048f178-131e-49f3-a393-5e265c90fa2d"
         ], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "e8e5f2ab-032d-4ffb-aed1-2c9f4e1b74a0", 
         "file_format": "pairs", 
-        "file_type": "contact list-replicate", 
-        "file_size": 5596801503, 
-        "md5sum": "063c44868fe904bb490fc50ff51666b7", 
-        "accession": "4DNFIKYF3V7I", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:47:31.469716+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "schema_version": "1", 
+        "file_classification": "processed file", 
         "public_release": "2018-06-07", 
-        "date_created": "2018-06-01T13:14:04.922149+00:00", 
-        "aliases": [], 
         "extra_files": [
             {
                 "status": "released", 
@@ -677,66 +625,58 @@
                 "href": "/files-processed/4DNFIKYF3V7I/@@download/4DNFIKYF3V7I.pairs.gz.px2"
             }
         ], 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T13:14:04.922149+00:00", 
+        "md5sum": "063c44868fe904bb490fc50ff51666b7", 
+        "quality_metric": "93451a27-04ea-4d62-84b9-b6c22253d0b2", 
+        "genome_assembly": "GRCm38"
     }, 
     {
+        "status": "released", 
         "source_experiments": [
             "f048f178-131e-49f3-a393-5e265c90fa2d"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "f69ab0fa-849c-472f-a213-722078bb9971", 
         "file_format": "bam", 
+        "md5sum": "df5d1f2c8ebffd4effbc9cabbb7b57e0", 
+        "uuid": "f69ab0fa-849c-472f-a213-722078bb9971", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "intermediate file", 
         "description": "This is an intermediate file in the HiC processing pipeline", 
-        "md5sum": "df5d1f2c8ebffd4effbc9cabbb7b57e0", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIAVL1XM8", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:49:57.008600+00:00"
-        }, 
-        "status": "released", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "file_size": 77521586578, 
-        "date_created": "2018-05-31T17:25:12.869739+00:00", 
-        "public_release": "2018-06-07", 
         "schema_version": "1", 
+        "genome_assembly": "GRCm38", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-05-31T17:25:12.869739+00:00", 
         "aliases": []
     }, 
     {
-        "status": "released", 
+        "file_type": "contact list-combined", 
+        "accession": "4DNFIDHNCVEM", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 9773315503, 
+        "aliases": [], 
         "source_experiments": [
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc", 
             "f048f178-131e-49f3-a393-5e265c90fa2d"
         ], 
-        "md5sum": "007da8002b81b22c65736fce78a4fbc6", 
-        "uuid": "5742cf29-7b84-4bee-a34d-3474bfe905b4", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "file_type": "contact list-combined", 
+        "uuid": "5742cf29-7b84-4bee-a34d-3474bfe905b4", 
         "file_format": "pairs", 
-        "file_classification": "processed file", 
-        "accession": "4DNFIDHNCVEM", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:18.451104+00:00"
-        }, 
-        "file_size": 9773315503, 
         "schema_version": "1", 
+        "file_classification": "processed file", 
         "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-05T14:25:00.087131+00:00", 
-        "aliases": [], 
         "extra_files": [
             {
                 "status": "released", 
@@ -748,59 +688,57 @@
                 "href": "/files-processed/4DNFIDHNCVEM/@@download/4DNFIDHNCVEM.pairs.gz.px2"
             }
         ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-05T14:25:00.087131+00:00", 
+        "md5sum": "007da8002b81b22c65736fce78a4fbc6", 
+        "quality_metric": "5c24f96b-0d09-4d2d-8661-cac7f2d7eb0e", 
+        "genome_assembly": "GRCm38"
     }, 
     {
+        "status": "released", 
         "source_experiments": [
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "47f46014-1463-4449-b37c-3ff69af00364", 
         "file_format": "bam", 
+        "md5sum": "02eb76ead2aadecfb727777d97717f75", 
+        "uuid": "47f46014-1463-4449-b37c-3ff69af00364", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "alignment", 
         "description": "This is an output file of the Hi-C processing pipeline", 
-        "md5sum": "02eb76ead2aadecfb727777d97717f75", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIPW15OGS", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:48:31.350874+00:00"
-        }, 
-        "status": "released", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "file_size": 44029732684, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-01T01:19:30.920552+00:00", 
-        "public_release": "2018-06-07", 
         "schema_version": "1", 
         "aliases": []
     }, 
     {
+        "file_type": "contact list-replicate", 
+        "accession": "4DNFIVMRIR5H", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 4785733233, 
+        "aliases": [], 
         "source_experiments": [
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc"
         ], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "552df3ad4bd801fa37190b1d04afe343", 
         "uuid": "d3460a87-fb51-4dd8-921d-ec9668c18318", 
         "file_format": "pairs", 
-        "file_type": "contact list-replicate", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
-        "file_size": 4785733233, 
-        "accession": "4DNFIVMRIR5H", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "status": "released", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:48:30.459192+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "schema_version": "1", 
+        "file_classification": "processed file", 
         "public_release": "2018-06-07", 
-        "date_created": "2018-06-01T01:19:31.301396+00:00", 
         "extra_files": [
             {
                 "status": "released", 
@@ -812,67 +750,65 @@
                 "href": "/files-processed/4DNFIVMRIR5H/@@download/4DNFIVMRIR5H.pairs.gz.px2"
             }
         ], 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "aliases": []
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T01:19:31.301396+00:00", 
+        "md5sum": "552df3ad4bd801fa37190b1d04afe343", 
+        "quality_metric": "6616d374-32bd-46a4-b8b3-5d12fe4e995c", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc"
         ], 
-        "uuid": "8d23e22d-96fe-4655-928f-ebcee057bdfb", 
         "file_format": "bam", 
+        "md5sum": "2f7dfde9c82ad069b16856a7cbf2bda3", 
+        "uuid": "8d23e22d-96fe-4655-928f-ebcee057bdfb", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "intermediate file", 
         "description": "This is an intermediate file in the HiC processing pipeline", 
-        "md5sum": "2f7dfde9c82ad069b16856a7cbf2bda3", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIEESGFJH", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:50:00.808736+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "file_size": 47773987329, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-05-31T17:19:42.950420+00:00", 
-        "public_release": "2018-06-07", 
         "schema_version": "1", 
         "aliases": []
     }, 
     {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc", 
             "f048f178-131e-49f3-a393-5e265c90fa2d"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "77da562e-d0ec-45a8-8764-14fa16d995a1", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
         "file_format": "hic", 
         "file_type": "contact matrix", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
+        "file_size": 3523935424, 
         "md5sum": "7869a586beb9ba1b7aa9b218396930db", 
-        "file_classification": "processed file", 
         "accession": "4DNFIK9PS9GM", 
         "schema_version": "1", 
-        "status": "released", 
+        "file_classification": "processed file", 
+        "genome_assembly": "GRCm38", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "public_release": "2018-06-07", 
+        "date_created": "2018-06-05T14:25:00.428174+00:00", 
+        "aliases": [], 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:18.044342+00:00"
-        }, 
-        "file_size": 3523935424, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-05T14:25:00.428174+00:00", 
-        "aliases": []
+        "uuid": "77da562e-d0ec-45a8-8764-14fa16d995a1"
     }, 
     {
         "status": "released", 
@@ -880,29 +816,26 @@
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc", 
             "f048f178-131e-49f3-a393-5e265c90fa2d"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_format": "mcool", 
         "md5sum": "50457ab713483d2589b8b92ae08f614b", 
         "uuid": "5b5f17be-a7b5-4c60-a1f3-37fd4d31b6a2", 
-        "file_format": "mcool", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "contact matrix", 
-        "file_size": 4051841735, 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIC453HVL", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:17.742994+00:00"
-        }, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
+        "file_size": 4051841735, 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-05T14:25:00.710042+00:00", 
-        "aliases": [], 
         "higlass_uid": "Ch3JXXcfSUe7cPAVZBSV1w", 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "schema_version": "1", 
+        "aliases": []
     }, 
     {
         "status": "released", 
@@ -911,79 +844,67 @@
             "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc", 
             "f048f178-131e-49f3-a393-5e265c90fa2d"
         ], 
-        "uuid": "5e42d642-58ac-42f1-ae80-96ce01116c51", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
         "file_format": "normvector_juicerformat", 
         "file_type": "juicebox norm vector", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
+        "file_size": 34913841, 
         "md5sum": "7b3c6cf7b7c4f0920392ce926cd78874", 
-        "file_classification": "processed file", 
         "accession": "4DNFI4OXCX82", 
+        "schema_version": "1", 
+        "file_classification": "processed file", 
+        "genome_assembly": "GRCm38", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "public_release": "2018-06-07", 
+        "date_created": "2018-06-05T14:25:00.967413+00:00", 
+        "aliases": [], 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:17.447467+00:00"
-        }, 
-        "file_size": 34913841, 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-06-05T14:25:00.967413+00:00", 
-        "aliases": []
+        "uuid": "5e42d642-58ac-42f1-ae80-96ce01116c51"
     }, 
     {
         "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "uuid": "8bbcc176-90c8-472e-b76b-ed99afd1a795", 
         "file_format": "bam", 
-        "file_type": "alignment", 
         "md5sum": "1299f9c53f2441f8b67ff063493feeae", 
+        "uuid": "8bbcc176-90c8-472e-b76b-ed99afd1a795", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_type": "alignment", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFI12DLPLR", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:47:34.820693+00:00"
-        }, 
         "file_size": 66767684425, 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-01T13:13:21.701923+00:00", 
         "aliases": [], 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
         "description": "This is an output file of the Hi-C processing pipeline"
     }, 
     {
+        "file_type": "contact list-replicate", 
+        "accession": "4DNFI6S3I9XZ", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 6499619176, 
+        "aliases": [], 
         "source_experiments": [
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "63ed0e0c-2878-4b97-ac0f-9a6834ddf17a", 
         "file_format": "pairs", 
-        "file_type": "contact list-replicate", 
-        "md5sum": "dcae48c67fff3e5da5c0027d413ae945", 
-        "accession": "4DNFI6S3I9XZ", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:47:33.745157+00:00"
-        }, 
-        "file_size": 6499619176, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-01T13:13:22.182138+00:00", 
-        "aliases": [], 
         "schema_version": "1", 
+        "file_classification": "processed file", 
+        "public_release": "2018-06-07", 
         "extra_files": [
             {
                 "status": "released", 
@@ -995,63 +916,58 @@
                 "href": "/files-processed/4DNFI6S3I9XZ/@@download/4DNFI6S3I9XZ.pairs.gz.px2"
             }
         ], 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T13:13:22.182138+00:00", 
+        "md5sum": "dcae48c67fff3e5da5c0027d413ae945", 
+        "quality_metric": "8a5c7242-1f68-44bb-88a6-57595a7397e0", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "351a8ec5-3056-4649-8236-89a1cd72a316", 
+        "description": "This is an intermediate file in the HiC processing pipeline", 
         "file_format": "bam", 
         "file_type": "intermediate file", 
+        "file_size": 77742308935, 
         "md5sum": "8e384e5a96b4c61a99cd92b186593bd7", 
-        "file_classification": "processed file", 
         "accession": "4DNFIP3Y44YL", 
         "schema_version": "1", 
+        "file_classification": "processed file", 
+        "genome_assembly": "GRCm38", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "public_release": "2018-06-07", 
+        "date_created": "2018-05-31T17:19:07.836339+00:00", 
+        "aliases": [], 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:50:02.061877+00:00"
-        }, 
-        "file_size": 77742308935, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "date_created": "2018-05-31T17:19:07.836339+00:00", 
-        "aliases": [], 
-        "description": "This is an intermediate file in the HiC processing pipeline"
+        "uuid": "351a8ec5-3056-4649-8236-89a1cd72a316"
     }, 
     {
+        "file_type": "contact list-combined", 
+        "accession": "4DNFIW3YHQXS", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 8240198550, 
+        "aliases": [], 
         "source_experiments": [
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c", 
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "8ed69ed6-724b-48b7-8ee2-66b471ff90a5", 
         "file_format": "pairs", 
-        "file_type": "contact list-combined", 
-        "md5sum": "9cf53f9fa708928c74954ed9630a664f", 
-        "accession": "4DNFIW3YHQXS", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:19.774254+00:00"
-        }, 
-        "file_size": 8240198550, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-05T14:24:16.554959+00:00", 
-        "aliases": [], 
         "schema_version": "1", 
+        "file_classification": "processed file", 
+        "public_release": "2018-06-07", 
         "extra_files": [
             {
                 "status": "released", 
@@ -1063,65 +979,57 @@
                 "href": "/files-processed/4DNFIW3YHQXS/@@download/4DNFIW3YHQXS.pairs.gz.px2"
             }
         ], 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-05T14:24:16.554959+00:00", 
+        "md5sum": "9cf53f9fa708928c74954ed9630a664f", 
+        "quality_metric": "3fe85883-38ec-4161-8d93-8f22b5880ba2", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c"
         ], 
-        "uuid": "8b95c7b4-c0d9-4213-8a6f-cb2d15d3f4c7", 
         "file_format": "bam", 
+        "md5sum": "75abf0638012893abfa2b6fe2c97b3bf", 
+        "uuid": "8b95c7b4-c0d9-4213-8a6f-cb2d15d3f4c7", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_type": "alignment", 
         "description": "This is an output file of the Hi-C processing pipeline", 
-        "md5sum": "75abf0638012893abfa2b6fe2c97b3bf", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
-        "accession": "4DNFI5TVC4OY", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFI5TVC4OY", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:48:32.980906+00:00"
-        }, 
         "file_size": 27579213359, 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-01T01:18:46.445717+00:00", 
+        "schema_version": "1", 
         "aliases": []
     }, 
     {
+        "file_type": "contact list-replicate", 
+        "accession": "4DNFIUZJOJW9", 
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "file_size": 2220872094, 
+        "aliases": [], 
         "source_experiments": [
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c"
         ], 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "376393c8f5e6b42f22985b5aad68c570", 
         "uuid": "7a2b1417-b056-4eaf-a8d1-21b401b6b6d9", 
         "file_format": "pairs", 
-        "file_type": "contact list-replicate", 
-        "description": "This is an output file of the Hi-C processing pipeline", 
-        "public_release": "2018-06-07", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "accession": "4DNFIUZJOJW9", 
-        "file_classification": "processed file", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:48:32.172700+00:00"
-        }, 
-        "status": "released", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "file_size": 2220872094, 
-        "date_created": "2018-06-01T01:18:46.761879+00:00", 
         "schema_version": "1", 
+        "file_classification": "processed file", 
+        "public_release": "2018-06-07", 
         "extra_files": [
             {
                 "status": "released", 
@@ -1133,91 +1041,89 @@
                 "href": "/files-processed/4DNFIUZJOJW9/@@download/4DNFIUZJOJW9.pairs.gz.px2"
             }
         ], 
-        "aliases": []
+        "status": "released", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "date_created": "2018-06-01T01:18:46.761879+00:00", 
+        "md5sum": "376393c8f5e6b42f22985b5aad68c570", 
+        "quality_metric": "4cbe624e-c8ba-4793-ae92-c2d39f9c1af0", 
+        "genome_assembly": "GRCm38"
     }, 
     {
         "status": "released", 
         "source_experiments": [
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "76557db7-24b6-472c-bdf4-0626e2174a12", 
         "file_format": "bam", 
-        "file_type": "intermediate file", 
         "md5sum": "b4c6e43f2e0957f2241b39059b1fb34b", 
+        "uuid": "76557db7-24b6-472c-bdf4-0626e2174a12", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "file_type": "intermediate file", 
+        "description": "This is an intermediate file in the HiC processing pipeline", 
+        "public_release": "2018-06-07", 
         "file_classification": "processed file", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "accession": "4DNFIOL4YM4X", 
-        "schema_version": "1", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-08T14:50:02.883803+00:00"
-        }, 
         "file_size": 31825744318, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-05-31T17:18:35.097533+00:00", 
-        "aliases": [], 
-        "description": "This is an intermediate file in the HiC processing pipeline"
+        "schema_version": "1", 
+        "aliases": []
     }, 
     {
         "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "8c380474-12cd-41f4-b86f-2a29faf12eec", 
         "source_experiments": [
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c", 
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "md5sum": "15ac9f7e70ab30e722a23768861caea4", 
-        "uuid": "8c380474-12cd-41f4-b86f-2a29faf12eec", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
         "file_format": "hic", 
         "file_type": "contact matrix", 
-        "file_size": 2673923086, 
-        "file_classification": "processed file", 
+        "md5sum": "15ac9f7e70ab30e722a23768861caea4", 
         "accession": "4DNFIY3XPKPO", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "contributing_labs": [
-            "795847de-20b6-4f8c-ba8d-185215469cbf"
-        ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:19.409395+00:00"
-        }, 
+        "genome_assembly": "GRCm38", 
+        "file_classification": "processed file", 
+        "file_size": 2673923086, 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "schema_version": "1", 
         "public_release": "2018-06-07", 
         "date_created": "2018-06-05T14:24:17.068759+00:00", 
         "aliases": [], 
-        "description": "This is an output file of the Hi-C processing pipeline"
+        "contributing_labs": [
+            "795847de-20b6-4f8c-ba8d-185215469cbf"
+        ], 
+        "schema_version": "1"
     }, 
     {
         "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "source_experiments": [
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c", 
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "uuid": "dc61dac6-14ae-46e5-8482-1323d32ee00c", 
         "file_format": "mcool", 
+        "md5sum": "ed87610d724717126422e91f9fdbe012", 
+        "uuid": "dc61dac6-14ae-46e5-8482-1323d32ee00c", 
+        "schema_version": "1", 
         "file_type": "contact matrix", 
         "description": "This is an output file of the Hi-C processing pipeline", 
-        "md5sum": "ed87610d724717126422e91f9fdbe012", 
+        "public_release": "2018-06-07", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "file_classification": "processed file", 
-        "accession": "4DNFI7Z381GX", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "accession": "4DNFI7Z381GX", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:19.051118+00:00"
-        }, 
         "file_size": 2915470709, 
-        "schema_version": "1", 
-        "public_release": "2018-06-07", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "genome_assembly": "GRCm38", 
         "date_created": "2018-06-05T14:24:17.332671+00:00", 
         "higlass_uid": "FAQD3hU6TQWgGH3DibpucA", 
         "aliases": []
@@ -1229,26 +1135,23 @@
             "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c", 
             "9127e693-bf95-4811-90d3-93e3e0afb785"
         ], 
-        "description": "This is an output file of the Hi-C processing pipeline", 
+        "uuid": "aa373eee-06fb-468d-b01d-bd1ca06f1a5a", 
         "file_format": "normvector_juicerformat", 
         "file_type": "juicebox norm vector", 
-        "md5sum": "9b4253893e00b39f0d8ba82527aac97f", 
-        "file_classification": "processed file", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "description": "This is an output file of the Hi-C processing pipeline", 
+        "file_size": 30398733, 
         "accession": "4DNFIQ56K12K", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "aliases": [], 
+        "file_classification": "processed file", 
+        "date_created": "2018-06-05T14:24:17.708116+00:00", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "public_release": "2018-06-07", 
+        "genome_assembly": "GRCm38", 
+        "md5sum": "9b4253893e00b39f0d8ba82527aac97f", 
         "contributing_labs": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ], 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-11T15:52:18.754615+00:00"
-        }, 
-        "file_size": 30398733, 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "public_release": "2018-06-07", 
-        "date_created": "2018-06-05T14:24:17.708116+00:00", 
-        "aliases": [], 
-        "schema_version": "1", 
-        "uuid": "aa373eee-06fb-468d-b01d-bd1ca06f1a5a"
+        "schema_version": "1"
     }
 ]

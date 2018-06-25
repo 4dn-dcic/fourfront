@@ -790,7 +790,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
                 errors.append({'uuid': result['uuid'],
                                'error': result['_response'].json})
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 exclude_list.append(result['uuid'])
                 print("excluding uuid %s do to error" % result['uuid'])
     if force_return:
