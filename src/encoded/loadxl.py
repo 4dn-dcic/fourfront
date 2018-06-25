@@ -110,24 +110,28 @@ IS_ATTACHMENT = [
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
     '''
-    we expect to get posted data in the form of {'item_type': [items], 'item_type2': [items]}
+    we expect to get posted data in the form of
+    {'item_type': [items], 'item_type2': [items]}
     then we just use load_all to load all that stuff in
     '''
 
     # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it 
     # TODO: allow user to pass in config_uri below
-    app = get_app('productioni.ini', 'app')
+    app = get_app('production.ini', 'app')
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
+
+    # expected response
     request.response.status = 200
     result = {
         'status': 'success',
         '@type': ['result'],
     }
+    # actually load the stuff
     res = load_all(testapp, request.json, [], from_json=True)
 
     if res:
@@ -913,7 +917,6 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    import pdb; pdb.set_trace()
     if indir != 'master-inserts': # Load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])

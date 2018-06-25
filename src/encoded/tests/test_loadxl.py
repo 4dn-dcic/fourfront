@@ -51,7 +51,6 @@ def test_load_data_endpoint(testapp):
     data['user'] = loadxl.read_single_sheet(master_inserts, 'user')
     res = testapp.post_json('/load_data', data, status=200)
     assert res.json['status'] == 'success'
-    import pdb; pdb.set_trace()
 
 
 def test_load_data_endpoint_returns_error_if_incorrect_data(testapp):
