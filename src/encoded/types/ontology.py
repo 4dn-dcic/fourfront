@@ -12,7 +12,7 @@ from .base import (
 @collection(
     name='ontology-terms',
     unique_key='ontology_term:term_id',
-    lookup_key='term_name',
+    lookup_key='preferred_name',
     properties={
         'title': 'Ontology Terms',
         'description': 'Listing of Ontology Terms',
