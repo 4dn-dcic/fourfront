@@ -91,7 +91,7 @@ def test_load_data_perf_data(testapp):
         json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
         # pluck a few uuids for testing
         if type_name in test_types:
-            test_inserts.append(json_inserts[type_name][0])
+            test_inserts.append({'type_name': type_name, 'data':json_inserts[type_name][0]})
 
     from timeit import default_timer as timer
     start = timer()
@@ -100,18 +100,23 @@ def test_load_data_perf_data(testapp):
         res = testapp.post_json('/load_data', json_inserts, status=200)
         assert res.json['status'] == 'success'
     stop = timer()
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     print("Time to insert is %s" % (stop - start))
 
     # check a couple random inserts
     for item in test_inserts:
-        assert testapp.get("/" + item['uuid'] + "?frame=raw").json['uuid']
+        start = timer()
+        assert testapp.get("/" + item['data']['uuid'] + "?frame=raw").json['uuid']
+        stop = timer()
+        frame_time = stop - start
+
+        start = timer()
+        assert testapp.get("/" + item['data']['uuid']).follow().json['uuid']
+        stop = timer()
+        embed_time = stop - start
+
+        print("Time to query item %s - %s raw: %s embed %s" % (item['type_name'], item['data']['uuid'],
+                                                               frame_time, embed_time))
 
     # userful for seeing debug messages
     # assert False
-
-
-
-
-
-
