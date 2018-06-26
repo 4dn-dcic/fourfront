@@ -100,7 +100,7 @@ def test_load_data_perf_data(testapp):
         res = testapp.post_json('/load_data', json_inserts, status=200)
         assert res.json['status'] == 'success'
     stop = timer()
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     print("Time to insert is %s" % (stop - start))
 
     # check a couple random inserts
