@@ -131,8 +131,15 @@ def load_data_view(context, request):
         'status': 'success',
         '@type': ['result'],
     }
+    # if we post local_dir key then we use local data
     # actually load the stuff
-    res = load_all(testapp, request.json, [], from_json=True)
+    from pkg_resources import resource_filename
+    local_dir = request.json.get('local_dir')
+    if  local_dir:
+        local_inserts = resource_filename('encoded', 'tests/data/' + local_dir + '/')
+        res = load_all(testapp, local_inserts, [])
+    else:
+        res = load_all(testapp, request.json, [], from_json=True)
 
     if res:
         request.response.status = 422

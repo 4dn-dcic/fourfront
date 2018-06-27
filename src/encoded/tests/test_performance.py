@@ -2,8 +2,20 @@ import pytest
 from encoded import loadxl
 from unittest import mock
 from timeit import default_timer as timer
+from pkg_resources import resource_filename
 
 pytestmark = pytest.mark.performance
+
+
+def test_load_data_local_dir(testapp):
+    expected_dir = resource_filename('encoded', 'tests/data/perf-testing/')
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        with mock.patch('encoded.loadxl.load_all') as load_all:
+            mocked_app.return_value = testapp.app
+            load_all.return_value = None
+            res = testapp.post_json('/load_data', {'local_dir': 'perf-testing'}, status=200)
+            assert res.json['status'] == 'success'
+            load_all.assert_called_once_with(mock.ANY, expected_dir, [])
 
 
 def test_load_data_perf_data(testapp):
@@ -14,7 +26,6 @@ def test_load_data_perf_data(testapp):
     Note:  run with bin/test -s -k test_performance to see the prints from the test
     '''
 
-    from pkg_resources import resource_filename
     from os import listdir
     from os.path import isfile, join
     insert_dir = resource_filename('encoded', 'tests/data/perf-testing/')
