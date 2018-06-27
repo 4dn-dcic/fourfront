@@ -7,6 +7,15 @@ from pkg_resources import resource_filename
 pytestmark = pytest.mark.performance
 
 
+def test_load_data_user_specified_config(testapp):
+    config_uri= 'test.ini'
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', {'config_uri': config_uri}, status=200)
+        assert res.json['status'] == 'success'
+        mocked_app.assert_called_once_with(config_uri, 'app')
+
+
 def test_load_data_local_dir(testapp):
     expected_dir = resource_filename('encoded', 'tests/data/perf-testing/')
     with mock.patch('encoded.loadxl.get_app') as mocked_app:

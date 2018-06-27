@@ -13,7 +13,6 @@ from dcicutils.beanstalk_utils import get_beanstalk_real_url
 from pyramid.paster import get_app
 
 from pyramid.view import view_config
-from pyramid.response import Response
 
 
 text = type(u'')
@@ -116,8 +115,9 @@ def load_data_view(context, request):
     then we just use load_all to load all that stuff in
     '''
 
-    # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it 
-    app = get_app('production.ini', 'app')
+    # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
+    config_uri = request.json.get('config_uri', 'production.ini')
+    app = get_app(config_uri, 'app')
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -766,6 +766,8 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
     exclude_list = []
     errors = []
     order = list(ORDER)
+    # default incase no data comes in
+    force_return = False
     if itype is not None:
         if isinstance(itype, list):
             order = itype
