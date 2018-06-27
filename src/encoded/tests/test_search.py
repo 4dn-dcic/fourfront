@@ -1,4 +1,5 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
+import pdb; pdb.set_trace()
 from .features.conftest import app_settings, app, workbook
 import pytest
 import random
@@ -371,6 +372,7 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     from snovault.elasticsearch import create_mapping
+    from dcicutils.ff_utils import find_uuids
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     # TODO: NAMESPACE - here, passed in list to create_mapping
@@ -392,14 +394,21 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if item_len > 0:
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             res = res.follow()
-            random_id = random.choice(res.json['@graph'])['@id']
-            indexer_testapp.get(random_id + '@@index-data', status=200)
-            # previously test_html_pages
-            try:
-                res = htmltestapp.get(random_id)
-                assert res.body.startswith(b'<!DOCTYPE html>')
-            except Exception as e:
-                pass
+            for item_res in res:
+                item_id = res['uuid']
+                index_view_res = indexer_testapp.get(item_id + '@@index-data', status=200)
+                # make sure that the embedded_uuids match the embedded data
+                assert 'embedded_uuids' in index_view_res
+                assert 'embedded' in index_view_res
+                found_uuids = set(find_uuids(index_view_res['embedded']))
+                found_uuids = found_uuids - set(item_id)  # remove self from found ids
+                assert found_uuids == index_view_res['embedded_uuids']
+                # previously test_html_pages
+                try:
+                    html_res = htmltestapp.get(item_id)
+                    assert html_res.body.startswith(b'<!DOCTYPE html>')
+                except Exception as e:
+                    pass
 
 
 ######################################
