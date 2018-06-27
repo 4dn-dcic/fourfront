@@ -198,6 +198,18 @@
                 }
             }
         },
+        "reference_files": {
+            "title": "Reference Files",
+            "description": "Reference files associated with this experiment (ex. file of sequencing barcodes).",
+            "type": "array",
+            "lookup": 415,
+            "items": {
+                "title": "Reference File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileReference"
+            }
+        },
         "filesets": {
             "title": "Sets of Data Files",
             "description": "Information about a set of data files associated with the experiment.",

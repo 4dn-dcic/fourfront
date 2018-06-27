@@ -260,7 +260,7 @@ export class FileDetailBody extends React.Component {
                 }
             }
             body = (
-                <Fade in={fileLoaded} transitionAppear>
+                <Fade in={fileLoaded} appear>
                     { fileLoaded ?
                         <div>
                             { table }

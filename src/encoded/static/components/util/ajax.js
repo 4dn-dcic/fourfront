@@ -41,7 +41,7 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
 
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE ) {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 if (typeof callback === 'function'){
                     callback(JSON.parse(xhr.responseText));
@@ -133,4 +133,13 @@ export function fetch(url, options){
         request.xhr_end = 1 * new Date();
     });
     return request;
+}
+
+/** Calls ajax.fetch() internally, but adds 'json' function to return self. */
+export function fetchPolyfill(url, options){
+    var req = fetch(url, options);
+    req.then((resp) => {
+        resp.json = function(){ return resp; };
+    });
+    return req;
 }

@@ -36,11 +36,16 @@
             "description": "A plain text description of the task.",
             "type": "string"
         },
+        "metadata_only": {
+            "title": "File Provenance Graph",
+            "description": "When True the file provenance graph was generated without a run of a 4dn-dcic pipeline.",
+		        "type": "boolean",
+			      "default": false
+        },
         "description_only": {
-            "title": "Description Only",
-            "description": "This workflow was not run by the DCC and thus this object is only a description of a run.",
-		    "type": "boolean",
-			"default": false
+            "title": "File Provenance Graph",
+            "description": "When True the file provenance graph was generated without a run of a 4dn-dcic pipeline.",
+            "type": "boolean"
         },
         "input_files": {
             "title": "Input files",

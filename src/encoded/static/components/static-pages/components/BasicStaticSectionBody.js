@@ -26,7 +26,7 @@ export class BasicStaticSectionBody extends React.PureComponent {
         if (filetype === 'md'){
             return React.createElement(element, passedProps, compiler(content, compileOptions || undefined) );
         } else if (filetype === 'html'){
-            return React.createElement(element, _.extend(passedProps, 'dangerouslySetInnerHTML' : { '__html' : content } ) );
+            return React.createElement(element, _.extend(passedProps, { 'dangerouslySetInnerHTML' : { '__html' : content } }) );
         } else {
             return React.createElement(element, passedProps, content );
         }

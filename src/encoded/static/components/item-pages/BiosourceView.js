@@ -7,11 +7,11 @@ import * as globals from './../globals';
 import { Button, Collapse } from 'react-bootstrap';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock } from './components';
-import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
+import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
 
 
-export default class BiosourceView extends ItemBaseView {
+export default class BiosourceView extends DefaultItemView {
 
     getTabViewContents(){
 

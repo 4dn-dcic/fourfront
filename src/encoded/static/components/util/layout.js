@@ -79,11 +79,12 @@ export function shortenString(originalText, maxChars = 28, addEllipsis = true, s
  *
  * @return {string} - Abbreviation for column/grid Bootstrap size, e.g. 'lg', 'md', 'sm', or 'xs'.
  */
-export function responsiveGridState(){
+export function responsiveGridState(width = null){
     if (isServerSide()) return 'lg';
-    if (window.innerWidth >= 1200) return 'lg';
-    if (window.innerWidth >= 992) return 'md';
-    if (window.innerWidth >= 768) return 'sm';
+    width = typeof width === 'number' ? width : window.innerWidth;
+    if (width >= 1200) return 'lg';
+    if (width >= 992) return 'md';
+    if (width >= 768) return 'sm';
     return 'xs';
 }
 

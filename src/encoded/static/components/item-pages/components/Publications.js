@@ -53,7 +53,7 @@ class DetailBlock extends React.Component {
 }
 
 
-class ShortAttribution extends React.Component {
+class ShortAttribution extends React.PureComponent {
 
     render(){
         var pub = this.props.publication;
@@ -127,7 +127,7 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
  * 
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
-export class Publications extends React.Component {
+export class Publications extends React.PureComponent {
 
     static DetailBlock = DetailBlock;
     static ShortAttribution = ShortAttribution;

@@ -27,6 +27,9 @@ var TITLE_PATHNAME_MAP = {
     '/health' : {
         'title' : "Health"
     },
+    '/indexing_status' : {
+        'title' : "Indexing Status"
+    },
     '/users/\*' : {
         'title' : function(pathName, context){
             var myDetails = JWT.getUserDetails();
@@ -61,7 +64,7 @@ export function getSchemaTypeFromSearchContext(context){
     return null;
 }
 
-export default class PageTitle extends React.Component {
+export default class PageTitle extends React.PureComponent {
 
     static isStaticPage(context){
         if (Array.isArray(context['@type'])){
@@ -165,7 +168,7 @@ export default class PageTitle extends React.Component {
                 if (context.title && context.short_attribution){
                     return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
                 }
-                return { 'title' : itemTypeTitle, 'subtitle' : context.title || title, 'subtitleEllipsis' : true };
+                return { 'title' : itemTypeTitle, 'subtitle' : title, 'subtitleEllipsis' : true };
             }
 
             // Don't show Accessions in titles.
@@ -201,10 +204,13 @@ export default class PageTitle extends React.Component {
                 return { 'title' : itemTypeTitle, 'calloutTitle' : title };
             }
 
-            
-
         }
-        return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
+
+        // Fallback-ish stuff.
+        title = object.itemUtil.getTitleStringFromContext(context);
+        if (!title) title = currentHrefParts.path;
+
+        return { title };
     }
 
     static getStyles(context, href, mounted, hasToc){
@@ -239,17 +245,16 @@ export default class PageTitle extends React.Component {
 
         if (PageTitle.isHomePage(href)){
             return (
-                <layout.WindowResizeUpdateTrigger>
-                    <div id="page-title-container" className="container">
-                        <div className="breadcrumb-placeholder" key="breadcrumbs" />
+                <div id="page-title-container" className="container">
+                    <div className="breadcrumb-placeholder" key="breadcrumbs" />
+                    <layout.WindowResizeUpdateTrigger>
                         <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
-                    </div>
-                </layout.WindowResizeUpdateTrigger>
+                    </layout.WindowResizeUpdateTrigger>
+                </div>
             );
         }
 
         var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
-        
 
         if (title) {
             title = <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>{ title }</span>;
@@ -264,18 +269,19 @@ export default class PageTitle extends React.Component {
         }
 
         var hasToc = (
-            context['@type'].indexOf('StaticPage') > -1
+            context && Array.isArray(context['@type'])
+            && context['@type'].indexOf('StaticPage') > -1
             && context['table-of-contents']
             && context['table-of-contents'].enabled
         );
 
         return (
-            <layout.WindowResizeUpdateTrigger>
-                <div id="page-title-container" className="container">
-                    <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
+            <div id="page-title-container" className="container">
+                <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
+                <layout.WindowResizeUpdateTrigger>
                     <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} />
-                </div>
-            </layout.WindowResizeUpdateTrigger>
+                </layout.WindowResizeUpdateTrigger>
+            </div>
         );
     }
 
@@ -356,10 +362,11 @@ export class StaticPageBreadcrumbs extends React.Component {
     }
 
     editButton(){
-        if (this.props.session && this.props.context['@type'].indexOf('StaticPage') > -1){
+        var { session, context } = this.props;
+        if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
 
-            if (Array.isArray(this.props.context.actions)){
-                var editAction = _.findWhere(this.props.context.actions, { 'name' : 'edit' });
+            if (Array.isArray(context.actions)){
+                var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right">

@@ -577,7 +577,7 @@ class SearchBar extends React.Component{
 
     selectItemTypeDropdown(inProp = false){
         return (
-            <Fade in={inProp} transitionAppear>
+            <Fade in={inProp} appear>
                 <DropdownButton
                     id="search-item-type-selector"
                     bsSize="sm"

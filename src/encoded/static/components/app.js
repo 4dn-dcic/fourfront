@@ -237,7 +237,6 @@ export default class App extends React.Component {
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
             'isSubmitting': false,
-            //'isLoading' : false,
             'mounted' : false
         };
 
@@ -317,13 +316,7 @@ export default class App extends React.Component {
 
         this.setState({ 'mounted' : true });
     }
-/*
-    componentWillReceiveProps(nextProps){
-        if (this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState === 4 && !this.requestCurrent){
-            this.setState({ 'isLoading' : false });
-        }
-    }
-*/
+
     componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
@@ -431,7 +424,7 @@ export default class App extends React.Component {
             console.info('Schemas available already.');
             return this.state.schemas;
         }
-        ajax.promise('/profiles/').then(data => {
+        ajax.promise('/profiles/?format=json').then(data => {
             if (object.isValidJSON(data)){
                 this.setState({
                     schemas: data
@@ -827,8 +820,6 @@ export default class App extends React.Component {
                 return null;
             }
 
-            //this.setState({ isLoading : true });
-
             var request = ajax.fetch(
                 href,
                 {
@@ -1193,8 +1184,6 @@ export default class App extends React.Component {
         // Set current path for per-page CSS rule targeting.
         var hrefParts = url.parse(canonical || base);
 
-        console.log(this.state.isLoading );
-
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4;
 
         return (
@@ -1219,7 +1208,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname} className={this.state.isLoading ? "loading-request" : null}>
+                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>

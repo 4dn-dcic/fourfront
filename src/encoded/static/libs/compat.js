@@ -2,8 +2,8 @@
 require('babel-polyfill');
 
 // Chrome 42 fetch does not have abort.
-window.fetch = undefined;
-
+//window.fetch = undefined;
+/*
 (function () {
 
 if (typeof console === 'undefined') {
@@ -35,7 +35,7 @@ for (var i=0, l=console_methods.length; i < l; i++) {
 }
 
 })();
-
+*/
 // https://gist.github.com/elijahmanor/6452535
 // https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
 if (!Element.prototype.matches) (function () {

@@ -11,7 +11,7 @@ import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
-import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownloadButtonColumn } from './FileView';
+import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownloadButtonColumn, QualityControlResults } from './FileView';
 
 
 export default class FileMicroscopyView extends FileView {
@@ -100,29 +100,34 @@ class FileMicOverViewBody extends FileOverViewBody {
             return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path;
         }) || parentExperimentsReversed[0] || null;
 
-        console.log('PP', parentExperimentWithImagingPaths);
+        var thumbnail = typeof file.thumbnail === 'string' && file.thumbnail;
+        if (thumbnail && thumbnail.slice(-5) === '/100/') {
+            thumbnail = thumbnail.slice(0, -5) + '/360/';
+        }
 
         return (
+            <div>
+                <div className="row overview-blocks">
 
-            <div className="row overview-blocks">
+                    { thumbnail ?
+                        <div className="col xs-6 col-sm-4">
+                            <Thumbnail href={ file.omerolink || null } className="inline-block" alt="OMERO Thumbnail" target="_blank" src={thumbnail} style={{ margin : '12px 0px 0px 0px' }} />
+                        </div>
+                        : null
+                    }
 
-                { file.thumbnail && typeof file.thumbnail === 'string' ?
-                    <div className="col xs-6 col-sm-2">
-                        <Thumbnail href={ file.omerolink || null } className="inline-block" alt="OMERO Thumbnail" target="_blank" src={file.thumbnail} style={{ margin : '12px 0px 0px 0px' }} />
-                    </div>
-                    : null
-                }
+                    { parentExperimentWithImagingPaths ?
+                        <OverViewBodyItem
+                            result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(this.props.schemas || Schemas.get(), parentExperimentWithImagingPaths)}
+                            wrapInColumn={"col-xs-12 pull-right col-sm-" + (thumbnail ? '8' : '12')} property='imaging_paths' fallbackTitle="Imaging Paths"
+                            listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+                    : null }
 
-                <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn={"col-xs-12 col-sm-" + (file.thumbnail && typeof file.thumbnail === 'string' ? '4' : '6' )} />
+                    <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn={thumbnail ? "col-sm-8" : "col-sm-6"} schemas={this.props.schemas} />
 
-                { parentExperimentWithImagingPaths ?
-                    <OverViewBodyItem
-                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(this.props.schemas || Schemas.get(), parentExperimentWithImagingPaths)}
-                        wrapInColumn="col-xs-12 col-md-6 pull-right" property='imaging_paths' fallbackTitle="Imaging Paths"
-                        listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp}
-                    />
-                : null }
+                    <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn={"col-xs-12 " + (thumbnail ? "col-sm-8" : "col-sm-6")} />
 
+                </div>
             </div>
 
         );

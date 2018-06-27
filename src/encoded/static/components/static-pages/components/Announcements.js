@@ -19,11 +19,11 @@ class Announcement extends React.Component {
     }
 
     subtitle(){
-        var content = this.props.content;
-        var date = content.date_created;
-        var author = content.submitted_by;
+        var section = this.props.section;
+        var date = section.date_created;
+        var author = section.submitted_by;
         var authorName = (author && author.display_title && <span className="text-500">{ author.display_title }</span>) || null;
-        var unreleasedStatus = content.status && content.status !== 'released' ? <span className="text-500"> - { Schemas.Term.capitalizeSentence(content.status) }</span> : null;
+        var unreleasedStatus = section.status && section.status !== 'released' ? <span className="text-500"> - { Schemas.Term.capitalizeSentence(section.status) }</span> : null;
         //var authorLink = authorName && object.itemUtil.atId(author);
         //if (authorLink) authorName = <a href={authorLink}>{ authorName }</a>;
         return (
@@ -36,18 +36,19 @@ class Announcement extends React.Component {
     }
 
     render() {
-        var title = this.props.content.title || "";
-        var content = this.props.content.content || "";
-        var filetype = this.props.content.filetype || 'html';
+        var section = this.props.section;
+        if (!section || !section.content) return null;
+
+        var filetype = section.filetype || 'html';
 
         return (
             <div className="announcement">
                 <div className="announcement-title">
-                    <span dangerouslySetInnerHTML={{__html: title }}/>
+                    <span dangerouslySetInnerHTML={{__html: section.title || '<em>Untitled</em>' }}/>
                 </div>
                 { this.subtitle() }
                 <div className="announcement-content">
-                    <BasicStaticSectionBody content={content} filetype={filetype} />
+                    <BasicStaticSectionBody content={section.content} filetype={filetype} />
                 </div>
             </div>
         );
@@ -145,7 +146,7 @@ export class Announcements extends React.Component {
         var persistent, collapsible = null;
 
         function createAnnouncement(announce, idx){
-            return <Announcement key={announce.title} index={idx} content={announce} icon={collapsible ? true : false} />;
+            return <Announcement key={announce.title} index={idx} section={announce} icon={collapsible ? true : false} />;
         }
 
         if (announcements.length > initiallyVisible) {

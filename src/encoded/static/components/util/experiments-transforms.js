@@ -152,7 +152,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
     var uniqExpAccessions = {};
     return _(ensureArray(experiment_sets)).chain()
         .map(function(set){
-            return ensureArray(set.experiments_in_set).map(function(exp){
+            return _.map(ensureArray(set.experiments_in_set), function(exp){
                 // Make sure we return new exp & set objects instead of mutating existing ones.
                 var cExp = _.clone(exp);
                 var cSet = _.clone(set);

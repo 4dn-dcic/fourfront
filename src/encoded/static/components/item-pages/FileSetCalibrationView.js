@@ -4,7 +4,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as globals from './../globals';
 import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, TabbedView } from './components';
-import { ItemBaseView } from './DefaultItemView';
+import DefaultItemView from './DefaultItemView';
 
 
 /**
@@ -14,7 +14,7 @@ import { ItemBaseView } from './DefaultItemView';
  * @module {Component} item-pages/file-set-calibration-view
  */
 
-export default class FileSetCalibrationView extends ItemBaseView {
+export default class FileSetCalibrationView extends DefaultItemView {
 
     constructor(props){
         super(props);

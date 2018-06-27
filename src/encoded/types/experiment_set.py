@@ -154,8 +154,8 @@ class ExperimentSet(Item):
         "processed_files.extra_files",
         "processed_files.extra_files.href",
         "processed_files.extra_files.file_format",
-        #for joint analysis page
         "processed_files.higlass_uid",
+        "processed_files.genome_assembly",
 
         #"processed_files.quality_metric.Total reads",
         #"processed_files.quality_metric.Total Sequences",
@@ -193,7 +193,18 @@ class ExperimentSet(Item):
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
-        "other_processed_files.files.file_size"
+        "other_processed_files.files.file_size",
+        "other_processed_files.files.higlass_uid",
+        "other_processed_files.files.genome_assembly",
+
+        "experiments_in_set.other_processed_files.title",
+        "experiments_in_set.other_processed_files.description",
+        "experiments_in_set.other_processed_files.type",
+        "experiments_in_set.other_processed_files.files.accession",
+        "experiments_in_set.other_processed_files.files.file_type_detailed",
+        "experiments_in_set.other_processed_files.files.file_size",
+        "experiments_in_set.other_processed_files.files.higlass_uid",
+        "experiments_in_set.other_processed_files.files.genome_assembly"
     ]
 
     @calculated_property(schema={

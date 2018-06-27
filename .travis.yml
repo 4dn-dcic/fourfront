@@ -41,6 +41,7 @@ env:
   - secure: i6C0l6inapwkgmwKT67liVcxjSL2y+LrICBd3KmpglH1ReuqqhlUZkgIt2TkW481hhhiCnbxDtPdArqwCzVOIAt+FJ9Ug/9CiJwBCuePujJWo5HMrnMNkdXKlopP73OiRoNuBnxYmzGVq30x0K+Wyvei0nJoUn0ZcOPRij+u0D7YuUk85fdCrfHSqjm/GVOypFWSm3lx0CzbbWPejmjCzllZebj2PkHJ6ydv9IFPLFDEb5MB2Rt4xodKFkZzABGnAJOroIVMYat14XUeeg2PxIHq9YXpA9ZRxFtYNrFolHMOpV3JY4XAcWUVpgH7DvQSUG0Jc6fMo8yEO2Cd3XKCwuTDNa4pmzzR0UUXYPVB9jVvSYXTWk+dtbOB3ehD8mTRPqbkXlzI5/IwcYbNMtr9hooQEXsLZQLSciiQPrMPNqKAiOcFAoEHqfDx0oURnnTmgzIdzjpd+2f+wLP3qRA8pUX9VXcBrseN20u0UigJrxOILSMHMM84jF6uuABmiBY8csV8XvKALVrUbQIFqepMti/9IItQQa5+SfyUSDv8onkzaqT+Hy24mNxifJJLErwfMFWmub0rOrq9KLMx1vkMnItqCG9rMPIDC6q3H60b5PD5eFnle2P3V92sE1y+V9rjo1YHf+FKx1Tgn3ceJ0Sm7R7kjMbGY8xsKocFzVDg7Jg=
   - secure: gSD7QL9OtPYmyFMvJKUHNeJu38uKCO686g6U7LfnlcOL675wuBGOSfgYnD4mfJxK0EjuVppVuUclzAFS7SwLyH1K6MjFzL777FkU6uZEVvXpTdiLHi+yeiRTJUXDi3YVTKiL5JZIHiDhNhrhI8mEDrCBMZwCl08NVQE+YjavcIdBYHd5RGyxF3/iRapl77Yh3ugIvagSabZ7IClLvklL1eyM1chh5Sxk6kZYmsginjfPF5sQf6DsgpfYtLklLXioJ9Z9+Zr4alGrSV700mndp2gwnrtSvBhnWzTGNMgHw9VQCBl9gSkZyRW83/YoJJDR9ozZMeKoFbXobkZ/jIQYY700dII1z2YSaJhahOfbXgYbj8qmi9sB7daF4NjJVllpmi8769rFpB99frJE3vyT8SJeRK1vLWB0Yq5rXmnE99gpUp7zCgMHQhfXr1IZTPf7SHO3IFvG4cVfqDdXc+uxRfYneTAoEU9yufxkvIdLqBzg5+cwBFVEjvS25T63LXnu3CUj3Hbcp3B1hrk4hVp9nfRexTtmPeC0j1+SreWGz1BDmtXFD1fZBJCqwvfcS4HVT8F7HS/bUvyu0+Wm4YtUiQcFBORpswzq2PsRI3BSBc7GSeO46qYv2qRphVXgmqEhTIYEh/1q8lxUxbr19Q90Pco6AGgZwsERBWKXMYhe1/w=
   - secure: Dzs4p1PuHdNXyBJu8FEWp839RhxvetKQrKonNeon3CvcN0xbxtICKr6ekj7+Y8hejxnUFGRwnypGmjbeee9evCC0bcvRQCjy/9aX7Kfuykn4IhvDAAYcWr533wqxC78A4TMyFJEJxYiZ4eJy+M/DnH+lr4zaoAwpsO1mxq92uPfjmj+gYZEAO5mvOUyCKQu5tKYYi9UTJ9Rxz0lJKRbaSQtEGRHs6+kU0qFc6QJGsYXXIbc/BOmfhKkrcJ+6jfvG7eli7cQSK1ve8h1VX0n/Eonk9heH4umCyTT2RTfhcARrc2ZwWYKXTka0jxmAck9gELcGEYOSV5dL/Qy9zykLeH7dL0UbNMnnrNY+89/b2WJfav9KtoG3e0dgiQZp5oMgC1MtkDxQif+V7In9baZA4rafgW+Bw/O3Uzz+VAPpl4xDVjk/29GLQ5iWnj9eJT9a7jIQIOMD6WKxAKH2O3XD6ZyUWvjKYEqT9BIxfchWnd+z2tIPDQBBI3Az+jDh6Quyrmb7AQVveTc+CtmzP98lhnIqAfIz8hwHyRgCo+i27wUGyKHMnKCJeHVSEPbANqXxeg1l8rgG5ht8H0AznkPpzTjajZRmZowDQRg9b9plM5AQsIxhPtAHBHAHcpXx8reN9NHrPuKLoMV3KRTUoq6UqTUrPz/qKCCSbaSbR7UNK7E=
+  - secure: ULUg4jjil5NND94FARuMbXS3cpS6pCIcu793tKTRaNvXAnpo5XHGd/VNStmWZez5EswA8NqI6KEWjl/0nnROWTkQXHczsJjebkzfhRwsqc2De+u3HZ+qAO1DieYQP++XGvvzWyry4ejFfy3qVC11GCV6CIJqMizQUt/D3QHHa3bwL8Tw8PubYsCW2wQa2lwKSc8Kw3Tj3x/pL/8Nw74dJ9M+Cyeh4XZq0Pp6Wlxkxe/zRPKydhV/DihT2rLEiMpxWsXMX1OS1cnXUJUvPf/bdwXMQMocZc3rjs/CMWWn7bx/k5Wdue481xGOdulIu9ljR/ZrxY+5xxm5a3UZd+ZYB8Y5tghiln4k7XDtdUXTSTBzZoDfRoboUbIiPzI0gma8XQJTeLXViS5T6p4M/SdUHkf5s0w8zJKRamqGDI0TL6wI3BnL85VQwXhMjWEmC5Zi1EZHgAGStFDxRGG2TLIHzFuSYly5zuTifyl80bcSj9czgkd6WoPKT3NKPsNTbWpQNF2Amixg4L5xr3Re5zFkTcpyaa05kySE9w84vqxPkczwKIDCmBuoTz6q1+rWaajM4KqlweNKo7OwPGy1R2zvZSq9vSa2a+f5YYpvUvjIYhvUpMQs1B0chC5kAFA2aTMXi+HMMabXq8AShoq8bnO7tBbPUxiu8OST72UQrF0j9Bg=
 matrix:
   include:
   - python: '3.4'
@@ -53,14 +54,11 @@ notifications:
 before_install:
 - SNO_PATH="snovault = git https://github.com/$USER/$SNO_REPO.git branch="
 - SNO_BRANCH=$(grep "${SNO_PATH}" buildout.cfg | sed "s@$SNO_PATH@@")
-- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH" | grep pass)
-- |
-    if [ -z "$SNO_STATUS" ]; then
-        echo "Snovault branch build for $SNO_BRANCH is failing; exiting build"
-        travis_terminate
-    else
-        echo "Snovault branch $SNO_BRANCH is okay with build status: $SNO_STATUS"
-    fi
+- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH"
+  | grep pass)
+- ! "if [ -z \"$SNO_STATUS\" ]; then\n    echo \"Snovault branch build for $SNO_BRANCH
+  is failing; exiting build\"\n    travis_terminate\nelse\n    echo \"Snovault branch
+  $SNO_BRANCH is okay with build status: $SNO_STATUS\"\nfi\n"
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
@@ -68,24 +66,27 @@ before_install:
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
+# need to manually change the version of six used by Travis for some reason
+- pip uninstall -y six
+- pip install six==1.11.0
 - pip install coveralls
 - pip install codacy-coverage
 - pip install -U zc.buildout setuptools
 - buildout bootstrap
-  #- python bootstrap.py --buildout-version 2.11.3 --setuptools-version 39.0.1
-  #- pip install zc.recipe.egg==2.0.5 --no-cache-dir
-  #- pip install -r requirements.txt
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip show pytest
 - pip install pytest==2.9.1
 - pip show pytest
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not bdd and setone" --durations=10 --cov
-  src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80; fi
-- if test -n "$UNIT"; then bin/test -v -v --aws-auth -m "working and not setone" --durations=10 --cov
-  src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80; fi
-- if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh; fi
+- if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not bdd and setone" --durations=10
+  --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  fi
+- if test -n "$UNIT"; then bin/test -v -v --aws-auth -m "working and not setone" --durations=10
+  --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  fi
+- if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh;
+  fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 after_success:
@@ -101,33 +102,19 @@ after_success:
 - echo $TRAVIS_PULL_REQUEST
 - echo $TRAVIS_BRANCH
 - echo $tibanna_deploy
-- |
-  if [ "$BUILD_LEADER" = "YES" ]; then
-    if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
-      if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-        echo "cleanup build artifacts"
-        rm elasticsearch-5.4.1.deb
-        rm .to_export_back
-        rm versions.cfg
-        pip install awsebcli
-        bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
-        git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
-        git config --global user.email "travis@builder.com"
-        git config --global user.name "Travis"
-        if [ "$TRAVIS_BRANCH" = "master" ]; then
-           git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-           git fetch --no-tags
-           git checkout master
-           
-           if [ -n "$tibanna_deploy" ]; then
-              echo "Job succeeded! PUBLISHING to ${tibanna_deploy} environment..."
-              eb use ${tibanna_deploy} --debug
-              python deploy/deploy_beanstalk.py
-           fi
-        fi
-       fi
-     fi
-    fi
+- ! "if [ \"$BUILD_LEADER\" = \"YES\" ]; then\n  if [ \"$BUILD_AGGREGATE_STATUS\"
+  = \"others_succeeded\" ]; then\n    if [ \"$TRAVIS_PULL_REQUEST\" = \"false\" ];
+  then\n      echo \"cleanup build artifacts\"\n      rm elasticsearch-5.4.1.deb\n
+  \     rm .to_export_back\n      rm versions.cfg\n      pip install awsebcli\n      bin/aws
+  s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws\n      git remote
+  add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git\n      git
+  config --global user.email \"travis@builder.com\"\n      git config --global user.name
+  \"Travis\"\n      if [ \"$TRAVIS_BRANCH\" = \"master\" ]; then\n         git config
+  --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'\n         git
+  fetch --no-tags\n         git checkout master\n         \n         if [ -n \"$tibanna_deploy\"
+  ]; then\n            echo \"Job succeeded! PUBLISHING to ${tibanna_deploy} environment...\"\n
+  \           eb use ${tibanna_deploy} --debug\n            python deploy/deploy_beanstalk.py\n
+  \        fi\n      fi\n     fi\n   fi\n  fi\n"
 after_failure:
 - python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null

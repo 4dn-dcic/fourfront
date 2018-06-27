@@ -571,7 +571,6 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
-        #'workflow.*',
         'award.project',
         'workflow.title',
         'workflow.steps.name',
@@ -588,6 +587,7 @@ class WorkflowRun(Item):
         'input_files.value.accession',
         'input_files.value.@type',
         'input_files.value.file_size',
+        'input_files.value.status',
         'output_files.workflow_argument_name',
         'output_files.*',
         'output_files.value.file_format',
@@ -644,7 +644,7 @@ class WorkflowRun(Item):
             #    return False # Skip. We only care about global arguments.
 
             value_field_name = 'value' if io_type == 'parameter' else 'file'
-            
+
             global_pointing_source_target = get_global_source_or_target(step_io_arg.get('source', step_io_arg.get('target', [])))
             if not global_pointing_source_target:
                 return False
@@ -807,6 +807,51 @@ def pseudo_run(context, request):
         sleep(2)
     else:
         res_dict['status'] = 'FOURFRONT-TIMEOUT'
+
+    if res_dict['status'] == 'FAILED':
+        # get error from execution and sent a 422 response
+        sfn = boto3.client('stepfunctions', region_name='us-east-1')
+        hist = sfn.get_execution_history(executionArn=res_dict['executionArn'], reverseOrder=True)
+        for event in hist['events']:
+            if event.get('type') == 'ExecutionFailed':
+                raise HTTPUnprocessableEntity(str(event['executionFailedEventDetails']))
+
+    return res_dict
+
+
+@view_config(name='run', context=WorkflowRun.Collection, request_method='POST',
+             permission='add')
+def run_workflow(context, request):
+    input_json = request.json
+
+    # set env_name for awsem runner in tibanna
+    env = request.registry.settings.get('env.name')
+    # for testing
+    if not env:
+        env = 'fourfront-webdev'
+    if env == 'fourfront-webprod2':
+        input_json['output_bucket'] = 'elasticbeanstalk-fourfront-webprod-wfoutput'
+    else:
+        input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
+
+    input_json['env_name'] = env
+
+    # hand-off to tibanna for further processing
+    aws_lambda = boto3.client('lambda', region_name='us-east-1')
+    res = aws_lambda.invoke(FunctionName='run_workflow',
+                            Payload=json.dumps(input_json))
+    res_decode = res['Payload'].read().decode()
+    res_dict = json.loads(res_decode)
+    arn = res_dict['_tibanna']['response']['executionArn']
+    # just loop until we get proper status
+    for _ in range(2):
+        res = aws_lambda.invoke(FunctionName='status_wfr',
+                                Payload=json.dumps({'executionArn': arn}))
+        res_decode = res['Payload'].read().decode()
+        res_dict = json.loads(res_decode)
+        if res_dict['status'] == 'RUNNING':
+            break
+        sleep(2)
 
     if res_dict['status'] == 'FAILED':
         # get error from execution and sent a 422 response

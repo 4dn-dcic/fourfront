@@ -127,8 +127,9 @@ export class TopRow extends React.Component {
      * @instance
      */
     itemActions(){
-        if (!Array.isArray(this.props.context.actions) || this.props.context.actions.length === 0) return null;
-        return this.props.context.actions.map(function(action, i){
+        var actions = this.props.context && this.props.context.actions;
+        if (!Array.isArray(actions) || actions.length === 0) return null;
+        return _.map(actions, function(action, i){
             var title = action.title;
             return (
                 <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
@@ -219,6 +220,12 @@ export class TopRow extends React.Component {
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
 export class MiddleRow extends React.Component {
+
+    shouldComponentUpdate(nextProps){
+        if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
+        return false;
+    }
+
     render(){
         var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
 
@@ -293,7 +300,7 @@ export class BottomRow extends React.Component {
  * @prop {string} href - Location from Redux store or '@id' of current Item. Used for View JSON button.
  * @prop {Object} schemas - Pass from app.state. Used for tooltips and such.
  */
-export class Wrapper extends React.Component {
+export class Wrapper extends React.PureComponent {
 
     constructor(props){
         super(props);

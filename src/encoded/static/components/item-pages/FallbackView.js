@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import { content_views } from './../globals';
 import { console, object, Filters } from './../util';
-import { ItemPageTitle, ItemDetailList } from './components';
+import { ItemDetailList, Detail } from './components';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -23,12 +23,11 @@ export class Fallback extends React.Component {
     }
 
     render() {
-        var context = this.props.context;
-        var title = typeof context.title === "string" ? context.title : url.parse(this.props.href || this.context.location_href).path;
+        var { context, href, schemas } = this.props;
         return (
-            <div className="view-item">
+            <div className="view-item mt-25">
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <ItemDetailList context={context} schemas={this.props.schemas} />
+                <ItemDetailList context={context} schemas={schemas} />
             </div>
         );
     }
