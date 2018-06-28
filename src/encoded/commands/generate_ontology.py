@@ -25,6 +25,7 @@ from dcicutils.ff_utils import (
     get_metadata,
     search_metadata
 )
+from dcicutils.s3_utils import s3Utils
 import mimetypes
 from pyramid.paster import get_app
 
@@ -414,9 +415,8 @@ def connect2server(env=None, key=None, app=None):
        reached with that key.
        Also handles keyfiles stored in s3'''
     if key == 's3':
-        assert app is not None
-        s3bucket = app.registry.settings['system_bucket']
-        keyfile = get_key(bucket=s3bucket)
+        assert env
+        key = ff_utils.unified_auth(env)
 
     if all([v in key for v in ['key', 'secret', 'server']]):
         import ast
@@ -807,57 +807,12 @@ def main():
                                 args.outdir + s3_patchfile)
 
         if args.s3upload:  # upload file to s3
+            s3 = s3Utils(env = args.env)
+            s3.outfile_bucket = s3.system_bucket
             with open(postfile, 'rb') as postedfile:
-                s3_put(postedfile, s3_postfile, app)
+                s3.s3_put(obj=postedfile, key=s3_postfile)
             with open(patchfile, 'rb') as patchedfile:
-                s3_put(patchedfile, s3_patchfile, app)
-
-
-def s3_check_last_modified(key, app):
-    '''
-    get last updated date for s3 ky
-    '''
-
-    s3bucket = app.registry.settings['system_bucket']
-    s3 = boto3.resource('s3')
-    obj = s3.Object(s3bucket, key)
-    return obj.last_modified
-
-
-#TODO: s3 utils file
-def s3_put(obj, filename, app):
-    '''
-    try to guess content type
-    '''
-    content_type = mimetypes.guess_type(filename)[0]
-    if content_type is None:
-        content_type = 'binary/octet-stream'
-
-    s3bucket = app.registry.settings['system_bucket']
-    s3 = boto3.client('s3')
-    s3.put_object(Bucket=s3bucket,
-                  Key=filename,
-                  Body=obj,
-                  )
-
-
-def get_key(bucket, keyfile_name='illnevertell'):
-    # Share secret encrypted S3 File
-    s3 = boto3.client('s3')
-    secret = os.environ['AWS_SECRET_KEY']
-    response = s3.get_object(Bucket=bucket,
-                             Key=keyfile_name,
-                             SSECustomerKey=secret[:32],
-                             SSECustomerAlgorithm='AES256')
-    akey = response['Body'].read()
-    try:
-        return json.loads(akey.decode('utf-8'))
-    except AttributeError:
-        # akey is probably just a string
-        return json.loads(akey)
-    except ValueError:
-        # maybe its not json after all
-        return akey
+                s3.s3_put(patchedfile, s3_patchfile)
 
 
 if __name__ == '__main__':
