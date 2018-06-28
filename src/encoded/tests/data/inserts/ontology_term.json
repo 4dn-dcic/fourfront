@@ -221,6 +221,7 @@
     },
     {
         "uuid": "111136bc-8535-4448-903e-854af460a233",
+        "preferred_name": "CNS",
         "term_name": "central nervous system",
         "term_id": "UBERON:0001017",
         "source_ontology": "530016bc-8535-4448-903e-854af460b254",
