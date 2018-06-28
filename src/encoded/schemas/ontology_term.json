@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["term_id"],
-    "identifyingProperties": ["uuid", "term_id", "term_name"],
+    "identifyingProperties": ["uuid", "term_id", "preferred_name"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -57,8 +57,6 @@
           "title": "Display name",
           "description": "A preferred name (possibly shortened or simpler version) for the ontology term - can be used for submission or retrieval.",
           "type": "string",
-          "comment": "Must be unique in our system",
-          "uniqueKey": true,
           "permission": "import-items"
         },
         "synonyms": {
