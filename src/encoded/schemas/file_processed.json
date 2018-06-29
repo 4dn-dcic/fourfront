@@ -85,9 +85,7 @@
             "type": "string",
             "default": "processed file",
             "exclude_from": ["submit4dn", "FFedit-create"],
-            "enum": [
-                "processed file"
-              ]
+            "enum": ["processed file"]
         },
          "source_experiments": {
              "title": "Source Experiments",
