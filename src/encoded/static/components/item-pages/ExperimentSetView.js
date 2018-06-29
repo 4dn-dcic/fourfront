@@ -15,6 +15,7 @@ import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, P
 import { requestAnimationFrame } from './../viz/utilities';
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
+//import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
 
 
 /**
@@ -76,6 +77,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
      */
     getTabViewContents(){
         var { context, schemas } = this.props;
+
+        //context = SET;
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
             width = this.getTabViewWidth(),
@@ -273,7 +276,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     static propTypes = {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
-        'file'  : PropTypes.any,
+        'files'  : PropTypes.array,
         'renderRightPanel' : PropTypes.func
     };
 
@@ -307,34 +310,43 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         }, 10);
     }
 
-    render(){
-        var { mounted, width, file, children, renderRightPanel, renderLeftPanelPlaceholder, leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
-        if (!file || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
+    collapsedToolTipContent(){
+        var fileTitles = _.filter(_.map(this.props.files, function(f){
+            return f.accession || f.display_title || null;
+        }));
+        if (fileTitles.length > 3){
+            fileTitles = fileTitles.slice(0, 2);
+            fileTitles.push('...');
+        }
+        return "Open HiGlass Visualization for file(s)&nbsp; <span class='text-600'>" + ( fileTitles.join(', ') ) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>";
+    }
 
-        var hiGlassHeight = HiGlassContainer.defaultProps.height;
+    render(){
+        var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
+        if (!files || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
+
+        var minOpenHeight = 300;
+
         return (
             <AdjustableDividerRow
-                width={width} mounted={mounted} height={hiGlassHeight} leftPanelCollapseHeight={leftPanelCollapseHeight}
+                width={width} mounted={mounted} height={minOpenHeight} leftPanelCollapseHeight={leftPanelCollapseHeight}
                 leftPanelClassName="expset-higlass-panel" leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
                     if (collapsed){
-                        var useHeight = leftPanelCollapseHeight || rightPanelHeight || hiGlassHeight;
+                        var useHeight = leftPanelCollapseHeight || rightPanelHeight || minOpenHeight;
                         if (typeof renderLeftPanelPlaceholder === 'function'){
                             return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
                         } else {
                             return (
                                 <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
-                                    data-html data-place="right" data-tip={"Open HiGlass Visualization for file&nbsp; <span class='text-600'>" + (file.accession || file.display_title) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>"}>
+                                    data-html data-place="right" data-tip={this.collapsedToolTipContent()}>
                                     <i className="icon icon-fw icon-television"/>
                                 </h5>
                             );
                         }
                     } else {
-                        return (
-                            <HiGlassContainer tilesetUid={file.higlass_uid} genomeAssembly={file.genome_assembly}
-                            className={collapsed ? 'disabled' : null} height={hiGlassHeight} ref="hiGlassContainer" />
-                        );
+                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.max(rightPanelHeight + 25, minOpenHeight)} ref="hiGlassContainer" />;
                     }
                 }}
                 rightPanelClassName="exp-table-container" renderRightPanel={renderRightPanel}
@@ -379,16 +391,19 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                 );
             return <span>{ title } { juiceBoxExternalLinkBtn }</span>;
 
-        } else if (file && file.higlass_uid && ((file.file_format && file.file_format === 'mcool') || (file.file_type_detailed && file.file_type_detailed.indexOf('(mcool)') > -1) ) ) {
+        } else if (file && file.higlass_uid && (
+            (file.file_format && (file.file_format === 'mcool' || file.file_format === 'bw' || file.file_format === 'bg'))
+            || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
+        )){
 
             var onDragStart = function(evt){
                 if (!evt || !evt.dataTransfer) return;
                 // evt.dataTransfer.setData('text/4dn-item-context', JSON.stringify(file));
-                evt.dataTransfer.setData('text/higlass-tileset-info', JSON.stringify({ 'tilesetUid' : file.higlass_uid, 'genome_assembly' : file.genome_assembly }));
+                evt.dataTransfer.setData('text/higlass-tileset-info', JSON.stringify({ 'tilesetUid' : file.higlass_uid, 'genome_assembly' : file.genome_assembly, 'file_format' : file.file_format }));
             };
 
             // Currently-visualized MCOOL File HiGlass Indicator
-            if (tb.currentlyVisualizedFile && object.itemUtil.atId(tb.currentlyVisualizedFile) === fileAtId){
+            if (Array.isArray(tb.currentlyVisualizedFiles) && _.map(tb.currentlyVisualizedFiles, object.itemUtil.atId).indexOf(fileAtId) > -1){
                 var hiGlassIndicatorProps = _.extend({
                         'className' : "indicator-higlass-available" + (collapsibleAndCollapsed ? ' clickable in-stacked-table-button' : ' in-stacked-table-icon-indicator')
                     }, collapsibleAndCollapsed ? {
@@ -420,8 +435,15 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.mcoolFile = this.mcoolFile.bind(this);
+        this.bigwigFiles = this.bigwigFiles.bind(this);
+
+        var mcoolFile = this.mcoolFile(props) || null,
+            bigwigFiles = this.bigwigFiles(props) || null;
+
         this.state = {
-            'mcoolFile' : this.mcoolFile(props) || null,
+            mcoolFile,
+            bigwigFiles,
+            'currentlyVisualizedFileType' : mcoolFile ? 'mcool' : (bigwigFiles ? 'bigwig' : null),
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)
         };
         this.columnHeaders = ProcessedFilesStackedTableSection.extendedColumnHeaders();
@@ -434,6 +456,15 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         }
         if (nextProps.context !== this.props.context){
             nextState.mcoolFile = this.mcoolFile(nextProps) || null;
+            nextState.bigwigFiles = this.bigwigFiles(nextProps) || null;
+            // TODO: Test
+            if (!nextState.mcoolFile && this.state.currentlyVisualizedFileType === 'mcool'){
+                nextState.currentlyVisualizedFileType = (nextState.bigwigFiles ? 'bigwig' : null);
+            } else if (!nextState.bigwigFiles && this.state.currentlyVisualizedFileType === 'bigwig'){
+                nextState.currentlyVisualizedFileType = (nextState.mcoolFile ? 'mcoolFile' : null);
+            } else if (!this.state.currentlyVisualizedFileType) {
+                nextState.currentlyVisualizedFileType = nextState.mcoolFile ? 'mcool' : (nextState.bigwigFiles ? 'bigwig' : null);
+            }
         }
         if (_.keys(nextState).length > 0){
             this.setState(nextState);
@@ -450,28 +481,47 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         return null;
     }
 
+    bigwigFiles(props = this.props){
+        var context = props.context;
+        function isValidBWVizFile(f){ return (f.file_format === 'bg' || f.file_format === 'bw') && f.higlass_uid; }
+        var out = _.filter(context.processed_files || [], isValidBWVizFile).concat(
+            _.flatten(
+                _.map(context.experiments_in_set || [], function(exp){
+                    return _.filter(exp.processed_files || [], isValidBWVizFile);
+                }),
+                true
+            )
+        );
+        if (out.length === 0) return null;
+        return out;
+    }
+
     renderTopRow(){
         var { mounted, width, processedFiles, context } = this.props;
         if (!mounted) return null;
 
-        var commonProcessedFilesStackedTableProps = {
+        // Used in ProcessedFilesStackedTable for icons/buttons
+        var currentlyVisualizedFiles = this.state.currentlyVisualizedFileType === 'mcool' ? this.state.mcoolFile && [this.state.mcoolFile] : (this.state.currentlyVisualizedFileType === 'bigwig' ? this.state.bigwigFiles : null);
+
+        var processedFilesTableProps = {
             'files' : processedFiles,
             'experimentSetAccession' : context.accession || null,
             'experimentArray' : context.experiments_in_set,
             'replicateExpsArray' : context.replicate_exps,
             'collapseLimit' : 10, 'collapseShow' : 7,
-            'columnHeaders' : this.columnHeaders,
-            'currentlyVisualizedFile' : this.state.mcoolFile
+            'columnHeaders' : this.columnHeaders
         };
 
-        if (this.state.mcoolFile){
+        if (currentlyVisualizedFiles && currentlyVisualizedFiles.length > 0){
+            processedFilesTableProps.currentlyVisualizedFiles = currentlyVisualizedFiles;
+            var propsToPass = { width, mounted, files : currentlyVisualizedFiles };
             return (
-                <HiGlassAdjustableWidthRow width={width} mounted={mounted} file={this.state.mcoolFile} renderRightPanel={(rightPanelWidth, resetDividerFxn, leftPanelCollapsed)=>
-                    <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={Math.max(rightPanelWidth, 320)} leftPanelCollapsed={leftPanelCollapsed} resetDivider={resetDividerFxn} />
+                <HiGlassAdjustableWidthRow {...propsToPass} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
+                    <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
                 } />
             );
         } else {
-            return <ProcessedFilesStackedTable {...commonProcessedFilesStackedTableProps} width={width}/>;
+            return <ProcessedFilesStackedTable {...processedFilesTableProps} width={width}/>;
         }
     }
 
@@ -590,7 +640,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
                 { collection.description ? <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" expanded={open} /> : <div className="mb-15"/> }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                        { mcoolFile ? <HiGlassAdjustableWidthRow file={mcoolFile} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} /> : this.renderFilesTable(width - 21) }
+                        { mcoolFile ? <HiGlassAdjustableWidthRow files={[mcoolFile]} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} /> : this.renderFilesTable(width - 21) }
                     </div>
                 </Collapse>
             </div>
