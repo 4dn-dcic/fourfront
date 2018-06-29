@@ -504,7 +504,6 @@ export const HiGlassConfigurator = {
 
         generateContentTrack : function(bigWigFile, options, { chromosome, annotation }, idx, all){
             var trackHeight = Math.min(Math.max(Math.floor((options.height - 30) / all.length), 20), 80);
-            console.log('test', chromosome, annotation);
             return {
                 "uid": "bigwig-content-track-" + idx,
                 "tilesetUid": bigWigFile.higlass_uid,
@@ -627,8 +626,6 @@ export class HiGlassContainer extends React.PureComponent {
 
             var allFileFormats = _.uniq(_.filter(_.pluck(files, 'file_format'))),
                 fileFormat = allFileFormats[0];
-
-            console.log('formats', allFileFormats, files);
 
             var fxnByFormatDict = {
                 'mcool' : HiGlassConfigurator.mcool.generateViewConfig,
