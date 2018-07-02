@@ -238,7 +238,7 @@ class Item(snovault.Item):
         'revoked': ALLOW_CURRENT,
         'archived': ALLOW_CURRENT,
         'deleted': DELETED,
-        'replaced': DELETED,
+        'replaced': ALLOW_CURRENT,
         'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
         'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
