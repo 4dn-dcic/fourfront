@@ -635,10 +635,17 @@ def test_labmember_can_view_submitter_file(file_item, submitter_testapp, wrangle
         lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=200)
 
 
-def test_labmember_can_view_submitter_item_replaced(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+def test_labmember_cannot_view_submitter_item_replaced_accession(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
     lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=404)
+
+
+def test_labmember_can_view_submitter_item_replaced_uuid(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    my_uuid = '/' + res.json['@graph'][0]['uuid']
+    lab_viewer_testapp.get(my_uuid, status=301)
 
 
 # Submitter created item and lab member wants to patch
