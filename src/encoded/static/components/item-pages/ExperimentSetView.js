@@ -15,7 +15,7 @@ import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, P
 import { requestAnimationFrame } from './../viz/utilities';
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
-//import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
+// import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
 
 
 /**
@@ -78,7 +78,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     getTabViewContents(){
         var { context, schemas } = this.props;
 
-        //context = SET;
+        // context = SET;
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
             width = this.getTabViewWidth(),
@@ -432,18 +432,52 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         return columnHeaders;
     }
 
+    /**
+     * *SUBJECT TO CHANGE*
+     * Might change to return list of MCOOL AND BIGWIG files. Or something else (act re: state.currentVisualizedFileType or something).
+     *
+     * Currently:
+     * If any one "mcool" file exists, return it.
+     * Else, if any bigwig files exist, return those.
+     * Else, return null.
+     */
+    static findAllFilesToVisualize(context){
+        var firstMcoolFile;
+        if (context && Array.isArray(context.processed_files)){
+            firstMcoolFile = _.find(context.processed_files, function(f){
+                return f.file_format === 'mcool' && f.higlass_uid;
+            }) || null;
+        }
+
+        if (firstMcoolFile) {
+            return [firstMcoolFile]; // 1 MCOOL file, if present
+        }
+
+        return null; // COMMENT THIS LINE OUT + UNCOMMENT BELOW LINES WHEN BIGWIG FILES R WORKING GOOD PLS. Will likely require testing re: HiGlass BigWig UI tho also.
+
+        /*
+        function isValidBWVizFile(f){ return (f.file_format === 'bg' || f.file_format === 'bw') && f.higlass_uid; }
+
+        var bigwigFiles = _.filter(context.processed_files || [], isValidBWVizFile).concat(
+            _.flatten(
+                _.map(context.experiments_in_set || [], function(exp){
+                    return _.filter(exp.processed_files || [], isValidBWVizFile);
+                }),
+                true
+            )
+        );
+        if (bigwigFiles.length > 0) {
+            return bigwigFiles; // All BigWig files, if present.
+        }
+
+        return null;
+        */
+    }
+
     constructor(props){
         super(props);
-        this.mcoolFile = this.mcoolFile.bind(this);
-        this.bigwigFiles = this.bigwigFiles.bind(this);
-
-        var mcoolFile = this.mcoolFile(props) || null,
-            bigwigFiles = this.bigwigFiles(props) || null;
-
         this.state = {
-            mcoolFile,
-            bigwigFiles,
-            'currentlyVisualizedFileType' : mcoolFile ? 'mcool' : (bigwigFiles ? 'bigwig' : null),
+            'currentlyVisualizedFiles' : ProcessedFilesStackedTableSection.findAllFilesToVisualize(props.context), // TODO: May change, act on some 'currentVisualizedFileType' param or state, etc.
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)
         };
         this.columnHeaders = ProcessedFilesStackedTableSection.extendedColumnHeaders();
@@ -455,56 +489,21 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             nextState.filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(nextProps.processedFiles);
         }
         if (nextProps.context !== this.props.context){
-            nextState.mcoolFile = this.mcoolFile(nextProps) || null;
-            nextState.bigwigFiles = this.bigwigFiles(nextProps) || null;
-            // TODO: Test
-            if (!nextState.mcoolFile && this.state.currentlyVisualizedFileType === 'mcool'){
-                nextState.currentlyVisualizedFileType = (nextState.bigwigFiles ? 'bigwig' : null);
-            } else if (!nextState.bigwigFiles && this.state.currentlyVisualizedFileType === 'bigwig'){
-                nextState.currentlyVisualizedFileType = (nextState.mcoolFile ? 'mcoolFile' : null);
-            } else if (!this.state.currentlyVisualizedFileType) {
-                nextState.currentlyVisualizedFileType = nextState.mcoolFile ? 'mcool' : (nextState.bigwigFiles ? 'bigwig' : null);
-            }
+            nextState.currentlyVisualizedFiles = ProcessedFilesStackedTableSection.findAllFilesToVisualize(nextProps.context);
         }
         if (_.keys(nextState).length > 0){
             this.setState(nextState);
         }
     }
 
-    mcoolFile(props = this.props){
-        var context = props.context;
-        if (context && Array.isArray(context.processed_files)){
-            return _.find(context.processed_files, function(f){
-                return f.file_format === 'mcool' && f.higlass_uid;
-            }) || null;
-        }
-        return null;
-    }
-
-    bigwigFiles(props = this.props){
-        var context = props.context;
-        function isValidBWVizFile(f){ return (f.file_format === 'bg' || f.file_format === 'bw') && f.higlass_uid; }
-        var out = _.filter(context.processed_files || [], isValidBWVizFile).concat(
-            _.flatten(
-                _.map(context.experiments_in_set || [], function(exp){
-                    return _.filter(exp.processed_files || [], isValidBWVizFile);
-                }),
-                true
-            )
-        );
-        if (out.length === 0) return null;
-        return out;
-    }
-
     renderTopRow(){
-        var { mounted, width, processedFiles, context } = this.props;
+        const { mounted, width, processedFiles, context } = this.props;
         if (!mounted) return null;
 
         // Used in ProcessedFilesStackedTable for icons/buttons
-        var currentlyVisualizedFiles = this.state.currentlyVisualizedFileType === 'mcool' ? this.state.mcoolFile && [this.state.mcoolFile] : (this.state.currentlyVisualizedFileType === 'bigwig' ? this.state.bigwigFiles : null);
-
-        var processedFilesTableProps = {
-            'files' : processedFiles,
+        const currentlyVisualizedFiles = this.state.currentlyVisualizedFiles;
+        const processedFilesTableProps = {
+            'files' : processedFiles, currentlyVisualizedFiles,
             'experimentSetAccession' : context.accession || null,
             'experimentArray' : context.experiments_in_set,
             'replicateExpsArray' : context.replicate_exps,
@@ -513,10 +512,9 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         };
 
         if (currentlyVisualizedFiles && currentlyVisualizedFiles.length > 0){
-            processedFilesTableProps.currentlyVisualizedFiles = currentlyVisualizedFiles;
-            var propsToPass = { width, mounted, files : currentlyVisualizedFiles };
+            const hiGlassProps = { width, mounted, files : currentlyVisualizedFiles };
             return (
-                <HiGlassAdjustableWidthRow {...propsToPass} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
+                <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
                     <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
                 } />
             );
@@ -559,12 +557,18 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 }
 
+/**
+ * TODOS:
+ * Need to remove "this.mcoolFile" and create own version of 'findAllFilesToVisualize' which works re: own 'files' or props.collection.files.
+ *
+ * Currently, feeds [mcoolFile] to HiGlassAdjustableWidthRow.props.files.
+ */
 export class OtherProcessedFilesStackedTableSectionPart extends React.Component {
 
     /**
      * Most likely deprecated as `OtherProcessedFilesStackedTableSection.extendCollectionsWithExperimentFiles` performs the same task(s) as part of its execution.
      * Eventually can remove function and state.files, instead using props.collection.files directly.
-     * @deprecated
+     * @deprecated - TODO: Check/test removal of this function and finalize.
      * @param {{ 'collection' : { 'files': { 'accession' : string, '@id' : string }[] }, 'context' : { 'accession' : string, '@id' : string } }} props - Object with 'collection', 'context' (expSet) properties.
      */
     static filesWithFromExpAndExpSetProperty(props){

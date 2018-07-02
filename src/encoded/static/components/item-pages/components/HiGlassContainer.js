@@ -271,6 +271,50 @@ export const HiGlassConfigurator = {
         return primaryConf;
     },
 
+    generateTopAnnotationTrack : function(trackBaseServer, { chromosome, annotation }){
+        return {
+            "name": annotation.name,
+            //"created": "2017-07-14T15:27:46.989053Z",
+            "server": trackBaseServer + "/api/v1",
+            "tilesetUid": annotation.tilesetUid,
+            "type": "horizontal-gene-annotations",
+            "options": {
+                "labelColor": "black",
+                "labelPosition": "hidden",
+                "plusStrandColor": "blue",
+                "minusStrandColor": "red",
+                "trackBorderWidth": 0,
+                "trackBorderColor": "black",
+                "name": "Gene Annotations (hg38)"
+            },
+            //"width": 20,
+            "height": 55,
+            "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+            "position": "top",
+            "orientation": "1d-horizontal",
+            "uid" : "top-annotation-track"
+        };
+    },
+
+    generateTopChromosomeTrack : function(trackBaseServer, { chromosome, annotation }){
+        return {
+            "name": chromosome.name,
+            //"created": "2017-07-17T14:16:45.346835Z",
+            "server": trackBaseServer + "/api/v1",
+            "tilesetUid": chromosome.tilesetUid,
+            "type": "horizontal-chromosome-labels",
+            "local": true,
+            "minHeight": 30,
+            "thumbnail": null,
+            "options": {},
+            //"width": 20,
+            "height": 30,
+            "position": "top",
+            "orientation": "1d-horizontal",
+            "uid" : "top-chromosome-track"
+        };
+    },
+
     // The following sub-objects' 'generateViewConfig' functions take in a tilesetUid (str or list of objects) + and options object (super-set of 'props' passed to HiGlassContainer).
 
     mcool : {
@@ -301,52 +345,6 @@ export const HiGlassConfigurator = {
                     }
                 ],
                 "position": "center"
-            };
-        },
-
-        // TODO: Move up from mcool to root object if re-usable.
-
-        generateTopAnnotationTrack : function(trackBaseServer, { chromosome, annotation }){
-            return {
-                "name": annotation.name,
-                //"created": "2017-07-14T15:27:46.989053Z",
-                "server": trackBaseServer + "/api/v1",
-                "tilesetUid": annotation.tilesetUid,
-                "type": "horizontal-gene-annotations",
-                "options": {
-                    "labelColor": "black",
-                    "labelPosition": "hidden",
-                    "plusStrandColor": "blue",
-                    "minusStrandColor": "red",
-                    "trackBorderWidth": 0,
-                    "trackBorderColor": "black",
-                    "name": "Gene Annotations (hg38)"
-                },
-                //"width": 20,
-                "height": 55,
-                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                "position": "top",
-                "orientation": "1d-horizontal",
-                "uid" : "top-annotation-track"
-            };
-        },
-
-        generateTopChromosomeTrack : function(trackBaseServer, { chromosome, annotation }){
-            return {
-                "name": chromosome.name,
-                //"created": "2017-07-17T14:16:45.346835Z",
-                "server": trackBaseServer + "/api/v1",
-                "tilesetUid": chromosome.tilesetUid,
-                "type": "horizontal-chromosome-labels",
-                "local": true,
-                "minHeight": 30,
-                "thumbnail": null,
-                "options": {},
-                //"width": 20,
-                "height": 30,
-                "position": "top",
-                "orientation": "1d-horizontal",
-                "uid" : "top-chromosome-track"
             };
         },
 
@@ -420,8 +418,8 @@ export const HiGlassConfigurator = {
                 },
                 "tracks": {
                     "top" : [
-                        HiGlassConfigurator.mcool.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
-                        HiGlassConfigurator.mcool.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation)
+                        HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
+                        HiGlassConfigurator.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation)
                     ],
                     "left" : [
                         HiGlassConfigurator.mcool.generateLeftAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
@@ -481,28 +479,7 @@ export const HiGlassConfigurator = {
 
     bigwig : {
 
-        generateTopChromosomeTrack : function(trackBaseServer, { chromosome, annotation }){
-            return {
-                "name": chromosome.name,
-                "server": trackBaseServer + "/api/v1",
-                "tilesetUid": chromosome.tilesetUid,
-                "orientation": "1d-horizontal",
-                "local": true,
-                "minHeight": 30,
-                "thumbnail": null,
-                //"chromInfoPath": "//s3.amazonaws.com/pkerp/data/mm9/chromSizes.tsv",
-                "position": "top",
-                "height": 30,
-                "type": "horizontal-chromosome-labels",
-                "options": {
-                    "showMousePosition": false,
-                    "mousePositionColor": "#999999"
-                },
-                "uid": "top-chromosome-track"
-            };
-        },
-
-        generateContentTrack : function(bigWigFile, options, { chromosome, annotation }, idx, all){
+        generateTopContentTrack : function(bigWigFile, options, { chromosome, annotation }, idx, all){
             var trackHeight = Math.min(Math.max(Math.floor((options.height - 30) / all.length), 20), 80);
             return {
                 "uid": "bigwig-content-track-" + idx,
@@ -547,12 +524,14 @@ export const HiGlassConfigurator = {
             const tracks = []; // Will be used as single 'top' tracks list.
 
             if (!excludeAnnotationTracks) {
-                //tracks.push(HiGlassConfigurator.mcool.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation));
-                tracks.push(HiGlassConfigurator.mcool.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation));
+                //tracks.push(HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation));
+                tracks.push(HiGlassConfigurator.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation));
             }
 
             _.forEach(files, function(file, idx, all){
-                tracks.push( HiGlassConfigurator.bigwig.generateContentTrack(file, options, chromosomeAndAnnotation, idx, all) );
+                tracks.push(
+                    HiGlassConfigurator.bigwig.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
+                );
             });
 
             return {
