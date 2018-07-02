@@ -395,7 +395,6 @@ export const HiGlassConfigurator = {
             }
 
             // Track definitions, default to human.
-            
             var chromosomeAndAnnotation = HiGlassConfigurator.chromosomeAndAnnotationFromGenomeAssembly(file.genome_assembly);
 
             var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
@@ -436,7 +435,7 @@ export const HiGlassConfigurator = {
         /**
          * This function is used to generate a full viewConfig for the HiGlassComponent.
          * Only the "center" view/track is dynamically generated, with other tracks currently being hard-coded to higlass.io data (e.g. hg38 tracks).
-         * 
+         *
          * @param {string|{ tilesetUid: string, extraViewProps: Object.<any> }[]} tilesetUid - A single string (if showing one, full view) or list of objects containing a 'tilesetUid' and 'extraViewProps' - properties which override default 'view' object for each tileset. Use primarily for configuring layouts.
          * @param {Object} options - Additional options for the function.
          * @param {number} [options.height=600] - Default height.
@@ -827,33 +826,6 @@ export class HiGlassTabView extends React.Component {
         'disabled' : false,
         'height' : 600
     }
-
-//    componentDidMount(){
-        /*
-        $script = require('scriptjs');
-        $script(["https://unpkg.com/react@16/umd/react.production.min.js"], 'react', ()=>{
-            $script(["https://unpkg.com/react-dom@16/umd/react-dom.production.min.js", "https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"], 'pixi', ()=>{
-                $script(["https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"], 'higlass', ()=>{
-                    setTimeout(()=>{
-                        HiGlassComponent = window.hglib.HiGlassComponent; //require('higlass').HiGlassComponent;
-                        this.setState({ 'mounted' : true });
-                    }, 500);
-                });
-            });
-        });
-        */
-
-        /*
-        loadJS("https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js").then(()=>{
-            loadJS("http://54.86.58.34/assets/scripts-third-party/hglib.js").then(()=>{
-                setTimeout(()=>{
-                    HiGlassComponent = window.hglib.HiGlassComponent; //require('higlass').HiGlassComponent;
-                    this.setState({ 'mounted' : true });
-                }, 500);
-            });
-        });*/
-
-//    }
 
     render(){
         var { disabled, isValidating, viewConfig, context, height } = this.props;
