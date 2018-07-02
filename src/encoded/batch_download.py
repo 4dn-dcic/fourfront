@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 
 def includeme(config):
     config.add_route('batch_download', '/batch_download/{search_params}')
-    config.add_route('metadata', '/metadata/{search_params}/{tsv}')
+    config.add_route('metadata', '/metadata/')
     config.add_route('peak_metadata', '/peak_metadata/{search_params}/{tsv}')
     config.add_route('report_download', '/report.tsv')
     config.scan(__name__)
@@ -219,7 +219,7 @@ def metadata_tsv(context, request):
     Alternatively, can accept a GET request wherein all files from ExpSets matching search query params are included.
     '''
 
-    search_params = parse_qs(request.matchdict['search_params'])
+    search_params = dict(request.GET) # Must use request.GET to get URI query params only (exclude POST params, etc.)
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
