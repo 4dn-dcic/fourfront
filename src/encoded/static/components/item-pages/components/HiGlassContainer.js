@@ -610,7 +610,7 @@ export class HiGlassContainer extends React.PureComponent {
                 'bw'    : HiGlassConfigurator.bigwig.generateViewConfig,
                 'bg'    : HiGlassConfigurator.bigwig.generateViewConfig
             };
-    
+
             if (allFileFormats.length === 1){
                 fxnToUse = fxnByFormatDict[fileFormat];
             } else {
@@ -742,7 +742,7 @@ export class HiGlassContainer extends React.PureComponent {
 
     /**
      * Binds functions to HiGlass events.
-     * 
+     *
      * - this.updateCurrentDomainsInStorage is bound to 'location' change event.
      * - TODO: onDrag/Drop stuff.
      */
