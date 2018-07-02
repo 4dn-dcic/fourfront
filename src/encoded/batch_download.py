@@ -248,14 +248,18 @@ def metadata_tsv(context, request):
     header = []
 
     def add_field_to_search_params(itemType, field):
-        if itemType == EXP_SET:
-            search_params['field'].append(param_field)
-        if itemType == EXP:
-            search_params['field'].append('experiments_in_set.' + param_field)
-        if itemType == FILE:
-            search_params['field'].append('experiments_in_set.files.' + param_field)
-            search_params['field'].append('experiments_in_set.processed_files.' + param_field)
-            search_params['field'].append('processed_files.' + param_field)
+        if search_params['type'] in ('ExperimentSet', 'ExperimentSetReplicate'):
+            if itemType == EXP_SET:
+                search_params['field'].append(param_field)
+            if itemType == EXP:
+                search_params['field'].append('experiments_in_set.' + param_field)
+            if itemType == FILE:
+                search_params['field'].append('experiments_in_set.files.' + param_field)
+                search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+                search_params['field'].append('processed_files.' + param_field)
+        elif search_params['type'] in ('File', 'FileProcessed', 'FileFastq', 'FileFasta', 'FileProcessed', 'FileReference', 'FileCalibration', 'FileMicroscopy'):
+            if itemType == FILE:
+                search_params['field'].append(param_field)
 
     for prop in TSV_MAPPING:
         header.append(prop)
@@ -324,10 +328,11 @@ def metadata_tsv(context, request):
             return None
 
         experiment_accession = column_vals_dict.get('Experiment Accession')
-        if experiment_accession and ',' not in experiment_accession:
-            return get_val(experiment_accession)
-        else:
-            return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
+        if experiment_accession:
+            if ',' not in experiment_accession:
+                return get_val(experiment_accession)
+            else:
+                return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
         return None
 
     def should_file_row_object_be_included(column_vals_dict):
@@ -476,16 +481,11 @@ def metadata_tsv(context, request):
 
         return file_row_dict
 
-
-    def format_graph_of_experiment_sets(graph):
+    def format_filter_resulting_file_row_dicts(file_row_dict_iterable):
         return map(
             post_process_file_row_dict,
-            enumerate(filter(
-                should_file_row_object_be_included,
-                chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
-            ))
+            enumerate(filter(should_file_row_object_be_included, file_row_dict_iterable))
         )
-
 
     def generate_summary_lines():
         ret_rows = [
@@ -547,13 +547,31 @@ def metadata_tsv(context, request):
         endpoints_initialized['metadata'] = True
         request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
 
+    # Prep - use dif functions if different type requested.
+    if search_params['type'] in ('ExperimentSet', 'ExperimentSetReplicate'):
+        iterable_pipeline = format_filter_resulting_file_row_dicts(
+            chain.from_iterable(
+                map(
+                    format_experiment_set,
+                    get_iterable_search_results(request, search_path, search_params)
+                )
+            )
+        )
+    elif search_params['type'] in ('File', 'FileProcessed', 'FileFastq', 'FileFasta', 'FileProcessed', 'FileReference', 'FileCalibration', 'FileMicroscopy'):
+        iterable_pipeline = format_filter_resulting_file_row_dicts(
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, {}, {}, {}, {}),
+                    get_iterable_search_results(request, search_path, search_params)
+                )
+            )
+        )
+    else:
+        raise Exception("Metadata can only be retrieved currently for Experiment Sets or Files.")
+
     return Response(
         content_type='text/tsv',
-        app_iter = stream_tsv_output(
-            format_graph_of_experiment_sets(
-                get_iterable_search_results(request, search_path, search_params)
-            )
-        ),
+        app_iter = stream_tsv_output(iterable_pipeline),
         content_disposition='attachment;filename="%s"' % filename_to_suggest
     )
 
