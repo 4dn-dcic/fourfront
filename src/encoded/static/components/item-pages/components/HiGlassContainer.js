@@ -487,7 +487,7 @@ export const HiGlassConfigurator = {
                     "labelPosition": "topLeft",
                     "labelColor": "black",
                     "labelTextOpacity": 0.3,
-                    "lineStrokeWidth": 2,
+                    "lineStrokeWidth": 1.25,
                     "trackBorderWidth": 0,
                     "trackBorderColor": "black",
                     "showMousePosition": false,
@@ -501,9 +501,13 @@ export const HiGlassConfigurator = {
                 var isFromExperiment = bigWigFile.from_experiment.accession !== 'NONE';
                 if (!isFromExperiment){
                     styleOptions.lineStrokeWidth = 2;
+                    //styleOptions.showTooltip = true;
+                    styleOptions.labelTextOpacity = 1;
+                    styleOptions.labelColor = '#888';
                 } else {
-                    styleOptions.lineStrokeWidth = 1.25;
                     styleOptions.lineStrokeColor = '#333';
+                    styleOptions.labelColor = '#888';
+                    styleOptions.labelTextOpacity = 0.5;
                 }
             }
 
