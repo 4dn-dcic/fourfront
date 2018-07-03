@@ -65,8 +65,7 @@
             "type": "string",
             "default": "ancillary file",
             "exclude_from": ["submit4dn", "FFedit-create"],
-            "enum": [
-                "ancillary file"]
+            "enum": ["ancillary file"]
         },
         "genome_assembly": {
             "title": "Genome Assembly",

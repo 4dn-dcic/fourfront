@@ -66,6 +66,9 @@ before_install:
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
+# need to manually change the version of six used by Travis for some reason
+- pip uninstall -y six
+- pip install six==1.11.0
 - pip install coveralls
 - pip install codacy-coverage
 - pip install -U zc.buildout setuptools
