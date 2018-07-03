@@ -35,15 +35,15 @@ def content(testapp):
         testapp.post_json(url, item, status=201)
 
 
-def test_embedded_uuids_object(content, dummy_request, threadlocals):
-    # the starting item's uuid is no longer in _embedded_uuids
+def test_referenced_uuids_object(content, dummy_request, threadlocals):
+    # the starting item's uuid is no longer in _referenced_uuids
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@object')
-    assert dummy_request._embedded_uuids == set()
+    assert dummy_request._referenced_uuids == set()
 
 
-def test_embedded_uuids_embedded(content, dummy_request, threadlocals):
+def test_referenced_uuids_embedded(content, dummy_request, threadlocals):
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@embedded')
-    assert dummy_request._embedded_uuids == {'775795d3-4410-4114-836b-8eeecf1d0c2f'}
+    assert dummy_request._referenced_uuids == {'775795d3-4410-4114-836b-8eeecf1d0c2f'}
 
 
 def test_updated_source(content, testapp):
@@ -64,18 +64,18 @@ def test_updated_target(content, testapp):
     assert set(res.headers['X-Updated'].split(',')) == {targets[0]['uuid']}
 
 
-def test_embedded_uuids_experiment(experiment, lab, award, human_biosample, human_biosource, mboI, dummy_request, threadlocals):
+def test_referenced_uuids_experiment(experiment, lab, award, human_biosample, human_biosource, mboI, dummy_request, threadlocals):
     to_embed = ['lab.uuid', 'award.uuid', 'biosample.biosource.uuid', 'digestion_enzyme.uuid']
     dummy_request.embed(experiment['@id'], '@@embedded', fields_to_embed=to_embed)
-    embedded_uuids = dummy_request._embedded_uuids
-    # starting item is not in embedded_uuids
-    assert experiment['uuid'] not in embedded_uuids
-    assert lab['uuid'] in embedded_uuids
-    assert award['uuid'] in embedded_uuids
+    referenced_uuids = dummy_request._referenced_uuids
+    # starting item is not in referenced_uuids
+    assert experiment['uuid'] not in referenced_uuids
+    assert lab['uuid'] in referenced_uuids
+    assert award['uuid'] in referenced_uuids
     # biosample is added because of biosample.biosource
-    assert human_biosample['uuid'] in embedded_uuids
-    assert human_biosource['uuid'] in embedded_uuids
-    assert mboI['uuid'] in embedded_uuids
+    assert human_biosample['uuid'] in referenced_uuids
+    assert human_biosource['uuid'] in referenced_uuids
+    assert mboI['uuid'] in referenced_uuids
 
 
 @pytest.mark.parametrize('item_type', ORDER)

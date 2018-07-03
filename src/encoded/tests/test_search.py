@@ -397,12 +397,12 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
             for item_res in res:
                 item_id = res['uuid']
                 index_view_res = indexer_testapp.get(item_id + '@@index-data', status=200)
-                # make sure that the embedded_uuids match the embedded data
-                assert 'embedded_uuids' in index_view_res
+                # make sure that the referenced_uuids match the embedded data
+                assert 'referenced_uuids' in index_view_res
                 assert 'embedded' in index_view_res
                 found_uuids = set(find_uuids(index_view_res['embedded']))
                 found_uuids = found_uuids - set(item_id)  # remove self from found ids
-                assert found_uuids == index_view_res['embedded_uuids']
+                assert found_uuids == index_view_res['referenced_uuids']
                 # previously test_html_pages
                 try:
                     html_res = htmltestapp.get(item_id)
