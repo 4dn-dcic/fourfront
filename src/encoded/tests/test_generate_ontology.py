@@ -41,15 +41,11 @@ def slim_terms():
     ]
 
 
-#@pytest.fixture
-#def connection(mocker):
-#    return mocker.patch.object(go, 'FDN_Connection')
-
-
 def test_connect2server(mocker, connection):
     # parameters we pass in don't really matter
+    key = "{'server': 'https://data.4dnucleome.org/', 'key': 'testkey', 'secret': 'testsecret'}"
     with mocker.patch('encoded.commands.generate_ontology.get_authentication_with_server', return_value=connection):
-        retval = go.connect2server(None, connection)
+        retval = go.connect2server(None, key)
         assert retval == connection
 
 
