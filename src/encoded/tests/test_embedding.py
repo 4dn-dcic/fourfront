@@ -46,24 +46,6 @@ def test_referenced_uuids_embedded(content, dummy_request, threadlocals):
     assert dummy_request._referenced_uuids == {'775795d3-4410-4114-836b-8eeecf1d0c2f'}
 
 
-def test_updated_source(content, testapp):
-    url = '/testing-link-sources/' + sources[0]['uuid']
-    res = testapp.patch_json(url, {})
-    assert set(res.headers['X-Updated'].split(',')) == {sources[0]['uuid']}
-
-
-def test_updated_source_changed(content, testapp):
-    url = '/testing-link-sources/' + sources[0]['uuid']
-    res = testapp.patch_json(url, {'target': targets[1]['uuid']})
-    assert set(res.headers['X-Updated'].split(',')) == {sources[0]['uuid'], targets[1]['uuid']}
-
-
-def test_updated_target(content, testapp):
-    url = '/testing-link-targets/' + targets[0]['uuid']
-    res = testapp.patch_json(url, {})
-    assert set(res.headers['X-Updated'].split(',')) == {targets[0]['uuid']}
-
-
 def test_referenced_uuids_experiment(experiment, lab, award, human_biosample, human_biosource, mboI, dummy_request, threadlocals):
     to_embed = ['lab.uuid', 'award.uuid', 'biosample.biosource.uuid', 'digestion_enzyme.uuid']
     dummy_request.embed(experiment['@id'], '@@embedded', fields_to_embed=to_embed)
