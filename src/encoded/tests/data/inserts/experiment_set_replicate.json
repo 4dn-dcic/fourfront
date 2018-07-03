@@ -4,6 +4,8 @@
         "submitted_by": "wrangler@wrangler.com",
         "description": "Sample replicate experiment set which is an experiment set of experiments testing user interface and other aspects of the 4DN Portal, including but not limited to a long text description (this) in order to test fit, resizing, and related with a long block of text that would likely vary from very short -- e.g. a few words -- to multiple paragraphs. Figured this description would be more descriptive than Lorem Ipsum text yet still has the potential to be quite long as it keeps rambling on. Normally this would be more of an interesting read.",
         "experimentset_type": "replicate",
+        "dataset_label": "HiC set",
+        "condition": "Condition 1",
         "notes": "This should be a consistent Hi-C replicate set",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67APU1", "bio_rep_no": 1, "tec_rep_no": 1},
@@ -22,6 +24,8 @@
         "submitted_by": "wrangler@wrangler.com",
         "description": "This is a Hi-C replicate set that should fail some audits",
         "experimentset_type": "replicate",
+        "dataset_label": "HiC set",
+        "condition": "Condition 2",
         "public_release" : "2017-11-04",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67APY1", "bio_rep_no": 1, "tec_rep_no":1},
@@ -38,6 +42,8 @@
         "submitted_by": "wrangler@wrangler.com",
         "public_release" : "2017-12-04",
         "description": "Test replicate experiment set for Repliseq experiments",
+        "dataset_label": "Repliseq Dataset",
+        "condition": "Experimental",
         "experimentset_type": "replicate",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67AXE1", "bio_rep_no": 1, "tec_rep_no":1},
@@ -55,6 +61,8 @@
         "public_release" : "2017-12-27",
         "description": "Test replicate experiment set for Repliseq with only a single experiment no replicates",
         "experimentset_type": "replicate",
+        "dataset_label": "Repliseq Dataset",
+        "condition": "Control",
         "replicate_exps": [
            {"replicate_exp": "4DNEX42CAX16", "bio_rep_no": 1, "tec_rep_no":1}
         ],
