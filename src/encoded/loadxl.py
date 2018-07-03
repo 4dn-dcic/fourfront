@@ -818,13 +818,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
         except ValueError:
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2, exclude=exclude_list)
-        processed_data = process(combine(source, pipeline))
-        if processed_data:
-            for result in processed_data:
-                if result.get('_response') and result.get('_response').status_code not in [200, 201]:
-                    errors.append({'uuid': result['uuid'],
-                                   'response': result['_response'].json})
-                    print("excluding uuid %s do to error" % result['uuid'])
+        process(combine(source, pipeline))
     return errors
 
 
@@ -928,7 +922,7 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts': # Load up master_inserts
+    if indir != 'master-inserts':  # Always load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
 
