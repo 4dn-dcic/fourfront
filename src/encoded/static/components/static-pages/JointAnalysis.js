@@ -349,13 +349,7 @@ class HiGlassSection extends React.Component {
                 </div>
                 <div className="row mb-2">
                     <div className="col-xs-12" style={{ 'height' : 600 }}>
-                        <HiGlassContainer
-                            height={600}
-                            tilesetUid={[
-                                { "tilesetUid" : tileset_h1, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
-                                { "tilesetUid" : tileset_hff, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
-                            ]}
-                        />
+                        <HiGlassContainer height={600} files={[h1_mcool, hff_mcool]} extraViewProps={[{ "layout" : {w: 6, h: 12, x: 0, y: 0} }, { "layout" : {w: 6, h: 12, x: 6, y: 0} } ]} />
                     </div>
                 </div>
             </div>

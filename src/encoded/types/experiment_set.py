@@ -180,6 +180,8 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.file_type_detailed",
         "experiments_in_set.processed_files.status",
         "experiments_in_set.processed_files.md5sum",
+        "experiments_in_set.processed_files.higlass_uid",
+        "experiments_in_set.processed_files.genome_assembly",
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
         "experiments_in_set.processed_files.extra_files.file_format",
@@ -193,6 +195,7 @@ class ExperimentSet(Item):
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
+        "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
@@ -202,6 +205,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.type",
         "experiments_in_set.other_processed_files.files.accession",
         "experiments_in_set.other_processed_files.files.file_type_detailed",
+        "experiments_in_set.other_processed_files.files.file_format",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
         "experiments_in_set.other_processed_files.files.genome_assembly"
