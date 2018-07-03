@@ -23,10 +23,10 @@ import io
 import json
 from datetime import datetime
 
-import logging
+import structlog
 
 
-log = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 
 
 def includeme(config):

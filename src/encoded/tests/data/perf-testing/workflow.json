@@ -12,35 +12,35 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/", 
         "arguments": [
             {
-                "argument_type": "Input file", 
+                "workflow_argument_name": "input_bams", 
                 "argument_format": "bam", 
-                "workflow_argument_name": "input_bams"
+                "argument_type": "Input file"
             }, 
             {
-                "argument_type": "Input file", 
+                "workflow_argument_name": "chromsize", 
                 "argument_format": "chromsizes", 
-                "workflow_argument_name": "chromsize"
+                "argument_type": "Input file"
             }, 
             {
-                "argument_type": "parameter", 
-                "workflow_argument_name": "nthreads_parse_sort"
+                "workflow_argument_name": "nthreads_parse_sort", 
+                "argument_type": "parameter"
             }, 
             {
-                "argument_type": "parameter", 
-                "workflow_argument_name": "nthreads_merge"
+                "workflow_argument_name": "nthreads_merge", 
+                "argument_type": "parameter"
             }, 
             {
-                "argument_type": "Output processed file", 
+                "workflow_argument_name": "annotated_bam", 
                 "argument_format": "bam", 
-                "workflow_argument_name": "annotated_bam"
+                "argument_type": "Output processed file"
             }, 
             {
                 "secondary_file_formats": [
                     "pairs_px2"
                 ], 
-                "argument_type": "Output processed file", 
+                "workflow_argument_name": "filtered_pairs", 
                 "argument_format": "pairs", 
-                "workflow_argument_name": "filtered_pairs"
+                "argument_type": "Output processed file"
             }
         ], 
         "public_release": "2018-02-14", 
@@ -48,7 +48,6 @@
         "description": "This is a subworkflow of the Hi-C data processing pipeline. It takes a bam file as input and performs parsing, sorting, filtering and deduping. It produces two output files, a lossless, filter-annotated bam file and a filtered pairs (contact list) file.", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/", 
-        "cwl_main_filename": "hi-c-processing-bam.cwl", 
         "data_types": [
             "Hi-C"
         ], 
@@ -62,10 +61,7 @@
             "pairsam-filter.cwl"
         ], 
         "workflow_type": "Hi-C data analysis", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-12T18:42:23.145355+00:00"
-        }, 
+        "cwl_main_filename": "hi-c-processing-bam.cwl", 
         "steps": [
             {
                 "inputs": [
@@ -76,8 +72,8 @@
                             }
                         ], 
                         "meta": {
-                            "cardinality": "array", 
                             "global": true, 
+                            "cardinality": "array", 
                             "type": "data file", 
                             "file_format": "bam"
                         }, 
@@ -90,8 +86,8 @@
                             }
                         ], 
                         "meta": {
-                            "cardinality": "single", 
                             "global": true, 
+                            "cardinality": "single", 
                             "type": "reference file", 
                             "file_format": "chromsize"
                         }, 
@@ -125,18 +121,18 @@
                 "outputs": [
                     {
                         "meta": {
-                            "cardinality": "single", 
                             "global": false, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairsam"
                         }, 
-                        "name": "sorted_pairsam", 
                         "target": [
                             {
                                 "step": "pairsam-merge", 
                                 "name": "input_pairsams"
                             }
-                        ]
+                        ], 
+                        "name": "sorted_pairsam"
                     }
                 ]
             }, 
@@ -150,8 +146,8 @@
                             }
                         ], 
                         "meta": {
-                            "cardinality": "single", 
                             "global": false, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairsam"
                         }, 
@@ -184,18 +180,18 @@
                 "outputs": [
                     {
                         "meta": {
-                            "cardinality": "single", 
                             "global": false, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairsam"
                         }, 
-                        "name": "merged_pairsam", 
                         "target": [
                             {
                                 "step": "pairsam-markasdup", 
                                 "name": "input_pairsam"
                             }
-                        ]
+                        ], 
+                        "name": "merged_pairsam"
                     }
                 ]
             }, 
@@ -209,8 +205,8 @@
                             }
                         ], 
                         "meta": {
-                            "cardinality": "single", 
                             "global": false, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairsam"
                         }, 
@@ -230,18 +226,18 @@
                 "outputs": [
                     {
                         "meta": {
-                            "cardinality": "single", 
                             "global": false, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairsam"
                         }, 
-                        "name": "dupmarked_pairsam", 
                         "target": [
                             {
                                 "step": "pairsam-filter", 
                                 "name": "input_pairsam"
                             }
-                        ]
+                        ], 
+                        "name": "dupmarked_pairsam"
                     }
                 ]
             }, 
@@ -255,8 +251,8 @@
                             }
                         ], 
                         "meta": {
-                            "cardinality": "single", 
                             "global": false, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairsam"
                         }, 
@@ -269,8 +265,8 @@
                             }
                         ], 
                         "meta": {
-                            "cardinality": "single", 
                             "global": true, 
+                            "cardinality": "single", 
                             "type": "reference file", 
                             "file_format": "chromsize"
                         }, 
@@ -291,31 +287,31 @@
                 "outputs": [
                     {
                         "meta": {
-                            "cardinality": "single", 
                             "global": true, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "bam"
                         }, 
-                        "name": "lossless_bamfile", 
                         "target": [
                             {
                                 "name": "annotated_bam"
                             }
-                        ]
+                        ], 
+                        "name": "lossless_bamfile"
                     }, 
                     {
                         "meta": {
-                            "cardinality": "single", 
                             "global": true, 
+                            "cardinality": "single", 
                             "type": "data file", 
                             "file_format": "pairs"
                         }, 
-                        "name": "filtered_pairs", 
                         "target": [
                             {
                                 "name": "filtered_pairs"
                             }
-                        ]
+                        ], 
+                        "name": "filtered_pairs"
                     }
                 ]
             }
@@ -373,7 +369,6 @@
         "description": "Creating a lossless alignment bam file from a pair of fastq files", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/", 
-        "cwl_main_filename": "bwa-mem.cwl", 
         "data_types": [
             "Hi-C"
         ], 
@@ -383,10 +378,7 @@
         "name": "bwa-mem", 
         "cwl_child_filenames": [], 
         "workflow_type": "Hi-C data analysis", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-12T17:26:21.088137+00:00"
-        }, 
+        "cwl_main_filename": "bwa-mem.cwl", 
         "steps": [
             {
                 "outputs": [
@@ -397,12 +389,12 @@
                             "type": "data file", 
                             "file_format": "bam"
                         }, 
-                        "name": "out_bam", 
                         "target": [
                             {
                                 "name": "out_bam"
                             }
-                        ]
+                        ], 
+                        "name": "out_bam"
                     }
                 ], 
                 "meta": {
@@ -518,15 +510,14 @@
         "app_version": "0.2.0", 
         "status": "released", 
         "description": "FastQC quality control step for fastq files", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/", 
-        "cwl_main_filename": "fastqc-0-11-4-1.cwl", 
         "data_types": [
             "Hi-C", 
             "Capture Hi-C", 
             "Repli-seq"
         ], 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "workflow_diagram": "", 
         "docker_registry_url": "https://hub.docker.com/", 
         "name": "fastqc-0-11-4-1", 
@@ -534,12 +525,35 @@
             "fastqc-0-11-4.cwl"
         ], 
         "workflow_type": "Data QC", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-12T17:59:35.740063+00:00"
-        }, 
+        "cwl_main_filename": "fastqc-0-11-4-1.cwl", 
         "steps": [
             {
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "report", 
+                            "file_format": "zip"
+                        }, 
+                        "target": [
+                            {
+                                "name": "report_zip"
+                            }
+                        ], 
+                        "name": "report_zip"
+                    }
+                ], 
+                "meta": {
+                    "software_used": [
+                        "02d636b9-d82d-4da9-950c-2ca994a13131"
+                    ], 
+                    "description": "FastQC QC for fastq files", 
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                }, 
+                "name": "FastQC", 
                 "inputs": [
                     {
                         "source": [
@@ -594,32 +608,6 @@
                         }, 
                         "name": "adapters_file"
                     }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "02d636b9-d82d-4da9-950c-2ca994a13131"
-                    ], 
-                    "description": "FastQC QC for fastq files", 
-                    "analysis_step_types": [
-                        "QC calculation"
-                    ]
-                }, 
-                "name": "FastQC", 
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single", 
-                            "global": true, 
-                            "type": "report", 
-                            "file_format": "zip"
-                        }, 
-                        "name": "report_zip", 
-                        "target": [
-                            {
-                                "name": "report_zip"
-                            }
-                        ]
-                    }
                 ]
             }
         ], 
@@ -656,24 +644,42 @@
         "app_version": "0.0.4", 
         "status": "released", 
         "description": "md5 on uncompressed file", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "cwl_main_filename": "md5.cwl", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "data_types": [
             "Hi-C", 
             "Capture Hi-C", 
             "Repli-seq"
         ], 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "workflow_diagram": "", 
         "name": "md5", 
         "cwl_child_filenames": [], 
         "workflow_type": "Data QC", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-12T16:39:15.937177+00:00"
-        }, 
+        "cwl_main_filename": "md5.cwl", 
         "steps": [
             {
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "QC", 
+                            "description": "The MD5 checksum generated."
+                        }, 
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ], 
+                        "name": "report"
+                    }
+                ], 
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                }, 
+                "name": "md5", 
                 "inputs": [
                     {
                         "source": [
@@ -690,33 +696,169 @@
                         }, 
                         "name": "input_file"
                     }
-                ], 
-                "meta": {
-                    "analysis_step_types": [
-                        "QC calculation"
-                    ]
-                }, 
-                "name": "md5", 
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single", 
-                            "global": true, 
-                            "type": "QC", 
-                            "description": "The MD5 checksum generated."
-                        }, 
-                        "name": "report", 
-                        "target": [
-                            {
-                                "name": "report"
-                            }
-                        ]
-                    }
                 ]
             }
         ], 
         "date_created": "2017-05-09T07:21:37.200199+00:00", 
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/"
+    }, 
+    {
+        "app_name": "pairsqc-single", 
+        "accession": "4DNWFHB26CID", 
+        "aliases": [], 
+        "category": "QC", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3", 
+        "title": "PairsQC", 
+        "schema_version": "4", 
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/", 
+        "arguments": [
+            {
+                "secondary_file_formats": [
+                    "pairs_px2"
+                ], 
+                "argument_type": "Input file", 
+                "argument_format": "pairs", 
+                "workflow_argument_name": "input_pairs"
+            }, 
+            {
+                "argument_type": "Input file", 
+                "argument_format": "chromsizes", 
+                "workflow_argument_name": "chromsizes"
+            }, 
+            {
+                "argument_type": "parameter", 
+                "workflow_argument_name": "enzyme"
+            }, 
+            {
+                "argument_type": "parameter", 
+                "workflow_argument_name": "sample_name"
+            }, 
+            {
+                "argument_type": "parameter", 
+                "workflow_argument_name": "max_distance"
+            }, 
+            {
+                "argument_type": "Output QC file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "public_release": "2018-06-12", 
+        "app_version": "0.2.6", 
+        "status": "released", 
+        "description": "PairsQC quality control step for pairs files", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/", 
+        "data_types": [
+            "Hi-C", 
+            "Capture Hi-C"
+        ], 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow_diagram": "", 
+        "name": "pairsqc-single", 
+        "cwl_child_filenames": [], 
+        "workflow_type": "Data QC", 
+        "cwl_main_filename": "pairsqc-single.cwl", 
+        "steps": [
+            {
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "report"
+                        }, 
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ], 
+                        "name": "report"
+                    }
+                ], 
+                "meta": {
+                    "software_used": [
+                        "15731f58-868f-44ab-b4ed-77b82ecd032b"
+                    ], 
+                    "description": "PairsQC QC for pairs files", 
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                }, 
+                "name": "PairsQC", 
+                "inputs": [
+                    {
+                        "source": [
+                            {
+                                "name": "input_pairs"
+                            }
+                        ], 
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "data file", 
+                            "file_format": "pairs"
+                        }, 
+                        "name": "input_pairs"
+                    }, 
+                    {
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ], 
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "reference file", 
+                            "file_format": "chromsizes"
+                        }, 
+                        "name": "chromsizes"
+                    }, 
+                    {
+                        "source": [
+                            {
+                                "name": "enzyme"
+                            }
+                        ], 
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "parameter"
+                        }, 
+                        "name": "enzyme"
+                    }, 
+                    {
+                        "source": [
+                            {
+                                "name": "sample_name"
+                            }
+                        ], 
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "parameter"
+                        }, 
+                        "name": "sample_name"
+                    }, 
+                    {
+                        "source": [
+                            {
+                                "name": "max_distance"
+                            }
+                        ], 
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "parameter"
+                        }, 
+                        "name": "max_distance"
+                    }
+                ]
+            }
+        ], 
+        "date_created": "2018-06-12T19:48:39.614883+00:00", 
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/"
     }, 
     {
         "app_name": "hi-c-processing-pairs", 
@@ -817,13 +959,12 @@
         "app_version": "0.2.5", 
         "status": "released", 
         "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/", 
-        "cwl_main_filename": "hi-c-processing-pairs.cwl", 
         "data_types": [
             "Hi-C"
         ], 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "docker_registry_url": "https://hub.docker.com/", 
         "name": "hi-c-processing-pairs", 
         "cwl_child_filenames": [
@@ -836,12 +977,43 @@
             "extract-mcool-normvector-for-juicebox.cwl"
         ], 
         "workflow_type": "Hi-C data analysis", 
-        "last_modified": {
-            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-            "date_modified": "2018-06-13T15:30:06.709672+00:00"
-        }, 
+        "cwl_main_filename": "hi-c-processing-pairs.cwl", 
         "steps": [
             {
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": true, 
+                            "type": "data file", 
+                            "file_format": "pairs"
+                        }, 
+                        "target": [
+                            {
+                                "name": "merged_pairs"
+                            }, 
+                            {
+                                "step": "addfragtopairs", 
+                                "name": "input_pairs"
+                            }, 
+                            {
+                                "step": "cooler", 
+                                "name": "pairs"
+                            }
+                        ], 
+                        "name": "merged_pairs"
+                    }
+                ], 
+                "meta": {
+                    "software_used": [
+                        "9baf9f73-2d59-4eca-a326-340007b2a8b8"
+                    ], 
+                    "description": "Merging pair files", 
+                    "analysis_step_types": [
+                        "merging"
+                    ]
+                }, 
+                "name": "merge-pairs", 
                 "inputs": [
                     {
                         "source": [
@@ -857,43 +1029,36 @@
                         }, 
                         "name": "input_pairs"
                     }
+                ]
+            }, 
+            {
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": false, 
+                            "type": "data file", 
+                            "file_format": "pairs"
+                        }, 
+                        "target": [
+                            {
+                                "step": "pairs2hic", 
+                                "name": "input_pairs"
+                            }
+                        ], 
+                        "name": "pairs_with_frags"
+                    }
                 ], 
                 "meta": {
                     "software_used": [
                         "9baf9f73-2d59-4eca-a326-340007b2a8b8"
                     ], 
-                    "description": "Merging pair files", 
+                    "description": "Adding restriction enzyme site information to the pairs file", 
                     "analysis_step_types": [
-                        "merging"
+                        "annotation"
                     ]
                 }, 
-                "name": "merge-pairs", 
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single", 
-                            "global": true, 
-                            "type": "data file", 
-                            "file_format": "pairs"
-                        }, 
-                        "name": "merged_pairs", 
-                        "target": [
-                            {
-                                "name": "merged_pairs"
-                            }, 
-                            {
-                                "step": "addfragtopairs", 
-                                "name": "input_pairs"
-                            }, 
-                            {
-                                "step": "cooler", 
-                                "name": "pairs"
-                            }
-                        ]
-                    }
-                ]
-            }, 
-            {
+                "name": "addfragtopairs", 
                 "inputs": [
                     {
                         "source": [
@@ -937,36 +1102,36 @@
                         }, 
                         "name": "donothing"
                     }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "9baf9f73-2d59-4eca-a326-340007b2a8b8"
-                    ], 
-                    "description": "Adding restriction enzyme site information to the pairs file", 
-                    "analysis_step_types": [
-                        "annotation"
-                    ]
-                }, 
-                "name": "addfragtopairs", 
+                ]
+            }, 
+            {
                 "outputs": [
                     {
                         "meta": {
                             "cardinality": "single", 
                             "global": false, 
                             "type": "data file", 
-                            "file_format": "pairs"
+                            "file_format": "cool"
                         }, 
-                        "name": "pairs_with_frags", 
                         "target": [
                             {
-                                "step": "pairs2hic", 
-                                "name": "input_pairs"
+                                "step": "cool2mcool", 
+                                "name": "input_cool"
                             }
-                        ]
+                        ], 
+                        "name": "cool"
                     }
-                ]
-            }, 
-            {
+                ], 
+                "meta": {
+                    "software_used": [
+                        "b43e5d6d-f1a6-4713-9b48-8f5c060dad6c"
+                    ], 
+                    "description": "Merged Pairs file is processed using Cooler", 
+                    "analysis_step_types": [
+                        "aggregation"
+                    ]
+                }, 
+                "name": "cooler", 
                 "inputs": [
                     {
                         "source": [
@@ -1036,36 +1201,37 @@
                         }, 
                         "name": "max_split"
                     }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "b43e5d6d-f1a6-4713-9b48-8f5c060dad6c"
-                    ], 
-                    "description": "Merged Pairs file is processed using Cooler", 
-                    "analysis_step_types": [
-                        "aggregation"
-                    ]
-                }, 
-                "name": "cooler", 
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single", 
-                            "global": false, 
-                            "type": "data file", 
-                            "file_format": "cool"
-                        }, 
-                        "name": "cool", 
-                        "target": [
-                            {
-                                "step": "cool2mcool", 
-                                "name": "input_cool"
-                            }
-                        ]
-                    }
                 ]
             }, 
             {
+                "outputs": [
+                    {
+                        "meta": {
+                            "global": true
+                        }, 
+                        "target": [
+                            {
+                                "name": "hic"
+                            }, 
+                            {
+                                "step": "add-hic-normvector-to-mcool", 
+                                "name": "input_hic"
+                            }
+                        ], 
+                        "name": "hic"
+                    }
+                ], 
+                "meta": {
+                    "software_used": [
+                        "b0c823f7-ca1e-44fb-b0f6-3eefb19eae46"
+                    ], 
+                    "description": "Merged Pairs file is processed using Juicebox", 
+                    "analysis_step_types": [
+                        "aggregation", 
+                        "normalization"
+                    ]
+                }, 
+                "name": "pairs2hic", 
                 "inputs": [
                     {
                         "source": [
@@ -1161,37 +1327,38 @@
                         }, 
                         "name": "mapqfilter"
                     }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "b0c823f7-ca1e-44fb-b0f6-3eefb19eae46"
-                    ], 
-                    "description": "Merged Pairs file is processed using Juicebox", 
-                    "analysis_step_types": [
-                        "aggregation", 
-                        "normalization"
-                    ]
-                }, 
-                "name": "pairs2hic", 
-                "outputs": [
-                    {
-                        "meta": {
-                            "global": true
-                        }, 
-                        "name": "hic", 
-                        "target": [
-                            {
-                                "name": "hic"
-                            }, 
-                            {
-                                "step": "add-hic-normvector-to-mcool", 
-                                "name": "input_hic"
-                            }
-                        ]
-                    }
                 ]
             }, 
             {
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single", 
+                            "global": false, 
+                            "type": "data file", 
+                            "file_format": "mcool"
+                        }, 
+                        "target": [
+                            {
+                                "step": "add-hic-normvector-to-mcool", 
+                                "name": "input_mcool"
+                            }
+                        ], 
+                        "name": "mcool"
+                    }
+                ], 
+                "meta": {
+                    "software_used": [
+                        "b43e5d6d-f1a6-4713-9b48-8f5c060dad6c"
+                    ], 
+                    "description": "Cooler file is converted to mcool", 
+                    "analysis_step_types": [
+                        "aggregation", 
+                        "normalization", 
+                        "file format conversion"
+                    ]
+                }, 
+                "name": "cool2mcool", 
                 "inputs": [
                     {
                         "source": [
@@ -1260,38 +1427,39 @@
                         }, 
                         "name": "custom_res"
                     }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "b43e5d6d-f1a6-4713-9b48-8f5c060dad6c"
-                    ], 
-                    "description": "Cooler file is converted to mcool", 
-                    "analysis_step_types": [
-                        "aggregation", 
-                        "normalization", 
-                        "file format conversion"
-                    ]
-                }, 
-                "name": "cool2mcool", 
+                ]
+            }, 
+            {
                 "outputs": [
                     {
                         "meta": {
                             "cardinality": "single", 
-                            "global": false, 
+                            "global": true, 
                             "type": "data file", 
                             "file_format": "mcool"
                         }, 
-                        "name": "mcool", 
                         "target": [
                             {
-                                "step": "add-hic-normvector-to-mcool", 
-                                "name": "input_mcool"
+                                "name": "mcool"
+                            }, 
+                            {
+                                "step": "extract-mcool-normvector-for-juicebox", 
+                                "name": "mcool"
                             }
-                        ]
+                        ], 
+                        "name": "mcool_with_hicnorm"
                     }
-                ]
-            }, 
-            {
+                ], 
+                "meta": {
+                    "software_used": [
+                        "c1c772a8-5d1c-4481-8ab7-30729f3f6cb2"
+                    ], 
+                    "description": "HiC normalization vector is added to mcooler", 
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ]
+                }, 
+                "name": "add-hic-normvector-to-mcool", 
                 "inputs": [
                     {
                         "source": [
@@ -1323,39 +1491,35 @@
                         }, 
                         "name": "input_hic"
                     }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "c1c772a8-5d1c-4481-8ab7-30729f3f6cb2"
-                    ], 
-                    "description": "HiC normalization vector is added to mcooler", 
-                    "analysis_step_types": [
-                        "file format conversion"
-                    ]
-                }, 
-                "name": "add-hic-normvector-to-mcool", 
+                ]
+            }, 
+            {
                 "outputs": [
                     {
                         "meta": {
                             "cardinality": "single", 
                             "global": true, 
                             "type": "data file", 
-                            "file_format": "mcool"
+                            "file_format": "normvector_juicerformat"
                         }, 
-                        "name": "mcool_with_hicnorm", 
                         "target": [
                             {
-                                "name": "mcool"
-                            }, 
-                            {
-                                "step": "extract-mcool-normvector-for-juicebox", 
-                                "name": "mcool"
+                                "name": "cooler_normvector"
                             }
-                        ]
+                        ], 
+                        "name": "cooler_normvector"
                     }
-                ]
-            }, 
-            {
+                ], 
+                "meta": {
+                    "software_used": [
+                        "f3907ef2-a9fe-4324-bc54-253a4cd53e3c"
+                    ], 
+                    "description": "Extracting HiC normalization vector", 
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ]
+                }, 
+                "name": "extract-mcool-normvector-for-juicebox", 
                 "inputs": [
                     {
                         "source": [
@@ -1398,32 +1562,6 @@
                             "file_format": "mcool"
                         }, 
                         "name": "mcool"
-                    }
-                ], 
-                "meta": {
-                    "software_used": [
-                        "f3907ef2-a9fe-4324-bc54-253a4cd53e3c"
-                    ], 
-                    "description": "Extracting HiC normalization vector", 
-                    "analysis_step_types": [
-                        "file format conversion"
-                    ]
-                }, 
-                "name": "extract-mcool-normvector-for-juicebox", 
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single", 
-                            "global": true, 
-                            "type": "data file", 
-                            "file_format": "normvector_juicerformat"
-                        }, 
-                        "name": "cooler_normvector", 
-                        "target": [
-                            {
-                                "name": "cooler_normvector"
-                            }
-                        ]
                     }
                 ]
             }

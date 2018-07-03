@@ -2,41 +2,27 @@
     {
         "status": "released", 
         "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
-        "uuid": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "description": "Ren Lab Protocol for in situ HiC on mammalian Cell Lines", 
         "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
         "schema_version": "1", 
         "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
-        "attachment": {
-            "download": "insituHiC.pdf", 
-            "type": "application/pdf", 
-            "href": "@@download/attachment/insituHiC.pdf", 
-            "blob_id": "045165f7-1f97-4ffa-8043-481b4571200f", 
-            "md5sum": "be1321006386b22ffc0e3d409d3d48cc"
-        }, 
         "public_release": "2017-11-29", 
         "date_created": "2017-09-01T21:49:51.420347+00:00", 
         "aliases": [
             "ren:insitu_HiC_protocol_JY"
         ], 
         "protocol_type": "Experimental protocol", 
-        "description": "Ren Lab Protocol for in situ HiC on mammalian Cell Lines"
+        "uuid": "d0ed0449-5b16-4782-9097-0232b1b1eba0"
     }, 
     {
         "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "1d39b581-9200-4494-8b24-3dc77d595bbb", 
+        "description": "Protocol for culturing F123 CASTx129 hybrid mouse cells", 
         "tags": [
             "4DN Standard"
         ], 
-        "attachment": {
-            "download": "4DN_F123_SOP_170425.pdf", 
-            "type": "application/pdf", 
-            "href": "@@download/attachment/4DN_F123_SOP_170425.pdf", 
-            "blob_id": "debeaa35-820c-47a5-a7c8-6cf5f03e451b", 
-            "md5sum": "7d23d6f3cc670a0563a65c092d6aae1c"
-        }, 
+        "uuid": "1d39b581-9200-4494-8b24-3dc77d595bbb", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "schema_version": "1", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "public_release": "2017-04-25T16:10:26.414167+00:00", 
         "date_created": "2017-04-25T16:10:26.414167+00:00", 
@@ -44,28 +30,21 @@
             "dcic:pro_f123castxsop"
         ], 
         "protocol_type": "Cell culture protocol", 
-        "description": "Protocol for culturing F123 CASTx129 hybrid mouse cells"
+        "schema_version": "1"
     }, 
     {
         "status": "released", 
         "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
-        "uuid": "aa5b5dcd-ccca-4501-b0a7-486b9057067e", 
+        "description": "culture protocol for mouse embryonic stem cell", 
         "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
-        "schema_version": "1", 
         "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
-        "attachment": {
-            "download": "CellCulture.pdf", 
-            "type": "application/pdf", 
-            "href": "@@download/attachment/CellCulture.pdf", 
-            "blob_id": "3fa5dbde-46a7-4403-9735-d9077b2bd274", 
-            "md5sum": "3394b8eb3224b8b86900970160acb8d2"
-        }, 
+        "schema_version": "1", 
         "public_release": "2017-11-29", 
         "date_created": "2017-09-01T21:49:49.107636+00:00", 
         "aliases": [
             "ren:mESC_culture_protocol"
         ], 
         "protocol_type": "Cell culture protocol", 
-        "description": "culture protocol for mouse embryonic stem cell"
+        "uuid": "aa5b5dcd-ccca-4501-b0a7-486b9057067e"
     }
 ]
