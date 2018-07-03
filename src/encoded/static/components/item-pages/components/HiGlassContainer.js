@@ -369,6 +369,7 @@ export const HiGlassConfigurator = {
                 "width": 55,
                 //"height": 20,
                 "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                "orientation": "1d-vertical",
                 "position": "left"
             };
         },
@@ -383,6 +384,8 @@ export const HiGlassConfigurator = {
                 "type": "vertical-chromosome-labels",
                 "options": {},
                 "width": 20,
+                "minWidth" : 20,
+                "orientation": "1d-vertical",
                 //"height": 30,
                 "position": "left"
             };
