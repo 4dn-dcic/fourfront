@@ -288,6 +288,7 @@ export const HiGlassConfigurator = {
                 "name": "Gene Annotations (hg38)"
             },
             //"width": 20,
+            "minHeight" : 55,
             "height": 55,
             "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
             "position": "top",
@@ -479,23 +480,12 @@ export const HiGlassConfigurator = {
     bigwig : {
 
         generateTopContentTrack : function(bigWigFile, options, { chromosome, annotation }, idx, all){
-            var trackHeight = Math.min(Math.max(Math.floor((options.height - 30) / all.length), 20), 80);
-            return {
-                "uid": "bigwig-content-track-" + idx,
-                "tilesetUid": bigWigFile.higlass_uid,
-                "height": trackHeight,
-                "position": "top",
-                "server": options.baseUrl + "/api/v1",
-                "type": "horizontal-line",
-                "options": {
-                    //"name": "Busslinger et al. 2017 Stag1 ChIP (WT, 10d resting, GSE76303_14549+14954)",
-                    "name" : bigWigFile.display_title,
-                    "valueScaling": "linear",
-                    "coordSystem": chromosome.infoid || "NOT SET",
+
+            var trackHeight = Math.min(Math.max(Math.floor((options.height - 150) / all.length), 20), 150),
+                styleOptions = {
                     "lineStrokeColor": "black",
                     "labelPosition": "topLeft",
                     "labelColor": "black",
-                    "axisPositionHorizontal": "right",
                     "labelTextOpacity": 0.3,
                     "lineStrokeWidth": 2,
                     "trackBorderWidth": 0,
@@ -503,7 +493,33 @@ export const HiGlassConfigurator = {
                     "showMousePosition": false,
                     "mousePositionColor": "#999999",
                     "showTooltip": false
+                };
+
+            var hasExpSetInfo = !!(bigWigFile.from_experiment && bigWigFile.from_experiment.from_experiment_set && bigWigFile.from_experiment.from_experiment_set.accession);
+
+            if (hasExpSetInfo){
+                var isFromExperiment = bigWigFile.from_experiment.accession !== 'NONE';
+                if (!isFromExperiment){
+                    styleOptions.lineStrokeWidth = 2;
+                } else {
+                    styleOptions.lineStrokeWidth = 1.25;
+                    styleOptions.lineStrokeColor = '#333';
                 }
+            }
+
+            return {
+                "uid": "bigwig-content-track-" + idx,
+                "tilesetUid": bigWigFile.higlass_uid,
+                "height": trackHeight,
+                "position": "top",
+                "server": options.baseUrl + "/api/v1",
+                "type": "horizontal-line",
+                "options": _.extend(styleOptions, {
+                    "name" : bigWigFile.display_title,
+                    "valueScaling": "linear",
+                    "coordSystem": chromosome.infoid || "NOT SET",
+                    "axisPositionHorizontal": "right",
+                })
             };
         },
 
@@ -523,7 +539,7 @@ export const HiGlassConfigurator = {
             const tracks = []; // Will be used as single 'top' tracks list.
 
             if (!excludeAnnotationTracks) {
-                //tracks.push(HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation));
+                tracks.push(HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation));
                 tracks.push(HiGlassConfigurator.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation));
             }
 
@@ -758,7 +774,6 @@ export class HiGlassContainer extends React.PureComponent {
 
     render(){
         var { disabled, isValidating, tilesetUid, height, width, options, style, className } = this.props;
-        console.log('FIFLL', this.props.files);
         let hiGlassInstance = null;
         const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
         if (isValidating || !mounted){

@@ -34,7 +34,8 @@ export const SET = {
         {
             "@id":"/files-processed/4DNFITTM7J2L/",
             "status":"released",
-            "higlass_uid":"ewGpxUSFSPCOq-SsYn8-MQ",
+            "higlass_uid":"VN57_ICeS7Kin3K8aKr9iQ",
+            "file_format" : "bw",
             "file_classification":"processed file",
             "href":"/files-processed/4DNFITTM7J2L/@@download/4DNFITTM7J2L.bw",
             "upload_key":"f1175e31-c309-424f-a57c-bee574ab4754/4DNFITTM7J2L.bw",
@@ -1050,7 +1051,7 @@ export const SET = {
                     "href":"/files-processed/4DNFIK7NR9ZO/@@download/4DNFIK7NR9ZO.bw",
                     "upload_key":"a1879e0b-5ddd-4eaa-8c19-833687ae2e47/4DNFIK7NR9ZO.bw",
                     "file_size":5661604,
-                    "higlass_uid" : "akhfhP7nQb2HKn4UXQCW0w",
+                    "higlass_uid" : "BMiJQfDpTC62JzjZCmVO-A",
                     "principals_allowed":{
                         "view":[
                             "system.Everyone"
@@ -1159,7 +1160,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIOX7H5VY/",
-                            "higlass_uid":"Adnj_zhfQdWwUmE9YbmRoQ",
+                            "higlass_uid":"WNf_4XDQTjy-hlTXx7P1Kg",
+                            "file_format" : "bw",
                             "uuid":"74ffc3be-9d3d-43a3-aa17-733620c0571e",
                             "link_id":"~files-processed~4DNFIOX7H5VY~",
                             "accession":"4DNFIOX7H5VY",
@@ -1180,7 +1182,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFI3RQT91O/",
-                            "higlass_uid":"Vg1X_yRRRJu7y9AD4-OYFQ",
+                            "higlass_uid":"E6B6YUFpQFa_emBoyl3oRg",
+                            "file_format" : "bw",
                             "uuid":"a3ea1d99-7cb9-4bf5-ad0a-15026b10a84b",
                             "link_id":"~files-processed~4DNFI3RQT91O~",
                             "accession":"4DNFI3RQT91O",
@@ -1288,7 +1291,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFICHWNUP5/",
-                            "higlass_uid":"Ji7GZT7fR2OXV9Ow4gE7ww",
+                            "higlass_uid":"WA-hPwxOQgmywGDG7200Xg",
+                            "file_format" : "bw",
                             "uuid":"deae6138-d751-43c7-8244-0a40d4bfcd5b",
                             "link_id":"~files-processed~4DNFICHWNUP5~",
                             "accession":"4DNFICHWNUP5",
@@ -1309,7 +1313,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIHAGLEH9/",
-                            "higlass_uid":"OwK_S88-Rn2T-eXocZ8Icw",
+                            "higlass_uid":"Sx59IdO3SB-eGxUm-RSUBw",
+                            "file_format" : "bw",
                             "uuid":"c1a119b3-4c0d-42a2-ae58-4b861eecb4db",
                             "link_id":"~files-processed~4DNFIHAGLEH9~",
                             "accession":"4DNFIHAGLEH9",
@@ -1417,7 +1422,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIV7B617O/",
-                            "higlass_uid":"cvpAJ2XIR8ykgfGnJIIi2Q",
+                            "higlass_uid":"DvKKxE73SgOX1JvHsup8Hg",
+                            "file_format" : "bw",
                             "uuid":"08dc3d2a-1da8-4b6f-9027-b15b331e4ec4",
                             "link_id":"~files-processed~4DNFIV7B617O~",
                             "accession":"4DNFIV7B617O",
@@ -1438,7 +1444,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIJ2YNVW1/",
-                            "higlass_uid":"Xkr6-DvTSFebbAYFS3JlxQ",
+                            "higlass_uid":"PzuydAHuRk6z1iymeXOgmg",
+                            "file_format" : "bw",
                             "uuid":"470e39fd-e7c6-406a-9121-c321c5f1ff93",
                             "link_id":"~files-processed~4DNFIJ2YNVW1~",
                             "accession":"4DNFIJ2YNVW1",
@@ -1546,7 +1553,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIXWGE6FK/",
-                            "higlass_uid":"DpmgzBOPSe6WFN522pWHIw",
+                            "higlass_uid":"CWTsmVkQT9GnnlgsXU9X3A",
+                            "file_format" : "bw",
                             "uuid":"cc9263c0-2931-4713-bfa9-f8a610de6b50",
                             "link_id":"~files-processed~4DNFIXWGE6FK~",
                             "accession":"4DNFIXWGE6FK",
@@ -1567,7 +1575,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIBIFES9U/",
-                            "higlass_uid":"AhyDpL1jSYq6w0e7mFwv4Q",
+                            "higlass_uid":"EhC-QFTsRqKH5m-Stc2dKA",
+                            "file_format" : "bw",
                             "uuid":"e9919293-acaa-470e-aef1-106118cad1ea",
                             "link_id":"~files-processed~4DNFIBIFES9U~",
                             "accession":"4DNFIBIFES9U",
@@ -1655,7 +1664,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIUUG2OZB/",
-                            "higlass_uid":"ArBEVvlXSza3SbAhKVITMQ",
+                            "higlass_uid":"HsRq2ev8RSCFLhleTVK-vQ",
+                            "file_format" : "bw",
                             "uuid":"af9d54d2-563d-492c-a2bc-ba8d26821d4a",
                             "link_id":"~files-processed~4DNFIUUG2OZB~",
                             "accession":"4DNFIUUG2OZB",
@@ -1763,7 +1773,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIHPHUZZN/",
-                            "higlass_uid":"fU6a3lXlTFGzA5iT99Uqog",
+                            "higlass_uid":"REy-PkUIS4-ybncUfK4lcQ",
+                            "file_format" : "bw",
                             "uuid":"d0615302-e52e-4b87-bbd5-8510657beb95",
                             "link_id":"~files-processed~4DNFIHPHUZZN~",
                             "accession":"4DNFIHPHUZZN",
@@ -1784,7 +1795,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIFRW3EU5/",
-                            "higlass_uid":"Ss9SvHU-Souxacn9PiJQfA",
+                            "higlass_uid":"IEMk0QXnQjiSUxBowxu4vg",
+                            "file_format" : "bw",
                             "uuid":"b4ec29ad-9fa5-4cb6-b6db-986f6300bae0",
                             "link_id":"~files-processed~4DNFIFRW3EU5~",
                             "accession":"4DNFIFRW3EU5",
@@ -1852,7 +1864,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIDMV2HEA/",
-                            "higlass_uid":"eCp3GgAWQY27ubGYBWRHcw",
+                            "higlass_uid":"Yra6tAjyS5aPXlxcf1hwMw",
+                            "file_format" : "bw",
                             "uuid":"465fe8cc-0f84-46ee-9b4b-7270c40877bd",
                             "link_id":"~files-processed~4DNFIDMV2HEA~",
                             "accession":"4DNFIDMV2HEA",
@@ -1873,7 +1886,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIQFUNWLY/",
-                            "higlass_uid":"ejzWRvHfR1yI3YIkuDpG2A",
+                            "higlass_uid":"VS7EbyS5SbGWiiEO08TRhA",
+                            "file_format" : "bw",
                             "uuid":"868ed90e-c7c5-435e-bf12-92342147912e",
                             "link_id":"~files-processed~4DNFIQFUNWLY~",
                             "accession":"4DNFIQFUNWLY",
@@ -2188,8 +2202,9 @@ export const SET = {
                     "file_classification":"processed file",
                     "href":"/files-processed/4DNFI8KTPLI9/@@download/4DNFI8KTPLI9.bw",
                     "upload_key":"e5b949a7-fd86-4976-b2a5-c82a7db1f836/4DNFI8KTPLI9.bw",
+                    "file_format" : "bw",
                     "file_size":5482564,
-                    "higlass_uid" : "BkkE54NYRyK7P4zzaNbgIg",
+                    "higlass_uid" : "PJGZyzVnTkmHHClQtEUj5Q",
                     "principals_allowed":{
                         "view":[
                             "system.Everyone"
@@ -2298,7 +2313,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFILK7DR1L/",
-                            "higlass_uid":"AGQEjUnsTXSWJ9mDRSzDVA",
+                            "higlass_uid":"U9M2fCOWSy-ksl_v4EETTA",
+                            "file_format" : "bw",
                             "uuid":"a46b1701-953f-4b7a-a4d6-95cdd88112ad",
                             "link_id":"~files-processed~4DNFILK7DR1L~",
                             "accession":"4DNFILK7DR1L",
@@ -2319,7 +2335,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFINFHHDOT/",
-                            "higlass_uid":"S6rGRh31SbGocB9hzt0n_w",
+                            "higlass_uid":"FvxVOdhHTG-LjJSEZvSJCw",
+                            "file_format" : "bw",
                             "uuid":"465b463a-1ce7-408a-a83c-7201b8bcbf65",
                             "link_id":"~files-processed~4DNFINFHHDOT~",
                             "accession":"4DNFINFHHDOT",
@@ -2427,7 +2444,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIOTR7V8C/",
-                            "higlass_uid":"A7KQ5I7bTi2p4dr6qcsxPA",
+                            "higlass_uid":"S_2DOxfkQ9uKc2mZCtBsRw",
+                            "file_format" : "bw",
                             "uuid":"90fdaa47-408f-4528-bfde-23b5af762943",
                             "link_id":"~files-processed~4DNFIOTR7V8C~",
                             "accession":"4DNFIOTR7V8C",
@@ -2448,7 +2466,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIK5LG6O8/",
-                            "higlass_uid":"GJf2QIbkSx-sWMbLhhgkgg",
+                            "higlass_uid":"ScN_UN5fROO0UFhlnruqgg",
+                            "file_format" : "bw",
                             "uuid":"4abd552d-6692-4fc9-b042-e79ef41568ab",
                             "link_id":"~files-processed~4DNFIK5LG6O8~",
                             "accession":"4DNFIK5LG6O8",
@@ -2496,7 +2515,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIZCUNOFD/",
-                            "higlass_uid":"SSk-ACupR2-awVwuyqKxiA",
+                            "higlass_uid":"JTR6QXzDQrilW-4c_umdMQ",
+                            "file_format" : "bw",
                             "uuid":"cf0197d0-528e-4c67-afc0-48b7fd5ed85d",
                             "link_id":"~files-processed~4DNFIZCUNOFD~",
                             "accession":"4DNFIZCUNOFD",
@@ -2517,7 +2537,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFI7NTH51U/",
-                            "higlass_uid":"ZRY2yXSDQCS4cynFEdwj_A",
+                            "higlass_uid":"RL8i5CzJTVWl7nbsfb3vgw",
+                            "file_format" : "bw",
                             "uuid":"b40f8833-523d-4ed4-9280-3adea67899c5",
                             "link_id":"~files-processed~4DNFI7NTH51U~",
                             "accession":"4DNFI7NTH51U",
@@ -2625,7 +2646,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIHJCIL6P/",
-                            "higlass_uid":"YUTOgsc3S-CFM68H4tbp-Q",
+                            "higlass_uid":"Q8I3A-lhSTKnbxI_qayn-g",
+                            "file_format" : "bw",
                             "uuid":"614ea5d4-62f5-4f7c-b989-812288974474",
                             "link_id":"~files-processed~4DNFIHJCIL6P~",
                             "accession":"4DNFIHJCIL6P",
@@ -2646,7 +2668,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIIBP7QQO/",
-                            "higlass_uid":"NPLZze9fQ8-KsALSqF4ivA",
+                            "higlass_uid":"XiAzroo5TSKNjoPA6hXNpw",
+                            "file_format" : "bw",
                             "uuid":"6150361b-32a5-463f-8335-0a3e7cf75f5b",
                             "link_id":"~files-processed~4DNFIIBP7QQO~",
                             "accession":"4DNFIIBP7QQO",
@@ -2734,7 +2757,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIWCMVWRT/",
-                            "higlass_uid":"bZh2MI7XQAKXD0j5Aq5e6A",
+                            "higlass_uid":"Rj1etrsFTN2Nx4QW9nVFJw",
+                            "file_format" : "bw",
                             "uuid":"8111e718-8457-450c-873f-9de2a0cbcbf8",
                             "link_id":"~files-processed~4DNFIWCMVWRT~",
                             "accession":"4DNFIWCMVWRT",
@@ -2842,7 +2866,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFI8SC36N6/",
-                            "higlass_uid":"LJMccheBRRCb9OhsLFvWrA",
+                            "higlass_uid":"Ao6hmcjZRaWuJZhRIB0fow",
+                            "file_format" : "bw",
                             "uuid":"788fcc0d-9010-4baa-8971-f603f52a85e8",
                             "link_id":"~files-processed~4DNFI8SC36N6~",
                             "accession":"4DNFI8SC36N6",
@@ -2863,7 +2888,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIW5138YX/",
-                            "higlass_uid":"aFEV9wUETy68xyqRUi7Bcg",
+                            "higlass_uid":"J1LN7Xv5SVqZUXxoSu0CPA",
+                            "file_format" : "bw",
                             "uuid":"da9b0492-2e6e-485a-9095-dd63e5a328d4",
                             "link_id":"~files-processed~4DNFIW5138YX~",
                             "accession":"4DNFIW5138YX",
@@ -2931,7 +2957,8 @@ export const SET = {
                         {
                             "file_type_detailed":"normalized counts (bw)",
                             "@id":"/files-processed/4DNFIC6K3MQQ/",
-                            "higlass_uid":"OtsvaMivSTqwYehNtZ2X5g",
+                            "higlass_uid":"SjXUFIayS0mmG5wTpIrOhA",
+                            "file_format" : "bw",
                             "uuid":"5334b730-47b4-495e-8c97-624ef7e280e5",
                             "link_id":"~files-processed~4DNFIC6K3MQQ~",
                             "accession":"4DNFIC6K3MQQ",
@@ -2952,7 +2979,8 @@ export const SET = {
                         {
                             "file_type_detailed":"counts (bw)",
                             "@id":"/files-processed/4DNFIK9Q285Z/",
-                            "higlass_uid":"UQElBA3JRMOeoK7qRXBYHg",
+                            "higlass_uid":"VISDMVm6TaqVxAAh0shmzA",
+                            "file_format" : "bw",
                             "uuid":"d0beab2e-473f-491b-81ef-5f2845ea0dbd",
                             "link_id":"~files-processed~4DNFIK9Q285Z~",
                             "accession":"4DNFIK9Q285Z",
@@ -3232,7 +3260,8 @@ export const SET = {
                 {
                     "file_type_detailed":"normalized counts (bw)",
                     "@id":"/files-processed/4DNFIFQ586DY/",
-                    "higlass_uid":"NSR8amB3TN2ocNF5YIcWGg",
+                    "higlass_uid":"IPvEIX5ZTAi59DIHR5Dhyw",
+                    "file_format" : "bw",
                     "uuid":"6066b666-6987-4795-865b-818f2f54d704",
                     "link_id":"~files-processed~4DNFIFQ586DY~",
                     "accession":"4DNFIFQ586DY",
@@ -3320,7 +3349,8 @@ export const SET = {
                 {
                     "file_type_detailed":"normalized counts (bw)",
                     "@id":"/files-processed/4DNFIDH4V3XO/",
-                    "higlass_uid":"dlnlXOpKTOi2IHicapQeew",
+                    "higlass_uid":"TUKDrtIQSqqBd0JDlp7joQ",
+                    "file_format" : "bw",
                     "uuid":"169464ca-2eda-4a8e-a203-ab6c539c7f2f",
                     "link_id":"~files-processed~4DNFIDH4V3XO~",
                     "accession":"4DNFIDH4V3XO",
@@ -3408,7 +3438,8 @@ export const SET = {
                 {
                     "file_type_detailed":"normalized counts (bw)",
                     "@id":"/files-processed/4DNFIP2SKOB5/",
-                    "higlass_uid":"avyPtKjFQAave7-Cba070g",
+                    "higlass_uid":"PoZDnlDnS5OLNkUqzdxJ-w",
+                    "file_format" : "bw",
                     "uuid":"a44de444-5e4a-4f5d-ac74-064db4dae3b0",
                     "link_id":"~files-processed~4DNFIP2SKOB5~",
                     "accession":"4DNFIP2SKOB5",
@@ -3497,6 +3528,7 @@ export const SET = {
                     "file_type_detailed":"normalized counts (bw)",
                     "@id":"/files-processed/4DNFI9VWSZT3/",
                     "higlass_uid":"Ng2depPwReGZuWgr5z3Q8A",
+                    "file_format" : "bw",
                     "uuid":"b9d83e24-07b3-4fb8-9a59-c915798f5af4",
                     "link_id":"~files-processed~4DNFI9VWSZT3~",
                     "accession":"4DNFI9VWSZT3",
@@ -3632,6 +3664,7 @@ export const SET = {
                     "file_type_detailed":"normalized counts (bw)",
                     "@id":"/files-processed/4DNFIEHDN5SV/",
                     "higlass_uid":"aduD1KgCRi-sMBKnFPwVcQ",
+                    "file_format" : "bw",
                     "uuid":"9af54030-7e8c-4fdf-85b2-d03cb0b31f91",
                     "link_id":"~files-processed~4DNFIEHDN5SV~",
                     "accession":"4DNFIEHDN5SV",
@@ -3680,6 +3713,7 @@ export const SET = {
                     "file_type_detailed":"normalized counts (bw)",
                     "@id":"/files-processed/4DNFIU56QKZG/",
                     "higlass_uid":"Y_gAlfDlQfCyNyoKe7wNlA",
+                    "file_format" : "bw",
                     "uuid":"e5ef1b78-1a38-4b22-94bf-d6050b0a81a7",
                     "link_id":"~files-processed~4DNFIU56QKZG~",
                     "accession":"4DNFIU56QKZG",
