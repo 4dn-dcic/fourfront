@@ -647,6 +647,23 @@ export class HiGlassContainer extends React.PureComponent {
         return fxnToUse;
     }
 
+    static does2DTrackExist(viewConfig){
+
+        var found = false;
+        
+        _.forEach(viewConfig.views || [], function(view){
+            if (found) return;
+            _.forEach((view.tracks && view.tracks.center) || [], function(centerTrack){
+                if (found) return;
+                if (centerTrack.position === 'center') {
+                    found = true;
+                }
+            });
+        });
+
+        return found;
+    }
+
     static defaultProps = {
         'options' : { 'bounded' : true },
         'isValidating' : false,
@@ -758,7 +775,14 @@ export class HiGlassContainer extends React.PureComponent {
             var viewID = this.getPrimaryViewID();
             var hiGlassDomains = hiGlassComponent.api.getLocation(viewID);
             if (hiGlassDomains && Array.isArray(hiGlassDomains.xDomain) && Array.isArray(hiGlassDomains.yDomain) && hiGlassDomains.xDomain.length === 2 && hiGlassDomains.yDomain.length === 2){
-                this.storage.saveDomains({ 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain });
+                var newDomainsToSave = { 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain };
+                if (!HiGlassContainer.does2DTrackExist(this.state.viewConfig)){ // If we only have 1D tracks, don't update Y position.
+                    var existingDomains = this.storage.getDomains();
+                    if (existingDomains){
+                        newDomainsToSave.y = existingDomains.y;
+                    }
+                }
+                this.storage.saveDomains(newDomainsToSave);
             }
         }
     }
