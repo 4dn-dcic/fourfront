@@ -1,6 +1,6 @@
 [
     {
-        "uuid": "012b362f-4eb6-4a9c-8173-3ab267307e3x",
+        "uuid": "586b362f-4eb6-4a9c-8173-3ab267307e3b",
         "aliases": ["dcic:drug-treatment"],
         "description": "Drug treatment to change performance",
         "treatment_type": "Chemical",
@@ -16,7 +16,7 @@
         "status": "in review by lab"
     },
     {
-        "uuid": "345b362f-4eb6-4a9c-8173-3ab267307e4y",
+        "uuid": "345b362f-4eb6-4a9c-8173-3ab267307f4a",
         "aliases": ["dcic:coldshock"],
         "description": "Cold shock to induce pathway X",
         "treatment_type": "Cold Shock",
@@ -26,6 +26,22 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "temperature": 4,
+        "status": "in review by lab"
+    },
+    {
+        "uuid": "486b362f-4eb6-4a9c-8173-3ab267307e4b",
+        "aliases": ["dcic:chemical-treatment"],
+        "description": "Chemical treatment for stressing cells",
+        "treatment_type": "Chemical",
+        "chemical":"Round Up",
+        "concentration": 50,
+        "concentration_units": "mg/mL",
+        "duration": 1,
+        "duration_units": "minute",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "temperature": 20,
         "status": "in review by lab"
     }
 ]

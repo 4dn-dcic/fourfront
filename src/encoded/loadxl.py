@@ -4,18 +4,25 @@ from .typedsheets import cast_row_values
 from functools import reduce
 import io
 import json
-import logging
+import structlog
 import os.path
 import boto3
 import os
 from datetime import datetime
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
+from pyramid.paster import get_app
+
+from pyramid.view import view_config
 
 
 text = type(u'')
 
-logger = logging.getLogger('encoded')
-logger.setLevel(logging.INFO)  # doesn't work to shut off sqla INFO
+logger = structlog.getLogger('encoded')
+
+def includeme(config):
+    # provide an endpoint to do bulk uploading that just uses loadxl
+    config.add_route('load_data', '/load_data')
+    config.scan(__name__)
 
 ORDER = [
     'user',
@@ -42,11 +49,12 @@ ORDER = [
     'biosample_cell_culture',
     'individual_human',
     'individual_mouse',
+    'individual_fly',
     'biosource',
     'antibody',
     'enzyme',
     'treatment_rnai',
-    'treatment_chemical',
+    'treatment_agent',
     'biosample',
     'quality_metric_fastqc',
     'quality_metric_bamqc',
@@ -96,6 +104,50 @@ IS_ATTACHMENT = [
     'IDR_parameters_pool_pr',
     'cross_correlation_plot'
 ]
+
+
+
+@view_config(route_name='load_data', request_method='POST', permission='add')
+def load_data_view(context, request):
+    '''
+    we expect to get posted data in the form of
+    {'item_type': [items], 'item_type2': [items]}
+    then we just use load_all to load all that stuff in
+    '''
+
+    # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
+    config_uri = request.json.get('config_uri', 'production.ini')
+    app = get_app(config_uri, 'app')
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    # expected response
+    request.response.status = 200
+    result = {
+        'status': 'success',
+        '@type': ['result'],
+    }
+    # if we post local_dir key then we use local data
+    # actually load the stuff
+    from pkg_resources import resource_filename
+    local_dir = request.json.get('local_dir')
+    if  local_dir:
+        local_inserts = resource_filename('encoded', 'tests/data/' + local_dir + '/')
+        res = load_all(testapp, local_inserts, [])
+    else:
+        res = load_all(testapp, request.json, [], from_json=True)
+
+    if res:
+        request.response.status = 422
+        result['status'] = 'error'
+        result['@graph'] = res
+
+    return result
+
 
 ##############################################################################
 # Pipeline components
@@ -226,7 +278,7 @@ def add_attachments(docsdir):
 
 
 def read_single_sheet(path, name=None):
-    """ Read an xlsx, csv or tsv from a zipfile or directory
+    """ Read an xlsx, csv, json, or tsv from a zipfile or directory
     """
     from zipfile import ZipFile
     from . import xlreader
@@ -708,11 +760,14 @@ PHASE2_PIPELINES = {
 }
 
 
-def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
+def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, from_json=False):
     """smth."""
     # exclude_list is for items that fail phase1 to be excluded from phase2
     exclude_list = []
+    errors = []
     order = list(ORDER)
+    # default incase no data comes in
+    force_return = False
     if itype is not None:
         if isinstance(itype, list):
             order = itype
@@ -720,7 +775,12 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
             order = [itype]
     for item_type in order:
         try:
-            source = read_single_sheet(filename, item_type)
+            if from_json:
+                source = filename.get(item_type)
+                if source == None:
+                    continue
+            else:
+                source = read_single_sheet(filename, item_type)
         except ValueError:
             logger.error('Opening %s %s failed.', filename, item_type)
             continue
@@ -734,8 +794,12 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
 
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase)
         processed_data = combine(source, pipeline)
+
         for result in processed_data:
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+                errors.append({'uuid': result['uuid'],
+                               'error': result['_response'].json})
+                # import pdb; pdb.set_trace()
                 exclude_list.append(result['uuid'])
                 print("excluding uuid %s do to error" % result['uuid'])
     if force_return:
@@ -745,11 +809,17 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         if item_type not in PHASE2_PIPELINES:
             continue
         try:
-            source = read_single_sheet(filename, item_type)
+            if from_json:
+                source = filename.get(item_type)
+                if source == None:
+                    continue
+            else:
+                source = read_single_sheet(filename, item_type)
         except ValueError:
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2, exclude=exclude_list)
         process(combine(source, pipeline))
+    return errors
 
 
 def generate_access_key(testapp, store_access_key=None,
@@ -852,7 +922,7 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts': # Load up master_inserts
+    if indir != 'master-inserts':  # Always load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
 
