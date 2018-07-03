@@ -548,7 +548,6 @@ def test_submitter_replaced_item_redirects_to_new_one(ind_human_item, submitter_
     wrangler_testapp.patch_json(new.json['@graph'][0]['@id'], {"alternate_accessions": [old.json['@graph'][0]['accession']]}, status=200)
     # visit old item and assert that it lands on new item
     redirect_message = submitter_testapp.get(old.json['@graph'][0]['@id'], status=301)
-    print(redirect_message)
     assert new.json['@graph'][0]['@id'] in redirect_message
 
 
