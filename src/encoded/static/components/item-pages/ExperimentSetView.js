@@ -15,7 +15,7 @@ import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, P
 import { requestAnimationFrame } from './../viz/utilities';
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
-import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
+// import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
 
 
 /**
@@ -78,7 +78,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     getTabViewContents(){
         var { context, schemas } = this.props;
 
-        context = SET;
+        //context = SET;
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
             width = this.getTabViewWidth(),
@@ -622,7 +622,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
     }
 
     render(){
-        const { collection, index, context, width, mounted } = this.props;
+        const { collection, index, context, width, mounted, defaultOpen } = this.props;
         const { open, files, currentlyVisualizedFiles } = this.state;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
@@ -635,7 +635,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
                 { collection.description ? <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" expanded={open} /> : <div className="mb-15"/> }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                        { currentlyVisualizedFiles ? <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} /> : this.renderFilesTable(width - 21) }
+                        { currentlyVisualizedFiles ? <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} /> : this.renderFilesTable(width - 21) }
                     </div>
                 </Collapse>
             </div>
@@ -727,7 +727,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { _.map(this.state.otherProcessedFileSetsCombined, (collection, index, all) => {
-                    var defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 3));
+                    var defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 2));
                     return <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width, mounted }} key={index} defaultOpen={defaultOpen} />;
                 }) }
             </div>
