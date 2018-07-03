@@ -40,7 +40,6 @@
             "title": "File Provenance Graph",
             "description": "When True the file provenance graph was generated without a run of a 4dn-dcic pipeline.",
 		    "type": "boolean",
-            "exclude_from": ["submit4dn", "FFedit-create"],
 			"default": false
         },
         "description_only": {
