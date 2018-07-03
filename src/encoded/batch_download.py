@@ -1,6 +1,9 @@
 from collections import OrderedDict
 from pyramid.compat import bytes_
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPMovedPermanently
+)
 from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
@@ -32,6 +35,7 @@ log = logging.getLogger(__name__)
 def includeme(config):
     config.add_route('batch_download', '/batch_download/{search_params}')
     config.add_route('metadata', '/metadata/')
+    config.add_route('metadata_redirect', '/metadata/{search_params}/{tsv}')
     config.add_route('peak_metadata', '/peak_metadata/{search_params}/{tsv}')
     config.add_route('report_download', '/report.tsv')
     config.scan(__name__)
@@ -575,6 +579,13 @@ def metadata_tsv(context, request):
         content_disposition='attachment;filename="%s"' % filename_to_suggest
     )
 
+
+@view_config(route_name="metadata_redirect", request_method='GET')
+def redirect_new_metadata_route(context, request):
+    return HTTPMovedPermanently(
+        location='/metadata/?' + request.matchdict['search_params'],
+        comment="Redirected to current metadata route."
+    )
 
 @view_config(route_name='batch_download', request_method='GET')
 def batch_download(context, request):
