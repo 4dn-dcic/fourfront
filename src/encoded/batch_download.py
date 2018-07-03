@@ -252,7 +252,7 @@ def metadata_tsv(context, request):
     header = []
 
     def add_field_to_search_params(itemType, field):
-        if search_params['type'] in ('ExperimentSet', 'ExperimentSetReplicate'):
+        if search_params['type'][0:13] == 'ExperimentSet':
             if itemType == EXP_SET:
                 search_params['field'].append(param_field)
             if itemType == EXP:
@@ -261,9 +261,11 @@ def metadata_tsv(context, request):
                 search_params['field'].append('experiments_in_set.files.' + param_field)
                 search_params['field'].append('experiments_in_set.processed_files.' + param_field)
                 search_params['field'].append('processed_files.' + param_field)
-        elif search_params['type'] in ('File', 'FileProcessed', 'FileFastq', 'FileFasta', 'FileProcessed', 'FileReference', 'FileCalibration', 'FileMicroscopy'):
+        elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
             if itemType == FILE:
                 search_params['field'].append(param_field)
+        else:
+            raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
 
     for prop in TSV_MAPPING:
         header.append(prop)
@@ -552,7 +554,7 @@ def metadata_tsv(context, request):
         request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
 
     # Prep - use dif functions if different type requested.
-    if search_params['type'] in ('ExperimentSet', 'ExperimentSetReplicate'):
+    if search_params['type'][0:13] == 'ExperimentSet':
         iterable_pipeline = format_filter_resulting_file_row_dicts(
             chain.from_iterable(
                 map(
@@ -561,7 +563,7 @@ def metadata_tsv(context, request):
                 )
             )
         )
-    elif search_params['type'] in ('File', 'FileProcessed', 'FileFastq', 'FileFasta', 'FileProcessed', 'FileReference', 'FileCalibration', 'FileMicroscopy'):
+    elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
         iterable_pipeline = format_filter_resulting_file_row_dicts(
             chain.from_iterable(
                 map(
@@ -571,7 +573,7 @@ def metadata_tsv(context, request):
             )
         )
     else:
-        raise Exception("Metadata can only be retrieved currently for Experiment Sets or Files.")
+        raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
 
     return Response(
         content_type='text/tsv',
