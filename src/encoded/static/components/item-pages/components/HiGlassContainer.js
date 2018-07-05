@@ -734,8 +734,6 @@ export class HiGlassContainer extends React.PureComponent {
         if (!this.hiGlassComponentExists && hiGlassComponentExists){
             this.bindHiGlassEventHandlers();
             console.info('Binding event handlers to HiGlassComponent.');
-            console.log(this.refs.hiGlassComponent);
-            window.hiGlassComponent = this.refs.hiGlassComponent;
             // Check if we have same initialDomains as props, which indicates it came not from storage, so then zoom out to extents.
             /*
             var viewConfig = this.state.viewConfig;

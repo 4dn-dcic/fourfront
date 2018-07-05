@@ -226,36 +226,29 @@ export default class JointAnalysisPlansPage extends React.Component {
         );
     }
 
+    renderSection(section, id){
+        return (
+            <div className="col-xs-12">
+                <div className="static-section-entry" id="legend">
+                    { section.title && <h5 className="section-title mt-1 mb-1">{ section.title }</h5> }
+                    <BasicStaticSectionBody content={section.content} filetype={section.filetype} />
+                </div>
+            </div>
+        );
+    }
+
     legend(){
         var context = this.props.context,
             legendContentSection = Array.isArray(context.content) && _.findWhere(context.content, { 'name' : 'joint-analysis-data-plans.legend' });
 
-        if (legendContentSection){
-            return (
-                <div className="col-xs-12">
-                    <div className="static-section-entry" id="legend">
-                        { legendContentSection.title && <h5 className="section-title mt-1 mb-1">{ legendContentSection.title }</h5> }
-                        <BasicStaticSectionBody content={legendContentSection.content} filetype={legendContentSection.filetype} />
-                    </div>
-                </div>
-            );
-        }
+        return (legendContentSection && this.renderSection(legendContentSection, "legend")) || null;
     }
 
     releaseUpdates(){
         var context = this.props.context,
             releaseUpdatesSection = Array.isArray(context.content) && _.findWhere(context.content, { 'name' : 'joint-analysis-data-plans.release-updates' });
 
-        if (releaseUpdatesSection){
-            return (
-                <div className="col-xs-12">
-                    <div className="static-section-entry" id="release-updates-section">
-                        { releaseUpdatesSection.title && <h5 className="section-title mt-1 mb-1">{ releaseUpdatesSection.title }</h5> }
-                        <BasicStaticSectionBody content={releaseUpdatesSection.content} filetype={releaseUpdatesSection.filetype} className="text-small" />
-                    </div>
-                </div>
-            );
-        }
+        return (releaseUpdatesSection && this.renderSection(releaseUpdatesSection, "release-updates-section")) || null;
     }
 
     render() {
@@ -280,10 +273,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         return (
             <StaticPage.Wrapper>
-                <div className="row">
-                    { this.legend() }
-                    { this.releaseUpdates() }
-                </div>
+                <div className="row">{ this.legend() }</div>
                 <div className="row">
                     <div className="col-xs-12 col-md-6">
                         <h3 className="mt-4 mb-0 text-300">4DN</h3>
@@ -321,6 +311,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
+                <div className="row">{ this.releaseUpdates() }</div>
                 <HiGlassSection disabled={!this.state.higlassVisible} results={resultList4DN} />
             </StaticPage.Wrapper>
         );
