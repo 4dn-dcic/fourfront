@@ -143,7 +143,7 @@ class LinksRow extends React.PureComponent {
     jointAnalysisPageLink(colSize){
         return (
             <div className={"link-block col-sm-" + colSize}>
-                <a href="/joint-analysis" target="_blank">
+                <a href="/joint-analysis">
                     <layout.VerticallyCenteredChild verticalPaddingOffset={this.props.linkBoxVerticalPaddingOffset}>
                         <span>Joint Analysis Page</span>
                     </layout.VerticallyCenteredChild>
@@ -156,7 +156,7 @@ class LinksRow extends React.PureComponent {
         var { linkBoxVerticalPaddingOffset, session } = this.props;
         var colSize = session ? 4 : 6;
         return (
-            <div className="homepage-links-row">
+            <div className="homepage-links-row internal-links">
                 <h3 className="text-300 mb-2 mt-3">Recommended</h3>
                 <div className="links-wrapper clearfix row">
                     <div className={"link-block col-sm-" + colSize}>
@@ -167,7 +167,7 @@ class LinksRow extends React.PureComponent {
                         </BigBrowseButton>
                     </div>
                     <div className={"link-block col-sm-" + colSize}>
-                        <a href="/help/user-guide/data-organization" target="_blank">
+                        <a href="/help/user-guide/data-organization">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>Introduction to 4DN Metadata</span>
                             </layout.VerticallyCenteredChild>
@@ -182,7 +182,7 @@ class LinksRow extends React.PureComponent {
     externalLinks(){
         var linkBoxVerticalPaddingOffset = this.props.linkBoxVerticalPaddingOffset;
         return (
-            <div className="homepage-links-row">
+            <div className="homepage-links-row external-links">
                 <h3 className="text-300 mb-2 mt-3">External Links</h3>
                 <div className="links-wrapper clearfix row">
                     <div className="link-block col-sm-3">
