@@ -122,6 +122,7 @@ class BigBrowseButton extends React.Component {
 
     render(){
         var children = this.props.children,
+            element = this.props.element,
             propsToPass = {
                 'onMouseEnter' : this.handleMouseEnter,
                 'onMouseLeave' : this.handleMouseLeave,
@@ -129,14 +130,7 @@ class BigBrowseButton extends React.Component {
                 'href' : navigate.getBrowseBaseHref()
             };
 
-        if (typeof children === 'function'){
-            children = children(propsToPass);
-        }
-        return React.createElement(
-            this.props.element,
-            _.extend(_.omit(this.props, 'element', 'children'), propsToPass),
-            children
-        );
+        return React.createElement(element, _.extend(_.omit(this.props, 'element', 'children'), propsToPass), children);
     }
 }
 
