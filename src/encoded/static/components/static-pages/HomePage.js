@@ -121,20 +121,26 @@ class BigBrowseButton extends React.Component {
     }
 
     render(){
-        return React.createElement(
-            this.props.element,
-            _.extend(_.omit(this.props, 'element', 'children'), {
+        var children = this.props.children,
+            propsToPass = {
                 'onMouseEnter' : this.handleMouseEnter,
                 'onMouseLeave' : this.handleMouseLeave,
                 'onClick' : this.handleMouseLeave,
                 'href' : navigate.getBrowseBaseHref()
-            }),
-            this.props.children
+            };
+
+        if (typeof children === 'function'){
+            children = children(propsToPass);
+        }
+        return React.createElement(
+            this.props.element,
+            _.extend(_.omit(this.props, 'element', 'children'), propsToPass),
+            children
         );
     }
 }
 
-class LinksRow extends React.PureComponent {
+class LinksRow extends React.Component {
 
     static defaultProps = {
         'linkBoxVerticalPaddingOffset' : 22
@@ -150,6 +156,12 @@ class LinksRow extends React.PureComponent {
                 </a>
             </div>
         );
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.session !== this.props.session){
+            setTimeout(this.forceUpdate.bind(this), 500);
+        }
     }
 
     internalLinks(){
