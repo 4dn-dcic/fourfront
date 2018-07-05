@@ -100,11 +100,10 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'baseUrl' : "https://higlass.4dnucleome.org",
     'supplementaryTracksBaseUrl' : "https://higlass.io",
     'initialDomains' : {
-        'x' : [31056455, 31254944],
-        'y' : [31114340, 31201073]
+        'x' : [-10000000, 3300000000],
+        'y' : [-8000000, 3100000000],
     },
     'extraViewProps' : [],
-    //'genomeAssembly' : 'GRCh38',
     'index' : 0,
     'storagePrefix' : HiGlassLocalStorage.DEFAULT_PREFIX,
     'groupID' : null,
@@ -735,6 +734,8 @@ export class HiGlassContainer extends React.PureComponent {
         if (!this.hiGlassComponentExists && hiGlassComponentExists){
             this.bindHiGlassEventHandlers();
             console.info('Binding event handlers to HiGlassComponent.');
+            console.log(this.refs.hiGlassComponent);
+            window.hiGlassComponent = this.refs.hiGlassComponent;
             // Check if we have same initialDomains as props, which indicates it came not from storage, so then zoom out to extents.
             /*
             var viewConfig = this.state.viewConfig;

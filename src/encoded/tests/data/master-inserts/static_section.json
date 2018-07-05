@@ -598,8 +598,22 @@
     {
         "name" : "joint-analysis-data-plans.legend",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b025",
+        "title" : "Legend",
         "file" : "/src/encoded/static/data/joint_data_analysis-legend.html"
-    }, {
+    },
+
+    {
+        "name" : "joint-analysis-data-plans.release-updates",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460c026",
+        "title" : "Release Updates",
+        "body" : "<ol><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01_internal_JA'>First Data Freeze (January 2018)</a></li><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01updates_internal_JA_toJune'>June Interim Update (January-June 2018)</a></li></ol>",
+        "options" : {
+            "filetype" : "html"
+        }
+    },
+    
+    
+    {
         "name" : "joint-analysis-data-plans.matrix-1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b026",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
