@@ -193,13 +193,14 @@ export const HiGlassConfigurator = {
 
     generateViewConfigViewBase : function(viewUID = null, chromosomeAndAnnotation = {}, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
         var { index, extraViewProps, baseUrl, supplementaryTracksBaseUrl } = options;
+
         viewUID = viewUID || "view-4dn-" + index;
 
         var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
         var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
 
         return _.extend({
-            "uid" : "view-4dn-" + options.index,
+            "uid" : viewUID,
             "layout": HiGlassConfigurator.generateDefaultLayoutForViewItem(viewUID, (extraViewProps && extraViewProps.layout) || null),
             "initialXDomain": initialDomains.x,
             "initialYDomain" : initialDomains.y,
@@ -210,22 +211,7 @@ export const HiGlassConfigurator = {
                 "chromInfoServer": genomeSearchUrl + "/api/v1",
                 "chromInfoId": (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
                 "visible": true
-            },
-
-            "editable"  : true,
-            "zoomFixed" : false,
-            "exportViewUrl": "/api/v1/viewconfs",
-            "zoomLocks" : {
-                "locksByViewUid" : {},
-                "locksDict" : {}
-            },
-            "locationLocks" : {
-                "locksByViewUid" : {},
-                "locksDict" : {}
-            },
-            "trackSourceServers": [
-                options.supplementaryTracksBaseUrl + "/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
-            ]
+            }
         }, options.viewConfigViewBase || {});
     },
 
@@ -748,7 +734,22 @@ export class HiGlassContainer extends React.PureComponent {
         var hiGlassComponentExists = !!(this.refs.hiGlassComponent);
         if (!this.hiGlassComponentExists && hiGlassComponentExists){
             this.bindHiGlassEventHandlers();
-            console.log('Binding event handlers to HiGlassComponent.');
+            console.info('Binding event handlers to HiGlassComponent.');
+            // Check if we have same initialDomains as props, which indicates it came not from storage, so then zoom out to extents.
+            /*
+            var viewConfig = this.state.viewConfig;
+            if (viewConfig && Array.isArray(viewConfig.views)){
+                _.forEach(viewConfig.views, (v) => {
+                    if (
+                        (v.initialXDomain && v.initialXDomain === DEFAULT_GEN_VIEW_CONFIG_OPTIONS.initialDomains.x) &&
+                        (v.initialYDomain && v.initialYDomain === DEFAULT_GEN_VIEW_CONFIG_OPTIONS.initialDomains.y)
+                    ) {
+                        console.info('Zooming view w/ uid ' + v.uid + ' to extents');
+                        this.refs.hiGlassComponent.api.zoomToDataExtent(v.uid);
+                    }
+                });
+            }
+            */
         }
         this.hiGlassComponentExists = hiGlassComponentExists;
     }
