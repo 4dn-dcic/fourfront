@@ -191,6 +191,44 @@ export const HiGlassConfigurator = {
         }, options.viewConfigBase || {});
     },
 
+    generateViewConfigViewBase : function(viewUID = null, chromosomeAndAnnotation = {}, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+        var { index, extraViewProps, baseUrl, supplementaryTracksBaseUrl } = options;
+        viewUID = viewUID || "view-4dn-" + index;
+
+        var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
+        var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
+
+        return _.extend({
+            "uid" : "view-4dn-" + options.index,
+            "layout": HiGlassConfigurator.generateDefaultLayoutForViewItem(viewUID, (extraViewProps && extraViewProps.layout) || null),
+            "initialXDomain": initialDomains.x,
+            "initialYDomain" : initialDomains.y,
+            "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+            "genomePositionSearchBox": {
+                "autocompleteServer": genomeSearchUrl + "/api/v1",
+                "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
+                "chromInfoServer": genomeSearchUrl + "/api/v1",
+                "chromInfoId": (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
+                "visible": true
+            },
+
+            "editable"  : true,
+            "zoomFixed" : false,
+            "exportViewUrl": "/api/v1/viewconfs",
+            "zoomLocks" : {
+                "locksByViewUid" : {},
+                "locksDict" : {}
+            },
+            "locationLocks" : {
+                "locksByViewUid" : {},
+                "locksDict" : {}
+            },
+            "trackSourceServers": [
+                options.supplementaryTracksBaseUrl + "/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
+            ]
+        }, options.viewConfigViewBase || {});
+    },
+
     chromosomeAndAnnotationFromGenomeAssembly : function(genomeAssembly = 'GRCh38'){
         if (genomeAssembly === 'GRCh38'){ // Human
             return {
@@ -400,25 +438,9 @@ export const HiGlassConfigurator = {
 
             // Track definitions, default to human.
             var chromosomeAndAnnotation = HiGlassConfigurator.chromosomeAndAnnotationFromGenomeAssembly(file.genome_assembly);
-
             var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
-
-            var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
-
-            const viewUid = "view-4dn-mcool-" + index;
-            return {
-                "uid": viewUid,
-                "initialXDomain": initialDomains.x,
-                "initialYDomain" : initialDomains.y,
-                "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
-                // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
-                "genomePositionSearchBox": {
-                    "autocompleteServer": genomeSearchUrl + "/api/v1",
-                    "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
-                    "chromInfoServer": genomeSearchUrl + "/api/v1",
-                    "chromInfoId": (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
-                    "visible": true
-                },
+    
+            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-mcool-" + index, chromosomeAndAnnotation, options), {
                 "tracks": {
                     "top" : [
                         HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
@@ -431,9 +453,8 @@ export const HiGlassConfigurator = {
                     "center": [ HiGlassConfigurator.mcool.generateCenterTrack(file, height - 50, baseUrl) ],
                     "right": [],
                     "bottom": []
-                },
-                "layout": HiGlassConfigurator.generateDefaultLayoutForViewItem(viewUid, (extraViewProps && extraViewProps.layout) || null)
-            };
+                }
+            });
         },
 
         /**
@@ -541,8 +562,6 @@ export const HiGlassConfigurator = {
 
             var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
 
-            const viewUid = "view-4dn-bigwig-" + index;
-
             const tracks = []; // Will be used as single 'top' tracks list.
 
             if (!excludeAnnotationTracks) {
@@ -556,19 +575,7 @@ export const HiGlassConfigurator = {
                 );
             });
 
-            return {
-                "uid": viewUid,
-                "initialXDomain": initialDomains.x,
-                "initialYDomain" : initialDomains.y,
-                "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
-                // TODO: Make this werk -- works if 'trackSourceServers' at top is set to higlass.io not 54.86.58.34
-                "genomePositionSearchBox": {
-                    "autocompleteServer": genomeSearchUrl + "/api/v1",
-                    "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
-                    "chromInfoServer": genomeSearchUrl + "/api/v1",
-                    "chromInfoId": (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
-                    "visible": true
-                },
+            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-bigwig-" + index, chromosomeAndAnnotation, options), {
                 "tracks": {
                     "top" : tracks,
                     "left" : [],
@@ -576,8 +583,7 @@ export const HiGlassConfigurator = {
                     "right": [],
                     "bottom": []
                 },
-                "layout": HiGlassConfigurator.generateDefaultLayoutForViewItem(viewUid, (extraViewProps && extraViewProps.layout) || null)
-            };
+            });
         },
 
         generateViewConfig : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
