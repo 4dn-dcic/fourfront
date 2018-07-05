@@ -606,7 +606,7 @@
         "name" : "joint-analysis-data-plans.release-updates",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460c026",
         "title" : "Release Updates",
-        "body" : "<ol><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01_internal_JA'>First Data Freeze (January 2018)</a></li><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01updates_internal_JA_toJune'>June Interim Update (January-June 2018)</a></li></ol>",
+        "body" : "<ol class='text-small mb-0'><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01_internal_JA'>First Data Freeze (January 2018)</a></li><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01updates_internal_JA_toJune'>June Interim Update (January-June 2018)</a></li></ol>",
         "options" : {
             "filetype" : "html"
         }

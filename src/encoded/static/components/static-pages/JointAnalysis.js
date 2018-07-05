@@ -229,7 +229,7 @@ export default class JointAnalysisPlansPage extends React.Component {
     renderSection(section, id){
         return (
             <div className="col-xs-12">
-                <div className="static-section-entry" id="legend">
+                <div className="static-section-entry" id={id || null}>
                     { section.title && <h5 className="section-title mt-1 mb-1">{ section.title }</h5> }
                     <BasicStaticSectionBody content={section.content} filetype={section.filetype} />
                 </div>
