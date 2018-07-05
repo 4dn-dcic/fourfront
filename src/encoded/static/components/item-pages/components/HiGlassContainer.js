@@ -418,15 +418,15 @@ export const HiGlassConfigurator = {
         generateView : function(file, options){
             var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index } = options;
 
-            if (Array.isArray(extraViewProps)){
-                extraViewProps = extraViewProps[index];
-            }
+            var passedOptions = _.extend({}, options, {
+                'extraViewProps' : (Array.isArray(extraViewProps) && extraViewProps[index]) || extraViewProps
+            });
 
             // Track definitions, default to human.
             var chromosomeAndAnnotation = HiGlassConfigurator.chromosomeAndAnnotationFromGenomeAssembly(file.genome_assembly);
             var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
     
-            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-mcool-" + index, chromosomeAndAnnotation, options), {
+            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-mcool-" + index, chromosomeAndAnnotation, passedOptions), {
                 "tracks": {
                     "top" : [
                         HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),

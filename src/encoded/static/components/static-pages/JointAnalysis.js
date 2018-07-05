@@ -428,10 +428,13 @@ class VisualBody extends React.Component {
 
                     var data_source = (aggrData || data).data_source;
                     var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
+                    var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
 
                     var currentFilteringPropertiesVals = _.object(
                         _.map(currentFilteringProperties, function(property){
-                            return [ GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], (aggrData || data)[property] ];
+                            var facetField = GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], facetTerm = (aggrData || data)[property];
+                            if (property === 'cell_type' && data_source === '4DN') facetTerm = reversed_cell_type_map[facetTerm] || facetTerm;
+                            return [ facetField, facetTerm ];
                         })
                     );
 
@@ -462,7 +465,6 @@ class VisualBody extends React.Component {
                         'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
                     );
 
-                    var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
                     keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
 
                     if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
