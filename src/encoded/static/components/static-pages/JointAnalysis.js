@@ -228,7 +228,7 @@ export default class JointAnalysisPlansPage extends React.Component {
 
     legend(){
         var context = this.props.context;
-        if (Array.isArray(context.content) && context.content.length > 0 && context.content[0].name === 'joint-analysis-data-plans#legend'){
+        if (Array.isArray(context.content) && context.content.length > 0 && context.content[0].name === 'joint-analysis-data-plans.legend'){
             // We expect first Item, if any, to be Legend.
             var legendSection = context.content[0];
             return (
