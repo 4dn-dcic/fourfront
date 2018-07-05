@@ -49,7 +49,9 @@ export default class HomePage extends React.PureComponent {
             <div className="col-md-6 col-xs-12">
                 <h2 className="homepage-section-title">{ (introContent && introContent.display_title) || "Introduction" }</h2>
                 <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: (introContent && introContent.content) || "<p>Introduction content not yet indexed.</p>" }}/>
-                <layout.WindowResizeUpdateTrigger><LinksRow/></layout.WindowResizeUpdateTrigger>
+                <layout.WindowResizeUpdateTrigger>
+                    <LinksRow session={this.props.session} />
+                </layout.WindowResizeUpdateTrigger>
             </div>
         );
     }
@@ -84,13 +86,19 @@ export default class HomePage extends React.PureComponent {
 
 class BigBrowseButton extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.onMouseEnter = this.onMouseEnter.bind(this);
-        this.onMouseLeave = this.onMouseLeave.bind(this);
+    static defaultProps = {
+        'element' : 'a',
+        'className' : "btn btn-block btn-primary btn-lg text-400",
+        'children' : 'Browse 4DN Data'
     }
 
-    onMouseEnter(){
+    constructor(props){
+        super(props);
+        this.handleMouseEnter = this.handleMouseEnter.bind(this);
+        this.handleMouseLeave = this.handleMouseLeave.bind(this);
+    }
+
+    handleMouseEnter(){
         requestAnimationFrame(function(){
             var topMenuBrowseButton = document.getElementById('browse-menu-item');
             if (topMenuBrowseButton){
@@ -101,7 +109,7 @@ class BigBrowseButton extends React.Component {
         });
     }
 
-    onMouseLeave(e){
+    handleMouseLeave(e){
         requestAnimationFrame(function(){
             var topMenuBrowseButton = document.getElementById('browse-menu-item');
             if (topMenuBrowseButton){
@@ -113,14 +121,18 @@ class BigBrowseButton extends React.Component {
     }
 
     render(){
-        return (
-            <Button className="btn-block btn-primary btn-lg text-400" href={navigate.getBrowseBaseHref()} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} onClick={this.onMouseLeave}>
-                Browse 4DN Data
-            </Button>
+        return React.createElement(
+            this.props.element,
+            _.extend(_.omit(this.props, 'element', 'children'), {
+                'onMouseEnter' : this.handleMouseEnter,
+                'onMouseLeave' : this.handleMouseLeave,
+                'onClick' : this.handleMouseLeave,
+                'href' : navigate.getBrowseBaseHref()
+            }),
+            this.props.children
         );
     }
 }
-
 
 class LinksRow extends React.PureComponent {
 
@@ -128,7 +140,46 @@ class LinksRow extends React.PureComponent {
         'linkBoxVerticalPaddingOffset' : 22
     }
 
-    render(){
+    jointAnalysisPageLink(colSize){
+        return (
+            <div className={"link-block col-sm-" + colSize}>
+                <a href="/joint-analysis" target="_blank">
+                    <layout.VerticallyCenteredChild verticalPaddingOffset={this.props.linkBoxVerticalPaddingOffset}>
+                        <span>Joint Analysis Page</span>
+                    </layout.VerticallyCenteredChild>
+                </a>
+            </div>
+        );
+    }
+
+    internalLinks(){
+        var { linkBoxVerticalPaddingOffset, session } = this.props;
+        var colSize = session ? 4 : 6;
+        return (
+            <div className="homepage-links-row">
+                <h3 className="text-300 mb-2 mt-3">Recommended</h3>
+                <div className="links-wrapper clearfix row">
+                    <div className={"link-block col-sm-" + colSize}>
+                        <BigBrowseButton className={null}>
+                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
+                                <span>{ BigBrowseButton.defaultProps.children }</span>
+                            </layout.VerticallyCenteredChild>
+                        </BigBrowseButton>
+                    </div>
+                    <div className={"link-block col-sm-" + colSize}>
+                        <a href="/help/user-guide/data-organization" target="_blank">
+                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
+                                <span>Introduction to 4DN Metadata</span>
+                            </layout.VerticallyCenteredChild>
+                        </a>
+                    </div>
+                    { (session && this.jointAnalysisPageLink(colSize)) || null }
+                </div>
+            </div>
+        );
+    }
+
+    externalLinks(){
         var linkBoxVerticalPaddingOffset = this.props.linkBoxVerticalPaddingOffset;
         return (
             <div className="homepage-links-row">
@@ -166,6 +217,10 @@ class LinksRow extends React.PureComponent {
                 <br/>
             </div>
         );
+    }
+
+    render(){
+        return <div className="homepage-links">{ this.internalLinks() }{ this.externalLinks() }</div>;
     }
 }
 
