@@ -31,21 +31,13 @@ export class SelectedFilesOverview extends React.Component {
 
 export class SelectedFilesDownloadButton extends React.PureComponent {
 
-    static encodePlainText(text){
-        return 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
-    }
-
-    static generateListOfURIsFromFiles(files, hostPrefix = ''){
-        return _.pluck(files, 'href').map(function(downloadPath){ return hostPrefix + downloadPath; });
-    }
-
     constructor(props){
         super(props);
         this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
+        this.handleHideModal = this.handleHideModal.bind(this);
         this.renderModal = this.renderModal.bind(this);
         this.state = {
-            'modalOpen' : false,
-            'urls' : null
+            'modalOpen' : false
         };
     }
 
@@ -60,14 +52,11 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     handleClick(e){
-        var urlParts = url.parse(windowHref(this.props.href));
-        var urlsString = SelectedFilesDownloadButton.generateListOfURIsFromFiles(
-            _.pluck(_.sortBy(_.pairs(this.props.subSelectedFiles || this.props.selectedFiles), function(pair){
-                var accessions = pair[0].split('~');
-            }), 1),
-            urlParts.protocol + '//' + urlParts.host
-        ).join('\n');
-        this.setState({ 'modalOpen' : true, 'urls' : urlsString });
+        this.setState({ 'modalOpen' : true });
+    }
+
+    handleHideModal(){
+        this.setState({ 'modalOpen' : false });
     }
 
     renderModalCodeSnippet(meta_download_filename, isSignedIn){
@@ -94,7 +83,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         var profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
 
         return (
-            <Modal show={true} className="batch-files-download-modal" onHide={()=>{ this.setState({ 'modalOpen' : false }); }} bsSize="large">
+            <Modal show={true} className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
                 <Modal.Header closeButton>
                     <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
                 </Modal.Header>
@@ -119,7 +108,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                         </li>
                     </ul>
 
-                    <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
+                    <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
                         <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
                         <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual file in the 'files.txt' download list below.">
