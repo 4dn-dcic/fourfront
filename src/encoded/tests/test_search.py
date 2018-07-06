@@ -262,7 +262,8 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 
     # run a simple GET query with type=ExperimentSetReplicate
-    res = htmltestapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv')
+    res = htmltestapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv') # OLD URL FORMAT IS USED -- TESTING REDIRECT TO NEW URL
+    res = res.maybe_follow() # Follow redirect -- https://docs.pylonsproject.org/projects/webtest/en/latest/api.html#webtest.response.TestResponse.maybe_follow
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
 
@@ -281,7 +282,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
         'download_file_name' : 'metadata_TEST.tsv'
     }
 
-    res2 = htmltestapp.post('/metadata/type=ExperimentSetReplicate/metadata.tsv', { k : json.dumps(v) for k,v in res2_post_data.items() })
+    res2 = htmltestapp.post('/metadata/?type=ExperimentSetReplicate', { k : json.dumps(v) for k,v in res2_post_data.items() }) # NEWER URL FORMAT
 
     assert 'text/tsv' in res2.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]

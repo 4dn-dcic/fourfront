@@ -224,7 +224,6 @@ def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample):
     }
 
 
-
 @pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, wrangler['uuid'])
@@ -515,11 +514,81 @@ def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_
         submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
 
 
-def test_submitter_cannot_view_ownitem_replaced(ind_human_item, submitter_testapp,
-                                                wrangler_testapp):
+def test_submitter_cannot_view_ownitem_replaced_using_accession(ind_human_item, submitter_testapp, wrangler_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
-    submitter_testapp.get(res.json['@graph'][0]['@id'], status=404)
+    my_accession = '/' + res.json['@graph'][0]['accession']
+    submitter_testapp.get(my_accession, status=404)
+
+
+def test_submitter_can_view_ownitem_replaced_using_uuid(ind_human_item, submitter_testapp, wrangler_testapp):
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    my_uuid = '/individuals-human/' + res.json['@graph'][0]['uuid'] + '/'
+    rep_res = submitter_testapp.get(my_uuid, status=200)
+
+
+def test_submitter_can_view_ownitem_replaced_using_alias(ind_human_item, submitter_testapp, wrangler_testapp):
+    # alias will redirect to uuid
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    res_p = wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced", "aliases": ['test:human']}, status=200)
+    my_alias = '/' + res_p.json['@graph'][0]['aliases'][0]
+    rep_res = submitter_testapp.get(my_alias, status=301)
+    # get the landing url, which is /object_type/uuid in this case
+    landing = rep_res.headers['Location'].replace('http://localhost', '')
+    submitter_testapp.get(landing, status=200)
+
+
+def test_submitter_replaced_item_redirects_to_new_one_with_accession(ind_human_item, submitter_testapp, wrangler_testapp):
+    # posting 2 individual, changing 1 to replaced, and giving its accession to alternate accession field of the
+    # second one. This should result in redirect when the old accession is used
+    # item that will be replaced (old item)
+    old = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    # item that will replace (new item)
+    new = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    # patch old one wih status
+    wrangler_testapp.patch_json(old.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    # patch new one with alternate accession
+    wrangler_testapp.patch_json(new.json['@graph'][0]['@id'], {"alternate_accessions": [old.json['@graph'][0]['accession']]}, status=200)
+    # visit old item and assert that it lands on new item
+    rep_res = submitter_testapp.get(old.json['@graph'][0]['@id'], status=301)
+    # get the landing url
+    landing = rep_res.headers['Location'].replace('http://localhost', '')
+    assert landing == new.json['@graph'][0]['@id']
+    submitter_testapp.get(landing, status=200)
+
+
+def test_submitter_replaced_item_doesnot_redirect_to_new_one_with_uuid(ind_human_item, submitter_testapp, wrangler_testapp):
+    # posting 2 individual, changing 1 to replaced, and giving its accession to alternate accession field of the
+    # second one. This should result in redirect when the old accession is used
+    # Old item should still be accessible with its uuid
+    old = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    old_uuid = '/individuals-human/' + old.json['@graph'][0]['uuid'] + '/'
+    print(old_uuid)
+    # item that will replace (new item)
+    new = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    # patch old one wih status
+    wrangler_testapp.patch_json(old.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    # patch new one with alternate accession
+    patch_data = {"alternate_accessions": [old.json['@graph'][0]['accession']]}
+    wrangler_testapp.patch_json(new.json['@graph'][0]['@id'], patch_data, status=200)
+    # visit old uuid and assert that it lands on old item
+    submitter_testapp.get(old_uuid, status=200)
+
+
+def test_submitter_can_not_add_to_alternate_accession_if_not_replaced(ind_human_item, submitter_testapp, wrangler_testapp):
+    # an accession that's status is not replaced, can not be added to alternate_accessions
+    old = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    # item that will replace (new item)
+    new = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    # patch old one wih status
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
+                'archived to project', 'in review by lab', 'submission in progress', 'planned']
+    for status in statuses:
+        wrangler_testapp.patch_json(old.json['@graph'][0]['@id'], {"status": status}, status=200)
+        # try adding the accession to alternate accessions
+        # should result in conflict (409)
+        wrangler_testapp.patch_json(new.json['@graph'][0]['@id'], {"alternate_accessions": [old.json['@graph'][0]['accession']]}, status=409)
 
 
 # Submitter created item and wants to patch
@@ -555,11 +624,12 @@ def test_submitter_cannot_patch_file_statuses(file_item, submitter_testapp, wran
         submitter_testapp.patch_json(res.json['@graph'][0]['@id'], {'paired_end': '1'}, status=403)
 
 
-# Replaced seems to be a special case with err0r 404 instead of 403
 def test_submitter_cannot_patch_replaced(ind_human_item, submitter_testapp, wrangler_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
-    submitter_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=404)
+    # replaced items are not accessible by accession
+    my_uuid = '/' + res.json['@graph'][0]['uuid']
+    submitter_testapp.patch_json(my_uuid, {'sex': 'female'}, status=403)
 
 
 # Submitter created item and lab member wants to view
@@ -589,10 +659,17 @@ def test_labmember_can_view_submitter_file(file_item, submitter_testapp, wrangle
         lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=200)
 
 
-def test_labmember_cannot_view_submitter_item_replaced(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+def test_labmember_cannot_view_submitter_item_replaced_accession(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
     lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=404)
+
+
+def test_labmember_can_view_submitter_item_replaced_uuid(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    my_uuid = '/individuals-human/' + res.json['@graph'][0]['uuid'] + '/'
+    lab_viewer_testapp.get(my_uuid, status=200)
 
 
 # Submitter created item and lab member wants to patch
@@ -684,10 +761,18 @@ def test_viewing_group_member_can_view_submitter_file(file_item, submitter_testa
         viewing_group_member_testapp.get(res.json['@graph'][0]['@id'], status=200)
 
 
-def test_viewing_group_member_cannot_view_submitter_item_replaced(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
+def test_viewing_group_member_can_view_submitter_item_replaced_with_uuid(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
-    viewing_group_member_testapp.get(res.json['@graph'][0]['@id'], status=404)
+    my_uuid = '/individuals-human/' + res.json['@graph'][0]['uuid'] + '/'
+    viewing_group_member_testapp.get(my_uuid, status=200)
+
+
+def test_viewing_group_member_cannot_view_submitter_item_replaced_with_accession(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    my_accession = '/' + res.json['@graph'][0]['accession']
+    viewing_group_member_testapp.get(my_accession, status=404)
 
 
 # Submitter created item and viewing group member wants to patch
@@ -812,7 +897,7 @@ def test_last_modified_works_correctly(ind_human_item, submitter, wrangler, subm
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201).json['@graph'][0]
     assert res['last_modified']['modified_by'] == submitter['@id']
     # patch same item using a different user
-    res2 = wrangler_testapp.patch_json(res['@id'], {"status": "replaced"}, status=200).json['@graph'][0]
+    res2 = wrangler_testapp.patch_json(res['@id'], {"status": "current"}, status=200).json['@graph'][0]
     assert res2['last_modified']['modified_by'] == wrangler['@id']
     assert res2['last_modified']['date_modified'] > res['last_modified']['date_modified']
 

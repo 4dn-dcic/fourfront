@@ -10,7 +10,7 @@ import { console, object, ajax } from'./../util';
 import * as plansData from './../testdata/stacked-block-matrix-list';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
-import { StackedBlockVisual, sumPropertyFromList } from './components';
+import { StackedBlockVisual, sumPropertyFromList, BasicStaticSectionBody } from './components';
 import { HiGlassContainer } from './../item-pages/components';
 
 
@@ -226,19 +226,29 @@ export default class JointAnalysisPlansPage extends React.Component {
         );
     }
 
-    legend(){
-        var context = this.props.context;
-        if (Array.isArray(context.content) && context.content.length > 0 && context.content[0].name === 'joint-analysis-data-plans#legend'){
-            // We expect first Item, if any, to be Legend.
-            var legendSection = context.content[0];
-            return (
-                <div className="col-xs-12">
-                    <div className="static-section-entry" id="legend">
-                        <div className="fourDN-content" dangerouslySetInnerHTML={{__html: legendSection.content }}/>
-                    </div>
+    renderSection(section, id){
+        return (
+            <div className="col-xs-12">
+                <div className="static-section-entry" id={id || null}>
+                    { section.title && <h5 className="section-title mt-1 mb-1">{ section.title }</h5> }
+                    <BasicStaticSectionBody content={section.content} filetype={section.filetype} />
                 </div>
-            );
-        }
+            </div>
+        );
+    }
+
+    legend(){
+        var context = this.props.context,
+            legendContentSection = Array.isArray(context.content) && _.findWhere(context.content, { 'name' : 'joint-analysis-data-plans.legend' });
+
+        return (legendContentSection && this.renderSection(legendContentSection, "legend")) || null;
+    }
+
+    releaseUpdates(){
+        var context = this.props.context,
+            releaseUpdatesSection = Array.isArray(context.content) && _.findWhere(context.content, { 'name' : 'joint-analysis-data-plans.release-updates' });
+
+        return (releaseUpdatesSection && this.renderSection(releaseUpdatesSection, "release-updates-section")) || null;
     }
 
     render() {
@@ -263,8 +273,8 @@ export default class JointAnalysisPlansPage extends React.Component {
 
         return (
             <StaticPage.Wrapper>
+                <div className="row">{ this.legend() }</div>
                 <div className="row">
-                    { this.legend() }
                     <div className="col-xs-12 col-md-6">
                         <h3 className="mt-4 mb-0 text-300">4DN</h3>
                         <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
@@ -301,6 +311,7 @@ export default class JointAnalysisPlansPage extends React.Component {
                         />
                     </div>
                 </div>
+                <div className="row">{ this.releaseUpdates() }</div>
                 <HiGlassSection disabled={!this.state.higlassVisible} results={resultList4DN} />
             </StaticPage.Wrapper>
         );
@@ -349,13 +360,7 @@ class HiGlassSection extends React.Component {
                 </div>
                 <div className="row mb-2">
                     <div className="col-xs-12" style={{ 'height' : 600 }}>
-                        <HiGlassContainer
-                            height={600}
-                            tilesetUid={[
-                                { "tilesetUid" : tileset_h1, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 0, y: 0} } }, // H1-hESC
-                                { "tilesetUid" : tileset_hff, "extraViewProps" : { "layout" : {w: 6, h: 12, x: 6, y: 0} } }  // HFFc6
-                            ]}
-                        />
+                        <HiGlassContainer height={600} files={[h1_mcool, hff_mcool]} extraViewProps={[{ "layout" : {w: 6, h: 12, x: 0, y: 0} }, { "layout" : {w: 6, h: 12, x: 6, y: 0} } ]} />
                     </div>
                 </div>
             </div>
@@ -434,10 +439,13 @@ class VisualBody extends React.Component {
 
                     var data_source = (aggrData || data).data_source;
                     var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
+                    var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
 
                     var currentFilteringPropertiesVals = _.object(
                         _.map(currentFilteringProperties, function(property){
-                            return [ GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], (aggrData || data)[property] ];
+                            var facetField = GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], facetTerm = (aggrData || data)[property];
+                            if (property === 'cell_type' && data_source === '4DN') facetTerm = reversed_cell_type_map[facetTerm] || facetTerm;
+                            return [ facetField, facetTerm ];
                         })
                     );
 
@@ -468,7 +476,6 @@ class VisualBody extends React.Component {
                         'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
                     );
 
-                    var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
                     keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
 
                     if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
