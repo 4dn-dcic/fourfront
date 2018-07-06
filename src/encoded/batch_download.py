@@ -252,17 +252,31 @@ def metadata_tsv(context, request):
     header = []
 
     def add_field_to_search_params(itemType, field):
-        if itemType == EXP_SET:
-            search_params['field'].append(param_field)
-        if itemType == EXP:
-            search_params['field'].append('experiments_in_set.' + param_field)
-        if itemType == FILE:
-            search_params['field'].append('experiments_in_set.files.' + param_field)
-            search_params['field'].append('experiments_in_set.processed_files.' + param_field)
-            search_params['field'].append('processed_files.' + param_field)
+        if search_params['type'][0:13] == 'ExperimentSet':
+            if itemType == EXP_SET:
+                search_params['field'].append(param_field)
+            elif itemType == EXP:
+                search_params['field'].append('experiments_in_set.' + param_field)
+            elif itemType == FILE:
+                search_params['field'].append('experiments_in_set.files.' + param_field)
+                search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+                search_params['field'].append('processed_files.' + param_field)
+        elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+            if itemType == EXP_SET:
+                search_params['field'].append('experiment_set.' + param_field)
+            elif itemType == EXP:
+                search_params['field'].append('experiment.' + param_field)
+            elif itemType == FILE:
+                search_params['field'].append(param_field)
+        else:
+            raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
 
     for prop in TSV_MAPPING:
-        header.append(prop)
+        if search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+            if TSV_MAPPING[prop][0] == FILE:
+                header.append(prop)
+        else:
+            header.append(prop)
         for param_field in TSV_MAPPING[prop][1]:
             add_field_to_search_params(TSV_MAPPING[prop][0], param_field)
     for itemType in EXTRA_FIELDS:
@@ -328,10 +342,11 @@ def metadata_tsv(context, request):
             return None
 
         experiment_accession = column_vals_dict.get('Experiment Accession')
-        if experiment_accession and ',' not in experiment_accession:
-            return get_val(experiment_accession)
-        else:
-            return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
+        if experiment_accession:
+            if ',' not in experiment_accession:
+                return get_val(experiment_accession)
+            else:
+                return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
         return None
 
     def should_file_row_object_be_included(column_vals_dict):
@@ -428,6 +443,7 @@ def metadata_tsv(context, request):
         all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
         all_row_vals['Bio Rep No']  = get_correct_rep_no('Bio Rep No',  all_row_vals, exp_set)
 
+        # Add file to our return list which is to be bubbled upwards to iterable.
         files_returned.append(all_row_vals)
 
         # Add attached secondary files, if any; copies most values over from primary file & overrides distinct File Download URL, md5sum, etc.
@@ -480,16 +496,11 @@ def metadata_tsv(context, request):
 
         return file_row_dict
 
-
-    def format_graph_of_experiment_sets(graph):
+    def format_filter_resulting_file_row_dicts(file_row_dict_iterable):
         return map(
             post_process_file_row_dict,
-            enumerate(filter(
-                should_file_row_object_be_included,
-                chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
-            ))
+            enumerate(filter(should_file_row_object_be_included, file_row_dict_iterable))
         )
-
 
     def generate_summary_lines():
         ret_rows = [
@@ -551,13 +562,31 @@ def metadata_tsv(context, request):
         endpoints_initialized['metadata'] = True
         request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
 
+    # Prep - use dif functions if different type requested.
+    if search_params['type'][0:13] == 'ExperimentSet':
+        iterable_pipeline = format_filter_resulting_file_row_dicts(
+            chain.from_iterable(
+                map(
+                    format_experiment_set,
+                    get_iterable_search_results(request, search_path, search_params)
+                )
+            )
+        )
+    elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+        iterable_pipeline = format_filter_resulting_file_row_dicts(
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, {}, {}, {}, {}),
+                    get_iterable_search_results(request, search_path, search_params)
+                )
+            )
+        )
+    else:
+        raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
+
     return Response(
         content_type='text/tsv',
-        app_iter = stream_tsv_output(
-            format_graph_of_experiment_sets(
-                get_iterable_search_results(request, search_path, search_params)
-            )
-        ),
+        app_iter = stream_tsv_output(iterable_pipeline),
         content_disposition='attachment;filename="%s"' % filename_to_suggest
     )
 
