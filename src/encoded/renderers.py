@@ -195,10 +195,10 @@ def should_transform(request, response):
     if format is None:
         original_vary = response.vary or ()
         response.vary = original_vary + ('Accept', 'Authorization')
-        if frame and (frame != 'page' and frame != 'embedded'):
-            format = 'json'
         # Temporary -- remove below if clause once can assert all 3rd party scripts provide 'Accept: application/json' header.
         if request.authorization is not None:
+            format = 'json'
+        if format is None and frame is not None and (frame != 'page' and frame != 'embedded'):
             format = 'json'
         if format is None:
             mime_type = request.accept.best_match(
