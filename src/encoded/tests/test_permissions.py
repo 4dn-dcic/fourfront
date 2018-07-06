@@ -554,7 +554,7 @@ def test_submitter_replaced_item_redirects_to_new_one_with_accession(ind_human_i
     # visit old item and assert that it lands on new item
     rep_res = submitter_testapp.get(old.json['@graph'][0]['@id'], status=301)
     # get the landing url, which includes a 'redirected_from' query param
-    redir_param = '?' + urlencode({ 'redirected_from' : old.json['@graph'][0]['@id'] }) 
+    redir_param = '?' + urlencode({ 'redirected_from' : old.json['@graph'][0]['@id'] })
     landing = rep_res.headers['Location'].replace('http://localhost', '')
     assert landing == new.json['@graph'][0]['@id'] + redir_param
     submitter_testapp.get(landing, status=200)
