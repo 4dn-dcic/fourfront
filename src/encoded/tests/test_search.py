@@ -45,9 +45,11 @@ def test_search_with_no_query(workbook, testapp):
 
 def test_collections_redirect_to_search(workbook, testapp):
     # we removed the collections page and redirect to search of that type
-    res = testapp.get('/biosamples/').follow(status=200)
+    # redirected_from is not used for search
+    res = testapp.get('/biosamples/', status=301).follow(status=200)
     assert res.json['@type'] == ['Search']
     assert res.json['@id'] == '/search/?type=Biosample'
+    assert 'redirected_from' not in res.json['@id']
     assert res.json['@context'] == '/terms/'
     assert res.json['notification'] == 'Success'
     assert res.json['title'] == 'Search'
