@@ -409,7 +409,8 @@
             text-transform: capitalize;
         }
 
-        &[data-field="status"] .term[data-term="deleted"][data-selected="false"] > .facet-item {
+        &[data-field="status"] .term[data-term="deleted"][data-selected="false"] > .facet-item,
+        &[data-field="status"] .term[data-term="replaced"][data-selected="false"] > .facet-item {
             &:after {
                 content: ' (not shown)';
                 font-weight: 300;
