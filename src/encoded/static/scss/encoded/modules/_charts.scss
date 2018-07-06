@@ -2065,9 +2065,31 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
 
-            &.open > .row > .list-section.has-header,
-            &:first-child > .row > .list-section.has-header {
-                padding-top: 80px;
+            @media screen and (min-width: $screen-sm-min){
+                &.open > .row > .list-section.has-header,
+                &:first-child > .row > .list-section.has-header {
+                    padding-top: 80px;
+                }
+            }
+
+            @media screen and (max-width: $screen-xs-max){
+                &.open > .row > .list-section.has-header,
+                &:first-child > .row > .list-section.has-header {
+                    .header-for-viz {
+                        position: relative;
+                        top: -45px;
+                        height: 10px;
+                    }
+                }
+                > .row > .label-section > h4 {
+                    padding-top: 10px;
+                    margin-bottom: 0;
+                }
+                > .row > .list-section {
+                    > .blocks-container {
+                        border-top: 1px solid #eee;
+                    }
+                }
             }
 
             &.row-index-0:not(.with-duplicated-headers),
