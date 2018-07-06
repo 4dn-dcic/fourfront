@@ -108,7 +108,8 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'storagePrefix' : HiGlassLocalStorage.DEFAULT_PREFIX,
     'groupID' : null,
     'baseViewProps' : null,
-    'excludeAnnotationTracks' : false
+    'excludeAnnotationTracks' : false,
+    'contentTrackOptions' : null
 };
 
 /** Dictionary (Object) of functions for building out a viewConfig. Uses common 'options' dictionary. */
@@ -197,6 +198,7 @@ export const HiGlassConfigurator = {
 
         var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
         var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
+        var evp_gpsb = (extraViewProps && extraViewProps.genomePositionSearchBox) || {};
 
         return _.extend({
             "uid" : viewUID,
@@ -205,13 +207,13 @@ export const HiGlassConfigurator = {
             "initialYDomain" : initialDomains.y,
             "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
             "genomePositionSearchBox": {
-                "autocompleteServer": genomeSearchUrl + "/api/v1",
-                "autocompleteId": "P0PLbQMwTYGy-5uPIQid7A",
-                "chromInfoServer": genomeSearchUrl + "/api/v1",
-                "chromInfoId": (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
-                "visible": true
+                "autocompleteServer": evp_gpsb.autocompleteServer || (genomeSearchUrl + "/api/v1"),
+                "autocompleteId": evp_gpsb.autocompleteId || "P0PLbQMwTYGy-5uPIQid7A",
+                "chromInfoServer": evp_gpsb.chromInfoServer || (genomeSearchUrl + "/api/v1"),
+                "chromInfoId": evp_gpsb.chromInfoId || (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
+                "visible": (typeof evp_gpsb.visible === 'boolean' ? evp_gpsb.visible : true)
             }
-        }, options.viewConfigViewBase || {});
+        }, _.omit(extraViewProps, 'layout', 'genomePositionSearchBox'));
     },
 
     chromosomeAndAnnotationFromGenomeAssembly : function(genomeAssembly = 'GRCh38'){
@@ -343,7 +345,7 @@ export const HiGlassConfigurator = {
 
     mcool : {
 
-        generateCenterTrack : function(file, height, trackBaseServer){
+        generateCenterTrack : function(file, height, options){
             /*
             var tilesetUidStr;
             if (typeof file.higlass_uid !== 'string') {
@@ -359,14 +361,14 @@ export const HiGlassConfigurator = {
                 "type": "combined",
                 "height": height,
                 "contents": [
-                    {
-                        "server": trackBaseServer + "/api/v1",
+                    _.extend({
+                        "server": options.baseUrl + "/api/v1",
                         "tilesetUid": file.higlass_uid,
                         "type": "heatmap",
                         "position": "center",
                         "uid": "GjuZed1ySGW1IzZZqFB9BA", // ? Unnecessary?
                         "name" : file.display_title
-                    }
+                    }, options.contentTrackOptions || {})
                 ],
                 "position": "center"
             };
@@ -415,10 +417,11 @@ export const HiGlassConfigurator = {
         },
 
         generateView : function(file, options){
-            var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index } = options;
+            var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index, contentTrackOptions } = options;
 
             var passedOptions = _.extend({}, options, {
-                'extraViewProps' : (Array.isArray(extraViewProps) && extraViewProps[index]) || extraViewProps
+                'extraViewProps' : (Array.isArray(extraViewProps) && extraViewProps[index]) || extraViewProps,
+                'contentTrackOptions' : (Array.isArray(contentTrackOptions) && contentTrackOptions[index]) || contentTrackOptions
             });
 
             // Track definitions, default to human.
@@ -435,7 +438,7 @@ export const HiGlassConfigurator = {
                         HiGlassConfigurator.mcool.generateLeftAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
                         HiGlassConfigurator.mcool.generateLeftChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation)
                     ],
-                    "center": [ HiGlassConfigurator.mcool.generateCenterTrack(file, height - 50, baseUrl) ],
+                    "center": [ HiGlassConfigurator.mcool.generateCenterTrack(file, height - 50, passedOptions) ],
                     "right": [],
                     "bottom": []
                 }
@@ -490,23 +493,25 @@ export const HiGlassConfigurator = {
 
         generateTopContentTrack : function(bigWigFile, options, { chromosome, annotation }, idx, all){
 
-            var trackHeight = Math.min(Math.max(Math.floor((options.height - 150) / all.length), 20), 150),
+            var trackHeight = Math.min(Math.max(Math.floor((options.height - 150) / all.length), 20), options.height - 150),
                 styleOptions = {
                     "lineStrokeColor": "black",
-                    "labelPosition": "topLeft",
+                    "labelPosition": "topRight",
                     "labelColor": "black",
                     "labelTextOpacity": 0.3,
                     "lineStrokeWidth": 1.25,
                     "trackBorderWidth": 0,
                     "trackBorderColor": "black",
-                    "showMousePosition": false,
+                    "showMousePosition": true,
                     "mousePositionColor": "#999999",
-                    "showTooltip": false
+                    "showTooltip": false,
+                    "axisPositionHorizontal": "left",
                 };
 
             var hasExpSetInfo = !!(bigWigFile.from_experiment && bigWigFile.from_experiment.from_experiment_set && bigWigFile.from_experiment.from_experiment_set.accession);
+            var isOnlyFile = all.length === 1;
 
-            if (hasExpSetInfo){
+            if (!isOnlyFile && hasExpSetInfo){
                 var isFromExperiment = bigWigFile.from_experiment.accession !== 'NONE';
                 if (!isFromExperiment){
                     styleOptions.lineStrokeWidth = 2;
@@ -520,6 +525,11 @@ export const HiGlassConfigurator = {
                 }
             }
 
+            var contentTrackOptions = options.contentTrackOptions;
+            if (Array.isArray(contentTrackOptions)){
+                contentTrackOptions = contentTrackOptions[options.index];
+            }
+
             return {
                 "uid": "bigwig-content-track-" + idx,
                 "tilesetUid": bigWigFile.higlass_uid,
@@ -531,8 +541,7 @@ export const HiGlassConfigurator = {
                     "name" : bigWigFile.display_title,
                     "valueScaling": "linear",
                     "coordSystem": chromosome.infoid || "NOT SET",
-                    "axisPositionHorizontal": "right",
-                })
+                }, contentTrackOptions || {})
             };
         },
 
@@ -671,6 +680,10 @@ export class HiGlassContainer extends React.PureComponent {
         }
     }
 
+    static propsToViewConfigGeneratorOptions(props){
+        return _.pick(props, 'height', 'groupID', 'extraViewProps', 'viewConfigBase', 'contentTrackOptions');
+    }
+
     static propTypes = {
         'files' : PropTypes.arrayOf(PropTypes.shape({
             '@id' : PropTypes.string.isRequired,
@@ -695,7 +708,7 @@ export class HiGlassContainer extends React.PureComponent {
 
         this.state = {
             'mounted' : false,
-            'viewConfig' : props.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, _.pick(props, 'height', 'groupID', 'extraViewProps', 'viewConfigBase'))
+            'viewConfig' : props.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, HiGlassContainer.propsToViewConfigGeneratorOptions(props))
         };
     }
 
@@ -722,7 +735,7 @@ export class HiGlassContainer extends React.PureComponent {
         }
 
         if (this.props.files != nextProps.files || nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
-            nextState.viewConfig = nextProps.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(nextProps)(nextProps.files, _.pick(nextProps, 'height', 'groupID', 'extraViewProps', 'viewConfigBase'));
+            nextState.viewConfig = nextProps.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(nextProps)(nextProps.files, HiGlassContainer.propsToViewConfigGeneratorOptions(nextProps));
         }
         if (_.keys(nextState).length > 0){
             this.setState(nextState);
@@ -880,14 +893,19 @@ export class HiGlassTabView extends React.Component {
     }
 
     render(){
-        var { disabled, isValidating, viewConfig, context, height } = this.props;
+        var file = this.props.context,
+            contentTrackOptions = {};
+
+        if (file.file_format === 'bg' || file.file_format === 'bw'){
+            contentTrackOptions.showTooltip = true;
+        }
         /**
          * TODO: Some state + UI functions to make higlass view full screen.
          * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
          */
         return (
             <div className="higlass-tab-view-contents">
-                <HiGlassContainer {...{ disabled, isValidating, viewConfig, height }} files={[context]} />
+                <HiGlassContainer {..._.omit(this.props, 'context')} files={[file]} contentTrackOptions={contentTrackOptions} />
             </div>
         );
     }
