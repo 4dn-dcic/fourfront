@@ -312,8 +312,8 @@ def canonical_redirect(event):
         return
 
     qs = canonical_qs or request.query_string
-    # add redirect information to the query string, but not for search/browse
-    if '/search' not in canonical_path and '/browse' not in canonical_path:
+    # add redirect information to the query string, but not for the routes specified below
+    if not any(route in canonical_path for route in ['/search', '/browse', '/metadata']):
         redir_qs = (qs + '&' if qs else '') + 'redirected_from=' + request.path_info
     else:
         redir_qs = qs

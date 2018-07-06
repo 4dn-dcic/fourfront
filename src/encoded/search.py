@@ -590,7 +590,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
-        if field in ['limit', 'y.limit', 'x.limit', 'mode',
+        if field in ['limit', 'y.limit', 'x.limit', 'mode', 'redirected_from',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue
