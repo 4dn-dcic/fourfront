@@ -190,12 +190,14 @@ def should_transform(request, response):
         return False
 
     format = request.params.get('format')
+    frame = request.params.get('frame')
+
     if format is None:
         original_vary = response.vary or ()
         response.vary = original_vary + ('Accept', 'Authorization')
-        if request.authorization is not None:
+        if frame and (frame != 'page' and frame != 'embedded'):
             format = 'json'
-        else:
+        if format is None:
             mime_type = request.accept.best_match(
                 [
                     'text/html',
