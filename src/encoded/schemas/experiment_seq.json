@@ -25,6 +25,8 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/antibody_info" },
+        { "$ref": "mixins.json#/spikein_info" },
+        { "$ref": "mixins.json#/attachment" },
         { "$ref": "experiment.json#/properties" }
     ],
     "dependencies": {
@@ -63,9 +65,14 @@
             "lookup": 95,
             "linkTo": "Target"
         },
+        "attachment": {
+            "title": "Spikein concentrations",
+            "description": "File (spreadsheet or txt) that contains information on concentration of each spikein sequence",
+            "lookup": 97
+        },
         "reaction_time": {
             "title": "Reaction Time (min)",
-            "description": "Time of a reaction in minutes eg. Digestion time in CUT&RUN experiments",
+            "description": "Time of a reaction in minutes eg. Digestion time in CUT&RUN experiments or Tyramid reaction in TSA-seq",
             "type": "number",
             "lookup": 100
         },

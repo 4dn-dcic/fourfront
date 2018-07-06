@@ -6,6 +6,7 @@ from snovault import (
     collection,
     load_schema
 )
+from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     paths_filtered_by_status,
@@ -564,7 +565,7 @@ class ExperimentDamid(Experiment):
         'title': 'Experiments CHIPseq, RNAseq ...',
         'description': 'Listing of ChIP and RNA seq type experiments',
     })
-class ExperimentSeq(Experiment):
+class ExperimentSeq(ItemWithAttachment, Experiment):
     """The experiment class for ChIPseq and RNAseq and potentially other types."""
 
     item_type = 'experiment_seq'
