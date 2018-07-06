@@ -63,7 +63,7 @@ def includeme(config):
 
 
 def add_x_user_info_header(response, request):
-    # Check if user logged in via Auth0 and set headers accordingly to inform React 
+    # Check if user logged in via Auth0 and set headers accordingly to inform React
     # server-side/client-side render.
     if hasattr(request, 'auth0_expired'):
 
@@ -135,7 +135,7 @@ def security_tween_factory(handler, registry):
                 # This is necessary because browsers do not yet universally support getting response headers from AJAX responses.
                 #
                 #
-                # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
+                # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end
                 # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
                 # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
                 # to ID an expired token using X-Request-JWT header set below.
@@ -312,7 +312,12 @@ def canonical_redirect(event):
         return
 
     qs = canonical_qs or request.query_string
-    location = canonical_path + ('?' if qs else '') + qs
+    # add redirect information to the query string, but not for search/browse
+    if '/search' not in canonical_path and '/browse' not in canonical_path:
+        redir_qs = (qs + '&' if qs else '') + 'redirected_from=' + request.path_info
+    else:
+        redir_qs = qs
+    location = canonical_path + ('?' if redir_qs else '') + redir_qs
     raise HTTPMovedPermanently(location=location)
 
 
