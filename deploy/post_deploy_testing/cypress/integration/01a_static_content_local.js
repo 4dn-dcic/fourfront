@@ -89,7 +89,7 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                                         if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
                                             haveWeSeenPageWithTableOfContents = true;
                                             const origScrollTop = w.scrollY;
-                                            cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(750).then(()=>{
+                                            cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(1500).then(()=>{
                                                 expect(w.scrollY).to.not.equal(origScrollTop);
                                                 finish(titleText);
                                             });
