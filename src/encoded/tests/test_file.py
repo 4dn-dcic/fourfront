@@ -575,10 +575,14 @@ def test_validate_produced_from_files_no_produced_by(testapp, processed_file_dat
 
 
 def test_validate_produced_from_files_invalid_post(testapp, processed_file_data):
-    processed_file_data['produced_from'] = ['not_a_file_id']
+    fids = ['not_a_file_id', 'definitely_not']
+    processed_file_data['produced_from'] = fids
     res = testapp.post_json('/files-processed', processed_file_data, status=422)
     errors = res.json['errors']
-    assert "'not_a_file_id' not found" == errors[0]['description']
+    descriptions = [e['description'] for e in errors]
+    for fid in fids:
+        desc = "'%s' not found" % fid
+        assert desc in descriptions
 
 
 def test_validate_produced_from_files_valid_post(testapp, processed_file_data, file, mcool_file):
