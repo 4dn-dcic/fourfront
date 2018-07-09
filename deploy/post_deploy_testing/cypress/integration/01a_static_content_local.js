@@ -73,13 +73,13 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                                 });
                                 if (count < listItems.length){
                                     cy.get('#help-menu-item').click().wait(500).then(()=>{
-                                        cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().then((nextListItem)=>{
+                                        cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().wait(300).then((nextListItem)=>{
                                             doVisit(nextListItem);
                                         });
                                     });
                                 }
                             }
-                            cy.wait(100).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                            cy.wait(300).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                                 var titleText = t.text();
                                 expect(titleText).to.have.length.above(0);
                                 prevTitle = titleText;
