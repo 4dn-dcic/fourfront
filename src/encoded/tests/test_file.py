@@ -578,8 +578,7 @@ def test_validate_produced_from_files_invalid_post(testapp, processed_file_data)
     processed_file_data['produced_from'] = ['not_a_file_id']
     res = testapp.post_json('/files-processed', processed_file_data, status=422)
     errors = res.json['errors']
-    assert 'some values in produced_from field are not valid file identifiers' in errors[0]['description']
-    assert 'not_a_file_id' in errors[0]['description']
+    assert "'not_a_file_id' not found" == errors[0]['description']
 
 
 def test_validate_produced_from_files_valid_post(testapp, processed_file_data, file, mcool_file):
