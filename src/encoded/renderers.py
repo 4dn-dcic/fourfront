@@ -190,7 +190,6 @@ def should_transform(request, response):
         return False
 
     format = request.params.get('format')
-    frame = request.params.get('frame')
 
     if format is None:
         original_vary = response.vary or ()
