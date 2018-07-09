@@ -27,12 +27,13 @@ EXP_CATEGORIZER_SCHEMA = {
             "type": "string",
             "description": "The value displayed for the field"
         },
-        "combined" : {
-            "type" : "string",
-            "description" : "Combined field:value string used for categorization of this experiment."
+        "combined": {
+            "type": "string",
+            "description": "Combined field:value string used for categorization of this experiment."
         }
     }
 }
+
 
 @abstract_collection(
     name='experiments',
@@ -371,7 +372,7 @@ class ExperimentCaptureC(Experiment):
                 return {
                     'field': 'Target',
                     'value': value,
-                    'combined' : 'Target: ' + value
+                    'combined': 'Target: ' + value
                 }
 
         return super(ExperimentCaptureC, self).experiment_categorizer(request)
@@ -431,7 +432,7 @@ class ExperimentRepliseq(Experiment):
             return {
                 'field': 'Fraction',
                 'value': value,
-                'combined' : 'Fraction: ' + value
+                'combined': 'Fraction: ' + value
             }
         else:
             return super(ExperimentRepliseq, self).experiment_categorizer(request)
