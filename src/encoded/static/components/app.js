@@ -118,6 +118,8 @@ export default class App extends React.Component {
         var hash = window.location.hash;
         if (hash && document.getElementById(hash.slice(1))) {
             window.location.replace(hash);
+            //layout.animateScrollTo(hash);
+            console.log('WE HAVE DE THING');
         } else {
             window.scrollTo(0, 0);
         }
@@ -261,7 +263,8 @@ export default class App extends React.Component {
             query_href = this.props.href;
         }
         // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
-        query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        //query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        query_href = globals.windowHref(query_href);
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
@@ -1025,9 +1028,9 @@ export default class App extends React.Component {
         var href_url = url.parse(this.props.href);
         // Switching between collections may leave component in place
         var key = context && context['@id'] && context['@id'].split('?')[0];
-        var current_action = this.currentAction();
+        var currentAction = this.currentAction();
 
-        if (!current_action && context.default_page) {
+        if (!currentAction && context.default_page) {
             context = context.default_page;
         }
 
@@ -1045,37 +1048,11 @@ export default class App extends React.Component {
                 canonical = context.canonical_uri;
             }
         }
-        // add static page routing
+
         var title;
-        var routeList = canonical.split("/");
-        var lowerList = [];
-        var scrollList = [];
-        var actionList = [];
-        routeList.map(function(value) {
-            if (value.includes('#') && value.charAt(0) !== "#"){
-                var navSplit = value.split("#");
-                lowerList.push(navSplit[0].toLowerCase());
-                if (navSplit[1].charAt(0) === '!'){
-                    actionList.push(navSplit[1].slice(1).toLowerCase());
-                }else{
-                    scrollList.push(navSplit[1].toLowerCase());
-                }
-            }else if(value.charAt(0) !== "!" && value.length > 0){
-                // test for edit handle
-                if (value === '#!edit'){
-                    actionList.push('edit');
-                }else if (value === '#!create'){
-                    actionList.push('create');
-                }else if (value === '#!clone'){
-                    actionList.push('clone');
-                }else if (value === '#!add'){
-                    actionList.push('add');
-                }else{
-                    lowerList.push(value.toLowerCase());
-                }
-            }
-        });
-        var currRoute = lowerList.slice(1); // eliminate http
+        var routeList = href_url.pathname.split("/");
+
+        var currRoute = routeList.slice(1); // eliminate http
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
@@ -1098,6 +1075,8 @@ export default class App extends React.Component {
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
+        console.log('APP', currentAction, route);
+
         // Object of common props passed to all content_views.
 
         let commonContentViewProps = {
@@ -1111,74 +1090,58 @@ export default class App extends React.Component {
             'updateUploads'     : this.updateUploads,
             'listActionsFor'    : this.listActionsFor,
             'updateUserInfo'    : this.updateUserInfo,
-            'browseBaseState'   : this.props.browseBaseState
+            'browseBaseState'   : this.props.browseBaseState,
+            'currentAction'     : currentAction
         };
 
-        // first case is fallback
-        if (canonical === "about:blank"){
+        if (canonical === "about:blank"){   // first case is fallback
             title = portal.portal_title;
             content = null;
-        // error catching
-        }else if(status){
+        } else if (status) {                // error catching
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
-        }else if(actionList.length === 1){
-            // check if the desired action is allowed per user (in the context)
+        } else if (context) {
 
-            var contextActionNames = this.listActionsFor('context').map(function(act){
-                return act.name || '';
-            });
-            // see if desired actions is not allowed for current user
-            if (!_.contains(contextActionNames, actionList[0])){
-                content = <ErrorPage status={'forbidden'}/>;
-                title = 'Action not permitted';
-            }else{
-                ContentView = globals.content_views.lookup(context, current_action);
-                if (ContentView){
-                    content = (
-                        <SubmissionView
-                            {...commonContentViewProps}
-                            setIsSubmitting={this.setIsSubmitting}
-                            create={actionList[0] === 'create' || actionList[0] === 'add'}
-                            edit={actionList[0] === 'edit'}
-                        />
-                    );
-                    title = object.itemUtil.getTitleStringFromContext(context);
-                    if (title && title != 'Home') {
-                        title = title + ' – ' + portal.portal_title;
-                    } else {
-                        title = portal.portal_title;
-                    }
-                }else{
-                    // Handle the case where context is not loaded correctly
-                    content = <ErrorPage status={null}/>;
-                    title = 'Error';
-                }
-            }
-        }else if (context) {
-            var ContentView = globals.content_views.lookup(context, current_action);
-            if (ContentView){
-                content = (
-                    <ContentView {...commonContentViewProps} />
-                );
-                title = context.display_title || context.title || context.name || context.accession || context['@id'];
-                if (title && title != 'Home') {
-                    title = title + ' – ' + portal.portal_title;
-                } else {
-                    title = portal.portal_title;
-                }
+            var ContentView = globals.content_views.lookup(context);
+
+            title = object.itemUtil.getTitleStringFromContext(context);
+            if (title && title != 'Home') {
+                title = title + ' – ' + portal.portal_title;
             } else {
-                // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null} />;
-                title = 'Error';
+                title = portal.portal_title;
             }
+            
+            if (!ContentView){
+                // Handle the case where context is not loaded correctly
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
+            } else if (currentAction && currentAction !== 'selection') {
+
+                var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
+
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    content = <ErrorPage status="forbidden" />;
+                    title = 'Action not permitted';
+                } else if (_.contains(['edit', 'add', 'create'], currentAction)) {
+                    content = (
+                        <SubmissionView {...commonContentViewProps} setIsSubmitting={this.setIsSubmitting}
+                            create={currentAction === 'create' || currentAction === 'add'} edit={currentAction === 'edit'} />
+                    );
+                }
+            }
+
+            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
+                content = <ContentView {...commonContentViewProps} />;
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
         }
         // Google does not update the content of 301 redirected pages
         var base;
         if (({'http://data.4dnucleome.org/': 1})[canonical]) {
             base = canonical = 'http://data.4dnucleome.org/';
             this.historyEnabled = false;
-
         }
 
         // Set current path for per-page CSS rule targeting.
