@@ -1,5 +1,34 @@
 [
     {
+        "uuid": "231111bc-8535-4448-903e-854af460bbbb",
+        "description": "GM12878 prepared for Hi-C, batch 1",
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
+        "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
+        "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
+        "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
+        "award": "Test-4DN",
+        "submitted_by": "wrangler@wrangler.com",
+        "lab": "test-4dn-lab",
+        "status": "replaced",
+        "accession": "4DNBS1211111"
+    },
+    {
+        "uuid": "231111bc-8535-4448-903e-854af460cccc",
+        "description": "GM12878 prepared for Hi-C, batch 1",
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
+        "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
+        "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
+        "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
+        "award": "Test-4DN",
+        "submitted_by": "wrangler@wrangler.com",
+        "lab": "test-4dn-lab",
+        "status": "in review by lab",
+        "accession": "4DNBS1222222",
+        "alternate_accessions": ["4DNBS1211111"]
+    },
+    {
         "uuid": "231111bc-8535-4448-903e-854af460b254",
         "description": "GM12878 prepared for Hi-C, batch 1",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],

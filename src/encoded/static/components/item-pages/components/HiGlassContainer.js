@@ -109,7 +109,8 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'groupID' : null,
     'baseViewProps' : null,
     'excludeAnnotationTracks' : false,
-    'contentTrackOptions' : null
+    'contentTrackOptions' : null,
+    'annotationTrackOptions' : null
 };
 
 /** Dictionary (Object) of functions for building out a viewConfig. Uses common 'options' dictionary. */
@@ -296,22 +297,22 @@ export const HiGlassConfigurator = {
         return primaryConf;
     },
 
-    generateTopAnnotationTrack : function(trackBaseServer, { chromosome, annotation }){
+    generateTopAnnotationTrack : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
         return {
             "name": annotation.name,
             //"created": "2017-07-14T15:27:46.989053Z",
             "server": trackBaseServer + "/api/v1",
             "tilesetUid": annotation.tilesetUid,
             "type": "horizontal-gene-annotations",
-            "options": {
+            "options": _.extend({
                 "labelColor": "black",
                 "labelPosition": "hidden",
                 "plusStrandColor": "blue",
                 "minusStrandColor": "red",
                 "trackBorderWidth": 0,
                 "trackBorderColor": "black",
-                "name": "Gene Annotations (hg38)"
-            },
+                "name": annotation.name
+            }, annotationTrackOptions || {}),
             //"width": 20,
             "minHeight" : 55,
             "height": 55,
@@ -374,7 +375,7 @@ export const HiGlassConfigurator = {
             };
         },
 
-        generateLeftAnnotationTrack : function(trackBaseServer, { chromosome, annotation }){
+        generateLeftAnnotationTrack : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
             return {
                 "name": annotation.name,
                 //"created": "2017-07-14T15:27:46.989053Z",
@@ -382,7 +383,7 @@ export const HiGlassConfigurator = {
                 "tilesetUid": annotation.tilesetUid,
                 "uid": "left-annotation-track",
                 "type": "vertical-gene-annotations",
-                "options": {
+                "options": _.extend({
                     "labelColor": "black",
                     "labelPosition": "hidden",
                     "plusStrandColor": "blue",
@@ -390,7 +391,7 @@ export const HiGlassConfigurator = {
                     "trackBorderWidth": 0,
                     "trackBorderColor": "black",
                     "name": annotation.name
-                },
+                }, annotationTrackOptions || {}),
                 "width": 55,
                 //"height": 20,
                 "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
@@ -431,11 +432,11 @@ export const HiGlassConfigurator = {
             return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-mcool-" + index, chromosomeAndAnnotation, passedOptions), {
                 "tracks": {
                     "top" : [
-                        HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
+                        HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation, options.annotationTrackOptions),
                         HiGlassConfigurator.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation)
                     ],
                     "left" : [
-                        HiGlassConfigurator.mcool.generateLeftAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation),
+                        HiGlassConfigurator.mcool.generateLeftAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation, options.annotationTrackOptions),
                         HiGlassConfigurator.mcool.generateLeftChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation)
                     ],
                     "center": [ HiGlassConfigurator.mcool.generateCenterTrack(file, height - 50, passedOptions) ],
@@ -681,7 +682,7 @@ export class HiGlassContainer extends React.PureComponent {
     }
 
     static propsToViewConfigGeneratorOptions(props){
-        return _.pick(props, 'height', 'groupID', 'extraViewProps', 'viewConfigBase', 'contentTrackOptions');
+        return _.pick(props, 'height', 'groupID', 'extraViewProps', 'viewConfigBase', 'contentTrackOptions', 'annotationTrackOptions');
     }
 
     static propTypes = {
