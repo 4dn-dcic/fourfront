@@ -98,7 +98,7 @@ class AccessKeyTable extends React.Component {
     create(e) {
         e.preventDefault();
         var item = {};
-        if(this.props.session || (this.context && this.context.session)){
+        if(this.props.session){
             var idToken = JWT.get();
             if (idToken){
                 var decoded = jwt.decode(idToken);

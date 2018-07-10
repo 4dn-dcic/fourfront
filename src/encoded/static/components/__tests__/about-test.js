@@ -19,7 +19,7 @@ describe('Testing about.js', function() {
     
     // Setup required variables/dependencies before running tests.
     
-    var React, ReactDOM, About, testItem, TestUtils, page, data, _, banners, Wrapper, App, statics, app, sinon, server;
+    var React, ReactDOM, About, testItem, TestUtils, page, data, _, banners, Wrapper, App, app, sinon, server;
 
     beforeAll(function() {
         React = require('react');
