@@ -1049,7 +1049,7 @@ export default class App extends React.Component {
             } else {
                 title = portal.portal_title;
             }
-            
+
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';
