@@ -970,24 +970,19 @@ def validate_processed_file_produced_from_field(context, request):
         return
     files_ok = True
     files2chk = data['produced_from']
-    bad_files = []
-    for f in files2chk:
+    for i, f in enumerate(files2chk):
         try:
             fid = get_item_if_you_can(request, f, 'files').get('uuid')
         except AttributeError:
             files_ok = False
-            bad_files.append(f)
+            request.errors.add('body', ['produced_from', i], "'%s' not found" % f)
+            # bad_files.append(f)
         else:
             if not fid:
                 files_ok = False
-                bad_files.append(f)
+                request.errors.add('body', ['produced_from', i], "'%s' not found" % f)
 
-    if not files_ok:
-        err_string = "some values in produced_from field are not valid file identifiers"
-        if bad_files:
-            err_string = err_string + '\n\t' + '\n\t'.join(bad_files)
-        request.errors.add('body', None, err_string)
-    else:
+    if files_ok:
         request.validated.update({})
 
 
