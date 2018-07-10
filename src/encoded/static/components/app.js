@@ -186,14 +186,11 @@ export default class App extends React.Component {
 
         // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
         this.handleDropdownChange = this.handleDropdownChange.bind(this);
-        this.handleAutocompleteChosenChange = this.handleAutocompleteChosenChange.bind(this);
-        this.handleAutocompleteFocusChange = this.handleAutocompleteFocusChange.bind(this);
-        this.handleAutocompleteHiddenChange = this.handleAutocompleteHiddenChange.bind(this);
         this.handleLayoutClick = this.handleLayoutClick.bind(this);
-        this.handleKey = this.handleKey.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handlePopState = this.handlePopState.bind(this);
+
         this.setIsSubmitting = this.setIsSubmitting.bind(this);
         this.stayOnSubmissionsPage = this.stayOnSubmissionsPage.bind(this);
         this.authenticateUser = this.authenticateUser.bind(this);
@@ -448,12 +445,6 @@ export default class App extends React.Component {
         this.setState({dropdownComponent: componentID});
     }
 
-    handleAutocompleteChosenChange(chosen) { this.setState({autocompleteTermChosen: chosen}); }
-
-    handleAutocompleteFocusChange(focused) { this.setState({autocompleteFocused: focused}); }
-
-    handleAutocompleteHiddenChange(hidden) { this.setState({autocompleteHidden: hidden}); }
-
     // Handle a click outside a dropdown menu by clearing currently dropped down menu
     handleLayoutClick(e) {
         if (this.state.dropdownComponent !== undefined) {
@@ -619,21 +610,6 @@ export default class App extends React.Component {
         }
         // Always async update in case of server side changes.
         navigate(href, {'replace': true});
-    }
-
-    // If ESC pressed while drop-down menu open, close the menu
-    handleKey(e) {
-        if (e.which === 27) {
-            if (this.state.dropdownComponent !== undefined) {
-                e.preventDefault();
-                this.handleDropdownChange(undefined);
-            } else if (!this.state.autocompleteHidden) {
-                e.preventDefault();
-                this.handleAutocompleteHiddenChange(true);
-            }
-        } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
-            e.preventDefault();
-        }
     }
 
     authenticateUser(callback = null){
