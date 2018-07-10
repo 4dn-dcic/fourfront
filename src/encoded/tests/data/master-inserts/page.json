@@ -551,7 +551,8 @@
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b2",
         "title": "4DN Joint Analysis Portal",
         "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025"
+            "joint-analysis-data-plans.legend",
+            "joint-analysis-data-plans.release-updates"
         ],
         "schema_version" : "3"
     },
