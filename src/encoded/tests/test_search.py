@@ -379,6 +379,11 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     # TODO: NAMESPACE - here, passed in list to create_mapping
     # turn of logging for a bit
     create_mapping.run(app, sync_index=True)
+    # check counts and ensure they're equal
+    testapp_counts = testapp.get('/counts')
+    total_counts = testapp_counts.json['db_es_total']
+    split_counts = total_counts.split()  # 2nd item is db counts, 4th is es
+    assert(int(split_counts[1]) == int(split_counts[3]))
     for item_type in TYPE_LENGTH.keys():
         print('\n\n--> %s' % item_type)
         tries = 0
