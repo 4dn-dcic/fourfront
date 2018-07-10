@@ -118,8 +118,6 @@ export default class App extends React.Component {
         var hash = window.location.hash;
         if (hash && document.getElementById(hash.slice(1))) {
             window.location.replace(hash);
-            //layout.animateScrollTo(hash);
-            console.log('WE HAVE DE THING');
         } else {
             window.scrollTo(0, 0);
         }
