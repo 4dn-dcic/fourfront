@@ -28,7 +28,6 @@ from snovault.validators import (
     validate_item_content_patch
 )
 from snovault.interfaces import CONNECTION
-from snovault.etag import if_match_tid
 from snovault.schema_utils import SERVER_DEFAULTS
 from jsonschema_serialize_fork import NO_DEFAULT
 
@@ -213,9 +212,9 @@ def collection_add(context, request, render=None):
 
 
 @view_config(context=snovault.Item, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put], decorator=if_match_tid)
+             validators=[validate_item_content_put])
 @view_config(context=snovault.Item, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch], decorator=if_match_tid)
+             validators=[validate_item_content_patch])
 def item_edit(context, request, render=None):
     check_only = request.params.get('check_only', False)
 

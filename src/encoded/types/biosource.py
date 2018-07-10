@@ -9,7 +9,6 @@ from snovault.validators import (
     validate_item_content_patch,
     validate_item_content_put,
 )
-from snovault.etag import if_match_tid
 from pyramid.view import view_config
 from .base import (
     Item,
@@ -199,10 +198,9 @@ def biosource_add(context, request, render=None):
 
 
 @view_config(context=Biosource, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line],
-             decorator=if_match_tid)
+             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line],
-             decorator=if_match_tid)
+             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
 def biosource_edit(context, request, render=None):
+    import pdb; pdb.set_trace()
     return item_edit(context, request, render)
