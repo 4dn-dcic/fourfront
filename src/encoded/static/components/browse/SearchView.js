@@ -103,12 +103,32 @@ class ControlsAndResults extends React.PureComponent {
         super(props);
         this.render = this.render.bind(this);
         this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.handleClearFilters = this.handleClearFilters.bind(this);
+    }
+
+    handleClearFilters(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        var { href, context } = this.props;
+        var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+        if (!clearFiltersURL) {
+            console.error("No Clear Filters URL");
+            return;
+        }
+
+        // If we have a '#' in URL, add to target URL as well.
+        var hashFragmentIdx = href.indexOf('#');
+        if (hashFragmentIdx > -1 && clearFiltersURL.indexOf('#') === -1){
+            clearFiltersURL += href.slice(hashFragmentIdx);
+        }
+
+        this.props.navigate(clearFiltersURL, {});
     }
 
     render() {
-        var { context, href, hiddenColumns } = this.props;
+        var { context, href, hiddenColumns, currentAction } = this.props;
         var results = context['@graph'],
-            submission_facet_list = false,
+            inSelectionMode = currentAction === 'selection',
             facets = this.props.facets || context.facets,
             thisType = 'Item',
             thisTypeTitle = Schemas.getTitleForType(thisType),
@@ -142,8 +162,6 @@ class ControlsAndResults extends React.PureComponent {
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         // Also add the popLink/target=_blank functionality to links
         if (typeof this.props.selectCallback === 'function'){
-            // this will hide data type facet for submissions view
-            submission_facet_list = true;
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
@@ -211,17 +229,8 @@ class ControlsAndResults extends React.PureComponent {
                                 if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
                                 return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
                             })()}
-                            onClearFilters={(evt)=>{
-                                evt.preventDefault();
-                                evt.stopPropagation();
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                if (!clearFiltersURL) {
-                                    console.error("No Clear Filters URL");
-                                    return;
-                                }
-                                this.props.navigate(clearFiltersURL, {});
-                            }}
-                            submissionFacetList={submission_facet_list}
+                            onClearFilters={this.handleClearFilters}
+                            hideDataTypeFacet={inSelectionMode}
                         />
                 </div> : null}
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>

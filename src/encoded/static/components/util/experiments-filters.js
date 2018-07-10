@@ -27,43 +27,58 @@ export let getLimit = function(){ return 25; };
  */
 export const currentExpSetFilters = contextFiltersToExpSetFilters;
 
-/** If the given term is selected, return the href for the term */
-export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
+/**
+ * If the given term is selected, return the href for the term from context.filters.
+ * 
+ * @param {string} term - Term for which existence of active filter is checked.
+ * @param {string} field - Field for which filter is checked.
+ * @param {{ 'field' : string, 'term' : string, 'remove' : string }[]} filters - Filters as supplied by context.filters in API response.
+ * @param {boolean} [includePathName] - If true, will return the pathname in addition to the URI search query.
+ * @returns {!string} URL to remove active filter, or null if filter not currently active for provided field:term pair.
+ */
+export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters, includePathName = false) {
     for (var filter in filters) {
         if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
-            return url.parse(filters[filter]['remove']).search;
+            var parts = url.parse(filters[filter]['remove']);
+            var retHref = '';
+            if (includePathName) {
+                retHref += parts.pathname;
+            }
+            retHref += parts.search;
+            return retHref;
         }
     }
     return null;
 }
 
 /**
- * @param {string} unselectHref - Returned from unselectHrefIfSelected, if used.
+ * Extends `searchBase` (URL) query with that of field:term and returns new URL with field:term filter query included.
+ *
  * @param {string} field - What field to build for.
  * @param {string} term - What term to build for.
  * @param {string} searchBase - Original href or search base of current page.
+ * @returns {string} href - Search URL.
  */
-export function buildSearchHref(unselectHref, field, term, searchBase){
+export function buildSearchHref(field, term, searchBase){
     var href;
-    if (unselectHref) {
-        href = unselectHref;
-    } else {
-        var parts = url.parse(searchBase, true);
-        var query = _.clone(parts.query);
-        // format multiple filters on the same field
-        if(field in query){
-            if(Array.isArray(query[field])){
-                query[field] = query[field].concat(term);
-            }else{
-                query[field] = [query[field]].concat(term);
-            }
-        }else{
-            query[field] = term;
+
+    var parts = url.parse(searchBase, true),
+        query = _.clone(parts.query);
+
+    // format multiple filters on the same field
+    if (field in query){
+        if (Array.isArray(query[field])) {
+            query[field] = query[field].concat(term);
+        } else {
+            query[field] = [query[field]].concat(term);
         }
-        query = queryString.stringify(query);
-        parts.search = query && query.length > 0 ? ('?' + query) : '';
-        href = url.format(parts);
+    } else {
+        query[field] = term;
     }
+    query = queryString.stringify(query);
+    parts.search = query && query.length > 0 ? ('?' + query) : '';
+    href = url.format(parts);
+
     return href;
 }
 
