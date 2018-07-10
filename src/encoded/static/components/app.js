@@ -973,23 +973,20 @@ export default class App extends React.Component {
 
     render() {
         console.log('render app');
-        var context = this.props.context;
-        var content;
-        var href_url = url.parse(this.props.href);
-        // Switching between collections may leave component in place
-        var key = context && context['@id'] && context['@id'].split('?')[0];
-        var currentAction = this.currentAction();
+        var canonical       = this.props.href,
+            context         = this.props.context,
+            href_url        = url.parse(canonical),
+            routeList       = href_url.pathname.split("/"),
+            routeLeaf       = routeList[routeList.length - 1],
+            key             = context && context['@id'] && context['@id'].split('?')[0], // Switching between collections may leave component in place
+            currentAction   = this.currentAction(),
+            appClass        = this.props.slow ? 'communicating' : 'done';
+
+        var content, title, status; // Rendered values
 
         if (!currentAction && context.default_page) {
             context = context.default_page;
         }
-
-        var appClass = 'done';
-        if (this.props.slow) {
-            appClass = 'communicating';
-        }
-
-        var canonical = this.props.href;
 
         if (context.canonical_uri) {
             if (href_url.host) {
@@ -999,13 +996,7 @@ export default class App extends React.Component {
             }
         }
 
-        var title;
-        var routeList = href_url.pathname.split("/");
-
-        var currRoute = routeList.slice(1); // eliminate http
         // check error status
-        var status;
-        var route = currRoute[currRoute.length-1];
 
         var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
         if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
@@ -1018,18 +1009,15 @@ export default class App extends React.Component {
             }
         } else if (context.code && context.code === 404){
             // check to ensure we're not looking at a static page
-            if (route != 'help' && route != 'about' && route !== 'home' && route !== 'submissions'){
+            if (routeLeaf != 'help' && routeLeaf != 'about' && routeLeaf !== 'home' && routeLeaf !== 'submissions'){
                 status = 'not_found';
             }
-        } else if (route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (routeLeaf == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
-        console.log('APP', currentAction, route);
-
         // Object of common props passed to all content_views.
-
-        let commonContentViewProps = {
+        var commonContentViewProps = {
             'context'           : context,
             'schemas'           : this.state.schemas,
             'session'           : this.state.session,
@@ -1048,12 +1036,13 @@ export default class App extends React.Component {
             title = portal.portal_title;
             content = null;
         } else if (status) {                // error catching
-            content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
+            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
             title = 'Error';
-        } else if (context) {
+        } else if (context) {               // What should occur (success)
 
             var ContentView = globals.content_views.lookup(context);
 
+            // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
             if (title && title != 'Home') {
                 title = title + ' – ' + portal.portal_title;
@@ -1061,8 +1050,7 @@ export default class App extends React.Component {
                 title = portal.portal_title;
             }
             
-            if (!ContentView){
-                // Handle the case where context is not loaded correctly
+            if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';
             } else if (currentAction && currentAction !== 'selection') {
