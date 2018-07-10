@@ -162,36 +162,22 @@ export default class App extends React.Component {
         'sessionMayBeSet' : null
     }
 
-    static childContextTypes = {
-        dropdownComponent: PropTypes.string,
-        location_href: PropTypes.string,
-        onDropdownChange: PropTypes.func,
-        hidePublicAudits: PropTypes.bool,
-        session: PropTypes.bool,
-        navigate: PropTypes.func,
-        schemas: PropTypes.object
-    }
-
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
 
         // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
         this.handleDropdownChange = this.handleDropdownChange.bind(this);
-        this.handleAutocompleteChosenChange = this.handleAutocompleteChosenChange.bind(this);
-        this.handleAutocompleteFocusChange = this.handleAutocompleteFocusChange.bind(this);
-        this.handleAutocompleteHiddenChange = this.handleAutocompleteHiddenChange.bind(this);
         this.handleLayoutClick = this.handleLayoutClick.bind(this);
-        this.handleKey = this.handleKey.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handlePopState = this.handlePopState.bind(this);
+
         this.setIsSubmitting = this.setIsSubmitting.bind(this);
         this.stayOnSubmissionsPage = this.stayOnSubmissionsPage.bind(this);
         this.authenticateUser = this.authenticateUser.bind(this);
@@ -261,7 +247,8 @@ export default class App extends React.Component {
             query_href = this.props.href;
         }
         // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
-        query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        //query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        query_href = globals.windowHref(query_href);
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
@@ -362,19 +349,6 @@ export default class App extends React.Component {
         }
     }
 
-    // Retrieve current React context
-    getChildContext() {
-        return {
-            dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            location_href: this.props.href,
-            onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
-            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
-            session: this.state.session,
-            navigate: navigate,
-            schemas : this.state.schemas
-        };
-    }
-
     listActionsFor(category) {
         if (category === 'context') {
             var context = this.props.context;
@@ -444,12 +418,6 @@ export default class App extends React.Component {
         // It's passed in as componentID
         this.setState({dropdownComponent: componentID});
     }
-
-    handleAutocompleteChosenChange(chosen) { this.setState({autocompleteTermChosen: chosen}); }
-
-    handleAutocompleteFocusChange(focused) { this.setState({autocompleteFocused: focused}); }
-
-    handleAutocompleteHiddenChange(hidden) { this.setState({autocompleteHidden: hidden}); }
 
     // Handle a click outside a dropdown menu by clearing currently dropped down menu
     handleLayoutClick(e) {
@@ -616,21 +584,6 @@ export default class App extends React.Component {
         }
         // Always async update in case of server side changes.
         navigate(href, {'replace': true});
-    }
-
-    // If ESC pressed while drop-down menu open, close the menu
-    handleKey(e) {
-        if (e.which === 27) {
-            if (this.state.dropdownComponent !== undefined) {
-                e.preventDefault();
-                this.handleDropdownChange(undefined);
-            } else if (!this.state.autocompleteHidden) {
-                e.preventDefault();
-                this.handleAutocompleteHiddenChange(true);
-            }
-        } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
-            e.preventDefault();
-        }
     }
 
     authenticateUser(callback = null){
@@ -1020,23 +973,20 @@ export default class App extends React.Component {
 
     render() {
         console.log('render app');
-        var context = this.props.context;
-        var content;
-        var href_url = url.parse(this.props.href);
-        // Switching between collections may leave component in place
-        var key = context && context['@id'] && context['@id'].split('?')[0];
-        var current_action = this.currentAction();
+        var canonical       = this.props.href,
+            context         = this.props.context,
+            href_url        = url.parse(canonical),
+            routeList       = href_url.pathname.split("/"),
+            routeLeaf       = routeList[routeList.length - 1],
+            key             = context && context['@id'] && context['@id'].split('?')[0], // Switching between collections may leave component in place
+            currentAction   = this.currentAction(),
+            appClass        = this.props.slow ? 'communicating' : 'done';
 
-        if (!current_action && context.default_page) {
+        var content, title, status; // Rendered values
+
+        if (!currentAction && context.default_page) {
             context = context.default_page;
         }
-
-        var appClass = 'done';
-        if (this.props.slow) {
-            appClass = 'communicating';
-        }
-
-        var canonical = this.props.href;
 
         if (context.canonical_uri) {
             if (href_url.host) {
@@ -1045,40 +995,8 @@ export default class App extends React.Component {
                 canonical = context.canonical_uri;
             }
         }
-        // add static page routing
-        var title;
-        var routeList = canonical.split("/");
-        var lowerList = [];
-        var scrollList = [];
-        var actionList = [];
-        routeList.map(function(value) {
-            if (value.includes('#') && value.charAt(0) !== "#"){
-                var navSplit = value.split("#");
-                lowerList.push(navSplit[0].toLowerCase());
-                if (navSplit[1].charAt(0) === '!'){
-                    actionList.push(navSplit[1].slice(1).toLowerCase());
-                }else{
-                    scrollList.push(navSplit[1].toLowerCase());
-                }
-            }else if(value.charAt(0) !== "!" && value.length > 0){
-                // test for edit handle
-                if (value === '#!edit'){
-                    actionList.push('edit');
-                }else if (value === '#!create'){
-                    actionList.push('create');
-                }else if (value === '#!clone'){
-                    actionList.push('clone');
-                }else if (value === '#!add'){
-                    actionList.push('add');
-                }else{
-                    lowerList.push(value.toLowerCase());
-                }
-            }
-        });
-        var currRoute = lowerList.slice(1); // eliminate http
+
         // check error status
-        var status;
-        var route = currRoute[currRoute.length-1];
 
         var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
         if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
@@ -1091,16 +1009,15 @@ export default class App extends React.Component {
             }
         } else if (context.code && context.code === 404){
             // check to ensure we're not looking at a static page
-            if (route != 'help' && route != 'about' && route !== 'home' && route !== 'submissions'){
+            if (routeLeaf != 'help' && routeLeaf != 'about' && routeLeaf !== 'home' && routeLeaf !== 'submissions'){
                 status = 'not_found';
             }
-        } else if (route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (routeLeaf == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
         // Object of common props passed to all content_views.
-
-        let commonContentViewProps = {
+        var commonContentViewProps = {
             'context'           : context,
             'schemas'           : this.state.schemas,
             'session'           : this.state.session,
@@ -1111,74 +1028,58 @@ export default class App extends React.Component {
             'updateUploads'     : this.updateUploads,
             'listActionsFor'    : this.listActionsFor,
             'updateUserInfo'    : this.updateUserInfo,
-            'browseBaseState'   : this.props.browseBaseState
+            'browseBaseState'   : this.props.browseBaseState,
+            'currentAction'     : currentAction
         };
 
-        // first case is fallback
-        if (canonical === "about:blank"){
+        if (canonical === "about:blank"){   // first case is fallback
             title = portal.portal_title;
             content = null;
-        // error catching
-        }else if(status){
-            content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
+        } else if (status) {                // error catching
+            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
             title = 'Error';
-        }else if(actionList.length === 1){
-            // check if the desired action is allowed per user (in the context)
+        } else if (context) {               // What should occur (success)
 
-            var contextActionNames = this.listActionsFor('context').map(function(act){
-                return act.name || '';
-            });
-            // see if desired actions is not allowed for current user
-            if (!_.contains(contextActionNames, actionList[0])){
-                content = <ErrorPage status={'forbidden'}/>;
-                title = 'Action not permitted';
-            }else{
-                ContentView = globals.content_views.lookup(context, current_action);
-                if (ContentView){
-                    content = (
-                        <SubmissionView
-                            {...commonContentViewProps}
-                            setIsSubmitting={this.setIsSubmitting}
-                            create={actionList[0] === 'create' || actionList[0] === 'add'}
-                            edit={actionList[0] === 'edit'}
-                        />
-                    );
-                    title = object.itemUtil.getTitleStringFromContext(context);
-                    if (title && title != 'Home') {
-                        title = title + ' – ' + portal.portal_title;
-                    } else {
-                        title = portal.portal_title;
-                    }
-                }else{
-                    // Handle the case where context is not loaded correctly
-                    content = <ErrorPage status={null}/>;
-                    title = 'Error';
-                }
-            }
-        }else if (context) {
-            var ContentView = globals.content_views.lookup(context, current_action);
-            if (ContentView){
-                content = (
-                    <ContentView {...commonContentViewProps} />
-                );
-                title = context.display_title || context.title || context.name || context.accession || context['@id'];
-                if (title && title != 'Home') {
-                    title = title + ' – ' + portal.portal_title;
-                } else {
-                    title = portal.portal_title;
-                }
+            var ContentView = globals.content_views.lookup(context);
+
+            // Set browser window title.
+            title = object.itemUtil.getTitleStringFromContext(context);
+            if (title && title != 'Home') {
+                title = title + ' – ' + portal.portal_title;
             } else {
-                // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null} />;
-                title = 'Error';
+                title = portal.portal_title;
             }
+
+            if (!ContentView){ // Handle the case where context is not loaded correctly
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
+            } else if (currentAction && currentAction !== 'selection') {
+
+                var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
+
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    content = <ErrorPage status="forbidden" />;
+                    title = 'Action not permitted';
+                } else if (_.contains(['edit', 'add', 'create'], currentAction)) {
+                    content = (
+                        <SubmissionView {...commonContentViewProps} setIsSubmitting={this.setIsSubmitting}
+                            create={currentAction === 'create' || currentAction === 'add'} edit={currentAction === 'edit'} />
+                    );
+                }
+            }
+
+            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
+                content = <ContentView {...commonContentViewProps} />;
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
         }
         // Google does not update the content of 301 redirected pages
         var base;
         if (({'http://data.4dnucleome.org/': 1})[canonical]) {
             base = canonical = 'http://data.4dnucleome.org/';
             this.historyEnabled = false;
-
         }
 
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4;
