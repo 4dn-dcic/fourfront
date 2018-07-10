@@ -62,6 +62,8 @@ export class WorkflowRunTracingView extends DefaultItemView {
     }
 
     componentDidMount(){
+        super.componentDidMount(...arguments);
+
         var nextState = { 'mounted' : true };
 
         if (!this.state.steps){

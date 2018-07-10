@@ -2,11 +2,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { panel_views, itemClass, content_views } from './../globals';
+import url from 'url';
 import { Collapse } from 'react-bootstrap';
 import _ from 'underscore';
+import { panel_views, itemClass, content_views } from './../globals';
+import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide } from './../util';
+import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -33,6 +35,42 @@ export default class DefaultItemView extends React.PureComponent {
         this.itemHeader = this.itemHeader.bind(this);
         this.render = this.render.bind(this);
         this.state = {};
+    }
+
+    maybeSetReplacedRedirectedAlert(){
+        var { href, context } = this.props;
+        if (!href) return;
+
+        var hrefParts = url.parse(href, true),
+            redirected_from = hrefParts.query && hrefParts.query.redirected_from,
+            redirected_from_accession = redirected_from && _.filter(redirected_from.split('/'))[1];
+
+        if (typeof redirected_from_accession !== 'string' || redirected_from_accession.slice(0,3) !== '4DN') redirected_from_accession = null; // Unset if not in form of accession.
+        if (redirected_from_accession && context.accession && Array.isArray(context.alternate_accessions) && context.alternate_accessions.indexOf(redirected_from_accession) > -1){
+            // Find @id of our redirected_from item.
+            ajax.load('/search/?type=Item&field=@id&field=uuid&field=accession&status=replaced&accession=' + redirected_from_accession, (r)=>{
+                var ourOldItem = _.findWhere(r['@graph'], { 'accession' : redirected_from_accession });
+                if (!ourOldItem){
+                    console.error('Couldnt find correct Item in list of results.');
+                    return;
+                }
+                if (!ourOldItem['@id']){
+                    console.error('Couldnt find @id of Item.');
+                    return;
+                }
+                Alerts.queue({
+                    'title' : "Redirected",
+                    'message': <span>You have been redirected from <a href={ourOldItem['@id']}>{ redirected_from_accession }</a>, which this item ({ context.accession }) supercedes.</span>,
+                    'style': 'warning'
+                });
+            }, 'GET', (err)=>{
+                console.error('No results found');
+            });
+        }
+    }
+
+    componentDidMount(){
+        this.maybeSetReplacedRedirectedAlert();
     }
 
     getCommonTabs(context = this.props.context){
