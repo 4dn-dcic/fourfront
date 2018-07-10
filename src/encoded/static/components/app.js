@@ -164,22 +164,11 @@ export default class App extends React.Component {
         'sessionMayBeSet' : null
     }
 
-    static childContextTypes = {
-        dropdownComponent: PropTypes.string,
-        location_href: PropTypes.string,
-        onDropdownChange: PropTypes.func,
-        hidePublicAudits: PropTypes.bool,
-        session: PropTypes.bool,
-        navigate: PropTypes.func,
-        schemas: PropTypes.object
-    }
-
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
@@ -360,19 +349,6 @@ export default class App extends React.Component {
                 }
             }
         }
-    }
-
-    // Retrieve current React context
-    getChildContext() {
-        return {
-            dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            location_href: this.props.href,
-            onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
-            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
-            session: this.state.session,
-            navigate: navigate,
-            schemas : this.state.schemas
-        };
     }
 
     listActionsFor(category) {

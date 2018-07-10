@@ -38,21 +38,6 @@ describe('Testing home.js', function() {
         );
 
         Wrapper = createReactClass({
-            childContextTypes: {
-                fetch: PropTypes.func
-            },
-
-            // Retrieve current React context
-            getChildContext: function() {
-                return {
-                    fetch: this.fetch
-                };
-            },
-
-            fetch: function(url, options) {
-                return null;
-            },
-
             render: function() {
                 return (
                     <div>{this.props.children}</div>
