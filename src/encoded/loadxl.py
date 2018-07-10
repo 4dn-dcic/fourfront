@@ -94,6 +94,7 @@ ORDER = [
 
 IS_ATTACHMENT = [
     'attachment',
+    'spikein_concentrations',
     'IDR_plot_true',
     'IDR_plot_rep1_pr',
     'IDR_plot_rep2_pr',
@@ -534,7 +535,9 @@ def attachment(path):
             'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
         }
 
-        if mime_type in ('application/pdf', "application/zip", 'text/plain', 'text/tab-separated-values', 'text/html'):
+        if mime_type in ('application/pdf', "application/zip", 'text/plain',
+                         'text/tab-separated-values', 'text/html', 'application/msword',
+                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
 

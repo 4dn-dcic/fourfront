@@ -636,6 +636,8 @@ class AttachmentInput extends React.Component{
                 "application/pdf",
                 "application/zip",
                 "application/msword",
+                "application/vnd.ms-excel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "text/plain",
                 "text/tab-separated-values",
                 "image/jpeg",
