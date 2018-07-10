@@ -239,32 +239,18 @@ export default class App extends React.Component {
 
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and update props.href (via Redux), if it is different.
-        var query_href;
+        var query_href = this.props.href;
         // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
         if (document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        } else {
-            query_href = this.props.href;
         }
-        // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
-        //query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        // Grab window.location.href w/ query_href as fallback.
         query_href = globals.windowHref(query_href);
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
             });
         }
-
-        // If the window href has a hash, which SHOULD NOT remain (!== globals.maybeRemoveHash()), strip it on mount to match app's props.href.
-        var parts = url.parse(query_href);
-        if (
-            typeof window.location.hash === 'string' &&
-            window.location.hash.length > 0 &&
-            (!parts.hash || parts.hash === '')
-        ){
-            window.location.hash = '';
-        }
-
 
         if (this.historyEnabled) {
             var data = this.props.context;
