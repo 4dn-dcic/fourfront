@@ -381,7 +381,7 @@ export class FormattedInfoBlock extends React.Component {
      * @param {function} cb - Callback function passed down to ajaxPropertyDetails.
      * @returns {boolean} Whether an AJAX load/fetch was initiated.
      */
-    static onMountMaybeFetch(propertyName = 'lab', contextProperty = this.props.context.lab, cb = null){
+    static onMountMaybeFetch(propertyName = 'lab', contextProperty = (this.props.context && this.props.context.lab), cb = null){
         if (typeof contextProperty == 'string' && contextProperty.length > 0){
             FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
             return true;

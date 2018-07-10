@@ -2,6 +2,7 @@ import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 from datetime import date
+from urllib.parse import urlencode
 
 
 @pytest.fixture
@@ -552,9 +553,10 @@ def test_submitter_replaced_item_redirects_to_new_one_with_accession(ind_human_i
     wrangler_testapp.patch_json(new.json['@graph'][0]['@id'], {"alternate_accessions": [old.json['@graph'][0]['accession']]}, status=200)
     # visit old item and assert that it lands on new item
     rep_res = submitter_testapp.get(old.json['@graph'][0]['@id'], status=301)
-    # get the landing url
+    # get the landing url, which includes a 'redirected_from' query param
+    redir_param = '?' + urlencode({ 'redirected_from' : old.json['@graph'][0]['@id'] })
     landing = rep_res.headers['Location'].replace('http://localhost', '')
-    assert landing == new.json['@graph'][0]['@id']
+    assert landing == new.json['@graph'][0]['@id'] + redir_param
     submitter_testapp.get(landing, status=200)
 
 

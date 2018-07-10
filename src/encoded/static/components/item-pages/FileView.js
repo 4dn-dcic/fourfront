@@ -22,6 +22,7 @@ import { FileDownloadButton } from './../util/file';
 // UNCOMMENT FOR TESTING
 // import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
 // import { test_file } from './../testdata/file/fastq-unreleased-expset';
+// import { FILE } from './../testdata/file/processed-bw';
 
 
 
@@ -36,7 +37,10 @@ export default class FileView extends WorkflowRunTracingView {
 
     static shouldHiGlassViewExist(context){
         // TODO: Remove context.file_format check?
-        return context.file_format === 'mcool' && context.higlass_uid && typeof context.higlass_uid === 'string';
+        if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
+        var isMcoolFile = context.file_format === 'mcool';
+        var isBWFile = (context.file_format === 'bw' || context.file_format === 'bg');
+        return isMcoolFile || isBWFile;
     }
 
     constructor(props){
@@ -92,7 +96,7 @@ export default class FileView extends WorkflowRunTracingView {
             initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
-        return initTabs.concat(this.getCommonTabs());
+        return initTabs.concat(this.getCommonTabs(context));
     }
 
     itemMidSection(){

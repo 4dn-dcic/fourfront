@@ -2,6 +2,10 @@
 """
 import os
 import requests
+from urllib.parse import (
+    urlparse,
+    urlencode
+)
 from pyramid.httpexceptions import ( # 301-307 redirect code response
     HTTPMovedPermanently,
     HTTPFound,
@@ -311,10 +315,12 @@ def static_page(request):
     context = Page(request.registry, request._static_page_model)
 
     if context.properties.get('redirect') and context.properties['redirect'].get('enabled'): # We have a redirect defined.
-        return get_pyramid_http_exception_for_redirect_code(context.properties['redirect'].get('code', 307))( # Fallback to 307 as is 'safest' (response isn't cached by browsers)
-            location=context.properties['redirect'].get('target', '/'),
-            comment="Redirected from " + page_name
-        )
+        parsed_redirect_uri = urlparse(context.properties['redirect'].get('target', '/'))
+        uri_to_use = (parsed_redirect_uri.scheme and (parsed_redirect_uri.scheme + ':') or '') + '//' if parsed_redirect_uri.netloc else ''
+        uri_to_use += parsed_redirect_uri.path
+        uri_to_use += '?' + urlencode({ 'redirected_from' : '/' + context.properties.get('name', str(context.uuid)) }) + ((parsed_redirect_uri.query and ('&' + parsed_redirect_uri.query)) or '')
+         # Fallback to 307 as is 'safest' (response isn't cached by browsers)
+        return get_pyramid_http_exception_for_redirect_code(context.properties['redirect'].get('code', 307))(location=uri_to_use, detail="Redirected from " + page_name)
     item = item_view_page(context, request)
     cleanup_page_tree(item)
     item['toc'] = item.get('table-of-contents')
