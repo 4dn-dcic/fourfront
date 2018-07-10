@@ -167,49 +167,6 @@ export const dbxref_prefix_map = {
     "doi": "http://dx.doi.org/doi:"
 };
 
-/**
- * Rules for determining if a hash is part of the href.
- * For most, it isn't, and should be stripped on page load.
- * For a few, such as workflows, it's part of the href.
- * 
- * @export
- * @param {string} href - The href to test.
- */
-export function isHashPartOfHref(href, parts = null){
-
-    if (!parts && typeof href !== 'string') throw Error("No href or parts passed.");
-    if (!parts) parts = url.parse(href);
-
-    // Edit Pages
-    if (parts.hash === '#!edit' || parts.hash === '#!create' || parts.hash === '#!add') return true;
-
-    // Workflow Pages
-    if (parts.path.slice(0,14) === '/workflow-runs' || parts.path.slice(0,11) === '/workflows/' ){
-        return true;
-    }
-
-    // Item pages with Workflow graphs
-    if (parts.path.slice(0,27) === '/experiment-set-replicates/' && parts.path.length > 28 ){
-        return true;
-    }
-    if (parts.path.slice(0,17) === '/files-processed/' && parts.path.length > 18 ){
-        return true;
-    }
-
-    return false;
-}
-
-export function maybeRemoveHash(href){
-    // Strip href fragment.
-    var hash_pos = href.indexOf('#');
-    if (hash_pos > -1) {
-        if (isHashPartOfHref(href)){
-            return href;
-        } else {
-            return href.slice(0, hash_pos);
-        }
-    } else return href;
-}
 
 export function windowHref(fallbackHref){
     if (!isServerSide() && window.location && window.location.href) return window.location.href;
