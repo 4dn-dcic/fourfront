@@ -3,6 +3,7 @@
 /* @flow */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
@@ -83,7 +84,6 @@ class ResultDetail extends React.PureComponent{
         super(props);
         this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        //this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
@@ -106,17 +106,17 @@ class ResultDetail extends React.PureComponent{
     }
 
     render(){
+        var { open, rowNumber, result, tableContainerWidth, tableContainerScrollLeft, renderDetailPane, toggleDetailOpen } = this.props;
         return (
-            <div className={"result-table-detail-container" + (this.props.open || this.state.closing ? ' open' : ' closed')}>
-                { this.props.open ?
-
+            <div className={"result-table-detail-container" + (open || this.state.closing ? ' open' : ' closed')}>
+                { open ?
                     <div className="result-table-detail" ref="detail" style={{
-                        'width' : this.props.tableContainerWidth,
-                        'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
+                        'width' : tableContainerWidth,
+                        'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
                     }}>
-                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth, this.setDetailHeightFromPane) }
-                        { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
-                            <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
+                        { renderDetailPane(result, rowNumber, tableContainerWidth, this.setDetailHeightFromPane) }
+                        { tableContainerScrollLeft && tableContainerScrollLeft > 10 ?
+                            <div className="close-button-container text-center" onClick={toggleDetailOpen}>
                                 <i className="icon icon-angle-up"/>
                             </div>
                         : null }
@@ -183,6 +183,7 @@ class ResultRow extends React.PureComponent {
         this.toggleDetailOpen = _.throttle(this.toggleDetailOpen.bind(this), 250);
         this.isOpen = this.isOpen.bind(this);
         this.setDetailHeight = props.setDetailHeight.bind(props.setDetailHeight, props['data-key']);
+        this.handleDragStart = this.handleDragStart.bind(this);
         this.render = this.render.bind(this);
     }
 
@@ -222,25 +223,56 @@ class ResultRow extends React.PureComponent {
         return props.openDetailPanes[props['data-key']] || false;
     }
 
+    /** Add some JSON data about the result item upon initiating dragstart. */
+    handleDragStart(evt){
+        if (!evt || !evt.dataTransfer) return;
+        var { result, href } = this.props;
+
+        // Result JSON itself.
+        evt.dataTransfer.setData('text/4dn-item-json', JSON.stringify(result));
+
+        // Result URL and @id.
+        var hrefParts = url.parse(href);
+        var atId = object.itemUtil.atId(result);
+        var formedURL = (
+            (hrefParts.protocol || '') +
+            (hrefParts.hostname ? '//' +  hrefParts.hostname + (hrefParts.port ? ':' + hrefParts.port : '') : '') +
+            atId
+        );
+        evt.dataTransfer.setData('text/plain', formedURL);
+        evt.dataTransfer.setData('text/uri-list', formedURL);
+        evt.dataTransfer.setData('text/4dn-item-id', atId);
+
+        /*
+        var firstColumnBlock = this.refs && this.refs.firstColumnBlock && ReactDOM.findDOMNode(this.refs.firstColumnBlock);
+
+        if (firstColumnBlock){
+            evt.dataTransfer.setDragImage(firstColumnBlock, 0, 0);
+        }
+        */
+    }
+
     render(){
         var { result, rowNumber, mounted, headerColumnWidths, renderDetailPane, columnDefinitions, schemas,
-              tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href } = this.props;
+              tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href, currentAction } = this.props;
         var detailOpen = this.isOpen();
+        var isDraggable = currentAction === 'selection';
         return (
-            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed')} data-row-number={rowNumber} /* ref={(r)=>{
+            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
                 // TODO POTENTIALLY: Use to set height on open/close icon & sticky title column.
                 var height = (r && r.offsetHeight) || null;
                 if (height && height !== this.rowFullHeight){
                     this.rowFullHeight = height;
                 }
             }}*/>
-                <div className="columns clearfix">
+                <div className="columns clearfix result-table-row" draggable={isDraggable} onDragStart={isDraggable ? this.handleDragStart : null}>
                     { _.map(columnDefinitions, (colDef, i) =>
                         <ResultRowColumnBlock
                             columnNumber={i} rowNumber={rowNumber} key={colDef.field}
                             columnDefinition={colDef} result={result}
                             toggleDetailOpen={this.toggleDetailOpen} detailOpen={detailOpen}
                             mounted={mounted} headerColumnWidths={headerColumnWidths} href={href}
+                            ref={isDraggable && i === 0 ? "firstColumnBlock" : null}
                             selectedFiles={i === 0 ? this.props.selectedFiles : null} // Passed to trigger update/re-render on PureComponent
                         />
                     ) }
@@ -887,7 +919,7 @@ class DimensioningContainer extends React.PureComponent {
             var key = DimensioningContainer.getKeyForGraphResult(r, idx);
             return (
                 <ResultRow
-                    {..._.pick(props, 'columnDefinitions', 'renderDetailPane', 'href', 'selectedFiles')} // selectedFiles passed to trigger re-render on PureComponent further down tree (DetailPane).
+                    {..._.pick(props, 'columnDefinitions', 'renderDetailPane', 'href', 'currentAction', 'selectedFiles')} // selectedFiles passed to trigger re-render on PureComponent further down tree (DetailPane).
                     result={r} rowNumber={idx} data-key={key} key={key} mounted={this.state.mounted || false}
                     rowWidth={fullRowWidth} headerColumnWidths={this.state.widths}
                     toggleDetailPaneOpen={this.toggleDetailPaneOpen} openDetailPanes={this.state.openDetailPanes} setDetailHeight={this.setDetailHeight}
@@ -998,7 +1030,8 @@ export class SearchResultTable extends React.PureComponent {
         'rowHeight' : 47,
         'stickyHeaderTopOffset' : -40,
         'fullWidthInitOffset' : 60,
-        'fullWidthContainerSelectorString' : '.browse-page-container'
+        'fullWidthContainerSelectorString' : '.browse-page-container',
+        'currentAction' : null
     }
 
     constructor(props){

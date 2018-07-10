@@ -134,7 +134,7 @@ class ResultTableContainer extends React.PureComponent {
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
         this.render = this.render.bind(this);
-        this.doForceUpdateOnContainer = this.forceUpdate.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
 
         // Primarily used here for caching some values re: PureComponents further down rendering tree.
         this.state = {
@@ -143,21 +143,6 @@ class ResultTableContainer extends React.PureComponent {
             'colDefOverrides' : this.colDefOverrides()
         };
     }
-    
-    /*
-    shouldComponentUpdate(nextProps, nextState){
-        if (this.props.selectedFiles !== nextProps.selectedFiles) return true;
-        if (this.props.context !== nextProps.context) return true;
-        if (this.props.page !== nextProps.page) return true;
-        if (this.props.limit !== nextProps.limit) return true;
-        if (this.props.changingPage !== nextProps.changingPage) return true;
-        if (this.props.sortColumn !== nextProps.sortColumn) return true;
-        if (this.props.sortReverse !== nextProps.sortReverse) return true;
-        if (this.props.searchBase !== nextProps.searchBase) return true;
-        if (this.props.schemas !== nextProps.schemas) return true;
-        return false;
-    }
-    */
 
     componentWillReceiveProps(nextProps){
         var stateChange = {};
@@ -304,10 +289,10 @@ class ResultTableContainer extends React.PureComponent {
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
                     <AboveTableControls
                         {..._.pick(this.props,
-                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href',
+                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles'
                         )}
-                        parentForceUpdate={this.doForceUpdateOnContainer} columnDefinitions={this.state.columnDefinitions}
+                        parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount
                     />
                     <SearchResultTable

@@ -388,7 +388,7 @@ export default class App extends React.Component {
         if (hash.slice(0, 2) === '#!') {
             name = hash.slice(2);
         }
-        return name;
+        return name || null;
     }
 
     loadSchemas(callback, forceFetch = false){
@@ -1106,7 +1106,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
+                <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
@@ -1135,7 +1135,7 @@ export default class App extends React.Component {
                                     browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
-                                <PageTitle context={this.props.context} session={this.state.session} href={this.props.href} schemas={this.state.schemas} />
+                                <PageTitle context={this.props.context} session={this.state.session} href={this.props.href} schemas={this.state.schemas} currentAction={currentAction} />
                                 <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}

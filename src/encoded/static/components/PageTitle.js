@@ -18,10 +18,13 @@ var TITLE_PATHNAME_MAP = {
         'subtitle' : "Filter & browse experiments"
     },
     '/search/' : {
-        'title' : 'Search',
-        'calloutTitle' : function(pathName, context){
+        'title' : function(pathName, context, href, currentAction){
+            if (currentAction === 'selection') return 'Selecting';
+            return 'Search';
+        },
+        'calloutTitle' : function(pathName, context, href, currentAction){
             var thisTypeTitle = getSchemaTypeFromSearchContext(context);
-            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>for</small> { thisTypeTitle }</span>: null;
+            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? 'a' : 'for' }</small> { thisTypeTitle }</span>: null;
         }
     },
     '/health' : {
@@ -85,12 +88,12 @@ export default class PageTitle extends React.PureComponent {
         return false;
     }
 
-    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false){
-        var currentPathName = null, currentPathRoot;
-        var title;
-        var atId = object.atIdFromObject(context);
-        var currentHref = isMounted ? windowHref(href) : href;
-        var currentHrefParts = url.parse(currentHref);
+    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false, currentAction){
+        var currentPathName = null,
+            currentPathRoot, title,
+            atId = object.atIdFromObject(context),
+            currentHref = isMounted ? windowHref(href) : href,
+            currentHrefParts = url.parse(currentHref);
 
         if (typeof atId === 'string'){
             currentPathName = url.parse(atId).pathname;
@@ -141,7 +144,7 @@ export default class PageTitle extends React.PureComponent {
 
         function getProp(prop){
             if (typeof prop === 'string') return prop;
-            if (typeof prop === 'function') return prop(currentPathName, context, href);
+            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction);
             return prop;
         }
 
@@ -241,7 +244,7 @@ export default class PageTitle extends React.PureComponent {
     }
 
     render(){
-        var { context, href, session } = this.props;
+        var { context, href, session, currentAction } = this.props;
 
         if (PageTitle.isHomePage(href)){
             return (
@@ -254,7 +257,9 @@ export default class PageTitle extends React.PureComponent {
             );
         }
 
-        var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
+        var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(
+            context, href, (this.props.shemas || Schemas.get()), this.state.mounted, currentAction
+        );
 
         if (title) {
             title = <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>{ title }</span>;
