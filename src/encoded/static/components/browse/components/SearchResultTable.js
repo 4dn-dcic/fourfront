@@ -680,6 +680,7 @@ class DimensioningContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.calculateStickyTopOffset = this.calculateStickyTopOffset.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
@@ -689,6 +690,8 @@ class DimensioningContainer extends React.PureComponent {
         this.onHorizontalScroll = this.onHorizontalScroll.bind(this);
         this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 200);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
+        this.getTableDims = this.getTableDims.bind(this);
+        this.onResize = this.onResize.bind(this);
         this.setResults = this.setResults.bind(this);
         this.renderHeadersRow = this.renderHeadersRow.bind(this);
         this.render = this.render.bind(this);
@@ -697,14 +700,25 @@ class DimensioningContainer extends React.PureComponent {
             'widths'    : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions),
             'results'   : props.results.slice(0),
             'isWindowPastTableTop' : false,
-            'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
+            'openDetailPanes' : {}, // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
+            'stickyHeaderTopOffset' : this.calculateStickyTopOffset(props)
         };
+    }
 
+    /** Primarily, correct props.stickyTopOffset to be 0 for when we are on mobile or small screens. */
+    calculateStickyTopOffset(props = this.props, responsiveGridSize = null){
+        responsiveGridSize = responsiveGridSize || (!isServerSide() && (this.state && this.state.mounted) && layout.responsiveGridState());
+        var stickyHeaderTopOffset = this.props.stickyHeaderTopOffset;
+        if (responsiveGridSize === 'xs' || responsiveGridSize === 'sm') stickyHeaderTopOffset = 0;
+        return stickyHeaderTopOffset;
     }
 
     componentDidMount(){
-        var state = { 'mounted' : true };
 
+        var state = _.extend(this.getTableDims(), {
+            'mounted' : true,
+            'stickyHeaderTopOffset' : this.calculateStickyTopOffset(this.props)
+        });
 
         if (!isServerSide()){
 
@@ -719,6 +733,7 @@ class DimensioningContainer extends React.PureComponent {
             }
 
             window.addEventListener('scroll', this.onVerticalScroll);
+            window.addEventListener('resize', this.onResize);
 
         }
 
@@ -728,6 +743,7 @@ class DimensioningContainer extends React.PureComponent {
 
     componentWillUnmount(){
         window.removeEventListener('scroll', this.onVerticalScroll);
+        window.removeEventListener('resize', this.onResize);
     }
 
     componentWillReceiveProps(nextProps){
@@ -749,7 +765,8 @@ class DimensioningContainer extends React.PureComponent {
                 this.lastResponsiveGridSize = responsiveGridSize;
                 // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
                 this.setState({
-                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted)
+                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted),
+                    'stickyHeaderTopOffset' : this.calculateStickyTopOffset(nextProps)
                 }, ()=>{
                     vizUtil.requestAnimationFrame(()=>{
                         // 2. Upon render into DOM, decrease col sizes.
@@ -790,6 +807,12 @@ class DimensioningContainer extends React.PureComponent {
             if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, this.refs.innerContainer.scrollLeft, this.throttledUpdate);
         }
         return false;
+    }
+
+    onResize(e){
+        vizUtil.requestAnimationFrame(()=>{
+            this.setState(this.getTableDims());
+        });
     }
 
     onVerticalScroll(e){
@@ -881,7 +904,8 @@ class DimensioningContainer extends React.PureComponent {
         if (!SearchResultTable.isDesktopClientside()){
             return {
                 'tableContainerWidth' : this.getTableContainerWidth(),
-                'tableContainerScrollLeft' : null
+                'tableContainerScrollLeft' : null,
+                'tableLeftOffset' : null
             };
         }
         return {
@@ -903,26 +927,27 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     renderHeadersRow({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}){
-        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.cachedTableDims || this.getTableDims();
+        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.state;
         return (
             <HeadersRow
-                {..._.pick(this.props, 'columnDefinitions', 'sortBy', 'sortColumn', 'sortReverse', 'defaultMinColumnWidth', 'rowHeight', 'stickyHeaderTopOffset', 'renderDetailPane')}
-                {..._.pick(this.state, 'mounted', 'results')}
+                {..._.pick(this.props, 'columnDefinitions', 'sortBy', 'sortColumn', 'sortReverse', 'defaultMinColumnWidth', 'rowHeight', 'renderDetailPane')}
+                {..._.pick(this.state, 'mounted', 'results', 'stickyHeaderTopOffset')}
                 headerColumnWidths={this.state.widths} setHeaderWidths={this.setHeaderWidths}
                 tableLeftOffset={tableLeftOffset} tableContainerWidth={tableContainerWidth}
                 stickyStyle={style} isSticky={isSticky} />
         );
     }
 
-    renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, props = this.props){
-        return _.map(this.state.results, (r, idx)=>{
+    renderResults(fullRowWidth, props = this.props){
+        var { results, tableContainerWidth, tableContainerScrollLeft, mounted, widths, openDetailPanes } = this.state;
+        return _.map(results, (r, idx)=>{
             var key = DimensioningContainer.getKeyForGraphResult(r, idx);
             return (
                 <ResultRow
                     {..._.pick(props, 'columnDefinitions', 'renderDetailPane', 'href', 'currentAction', 'selectedFiles')} // selectedFiles passed to trigger re-render on PureComponent further down tree (DetailPane).
-                    result={r} rowNumber={idx} data-key={key} key={key} mounted={this.state.mounted || false}
-                    rowWidth={fullRowWidth} headerColumnWidths={this.state.widths}
-                    toggleDetailPaneOpen={this.toggleDetailPaneOpen} openDetailPanes={this.state.openDetailPanes} setDetailHeight={this.setDetailHeight}
+                    result={r} rowNumber={idx} data-key={key} key={key} mounted={mounted || false}
+                    rowWidth={fullRowWidth} headerColumnWidths={widths}
+                    toggleDetailPaneOpen={this.toggleDetailPaneOpen} openDetailPanes={openDetailPanes} setDetailHeight={this.setDetailHeight}
                     tableContainerWidth={tableContainerWidth} tableContainerScrollLeft={tableContainerScrollLeft} />
             );
         });
@@ -930,15 +955,12 @@ class DimensioningContainer extends React.PureComponent {
 
     render(){
         var { columnDefinitions, stickyHeaderTopOffset } = this.props;
-        var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
-        var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
+        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset, mounted, widths } = this.state;
 
-        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.cachedTableDims = this.getTableDims();
+        var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, mounted, widths);
 
         var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
             typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
-
-        if (responsiveGridSize === 'xs' || responsiveGridSize === 'sm') stickyHeaderTopOffset = 0;
 
         return (
             <div className="search-results-outer-container">
@@ -946,7 +968,7 @@ class DimensioningContainer extends React.PureComponent {
                     <div className={"search-results-container" + (canLoadMore === false ? ' fully-loaded' : '')}>
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
-                                <Sticky topOffset={stickyHeaderTopOffset} children={this.renderHeadersRow} />
+                                <Sticky topOffset={this.state.stickyHeaderTopOffset} children={this.renderHeadersRow} ref="stickiedHeaders" />
                                 <LoadMoreAsYouScroll
                                     {..._.pick(this.props, 'href', 'limit', 'rowHeight', 'totalExpected')}
                                     {..._.pick(this.state, 'results', 'mounted', 'openDetailPanes')}
@@ -956,7 +978,7 @@ class DimensioningContainer extends React.PureComponent {
                                     ref="loadMoreAsYouScroll"
                                     innerContainerElem={this.refs && this.refs.innerContainer}
                                     //onVerticalScroll={this.onVerticalScroll}
-                                    children={this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft)}
+                                    children={this.renderResults(fullRowWidth)}
                                 />
                             </div>
                         </div>

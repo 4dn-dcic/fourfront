@@ -1651,11 +1651,11 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 .search-headers-row {
 	background-color: #22656d;
-	z-index: 10;
+	z-index: 50;
 	transform: translate3d(0,0,0) !important;
 	overflow-x: hidden;
 	&.stickied {
-		top : 40px;
+		top : 0px;
 		.browse-page-container & {
 			top: 80px;
 		}
