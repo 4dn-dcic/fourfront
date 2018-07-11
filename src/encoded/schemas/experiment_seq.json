@@ -99,6 +99,13 @@
             "type": "integer",
             "lookup": 120,
             "use_for": ["TSA-seq-v1", "TSE-seq-v2"]
+        },
+        "average_biotin_range": {
+            "title": "Biotynylation range",
+            "description": "Estimated average biotinlyation range from dot blot (kb/1 biotin）",
+            "type": "string",
+            "lookup": 125,
+            "use_for": ["TSA-seq-v1", "TSE-seq-v2"]
         }
     },
     "columns": {
