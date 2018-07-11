@@ -659,9 +659,11 @@ class DimensioningContainer extends React.PureComponent {
 
     static setDetailPanesLeftOffset(detailPanes, leftOffset = 0, cb = null){
         if (detailPanes && detailPanes.length > 0){
-            var transformStyle = vizUtil.style.translate3d(leftOffset);
-            detailPanes.forEach(function(d){
-                if (d.style.transform !== transformStyle) d.style.transform = transformStyle;
+            vizUtil.requestAnimationFrame(()=>{
+                var transformStyle = vizUtil.style.translate3d(leftOffset);
+                detailPanes.forEach(function(d){
+                    d.style.transform = transformStyle;
+                });
             });
         }
         if (typeof cb === 'function') cb();
@@ -728,6 +730,7 @@ class DimensioningContainer extends React.PureComponent {
                     state.widths = DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions);
                     state.isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer);
                 }
+                this.refs.innerContainer.addEventListener('scroll', this.onHorizontalScroll);
             } else {
                 state.widths = DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions);
             }
@@ -744,6 +747,7 @@ class DimensioningContainer extends React.PureComponent {
     componentWillUnmount(){
         window.removeEventListener('scroll', this.onVerticalScroll);
         window.removeEventListener('resize', this.onResize);
+        this.refs.innerContainer.removeEventListener('scroll', this.onHorizontalScroll);
     }
 
     componentWillReceiveProps(nextProps){
@@ -766,7 +770,7 @@ class DimensioningContainer extends React.PureComponent {
                 // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
                 this.setState({
                     'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted),
-                    'stickyHeaderTopOffset' : this.calculateStickyTopOffset(nextProps)
+                    'stickyHeaderTopOffset' : this.calculateStickyTopOffset(nextProps, responsiveGridSize)
                 }, ()=>{
                     vizUtil.requestAnimationFrame(()=>{
                         // 2. Upon render into DOM, decrease col sizes.
@@ -802,10 +806,13 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     onHorizontalScroll(e){
-        if (document && document.querySelectorAll && this.refs && this.refs.innerContainer && this.refs.innerContainer.childNodes[0]){
-            var detailPanes = DimensioningContainer.findDetailPaneElements();
-            if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, this.refs.innerContainer.scrollLeft, this.throttledUpdate);
-        }
+        e.stopPropagation();
+        var nextScrollLeft = e.target.scrollLeft,
+            detailPanes = DimensioningContainer.findDetailPaneElements();
+
+        if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, nextScrollLeft, ()=>{
+            this.setState({ 'tableContainerScrollLeft' : nextScrollLeft });
+        });
         return false;
     }
 
@@ -816,20 +823,20 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     onVerticalScroll(e){
-        if (!document || !window || !this.refs.innerContainer) return null;
+        //if (!document || !window || !this.refs.innerContainer) return null;
 
+        e.stopPropagation();
 
+        setTimeout(()=>{
 
-        //vizUtil.requestAnimationFrame(()=>{
-
-        var windowHeight    = window.innerHeight;
-        var scrollTop       = layout.getPageVerticalScrollPosition();
-        var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
+            var windowHeight    = window.innerHeight;
+            var scrollTop       = layout.getPageVerticalScrollPosition();
+            var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
 
             //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
 
 
-        var done = false;
+            var done = false;
 
             // Resize to full width.
             /*
@@ -879,15 +886,15 @@ class DimensioningContainer extends React.PureComponent {
             }
             */
 
-        if (!done){
-            var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
-            if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
-                this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
+            if (!done){
+                var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
+                if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
+                    this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
+                }
             }
-        }
 
 
-        //});
+        }, 0);
 
 
     }
@@ -900,6 +907,10 @@ class DimensioningContainer extends React.PureComponent {
         return (this.refs && this.refs.innerContainer && this.refs.innerContainer.offsetWidth) || null;
     }
 
+    getTableScrollLeft(){
+        return (this.refs && this.refs.innerContainer && typeof this.refs.innerContainer.scrollLeft === 'number') ? this.refs.innerContainer.scrollLeft : null;
+    }
+
     getTableDims(){
         if (!SearchResultTable.isDesktopClientside()){
             return {
@@ -910,7 +921,7 @@ class DimensioningContainer extends React.PureComponent {
         }
         return {
             'tableContainerWidth' : this.getTableContainerWidth(),
-            'tableContainerScrollLeft' : (this.refs && this.refs.innerContainer && typeof this.refs.innerContainer.scrollLeft === 'number') ? this.refs.innerContainer.scrollLeft : null,
+            'tableContainerScrollLeft' : this.getTableScrollLeft(),
             'tableLeftOffset' : this.getTableLeftOffset()
         };
     }
@@ -966,7 +977,7 @@ class DimensioningContainer extends React.PureComponent {
             <div className="search-results-outer-container">
                 <StickyContainer>
                     <div className={"search-results-container" + (canLoadMore === false ? ' fully-loaded' : '')}>
-                        <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
+                        <div className="inner-container" ref="innerContainer">
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                 <Sticky topOffset={this.state.stickyHeaderTopOffset} children={this.renderHeadersRow} ref="stickiedHeaders" />
                                 <LoadMoreAsYouScroll
