@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
+import url from 'url';
 import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -49,6 +50,7 @@ export default class BuildField extends React.Component {
         super(props);
         this.wrapWithLabel = this.wrapWithLabel.bind(this);
         this.wrapWithNoLabel = this.wrapWithNoLabel.bind(this);
+        this.displayField = this.displayField.bind(this);
         this.state = {
             'dropdownOpen' : false
         };
@@ -66,9 +68,10 @@ export default class BuildField extends React.Component {
         }
     }
 
-    displayField = (field_case) => {
+    displayField(field_case){
         var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo } = this.props;
         var inputProps = {
+            'key' : field,
             'id' : 'field_for_' + field,
             'disabled' : disabled || false,
             'ref' : "inputElement",
@@ -105,7 +108,7 @@ export default class BuildField extends React.Component {
                     </DropdownButton>
                 </span>
             );
-            case 'linked object'    : return <LinkedObj {...this.props}/>;
+            case 'linked object'    : return <LinkedObj key="linked-item" {...this.props}/>;
             case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={value || null} roundTwo={roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
@@ -220,40 +223,39 @@ export default class BuildField extends React.Component {
 
     render = () => {
         // TODO: come up with a schema based solution for code below?
-        // hardcoded fields you can't delete
-        var cannot_delete = ['filename'];
-        var showDelete = false;
-        var disableDelete = false;
-        var extClass = '';
+        var { value, isArray, field, fieldType, arrayIdx, isLastItemInArray } = this.props;
+        var cannot_delete = ['filename'], // hardcoded fields you can't delete
+            showDelete = false,
+            disableDelete = false,
+            extClass = '';
+
         // don't show delet button unless:
         // not in hardcoded cannot delete list AND is not an object or
         // non-empty array element (individual values get deleted)
-        if(!_.contains(cannot_delete, this.props.field) && this.props.fieldType !== 'array'){
+        if(!_.contains(cannot_delete, field) && fieldType !== 'array'){
             showDelete = true;
         }
 
         // if there is no value in the field and non-array, hide delete button
-        if(
-            isValueNull(this.props.value) && !this.props.isArray
-        ) {
+        if (isValueNull(value) && !isArray) {
             showDelete = false;
         }
 
         var wrapFunc = this.wrapWithLabel;
 
-        var excludeRemoveButton = (this.props.fieldType === 'array' || this.props.fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
+        var excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
 
-        if (this.props.isArray) {
+        if (isArray) {
             // array items don't need fieldnames/tooltips
             wrapFunc = this.wrapWithNoLabel;
 
-            if (this.props.isLastItemInArray && isValueNull(this.props.value)){
+            if (isLastItemInArray && isValueNull(value)){
                 showDelete = false;
-                if (Array.isArray(this.props.arrayIdx) && this.props.arrayIdx[0] !== 0) extClass = "last-item-empty";
-            } else if (this.props.fieldType === 'object') {
+                if (Array.isArray(arrayIdx) && arrayIdx[0] !== 0) extClass = "last-item-empty";
+            } else if (fieldType === 'object') {
                 // if we've got an object that's inside inside an array, only allow
                 // the array to be deleted if ALL individual fields are null
-                if (!isValueNull(this.props.value)){
+                if (!isValueNull(value)){
                     disableDelete = true;
                 }
                 //var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
@@ -266,13 +268,13 @@ export default class BuildField extends React.Component {
 
         return wrapFunc(
             <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + ' ' + extClass}>
-                {this.displayField(this.props.fieldType)}
+                {this.displayField(fieldType)}
             </div>,
             excludeRemoveButton ? null : (
                 <div className="col-xs-2 remove-button-column">
                     <Fade in={showDelete}>
                         <div className={"pull-right remove-button-container" + (!showDelete ? ' hidden' : '')}>
-                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField} data-tip={this.props.isArray ? 'Remove Item' : 'Clear Value'}><i className="icon icon-fw icon-times"/></Button>
+                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField} data-tip={isArray ? 'Remove Item' : 'Clear Value'}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>
@@ -286,92 +288,275 @@ class LinkedObj extends React.Component{
 
     constructor(props){
         super(props);
+        this.updateContext = this.updateContext.bind(this);
+        this.setSubmissionStateToLinkedToItem = this.setSubmissionStateToLinkedToItem.bind(this);
+        this.handleSelectItemClick = this.handleSelectItemClick.bind(this);
+        this.handleCreateNewItemClick = this.handleCreateNewItemClick.bind(this);
+        this.handleWindowDragOver = this.handleWindowDragOver.bind(this);
+        this.refreshWindowDropReceiver = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
+        this.closeWindowDropReceiver = this.closeWindowDropReceiver.bind(this);
+        this.handleDrop = this.handleDrop.bind(this);
+
+        this.windowDropReceiverHideTimeout = null;
     }
 
-
-    // mechanism for changing value of linked object in parent context
-    // from int keyIdx to string path of newly submitted object
     componentDidMount(){
-        if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
-            this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
+        this.updateContext();
+    }
+
+    componentDidUpdate(pastProps){
+        this.updateContext();
+
+        if (pastProps.fieldBeingSelected !== this.props.fieldBeingSelected || pastProps.fieldBeingSelectedArrayIdx !== pastProps.fieldBeingSelectedArrayIdx){
+            this.manageWindowOnDragHandler(pastProps, this.props);
+        }
+
+        ReactTooltip.rebuild();
+    }
+
+    componentWillUnmount(){
+        this.manageWindowOnDragHandler(this.props, null);
+    }
+
+    /**
+     * Mechanism for changing value of linked object in parent context
+     * from {number} keyIdx to {string} path of newly submitted object.
+     */
+    updateContext(){
+        var { keyComplete, value, linkType, arrayIdx, nestedField, modifyNewContext } = this.props;
+        if (keyComplete[value] && !isNaN(value)) {
+            modifyNewContext(nestedField, keyComplete[value], 'finished linked object', linkType, arrayIdx);
             ReactTooltip.rebuild();
         }
     }
 
-    componentDidUpdate(){
-        if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
-            this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
-            ReactTooltip.rebuild();
+    manageWindowOnDragHandler(pastProps, nextProps){
+        var pastInSelection     = this.isInSelectionField(pastProps),
+            nowInSelection      = this.isInSelectionField(nextProps),
+            hasUnsetInSelection = pastInSelection && !nowInSelection,
+            hasSetInSelection   = !pastInSelection && nowInSelection;
+
+        if (hasUnsetInSelection){
+            window.removeEventListener('dragenter', this.handleWindowDragEnter);
+            window.removeEventListener('dragover',  this.handleWindowDragOver);
+            window.removeEventListener('drop',      this.handleDrop);
+            this.closeWindowDropReceiver();
+            this.childWindowClosedInterval && clearInterval(this.childWindowClosedInterval);
+            console.warn('Removed window event handlers for field', this.props.field);
+            //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
+        } else if (hasSetInSelection){
+            var _this = this;
+            setTimeout(function(){
+                if (!_this || !_this.isInSelectionField(_this.props)) return false;
+                window.addEventListener('dragenter', _this.handleWindowDragEnter);
+                window.addEventListener('dragover',  _this.handleWindowDragOver);
+                window.addEventListener('drop',      _this.handleDrop);
+                console.warn('Added window event handlers for field', _this.props.field);
+                //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
+            }, 250);
         }
+    }
+
+    setSubmissionStateToLinkedToItem(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var intKey = parseInt(this.props.value);
+        if (isNaN(intKey)) throw new Error('Expected an integer for props.value, received', this.props.value);
+        this.props.setSubmissionState('currKey', intKey);
+    }
+
+    isInSelectionField(props = this.props){
+        if (!props) return false;
+        return props.fieldBeingSelected && props.fieldBeingSelected === props.nestedField && ( // & check if array indices match, if any
+            (props.arrayIdx === null && props.fieldBeingSelectedArrayIdx === null) ||
+            (Array.isArray(props.arrayIdx) && Array.isArray(props.fieldBeingSelectedArrayIdx) && props.fieldBeingSelectedArrayIdx[0] === props.arrayIdx[0])
+        );
+    }
+
+    handleSelectItemClick(e){
+        e.preventDefault();
+
+        if (!window) return;
+        
+        var { schema, nestedField, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+
+        var itemType    = schema.linkTo,
+            searchURL   = '/search/?type=' + itemType + '#!selection';
+
+        this.windowObjectReference = window.open(
+            searchURL,
+            "selection-search",
+            "menubar=no,location=yes,resizable=yes,scrollbars=yes,status=no,navigation=yes,chrome=yes,centerscreen=yes,width=992,height=600"
+        );
+
+        selectObj(itemType, nestedField, linkType, arrayIdx);
+
+        this.childWindowClosedInterval = setInterval(()=>{
+            if (!this || !this.windowObjectReference || this.windowObjectReference.closed) {
+                clearInterval(this.childWindowClosedInterval);
+                delete this.childWindowClosedInterval;
+                if (this && this.windowObjectReference && this.windowObjectReference.closed){
+                    selectCancel();
+                }
+            }
+        }, 1000);
+
+    }
+
+    handleCreateNewItemClick(e){
+        e.preventDefault();
+        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.schema.linkTo);
+    }
+
+    handleDrop(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json'),
+            draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain'),
+            draggedID = evt.dataTransfer && evt.dataTransfer.getData('text/text/4dn-item-id');
+
+        if (!draggedID){
+            draggedID = (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname;
+        }
+
+        var isValidAtId = typeof draggedID === 'string' && draggedID.charAt(0) === '/';// && ...
+
+        if (!draggedID || !isValidAtId){
+            throw new Error('No valid @id available.');
+        }
+
+        console.log('DROPPED', evt, draggedURI, this.props);
+        console.log('TODO: Call `this.props.modifyNewContext` to update value, hide input field & show linkedTo Item, etc.');
+
+        this.props.selectComplete(draggedID);
+
+        if (this.windowObjectReference){
+            this.windowObjectReference.close();
+            delete this.windowObjectReference;
+        }
+    }
+
+    handleWindowDragEnter(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
+
+    handleWindowDragOver(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.refreshWindowDropReceiver(evt);
+    }
+
+    closeWindowDropReceiver(evt){
+        var elem = this.windowDropReceiverElement;
+        if (!elem) return;
+        elem.style.opacity = 0;
+        setTimeout(()=>{
+            document.body.removeChild(elem);
+            this.windowDropReceiverElement = null;
+            this.windowDropReceiverHideTimeout = null;
+        }, 250);
+    }
+
+    refreshWindowDropReceiver(evt){
+        if (!document || !document.createElement) return;
+
+        if (this.windowDropReceiverHideTimeout !== null){
+            clearTimeout(this.windowDropReceiverHideTimeout);
+            this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+            return;
+        }
+
+        var element = document.createElement('div');
+        element.className = "full-window-drop-receiver";
+        var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json');
+        draggedContext = (draggedContext && JSON.parse(draggedContext)) || null;
+        var draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain');
+    
+        var innerText = "Drop " + (draggedContext && draggedContext.display_title || draggedURI || "Item") + " for field '" + this.props.nestedField +  "'";  // document.createTextNode('')
+        var innerBoldElem = document.createElement('h3');
+        innerBoldElem.appendChild(document.createTextNode(innerText));
+        element.appendChild(innerBoldElem);
+        element.appendChild(document.createElement('br'));
+        document.body.appendChild(element);
+        this.windowDropReceiverElement = element;
+
+        setTimeout(()=>{
+            this.windowDropReceiverElement.style.opacity = 1;
+        }, 10);
+
+        this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+    }
+
+    renderSelectInputField(){
+        return (
+            <div className="linked-object-text-input-container">
+                <FormControl inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.props.value} onDrop={this.handleDrop} />
+            </div>
+        );
+    }
+
+    renderEmptyField(){
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState } = this.props;
+        return (
+            <div className="linked-object-buttons-container">
+                <Button className="select-create-linked-item-button" onClick={this.handleSelectItemClick}>
+                    <i className="icon icon-fw icon-search"/> Select existing
+                </Button>
+                <Button className="select-create-linked-item-button" onClick={this.handleCreateNewItemClick}>
+                    <i className="icon icon-fw icon-file-o"/> Create new
+                </Button>
+            </div>
+        );
     }
 
     render(){
-        var objType = this.props.schema.linkTo;
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, fieldBeingSelected } = this.props;
+
+        if (this.isInSelectionField()){
+            return this.renderSelectInputField();
+        }
+
         // object chosen or being created
-        if(this.props.value){
-            var keyDisplay = this.props.keyDisplay;
-            var thisDisplay;
-            if(isNaN(this.props.value)){
-                thisDisplay = keyDisplay[this.props.value] || this.props.value;
+        if (value){
+            var thisDisplay = keyDisplay[value] || value;
+            if (isNaN(value)) {
+                //thisDisplay = keyDisplay[value] || value;
                 return(
-                    <div className="submitted-linked-object-display-container">
-                        <a href={this.props.value} target="_blank" className="inline-block" data-tip="This Item is already in the database">
-                            <span>{thisDisplay}</span>
-                        </a>
-                        &nbsp;<i style={{'marginLeft':'5px', 'fontSize' : '0.85rem'}} className="icon icon-external-link"/>
+                    <div className="submitted-linked-object-display-container text-ellipsis-container">
+                        <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
+                        <a href={value} target="_blank" className="inline-block" data-tip={"This Item, '" + thisDisplay + "' is already in the database"} children={thisDisplay} />
+                        &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-external-link"/>
                     </div>
                 );
-            }else{
+            } else {
                 // it's a custom object. Either render a link to editing the object
                 // or a pop-up link to the object if it's already submitted
-                var intKey = parseInt(this.props.value);
-                thisDisplay = keyDisplay[this.props.value] || this.props.value;
+                var intKey = parseInt(value);
+                //thisDisplay = keyDisplay[value] || value;
                 // this is a fallback - shouldn't be int because value should be
                 // string once the obj is successfully submitted
-                if(this.props.keyComplete[intKey]){
+                if (keyComplete[intKey]){
                     return(
                         <div>
-                            <a href="#" onClick={function(e){
-                                e.preventDefault();
-                                var win = window.open(this.props.keyComplete[intKey], '_blank');
-                                if(win){
-                                    win.focus();
-                                }else{
-                                    alert('Object page popup blocked!');
-                                }
-                            }.bind(this)}>
-                                <span>{thisDisplay}</span>
-                                <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
-                            </a>
+                            <a href={keyComplete[intKey]} target="_blank" children={thisDisplay}/>
+                            <i style={{'marginLeft': 5}} className="icon icon-fw icon-external-link"/>
                         </div>
                     );
-                }else{
+                } else {
                     return(
-                        <div className="incomplete-linked-object-display-container" data-tip="Continue editing/submitting">
-                            <a href="#" onClick={function(e){
-                                e.preventDefault();
-                                this.props.setSubmissionState('currKey', intKey);
-                            }.bind(this)}>
-                                {thisDisplay}
-                            </a>
+                        <div className="incomplete-linked-object-display-container text-ellipsis-container">
+                            <i className="icon icon-fw icon-sticky-note-o" />&nbsp;&nbsp;
+                            <a href="#" className="inline-block" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting" children={thisDisplay} />
+                            &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-pencil"/>
                         </div>
                     );
                 }
             }
+        } else {
+            // nothing chosen/created yet
+            return this.renderEmptyField();
         }
-        // nothing chosen/created yet
-        return(
-            <div className="linked-object-buttons-container">
-                <Button className="select-create-linked-item-button" onClick={function(e){
-                    e.preventDefault();
-                    this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
-                }.bind(this)}>Select existing</Button>
-                <Button className="select-create-linked-item-button" onClick={function(e){
-                    e.preventDefault();
-                    this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
-                }.bind(this)}>Create new</Button>
-            </div>
-        );
     }
 }
 
@@ -465,21 +650,12 @@ class ArrayField extends React.Component{
         return(
             <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')} data-field-type={fieldType}>
                 <BuildField
-                    value={value}
-                    schema={fieldSchema}
-                    fieldType={fieldType}
-                    fieldTip={fieldTip}
-                    title={title}
-                    enumValues={enumValues}
-                    disabled={false}
-                    required={false}
-                    arrayIdx={arrayIdxList}
-                    isArray={true}
-                    isLastItemInArray={allItems.length - 1 === index}
-                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj',
-                        'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState',
-                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo') }
-                />
+                    {...{ value, fieldTip, fieldType, title, enumValues }}
+                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'selectComplete', 'selectCancel',
+                        'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx',
+                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo' ) } 
+                        isArray={true} isLastItemInArray={allItems.length - 1 === index} arrayIdx={arrayIdxList}
+                        schema={fieldSchema} disabled={false} required={false} key={arrayIdx} />
             </div>
         );
     }
@@ -571,30 +747,13 @@ class ObjectField extends React.Component {
         var nestedField = this.props.nestedField + '.' + field;
         return (
             <BuildField
-                value={fieldValue}
-                key={field}
-                schema={fieldSchema}
-                field={field}
-                fieldType={fieldType}
-                fieldTip={fieldTip}
-                enumValues={enumValues}
-                disabled={false}
-                modifyNewContext={this.props.modifyNewContext}
-                required={false}
-                linkType={this.props.linkType}
-                selectObj={this.props.selectObj}
-                title={title}
-                nestedField={nestedField}
-                isArray={false}
-                arrayIdx={this.props.arrayIdx}
-                keyDisplay={this.props.keyDisplay}
-                keyComplete={this.props.keyComplete}
-                setSubmissionState= {this.props.setSubmissionState}
-                updateUpload={this.props.updateUpload}
-                upload={this.props.upload}
-                uploadStatus={this.props.uploadStatus}
-                md5Progress={this.props.md5Progress}
-            />
+                { ..._.pick(this.props, 'field', 'fieldType', 'fieldTip', 'enumValues', 'modifyNewContext', 'linkType', 'setSubmissionState',
+                    'selectObj', 'selectComplete', 'selectCancel', 'title', 'nestedField', 'arrayIdx', 'keyDisplay', 'keyComplete',
+                    'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx'
+                )}
+                { ...{ field, fieldType, fieldTip, enumValues, nestedField, title } }
+                value={fieldValue} key={field} schema={fieldSchema}
+                disabled={false} required={false} isArray={false} />
         );
     }
 

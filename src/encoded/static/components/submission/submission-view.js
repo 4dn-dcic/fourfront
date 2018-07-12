@@ -1634,51 +1634,6 @@ class AliasSelectModal extends TypeSelectModal {
     }
 }
 
-class SelectExistingItemModal extends React.Component {
-
-    render(){
-        var { onCancel, selectData, navigate, submissionBase  } = this.props;
-
-        var selecting = false;
-        if(selectData !== null){
-            selecting = true;
-        }
-
-        if (!selecting) return null;
-
-        /*
-        return (
-            <Modal bsSize="xlarge" show onHide={onCancel} className="submission-view-modal select-existing-item-modal">
-                <Modal.Header closeButton>
-                    <Modal.Title>Select an existing Item</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="text-right">
-                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
-                    </div>
-                    <SearchView
-                        {..._.pick(this.props, 'navigate', 'selectCallback', 'submissionBase')}
-                        context={selectData}
-                    />
-                </Modal.Body>
-            </Modal>
-        );
-        */
-
-        return(
-            <Fade in appear>
-                <div>
-                    <div className="text-right">
-                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
-                    </div>
-                    <SearchView {...this.props} context={selectData}/>
-                </div>
-            </Fade>
-        );
-    }
-
-}
-
 
 /**
  * Main view for editing a specific object. This includes all non-same level
@@ -1850,6 +1805,7 @@ class IndividualObjectView extends React.Component{
      * Navigation function passed to Search so that faceting can be done in-place
      * through ajax. If no results are returned from the search, abort.
      */
+    /*
     inPlaceNavigate = (destination, options, callback) => {
         if(this.state.selectQuery){
             var dest = destination;
@@ -1883,32 +1839,15 @@ class IndividualObjectView extends React.Component{
             });
         }
     }
+    */
 
     /**
      * Initializes the first search (with just type=<type>) and sets state
      * accordingly. Set the fullScreen state in SubmissionView to alter its render
      * and hide the object navigation tree.
      */
-    selectObj = (collection, field, newLink, array=null) => {
-        ajax.promise('/' + collection + '/?format=json').then(data => {
-            if (data && data['@graph']){
-                var results = data['@graph'];
-                if(results.length > 0){
-                    setTimeout(layout.animateScrollTo(0), 100);
-                    this.setState({
-                        'selectType': collection,
-                        'selectData': data,
-                        'selectQuery': '/search/?type=' + collection,
-                        'selectField': field,
-                        'selectLink': field,
-                        'selectArrayIdx': array
-                    });
-                    this.props.setSubmissionState('fullScreen', true);
-                }else{ // this is not a great long-term solution
-                    alert('No objects of this type exist yet! Please use "Create new"');
-                }
-            }
-        });
+    selectObj = (collection, field, newLink, arrayIdx=null) => {
+        this.setState({ 'selectField' : field, 'selectArrayIdx': arrayIdx, 'selectType' : collection });
     }
 
     /**
@@ -1917,40 +1856,25 @@ class IndividualObjectView extends React.Component{
      * process.
      */
     selectComplete = (value) => {
-        var isRepeat = false;
-        var current = this.props.currContext[this.state.selectField];
-        if(current instanceof Array && _.contains(current, value)){
-            isRepeat = true;
+        var { selectField, selectArrayIdx, selectType } = this.state;
+        if (!selectField) throw new Error('No field being selected for');
+        var current = selectField && this.props.currContext[selectField],
+            isRepeat = (Array.isArray(current) && _.contains(current, value));
+        
+        if (!isRepeat) {
+            this.modifyNewContext(selectField, value, 'existing linked object', null, selectArrayIdx);
+            this.fetchObjTitle(value, selectType, null);
+        } else {
+            this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
         }
-        if(this.state.selectField && !isRepeat){
-            this.modifyNewContext(this.state.selectField, value, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
-            this.fetchObjTitle(value, this.state.selectType, this.state.selectLink);
-        }else{
-            this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
-        }
-        this.setState({
-            'selectType': null,
-            'selectData': null,
-            'selectQuery': null,
-            'selectField': null,
-            'selectLink': null,
-            'selectArrayIdx': null
-        });
-        this.props.setSubmissionState('fullScreen', false);
+        this.setState({ 'selectField': null, 'selectArrayIdx': null, 'selectType': null });
     }
 
     /** Exit out of the selection process and clean up state */
     selectCancel(e){
-        this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
-        this.setState({
-            'selectType': null,
-            'selectData': null,
-            'selectQuery': null,
-            'selectField': null,
-            'selectLink': null,
-            'selectArrayIdx': null
-        });
-        this.props.setSubmissionState('fullScreen', false);
+        this.modifyNewContext(this.state.selectField, null, 'existing linked object', null, this.state.selectArrayIdx);
+        this.setState({ 'selectType': null, 'selectField': null, 'selectArrayIdx': null });
+        //this.props.setSubmissionState('fullScreen', false);
     }
 
     /**
@@ -1959,21 +1883,23 @@ class IndividualObjectView extends React.Component{
      * for roundOne and roundTwo.
      */
     initiateField(field) {
-        var currSchema = this.props.schemas[this.props.currType];
-        var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
-        if(!fieldSchema) return null;
-        var secondRoundField = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
-        var fieldTitle = fieldSchema.title || field;
-        if(this.props.roundTwo && !secondRoundField){
+        var { schemas, currType, currKey, roundTwo, currContext, keyComplete, keyContext, edit } = this.props;
+        var currSchema  = schemas[currType],
+            fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
+
+        if (!fieldSchema) return null;
+
+        var secondRoundField    = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round',
+            fieldTitle          = fieldSchema.title || field;
+
+        if(roundTwo && !secondRoundField){
             return null;
-        }else if(!this.props.roundTwo && secondRoundField){
+        } else if (!roundTwo && secondRoundField){
             // return a placeholder informing user that this field is for roundTwo
             return(
                 <div key={fieldTitle} className="row field-row" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
                     <div className="col-sm-12 col-md-4">
-                        <h5 className="facet-title submission-field-title">
-                            {fieldTitle}
-                        </h5>
+                        <h5 className="facet-title submission-field-title" children={fieldTitle}/>
                     </div>
                     <div className="col-sm-12 col-md-8">
                         <div className="field-container">
@@ -1983,78 +1909,56 @@ class IndividualObjectView extends React.Component{
                 </div>
             );
         }
+
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
-        var fieldValue = this.props.currContext[field] || null;
-        var enumValues = [];
-        var isLinked = false;
+
+        var fieldType   = BuildField.fieldTypeFromFieldSchema(fieldSchema),
+            fieldValue  = currContext[field] || null,
+            enumValues  = [],
+            isLinked    = false,
+            linked      = delveObject(fieldSchema);
 
         // check if this is an enum
         if(fieldType === 'enum'){
             enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
+
         // check for linkTo if further down in object or array
-        var linked = delveObject(fieldSchema);
         if(linked !== null){
             linked = fieldSchema.title ? fieldSchema.title : linked;
             isLinked = true;
         }
+
         // handle a linkTo object on the the top level
         // check if any schema-specific adjustments need to made:
         if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
             // when editing a File principal object.
-            var path = this.props.keyComplete[this.props.currKey];
-            var completeContext = this.props.keyContext[path];
-            var statusCheck = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
-            if(this.props.edit){
-                if(statusCheck){
+            var path            = keyComplete[currKey],
+                completeContext = keyContext[path],
+                statusCheck     = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
+
+            if (edit) {
+                if (statusCheck) {
                     fieldType = 'file upload';
-                }else{
+                } else {
                     return null;
                 }
-            }else{
+            } else {
                 fieldType = 'file upload';
             }
         }
-        // set a required flag if this field is required
-        var required = _.contains(currSchema.required, field);
-        return(
+        return (
             <BuildField
-                value={fieldValue}
-                key={field}
-                schema={fieldSchema}
-                field={field}
-                fieldType={fieldType}
-                fieldTip={fieldTip}
-                nestedField={field}
-                enumValues={enumValues}
-                disabled={false}
-                modifyNewContext={this.modifyNewContext}
-                modifyFile={null}
-                md5Progress={this.props.md5Progress}
-                required={required}
-                linkType={linked}
-                isLinked={isLinked}
-                selectObj={this.selectObj}
-                getCurrContext={this.getCurrContext}
-                getCurrSchema={this.getCurrSchema}
-                title={fieldTitle}
-                arrayIdx={null}
-                edit={this.props.edit}
-                create={this.props.create}
-                keyDisplay={this.props.keyDisplay}
-                keyComplete={this.props.keyComplete}
-                setSubmissionState={this.props.setSubmissionState}
-                updateUpload={this.props.updateUpload}
-                upload={this.props.upload}
-                uploadStatus={this.props.uploadStatus}
-                currentSubmittingUser={this.props.currentSubmittingUser}
-                roundTwo={this.props.roundTwo}
-            />
+                {...{ field, fieldType, fieldTip, enumValues, isLinked }}
+                {..._.pick(this.props, 'md5Progress', 'edit', 'create', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'upload', 'uploadStatus', 'updateUpload', 'currentSubmittingUser', 'roundTwo')}
+                value={fieldValue} key={field} schema={fieldSchema} nestedField={field} title={fieldTitle} modifyFile={null} linkType={linked} disabled={false}
+                getCurrContext={this.getCurrContext} getCurrSchema={this.getCurrSchema} arrayIdx={null} required={_.contains(currSchema.required, field)}
+                modifyNewContext={this.modifyNewContext} selectObj={this.selectObj} selectComplete={this.selectComplete} selectCancel={this.selectCancel}
+                fieldBeingSelected={this.state.selectField} fieldBeingSelectedArrayIdx={this.state.selectArrayIdx} />
         );
     }
 
@@ -2067,48 +1971,39 @@ class IndividualObjectView extends React.Component{
      * object.
      */
     render(){
-        var fields = this.props.currContext ? _.keys(this.props.currContext) : [];
-        var buildFields = [];
-        var linkedObjs = [];
-        var detailContext;
-        var i;
-        var built;
-        var fieldComponents = sortPropFields(_.filter(
-            _.map(fields, this.initiateField),
-            function(f){ return !!f; } // Removes falsy (e.g. null) items.
-        ));
-        if(this.props.roundTwo){
-            var path = this.props.keyComplete[this.props.currKey];
-            detailContext = this.props.keyContext[path];
+        var { currContext, keyComplete, keyContext, currKey, schemas, roundTwo } = this.props;
+        var { selectData, selectQuery, fadeState } = this.state;
+        var fields = currContext ? _.keys(currContext) : [],
+            detailContext,
+            fieldJSXComponents = sortPropFields(_.filter( // Sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
+                _.map(fields, this.initiateField),
+                function(f){ return !!f; } // Removes falsy (e.g. null) items.
+            ));
+
+        if (roundTwo) {
+            var path = keyComplete[currKey];
+            detailContext = keyContext[path];
         }
-        // sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
-        //fieldComponents = sortPropFields(fieldComponents);
-        var selecting = false;
-        if(this.state.selectData !== null){
-            selecting = true;
-        }
+
         return(
             <div>
-                <SelectExistingItemModal
-                    {...this.props}
+                {/*
+                <SelectExistingItemModal {...this.props}
                     navigate={this.inPlaceNavigate}         // Override global navigate func
                     selectCallback={this.selectComplete}
-                    submissionBase={this.state.selectQuery} // Base HREF used, overrides props.href
-                    onCancel={this.selectCancel}
-                    selectData={this.state.selectData}
-                    selectObj={this.selectObj}
+                    submissionBase={selectQuery} // Base HREF used, overrides props.href
+                    onCancel={this.selectCancel} selectData={selectData} selectObj={this.selectObj}
                 />
-                <Fade in={!selecting || this.state.fadeState} appear>
-                    <div>
-                        <FormFieldsContainer children={fieldComponents} currKey={this.props.currKey}/>
-                        {
-                            this.props.roundTwo ?
-                            <RoundTwoDetailPanel schemas={this.props.schemas} context={detailContext} open={true} />
-                            :
-                            null
-                        }
-                    </div>
-                </Fade>
+                */}
+
+                <FormFieldsContainer currKey={currKey} children={fieldJSXComponents}/>
+
+                {
+                    this.props.roundTwo ?
+                    <RoundTwoDetailPanel schemas={this.props.schemas} context={detailContext} open={true} />
+                    :
+                    null
+                }
             </div>
         );
     }

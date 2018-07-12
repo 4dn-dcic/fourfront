@@ -245,12 +245,11 @@ class ControlsAndResults extends React.PureComponent {
                                 ['@type']
                             )}
                             showTotalResults={context.total} />
-                        <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')}
-                            results={results} columns={context.columns || {}} totalExpected={context.total}
+                        <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')} results={results} totalExpected={context.total}
+                            columns={context.columns || {}} hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
                             renderDetailPane={(result, rowNumber, containerWidth)=>
                                 <SearchResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
-                            }
-                            hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides} />
+                            } />
                     </div>
                 </div>
             </div>

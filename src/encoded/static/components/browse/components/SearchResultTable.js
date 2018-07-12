@@ -28,22 +28,19 @@ import {
 class ResultRowColumnBlock extends React.PureComponent {
 
     render(){
-        var { result, columnDefinition, mounted } = this.props;
+        var { result, columnDefinition, columnNumber, mounted, headerColumnWidths, schemas } = this.props;
         var isDesktopClientside = SearchResultTable.isDesktopClientside();
         var blockWidth;
 
         if (mounted){
-            blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || getColumnWidthFromDefinition(columnDefinition, mounted);
+            blockWidth = headerColumnWidths[columnNumber] || getColumnWidthFromDefinition(columnDefinition, mounted);
         } else {
             blockWidth = getColumnWidthFromDefinition(columnDefinition, mounted);
         }
 
         return (
             <div className="search-result-column-block" style={{ width : blockWidth }} data-field={columnDefinition.field}>
-                <ResultRowColumnBlockValue
-                    width={blockWidth} result={result} columnDefinition={columnDefinition} columnNumber={this.props.columnNumber}
-                    mounted={mounted} schemas={Schemas.get()} toggleDetailOpen={this.props.toggleDetailOpen} detailOpen={this.props.detailOpen}
-                />
+                <ResultRowColumnBlockValue {...this.props} width={blockWidth} schemas={schemas || Schemas.get()} />
             </div>
         );
     }
@@ -195,25 +192,6 @@ class ResultRow extends React.PureComponent {
             this.setDetailHeight = nextProps.setDetailHeight.bind(nextProps.setDetailHeight, nextProps['data-key']);
         }
     }
-    /*
-    shouldComponentUpdate(nextProps, nextState){
-        var isOpen = this.isOpen(nextProps);
-        if (
-            isOpen || isOpen !== this.isOpen(this.props) ||
-            nextProps.rowNumber !== this.props.rowNumber ||
-            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result) ||
-            nextProps.schemas !== this.props.schemas ||
-            nextProps.columnDefinitions.length !== this.props.columnDefinitions.length ||
-            !ResultRow.areWidthsEqual(nextProps.headerColumnWidths, this.props.headerColumnWidths)
-            //nextProps.tableContainerScrollLeft !== this.props.tableContainerScrollLeft ||
-            //nextProps.tableContainerWidth !== this.props.tableContainerWidth
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    */
 
     toggleDetailOpen(){
         this.props.toggleDetailPaneOpen(this.props['data-key']);
@@ -243,6 +221,23 @@ class ResultRow extends React.PureComponent {
         evt.dataTransfer.setData('text/uri-list', formedURL);
         evt.dataTransfer.setData('text/4dn-item-id', atId);
 
+        // Add cool drag image (generate HTML element showing display_title and item type)
+        if (!document || !document.createElement) return;
+        var element = document.createElement('div');
+        element.className = "draggable-item-cursor";
+        var innerText = result.display_title;  // document.createTextNode('')
+        var innerBoldElem = document.createElement('strong');
+        innerBoldElem.appendChild(document.createTextNode(innerText));
+        element.appendChild(innerBoldElem);
+        element.appendChild(document.createElement('br'));
+        innerText = Schemas.getItemTypeTitle(result, this.props.schemas);  // document.createTextNode('')
+        element.appendChild(document.createTextNode(innerText));
+        document.body.appendChild(element);
+        evt.dataTransfer.setDragImage(element, 150, 30);
+        setTimeout(()=>{
+            document.body.removeChild(element);
+        }, 10);
+
         /*
         var firstColumnBlock = this.refs && this.refs.firstColumnBlock && ReactDOM.findDOMNode(this.refs.firstColumnBlock);
 
@@ -252,9 +247,20 @@ class ResultRow extends React.PureComponent {
         */
     }
 
+    renderColumns(detailOpen, isDraggable){
+        var { columnDefinitions, selectedFiles, currentAction } = this.props;
+        return _.map(columnDefinitions, (columnDefinition, columnNumber) =>
+            <ResultRowColumnBlock {...{ columnDefinition, columnNumber, detailOpen, currentAction }}
+                {..._.pick(this.props, 'result', 'rowNumber', 'href', 'headerColumnWidths', 'mounted')}
+                key={columnDefinition.field} toggleDetailOpen={this.toggleDetailOpen}
+                selectedFiles={columnNumber === 0 ? selectedFiles : null} // Passed to trigger update/re-render on PureComponent
+                ref={isDraggable && columnNumber === 0 ? "firstColumnBlock" : null} />
+        );
+    }
+
     render(){
         var { result, rowNumber, mounted, headerColumnWidths, renderDetailPane, columnDefinitions, schemas,
-              tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href, currentAction } = this.props;
+              tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href, currentAction, selectedFiles } = this.props;
         var detailOpen = this.isOpen();
         var isDraggable = currentAction === 'selection';
         return (
@@ -266,28 +272,10 @@ class ResultRow extends React.PureComponent {
                 }
             }}*/>
                 <div className="columns clearfix result-table-row" draggable={isDraggable} onDragStart={isDraggable ? this.handleDragStart : null}>
-                    { _.map(columnDefinitions, (colDef, i) =>
-                        <ResultRowColumnBlock
-                            columnNumber={i} rowNumber={rowNumber} key={colDef.field}
-                            columnDefinition={colDef} result={result}
-                            toggleDetailOpen={this.toggleDetailOpen} detailOpen={detailOpen}
-                            mounted={mounted} headerColumnWidths={headerColumnWidths} href={href}
-                            ref={isDraggable && i === 0 ? "firstColumnBlock" : null}
-                            selectedFiles={i === 0 ? this.props.selectedFiles : null} // Passed to trigger update/re-render on PureComponent
-                        />
-                    ) }
+                    { this.renderColumns(detailOpen, isDraggable) }
                 </div>
-                <ResultDetail
-                    result={result}
-                    open={!!(detailOpen)}
-                    renderDetailPane={renderDetailPane}
-                    rowNumber={rowNumber}
-                    tableContainerWidth={tableContainerWidth}
-                    tableContainerScrollLeft={tableContainerScrollLeft}
-                    toggleDetailOpen={this.toggleDetailOpen}
-                    setDetailHeight={this.setDetailHeight}
-                    selectedFiles={this.props.selectedFiles}
-                />
+                <ResultDetail {...{ result, renderDetailPane, rowNumber, tableContainerWidth, tableContainerScrollLeft, selectedFiles }}
+                    open={!!(detailOpen)} toggleDetailOpen={this.toggleDetailOpen} setDetailHeight={this.setDetailHeight} />
             </div>
         );
     }
@@ -709,7 +697,7 @@ class DimensioningContainer extends React.PureComponent {
 
     /** Primarily, correct props.stickyTopOffset to be 0 for when we are on mobile or small screens. */
     calculateStickyTopOffset(props = this.props, responsiveGridSize = null){
-        responsiveGridSize = responsiveGridSize || (!isServerSide() && (this.state && this.state.mounted) && layout.responsiveGridState());
+        responsiveGridSize = responsiveGridSize || (!isServerSide() && layout.responsiveGridState());
         var stickyHeaderTopOffset = this.props.stickyHeaderTopOffset;
         if (responsiveGridSize === 'xs' || responsiveGridSize === 'sm') stickyHeaderTopOffset = 0;
         return stickyHeaderTopOffset;
