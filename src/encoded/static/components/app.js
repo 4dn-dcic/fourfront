@@ -287,6 +287,9 @@ export default class App extends React.Component {
             'navigate' : navigate
         });
 
+        // Lets emit an event from our window object that fourfront JS has initialized. This is to be used by, e.g. submissions view which might control a child window.
+        window.dispatchEvent(new Event('fourfrontinitialized'));
+
         this.setState({ 'mounted' : true });
     }
 
@@ -477,7 +480,8 @@ export default class App extends React.Component {
 
     // Submitted forms are treated the same as links
     handleSubmit(event) {
-        var target = event.target;
+        var target = event.target,
+            hrefParts = url.parse(this.props.href);
 
         // Skip POST forms
         if (target.method != 'get') return;
@@ -490,7 +494,7 @@ export default class App extends React.Component {
 
         var options = {};
         var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
+        options.replace = action_url.pathname == hrefParts.pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
             search = _.map(
@@ -507,6 +511,12 @@ export default class App extends React.Component {
         if (search) {
             href += '?' + search;
         }
+
+        var currentAction = this.currentAction();
+        if (currentAction === 'selection'){
+            href += '#!' + currentAction;
+        }
+
         options.skipRequest = target.getAttribute('data-skiprequest');
 
         if (this.historyEnabled) {
@@ -1111,6 +1121,7 @@ export default class App extends React.Component {
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation
                                     href={this.props.href}
+                                    currentAction={currentAction}
                                     session={this.state.session}
                                     updateUserInfo={this.updateUserInfo}
                                     portal={portal}

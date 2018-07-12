@@ -158,21 +158,22 @@ class ControlsAndResults extends React.PureComponent {
         }
 
         var columnDefinitionOverrides = {};
+        var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         // Also add the popLink/target=_blank functionality to links
-        if (typeof this.props.selectCallback === 'function'){
+        if (isThereParentWindow) {
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
                     var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width, true);
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
-                        <div className="select-button-container" onClick={(e)=>{
-                            e.preventDefault();
-                            this.props.selectCallback(object.atIdFromObject(result));
-                        }}>
-                            <button className="select-button" onClick={props.toggleDetailOpen}>
+                        <div className="select-button-container">
+                            <button className="select-button" onClick={(e)=>{
+                                //e.preventDefault();
+                                window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : { 'json' : result, 'id' : object.itemUtil.atId(result) } }));
+                            }}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>

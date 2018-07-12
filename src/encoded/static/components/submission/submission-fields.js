@@ -283,6 +283,8 @@ export default class BuildField extends React.Component {
     }
 }
 
+var linkedObjChildWindow = null; // Global var
+
 /** Case for a linked object. */
 class LinkedObj extends React.Component{
 
@@ -290,6 +292,9 @@ class LinkedObj extends React.Component{
         super(props);
         this.updateContext = this.updateContext.bind(this);
         this.setSubmissionStateToLinkedToItem = this.setSubmissionStateToLinkedToItem.bind(this);
+        this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
+        this.setOnFourfrontSelectionClickHandler = this.setOnFourfrontSelectionClickHandler.bind(this);
+        this.handleChildFourFrontSelectionClick = this.handleChildFourFrontSelectionClick.bind(this);
         this.handleSelectItemClick = this.handleSelectItemClick.bind(this);
         this.handleCreateNewItemClick = this.handleCreateNewItemClick.bind(this);
         this.handleWindowDragOver = this.handleWindowDragOver.bind(this);
@@ -341,7 +346,11 @@ class LinkedObj extends React.Component{
             window.removeEventListener('dragover',  this.handleWindowDragOver);
             window.removeEventListener('drop',      this.handleDrop);
             this.closeWindowDropReceiver();
-            this.childWindowClosedInterval && clearInterval(this.childWindowClosedInterval);
+            if (this.childWindowClosedInterval){
+                clearInterval(this.childWindowClosedInterval);
+                delete this.childWindowClosedInterval;
+                this.cleanChildWindowEventHandlers();
+            }
             console.warn('Removed window event handlers for field', this.props.field);
             //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
         } else if (hasSetInSelection){
@@ -373,6 +382,23 @@ class LinkedObj extends React.Component{
         );
     }
 
+    showAlertInChildWindow(evt){
+        var { schema, nestedField } = this.props;
+        var itemType = schema.linkTo;
+        if (this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts){
+            this.windowObjectReference.fourfront.alerts.queue({
+                'title' : 'Linked Item Selection',
+                'message' : (
+                    <div>
+                        <p className="mb-05">Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.</p>
+                        <p className="mb-0">Currently selecting { itemType } for field { schema.title ? schema.title + ' ("' + nestedField + '")' : '"' + nestedField + '"' }.</p>
+                    </div>
+                ),
+                'style' : 'info'
+            });
+        }
+    }
+
     handleSelectItemClick(e){
         e.preventDefault();
 
@@ -383,11 +409,21 @@ class LinkedObj extends React.Component{
         var itemType    = schema.linkTo,
             searchURL   = '/search/?type=' + itemType + '#!selection';
 
-        this.windowObjectReference = window.open(
-            searchURL,
-            "selection-search",
-            "menubar=no,location=yes,resizable=yes,scrollbars=yes,status=no,navigation=yes,chrome=yes,centerscreen=yes,width=992,height=600"
-        );
+        if (linkedObjChildWindow && !linkedObjChildWindow.closed && linkedObjChildWindow.fourfront && typeof linkedObjChildWindow.fourfront.navigate === 'function'){
+            // We have access to the JS of our child window. Call app.navigate(URL) directly instead of reloading entire HTML. May not work for some browsers.
+            this.windowObjectReference = linkedObjChildWindow;
+            this.windowObjectReference.fourfront.navigate(searchURL, {}, this.showAlertInChildWindow);
+            this.windowObjectReference.focus();
+            this.setOnFourfrontSelectionClickHandler();
+        } else {
+            this.windowObjectReference = linkedObjChildWindow = window.open(
+                searchURL,
+                "selection-search",
+                "menubar=0,toolbar=1,location=1,resizable=1,scrollbars=1,status=1,navigation=1,width=992,height=600"
+            );
+            this.setOnFourfrontSelectionClickHandler();
+            this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
+        }
 
         selectObj(itemType, nestedField, linkType, arrayIdx);
 
@@ -398,14 +434,53 @@ class LinkedObj extends React.Component{
                 if (this && this.windowObjectReference && this.windowObjectReference.closed){
                     selectCancel();
                 }
+                this.cleanChildWindowEventHandlers();
+                this.windowObjectReference = linkedObjChildWindow = null;
             }
         }, 1000);
 
     }
 
+    setOnFourfrontSelectionClickHandler(){
+        setTimeout(()=>{
+            this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
+            this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
+            console.log('Updated \'fourfrontselectionclick\' event handler');
+        }, 1500);
+    }
+
+    cleanChildWindowEventHandlers(){
+        this.windowObjectReference.removeEventListener('unload', this.setOnFourfrontSelectionClickHandler);
+        this.windowObjectReference.removeEventListener('fourfrontinitialized', this.showAlertInChildWindow);
+        this.windowObjectReference.removeEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
+    }
+
+    cleanChildWindow(){
+        if (this && this.windowObjectReference){
+            this.cleanChildWindowEventHandlers();
+            if (!this.windowObjectReference.closed) this.windowObjectReference.close();
+            this.windowObjectReference = linkedObjChildWindow = null;
+        }
+    }
+
     handleCreateNewItemClick(e){
         e.preventDefault();
         this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.schema.linkTo);
+    }
+
+    handleChildFourFrontSelectionClick(evt){
+        var atId = evt && evt.detail && evt.detail.id;
+
+        var isValidAtId = atId && typeof atId === 'string' && atId.charAt(0) === '/'; // && ... more JS validation prly warranted.
+
+        if (!isValidAtId) {
+            throw new Error('No valid @id available.');
+        }
+
+        console.log('FOURFRONTSELECTIONCLICK', evt, evt.detail);
+
+        this.props.selectComplete(atId);
+        this.cleanChildWindow();
     }
 
     handleDrop(evt){
@@ -425,15 +500,10 @@ class LinkedObj extends React.Component{
             throw new Error('No valid @id available.');
         }
 
-        console.log('DROPPED', evt, draggedURI, this.props);
-        console.log('TODO: Call `this.props.modifyNewContext` to update value, hide input field & show linkedTo Item, etc.');
+        console.log('DROP', evt, draggedID, this.props);
 
         this.props.selectComplete(draggedID);
-
-        if (this.windowObjectReference){
-            this.windowObjectReference.close();
-            delete this.windowObjectReference;
-        }
+        this.cleanChildWindow();
     }
 
     handleWindowDragEnter(evt){
@@ -722,9 +792,7 @@ class ObjectField extends React.Component {
         return schemaVal;
     }
 
-    initiateField = (fieldInfo) => {
-        var field = fieldInfo[0];
-        var fieldSchema = fieldInfo[1];
+    initiateField = ([ field, fieldSchema ]) => {
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
@@ -747,8 +815,8 @@ class ObjectField extends React.Component {
         var nestedField = this.props.nestedField + '.' + field;
         return (
             <BuildField
-                { ..._.pick(this.props, 'field', 'fieldType', 'fieldTip', 'enumValues', 'modifyNewContext', 'linkType', 'setSubmissionState',
-                    'selectObj', 'selectComplete', 'selectCancel', 'title', 'nestedField', 'arrayIdx', 'keyDisplay', 'keyComplete',
+                { ..._.pick(this.props, 'modifyNewContext', 'linkType', 'setSubmissionState',
+                    'selectObj', 'selectComplete', 'selectCancel', 'arrayIdx', 'keyDisplay', 'keyComplete',
                     'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx'
                 )}
                 { ...{ field, fieldType, fieldTip, enumValues, nestedField, title } }
@@ -758,20 +826,14 @@ class ObjectField extends React.Component {
     }
 
     render(){
-        var schema = this.props.schema;
-        var fields = schema['properties'] ? _.keys(schema['properties']) : [];
-        var buildFields = [];
-        for (var i=0; i<fields.length; i++){
-            var fieldSchema = this.includeField(schema, fields[i]);
-            if (fieldSchema){
-                buildFields.push([fields[i], fieldSchema]);
-            }
-        }
-        return(
-            <div className="object-field-container">
-                {buildFields.map((field) => this.initiateField(field))}
-            </div>
-        );
+        var objectSchema = this.props.schema,
+            allFieldsInSchema = objectSchema['properties'] ? _.keys(objectSchema['properties']) : [],
+            fieldsToBuild = _.filter(_.map(allFieldsInSchema, (f)=>{ // List of [field, fieldSchema] pairs.
+                var fieldSchemaToUseOrNull = this.includeField(objectSchema, f);
+                return (fieldSchemaToUseOrNull && [f, fieldSchemaToUseOrNull]) || null;
+            }));
+
+        return <div className="object-field-container" children={_.map(fieldsToBuild, this.initiateField)} />;
     }
 }
 
