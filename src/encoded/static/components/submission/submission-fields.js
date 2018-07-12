@@ -383,15 +383,16 @@ class LinkedObj extends React.Component{
     }
 
     showAlertInChildWindow(evt){
-        var { schema, nestedField } = this.props;
+        var { schema, nestedField, title } = this.props;
         var itemType = schema.linkTo;
+        var prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
         if (this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts){
             this.windowObjectReference.fourfront.alerts.queue({
                 'title' : 'Linked Item Selection',
                 'message' : (
                     <div>
                         <p className="mb-05">Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.</p>
-                        <p className="mb-0">Currently selecting { itemType } for field { schema.title ? schema.title + ' ("' + nestedField + '")' : '"' + nestedField + '"' }.</p>
+                        <p className="mb-0">Currently selecting { itemType } for field { prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"' }.</p>
                     </div>
                 ),
                 'style' : 'info'
@@ -443,8 +444,8 @@ class LinkedObj extends React.Component{
 
     setOnFourfrontSelectionClickHandler(){
         setTimeout(()=>{
-            this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
-            this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
+            this.windowObjectReference && this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
+            this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
             console.log('Updated \'fourfrontselectionclick\' event handler');
         }, 1500);
     }
@@ -717,6 +718,7 @@ class ArrayField extends React.Component{
             arrayIdxList = [];
         }
         arrayIdxList.push(arrayIdx);
+        fieldSchema = _.extend({}, fieldSchema, { 'parentSchema' : this.props.schema });
         return(
             <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')} data-field-type={fieldType}>
                 <BuildField
