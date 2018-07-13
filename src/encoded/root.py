@@ -51,9 +51,8 @@ def item_counts(config):
         db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
         es_counts = {} # keyed by uppercase Item name, such as "ExperimentHic"
-        # need to search both status=deleted and status!=deleted (which is now
-        # done by default) to get real totals.
-        search_req = make_search_subreq(request, '/search/?type=Item&limit=1&status!=deleted')
+        # need to search for statuses that are hidden from search (deleted, replaced)
+        search_req = make_search_subreq(request, '/search/?type=Item&limit=0')
         search_resp = request.invoke_subrequest(search_req, True)
         if search_resp.status_int < 400: # catch errors
             es_count_facets = [facet for facet in search_resp.json.get('facets', []) if facet.get('field') == 'type']
@@ -61,7 +60,7 @@ def item_counts(config):
                 es_count_facets = es_count_facets[0]
                 for term in es_count_facets.get('terms'):
                     es_counts[term['key']] = term['doc_count']
-        search_req_del = make_search_subreq(request, '/search/?type=Item&limit=1&status=deleted')
+        search_req_del = make_search_subreq(request, '/search/?type=Item&limit=0&status=replaced&status=deleted')
         search_resp_del = request.invoke_subrequest(search_req_del, True)
         if search_resp_del.status_int < 400: # catch errors
             es_count_facets = [facet for facet in search_resp_del.json.get('facets', []) if facet.get('field') == 'type']

@@ -3,7 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import url from 'url';
 import { compiler } from 'markdown-to-jsx';
+import Alerts from './../alerts';
 import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
 import * as globals from './../globals';
 import { layout, console, object, isServerSide } from './../util';
@@ -276,6 +278,28 @@ export default class StaticPage extends React.PureComponent {
         super(props);
         this.render = this.render.bind(this);
         this.entryRenderFxn = typeof this.entryRenderFxn === 'function' ? this.entryRenderFxn.bind(this) : this.props.entryRenderFxn;
+    }
+
+    componentDidMount(){
+        this.maybeSetRedirectedAlert();
+    }
+
+    /**
+     * A simpler form (minus AJAX request) of DefaultItemView's similar method.
+     */
+    maybeSetRedirectedAlert(){
+        if (!this.props.href) return;
+
+        var hrefParts = url.parse(this.props.href, true),
+            redirected_from = hrefParts.query && hrefParts.query.redirected_from;
+
+        if (redirected_from){
+            Alerts.queue({
+                'title' : "Redirected",
+                'message': <span>You have been redirected from old page <span className="text-500">{ redirected_from }</span> to <span className="text-500">{ hrefParts.pathname }</span>. Please update your bookmarks.</span>,
+                'style': 'warning'
+            });
+        }
     }
 
     render(){

@@ -63,7 +63,7 @@ const CELL_TYPE_NAME_MAP = {
 };
 
 
-export default class JointAnalysisPlansPage extends React.Component {
+export default class JointAnalysisPlansPage extends StaticPage {
 
     static standardizeEncodeResult(result, idx){
         var cellType = result.biosample_term_name || FALLBACK_NAME_FOR_UNDEFINED;
@@ -156,6 +156,7 @@ export default class JointAnalysisPlansPage extends React.Component {
     }
 
     componentDidMount(){
+        super.componentDidMount(...arguments);
         this.setState({ 'mounted' : true });
         this.loadSearchQueryResults();
         setTimeout(()=>{
