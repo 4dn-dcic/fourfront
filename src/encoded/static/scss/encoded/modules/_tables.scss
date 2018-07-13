@@ -1760,48 +1760,6 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 } // .search-headers-row
 
 
-// Draggable Cursor Indicator
-div.draggable-item-cursor {
-
-	position: absolute;
-	z-index: -1000;
-	top: -1000px;
-	left: 1000px;
-	background-color: #555;
-	padding: 8px 12px;
-	width: 300px;
-	border-radius: 2px;
-	border: 1px solid #000;
-	color: #ddd;
-
-	> strong {
-		font-weight: 500;
-		color: #fff;
-	}
-}
-
-div.full-window-drop-receiver {
-	position: fixed;
-	z-index: 1000;
-	opacity: 0;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(0,0,0,0.7);
-	transition: opacity .25s;
-	> h3 {
-		position: absolute;
-		top: 50%;
-		margin-top: -20px;
-		color: #fff;
-		text-align: center;
-		left: 0;
-		right: 0;
-		font-weight: 500;
-	}
-}
-
 .above-results-table-row {
 	min-height: 40px;
 	padding-bottom: 5px;

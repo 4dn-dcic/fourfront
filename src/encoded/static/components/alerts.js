@@ -154,7 +154,7 @@ export default class Alerts extends React.Component {
                                     className={alert.noCloseButton === true ? 'no-close-button' : null}
                                 >
                                     <h4>{ alert.title }</h4>
-                                    <p>{ alert.message }</p>
+                                    <div className="mb-0" children={alert.message} />
                                 </Alert>
                             </div>
                         </Fade>

@@ -223,7 +223,7 @@ export default class BuildField extends React.Component {
 
     render = () => {
         // TODO: come up with a schema based solution for code below?
-        var { value, isArray, field, fieldType, arrayIdx, isLastItemInArray } = this.props;
+        var { value, isArray, field, fieldType, arrayIdx, isLastItemInArray, schema } = this.props;
         var cannot_delete = ['filename'], // hardcoded fields you can't delete
             showDelete = false,
             disableDelete = false,
@@ -245,13 +245,17 @@ export default class BuildField extends React.Component {
 
         var excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
 
+        var fieldToDisplay = this.displayField(fieldType);
+
         if (isArray) {
             // array items don't need fieldnames/tooltips
             wrapFunc = this.wrapWithNoLabel;
 
             if (isLastItemInArray && isValueNull(value)){
                 showDelete = false;
-                if (Array.isArray(arrayIdx) && arrayIdx[0] !== 0) extClass = "last-item-empty";
+                if (Array.isArray(arrayIdx) && arrayIdx[0] !== 0){
+                    extClass += " last-item-empty";
+                }
             } else if (fieldType === 'object') {
                 // if we've got an object that's inside inside an array, only allow
                 // the array to be deleted if ALL individual fields are null
@@ -266,19 +270,35 @@ export default class BuildField extends React.Component {
             }
         }
 
+        if (fieldType === 'linked object' && LinkedObj.isInSelectionField(this.props)){
+            extClass += ' in-selection-field';
+        }
+
         return wrapFunc(
-            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + ' ' + extClass}>
-                {this.displayField(fieldType)}
-            </div>,
-            excludeRemoveButton ? null : (
-                <div className="col-xs-2 remove-button-column">
-                    <Fade in={showDelete}>
-                        <div className={"pull-right remove-button-container" + (!showDelete ? ' hidden' : '')}>
-                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField} data-tip={isArray ? 'Remove Item' : 'Clear Value'}><i className="icon icon-fw icon-times"/></Button>
-                        </div>
-                    </Fade>
-                </div>
-            )
+            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + extClass} children={fieldToDisplay}/>,
+            excludeRemoveButton ? null : <SquareButton show={showDelete} disabled={disableDelete} tip={isArray ? 'Remove Item' : 'Clear Value'} onClick={this.deleteField} />
+        );
+    }
+}
+
+class SquareButton extends React.Component {
+
+    static defaultProps = {
+        'bsStyle' : 'danger',
+        'icon' : 'times',
+        'style' : null
+    }
+
+    render(){
+        var { show, disabled, onClick, tip, bsStyle, buttonContainerClassName, icon, style } = this.props;
+        return (
+            <div className="col-xs-2 remove-button-column" style={style}>
+                <Fade in={show}>
+                    <div className={"pull-right remove-button-container" + (!show ? ' hidden' : '') + (buttonContainerClassName ? ' ' + buttonContainerClassName : '')}>
+                        <Button tabIndex={2} bsStyle={bsStyle} disabled={disabled} onClick={onClick} data-tip={tip}><i className={"icon icon-fw icon-" + icon}/></Button>
+                    </div>
+                </Fade>
+            </div>
         );
     }
 }
@@ -287,6 +307,22 @@ var linkedObjChildWindow = null; // Global var
 
 /** Case for a linked object. */
 class LinkedObj extends React.Component{
+
+    /**
+     * @param {Object} props - Props passed from LinkedObj or BuildField.
+     * @param {string} props.nestedField - Field of LinkedObj
+     * @param {number[]|null} props.arrayIdx - Array index (if any) of this item, if any.
+     * @param {string} props.fieldBeingSelected - Field currently selected for linkedTo item selection.  
+     * @param {number[]|null} props.fieldBeingSelectedArrayIdx - Array index (if any) of currently selected for linkedTo item selection.  
+     * @returns {boolean} Whether is currently selected field/item or not.
+     */
+    static isInSelectionField(props){
+        if (!props) return false;
+        return props.fieldBeingSelected && props.fieldBeingSelected === props.nestedField && ( // & check if array indices match, if any
+            (props.arrayIdx === null && props.fieldBeingSelectedArrayIdx === null) ||
+            (Array.isArray(props.arrayIdx) && Array.isArray(props.fieldBeingSelectedArrayIdx) && props.fieldBeingSelectedArrayIdx[0] === props.arrayIdx[0])
+        );
+    }
 
     constructor(props){
         super(props);
@@ -301,8 +337,13 @@ class LinkedObj extends React.Component{
         this.refreshWindowDropReceiver = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
         this.closeWindowDropReceiver = this.closeWindowDropReceiver.bind(this);
         this.handleDrop = this.handleDrop.bind(this);
+        this.handleTextInputChange = this.handleTextInputChange.bind(this);
+        this.handleAcceptTypedID = this.handleAcceptTypedID.bind(this);
 
         this.windowDropReceiverHideTimeout = null;
+        this.state = {
+            'textInputValue' : (typeof props.value === 'string' && props.value) || ''
+        };
     }
 
     componentDidMount(){
@@ -374,25 +415,21 @@ class LinkedObj extends React.Component{
         this.props.setSubmissionState('currKey', intKey);
     }
 
-    isInSelectionField(props = this.props){
-        if (!props) return false;
-        return props.fieldBeingSelected && props.fieldBeingSelected === props.nestedField && ( // & check if array indices match, if any
-            (props.arrayIdx === null && props.fieldBeingSelectedArrayIdx === null) ||
-            (Array.isArray(props.arrayIdx) && Array.isArray(props.fieldBeingSelectedArrayIdx) && props.fieldBeingSelectedArrayIdx[0] === props.arrayIdx[0])
-        );
-    }
+    isInSelectionField(props = this.props){ return LinkedObj.isInSelectionField(props); }
 
-    showAlertInChildWindow(evt){
+    showAlertInChildWindow(){
         var { schema, nestedField, title } = this.props;
         var itemType = schema.linkTo;
         var prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
         if (this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts){
             this.windowObjectReference.fourfront.alerts.queue({
-                'title' : 'Linked Item Selection',
+                'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
                 'message' : (
                     <div>
-                        <p className="mb-05">Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.</p>
-                        <p className="mb-0">Currently selecting { itemType } for field { prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"' }.</p>
+                        <p className="mb-0">
+                            Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
+                        </p>
+                        <p className="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
                     </div>
                 ),
                 'style' : 'info'
@@ -423,7 +460,7 @@ class LinkedObj extends React.Component{
                 "menubar=0,toolbar=1,location=1,resizable=1,scrollbars=1,status=1,navigation=1,width=992,height=600"
             );
             this.setOnFourfrontSelectionClickHandler();
-            this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
+            //this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
         }
 
         selectObj(itemType, nestedField, linkType, arrayIdx);
@@ -444,6 +481,10 @@ class LinkedObj extends React.Component{
 
     setOnFourfrontSelectionClickHandler(){
         setTimeout(()=>{
+            this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
+            console.log('Updated \'fourfrontinitialized\' event handler');
+        }, 200);
+        setTimeout(()=>{
             this.windowObjectReference && this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
             this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
             console.log('Updated \'fourfrontselectionclick\' event handler');
@@ -451,6 +492,10 @@ class LinkedObj extends React.Component{
     }
 
     cleanChildWindowEventHandlers(){
+        if (!this || !this.windowObjectReference) {
+            console.warn('Child window no longer available to unbind event handlers. Fine if closed.');
+            return;
+        }
         this.windowObjectReference.removeEventListener('unload', this.setOnFourfrontSelectionClickHandler);
         this.windowObjectReference.removeEventListener('fourfrontinitialized', this.showAlertInChildWindow);
         this.windowObjectReference.removeEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
@@ -472,7 +517,7 @@ class LinkedObj extends React.Component{
     handleChildFourFrontSelectionClick(evt){
         var atId = evt && evt.detail && evt.detail.id;
 
-        var isValidAtId = atId && typeof atId === 'string' && atId.charAt(0) === '/'; // && ... more JS validation prly warranted.
+        var isValidAtId = object.isValidAtIDFormat(atId);
 
         if (!isValidAtId) {
             throw new Error('No valid @id available.');
@@ -495,7 +540,7 @@ class LinkedObj extends React.Component{
             draggedID = (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname;
         }
 
-        var isValidAtId = typeof draggedID === 'string' && draggedID.charAt(0) === '/';// && ...
+        var isValidAtId = object.isValidAtIDFormat(draggedID);
 
         if (!draggedID || !isValidAtId){
             throw new Error('No valid @id available.');
@@ -545,7 +590,7 @@ class LinkedObj extends React.Component{
         var draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain');
     
         var innerText = "Drop " + (draggedContext && draggedContext.display_title || draggedURI || "Item") + " for field '" + this.props.nestedField +  "'";  // document.createTextNode('')
-        var innerBoldElem = document.createElement('h3');
+        var innerBoldElem = document.createElement('h2');
         innerBoldElem.appendChild(document.createTextNode(innerText));
         element.appendChild(innerBoldElem);
         element.appendChild(document.createElement('br'));
@@ -559,10 +604,31 @@ class LinkedObj extends React.Component{
         this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
     }
 
+    handleAcceptTypedID(evt){
+        console.log(evt);
+        if (!this || !this.state || !this.state.textInputValue || !object.isValidAtIDFormat(this.state.textInputValue)){
+            throw new Error('Invalid @id format.');
+        }
+        this.props.selectComplete(this.state.textInputValue);
+        this.cleanChildWindow();
+    }
+
+    handleTextInputChange(evt){
+        this.setState({ 'textInputValue' : evt.target.value });
+    }
+
     renderSelectInputField(){
+        var { value, selectCancel, selectComplete } = this.props;
+        var textInputValue  = this.state.textInputValue,
+            isValidAtID     = object.isValidAtIDFormat(textInputValue),
+            extClass        = !isValidAtID && textInputValue ? ' has-error' : (isValidAtID ? ' has-success' : '');
         return (
-            <div className="linked-object-text-input-container">
-                <FormControl inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.props.value} onDrop={this.handleDrop} />
+            <div className="linked-object-text-input-container row flexrow">
+                <div className="field-column col-xs-10">
+                    <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
+                </div>
+                { isValidAtID ? <SquareButton show onClick={this.handleAcceptTypedID} icon="check" bsStyle="success" tip="Accept typed @ID" /> : null }
+                <SquareButton show onClick={(e)=>{ selectCancel(); this.cleanChildWindow(); }} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
             </div>
         );
     }
@@ -671,10 +737,6 @@ class ArrayField extends React.Component{
             }
         }
         return false;
-    }
-
-    constructor(props){
-        super(props);
     }
 
     /**

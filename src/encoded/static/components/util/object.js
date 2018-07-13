@@ -158,6 +158,21 @@ export function isValidJSON(content) {
     return isJson;
 }
 
+
+/**
+ * Check if param is in form of an @id. Doesn't validate whether proper collection, etc. just URL format.
+ *
+ * @param {string} value - String to test
+ * @returns {boolean} - Whether is valid-ish. 
+ */
+export function isValidAtIDFormat(value){
+    return (
+        value && typeof value === 'string' && value.length > 3 &&
+        value.charAt(0) === '/' && value[value.length - 1] === '/' &&
+        (value.match(/\//g) || []).length === 3
+    );
+}
+
 /**
  * Performs a rudimentary check on an object to determine whether it is an Item.
  * Checks for presence of properties 'display_title' and '@id'.

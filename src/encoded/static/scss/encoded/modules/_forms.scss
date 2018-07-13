@@ -948,8 +948,19 @@ div.fieldset.editable-fields {
 				flex: 1;
 				opacity: 1;
 				transition: opacity 0.33s;
-				&.last-item-empty:not(:hover) {
-					opacity: 0.5;
+				&.last-item-empty:not(:hover):not(.in-selection-field) {
+					opacity: 0.7;
+				}
+				&.in-selection-field {
+					.field-column > input {
+						border: 2px solid #c78300;
+						&.has-error {
+							border-color: red;
+						}
+						&.has-success {
+							border-color: #5b8c55;
+						}
+					}
 				}
 			}
 
@@ -971,6 +982,13 @@ div.fieldset.editable-fields {
 						&:hover {
 							border-color: #9f3c3b;
 							color: #B24342;
+						}
+						&.btn-success {
+							color: #416f12;
+							&:hover {
+								color: #508816;
+								border-color: #508816;
+							}
 						}
 					}
 				}
@@ -1258,6 +1276,61 @@ div.fieldset.editable-fields {
 	> .modal-dialog {
 		width: auto;
 		margin: 30px;
+	}
+}
+
+// Draggable Cursor Indicator
+div.draggable-item-cursor {
+
+	position: absolute;
+	z-index: -1000;
+	top: -1000px;
+	left: 1000px;
+	background-color: #555;
+	padding: 8px 12px;
+	width: 300px;
+	border-radius: 2px;
+	border: 1px solid #000;
+	color: #ddd;
+
+	> strong {
+		font-weight: 500;
+		color: #fff;
+	}
+}
+
+div.full-window-drop-receiver {
+	position: fixed;
+	z-index: 10000;
+	opacity: 0;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(27, 144, 173, 0.8); // rgba(0,0,0,0.7);
+	transition: opacity .25s;
+	> h2 {
+		position: absolute;
+		top: 50%;
+		margin-top: -20px;
+		color: #fff;
+		text-align: center;
+		left: 0;
+		right: 0;
+		font-weight: 500;
+		animation: pulseText 1.5s infinite;
+	}
+}
+
+@keyframes pulseText {
+	0% {
+	  	transform: scale(1);
+	}
+	60% {
+	  	transform: scale(1.1);
+	}
+	100% {
+	  	transform: scale(1);
 	}
 }
 

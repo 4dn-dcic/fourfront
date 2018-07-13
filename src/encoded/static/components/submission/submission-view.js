@@ -1718,6 +1718,12 @@ class IndividualObjectView extends React.Component{
                 return;
             }
         }
+
+        if (!field || typeof field !== 'string'){
+            // Throw error instead?
+            console.error('No field supplied', ...arguments);
+        }
+
         var splitField = field.split('.');
         var splitFieldLeaf = splitField[splitField.length-1];
         var arrayIdxPointer = 0;
@@ -1872,7 +1878,9 @@ class IndividualObjectView extends React.Component{
 
     /** Exit out of the selection process and clean up state */
     selectCancel(e){
-        this.modifyNewContext(this.state.selectField, null, 'existing linked object', null, this.state.selectArrayIdx);
+        var { selectField, selectArrayIdx } = this.state;
+        console.log('SELCANCEL', selectField, selectArrayIdx);
+        this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
         this.setState({ 'selectType': null, 'selectField': null, 'selectArrayIdx': null });
         //this.props.setSubmissionState('fullScreen', false);
     }
