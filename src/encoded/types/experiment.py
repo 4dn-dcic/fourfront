@@ -603,6 +603,49 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
 
 
 @collection(
+    name='experiments-tsaseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments TSA-Seq',
+        'description': 'Listing of TSA-seq type experiments',
+    })
+class ExperimentTsaseq(ItemWithAttachment, Experiment):
+    """The experiment class for TSA-seq."""
+
+    item_type = 'experiment_tsaseq'
+    schema = load_schema('encoded:schemas/experiment_tsaseq.json')
+    embedded_list = Experiment.embedded_list
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
+        sum_str = experiment_type
+
+        if target:
+            target_props = request.embed(target, '@@object')
+            target_summary = target_props['target_summary']
+            sum_str += ('against ' + target_summary)
+
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+
+
+@collection(
     name='experiments-mic',
     unique_key='accession',
     properties={

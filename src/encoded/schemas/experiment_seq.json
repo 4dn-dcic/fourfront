@@ -68,16 +68,9 @@
         },
         "reaction_time": {
             "title": "Reaction Time (min)",
-            "description": "Time of a reaction in minutes eg. Digestion time in CUT&RUN experiments or Tyramid reaction in TSA-seq",
+            "description": "Time of a reaction in minutes eg. Digestion time in CUT&RUN experiments",
             "type": "number",
             "lookup": 100
-        },
-        "reaction_buffier": {
-            "title": "Reaction Buffer",
-            "description": "The reaction buffer can be a significant variable for some experiment types (eg. the TSA-seq tyramide labeling) - this field should used to record this information",
-            "type": "string",
-            "lookup": 101,
-            "use_for": ["TSA-seq-v1", "TSE-seq-v2"]
         },
         "3p_adenylation_time": {
             "title": "Time of 3'Adenylation (mins)",
@@ -92,20 +85,6 @@
             "type": "number",
             "lookup": 115,
             "use_for": ["CUT&RUN"]
-        },
-        "affinity_rounds": {
-            "title": "Number of rounds of affinity purification",
-            "description": "If there are multiple rounds of purification - eg. 2 biotin affinity purifications for TSA-seq",
-            "type": "integer",
-            "lookup": 120,
-            "use_for": ["TSA-seq-v1", "TSE-seq-v2"]
-        },
-        "average_biotin_range": {
-            "title": "Biotynylation range",
-            "description": "Estimated average biotinlyation range from dot blot (kb/1 biotin）",
-            "type": "string",
-            "lookup": 125,
-            "use_for": ["TSA-seq-v1", "TSE-seq-v2"]
         }
     },
     "columns": {

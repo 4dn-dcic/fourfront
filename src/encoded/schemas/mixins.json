@@ -421,7 +421,7 @@
             "title": "Spike In Sequences",
             "description": "Reference to a Reference File Item with multi fasta of the spike in sequences",
             "type": "string",
-            "lookup": 96,
+            "lookup": 196,
             "linkTo": "FileReference"
         },
         "spikein_source": {
@@ -429,13 +429,13 @@
             "description": "The vendor or lab that provided the spikein",
             "type": "string",
             "linkTo": "Vendor",
-            "lookup": 98
+            "lookup": 198
         },
         "spikein_concentrations": {
             "title": "Attached file of spikein concentrations",
             "description" : "tsv formatted text file of spikein species concentrations used.",
             "type": "object",
-            "lookup": 97,
+            "lookup": 197,
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,

@@ -42,6 +42,7 @@
                 "compressed_fasta",
                 "fasta",
                 "juicer_format_restriction_site_file",
+                "conc",
                 "other"
             ]
         },
@@ -85,6 +86,7 @@
         "compressed_fasta": ".fasta.gz",
         "fasta": ".fasta",
         "juicer_format_restriction_site_file": ".txt",
+        "conc": ".fasta.conc",
         "other": ""
     }
 }
