@@ -119,53 +119,63 @@ export default class Alerts extends React.Component {
         };
     }
 
+    setDismissing(dismissing){ this.setState({ dismissing }); }
+
     /**
      * Renders out Bootstrap Alerts for any queued alerts.
-     * 
-     * @memberof module:alerts
-     * @private
-     * @instance
+     *
      * @returns {JSX.Element} A <div> element.
      */
     render(){
         if (this.props.alerts.length === 0) return null;
 
-        function dismiss(index){
-            var currentAlert = this.props.alerts.slice(index, index + 1)[0];
-            var dismissing = _.clone(this.state.dismissing);
-            if (_.findIndex(dismissing, currentAlert) === -1) dismissing.push(currentAlert);
-            this.setState({ 'dismissing' : dismissing });
-        }
-
-        function finishDismiss(index){
-            var currentAlert = this.props.alerts.slice(index, index + 1)[0];
-            this.setState({ 'dismissing' : _.without(this.state.dismissing, currentAlert) });
-            store.dispatch({
-                type: { 'alerts' : _.without(this.props.alerts, currentAlert) }
-            });
-        }
-
         return (
-            <div className="alerts">
-            {
-                this.props.alerts.map(function(alert,i){
-                    return (
-                        <Fade key={'alert-' + i} timeout={500}
-                            in={ _.findIndex(this.state.dismissing, alert) === -1 }
-                            onExited={finishDismiss.bind(this, i)} unmountOnExit={true}>
-                            <div>
-                                <Alert bsStyle={alert.style || 'danger'}
-                                    onDismiss={alert.noCloseButton === true ? null : dismiss.bind(this, i)}
-                                    className={alert.noCloseButton === true ? 'no-close-button' : null}>
-                                    <h4>{ alert.title }</h4>
-                                    <div className="mb-0" children={alert.message} />
-                                </Alert>
-                            </div>
-                        </Fade>
-                    );
-                }.bind(this))
-            }
-            </div>
+            <div className="alerts" children={_.map(this.props.alerts, (alert, index, alerts) =>
+                <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={this.state.dismissing} />
+            )} />
         );
     }
+}
+
+class AlertItem extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.dismiss = this.dismiss.bind(this);
+        this.finishDismiss = this.finishDismiss.bind(this);
+    }
+
+    dismiss(){
+        var { alert, dismissing, setDismissing } = this.props;
+        dismissing = dismissing.slice(0);
+        if (_.findIndex(dismissing, alert) === -1) dismissing.push(alert);
+        setDismissing(dismissing);
+    }
+
+    finishDismiss(){
+        var { alert, dismissing, setDismissing, alerts } = this.props;
+        setDismissing(_.without(dismissing, alert));
+        store.dispatch({
+            type: { 'alerts' : _.without(alerts, alert) }
+        });
+    }
+
+    render(){
+        var { index, alert, dismissing } = this.props;
+        return (
+            <Fade key={'alert-' + index} timeout={500}
+                in={ _.findIndex(dismissing, alert) === -1 }
+                onExited={this.finishDismiss} unmountOnExit={true}>
+                <div>
+                    <Alert bsStyle={alert.style || 'danger'}
+                        onDismiss={alert.noCloseButton === true ? null : this.dismiss}
+                        className={alert.noCloseButton === true ? 'no-close-button' : null}>
+                        <h4>{ alert.title }</h4>
+                        <div className="mb-0" children={alert.message} />
+                    </Alert>
+                </div>
+            </Fade>
+        );
+    }
+
 }
