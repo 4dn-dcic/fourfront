@@ -111,6 +111,21 @@
                     "href": {
                         "title": "Download URL",
                         "type": "string"
+                    },
+                    "md5sum": {
+                        "title": "MD5sum",
+                        "description": "The md5sum of the extra file.",
+                        "type": "string",
+                        "exclude_from": ["submit4dn", "FFedit-create"],
+                        "ff_flag":"clear edit",
+                        "format": "hex"
+                    },
+                    "file_size": {
+                        "title": "File Size",
+                        "exclude_from": ["submit4dn", "FFedit-create"],
+                        "description": "Size of file of the extra file.",
+                        "comment": "File size is specified in bytes",
+                        "type": "integer"
                     }
                 }
             }
