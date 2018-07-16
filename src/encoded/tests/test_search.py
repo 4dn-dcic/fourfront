@@ -1,5 +1,4 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
-import pdb; pdb.set_trace()
 from .features.conftest import app_settings, app, workbook
 import pytest
 import random

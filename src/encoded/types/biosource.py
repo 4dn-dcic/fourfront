@@ -202,5 +202,4 @@ def biosource_add(context, request, render=None):
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
 def biosource_edit(context, request, render=None):
-    import pdb; pdb.set_trace()
     return item_edit(context, request, render)
