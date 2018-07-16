@@ -592,7 +592,7 @@ class LinkedObj extends React.Component{
         var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json');
         draggedContext = (draggedContext && JSON.parse(draggedContext)) || null;
         var draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain');
-    
+
         var innerText = "Drop " + (draggedContext && draggedContext.display_title || draggedURI || "Item") + " for field '" + this.props.nestedField +  "'";  // document.createTextNode('')
         var innerBoldElem = document.createElement('h2');
         innerBoldElem.appendChild(document.createTextNode(innerText));
