@@ -258,7 +258,9 @@
     "quality_metric": "131106bc-8535-4448-903e-854abbbbbbbb",
     "extra_files" : [
         {
-            "file_format" : "pairs_px2"
+            "file_format" : "pairs_px2",
+            "file_size" :12345678,
+            "md5sum": "6c2b2059745304918502d4ed2a863f59"
         }
     ]
 },
