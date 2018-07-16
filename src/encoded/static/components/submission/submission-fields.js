@@ -312,8 +312,8 @@ class LinkedObj extends React.Component{
      * @param {Object} props - Props passed from LinkedObj or BuildField.
      * @param {string} props.nestedField - Field of LinkedObj
      * @param {number[]|null} props.arrayIdx - Array index (if any) of this item, if any.
-     * @param {string} props.fieldBeingSelected - Field currently selected for linkedTo item selection.  
-     * @param {number[]|null} props.fieldBeingSelectedArrayIdx - Array index (if any) of currently selected for linkedTo item selection.  
+     * @param {string} props.fieldBeingSelected - Field currently selected for linkedTo item selection.
+     * @param {number[]|null} props.fieldBeingSelectedArrayIdx - Array index (if any) of currently selected for linkedTo item selection.
      * @returns {boolean} Whether is currently selected field/item or not.
      */
     static isInSelectionField(props){
@@ -353,7 +353,7 @@ class LinkedObj extends React.Component{
     componentDidUpdate(pastProps){
         this.updateContext();
 
-        if (pastProps.fieldBeingSelected !== this.props.fieldBeingSelected || pastProps.fieldBeingSelectedArrayIdx !== pastProps.fieldBeingSelectedArrayIdx){
+        if (pastProps.fieldBeingSelected !== this.props.fieldBeingSelected || pastProps.fieldBeingSelectedArrayIdx !== this.props.fieldBeingSelectedArrayIdx) {
             this.manageWindowOnDragHandler(pastProps, this.props);
         }
 
@@ -441,7 +441,7 @@ class LinkedObj extends React.Component{
         e.preventDefault();
 
         if (!window) return;
-        
+
         var { schema, nestedField, linkType, arrayIdx, selectObj, selectCancel } = this.props;
 
         var itemType    = schema.linkTo,
@@ -787,9 +787,9 @@ class ArrayField extends React.Component{
                     {...{ value, fieldTip, fieldType, title, enumValues }}
                     { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'selectComplete', 'selectCancel',
                         'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx',
-                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo' ) } 
-                        isArray={true} isLastItemInArray={allItems.length - 1 === index} arrayIdx={arrayIdxList}
-                        schema={fieldSchema} disabled={false} required={false} key={arrayIdx} />
+                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo' ) }
+                    isArray={true} isLastItemInArray={allItems.length - 1 === index} arrayIdx={arrayIdxList}
+                    schema={fieldSchema} disabled={false} required={false} key={arrayIdx} />
             </div>
         );
     }

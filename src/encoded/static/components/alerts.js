@@ -151,8 +151,7 @@ export default class Alerts extends React.Component {
                                 <Alert
                                     bsStyle={alert.style || 'danger'}
                                     onDismiss={alert.noCloseButton === true ? null : dismiss.bind(this, i)}
-                                    className={alert.noCloseButton === true ? 'no-close-button' : null}
-                                >
+                                    className={alert.noCloseButton === true ? 'no-close-button' : null}>
                                     <h4>{ alert.title }</h4>
                                     <div className="mb-0" children={alert.message} />
                                 </Alert>

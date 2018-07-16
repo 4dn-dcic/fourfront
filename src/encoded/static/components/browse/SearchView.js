@@ -237,7 +237,7 @@ class ControlsAndResults extends React.PureComponent {
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                         <AboveTableControls {..._.pick(this.props,
                                 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                                'columns', 'selectedFiles', 'constantHiddenColumns', 'currentAction'
+                                    'columns', 'selectedFiles', 'constantHiddenColumns', 'currentAction'
                             )}
                             parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                                 SearchResultTable.defaultProps.constantColumnDefinitions,

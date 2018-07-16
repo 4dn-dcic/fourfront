@@ -260,7 +260,7 @@ class ResultRow extends React.PureComponent {
 
     render(){
         var { result, rowNumber, mounted, headerColumnWidths, renderDetailPane, columnDefinitions, schemas,
-              tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href, currentAction, selectedFiles } = this.props;
+            tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href, currentAction, selectedFiles } = this.props;
         var detailOpen = this.isOpen();
         var isDraggable = currentAction === 'selection';
         return (

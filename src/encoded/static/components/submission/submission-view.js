@@ -1866,7 +1866,7 @@ class IndividualObjectView extends React.Component{
         if (!selectField) throw new Error('No field being selected for');
         var current = selectField && this.props.currContext[selectField],
             isRepeat = (Array.isArray(current) && _.contains(current, value));
-        
+
         if (!isRepeat) {
             this.modifyNewContext(selectField, value, 'existing linked object', null, selectArrayIdx);
             this.fetchObjTitle(value, selectType, null);

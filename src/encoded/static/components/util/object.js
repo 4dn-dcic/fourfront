@@ -162,8 +162,8 @@ export function isValidJSON(content) {
 /**
  * Check if param is in form of an @id. Doesn't validate whether proper collection, etc. just URL format.
  *
- * @param {string} value - String to test
- * @returns {boolean} - Whether is valid-ish. 
+ * @param {string} value - String to test.
+ * @returns {boolean} - Whether is valid-ish.
  */
 export function isValidAtIDFormat(value){
     return (
