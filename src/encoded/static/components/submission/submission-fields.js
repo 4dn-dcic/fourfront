@@ -19,7 +19,7 @@ if it is a simple number/text/enum, or generates a child component for
 attachment, linked object, array, object, and file fields. Contains delete
 logic for the field as well (deleting is done by setting value to null).
 */
-export default class BuildField extends React.Component {
+export default class BuildField extends React.PureComponent {
 
     /**
      * @param {{ 'type' : string }} fieldSchema - Schema definition for this property. Should be same as `app.state.schemas[CurrentItemType].properties[currentField]`.
@@ -306,7 +306,7 @@ class SquareButton extends React.Component {
 var linkedObjChildWindow = null; // Global var
 
 /** Case for a linked object. */
-class LinkedObj extends React.Component{
+class LinkedObj extends React.PureComponent{
 
     /**
      * @param {Object} props - Props passed from LinkedObj or BuildField.

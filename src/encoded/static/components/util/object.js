@@ -160,6 +160,14 @@ export function isValidJSON(content) {
 
 
 /**
+ * Deep-clone a given object using JSON stringify/parse.
+ */
+export function deepClone(obj){
+    return JSON.parse(JSON.stringify(obj));
+}
+
+
+/**
  * Check if param is in form of an @id. Doesn't validate whether proper collection, etc. just URL format.
  *
  * @param {string} value - String to test.

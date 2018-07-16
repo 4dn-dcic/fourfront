@@ -42,7 +42,7 @@ import { Detail } from '../item-pages/components';
  * @prop {boolean} create   Is this a new Item being created?
  * @prop {boolean} edit     Is this an Item being edited?
  */
-export default class SubmissionView extends React.Component{
+export default class SubmissionView extends React.PureComponent{
 
     constructor(props){
         super(props);
@@ -146,8 +146,8 @@ export default class SubmissionView extends React.Component{
      * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = cloneObj(this.state.keyContext);
-        var validCopy = cloneObj(this.state.keyValid);
+        var contextCopy = object.deepClone(this.state.keyContext);
+        var validCopy = object.deepClone(this.state.keyValid);
         contextCopy[objKey] = newContext;
         validCopy[objKey] = this.findValidationState(objKey);
         this.setState({
@@ -163,7 +163,7 @@ export default class SubmissionView extends React.Component{
      * 1 (ready to validate). Otherwise return 0 (not ready to validate)
      */
     findValidationState = (keyIdx) => {
-        var hierarchy = cloneObj(this.state.keyHierarchy);
+        var hierarchy = object.deepClone(this.state.keyHierarchy);
         var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
         if (keyHierarchy === null) return 0;
         var validationReturn = 1;
@@ -509,46 +509,51 @@ export default class SubmissionView extends React.Component{
      * so the view changes to it.
      */
     createObj = (type, newIdx, newLink, alias, extraState={}) => {
-        var contextCopy = this.state.keyContext;
-        var validCopy = this.state.keyValid;
-        var typesCopy = this.state.keyTypes;
-        var parentKeyIdx = this.state.currKey;
-        var hierarchy = this.state.keyHierarchy;
-        var keyDisplay = this.state.keyDisplay;
-        var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = cloneObj(this.state.keyLinks);
-        var bookmarksList = [];
-        // increase key iter by 1 for a new unique key
-        var keyIdx;
-        var newHierarchy;
-        if(newIdx === 0){ // initial object creation
+        var { keyTypes, currKey, keyHierarchy, keyIter } = this.state;
+        var contextCopy     = _.clone(this.state.keyContext),
+            validCopy       = _.clone(this.state.keyValid),
+            typesCopy       = _.clone(keyTypes),
+            parentKeyIdx    = currKey,
+            bookmarksCopy   = _.clone(this.state.keyLinkBookmarks),
+            linksCopy       = object.deepClone(this.state.keyLinks),
+            keyDisplay      = _.clone(this.state.keyDisplay),
+            bookmarksList   = [],
+            keyIdx,
+            newHierarchy;
+
+
+        if (newIdx === 0){ // initial object creation
             keyIdx = 0;
-            newHierarchy = hierarchy;
-        }else{
-            keyIdx = this.state.keyIter + 1;
-            if(newIdx !== keyIdx){
+            newHierarchy = _.clone(keyHierarchy);
+        } else {
+            keyIdx = keyIter + 1; // increase key iter by 1 for a new unique key
+            if (newIdx !== keyIdx) {
                 console.error('ERROR: KEY INDEX INCONSISTENCY!');
                 return;
             }
-            newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
+            newHierarchy = modifyHierarchy(_.clone(keyHierarchy), keyIdx, parentKeyIdx);
             validCopy[keyIdx] = 1; // new object has no incomplete children yet
             validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
         }
+
         typesCopy[keyIdx] = type;
         var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
-        if(contextWithAlias.aliases){
+        if (contextWithAlias.aliases) {
             contextWithAlias.aliases.push(alias);
-        }else{
+        } else {
             contextWithAlias.aliases = [alias];
         }
+
         contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], bookmarksList, true, false);
         bookmarksCopy[keyIdx] = bookmarksList;
         linksCopy[keyIdx] = newLink;
         keyDisplay[keyIdx] = alias;
+
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
         }
+
         this.setState(_.extend({
             'keyContext': contextCopy,
             'keyValid': validCopy,
@@ -577,16 +582,15 @@ export default class SubmissionView extends React.Component{
      * @param {number} key - Key of item to remove.
      */
     removeObj = (key) => {
-        var contextCopy = cloneObj(this.state.keyContext);
-        var validCopy = cloneObj(this.state.keyValid);
-        var typesCopy = cloneObj(this.state.keyTypes);
-        var keyDisplay = this.state.keyDisplay;
-        var keyComplete = this.state.keyComplete;
-        var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = this.state.keyLinks;
+        var contextCopy = object.deepClone(this.state.keyContext);
+        var validCopy = object.deepClone(this.state.keyValid);
+        var typesCopy = object.deepClone(this.state.keyTypes);
+        var keyComplete = _.clone(this.state.keyComplete);
+        var bookmarksCopy = _.clone(this.state.keyLinkBookmarks);
+        var linksCopy = _.clone(this.state.keyLinks);
         var roundTwoCopy = this.state.roundTwoKeys.slice();
-        var hierarchy = this.state.keyHierarchy;
-        var dummyHierarchy = cloneObj(hierarchy);
+        var hierarchy = _.clone(this.state.keyHierarchy);
+        var dummyHierarchy = object.deepClone(hierarchy);
         var hierKey = key;
 
         // the key may be a @id string and not keyIdx if already submitted
@@ -631,7 +635,6 @@ export default class SubmissionView extends React.Component{
         });
         this.setState({
             'keyHierarchy': newHierarchy,
-            'keyDisplay': keyDisplay,
             'keyContext': contextCopy,
             'keyValid': validCopy,
             'keyTypes': typesCopy,
@@ -659,14 +662,13 @@ export default class SubmissionView extends React.Component{
      * isNan() for the key of a pre-existing object will return true.
      */
     addExistingObj = (path, display, type, newLink, init=false) => {
+        var { currKey, keyHierarchy } = this.state;
         // on init=true, all objects are children of the principal object (keyIdx = 0)
-        var parentKeyIdx = init ? 0 : this.state.currKey;
-        var hierarchy = this.state.keyHierarchy;
-        var keyDisplay = this.state.keyDisplay;
-        var keyTypes = this.state.keyTypes;
-        var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = this.state.keyLinks;
-        hierarchy = modifyHierarchy(hierarchy, path, parentKeyIdx);
+        var parentKeyIdx = init ? 0 : currKey;
+        var keyDisplay = _.clone(this.state.keyDisplay);
+        var keyTypes = _.clone(this.state.keyTypes);
+        var linksCopy = _.clone(this.state.keyLinks);
+        var hierarchy = modifyHierarchy(_.clone(keyHierarchy), path, parentKeyIdx);
         keyDisplay[path] = display;
         keyTypes[path] = type;
         linksCopy[path] = newLink;
@@ -674,7 +676,6 @@ export default class SubmissionView extends React.Component{
             'keyHierarchy': hierarchy,
             'keyDisplay': keyDisplay,
             'keyTypes': keyTypes,
-            'keyLinkBookmarks': bookmarksCopy,
             'keyLinks': linksCopy
         });
     }
@@ -893,7 +894,7 @@ export default class SubmissionView extends React.Component{
      * with a null value.
      */
     removeNullsFromContext = (inKey) => {
-        var finalizedContext = cloneObj(this.state.keyContext[inKey]);
+        var finalizedContext = object.deepClone(this.state.keyContext[inKey]);
         var noNulls = removeNulls(finalizedContext);
         return noNulls;
     }
@@ -934,7 +935,7 @@ export default class SubmissionView extends React.Component{
     buildDeleteFields = (patchContext, origContext, schema) => {
         var deleteFields = [];
         // must remove nulls from the orig copy to sync with patchContext
-        var origCopy = cloneObj(origContext);
+        var origCopy = object.deepClone(origContext);
         origCopy = removeNulls(origCopy);
         var userGroups = JWT.getUserGroups();
         _.keys(origCopy).forEach(function(field, index){
@@ -1388,7 +1389,7 @@ export default class SubmissionView extends React.Component{
     }
 }
 
-class WarningBanner extends React.Component {
+class WarningBanner extends React.PureComponent {
     render() {
         return(
             <div className="mb-2 mt-1 text-400 warning-banner">
@@ -1405,7 +1406,7 @@ class WarningBanner extends React.Component {
     }
 }
 
-class DetailTitleBanner extends React.Component {
+class DetailTitleBanner extends React.PureComponent {
 
     /**
      * Traverse keyHierarchy option to get a list of hierarchical keys, e.g. 0,1,4 if are on currKey 4 that is a child of currKey 1 that is a child of currKey 0.
@@ -1512,19 +1513,21 @@ class DetailTitleBanner extends React.Component {
     }
 
     generateHierarchicalTitles(){
-        return _.map(DetailTitleBanner.getListOfKeysInPath(this.props.hierarchy, this.props.currKey), this.generateCrumbTitle);
+        var { hierarchy, currKey } = this.props;
+        return _.map(DetailTitleBanner.getListOfKeysInPath(hierarchy, currKey), this.generateCrumbTitle);
     }
 
     render(){
-        if (this.props.fullScreen) return null;
+        var { fullScreen, currKey } = this.props;
+        if (fullScreen) return null;
         return (
             <h3 className="crumbs-title mb-2">
                 <div className="subtitle-heading form-section-heading mb-08">
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        Currently Editing { this.props.currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} /> : null }
+                        Currently Editing { currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} /> : null }
                     </span>
                 </div>
-                { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(this.props.currKey) }
+                { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(currKey) }
             </h3>
         );
     }
@@ -1660,18 +1663,13 @@ class IndividualObjectView extends React.Component{
          * State in this component mostly has to do with selection of existing objs
          *
          * @prop {!string} selectType           Type of existing object being selected (i.e. ExperimentHiC).
-         * @prop {!Object} selectData           Initial collection context fed to Search, given by LinkedObj in submission-fields.js.
-         * @prop {!string} selectQuery          Search query held by this component for in-place navigation
          * @prop {!string} selectField          Actual fieldname that we're selecting the existing obj for. May be nested in the case of subobjects, e.g. experiments_in_set.experiment
          * @prop {!number[]} selectArrayIdx     List of int numbers keeping track of list positions of the object we're selecting for. Since you can have arrays within arrays, one int won't do. Example: [1,2] would mean the current field is the second item within the first item of the array given by the top level field. When null, no arrays involved.
          * @prop {boolean} fadeState            Controls whether a fade animation should be triggered in render
          */
         this.state = {
             'selectType'    : null,
-            'selectData'    : null,
-            'selectQuery'   : null,
             'selectField'   : null,
-            'selectLink'    : null,
             'selectArrayIdx': null,
             'fadeState'     : false
         };
@@ -1800,6 +1798,7 @@ class IndividualObjectView extends React.Component{
                     "message"   : "Could not find valid" + (type ? " '" + type + "'" : '') + " Item in database for value '" + value + "'.",
                     "style"     : "danger"
                 });
+                layout.animateScrollTo(0); // Scroll to top of page so alert b visible to end-user.
                 this.modifyNewContext(field, null, 'existing linked object', null, arrayIdx);
             },
             successCallback = (result)=>{
@@ -2014,45 +2013,24 @@ class IndividualObjectView extends React.Component{
      */
     render(){
         var { currContext, keyComplete, keyContext, currKey, schemas, roundTwo } = this.props;
-        var { selectData, selectQuery, fadeState } = this.state;
         var fields = currContext ? _.keys(currContext) : [],
-            detailContext,
             fieldJSXComponents = sortPropFields(_.filter( // Sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
                 _.map(fields, this.initiateField),
                 function(f){ return !!f; } // Removes falsy (e.g. null) items.
-            ));
-
-        if (roundTwo) {
-            var path = keyComplete[currKey];
-            detailContext = keyContext[path];
-        }
+            )),
+            roundTwoDetailContext = roundTwo && keyComplete[currKey] && keyContext[keyComplete[currKey]];
 
         return(
             <div>
-                {/*
-                <SelectExistingItemModal {...this.props}
-                    navigate={this.inPlaceNavigate}         // Override global navigate func
-                    selectCallback={this.selectComplete}
-                    submissionBase={selectQuery} // Base HREF used, overrides props.href
-                    onCancel={this.selectCancel} selectData={selectData} selectObj={this.selectObj}
-                />
-                */}
-
                 <FormFieldsContainer currKey={currKey} children={fieldJSXComponents}/>
-
-                {
-                    this.props.roundTwo ?
-                    <RoundTwoDetailPanel schemas={this.props.schemas} context={detailContext} open={true} />
-                    :
-                    null
-                }
+                { roundTwo ? <RoundTwoDetailPanel schemas={schemas} context={roundTwoDetailContext} open={true} /> : null }
             </div>
         );
     }
 }
 
 
-class FormFieldsContainer extends React.Component {
+class FormFieldsContainer extends React.PureComponent {
 
     static defaultProps = {
         'title' : 'Fields & Dependencies',
@@ -2115,6 +2093,8 @@ class RoundTwoDetailPanel extends React.Component{
  * All linkTo fields are added to objList.
  * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
  * Also checks user info to see if user is admin, which affects which fields are displayed.
+ * 
+ * @returns {Object} A new object represent context.
  */
 export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
     var built = {};
@@ -2372,11 +2352,3 @@ var removeNulls = function myself(context){
     });
     return context;
 };
-
-
-/**
- * Clone a given object using JSON techniques
- */
-function cloneObj(obj){
-    return JSON.parse(JSON.stringify(obj));
-}
