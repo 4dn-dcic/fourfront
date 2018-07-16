@@ -131,7 +131,7 @@ export default class Alerts extends React.Component {
 
         return (
             <div className="alerts" children={_.map(this.props.alerts, (alert, index, alerts) =>
-                <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={this.state.dismissing} />
+                <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={this.state.dismissing} key={index} />
             )} />
         );
     }
@@ -163,7 +163,7 @@ class AlertItem extends React.PureComponent {
     render(){
         var { index, alert, dismissing } = this.props;
         return (
-            <Fade key={'alert-' + index} timeout={500}
+            <Fade timeout={500}
                 in={ _.findIndex(dismissing, alert) === -1 }
                 onExited={this.finishDismiss} unmountOnExit={true}>
                 <div>

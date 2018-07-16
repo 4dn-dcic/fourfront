@@ -454,11 +454,16 @@ class LinkedObj extends React.PureComponent{
             this.windowObjectReference.focus();
             this.setOnFourfrontSelectionClickHandler();
         } else {
+            // Some browsers (*cough* MS Edge *cough*) are strange and will encode '#' to '%23' initially.
             this.windowObjectReference = linkedObjChildWindow = window.open(
-                searchURL,
+                "about:blank",
                 "selection-search",
-                "menubar=0,toolbar=1,location=1,resizable=1,scrollbars=1,status=1,navigation=1,width=992,height=600"
+                "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1,width=992,height=600"
             );
+            setTimeout(()=>{
+                this.windowObjectReference.location.assign(searchURL);
+                this.windowObjectReference.location.hash = '#!selection';
+            }, 100);
             this.setOnFourfrontSelectionClickHandler();
             //this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
         }
@@ -666,7 +671,7 @@ class LinkedObj extends React.PureComponent{
                 return(
                     <div className="submitted-linked-object-display-container text-ellipsis-container">
                         <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
-                        <a href={value} target="_blank" className="inline-block" data-tip={"This Item, '" + thisDisplay + "' is already in the database"} children={thisDisplay} />
+                        <a href={value} target="_blank" data-tip={"This Item, '" + thisDisplay + "' is already in the database"} children={thisDisplay} />
                         &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-external-link"/>
                     </div>
                 );
@@ -688,7 +693,7 @@ class LinkedObj extends React.PureComponent{
                     return(
                         <div className="incomplete-linked-object-display-container text-ellipsis-container">
                             <i className="icon icon-fw icon-sticky-note-o" />&nbsp;&nbsp;
-                            <a href="#" className="inline-block" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting" children={thisDisplay} />
+                            <a href="#" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting" children={thisDisplay} />
                             &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-pencil"/>
                         </div>
                     );
