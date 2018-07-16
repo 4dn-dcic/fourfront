@@ -23,15 +23,25 @@ export default class Alerts extends React.Component {
     /**
      * Open an alert box.
      * More specifically, saves a new alert to Redux store 'alerts' field.
-     * 
+     *
      * @public
-     * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
-     * @returns {undefined} Nothing
+     * @param {Object} alert                    Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+     * @param {string} alert.title              Title to be shown at top of alert box.
+     * @param {string|JSXElement} alert.message Message to be shown in body of alert box. May be JSX if no plans for alert to be rendered server-side.
+     * @param {string} alert.style              Style of alert box. May be any Bootstrap-compliant style, e.g. "danger", "warning", "info".
+     * @returns {undefined}                     Nothing
      */
     static queue(alert, callback, currentAlerts = null){
         if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
-        if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
-        var newAlerts = currentAlerts.concat([alert]);
+        var duplicateTitleAlertIdx = _.findIndex(currentAlerts, { 'title' : alert.title }),
+            newAlerts = currentAlerts.slice(0);
+
+        if (typeof duplicateTitleAlertIdx === 'number' && duplicateTitleAlertIdx > -1){
+            // Same alert already set, lets update it instead of adding new one.
+            newAlerts.splice(duplicateTitleAlertIdx, 1, alert);
+        } else {
+            newAlerts.push(alert);
+        }
         store.dispatch({
             type: { 'alerts' : newAlerts }
         });
@@ -39,7 +49,7 @@ export default class Alerts extends React.Component {
 
     /**
      * Close an alert box.
-     * 
+     *
      * @public
      * @param {Object} alert - Object with at least 'title'.
      * @returns {undefined} Nothing

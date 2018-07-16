@@ -517,38 +517,42 @@ class LinkedObj extends React.Component{
     handleChildFourFrontSelectionClick(evt){
         var atId = evt && evt.detail && evt.detail.id;
 
-        var isValidAtId = object.isValidAtIDFormat(atId);
+        if (!object.isValidAtIDFormat(atId)) {
+            // Possibly unnecessary as all #!selection clicked items would have evt.detail.id in proper format, or not have it.
+            // Also more validation performed in SubmissionView.prototype.fetchAndValidateItem().
 
-        if (!isValidAtId) {
+            // TODO: Perhaps turn failureCallback to own func on SubmissionView.prototype and pass it in as prop here to be called. 
             throw new Error('No valid @id available.');
         }
 
-        console.log('FOURFRONTSELECTIONCLICK', evt, evt.detail);
+        console.log('Fourfront Submissions - CLICKED SELECT BUTTON FOR', atId, evt, evt.detail);
 
         this.props.selectComplete(atId);
         this.cleanChildWindow();
     }
 
+    /**
+     * Handles drop event for the (temporarily-existing-while-dragging-over) window drop receiver element.
+     * Grabs @ID of Item from evt.dataTransfer, attempting to grab from 'text/4dn-item-id', 'text/4dn-item-json', or 'text/plain'.
+     * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
+     */
     handleDrop(evt){
         evt.preventDefault();
         evt.stopPropagation();
         var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json'),
             draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain'),
-            draggedID = evt.dataTransfer && evt.dataTransfer.getData('text/text/4dn-item-id');
+            draggedID = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-id'),
+            atId = draggedID || (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname || null;
 
-        if (!draggedID){
-            draggedID = (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname;
-        }
+        var isValidAtId = object.isValidAtIDFormat(atId);
 
-        var isValidAtId = object.isValidAtIDFormat(draggedID);
-
-        if (!draggedID || !isValidAtId){
+        if (!atId || !isValidAtId){
             throw new Error('No valid @id available.');
         }
 
-        console.log('DROP', evt, draggedID, this.props);
+        console.log('Fourfront Submissions - DROPPED', atId, evt, this.props);
 
-        this.props.selectComplete(draggedID);
+        this.props.selectComplete(atId);
         this.cleanChildWindow();
     }
 
@@ -606,7 +610,7 @@ class LinkedObj extends React.Component{
 
     handleAcceptTypedID(evt){
         console.log(evt);
-        if (!this || !this.state || !this.state.textInputValue || !object.isValidAtIDFormat(this.state.textInputValue)){
+        if (!this || !this.state || !this.state.textInputValue){
             throw new Error('Invalid @id format.');
         }
         this.props.selectComplete(this.state.textInputValue);
@@ -619,15 +623,15 @@ class LinkedObj extends React.Component{
 
     renderSelectInputField(){
         var { value, selectCancel, selectComplete } = this.props;
-        var textInputValue  = this.state.textInputValue,
-            isValidAtID     = object.isValidAtIDFormat(textInputValue),
-            extClass        = !isValidAtID && textInputValue ? ' has-error' : (isValidAtID ? ' has-success' : '');
+        var textInputValue              = this.state.textInputValue,
+            canShowAcceptTypedInput     = typeof textInputValue === 'string' && textInputValue.length > 3,
+            extClass                    = !canShowAcceptTypedInput && textInputValue ? ' has-error' : '';
         return (
             <div className="linked-object-text-input-container row flexrow">
                 <div className="field-column col-xs-10">
                     <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
                 </div>
-                { isValidAtID ? <SquareButton show onClick={this.handleAcceptTypedID} icon="check" bsStyle="success" tip="Accept typed @ID" /> : null }
+                { canShowAcceptTypedInput ? <SquareButton show onClick={this.handleAcceptTypedID} icon="check" bsStyle="success" tip="Accept typed identifier and look it up in database." /> : null }
                 <SquareButton show onClick={(e)=>{ selectCancel(); this.cleanChildWindow(); }} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
             </div>
         );

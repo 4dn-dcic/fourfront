@@ -1786,15 +1786,51 @@ class IndividualObjectView extends React.Component{
      * Use ajax to get the display_title for an existing object. Use that to kicks
      * of the addExistingObj process; if a title can't be found, use the object
      * path as a fallback.
+     *
+     * @param {string} value    The @ID or unique key of the Item for which we want to validate and get title for.
+     * @param {string} type     The Item type of value.
+     * @param {any} newLink     No idea what this is.
      */
-    fetchObjTitle = (value, type, newLink) => {
-        ajax.promise(value).then(data => {
-            if (data['display_title']){
-                this.props.addExistingObj(value, data['display_title'], type, newLink);
-            }else{
-                this.props.addExistingObj(value, value, type, newLink);
+    fetchAndValidateItem = (value, field, type, arrayIdx, newLink = null) => {
+        var hrefToFetch = value,
+            failureAlertTitle = "Validation error for field '" + field + "'" + (typeof arrayIdx === 'number' ? ' [' + arrayIdx + ']' : ''),
+            failureCallback = ()=>{
+                Alerts.queue({
+                    "title"     : failureAlertTitle,
+                    "message"   : "Could not find valid" + (type ? " '" + type + "'" : '') + " Item in database for value '" + value + "'.",
+                    "style"     : "danger"
+                });
+                this.modifyNewContext(field, null, 'existing linked object', null, arrayIdx);
+            },
+            successCallback = (result)=>{
+                Alerts.deQueue({ 'title' : failureAlertTitle });
+                this.modifyNewContext(field, value, 'existing linked object', null, arrayIdx);
+                this.props.addExistingObj(value, result.display_title, type, newLink);
+            };
+
+        if (typeof hrefToFetch !== 'string') {
+            failureCallback();
+            return;
+        }
+
+        if (hrefToFetch.charAt(0) !== '/'){ // Pre-pend slash so will request hostname + '/' + value.
+            hrefToFetch = '/' + hrefToFetch;
+        }
+
+        ajax.load(hrefToFetch, (result)=>{
+            if (result && result.display_title && Array.isArray(result['@type']) ){
+                if (type) { // Check for matching Type validity.
+                    if (result['@type'].indexOf(type) > -1) {
+                        successCallback(result);
+                        return;
+                    }
+                } else { // Any Item type == valid, is assumed (e.g. linkTo type Item)
+                    successCallback(result);
+                    return;
+                }
             }
-        });
+            failureCallback();
+        }, 'GET', failureCallback);
     }
 
     /**
@@ -1858,7 +1894,7 @@ class IndividualObjectView extends React.Component{
 
     /**
      * Callback passed to Search to select a pre-existing object. Cleans up
-     * object selection state, modifies context, and initializes the fetchObjTitle
+     * object selection state, modifies context, and initializes the fetchAndValidateItem
      * process.
      */
     selectComplete = (value) => {
@@ -1868,8 +1904,8 @@ class IndividualObjectView extends React.Component{
             isRepeat = (Array.isArray(current) && _.contains(current, value));
 
         if (!isRepeat) {
-            this.modifyNewContext(selectField, value, 'existing linked object', null, selectArrayIdx);
-            this.fetchObjTitle(value, selectType, null);
+            //this.modifyNewContext(selectField, value, 'existing linked object', null, selectArrayIdx);
+            this.fetchAndValidateItem(value, selectField, selectType, selectArrayIdx, null);
         } else {
             this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
         }
@@ -1879,10 +1915,8 @@ class IndividualObjectView extends React.Component{
     /** Exit out of the selection process and clean up state */
     selectCancel(e){
         var { selectField, selectArrayIdx } = this.state;
-        console.log('SELCANCEL', selectField, selectArrayIdx);
         this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
         this.setState({ 'selectType': null, 'selectField': null, 'selectArrayIdx': null });
-        //this.props.setSubmissionState('fullScreen', false);
     }
 
     /**
