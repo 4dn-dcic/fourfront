@@ -2093,7 +2093,7 @@ class RoundTwoDetailPanel extends React.Component{
  * All linkTo fields are added to objList.
  * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
  * Also checks user info to see if user is admin, which affects which fields are displayed.
- * 
+ *
  * @returns {Object} A new object represent context.
  */
 export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){

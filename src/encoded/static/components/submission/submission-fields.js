@@ -521,7 +521,7 @@ class LinkedObj extends React.PureComponent{
             // Possibly unnecessary as all #!selection clicked items would have evt.detail.id in proper format, or not have it.
             // Also more validation performed in SubmissionView.prototype.fetchAndValidateItem().
 
-            // TODO: Perhaps turn failureCallback to own func on SubmissionView.prototype and pass it in as prop here to be called. 
+            // TODO: Perhaps turn failureCallback to own func on SubmissionView.prototype and pass it in as prop here to be called.
             throw new Error('No valid @id available.');
         }
 

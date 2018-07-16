@@ -150,16 +150,11 @@ export default class Alerts extends React.Component {
             {
                 this.props.alerts.map(function(alert,i){
                     return (
-                        <Fade
-                            key={'alert-' + i}
-                            timeout={500}
+                        <Fade key={'alert-' + i} timeout={500}
                             in={ _.findIndex(this.state.dismissing, alert) === -1 }
-                            onExited={finishDismiss.bind(this, i)}
-                            unmountOnExit={true}
-                        >
+                            onExited={finishDismiss.bind(this, i)} unmountOnExit={true}>
                             <div>
-                                <Alert
-                                    bsStyle={alert.style || 'danger'}
+                                <Alert bsStyle={alert.style || 'danger'}
                                     onDismiss={alert.noCloseButton === true ? null : dismiss.bind(this, i)}
                                     className={alert.noCloseButton === true ? 'no-close-button' : null}>
                                     <h4>{ alert.title }</h4>
