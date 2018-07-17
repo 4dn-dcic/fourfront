@@ -1059,7 +1059,8 @@ export default class App extends React.Component {
             'listActionsFor'    : this.listActionsFor,
             'updateUserInfo'    : this.updateUserInfo,
             'browseBaseState'   : this.props.browseBaseState,
-            'currentAction'     : currentAction
+            'currentAction'     : currentAction,
+            'setIsSubmitting'   : this.setIsSubmitting
         };
 
         if (canonical === "about:blank"){   // first case is fallback

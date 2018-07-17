@@ -111,7 +111,9 @@ export default class SubmissionView extends React.PureComponent{
             'file'                  : null,
             'upload'                : null,
             'uploadStatus'          : null,
-            'currentSubmittingUser' : null
+            'currentSubmittingUser' : null,
+            'edit'                  : props.currentAction === 'edit',
+            'create'                : (props.currentAction === 'create' || props.currentAction === 'add')
         };
     }
 
@@ -120,7 +122,7 @@ export default class SubmissionView extends React.PureComponent{
      * available.
      */
     componentDidMount(){
-        if(this.props.schemas && _.keys(this.props.schemas).length > 0){
+        if (this.props.schemas && _.keys(this.props.schemas).length > 0){
             this.initializePrincipal(this.props.context, this.props.schemas);
         }
     }
@@ -131,10 +133,15 @@ export default class SubmissionView extends React.PureComponent{
      * available on componentDidMount.
      */
     componentWillReceiveProps(nextProps){
-        if(this.props.schemas !== nextProps.schemas){
-            if(this.state.currKey === null){
+        if (this.props.schemas !== nextProps.schemas){
+            if (this.state.currKey === null){
                 this.initializePrincipal(nextProps.context, nextProps.schemas);
             }
+        }
+        if (this.props.currentAction !== nextProps.currentAction){
+            var edit = nextProps.currentAction === 'edit';
+            var create = (nextProps.currentAction === 'create' || nextProps.currentAction === 'add');
+            this.setState({ edit, create });
         }
     }
 
@@ -182,9 +189,9 @@ export default class SubmissionView extends React.PureComponent{
             context = this.props.context;
         }
         var principalDisplay; // Name of our current Item being created.
-        if (this.props.create === true && !this.props.edit){
+        if (this.state.create === true && !this.state.edit){
             principalDisplay = 'New ' + itemType;
-        } else if (this.props.edit === true && !this.props.create){
+        } else if (this.state.edit === true && !this.state.create){
             if (context && typeof context.accession === 'string'){
                 principalDisplay = context.accession;
             } else {
@@ -233,9 +240,9 @@ export default class SubmissionView extends React.PureComponent{
         // Step B : Callback for after grabbing user w/ submits_for
         var continueInitProcess = function(){
             // if @id cannot be found or we are creating from scratch, start with empty fields
-            if(!contextID || this.props.create){
+            if(!contextID || this.state.create){
                 // We may not have schema (if Abstract type). If so, leave empty and allow initCreateObj ... -> createObj() to create it.
-                if (schema) initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                if (schema) initContext[0] = buildContext({}, schema, bookmarksList, this.state.edit, this.state.create);
                 initBookmarks[0] = bookmarksList;
 
                 this.setState({
@@ -252,9 +259,9 @@ export default class SubmissionView extends React.PureComponent{
                 ajax.promise(contextID + '?frame=object&datastore=database').then(response => {
                     var initObjs = [];
                     if (response['@id'] && response['@id'] === contextID){
-                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, initObjs);
+                        initContext[0] = buildContext(response, schema, bookmarksList, this.state.edit, this.state.create, initObjs);
                         initBookmarks[0] = bookmarksList;
-                        if(this.props.edit && response.aliases && response.aliases.length > 0){
+                        if(this.state.edit && response.aliases && response.aliases.length > 0){
                             // we already have an alias for editing, so use it for title
                             // setting creatingIdx and creatingType to null prevents alias creation
                             initDisplay[0] = response.aliases[0];
@@ -262,7 +269,7 @@ export default class SubmissionView extends React.PureComponent{
                         }
                     }else{
                         // something went wrong with fetching context. Just use an empty object
-                        initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                        initContext[0] = buildContext({}, schema, bookmarksList, this.state.edit, this.state.create);
                         initBookmarks[0] = bookmarksList;
                     }
                     this.setState({
@@ -279,7 +286,7 @@ export default class SubmissionView extends React.PureComponent{
                     // if we are cloning and there is not an existing alias
                     // never prompt alias creation on edit
                     // do not initiate ambiguous type lookup on edit or create
-                    if(!this.props.edit && !existingAlias){
+                    if(!this.state.edit && !existingAlias){
                         this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
                     }
                 });
@@ -1042,7 +1049,7 @@ export default class SubmissionView extends React.PureComponent{
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 // this should only be done on the primary object
-                if(this.props.edit && inKey === 0 && propContext.award && propContext.lab){
+                if(this.state.edit && inKey === 0 && propContext.award && propContext.lab){
                     if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = object.atIdFromObject(propContext.award);
                     }
@@ -1075,13 +1082,13 @@ export default class SubmissionView extends React.PureComponent{
                 var deleteFields;
                 // change actionMethod and destination based on edit/round two
                 if(!test){
-                    if(this.state.roundTwo){
+                    if (this.state.roundTwo){
                         actionMethod = 'PATCH';
                         destination = this.state.keyComplete[inKey];
                         var alreadySubmittedContext = this.state.keyContext[destination];
                         // roundTwo flag set to true for second round
                         deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
-                    }else if(this.props.edit && inKey == 0){
+                    } else if (this.state.edit && inKey == 0){
                         // PATCH for principal obj on edit
                         actionMethod = 'PATCH';
                         destination = propContext['@id'];
