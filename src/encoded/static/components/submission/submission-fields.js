@@ -71,15 +71,15 @@ export default class BuildField extends React.PureComponent {
     displayField(field_case){
         var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo } = this.props;
         var inputProps = {
-            'key' : field,
-            'id' : 'field_for_' + field,
-            'disabled' : disabled || false,
-            'ref' : "inputElement",
-            'value' : (typeof value === 'number' ? value || 0 : value || ''),
-            'onChange' : this.handleChange,
-            'name' : field,
-            'placeholder': "No value",
-            'data-field-type' : field_case
+            'key'       :        field,
+            'id'                : 'field_for_' + field,
+            'disabled'          : disabled || false,
+            'ref'               : "inputElement",
+            'value'             : (typeof value === 'number' ? value || 0 : value || ''),
+            'onChange'          : this.handleChange,
+            'name'              : field,
+            'placeholder'       : "No value",
+            'data-field-type'   : field_case
         };
         switch(field_case){
             case 'text' :
@@ -96,7 +96,7 @@ export default class BuildField extends React.PureComponent {
             case 'number'           : return <FormControl type="number" {...inputProps} />;
             case 'boolean'          : return (
                 <Checkbox {..._.omit(inputProps, 'value', 'placeholder')} checked={!!(value)} className="mb-07 mt-07">
-                    <span style={{ 'verticalAlign' : 'middle', 'text-transform' : 'capitalize' }}>
+                    <span style={{ 'verticalAlign' : 'middle', 'textTransform' : 'capitalize' }}>
                         { typeof value === 'boolean' ? value + '' : null }
                     </span>
                 </Checkbox>
