@@ -2001,7 +2001,7 @@ class IndividualObjectView extends React.Component{
         }
         return (
             <BuildField
-                {...{ field, fieldType, fieldTip, enumValues, isLinked }}
+                {...{ field, fieldType, fieldTip, enumValues, isLinked, currType }}
                 {..._.pick(this.props, 'md5Progress', 'edit', 'create', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'upload', 'uploadStatus', 'updateUpload', 'currentSubmittingUser', 'roundTwo')}
                 value={fieldValue} key={field} schema={fieldSchema} nestedField={field} title={fieldTitle} modifyFile={null} linkType={linked} disabled={false}
                 getCurrContext={this.getCurrContext} getCurrSchema={this.getCurrSchema} arrayIdx={null} required={_.contains(currSchema.required, field)}

@@ -5,13 +5,17 @@ import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
-import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
+import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
+
 
 var ProgressBar = require('rc-progress').Line;
 
 var makeTitle = object.itemUtil.title;
+
+
 
 /*
 Individual component for each type of field. Contains the appropriate input
@@ -30,7 +34,7 @@ export default class BuildField extends React.PureComponent {
         if(fieldType === 'string'){
             fieldType = 'text';
             if (typeof fieldSchema.formInput === 'string'){
-                if (fieldSchema.formInput === 'textarea' || fieldSchema.formInput === 'html') return fieldSchema.formInput;
+                if (['textarea', 'html', 'code'].indexOf(fieldSchema.formInput) > -1) return fieldSchema.formInput;
             }
         }
         // check if this is an enum
@@ -69,7 +73,7 @@ export default class BuildField extends React.PureComponent {
     }
 
     displayField(field_case){
-        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo } = this.props;
+        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, fieldType, currType, getCurrContext } = this.props;
         var inputProps = {
             'key'       :        field,
             'id'                : 'field_for_' + field,
@@ -81,6 +85,19 @@ export default class BuildField extends React.PureComponent {
             'placeholder'       : "No value",
             'data-field-type'   : field_case
         };
+
+        // Unique per-type overrides
+
+        if (currType === 'StaticSection' && field === 'body'){
+            // Static section preview
+            var currContext = getCurrContext(), // Make sure we have a filetype.
+                filetype = currContext && currContext.options && currContext.options.filetype;
+            if (filetype === 'md' || filetype === 'html'){
+                return <PreviewField {...this.props} filetype={filetype} onChange={this.handleChange} />;
+            }
+        }
+
+        // Common field types
         switch(field_case){
             case 'text' :
                 if (field === 'aliases'){
@@ -281,6 +298,8 @@ export default class BuildField extends React.PureComponent {
     }
 }
 
+
+
 class SquareButton extends React.Component {
 
     static defaultProps = {
@@ -302,6 +321,8 @@ class SquareButton extends React.Component {
         );
     }
 }
+
+
 
 var linkedObjChildWindow = null; // Global var
 
@@ -727,6 +748,26 @@ class LinkedObj extends React.PureComponent{
 }
 
 
+
+class PreviewField extends React.Component {
+
+    render(){
+        var { value, filetype, field, onChange } = this.props;
+        return (
+            <div className="preview-field-container">
+                { value && <h6 className="mt-0 text-600">Preview:</h6> }
+                { value && <hr className="mb-1 mt-05" /> }
+                { value &&  <BasicStaticSectionBody content={value || ''} filetype={filetype} /> }
+                { value && <hr className="mb-05 mt-05" /> }
+                <FormControl onChange={onChange} id={"field_for_" + field} name={field} value={value} type="text" inputMode="latin" componentClass="textarea" rows={8}
+                    wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />
+            </div>
+        );
+    }
+
+}
+
+
 /**
  * Display fields that are arrays. To do this, make a BuildField for each
  * object in the value and use a custom render method. initiateArrayField is
@@ -816,7 +857,7 @@ class ArrayField extends React.Component{
                     {...{ value, fieldTip, fieldType, title, enumValues }}
                     { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'selectComplete', 'selectCancel',
                         'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx',
-                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo' ) }
+                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo', 'currType' ) }
                     isArray={true} isLastItemInArray={allItems.length - 1 === index} arrayIdx={arrayIdxList}
                     schema={fieldSchema} disabled={false} required={false} key={arrayIdx} />
             </div>
@@ -846,6 +887,8 @@ class ArrayField extends React.Component{
         );
     }
 }
+
+
 
 /**
  * Builds a field that represents a sub-object. Essentially serves to hold
@@ -909,7 +952,7 @@ class ObjectField extends React.Component {
         return (
             <BuildField
                 { ..._.pick(this.props, 'modifyNewContext', 'linkType', 'setSubmissionState',
-                    'selectObj', 'selectComplete', 'selectCancel', 'arrayIdx', 'keyDisplay', 'keyComplete',
+                    'selectObj', 'selectComplete', 'selectCancel', 'arrayIdx', 'keyDisplay', 'keyComplete', 'currType',
                     'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx'
                 )}
                 { ...{ field, fieldType, fieldTip, enumValues, nestedField, title } }
@@ -929,6 +972,8 @@ class ObjectField extends React.Component {
         return <div className="object-field-container" children={_.map(fieldsToBuild, this.initiateField)} />;
     }
 }
+
+
 
 /**
  * For version 1. A simple local file upload that gets the name, type,
@@ -1011,6 +1056,8 @@ class AttachmentInput extends React.Component{
         );
     }
 }
+
+
 
 /**
  * Input for an s3 file upload. Context value set is local value of the filename.
@@ -1211,6 +1258,8 @@ class S3FileInput extends React.Component{
     }
 }
 
+
+
 /**
  * Accepts a 'value' prop (which should contain a colon, at minimum) and present two fields for modifying its two parts.
  *
@@ -1337,6 +1386,8 @@ export class AliasInputField extends React.Component {
 
 }
 
+
+
 class InfoIcon extends React.Component{
 
     fieldTypeDescriptor(){
@@ -1364,6 +1415,8 @@ class InfoIcon extends React.Component{
         );
     }
 }
+
+
 
 export function isValueNull(value){
     if (value === null) return true;
