@@ -529,3 +529,4 @@ export default class BrowseView extends React.Component {
 }
 
 globals.content_views.register(BrowseView, 'Browse');
+globals.content_views.register(BrowseView, 'Browse', 'selection'); // Not yet fully supported but might be eventually.

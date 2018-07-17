@@ -353,3 +353,4 @@ export default class SearchView extends React.PureComponent {
 }
 
 globals.content_views.register(SearchView, 'Search');
+globals.content_views.register(SearchView, 'Search', 'selection');
