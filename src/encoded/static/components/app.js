@@ -298,7 +298,7 @@ export default class App extends React.Component {
 
         console.log('BROWSER', browserInfo);
 
-        if (typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
+        if (browserInfo && typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
             Alerts.queue({
                 'title' : 'Browser Suggestion',
                 'message' : (
