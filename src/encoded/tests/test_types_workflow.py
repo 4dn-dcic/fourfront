@@ -1,14 +1,17 @@
 import pytest
 import json
-from dcicutils.ff_utils import patch_metadata
+from dcicutils.ff_utils import patch_metadata, get_metadata
 pytestmark = [pytest.mark.working]
 
 
 @pytest.fixture()
 def input_json(workflow):
-    # use workflow that should always be in webdev 
+    # use workflow that should always be in webdev
+    # item uuid (e6814e3b-8adb-4f8c-b7d7-3485f99be2e5) is specified so that
+    # the number of
     item = {
       "app_name": "hi-c-processing-bam",
+      "uuid": "e6814e3b-8adb-4f8c-b7d7-3485f99be2e5",
       "parameters": {
       },
       "output_bucket": "elasticbeanstalk-fourfront-webdev-wfoutput",
@@ -56,11 +59,15 @@ def workflow(testapp, software, award, lab):
     workflow_uuid = '023bfb3e-9a8b-42b9-a9d4-216079526f68'
     return workflow_uuid
 
+
 def test_pseudo_run(testapp, input_json):
+    wfr_uuid = input_json['uuid']
     res = testapp.post_json('/WorkflowRun/pseudo-run', input_json)
     assert(res)
-
-    # cleanup
     output = json.loads(res.json['output'])
-    patch_metadata({'status':'deleted'}, output['ff_meta']['uuid'], ff_env='fourfront-webdev')
-
+    assert output['uuid'] == wfr_uuid
+    # cleanup -- patch status to deleted if it is not already
+    wfr_obj = get_metadata(wfr_uuid, ff_env='fourfront-webdev',
+                                    add_on='frame=object&datastore=database')
+    if wfr_obj['status'] != 'deleted':
+        patch_metadata({'status':'deleted'}, output['ff_meta']['uuid'], ff_env='fourfront-webdev')
