@@ -3,6 +3,23 @@
         "name": "about",
         "uuid": "c79afee0-7ba5-4dc6-9c1c-684984f85607",
         "title": "About",
+        "content": [],
+        "table-of-contents": {
+            "enabled": false
+        },
+        "redirect" : {
+            "target" : "/help/about",
+            "enabled" : true,
+            "code" : 307
+        },
+        "schema_version" : "3"
+    },
+
+
+    {
+        "name": "help/about",
+        "uuid": "c79afee0-7ba5-4dc6-9c1c-684984f85608",
+        "title": "About",
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b008",
             "442c8aa0-dc6c-43d7-814a-854af460b009",
@@ -409,7 +426,8 @@
             "f0f0f0f0-0000-0000-0000-aaaaaa000002",
             "f0f0f0f0-0000-0000-0000-aaaaaa000003",
             "f0f0f0f0-0000-0000-0000-aaaaaa000004",
-            "f0f0f0f0-0000-0000-0000-aaaaaa000005"
+            "f0f0f0f0-0000-0000-0000-aaaaaa000005",
+            "c79afee0-7ba5-4dc6-9c1c-684984f85608"
         ],
         "content" : [
             "reusable-dummy-sections.lorem-ipsum-overview"
