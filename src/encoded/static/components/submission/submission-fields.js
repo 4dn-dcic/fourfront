@@ -481,7 +481,7 @@ class LinkedObj extends React.PureComponent{
             this.windowObjectReference = linkedObjChildWindow = window.open(
                 "about:blank",
                 "selection-search",
-                "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1,width=992,height=600"
+                "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1,width=1010,height=600"
             );
             setTimeout(()=>{
                 this.windowObjectReference.location.assign(searchURL);
@@ -513,6 +513,17 @@ class LinkedObj extends React.PureComponent{
             return;
         }
 
+        // Authenticate message origin to prevent XSS attacks.
+        var eventOriginParts = url.parse(evt.origin);
+        if (window.location.host !== eventOriginParts.host){
+            console.error('Received message from unauthorized host. Canceling.');
+            return;
+        }
+        if (window.location.protocol !== eventOriginParts.protocol){
+            console.error('Received message from unauthorized protocol. Canceling.');
+            return;
+        }
+
         if (eventType === 'fourfrontselectionclick') {
             return this.handleChildFourFrontSelectionClick(evt);
         }
@@ -525,14 +536,8 @@ class LinkedObj extends React.PureComponent{
     setOnFourfrontSelectionClickHandler(){
         setTimeout(()=>{
             window && window.addEventListener('message', this.handleChildWindowMessage);
-            this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
-            console.log('Updated \'fourfrontinitialized\' event handler');
+            console.log('Updated \'message\' event handler');
         }, 200);
-        //setTimeout(()=>{
-        //    this.windowObjectReference && this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
-        //    this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
-        //    console.log('Updated \'fourfrontselectionclick\' event handler');
-        //}, 1500);
     }
 
     cleanChildWindowEventHandlers(){
@@ -541,9 +546,6 @@ class LinkedObj extends React.PureComponent{
             console.warn('Child window no longer available to unbind event handlers. Fine if closed.');
             return;
         }
-        //this.windowObjectReference.removeEventListener('unload', this.setOnFourfrontSelectionClickHandler);
-        //this.windowObjectReference.removeEventListener('fourfrontinitialized', this.showAlertInChildWindow);
-        //this.windowObjectReference.removeEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
     }
 
     cleanChildWindow(){
