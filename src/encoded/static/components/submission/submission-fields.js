@@ -1308,6 +1308,7 @@ export class AliasInputField extends React.Component {
         super(props); // Inherits this.onHide() function.
         this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
         this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
+        this.onAliasFirstPartChangeTyped = this.onAliasFirstPartChangeTyped.bind(this);
     }
 
     getInitialSubmitsForPart(){
@@ -1323,6 +1324,11 @@ export class AliasInputField extends React.Component {
             aliasParts[1] = '';
         }
         this.props.onAliasChange(aliasParts.join(':'));
+    }
+
+    onAliasFirstPartChangeTyped(evt){
+        var newValue = evt.target.value || '';
+        return this.onAliasFirstPartChange(newValue, evt);
     }
 
     onAliasFirstPartChange(evtKey, e){
@@ -1342,26 +1348,30 @@ export class AliasInputField extends React.Component {
     }
 
     render(){
-        var firstPartSelect = null;
-        var parts = AliasInputField.splitInTwo(this.props.value);
-        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
-        if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ this.getInitialSubmitsForPart() }</InputGroup.Addon>;
+        var { currentSubmittingUser, errorMessage, withinModal, value } = this.props;
+        var parts = AliasInputField.splitInTwo(value),
+            submits_for_list = (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0 && currentSubmittingUser.submits_for) || null,
+            initialDefaultFirstPartValue = this.getInitialSubmitsForPart(),
+            firstPartSelect;
+        
+        if (currentSubmittingUser && Array.isArray(currentSubmittingUser.groups) && currentSubmittingUser.groups.indexOf('admin') > -1){
+            // Render an ordinary input box for admins (can specify any lab).
+            firstPartSelect = (
+                <FormControl id="aliasFirstPartInput" type="text" inputMode="latin"
+                    value={(parts.length > 1 && parts[0]) || ''} placeholder={"Lab (default: " + initialDefaultFirstPartValue + ")"}
+                    onChange={this.onAliasFirstPartChangeTyped} style={{ 'paddingRight' : 8, 'borderRight' : 'none' }} />
+            );
+        } else if (submits_for_list && submits_for_list.length === 1){
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ initialDefaultFirstPartValue }</InputGroup.Addon>;
         } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
-                <DropdownButton
-                    className="alias-lab-select form-control alias-first-part-input"
-                    onSelect={this.onAliasFirstPartChange}
-                    componentClass={InputGroup.Button}
-                    id="aliasFirstPartInput"
-                    title={(parts.length > 1 && (
+                <DropdownButton className="alias-lab-select form-control alias-first-part-input"
+                    onSelect={this.onAliasFirstPartChange} componentClass={InputGroup.Button}
+                    id="aliasFirstPartInput" title={(parts.length > 1 && (
                         <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right text-ellipsis-container" style={{ maxWidth : '80%' }}>{ ((parts[0] !== '' && parts[0]) || this.getInitialSubmitsForPart()) }</span></span>
-                    )) || 'Select a Lab'}
-                >
-                    { _.map(submits_for_list, function(lab){
-                        return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
-                    }) }
-                </DropdownButton>
+                    )) || 'Select a Lab'} children={_.map(submits_for_list, (lab) =>
+                        <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>
+                    )} />
             );
         }
         return (
