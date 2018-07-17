@@ -7,9 +7,25 @@ import json
 import time
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
+
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
+
+
+# just a little helper function
+def recursively_find_uuids(json, uuids):
+    for key, val in json.items():
+        if key == 'uuid':
+            uuids.add(val)
+        elif isinstance(val, list):
+            for item in val:
+                if isinstance(item, dict):
+                    uuids = recursively_find_uuids(item, uuids)
+        elif isinstance(val, dict):
+            uuids = recursively_find_uuids(val, uuids)
+    return uuids
+
 
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
@@ -374,7 +390,6 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     from snovault.elasticsearch import create_mapping
-    from dcicutils.ff_utils import find_uuids
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     # TODO: NAMESPACE - here, passed in list to create_mapping
@@ -401,18 +416,18 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if item_len > 0:
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             res = res.follow()
-            for item_res in res:
-                item_id = res['uuid']
-                index_view_res = indexer_testapp.get(item_id + '@@index-data', status=200)
+            for item_res in res.json.get('@graph', []):
+                index_view_res = es.get(index=item_type, doc_type=item_type,
+                                        id=item_res['uuid'])['_source']
                 # make sure that the referenced_uuids match the embedded data
                 assert 'referenced_uuids' in index_view_res
                 assert 'embedded' in index_view_res
-                found_uuids = set(find_uuids(index_view_res['embedded']))
-                found_uuids = found_uuids - set(item_id)  # remove self from found ids
-                assert found_uuids == index_view_res['referenced_uuids']
+                found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
+                # all found uuids must be within the referenced_uuids
+                assert found_uuids <= set(index_view_res['referenced_uuids'])
                 # previously test_html_pages
                 try:
-                    html_res = htmltestapp.get(item_id)
+                    html_res = htmltestapp.get(item_res['@id'])
                     assert html_res.body.startswith(b'<!DOCTYPE html>')
                 except Exception as e:
                     pass
