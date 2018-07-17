@@ -6,7 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
-var jwt = require('jsonwebtoken');
+import { detect } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
@@ -229,7 +229,15 @@ export default class App extends React.Component {
         console.log("App Initial State: ", this.state);
     }
 
-    // Once the app component is mounted, bind keydowns to handleKey function
+    /**
+     * Perform various actions once component is mounted which depend on browser environment.
+     *
+     * - Add URI hash from window.location.hash/href to Redux store (doesn't get sent server-side).
+     * - Bind 'handlePopState' function to window popstate event (e.g. back/forward button navigation).
+     * - Initializes Google Analytics
+     * - Exposes 'API' from browser window object via property {Object} 'fourfront' which has reference to Alerts, JWT, navigate, and this app component.
+     * - Emits an event from browser window named 'fourfrontinitialized', letting any listeners (parent windows, etc.) know that JS of this window has initialized. Posts message with same 'eventType' as well.
+     */
     componentDidMount() {
         globals.bindEvent(window, 'keydown', this.handleKey);
 
@@ -273,24 +281,50 @@ export default class App extends React.Component {
         window.onbeforeunload = this.handleBeforeUnload;
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics(
-            analytics.getTrackingId(this.props.href),
-            this.props.context
-        );
+        analytics.initializeGoogleAnalytics( analytics.getTrackingId(this.props.href), this.props.context );
 
         // Save some stuff to global window variables so we can access it in tests:
         // Normally would call this 'window.app' but ENCODE already sets this in browser.js to be the top-level Redux provider (not really useful, remove?)
         window.fourfront = _.extend(window.fourfront || {}, {
-            'app' : this,
-            'alerts' : Alerts,
-            'JWT' : JWT,
-            'navigate' : navigate
+            'app'       : this,
+            'alerts'    : Alerts,
+            'JWT'       : JWT,
+            'navigate'  : navigate
         });
 
-        // Lets emit an event from our window object that fourfront JS has initialized. This is to be used by, e.g. submissions view which might control a child window.
-        window.dispatchEvent(new Event('fourfrontinitialized'));
+        // Detect browser and save it to state. Show alert to inform people we're too ~lazy~ under-resourced to support MS Edge to the max.
+        var browserInfo = detect(),
+            mounted = true;
 
-        this.setState({ 'mounted' : true });
+        console.log('BROWSER', browserInfo);
+
+        if (typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
+            Alerts.queue({
+                'title' : 'Browser Suggestion',
+                'message' : (
+                    <div>
+                        <p className="mb-0">
+                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            the recommended browser(s) for using the 4DN Data Portal.
+                        </p>
+                        <p className="mb-0">
+                            Microsoft Edge, Safari, etc. should work for a majority of portal functions but are not explicitly supported and may present some glitches, e.g. during submission.
+                        </p>
+                    </div>
+                ),
+                'style' : 'warning'
+            });
+        }
+
+        this.setState({ mounted, browserInfo }, ()=>{
+            // Emit event from our window object to notify that fourfront JS has initialized.
+            // This is to be used by, e.g. submissions view which might control a child window.
+            console.log('App is mounted, dispatching fourfrontinitialized event.');
+            window.dispatchEvent(new Event('fourfrontinitialized'));
+            if (window.opener) { // If we have parent window, post a message to it as well.
+                window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
+            }
+        });
     }
 
     componentWillUpdate(nextProps, nextState){
@@ -1132,21 +1166,12 @@ export default class App extends React.Component {
                                     browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
-                                <PageTitle context={this.props.context} session={this.state.session} href={this.props.href} schemas={this.state.schemas} currentAction={currentAction} />
+                                <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts')} {..._.pick(this.state, 'session', 'schemas')} currentAction={currentAction} />
                                 <div id="facet-charts-container" className="container">
-                                    <FacetCharts
-                                        href={this.props.href}
-                                        context={this.props.context}
-                                        navigate={navigate}
-                                        schemas={this.state.schemas}
-                                        session={this.state.session}
-                                    />
+                                    <FacetCharts {..._.pick(this.props, 'context', 'href')} {..._.pick(this.state, 'session', 'schemas')} navigate={navigate} />
                                 </div>
-                                <div id="content" className="container">
-                                    <Alerts alerts={this.props.alerts} />
-                                    { content }
-                                </div>
-                                <div id="layout-footer"></div>
+                                <div id="content" className="container" children={content} />
+                                <div id="layout-footer"/>
                             </div>
                             <Footer version={this.props.context.app_version} />
                         </div>

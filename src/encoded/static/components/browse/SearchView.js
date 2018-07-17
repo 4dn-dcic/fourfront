@@ -172,7 +172,9 @@ class ControlsAndResults extends React.PureComponent {
                         <div className="select-button-container">
                             <button className="select-button" onClick={(e)=>{
                                 //e.preventDefault();
-                                window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : { 'json' : result, 'id' : object.itemUtil.atId(result) } }));
+                                var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
+                                window.opener.postMessage(eventJSON, '*');
+                                window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
                             }}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>

@@ -330,6 +330,7 @@ class LinkedObj extends React.PureComponent{
         this.setSubmissionStateToLinkedToItem = this.setSubmissionStateToLinkedToItem.bind(this);
         this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
         this.setOnFourfrontSelectionClickHandler = this.setOnFourfrontSelectionClickHandler.bind(this);
+        this.handleChildWindowMessage = this.handleChildWindowMessage.bind(this);
         this.handleChildFourFrontSelectionClick = this.handleChildFourFrontSelectionClick.bind(this);
         this.handleSelectItemClick = this.handleSelectItemClick.bind(this);
         this.handleCreateNewItemClick = this.handleCreateNewItemClick.bind(this);
@@ -421,8 +422,9 @@ class LinkedObj extends React.PureComponent{
         var { schema, nestedField, title } = this.props;
         var itemType = schema.linkTo;
         var prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
-        if (this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts){
-            this.windowObjectReference.fourfront.alerts.queue({
+        var childAlerts = this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts;
+        if (childAlerts){
+            childAlerts.queue({
                 'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
                 'message' : (
                     <div>
@@ -481,29 +483,46 @@ class LinkedObj extends React.PureComponent{
                 this.windowObjectReference = linkedObjChildWindow = null;
             }
         }, 1000);
+    }
 
+    handleChildWindowMessage(evt){
+        var eventType = evt && evt.data && evt.data.eventType;
+        if (!eventType) {
+            console.error("No eventType specified in message. Canceling.");
+            return;
+        }
+
+        if (eventType === 'fourfrontselectionclick') {
+            return this.handleChildFourFrontSelectionClick(evt);
+        }
+
+        if (eventType === 'fourfrontinitialized') {
+            return this.showAlertInChildWindow();
+        }
     }
 
     setOnFourfrontSelectionClickHandler(){
         setTimeout(()=>{
+            window && window.addEventListener('message', this.handleChildWindowMessage);
             this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
             console.log('Updated \'fourfrontinitialized\' event handler');
         }, 200);
-        setTimeout(()=>{
-            this.windowObjectReference && this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
-            this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
-            console.log('Updated \'fourfrontselectionclick\' event handler');
-        }, 1500);
+        //setTimeout(()=>{
+        //    this.windowObjectReference && this.windowObjectReference.addEventListener('unload', this.setOnFourfrontSelectionClickHandler);
+        //    this.windowObjectReference && this.windowObjectReference.addEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
+        //    console.log('Updated \'fourfrontselectionclick\' event handler');
+        //}, 1500);
     }
 
     cleanChildWindowEventHandlers(){
+        window.removeEventListener('message', this.handleChildWindowMessage);
         if (!this || !this.windowObjectReference) {
             console.warn('Child window no longer available to unbind event handlers. Fine if closed.');
             return;
         }
-        this.windowObjectReference.removeEventListener('unload', this.setOnFourfrontSelectionClickHandler);
-        this.windowObjectReference.removeEventListener('fourfrontinitialized', this.showAlertInChildWindow);
-        this.windowObjectReference.removeEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
+        //this.windowObjectReference.removeEventListener('unload', this.setOnFourfrontSelectionClickHandler);
+        //this.windowObjectReference.removeEventListener('fourfrontinitialized', this.showAlertInChildWindow);
+        //this.windowObjectReference.removeEventListener('fourfrontselectionclick', this.handleChildFourFrontSelectionClick);
     }
 
     cleanChildWindow(){
@@ -520,7 +539,8 @@ class LinkedObj extends React.PureComponent{
     }
 
     handleChildFourFrontSelectionClick(evt){
-        var atId = evt && evt.detail && evt.detail.id;
+        // Grab from custom event
+        var atId = evt && ((evt.data && evt.data.id) || (evt.detail && evt.detail.id) || null);
 
         if (!object.isValidAtIDFormat(atId)) {
             // Possibly unnecessary as all #!selection clicked items would have evt.detail.id in proper format, or not have it.

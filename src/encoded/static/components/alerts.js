@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { Alert, Fade } from 'react-bootstrap';
+import {  Button, Fade } from 'react-bootstrap';
 import _ from 'underscore';
 import * as store from '../store';
 
@@ -113,6 +113,7 @@ export default class Alerts extends React.Component {
 
     constructor(props){
         super(props);
+        this.setDismissing = this.setDismissing.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'dismissing' : []
@@ -130,7 +131,7 @@ export default class Alerts extends React.Component {
         if (this.props.alerts.length === 0) return null;
 
         return (
-            <div className="alerts" children={_.map(this.props.alerts, (alert, index, alerts) =>
+            <div className="alerts mt-2" {..._.omit(this.props, 'children', 'alerts')} children={_.map(this.props.alerts, (alert, index, alerts) =>
                 <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={this.state.dismissing} key={index} />
             )} />
         );
@@ -145,7 +146,9 @@ class AlertItem extends React.PureComponent {
         this.finishDismiss = this.finishDismiss.bind(this);
     }
 
-    dismiss(){
+    dismiss(e){
+        e.stopPropagation();
+        e.preventDefault();
         var { alert, dismissing, setDismissing } = this.props;
         dismissing = dismissing.slice(0);
         if (_.findIndex(dismissing, alert) === -1) dismissing.push(alert);
@@ -166,13 +169,15 @@ class AlertItem extends React.PureComponent {
             <Fade timeout={500}
                 in={ _.findIndex(dismissing, alert) === -1 }
                 onExited={this.finishDismiss} unmountOnExit={true}>
-                <div>
-                    <Alert bsStyle={alert.style || 'danger'}
-                        onDismiss={alert.noCloseButton === true ? null : this.dismiss}
-                        className={alert.noCloseButton === true ? 'no-close-button' : null}>
-                        <h4>{ alert.title }</h4>
-                        <div className="mb-0" children={alert.message} />
-                    </Alert>
+                <div className={"alert alert-dismissable alert-" + (alert.style || 'danger') + (alert.noCloseButton === true ? ' no-close-button' : '')}>
+                    { alert.noCloseButton === true ? null :
+                        <button type="button" className="close" onClick={this.dismiss}>
+                            <span aria-hidden="true">×</span>
+                            <span className="sr-only">Close alert</span>
+                        </button>
+                    }
+                    <h4>{ alert.title }</h4>
+                    <div className="mb-0" children={alert.message} />
                 </div>
             </Fade>
         );

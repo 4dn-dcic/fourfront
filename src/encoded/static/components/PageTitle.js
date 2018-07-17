@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import Alerts from './alerts';
 import { content_views } from './globals';
 import { console, object, Schemas, JWT, layout, DateUtility } from './util';
 import { windowHref } from './globals';
@@ -24,7 +25,13 @@ var TITLE_PATHNAME_MAP = {
         },
         'calloutTitle' : function(pathName, context, href, currentAction){
             var thisTypeTitle = getSchemaTypeFromSearchContext(context);
-            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? 'a' : 'for' }</small> { thisTypeTitle }</span>: null;
+            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
+        },
+        'subtitle' : function(pathName, context, href, currentAction){
+            if (currentAction === 'selection') {
+                return 'Drag and drop Items from this view into other window(s).';
+            }
+            return null;
         }
     },
     '/health' : {
@@ -246,13 +253,17 @@ export default class PageTitle extends React.PureComponent {
     render(){
         var { context, href, session, currentAction } = this.props;
 
+        var elementStyle;
+
         if (PageTitle.isHomePage(href)){
+            elementStyle = PageTitle.getStyles(context, href, this.state.mounted, false);
             return (
                 <div id="page-title-container" className="container">
                     <div className="breadcrumb-placeholder" key="breadcrumbs" />
                     <layout.WindowResizeUpdateTrigger>
-                        <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
+                        <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} style={elementStyle} />
                     </layout.WindowResizeUpdateTrigger>
+                    <Alerts alerts={this.props.alerts} />
                 </div>
             );
         }
@@ -280,17 +291,20 @@ export default class PageTitle extends React.PureComponent {
             && context['table-of-contents'].enabled
         );
 
+        elementStyle = PageTitle.getStyles(context, href, this.state.mounted, hasToc);
+
         return (
             <div id="page-title-container" className="container">
                 <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
                 <layout.WindowResizeUpdateTrigger>
-                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} />
+                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} style={elementStyle} />
                 </layout.WindowResizeUpdateTrigger>
+                <Alerts alerts={this.props.alerts} style={{ width : elementStyle.width || null }} />
             </div>
         );
     }
-
 }
+
 
 /**
  * Used for most page titles.
@@ -300,13 +314,13 @@ export default class PageTitle extends React.PureComponent {
  * @prop {JSX.Element|string} subtitle - Shown @ bottom title in small size, 400 font weight.
  * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
  */
-class PageTitleElement extends React.Component {
+class PageTitleElement extends React.PureComponent {
 
     render(){
-        var { title, calloutTitle, subtitle, context, href, mounted, hasToc } = this.props;
+        var { title, calloutTitle, subtitle, context, href, mounted, hasToc, style } = this.props;
 
         return ((title || subtitle) && (
-            <h1 className="page-title top-of-page" style={PageTitle.getStyles(context, href, mounted, hasToc)} >
+            <h1 className="page-title top-of-page" style={style} >
                 { title }{ calloutTitle }{ subtitle }
             </h1>
         )) || <br/>;
@@ -314,11 +328,11 @@ class PageTitleElement extends React.Component {
 }
 
 
-class HomePageTitleElement extends React.Component {
+class HomePageTitleElement extends React.PureComponent {
     render(){
-        var { title, calloutTitle, subtitle, context, href, mounted, hasToc } = this.props;
+        var { title, calloutTitle, subtitle, context, href, mounted, hasToc, style } = this.props;
 
-        var style = PageTitle.getStyles(context, href, mounted, hasToc);
+        style = _.clone(style);
         style.marginTop ? style.marginTop -= 3 : null;
 
         return (
