@@ -1012,7 +1012,7 @@ export default class App extends React.Component {
             if (routeLeaf != 'help' && routeLeaf != 'about' && routeLeaf !== 'home' && routeLeaf !== 'submissions'){
                 status = 'not_found';
             }
-        } else if (routeLeaf == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (routeLeaf == 'submissions' && !_.contains(_.pluck(this.state.user_actions, 'id'), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1040,7 +1040,7 @@ export default class App extends React.Component {
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context);
+            var ContentView = globals.content_views.lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
@@ -1053,19 +1053,13 @@ export default class App extends React.Component {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';
-            } else if (currentAction && currentAction !== 'selection') {
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
 
                 var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
-
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     content = <ErrorPage status="forbidden" />;
                     title = 'Action not permitted';
-                } else if (_.contains(['edit', 'add', 'create'], currentAction)) {
-                    content = (
-                        <SubmissionView {...commonContentViewProps} setIsSubmitting={this.setIsSubmitting}
-                            create={currentAction === 'create' || currentAction === 'add'} edit={currentAction === 'edit'} />
-                    );
                 }
             }
 
