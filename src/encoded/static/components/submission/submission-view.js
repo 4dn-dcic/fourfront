@@ -697,10 +697,10 @@ export default class SubmissionView extends React.PureComponent{
      * remove any hanging Alert error messages from validation.
      */
     setSubmissionState = (key, value) => {
-        var stateToSet = this.state;
-        if(key in stateToSet){
+        var stateToSet = {};
+        if (typeof this.state[key] !== 'undefined'){
             // this means we're navigating to a new object if true
-            if(key === 'currKey' && value !== this.state.currKey){
+            if (key === 'currKey' && value !== this.state.currKey){
                 // don't allow navigation when we have an uploading file
                 // or calculating md5
                 if(this.state.upload !== null || this.state.md5Progress !== null){
@@ -717,13 +717,14 @@ export default class SubmissionView extends React.PureComponent{
                 if(!this.state.roundTwo){
                     // if current key is ready for validation, first try that
                     // but suppress warning messages
-                    if(keyValid[this.state.currKey] == 1){
+                    if (keyValid[this.state.currKey] === 1) {
                         this.submitObject(this.state.currKey, true, true);
                     }
                     // see if newly-navigated obj is ready for validation
                     if(keyValid[value] === 0){
                         var validState = this.findValidationState(value);
                         if(validState === 1){
+                            keyValid = _.clone(keyValid);
                             keyValid[value] = 1;
                             stateToSet['keyValid'] = keyValid;
                         }

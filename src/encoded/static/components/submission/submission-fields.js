@@ -364,6 +364,9 @@ class LinkedObj extends React.PureComponent{
 
     componentWillUnmount(){
         this.manageWindowOnDragHandler(this.props, null);
+        //if (this.props.fieldBeingSelected !== null){
+        //    this.cleanChildWindow();
+        //}
     }
 
     /**
