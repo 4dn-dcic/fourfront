@@ -64,6 +64,23 @@ class Target(Item):
             return ",".join(filter(None, values))
         return "no target"
 
+
+    @calculated_property(schema={
+        "title": "Target type",
+        "description": "Type of target (gene, RNA, protein)",
+        "type": "string",
+    })
+    def target_type(self, request, targeted_genes=None, targeted_genome_regions=None,
+                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
+        targets = {targeted_genes: 'Gene', targeted_rnas: 'RNA', targeted_proteins: 'Protein',
+                   targeted_genome_regions: 'Genomic Region', targeted_structure: 'Structure'}
+        if len(targets) > 1:
+            return 'Hybrid target type'
+        for key, val in targets.items():
+            if key:
+                return val
+        return
+
     @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
