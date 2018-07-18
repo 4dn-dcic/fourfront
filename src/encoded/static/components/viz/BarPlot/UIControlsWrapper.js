@@ -6,7 +6,7 @@ import url from 'url';
 import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as vizUtil from './../utilities';
 import { RotatedLabel, Legend } from './../components';
-import { console, object, isServerSide, expFxn, Filters, Schemas, layout } from './../../util';
+import { console, object, isServerSide, expFxn, Filters, Schemas, layout, analytics } from './../../util';
 import { Toggle } from './../../inputs';
 import { boundActions } from './ViewContainer';
 
@@ -51,12 +51,13 @@ export class UIControlsWrapper extends React.PureComponent {
             { title : "Status", field : "status" }
         ],
         'availableFields_Subdivision' : [
-            { title : "Project", field : "award.project" },
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
+            { title : "Project", field : "award.project" },
+            { title : "Center", field : "award.center_title" },
             { title : "Lab", field : "lab.title" },
             { title : "Status", field : "status" }
         ],
@@ -162,7 +163,14 @@ export class UIControlsWrapper extends React.PureComponent {
         this.setState({ showState : eventKey });
     }
 
-    handleFieldSelect(fieldIndex, newFieldKey, event){
+    /**
+     * Handler for the Dropdown components which offer field options.
+     *
+     * @param {number} fieldIndex   Index of field in aggregation being changed -- must be 0 or 1.
+     * @param {string} newFieldKey  Dot-delimited name of field used for aggregation, e.g. 'lab.display_title'.
+     * @param {Event} [event]       Reference to event of DropDown change.
+     */
+    handleFieldSelect(fieldIndex, newFieldKey, event = null){
         var newFields;
         if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
             newFields = this.props.barplot_data_fields.slice(0,1);
@@ -190,6 +198,10 @@ export class UIControlsWrapper extends React.PureComponent {
         }
         setTimeout(()=>{
             this.props.updateBarPlotFields(_.pluck(newFields, 'field'));
+            analytics.event('BarPlot', 'Set Aggregation Field', {
+                'eventLabel' : '[' + _.pluck(newFields, 'field').join(', ') + ']',
+                'field' : newFieldKey
+            });
         }, 0);
     }
 

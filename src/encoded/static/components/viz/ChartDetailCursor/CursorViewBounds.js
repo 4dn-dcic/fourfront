@@ -177,7 +177,11 @@ export default class CursorViewBounds extends React.Component {
         });
     }
 
-    sendHoverEvent(node){
+    /**
+     * Is debounced by 3 seconds. Nodes hovered over get added to this.hovers and then every 3 seconds (+) any
+     * queued this.hovers nodes get an Analytics events sent, with multiple node hover instances delimited by '; '.
+     */
+    sendHoverEvent(){
         setTimeout(()=>{
             analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Hover Node', {
                 eventLabel : analytics.eventLabelFromChartNodes(this.hovers),
