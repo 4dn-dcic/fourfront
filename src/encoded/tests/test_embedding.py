@@ -36,22 +36,26 @@ def content(testapp):
 
 
 def test_referenced_uuids_object(content, dummy_request, threadlocals):
-    # the starting item's uuid is no longer in _referenced_uuids
+    # needed to track _referenced_uuids
+    dummy_request._indexing_view = True
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@object')
-    assert dummy_request._referenced_uuids == set()
+    assert dummy_request._referenced_uuids == {'16157204-8c8f-4672-a1a4-14f4b8021fcd'}
 
 
 def test_referenced_uuids_embedded(content, dummy_request, threadlocals):
+    # needed to track _referenced_uuids
+    dummy_request._indexing_view = True
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@embedded')
-    assert dummy_request._referenced_uuids == {'775795d3-4410-4114-836b-8eeecf1d0c2f'}
+    assert dummy_request._referenced_uuids == {'16157204-8c8f-4672-a1a4-14f4b8021fcd', '775795d3-4410-4114-836b-8eeecf1d0c2f'}
 
 
 def test_referenced_uuids_experiment(experiment, lab, award, human_biosample, human_biosource, mboI, dummy_request, threadlocals):
     to_embed = ['lab.uuid', 'award.uuid', 'biosample.biosource.uuid', 'digestion_enzyme.uuid']
+    dummy_request._indexing_view = True
     dummy_request.embed(experiment['@id'], '@@embedded', fields_to_embed=to_embed)
     referenced_uuids = dummy_request._referenced_uuids
     # starting item is not in referenced_uuids
-    assert experiment['uuid'] not in referenced_uuids
+    assert experiment['uuid'] in referenced_uuids
     assert lab['uuid'] in referenced_uuids
     assert award['uuid'] in referenced_uuids
     # biosample is added because of biosample.biosource
