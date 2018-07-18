@@ -12,8 +12,10 @@ import * as JWT from './json-web-token';
 
 
 const GADimensionMap = {
-    'currentFilters' : 'dimension1',
-    'name' : 'dimension2'
+    'currentFilters'    : 'dimension1',
+    'name'              : 'dimension2',
+    'field'             : 'dimension3',
+    'term'              : 'dimension4'
 };
 
 const defaultOptions = {
@@ -217,22 +219,26 @@ export function registerPageView(href = null, context = {}){
  * @param {string} action - Event Action
  * @param {Object} fields - Additional fields.
  * @param {string} fields.eventLabel - Event Label, e.g. 'play'.
- * @param {number} fields.eventValue - Event Value, must be an integer.
+ * @param {number} [fields.eventValue] - Event Value, must be an integer.
+ * @param {Object} [fields.currentFilters] - Current filters set in portal, if on a search page.
+ * @param {string} [fields.name] - Name of Item we're on, if any.
+ * @param {string} [fields.field] - Name of field being acted on, if any.
+ * @param {string} [fields.term] - Name of term being acted on or changed, if any.
  */
 export function event(category, action, fields = {}){
     if (!shouldTrack()) return false;
 
-    var eventObj = _.extend(fields, {
+    var eventObj = _.extend({}, fields, {
         'hitType'       : 'event',
         'eventCategory' : category,
         'eventAction'   : action
     });
 
     // Convert internal dimension names to Google Analytics ones.
-    _.pairs(eventObj).forEach(function(kvPair){
-        if (typeof GADimensionMap[kvPair[0]] !== 'undefined'){
-            eventObj[GADimensionMap[kvPair[0]]] = kvPair[1];
-            delete eventObj[kvPair[0]];
+    _.forEach(_.pairs(eventObj), function([key, value]){
+        if (typeof GADimensionMap[key] !== 'undefined'){
+            eventObj[GADimensionMap[key]] = value;
+            delete eventObj[key];
         }
     });
 
