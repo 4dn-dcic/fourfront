@@ -1370,7 +1370,7 @@ export default class SubmissionView extends React.PureComponent{
                             setSubmissionState={this.setSubmissionState}
                             hierarchy={this.state.keyHierarchy}
                             schemas={this.props.schemas}
-                            {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks')}
+                            {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks', 'keyHierarchy')}
                         />
                     </div>
                     <div className={bodyCol}>
