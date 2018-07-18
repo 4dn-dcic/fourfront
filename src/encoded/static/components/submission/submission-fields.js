@@ -1371,7 +1371,7 @@ export class AliasInputField extends React.Component {
             submits_for_list = (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0 && currentSubmittingUser.submits_for) || null,
             initialDefaultFirstPartValue = this.getInitialSubmitsForPart(),
             firstPartSelect;
-        
+
         if (currentSubmittingUser && Array.isArray(currentSubmittingUser.groups) && currentSubmittingUser.groups.indexOf('admin') > -1){
             // Render an ordinary input box for admins (can specify any lab).
             firstPartSelect = (
