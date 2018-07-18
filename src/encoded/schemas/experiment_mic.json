@@ -65,7 +65,8 @@
                 "STORM",
                 "Light sheet",
                 "EM",
-                "TIRF"
+                "TIRF",
+                "HILO"
             ]
         },
         "microscope_qc":{
