@@ -948,7 +948,7 @@ export default class SubmissionView extends React.PureComponent{
         _.keys(origCopy).forEach(function(field, index){
             // if patchContext already has a value (such as admin edited
             // import_items fields), don't overwrite
-            if(patchContext[field]){
+            if(patchContext[field] !== null){
                 return;
             }
             if(schema.properties[field]){
@@ -1964,7 +1964,7 @@ class IndividualObjectView extends React.Component{
         }
 
         var fieldType   = BuildField.fieldTypeFromFieldSchema(fieldSchema),
-            fieldValue  = currContext[field] || null,
+            fieldValue  = currContext[field] !== null ? currContext[field] : null,
             enumValues  = [],
             isLinked    = false,
             linked      = delveObject(fieldSchema);
@@ -2134,13 +2134,13 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
             if(edit){
-                if(!context[fields[i]] || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
+                if(context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
                     built[fields[i]] = null;
                 }else{
                     built[fields[i]] = context[fields[i]];
                 }
             }else if(!create){ //clone
-                if(!context[fields[i]] || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
+                if(context[fields[i]] === null || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
                     built[fields[i]] = null;
                 }else{
                     built[fields[i]] = context[fields[i]];
