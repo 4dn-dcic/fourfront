@@ -6,6 +6,7 @@ import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
 import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
+import Alerts from '../alerts';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 
@@ -329,7 +330,7 @@ class LinkedObj extends React.PureComponent{
         this.updateContext = this.updateContext.bind(this);
         this.setSubmissionStateToLinkedToItem = this.setSubmissionStateToLinkedToItem.bind(this);
         this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
-        this.setOnFourfrontSelectionClickHandler = this.setOnFourfrontSelectionClickHandler.bind(this);
+        this.setChildWindowMessageHandler = this.setChildWindowMessageHandler.bind(this);
         this.handleChildWindowMessage = this.handleChildWindowMessage.bind(this);
         this.handleChildFourFrontSelectionClick = this.handleChildFourFrontSelectionClick.bind(this);
         this.handleSelectItemClick = this.handleSelectItemClick.bind(this);
@@ -454,7 +455,6 @@ class LinkedObj extends React.PureComponent{
             this.windowObjectReference = linkedObjChildWindow;
             this.windowObjectReference.fourfront.navigate(searchURL, {}, this.showAlertInChildWindow);
             this.windowObjectReference.focus();
-            this.setOnFourfrontSelectionClickHandler();
         } else {
             // Some browsers (*cough* MS Edge *cough*) are strange and will encode '#' to '%23' initially.
             this.windowObjectReference = linkedObjChildWindow = window.open(
@@ -466,9 +466,8 @@ class LinkedObj extends React.PureComponent{
                 this.windowObjectReference.location.assign(searchURL);
                 this.windowObjectReference.location.hash = '#!selection';
             }, 100);
-            this.setOnFourfrontSelectionClickHandler();
-            //this.windowObjectReference.addEventListener('fourfrontinitialized', this.showAlertInChildWindow);
         }
+        this.setChildWindowMessageHandler();
 
         selectObj(itemType, nestedField, linkType, arrayIdx);
 
@@ -512,7 +511,7 @@ class LinkedObj extends React.PureComponent{
         }
     }
 
-    setOnFourfrontSelectionClickHandler(){
+    setChildWindowMessageHandler(){
         setTimeout(()=>{
             window && window.addEventListener('message', this.handleChildWindowMessage);
             console.log('Updated \'message\' event handler');
@@ -529,14 +528,17 @@ class LinkedObj extends React.PureComponent{
 
     cleanChildWindow(){
         if (this && this.windowObjectReference){
-            this.cleanChildWindowEventHandlers();
             if (!this.windowObjectReference.closed) this.windowObjectReference.close();
+            this.cleanChildWindowEventHandlers();
             this.windowObjectReference = linkedObjChildWindow = null;
         }
     }
 
     handleCreateNewItemClick(e){
         e.preventDefault();
+        if (this.props.fieldBeingSelected !== null) {
+            this.props.selectCancel();
+        }
         this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.schema.linkTo);
     }
 
@@ -550,6 +552,8 @@ class LinkedObj extends React.PureComponent{
 
             // TODO: Perhaps turn failureCallback to own func on SubmissionView.prototype and pass it in as prop here to be called.
             throw new Error('No valid @id available.');
+        } else {
+            Alerts.deQueue({ 'title' : "Invalid Item Dropped" });
         }
 
         console.log('Fourfront Submissions - CLICKED SELECT BUTTON FOR', atId, evt, evt.detail);
@@ -571,10 +575,18 @@ class LinkedObj extends React.PureComponent{
             draggedID = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-id'),
             atId = draggedID || (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname || null;
 
-        var isValidAtId = object.isValidAtIDFormat(atId);
+        var isValidAtId = object.isValidAtIDFormat(atId),
+            invalidTitle = "Invalid Item Dropped";
 
         if (!atId || !isValidAtId){
+            Alerts.queue({
+                'title' : invalidTitle,
+                'message': "You have dragged & dropped an item or link which doesn't have a valid 4DN ID or URL associated with it. Please try again.",
+                'style': 'danger'
+            });
             throw new Error('No valid @id available.');
+        } else {
+            Alerts.deQueue({ 'title' : invalidTitle });
         }
 
         console.log('Fourfront Submissions - DROPPED', atId, evt, this.props);
@@ -608,19 +620,20 @@ class LinkedObj extends React.PureComponent{
     refreshWindowDropReceiver(evt){
         if (!document || !document.createElement) return;
 
-        if (this.windowDropReceiverHideTimeout !== null){
+        if (this.windowDropReceiverHideTimeout !== null) {
             clearTimeout(this.windowDropReceiverHideTimeout);
             this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
             return;
         }
 
+        var { schema, nestedField } = this.props,
+            itemType = schema.linkTo,
+            prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
+
         var element = document.createElement('div');
         element.className = "full-window-drop-receiver";
-        var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json');
-        draggedContext = (draggedContext && JSON.parse(draggedContext)) || null;
-        var draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain');
 
-        var innerText = "Drop " + (draggedContext && draggedContext.display_title || draggedURI || "Item") + " for field '" + this.props.nestedField +  "'";  // document.createTextNode('')
+        var innerText = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'";
         var innerBoldElem = document.createElement('h2');
         innerBoldElem.appendChild(document.createTextNode(innerText));
         element.appendChild(innerBoldElem);
