@@ -6,7 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
-var jwt = require('jsonwebtoken');
+import { detect } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
@@ -229,7 +229,15 @@ export default class App extends React.Component {
         console.log("App Initial State: ", this.state);
     }
 
-    // Once the app component is mounted, bind keydowns to handleKey function
+    /**
+     * Perform various actions once component is mounted which depend on browser environment.
+     *
+     * - Add URI hash from window.location.hash/href to Redux store (doesn't get sent server-side).
+     * - Bind 'handlePopState' function to window popstate event (e.g. back/forward button navigation).
+     * - Initializes Google Analytics
+     * - Exposes 'API' from browser window object via property {Object} 'fourfront' which has reference to Alerts, JWT, navigate, and this app component.
+     * - Emits an event from browser window named 'fourfrontinitialized', letting any listeners (parent windows, etc.) know that JS of this window has initialized. Posts message with same 'eventType' as well.
+     */
     componentDidMount() {
         globals.bindEvent(window, 'keydown', this.handleKey);
 
@@ -239,32 +247,18 @@ export default class App extends React.Component {
 
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and update props.href (via Redux), if it is different.
-        var query_href;
+        var query_href = this.props.href;
         // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
         if (document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        } else {
-            query_href = this.props.href;
         }
-        // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
-        //query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        // Grab window.location.href w/ query_href as fallback.
         query_href = globals.windowHref(query_href);
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
             });
         }
-
-        // If the window href has a hash, which SHOULD NOT remain (!== globals.maybeRemoveHash()), strip it on mount to match app's props.href.
-        var parts = url.parse(query_href);
-        if (
-            typeof window.location.hash === 'string' &&
-            window.location.hash.length > 0 &&
-            (!parts.hash || parts.hash === '')
-        ){
-            window.location.hash = '';
-        }
-
 
         if (this.historyEnabled) {
             var data = this.props.context;
@@ -287,21 +281,50 @@ export default class App extends React.Component {
         window.onbeforeunload = this.handleBeforeUnload;
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics(
-            analytics.getTrackingId(this.props.href),
-            this.props.context
-        );
+        analytics.initializeGoogleAnalytics( analytics.getTrackingId(this.props.href), this.props.context );
 
         // Save some stuff to global window variables so we can access it in tests:
         // Normally would call this 'window.app' but ENCODE already sets this in browser.js to be the top-level Redux provider (not really useful, remove?)
         window.fourfront = _.extend(window.fourfront || {}, {
-            'app' : this,
-            'alerts' : Alerts,
-            'JWT' : JWT,
-            'navigate' : navigate
+            'app'       : this,
+            'alerts'    : Alerts,
+            'JWT'       : JWT,
+            'navigate'  : navigate
         });
 
-        this.setState({ 'mounted' : true });
+        // Detect browser and save it to state. Show alert to inform people we're too ~lazy~ under-resourced to support MS Edge to the max.
+        var browserInfo = detect(),
+            mounted = true;
+
+        console.log('BROWSER', browserInfo);
+
+        if (browserInfo && typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
+            Alerts.queue({
+                'title' : 'Browser Suggestion',
+                'message' : (
+                    <div>
+                        <p className="mb-0">
+                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            the recommended browser(s) for using the 4DN Data Portal.
+                        </p>
+                        <p className="mb-0">
+                            Microsoft Edge, Safari, etc. should work for a majority of portal functions but are not explicitly supported and may present some glitches, e.g. during submission.
+                        </p>
+                    </div>
+                ),
+                'style' : 'warning'
+            });
+        }
+
+        this.setState({ mounted, browserInfo }, ()=>{
+            // Emit event from our window object to notify that fourfront JS has initialized.
+            // This is to be used by, e.g. submissions view which might control a child window.
+            console.log('App is mounted, dispatching fourfrontinitialized event.');
+            window.dispatchEvent(new Event('fourfrontinitialized'));
+            if (window.opener) { // If we have parent window, post a message to it as well.
+                window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
+            }
+        });
     }
 
     componentWillUpdate(nextProps, nextState){
@@ -388,7 +411,7 @@ export default class App extends React.Component {
         if (hash.slice(0, 2) === '#!') {
             name = hash.slice(2);
         }
-        return name;
+        return name || null;
     }
 
     loadSchemas(callback, forceFetch = false){
@@ -491,7 +514,8 @@ export default class App extends React.Component {
 
     // Submitted forms are treated the same as links
     handleSubmit(event) {
-        var target = event.target;
+        var target = event.target,
+            hrefParts = url.parse(this.props.href);
 
         // Skip POST forms
         if (target.method != 'get') return;
@@ -504,7 +528,7 @@ export default class App extends React.Component {
 
         var options = {};
         var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
+        options.replace = action_url.pathname == hrefParts.pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
             search = _.map(
@@ -521,6 +545,12 @@ export default class App extends React.Component {
         if (search) {
             href += '?' + search;
         }
+
+        var currentAction = this.currentAction();
+        if (currentAction === 'selection'){
+            href += '#!' + currentAction;
+        }
+
         options.skipRequest = target.getAttribute('data-skiprequest');
 
         if (this.historyEnabled) {
@@ -1012,7 +1042,7 @@ export default class App extends React.Component {
             if (routeLeaf != 'help' && routeLeaf != 'about' && routeLeaf !== 'home' && routeLeaf !== 'submissions'){
                 status = 'not_found';
             }
-        } else if (routeLeaf == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (routeLeaf == 'submissions' && !_.contains(_.pluck(this.state.user_actions, 'id'), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1029,7 +1059,8 @@ export default class App extends React.Component {
             'listActionsFor'    : this.listActionsFor,
             'updateUserInfo'    : this.updateUserInfo,
             'browseBaseState'   : this.props.browseBaseState,
-            'currentAction'     : currentAction
+            'currentAction'     : currentAction,
+            'setIsSubmitting'   : this.setIsSubmitting
         };
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1040,7 +1071,7 @@ export default class App extends React.Component {
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context);
+            var ContentView = globals.content_views.lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
@@ -1053,19 +1084,13 @@ export default class App extends React.Component {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';
-            } else if (currentAction && currentAction !== 'selection') {
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
 
                 var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
-
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     content = <ErrorPage status="forbidden" />;
                     title = 'Action not permitted';
-                } else if (_.contains(['edit', 'add', 'create'], currentAction)) {
-                    content = (
-                        <SubmissionView {...commonContentViewProps} setIsSubmitting={this.setIsSubmitting}
-                            create={currentAction === 'create' || currentAction === 'add'} edit={currentAction === 'edit'} />
-                    );
                 }
             }
 
@@ -1106,7 +1131,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
+                <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
@@ -1125,6 +1150,7 @@ export default class App extends React.Component {
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation
                                     href={this.props.href}
+                                    currentAction={currentAction}
                                     session={this.state.session}
                                     updateUserInfo={this.updateUserInfo}
                                     portal={portal}
@@ -1135,21 +1161,12 @@ export default class App extends React.Component {
                                     browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
-                                <PageTitle context={this.props.context} session={this.state.session} href={this.props.href} schemas={this.state.schemas} />
+                                <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts')} {..._.pick(this.state, 'session', 'schemas')} currentAction={currentAction} />
                                 <div id="facet-charts-container" className="container">
-                                    <FacetCharts
-                                        href={this.props.href}
-                                        context={this.props.context}
-                                        navigate={navigate}
-                                        schemas={this.state.schemas}
-                                        session={this.state.session}
-                                    />
+                                    <FacetCharts {..._.pick(this.props, 'context', 'href')} {..._.pick(this.state, 'session', 'schemas')} navigate={navigate} />
                                 </div>
-                                <div id="content" className="container">
-                                    <Alerts alerts={this.props.alerts} />
-                                    { content }
-                                </div>
-                                <div id="layout-footer"></div>
+                                <div id="content" className="container" children={content} />
+                                <div id="layout-footer"/>
                             </div>
                             <Footer version={this.props.context.app_version} />
                         </div>

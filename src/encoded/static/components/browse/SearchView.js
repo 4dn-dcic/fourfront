@@ -11,14 +11,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
 
-class InfoIcon extends React.PureComponent{
-    render() {
-        if (!this.props.children) return null;
-        return (
-            <i className="icon icon-info-circle" data-tip={this.props.children}/>
-        );
-    }
-}
+
 
 export function getSearchType(facets){
     var specificSearchType;
@@ -38,6 +31,7 @@ export function getSearchType(facets){
     }
 }
 
+
 /**
  * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
  * 'searchBase' or 'href' prop (treated the same) and the 'navigate' callback prop (usually utils/navigate.js).
@@ -51,9 +45,8 @@ export function getSearchType(facets){
 export class ResultTableHandlersContainer extends React.PureComponent {
 
     static defaultProps = {
-        restrictions : {},
-        searchBase : '',
-        navigate : navigate
+        'restrictions'  : {},
+        'navigate'      : navigate
     }
 
     constructor(props){
@@ -89,7 +82,7 @@ export class ResultTableHandlersContainer extends React.PureComponent {
     render(){
         return (
             <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
-                <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
+                <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate}>
                     <ControlsAndResults {...this.props} isTermSelected={this.isTermSelected} onFilter={this.onFilter} />
                 </SortController>
             </CustomColumnController>
@@ -103,59 +96,86 @@ export class ResultTableHandlersContainer extends React.PureComponent {
 class ControlsAndResults extends React.PureComponent {
 
     static defaultProps = {
-        restrictions : {}
+        'restrictions' : {}
     }
 
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.handleClearFilters = this.handleClearFilters.bind(this);
+    }
+
+    handleClearFilters(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        var { href, context } = this.props;
+        var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+        if (!clearFiltersURL) {
+            console.error("No Clear Filters URL");
+            return;
+        }
+
+        // If we have a '#' in URL, add to target URL as well.
+        var hashFragmentIdx = href.indexOf('#');
+        if (hashFragmentIdx > -1 && clearFiltersURL.indexOf('#') === -1){
+            clearFiltersURL += href.slice(hashFragmentIdx);
+        }
+
+        this.props.navigate(clearFiltersURL, {});
     }
 
     render() {
-        var context = this.props.context;
-        var results = context['@graph'];
-        var submission_facet_list = false;
-        var facets = this.props.facets || context.facets;
+        var { context, href, hiddenColumns, currentAction } = this.props;
+        var results = context['@graph'],
+            inSelectionMode = currentAction === 'selection',
+            facets = this.props.facets || context.facets,
+            thisType = 'Item',
+            thisTypeTitle = Schemas.getTitleForType(thisType),
+            itemTypeForSchemas,
+            schemaForType,
+            abstractType,
+            urlParts = url.parse(href, true),
+            hiddenColumnsFull = (hiddenColumns || []).slice(0);
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
-        var thisType = 'Item', itemTypeForSchemas;
-        var urlParts = url.parse(this.props.searchBase, true);
+
         if (typeof urlParts.query.type === 'string') { // Can also be array
             if (urlParts.query.type !== 'Item') {
                 thisType = itemTypeForSchemas = urlParts.query.type;
             }
         }
 
-        var thisTypeTitle = Schemas.getTitleForType(thisType);
-        var abstractType = Schemas.getAbstractTypeForType(thisType);
-        var hiddenColumns = (this.props.hiddenColumns || []).slice(0);
+        abstractType = Schemas.getAbstractTypeForType(thisType);
         if ((abstractType && abstractType !== thisType) || (!abstractType && thisType !== 'Item')) {
-            hiddenColumns.push('@type');
+            hiddenColumnsFull.push('@type');
         }
+
         // Excluded columns from schema.
-        var schemaForType = Schemas.getSchemaForItemType(thisType);
+        schemaForType = Schemas.getSchemaForItemType(thisType);
         if (schemaForType && Array.isArray(schemaForType.excludedColumns) && _.every(schemaForType.excludedColumns, function(c){ return typeof c === 'string'; }) ){
-            hiddenColumns = hiddenColumns.concat(schemaForType.excludedColumns);
+            hiddenColumnsFull = hiddenColumnsFull.concat(schemaForType.excludedColumns);
         }
 
         var columnDefinitionOverrides = {};
+        var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         // Also add the popLink/target=_blank functionality to links
-        if (typeof this.props.selectCallback === 'function'){
-            // this will hide data type facet for submissions view
-            submission_facet_list = true;
+        if (isThereParentWindow) {
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
                     var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width, true);
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
-                        <div className="select-button-container" onClick={(e)=>{
-                            e.preventDefault();
-                            this.props.selectCallback(object.atIdFromObject(result));
-                        }}>
-                            <button className="select-button" onClick={props.toggleDetailOpen}>
+                        <div className="select-button-container">
+                            <button className="select-button" onClick={(e)=>{
+                                //e.preventDefault();
+                                var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
+                                window.opener.postMessage(eventJSON, '*');
+                                window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
+                            }}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>
@@ -212,50 +232,27 @@ class ControlsAndResults extends React.PureComponent {
                                 if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
                                 return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
                             })()}
-                            onClearFilters={(evt)=>{
-                                evt.preventDefault();
-                                evt.stopPropagation();
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                if (!clearFiltersURL) {
-                                    console.error("No Clear Filters URL");
-                                    return;
-                                }
-                                this.props.navigate(clearFiltersURL, {});
-                            }}
-                            submissionFacetList={submission_facet_list}
+                            onClearFilters={this.handleClearFilters}
+                            hideDataTypeFacet={inSelectionMode}
                         />
                 </div> : null}
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                        <AboveTableControls
-                            {..._.pick(this.props,
+                        <AboveTableControls {..._.pick(this.props,
                                 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                                'columns', 'selectedFiles', 'constantHiddenColumns', 'submissionBase'
+                                    'columns', 'selectedFiles', 'constantHiddenColumns', 'currentAction'
                             )}
-                            parentForceUpdate={this.forceUpdate.bind(this)}
-                            columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                            parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                                 SearchResultTable.defaultProps.constantColumnDefinitions,
                                 context.columns || {},
                                 columnDefinitionOverrides,
                                 ['@type']
                             )}
-                            showTotalResults={context.total}
-                        />
-                        <SearchResultTable
-                            results={results}
-                            columns={context.columns || {}}
+                            showTotalResults={context.total} />
+                        <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')} results={results} totalExpected={context.total}
+                            columns={context.columns || {}} hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
                             renderDetailPane={(result, rowNumber, containerWidth)=>
                                 <SearchResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
-                            }
-                            hiddenColumns={hiddenColumns}
-                            columnDefinitionOverrideMap={columnDefinitionOverrides}
-                            href={this.props.href}
-                            totalExpected={context.total}
-
-                            sortBy={this.props.sortBy}
-                            sortColumn={this.props.sortColumn}
-                            sortReverse={this.props.sortReverse}
-
-                        />
+                            } />
                     </div>
                 </div>
             </div>
@@ -266,8 +263,15 @@ class ControlsAndResults extends React.PureComponent {
 
 export default class SearchView extends React.PureComponent {
 
+    static propTypes = {
+        'context' : PropTypes.object.isRequired,
+        'currentAction' : PropTypes.string
+    }
+
     static defaultProps = {
-        restrictions : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
+        'href'          : null,
+        'currentAction' : null,
+        'restrictions'  : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
     }
 
     constructor(props){
@@ -288,16 +292,8 @@ export default class SearchView extends React.PureComponent {
         ReactTooltip.rebuild();
     }
 
-    searchBase(props = this.props){
-        if (props.submissionBase){
-            return props.submissionBase || '';
-        } else {
-            return url.parse(props.href).search || '';
-        }
-    }
-
     filterFacets(props = this.props){ // Filter Facets down to abstract types only (if none selected) for Search. Do something about restrictions(?)
-        var searchBase = this.searchBase(props);
+        var href = props.href;
         return props.context.facets.map((facet)=>{
 
             if (props.restrictions[facet.field] !== undefined) {
@@ -309,7 +305,7 @@ export default class SearchView extends React.PureComponent {
             // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
             if (facet.field === 'type'){
                 facet = _.clone(facet);
-                var queryParts = url.parse(searchBase, true).query;
+                var queryParts = url.parse(href, true).query;
                 if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
                 queryParts.type = _.without(queryParts.type, 'Item');
 
@@ -338,23 +334,23 @@ export default class SearchView extends React.PureComponent {
     }
 
     render() {
-        var context = this.props.context;
-        var results = context['@graph'];
-        var notification = context['notification'];
+        var context = this.props.context,
+            results = context['@graph'],
+            notification = context['notification'],
+            facets = this.state.filteredFacets;
+
         // submissionBase is supplied when using Search through frontend
         // submission. this switch controls several things, including
         // pagination, clear filter, and types filter.
-        var searchBase = this.searchBase();
-
-        var facets = this.state.filteredFacets;
 
         return (
             <div className="search-page-container" ref="container">
-                <AboveSearchTablePanel href={searchBase} context={context} />
-                <ResultTableHandlersContainer {...this.props} facets={facets} searchBase={searchBase} navigate={this.props.navigate || navigate} />
+                <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
+                <ResultTableHandlersContainer {...this.props} facets={facets} navigate={this.props.navigate || navigate} />
             </div>
         );
     }
 }
 
 globals.content_views.register(SearchView, 'Search');
+globals.content_views.register(SearchView, 'Search', 'selection');

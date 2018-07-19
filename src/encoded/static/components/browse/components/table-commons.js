@@ -121,7 +121,7 @@ export const defaultColumnDefinitionMap = {
             var hasPhoto = false;
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
-                var linkProps = { 'href' : link || '#', 'target' : (popLink ? '_blank' : null) };
+                var linkProps = { 'href' : link || '#' /*, 'target' : (props.currentAction === 'selection' ? '_blank' : null) */ };
                 title = <a key="title" {...linkProps}>{ title }</a>;
                 if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
                     hasPhoto = true;
