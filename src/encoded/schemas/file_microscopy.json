@@ -50,6 +50,7 @@
                 "flex",
                 "dv",
                 "r3d",
+                "nd2",
                 "other"
             ]
         },
@@ -116,6 +117,7 @@
         "dv": ".dv",
         "r3d": ".r3d",
         "flex": ".flex",
+        "nd2": ".nd2",
         "other": ""
     }
 }
