@@ -31,14 +31,6 @@ def genomic_target(testapp, lab, award, some_genomic_region):
             'targeted_genome_regions': [some_genomic_region['@id']]}
     return testapp.post_json('/target', item).json['@graph'][0]
 
-# def drug_treatment(testapp, lab, award):
-#     item = {
-#         'award': award['@id'],
-#         'lab': lab['@id'],
-#         'treatment_type': 'Chemical',
-#         'chemical': 'Drug',
-#     }
-#     return testapp.post_json('/treatment_agent', item).json['@graph'][0]
 
 @pytest.fixture
 def protein_complex_target(testapp, lab, award):
@@ -46,6 +38,7 @@ def protein_complex_target(testapp, lab, award):
             'lab': lab['@id'],
             'targeted_proteins': ['SubunitA', 'SubunitX']}
     return testapp.post_json('/target', item).json['@graph'][0]
+
 
 @pytest.fixture
 def multi_target(testapp, lab, award):
@@ -56,7 +49,6 @@ def multi_target(testapp, lab, award):
     return testapp.post_json('/target', item).json['@graph'][0]
 
 
-# test target_summary
 def test_target_summary_genomic(testapp, genomic_target, some_genomic_region, vague_genomic_region):
     assert genomic_target['target_summary'] == 'GRCh38:1:17-544'
     assert genomic_target['display_title'] == 'GRCh38:1:17-544'
@@ -64,10 +56,6 @@ def test_target_summary_genomic(testapp, genomic_target, some_genomic_region, va
                              {'targeted_genome_regions': [some_genomic_region['@id'], vague_genomic_region['@id']]})
     assert res.json['@graph'][0]['target_summary'] == 'GRCh38:1:17-544,GRCm38:5'
     assert res.json['@graph'][0]['display_title'] == 'GRCh38:1:17-544,GRCm38:5'
-# assert res.json['@graph'][0]['display_title'] == 'Heat Shock (3.5h)'
-# res = testapp.patch_json(
-#     heatshock_treatment['@id'],
-#     {'duration': 3.5, 'duration_units': 'hour'})
 
 
 def test_target_summary_proteins(testapp, protein_complex_target):
@@ -82,7 +70,7 @@ def test_target_summary_multiple(testapp, multi_target):
     assert res.json['@graph'][0]['target_summary'] == 'Gene:GeneA1 & RNA:lncRNA & Nuclear pore complex'
     assert res.json['@graph'][0]['display_title'] == 'Gene:GeneA1 & RNA:lncRNA & Nuclear pore complex'
 
-# test target_type
+
 def test_target_type(testapp, genomic_target, protein_complex_target, multi_target):
     assert genomic_target['target_type'] == 'Genomic Region'
     assert protein_complex_target['target_type'] == 'Protein'
