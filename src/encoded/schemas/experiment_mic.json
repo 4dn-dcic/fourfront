@@ -135,5 +135,13 @@
         "microscopy_technique": {
             "title" : "Microscopy Technique"
         }
+    },
+    "facets": {
+        "experiment_type": {
+            "title" : "Experiment Type"
+        },
+        "microscopy_technique": {
+            "title" : "Microscopy Technique"
+        }
     }
 }
