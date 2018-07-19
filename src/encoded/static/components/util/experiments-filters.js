@@ -287,6 +287,7 @@ export const NON_FILTER_URL_PARAMS = [
  * Replaces now-removed 'hrefToFilters' function and copy of expSetFilters passed down from Redux store.
  * 
  * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
+ * @param {string} [browseBaseState] - Supply 'only_4dn' or 'all' to control which URI query params are filtered out. If 'search' is supplied, none are excluded.
  * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
 export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseState = null){
