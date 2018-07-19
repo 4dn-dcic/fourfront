@@ -152,26 +152,17 @@
         }
     },
     "facets": {
-        "publications_of_set.display_title": {
-            "title": "Publication"
-        },
-        "experimentset_type": {
-            "title": "Set Type"
-        },
         "experiments_in_set.experiment_type": {
-            "title": "Experiment Type"
-        },
-        "experiments_in_set.experiment_categorizer.combined" : {
-            "title" : "Assay Details"
+          "title": "Experiment Type"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "experiments_in_set.biosample.biosource.biosource_type": {
-            "title": "Biosource type"
-        },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Sample"
+        },
+        "publications_of_set.display_title": {
+            "title": "Publication"
         },
         "experiments_in_set.biosample.modifications.modification_type": {
             "title": "Modifications"
@@ -179,8 +170,17 @@
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
+        "experiments_in_set.biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "experiments_in_set.experiment_categorizer.combined" : {
+            "title" : "Assay Details"
+        },
         "award.center_title": {
             "title": "Center"
+        },
+        "experimentset_type": {
+            "title": "Set Type"
         }
     },
     "columns": {
