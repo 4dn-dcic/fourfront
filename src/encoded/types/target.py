@@ -74,12 +74,13 @@ class Target(Item):
                        targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         targets = {'Gene': targeted_genes, 'RNA': targeted_rnas, 'Protein': targeted_proteins,
                    'Genomic Region': targeted_genome_regions, 'Structure': targeted_structure}
-        if len([val for val in targets.values() if val]) > 1:
-            return 'Hybrid target type'
-        for key, val in targets.items():
-            if val:
-                return key
-        return
+        # if len([val for val in targets.values() if val]) > 1:
+        #     return 'Hybrid target type'
+        # for key, val in targets.items():
+        #     if val:
+        #         return key
+        types = [key for key in targets.keys() if targets[key]]
+        return types
 
     @calculated_property(schema={
         "title": "Display Title",

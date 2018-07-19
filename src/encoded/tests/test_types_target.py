@@ -72,6 +72,6 @@ def test_target_summary_multiple(testapp, multi_target):
 
 
 def test_target_type(testapp, genomic_target, protein_complex_target, multi_target):
-    assert genomic_target['target_type'] == 'Genomic Region'
-    assert protein_complex_target['target_type'] == 'Protein'
-    assert multi_target['target_type'] == 'Hybrid target type'
+    assert genomic_target['target_type'] == ['Genomic Region']
+    assert protein_complex_target['target_type'] == ['Protein']
+    assert multi_target['target_type'] == ['Gene', 'Structure']
