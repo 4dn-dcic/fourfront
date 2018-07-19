@@ -55,10 +55,10 @@ class Target(Item):
                 genomic_region = request.embed(each_target, '@@object')
                 value = ""
                 value += genomic_region['genome_assembly']
-                if genomic_region['chromosome']:
+                if genomic_region.get('chromosome'):
                     value += ':'
                     value += genomic_region['chromosome']
-                if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
+                if genomic_region.get('start_coordinate') and genomic_region.get('end_coordinate'):
                     value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
                 values.append(value)
             return ",".join(filter(None, values))
