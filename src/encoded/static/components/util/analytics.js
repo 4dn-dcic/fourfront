@@ -2,6 +2,7 @@
 
 import _ from 'underscore';
 import url from 'url';
+import queryString from 'query-string';
 import { isServerSide } from './misc';
 var console = require('./patched-console').default;
 import * as Filters from './experiments-filters';
@@ -19,8 +20,8 @@ const GADimensionMap = {
 };
 
 const defaultOptions = {
-    isAnalyticsScriptOnPage : true,
-    enhancedEcommercePlugin : true
+    'isAnalyticsScriptOnPage' : true,
+    'enhancedEcommercePlugin' : true
 };
 
 let state = null;
@@ -75,6 +76,8 @@ export function initializeGoogleAnalytics(trackingID = null, context = {}, optio
 }
 
 
+var lastRegisteredPageViewRealPathNameAndSearch = null;
+
 /**
  * Register a pageview.
  * Used in app.js in App.componentDidUpdate(pastProps, ...).
@@ -97,7 +100,10 @@ export function registerPageView(href = null, context = {}){
     }
 
     // Options to send with GA pageview event.
-    var opts = {};
+    var parts = url.parse(href, true),
+        pageViewObject = { 'hitType' : 'pageview' },
+        origHref = href; // Store orig href in case we need it later
+        
 
     /**
      * Convert pathname with a 'UUID', 'Accession', or 'name' to having a 
@@ -114,14 +120,18 @@ export function registerPageView(href = null, context = {}){
         });
 
         var newPathName = null;
-        if (pathParts[1] && typeof pathParts[1] === 'string'){
+        if (navigate.isBrowseHref(parts) || navigate.isSearchHref(parts)){
+            // Add 'q' and 'type' params back to pathname; they'll be parsed and filtered out by Google Analytics to be used for 'search query' and 'search category' analytics.
+            var qs = queryString.stringify({ 'q' : parts.query.q, 'type' : parts.query.type });
+            newPathName = pathName + (qs ? '?' + qs : '');
+        } else if (pathParts[1] && typeof pathParts[1] === 'string'){
             // Remove Accession, UUID, and Name from URL and save it to 'name' dimension instead.
             if ( (typeof context.accession === 'string' && pathParts[1] === context.accession) || object.isAccessionRegex(pathParts[1]) ){
                 // We gots an accessionable Item. Lets remove its Accession from the path to get nicer Behavior Flows in GA.
                 // And let product tracking / Shopping Behavior handle Item details.
                 pathParts[1] = 'accession';
                 newPathName = '/' + pathParts.join('/') + '/';
-                opts[GADimensionMap.name] = context.accession || pathParts[1];
+                pageViewObject[GADimensionMap.name] = context.accession || pathParts[1];
             } else if (
                 (context.last_name && context.first_name) || (context['@type'] && context['@type'].indexOf('User') > -1) &&
                 (pathParts[0] === 'users' && (context.uuid && pathParts[1] === context.uuid))
@@ -129,15 +139,15 @@ export function registerPageView(href = null, context = {}){
                 // Save User name.
                 pathParts[1] = 'uuid';
                 newPathName = '/' + pathParts.join('/') + '/';
-                opts[GADimensionMap.name] = context.title || context.uuid;
+                pageViewObject[GADimensionMap.name] = context.title || context.uuid;
             } else if (typeof context.uuid === 'string' && pathParts[1] === context.uuid){
                 pathParts[1] = 'uuid';
                 newPathName = '/' + pathParts.join('/') + '/';
-                opts[GADimensionMap.name] = context.display_title || context.uuid;
+                pageViewObject[GADimensionMap.name] = context.display_title || context.uuid;
             } else if (typeof context.name === 'string' && pathParts[1] === context.name){
                 pathParts[1] = 'name';
                 newPathName = '/' + pathParts.join('/') + '/';
-                opts[GADimensionMap.name] = context.display_title || context.name;
+                pageViewObject[GADimensionMap.name] = context.display_title || context.name;
             } else {
                 newPathName = pathName;
             }
@@ -163,27 +173,29 @@ export function registerPageView(href = null, context = {}){
             return false;
         }
         if (Array.isArray(context['@graph'])){ // We have a results page of some kind. Likely, browse, search, or collection.
-            // If browse page, get current filters and add to pageview event for 'dimension1'.
-            opts[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
-                (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null
-            );
+
+            // If browse or search page, get current filters and add to pageview event for 'dimension1'.
+            var filtersToRegister = null;
+            if (navigate.isBrowseHref(parts)){
+                filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
+            } else if (navigate.isSearchHref(parts)){
+                filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
+            }
+            if(filtersToRegister) {
+                pageViewObject[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(filtersToRegister);
+            }
+
             if (context['@graph'].length > 0){
                 // We have some results, lets impression them as product list views.
-                if (navigate.isBrowseHref(href)){
-                    return impressionListOfItems(context['@graph'], origHref, 'Browse Results', context);
-                } else if (navigate.isSearchHref(href)){
-                    return impressionListOfItems(context['@graph'], origHref, 'Search Results', context);
-                } else {
-                    // Probably a collection page
-                    return impressionListOfItems(context['@graph'], origHref, 'Collection View', context);
-                }
+                return impressionListOfItems(context['@graph'], parts, context);
+
             }
             return false;
         } else if (typeof context.accession === 'string'){ // We got an Item view, lets track some details about it.
             var productObj = createProductObjectFromItem(context);
             console.info("Item with an accession. Will track as product:", productObj);
             //if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
-            //    opts[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(currentExpSetFilters);
+            //    pageViewObject[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(currentExpSetFilters);
             //}
 
             ga('ec:addProduct', productObj);
@@ -192,14 +204,22 @@ export function registerPageView(href = null, context = {}){
         }
     }
 
-    var origHref = href; // Store orig href in case we need it later
-    var parts = url.parse(href);
     // Clear query & hostname from HREF & convert accessions, uuids, and certain names to literals.
     href = adjustPageViewPath(parts.pathname);
-    ga('set', 'page', href); // Set it as current page
+
+    // Ensure is not the same page but with a new hash or something (RARE - should only happen for Help page table of contents navigation).
+    if (lastRegisteredPageViewRealPathNameAndSearch === (parts.pathname + parts.search)){
+        console.warn('Page did not change, canceling PageView tracking for this navigation.');
+        return false;
+    }
+
+    lastRegisteredPageViewRealPathNameAndSearch = parts.pathname + parts.search;
+    ga('set', 'page', href);    // Set it as current page
     registerProductView();
-    ga('send', 'pageview', opts);
-    console.info('Sent pageview event.', href, opts);
+    pageViewObject.hitCallback = function(){
+        console.info('Successfuly sent pageview event.', href, pageViewObject);
+    }
+    ga('send', 'pageview', pageViewObject);
     return true;
 }
 
@@ -247,24 +267,37 @@ export function event(category, action, fields = {}){
         eventObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(Filters.currentExpSetFilters());
     }
 
-    ga('send', eventObj);
-    console.info("Sent UI event", eventObj);
+    eventObj.hitCallback = function(){
+        console.info('Successfuly sent UI event.', eventObj);
+    }
+
+    setTimeout(function(){ ga('send', eventObj); }, 0);
+}
+
+
+/**
+ * This will be created once we upgrade to React 16, where-in we'll be able to catch exceptions from React in a streamlined fashion.
+ * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/exceptions
+ */
+export function exception(){
+    return;
 }
 
 
 /**
  * Given a 'node' object with a field, term, and potential parent node, generate a descriptive string to use as event label.
  *
- * @param {Object} node - Node object.
+ * @param {{ field : string, term : string }} node - Node object with at least 'field' and 'term'.
+ * @param {boolean} [includeParentInfo=true] - Whether to add text for Parent Field and Parent Term (if any).
  * @returns {string} Label for analytics event.
  */
-export function eventLabelFromChartNode(node){
+export function eventLabelFromChartNode(node, includeParentInfo = true){
     if (!node || typeof node !== 'object') return null;
     var labelData = [];
     if (node.field)     labelData.push('Field: ' + node.field);
     if (node.term)      labelData.push('Term: ' + node.term);
-    if (node.parent && node.parent.field)   labelData.push('Parent Field: ' + node.parent.field);
-    if (node.parent && node.parent.term)    labelData.push('Parent Term: ' + node.parent.term);
+    if (includeParentInfo && node.parent && node.parent.field)   labelData.push('Parent Field: ' + node.parent.field);
+    if (includeParentInfo && node.parent && node.parent.term)    labelData.push('Parent Term: ' + node.parent.term);
     return labelData.join(', ');
 }
 
@@ -356,22 +389,31 @@ function shouldTrack(){
  * @private
  * @returns {Object[]} Representation of what was sent.
  */
-function impressionListOfItems(itemList, origHref = null, listName = null, context = null){
+function impressionListOfItems(itemList, href, listName = null, context = null){
     var from = 0;
-    if (typeof origHref === 'string'){
-        var urlParts = url.parse(origHref, true);
-        if (!isNaN(parseInt(urlParts.query.from))) from = parseInt(urlParts.query.from);
+    if (typeof href === 'string'){ // Convert to URL parts.
+        href = url.parse(href, true);
+        if (!isNaN(parseInt(href.query.from))) from = parseInt(href.query.from);
     }
+
+    var filtersToRegister = null;
+    var commonProductObj = {};
+    if (navigate.isBrowseHref(href)){
+        commonProductObj.list = 'Browse Results';
+        filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
+    } else if (navigate.isSearchHref(href)){
+        commonProductObj.list = 'Search Results';
+        filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
+    } else {
+        commonProductObj.list = 'Collection Results';
+    }
+    if (filtersToRegister) {
+        commonProductObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(filtersToRegister);
+    }
+
     console.info("Will impression " + itemList.length + ' items.');
-    return itemList.map(function(expSet, i){
-        var pObj = createProductObjectFromItem(expSet);
-        pObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
-            (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null
-        );
-        if (typeof listName === 'string'){
-            pObj.list = listName;
-        }
-        pObj.position = from + i + 1;
+    return _.map(itemList, function(item, i){
+        var pObj = _.extend(createProductObjectFromItem(item), commonProductObj, { 'position' : from + i + 1 });
         ga('ec:addImpression', pObj);
         return pObj;
     });
@@ -379,10 +421,10 @@ function impressionListOfItems(itemList, origHref = null, listName = null, conte
 
 function createProductObjectFromItem(item){
     var productObj = {
-        'id' : item.accession || item['@id'] || object.atIdFromObject(item) || item.uuid,
-        'name' : item.display_title || item.title || null,
-        'category' : item['@type'].slice().reverse().slice(1).join('/'),
-        'brand' : (item.lab && item.lab.display_title) || (item.submitted_by && item.submitted_by.display_title) || item.lab || item.submitted_by || null,
+        'id'            : item.accession || item['@id'] || object.atIdFromObject(item) || item.uuid,
+        'name'          : item.display_title || item.title || null,
+        'category'      : item['@type'].slice().reverse().slice(1).join('/'),
+        'brand'         : (item.lab && item.lab.display_title) || (item.submitted_by && item.submitted_by.display_title) || item.lab || item.submitted_by || null,
     };
     return productObj;
 }

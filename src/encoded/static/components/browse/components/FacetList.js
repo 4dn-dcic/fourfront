@@ -426,7 +426,8 @@ class Facet extends React.PureComponent {
  */
 export function onFilterHandlerMixin(field, term, callback){
 
-    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
+    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters),
+        isUnselecting = !!(unselectHrefIfSelected);
 
     var targetSearchHref = unselectHrefIfSelected || Filters.buildSearchHref(field, term, this.props.href);
 
@@ -453,6 +454,12 @@ export function onFilterHandlerMixin(field, term, callback){
             }
         }
     }
+
+    analytics.event('FacetList', (isUnselecting ? 'Unset Filter' : 'Set Filter'), {
+        field, term,
+        'eventLabel'        : analytics.eventLabelFromChartNode({ field, term }),
+        'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
+    });
 
     (this.props.navigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true });
     setTimeout(callback, 100);
