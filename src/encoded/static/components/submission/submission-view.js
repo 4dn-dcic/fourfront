@@ -2138,13 +2138,13 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
                 if(context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
                     built[fields[i]] = null;
                 }else{
-                    built[fields[i]] = context[fields[i]];
+                    built[fields[i]] = context[fields[i]] || null;
                 }
             }else if(!create){ //clone
                 if(context[fields[i]] === null || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
                     built[fields[i]] = null;
                 }else{
-                    built[fields[i]] = context[fields[i]];
+                    built[fields[i]] = context[fields[i]] || null;
                 }
             }else{
                 built[fields[i]] = null;
