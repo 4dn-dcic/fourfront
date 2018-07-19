@@ -152,9 +152,6 @@
         }
     },
     "facets": {
-        "award.center_title": {
-            "title": "Center"
-        },
         "publications_of_set.display_title": {
             "title": "Publication"
         },
@@ -181,6 +178,9 @@
         },
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
+        },
+        "award.center_title": {
+            "title": "Center"
         }
     },
     "columns": {
