@@ -43,6 +43,7 @@ class Biosource(Item):
         "individual.mouse_strain",
         "individual.ethnicity",
         "individual.health_status",
+        "modifications.modification_type"
         "tissue.term_name",
         "tissue.slim_terms",
         "tissue.synonyms",
