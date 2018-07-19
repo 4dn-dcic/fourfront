@@ -1116,7 +1116,7 @@ export default class App extends React.Component {
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-                    <meta name="google-site-verification" content="t0PnhAqm80xyWalBxJHZdld9adAk40SHjUyPspYNm7I" />
+                    <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
