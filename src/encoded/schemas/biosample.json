@@ -137,14 +137,14 @@
         }
     },
     "facets": {
-        "biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
-        "lab.display_title": {
-            "title": "Lab"
-        },
         "biosource_summary": {
             "title": "Sample Type"
+        },
+        "biosource.cell_line_tier": {
+            "title": "4DN Cell Line Tier"
+        },
+        "biosource.biosource_type": {
+            "title": "Biosource Type"
         },
         "biosource.individual.organism.name": {
             "title": "Organism"
