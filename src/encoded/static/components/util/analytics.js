@@ -366,6 +366,7 @@ export function getGoogleAnalyticsTrackingData(key = null){
  *********************/
 
 function shouldTrack(){
+
     // 1. Ensure we're initialized
     if (!state || isServerSide() || typeof window.ga === 'undefined') {
         console.error("Google Analytics is not initialized. Fine if this appears in a test.");
@@ -374,11 +375,13 @@ function shouldTrack(){
 
     // 2. TODO: Make sure not logged in as admin on a production site.
     var userDetails = JWT.getUserDetails();
-    if (userDetails && userDetails.email === '4dndcic@gmail.com'){
+    if (userDetails && Array.isArray(userDetails.groups) && userDetails.groups.indexOf('admin') > -1){
         var urlParts = url.parse(window.location.href);
         if (urlParts.host.indexOf('4dnucleome.org') > -1){
-            console.warn("Logged in as 4DNDCIC on 4dnucleome.org - will NOT track.");
+            console.warn("Logged in as admin on 4dnucleome.org - will NOT track.");
             return false;
+        } else {
+            // console.warn("Logged in as admin but not on 4dnucleome.org - WILL track (for testing)."); // Too verbose ?
         }
     }
 
