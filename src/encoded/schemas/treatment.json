@@ -27,5 +27,15 @@
               "Other"
             ]
         }
+    },
+    "facets": {
+        "treatment_type": {
+            "title": "Treatment type"
+        }
+    },
+    "columns": {
+        "treatment_type": {
+          "title": "Treatment type"
+        }
     }
 }
