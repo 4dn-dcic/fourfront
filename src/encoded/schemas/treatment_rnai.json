@@ -23,7 +23,8 @@
         { "$ref": "mixins.json#/documents" }
     ],
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "treatment.json#/facets"}
     ],
     "properties": {
         "schema_version": {
