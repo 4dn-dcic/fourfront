@@ -275,6 +275,47 @@ export function event(category, action, fields = {}){
 }
 
 
+export function productClick(item, extraData = {}, callback = null){
+    if (!shouldTrack()) {
+        if (typeof callback === 'function') callback();
+        return true;
+    }
+    var pObj = _.extend(createProductObjectFromItem(item), extraData);
+    var eventObj = {
+        'hitType' : 'event',
+        'eventCategory' : pObj.list || 'Search Results',
+        'eventAction' : 'click',
+        'eventLabel' : pObj.id || pObj.name,
+        'hitCallback' : function(){
+            console.info('Successfully sent product click event.', eventObj, pObj);
+            if (typeof callback === 'function'){
+                callback();
+            }
+        },
+        'name' : pObj.name || pObj.id,
+    };
+
+    ga('ec:addProduct', _.omit(pObj, 'list'));
+    ga('ec:setAction', 'click',  _.pick(pObj, 'list'));
+
+    // Convert internal dimension names to Google Analytics ones.
+    _.forEach(_.pairs(eventObj), function([key, value]){
+        if (typeof GADimensionMap[key] !== 'undefined'){
+            eventObj[GADimensionMap[key]] = value;
+            delete eventObj[key];
+        }
+    });
+
+    // Add current filters.
+    eventObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
+        Filters.currentExpSetFilters(null, pObj.list.indexOf('Search Results') > -1 ? 'item_search' : null)
+    );
+
+    ga('send', eventObj);
+    return true;
+}
+
+
 /**
  * This will be created once we upgrade to React 16, where-in we'll be able to catch exceptions from React in a streamlined fashion.
  * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/exceptions
@@ -405,7 +446,7 @@ function impressionListOfItems(itemList, href, listName = null, context = null){
         commonProductObj.list = 'Browse Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
     } else if (navigate.isSearchHref(href)){
-        commonProductObj.list = 'Search Results';
+        commonProductObj.list = href.hash.indexOf('selection') > -1 ? 'Selection Search Results' : 'Search Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
     } else {
         commonProductObj.list = 'Collection Results';
@@ -428,6 +469,7 @@ function createProductObjectFromItem(item){
         'name'          : item.display_title || item.title || null,
         'category'      : item['@type'].slice().reverse().slice(1).join('/'),
         'brand'         : (item.lab && item.lab.display_title) || (item.submitted_by && item.submitted_by.display_title) || item.lab || item.submitted_by || null,
+        'price'         : (item && item.file_size) || null
     };
     return productObj;
 }

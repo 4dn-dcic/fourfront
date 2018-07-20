@@ -162,11 +162,13 @@ class ControlsAndResults extends React.PureComponent {
 
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         // Also add the popLink/target=_blank functionality to links
-        if (isThereParentWindow) {
+        if (isThereParentWindow && currentAction === 'selection') {
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width, true);
+                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(
+                        result, columnDefinition, _.extend({}, props, { currentAction }), width, true
+                    );
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container">
