@@ -103,6 +103,7 @@
                 "title": "Extra File",
                 "type": "object",
                 "additionalProperties": true,
+                "required": ["file_format"],
                 "properties": {
                     "file_format": {
                         "title": "File Format",
