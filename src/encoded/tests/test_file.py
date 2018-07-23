@@ -296,7 +296,6 @@ def test_s3_filename_validation(testapp, fastq_uploading):
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
 
 
-
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
@@ -565,7 +564,7 @@ def processed_file_data(award, lab):
     return {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'bed',
+        'file_format': 'pairs'
     }
 
 
@@ -595,3 +594,47 @@ def test_validate_produced_from_files_valid_patch(testapp, processed_file_data, 
     res = testapp.post_json('/files-processed', processed_file_data, status=201).json['@graph'][0]
     pres = testapp.patch_json(res['@id'], {'produced_from': [file['@id'], mcool_file['@id']]}, status=200)
     assert not pres.json.get('errors')
+
+
+def test_validate_extra_files_no_extra_files(testapp, processed_file_data):
+    res = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_extra_files_extra_files_good_post(testapp, processed_file_data):
+    extf = {'file_format': 'pairs_px2'}
+    processed_file_data['extra_files'] = [extf]
+    res = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_extra_files_extra_files_bad_post_extra_same_as_primary(testapp, processed_file_data):
+    extf = {'file_format': 'pairs'}
+    processed_file_data['extra_files'] = [extf]
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    assert "'pairs' format cannot be the same for file and extra_file" == res.json.get('errors')[0].get('description')
+
+
+def test_validate_extra_files_extra_files_bad_patch_extra_same_as_primary(testapp, processed_file_data):
+    extf = {'file_format': 'pairs'}
+    # import pdb; pdb.set_trace()
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
+    pfid = res1.json['@graph'][0]['@id']
+    res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=422)
+    assert "'pairs' format cannot be the same for file and extra_file" == res2.json.get('errors')[0].get('description')
+
+
+def test_validate_extra_files_extra_files_bad_post_extra_format_not_in_map(testapp, processed_file_data):
+    extf = {'file_format': 'wiggly'}
+    processed_file_data['extra_files'] = [extf]
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    assert "'wiggly' not found in the file_format_file_extension_mapping" == res.json.get('errors')[0].get('description')
+
+
+def test_validate_extra_files_extra_files_bad_patch_extra_format_not_in_map(testapp, processed_file_data):
+    extf = {'file_format': 'wiggly'}
+    # import pdb; pdb.set_trace()
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
+    pfid = res1.json['@graph'][0]['@id']
+    res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=422)
+    assert "'wiggly' not found in the file_format_file_extension_mapping" == res2.json.get('errors')[0].get('description')

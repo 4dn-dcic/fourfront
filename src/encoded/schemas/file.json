@@ -96,7 +96,6 @@
         },
         "extra_files": {
             "title": "Extra Files",
-            "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "Links to extra files on s3 that don't have associated metadata",
             "type": "array",
             "items": {
@@ -106,11 +105,13 @@
                 "properties": {
                     "file_format": {
                         "title": "File Format",
-                        "type": "string"
+                        "type": "string",
+                        "lookup": 400
                     },
                     "href": {
                         "title": "Download URL",
-                        "type": "string"
+                        "type": "string",
+                        "exclude_from": ["submit4dn", "FFedit-create"]
                     },
                     "md5sum": {
                         "title": "MD5sum",
