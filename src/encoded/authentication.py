@@ -158,14 +158,19 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             return None
 
         jwt_info = self.get_token_info(id_token, request)
-        if not user_info:
+        if not jwt_info:
             return None
 
         email = request._auth0_authenticated = jwt_info['email'].lower()
 
+        # At this point, email has been authenticated with their Auth0 provider, but we don't know yet if this email is in our database.
+        # If not authenticated (not in our DB), request.user_info will throw an HTTPForbidden error.
+
         # Allow access basic user credentials from request obj after authenticating & saving request
         def get_user_info(request):
-            user_props = request.embed('/session-properties', as_user=email)
+            user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
+            if not user_props.get('details'):
+                raise HTTPForbidden(title="Not logged in.")
             user_props.update({
                 "id_token": id_token
             })
