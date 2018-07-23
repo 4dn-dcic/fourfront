@@ -65,7 +65,7 @@ const portal = {
     ],
     "user_section": [
         {id: 'login-menu-item', title: 'Log in', url: '/'},
-        {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
+        {id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}
         // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
@@ -810,13 +810,7 @@ export default class App extends React.Component {
                 return null;
             }
 
-            var request = ajax.fetch(
-                href,
-                {
-                    'headers': {}, // Filled in by ajax.promise
-                    'cache' : options.cache === false ? false : true
-                }
-            );
+            var request = ajax.fetch(href, { 'cache' : options.cache === false ? false : true });
 
             this.requestCurrent = true; // Remember we have an outstanding GET request
             var timeout = new Timeout(App.SLOW_REQUEST_TIME);
@@ -902,14 +896,16 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                dispatch_dict.href = href + fragment;
+
+                var hrefToSet = (request && request.xhr && request.xhr.responseURL) || href; // Get correct URL from XHR, in case we hit a redirect during the request.
+                dispatch_dict.href = hrefToSet + fragment;
 
                 return response;
             })
             .then(response => this.receiveContextResponse(response, includeReduxDispatch, options))
             .then(response => {
                 this.state.slowLoad && this.setState({'slowLoad' : false});
-                if (typeof callback == 'function'){
+                if (typeof callback === 'function'){
                     callback(response);
                 }
             });

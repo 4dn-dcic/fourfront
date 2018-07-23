@@ -235,7 +235,7 @@ export default class PageTitle extends React.PureComponent {
             }
         }
 
-        if (hasToc && (gridSize === 'md' || gridSize === 'lg' || !mounted)) style.width = '75%';
+        if (hasToc && (gridSize === 'lg' || !mounted)) style.width = '75%';
 
         return style;
     }

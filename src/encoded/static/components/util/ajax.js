@@ -120,7 +120,7 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
 export function fetch(url, options){
     options = _.extend({credentials: 'same-origin'}, options);
     var http_method = options.method || 'GET';
-    var headers = options.headers = _.extend({}, options.headers);
+    var headers = options.headers = _.extend({}, options.headers || {});
     // Strip url fragment.
     var url_hash = url.indexOf('#');
     if (url_hash > -1) {
