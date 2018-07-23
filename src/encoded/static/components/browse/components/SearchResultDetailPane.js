@@ -34,7 +34,8 @@ export class SearchResultDetailPane extends React.Component {
                     description={ description }
                     fitTo="self"
                     textClassName="text-normal"
-                    dimensions={null}
+                    collapsedHeight="auto"
+                    linesOfText={2}
                 />
                 <hr className="desc-separator" />
             </div>

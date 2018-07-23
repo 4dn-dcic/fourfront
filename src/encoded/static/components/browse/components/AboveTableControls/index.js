@@ -241,7 +241,7 @@ export class AboveTableControls extends React.Component {
         var addButton = null;
         var context = this.props.context;
         // don't show during submission search "selecting existing"
-        if (context && Array.isArray(context.actions) && !this.props.submissionBase){
+        if (context && Array.isArray(context.actions) && !this.props.currentAction){
             var addAction = _.findWhere(context.actions, { 'name' : 'add' });
             if (addAction && typeof addAction.href === 'string'){ // TODO::: WE NEED TO CHANGE THIS HREF!! to /search/?type= format.
                 addButton = (

@@ -426,12 +426,16 @@ class Facet extends React.PureComponent {
  */
 export function onFilterHandlerMixin(field, term, callback){
 
-    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
+    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters),
+        isUnselecting = !!(unselectHrefIfSelected);
 
-    var targetSearchHref = Filters.buildSearchHref(
-        unselectHrefIfSelected,
-        field, term, this.props.searchBase || this.props.href
-    );
+    var targetSearchHref = unselectHrefIfSelected || Filters.buildSearchHref(field, term, this.props.href);
+
+    // If we have a '#' in URL, add to target URL as well.
+    var hashFragmentIdx = this.props.href.indexOf('#');
+    if (hashFragmentIdx > -1 && targetSearchHref.indexOf('#') === -1){
+        targetSearchHref += this.props.href.slice(hashFragmentIdx);
+    }
 
     // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
     if (field === 'type'){
@@ -450,6 +454,12 @@ export function onFilterHandlerMixin(field, term, callback){
             }
         }
     }
+
+    analytics.event('FacetList', (isUnselecting ? 'Unset Filter' : 'Set Filter'), {
+        field, term,
+        'eventLabel'        : analytics.eventLabelFromChartNode({ field, term }),
+        'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
+    });
 
     (this.props.navigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true });
     setTimeout(callback, 100);
@@ -502,7 +512,7 @@ export class FacetList extends React.PureComponent {
         'restrictions' : PropTypes.object,  // Unused
         'mode' : PropTypes.string,          // Unused
         'onChange' : PropTypes.func,        // Unused
-        'submissionFacetList' : PropTypes.bool // Used for hiding dataType facet
+        'hideDataTypeFacet' : PropTypes.bool
     }
 
     static isLoggedInAsAdmin(){
@@ -555,7 +565,7 @@ export class FacetList extends React.PureComponent {
             return false; // Ignore audit facets temporarily, esp if logged out.
         }
         // logic for removing Data Type facet on submissions page-title
-        if (facet.field === 'type' && props.submissionFacetList) return false;
+        if (facet.field === 'type' && props.hideDataTypeFacet) return false;
         return true;
     }
 

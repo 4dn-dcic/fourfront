@@ -400,10 +400,14 @@ export const barPlotCursorActions = [
                 return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE
             }, currentExpSetFilters);
 
-            // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
-            analytics.event('BarPlot', 'Set Filter', {
-                'eventLabel' : analytics.eventLabelFromChartNode(cursorProps.path[cursorProps.path.length - 1]), // 'New' filters logged here.
-                'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
+            // Register 'Set Filter' event for each field:term pair (node) of selected Bar Section.
+            _.forEach(cursorProps.path, function(node){
+                analytics.event('BarPlot', 'Set Filter', {
+                    'eventLabel'        : analytics.eventLabelFromChartNode(node, false),                         // 'New' filter logged here.
+                    'field'             : node.field,
+                    'term'              : node.term,
+                    'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
+                });
             });
 
             Filters.saveChangedFilters(newExpSetFilters, href, () => {

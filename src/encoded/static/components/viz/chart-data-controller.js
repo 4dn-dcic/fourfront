@@ -449,10 +449,13 @@ export const ChartDataController = {
         delete providerLoadStartCallbacks[uniqueID];
     },
 
+    /**
+     * Updates fields for which BarPlot aggregations are performed.
+     */
     updateBarPlotFields : function(fields, callback = null){
         if (Array.isArray(fields) && Array.isArray(state.barplot_data_fields)){
             if (fields.length === state.barplot_data_fields.length){
-                
+                // Cancel if fields are same as before.
                 if (_.every(fields, function(f,i){
                     return (f === state.barplot_data_fields[i]);
                 })) return;

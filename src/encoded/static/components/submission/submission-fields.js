@@ -4,13 +4,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
-import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
-import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
+import url from 'url';
 import ReactTooltip from 'react-tooltip';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
+import Alerts from '../alerts';
+import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
+
 
 var ProgressBar = require('rc-progress').Line;
 
 var makeTitle = object.itemUtil.title;
+
+
 
 /*
 Individual component for each type of field. Contains the appropriate input
@@ -18,7 +24,7 @@ if it is a simple number/text/enum, or generates a child component for
 attachment, linked object, array, object, and file fields. Contains delete
 logic for the field as well (deleting is done by setting value to null).
 */
-export default class BuildField extends React.Component {
+export default class BuildField extends React.PureComponent {
 
     /**
      * @param {{ 'type' : string }} fieldSchema - Schema definition for this property. Should be same as `app.state.schemas[CurrentItemType].properties[currentField]`.
@@ -29,7 +35,7 @@ export default class BuildField extends React.Component {
         if(fieldType === 'string'){
             fieldType = 'text';
             if (typeof fieldSchema.formInput === 'string'){
-                if (fieldSchema.formInput === 'textarea' || fieldSchema.formInput === 'html') return fieldSchema.formInput;
+                if (['textarea', 'html', 'code'].indexOf(fieldSchema.formInput) > -1) return fieldSchema.formInput;
             }
         }
         // check if this is an enum
@@ -49,6 +55,7 @@ export default class BuildField extends React.Component {
         super(props);
         this.wrapWithLabel = this.wrapWithLabel.bind(this);
         this.wrapWithNoLabel = this.wrapWithNoLabel.bind(this);
+        this.displayField = this.displayField.bind(this);
         this.state = {
             'dropdownOpen' : false
         };
@@ -66,18 +73,32 @@ export default class BuildField extends React.Component {
         }
     }
 
-    displayField = (field_case) => {
-        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo } = this.props;
+    displayField(field_case){
+        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, fieldType, currType, getCurrContext } = this.props;
         var inputProps = {
-            'id' : 'field_for_' + field,
-            'disabled' : disabled || false,
-            'ref' : "inputElement",
-            'value' : (typeof value === 'number' ? value || 0 : value || ''),
-            'onChange' : this.handleChange,
-            'name' : field,
-            'placeholder': "No value",
-            'data-field-type' : field_case
+            'key'       :        field,
+            'id'                : 'field_for_' + field,
+            'disabled'          : disabled || false,
+            'ref'               : "inputElement",
+            'value'             : (typeof value === 'number' ? value || 0 : value || ''),
+            'onChange'          : this.handleChange,
+            'name'              : field,
+            'placeholder'       : "No value",
+            'data-field-type'   : field_case
         };
+
+        // Unique per-type overrides
+
+        if (currType === 'StaticSection' && field === 'body'){
+            // Static section preview
+            var currContext = getCurrContext(), // Make sure we have a filetype.
+                filetype = currContext && currContext.options && currContext.options.filetype;
+            if (filetype === 'md' || filetype === 'html'){
+                return <PreviewField {...this.props} filetype={filetype} onChange={this.handleChange} />;
+            }
+        }
+
+        // Common field types
         switch(field_case){
             case 'text' :
                 if (field === 'aliases'){
@@ -93,7 +114,7 @@ export default class BuildField extends React.Component {
             case 'number'           : return <FormControl type="number" {...inputProps} />;
             case 'boolean'          : return (
                 <Checkbox {..._.omit(inputProps, 'value', 'placeholder')} checked={!!(value)} className="mb-07 mt-07">
-                    <span style={{ 'verticalAlign' : 'middle', 'text-transform' : 'capitalize' }}>
+                    <span style={{ 'verticalAlign' : 'middle', 'textTransform' : 'capitalize' }}>
                         { typeof value === 'boolean' ? value + '' : null }
                     </span>
                 </Checkbox>
@@ -105,7 +126,7 @@ export default class BuildField extends React.Component {
                     </DropdownButton>
                 </span>
             );
-            case 'linked object'    : return <LinkedObj {...this.props}/>;
+            case 'linked object'    : return <LinkedObj key="linked-item" {...this.props}/>;
             case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={value || null} roundTwo={roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
@@ -220,40 +241,43 @@ export default class BuildField extends React.Component {
 
     render = () => {
         // TODO: come up with a schema based solution for code below?
-        // hardcoded fields you can't delete
-        var cannot_delete = ['filename'];
-        var showDelete = false;
-        var disableDelete = false;
-        var extClass = '';
+        var { value, isArray, field, fieldType, arrayIdx, isLastItemInArray, schema } = this.props;
+        var cannot_delete = ['filename'], // hardcoded fields you can't delete
+            showDelete = false,
+            disableDelete = false,
+            extClass = '';
+
         // don't show delet button unless:
         // not in hardcoded cannot delete list AND is not an object or
         // non-empty array element (individual values get deleted)
-        if(!_.contains(cannot_delete, this.props.field) && this.props.fieldType !== 'array'){
+        if(!_.contains(cannot_delete, field) && fieldType !== 'array'){
             showDelete = true;
         }
 
         // if there is no value in the field and non-array, hide delete button
-        if(
-            isValueNull(this.props.value) && !this.props.isArray
-        ) {
+        if (isValueNull(value) && !isArray) {
             showDelete = false;
         }
 
         var wrapFunc = this.wrapWithLabel;
 
-        var excludeRemoveButton = (this.props.fieldType === 'array' || this.props.fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
+        var excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
 
-        if (this.props.isArray) {
+        var fieldToDisplay = this.displayField(fieldType);
+
+        if (isArray) {
             // array items don't need fieldnames/tooltips
             wrapFunc = this.wrapWithNoLabel;
 
-            if (this.props.isLastItemInArray && isValueNull(this.props.value)){
+            if (isLastItemInArray && isValueNull(value)){
                 showDelete = false;
-                if (Array.isArray(this.props.arrayIdx) && this.props.arrayIdx[0] !== 0) extClass = "last-item-empty";
-            } else if (this.props.fieldType === 'object') {
+                if (Array.isArray(arrayIdx) && arrayIdx[0] !== 0){
+                    extClass += " last-item-empty";
+                }
+            } else if (fieldType === 'object') {
                 // if we've got an object that's inside inside an array, only allow
                 // the array to be deleted if ALL individual fields are null
-                if (!isValueNull(this.props.value)){
+                if (!isValueNull(value)){
                     disableDelete = true;
                 }
                 //var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
@@ -264,115 +288,501 @@ export default class BuildField extends React.Component {
             }
         }
 
+        if (fieldType === 'linked object' && LinkedObj.isInSelectionField(this.props)){
+            extClass += ' in-selection-field';
+        }
+
         return wrapFunc(
-            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + ' ' + extClass}>
-                {this.displayField(this.props.fieldType)}
-            </div>,
-            excludeRemoveButton ? null : (
-                <div className="col-xs-2 remove-button-column">
-                    <Fade in={showDelete}>
-                        <div className={"pull-right remove-button-container" + (!showDelete ? ' hidden' : '')}>
-                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField} data-tip={this.props.isArray ? 'Remove Item' : 'Clear Value'}><i className="icon icon-fw icon-times"/></Button>
-                        </div>
-                    </Fade>
-                </div>
-            )
+            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + extClass} children={fieldToDisplay}/>,
+            excludeRemoveButton ? null : <SquareButton show={showDelete} disabled={disableDelete} tip={isArray ? 'Remove Item' : 'Clear Value'} onClick={this.deleteField} />
         );
     }
 }
 
-/** Case for a linked object. */
-class LinkedObj extends React.Component{
-
-    constructor(props){
-        super(props);
-    }
 
 
-    // mechanism for changing value of linked object in parent context
-    // from int keyIdx to string path of newly submitted object
-    componentDidMount(){
-        if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
-            this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
-            ReactTooltip.rebuild();
-        }
-    }
+class SquareButton extends React.Component {
 
-    componentDidUpdate(){
-        if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
-            this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
-            ReactTooltip.rebuild();
-        }
+    static defaultProps = {
+        'bsStyle' : 'danger',
+        'icon' : 'times',
+        'style' : null
     }
 
     render(){
-        var objType = this.props.schema.linkTo;
+        var { show, disabled, onClick, tip, bsStyle, buttonContainerClassName, icon, style } = this.props;
+        return (
+            <div className="col-xs-2 remove-button-column" style={style}>
+                <Fade in={show}>
+                    <div className={"pull-right remove-button-container" + (!show ? ' hidden' : '') + (buttonContainerClassName ? ' ' + buttonContainerClassName : '')}>
+                        <Button tabIndex={2} bsStyle={bsStyle} disabled={disabled} onClick={onClick} data-tip={tip}><i className={"icon icon-fw icon-" + icon}/></Button>
+                    </div>
+                </Fade>
+            </div>
+        );
+    }
+}
+
+
+
+var linkedObjChildWindow = null; // Global var
+
+/** Case for a linked object. */
+class LinkedObj extends React.PureComponent{
+
+    /**
+     * @param {Object} props - Props passed from LinkedObj or BuildField.
+     * @param {string} props.nestedField - Field of LinkedObj
+     * @param {number[]|null} props.arrayIdx - Array index (if any) of this item, if any.
+     * @param {string} props.fieldBeingSelected - Field currently selected for linkedTo item selection.
+     * @param {number[]|null} props.fieldBeingSelectedArrayIdx - Array index (if any) of currently selected for linkedTo item selection.
+     * @returns {boolean} Whether is currently selected field/item or not.
+     */
+    static isInSelectionField(props){
+        if (!props) return false;
+        return props.fieldBeingSelected && props.fieldBeingSelected === props.nestedField && ( // & check if array indices match, if any
+            (props.arrayIdx === null && props.fieldBeingSelectedArrayIdx === null) ||
+            (Array.isArray(props.arrayIdx) && Array.isArray(props.fieldBeingSelectedArrayIdx) && props.fieldBeingSelectedArrayIdx[0] === props.arrayIdx[0])
+        );
+    }
+
+    constructor(props){
+        super(props);
+        this.updateContext = this.updateContext.bind(this);
+        this.setSubmissionStateToLinkedToItem = this.setSubmissionStateToLinkedToItem.bind(this);
+        this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
+        this.setChildWindowMessageHandler = this.setChildWindowMessageHandler.bind(this);
+        this.handleChildWindowMessage = this.handleChildWindowMessage.bind(this);
+        this.handleChildFourFrontSelectionClick = this.handleChildFourFrontSelectionClick.bind(this);
+        this.handleSelectItemClick = this.handleSelectItemClick.bind(this);
+        this.handleCreateNewItemClick = this.handleCreateNewItemClick.bind(this);
+        this.handleWindowDragOver = this.handleWindowDragOver.bind(this);
+        this.refreshWindowDropReceiver = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
+        this.closeWindowDropReceiver = this.closeWindowDropReceiver.bind(this);
+        this.handleDrop = this.handleDrop.bind(this);
+        this.handleTextInputChange = this.handleTextInputChange.bind(this);
+        this.handleAcceptTypedID = this.handleAcceptTypedID.bind(this);
+
+        this.windowDropReceiverHideTimeout = null;
+        this.state = {
+            'textInputValue' : (typeof props.value === 'string' && props.value) || ''
+        };
+    }
+
+    componentDidMount(){
+        this.updateContext();
+    }
+
+    componentDidUpdate(pastProps){
+        this.updateContext();
+
+        if (pastProps.fieldBeingSelected !== this.props.fieldBeingSelected || pastProps.fieldBeingSelectedArrayIdx !== this.props.fieldBeingSelectedArrayIdx) {
+            this.manageWindowOnDragHandler(pastProps, this.props);
+        }
+
+        ReactTooltip.rebuild();
+    }
+
+    componentWillUnmount(){
+        this.manageWindowOnDragHandler(this.props, null);
+        //if (this.props.fieldBeingSelected !== null){
+        //    this.cleanChildWindow();
+        //}
+    }
+
+    /**
+     * Mechanism for changing value of linked object in parent context
+     * from {number} keyIdx to {string} path of newly submitted object.
+     */
+    updateContext(){
+        var { keyComplete, value, linkType, arrayIdx, nestedField, modifyNewContext } = this.props;
+        if (keyComplete[value] && !isNaN(value)) {
+            modifyNewContext(nestedField, keyComplete[value], 'finished linked object', linkType, arrayIdx);
+            ReactTooltip.rebuild();
+        }
+    }
+
+    manageWindowOnDragHandler(pastProps, nextProps){
+        var pastInSelection     = this.isInSelectionField(pastProps),
+            nowInSelection      = this.isInSelectionField(nextProps),
+            hasUnsetInSelection = pastInSelection && !nowInSelection,
+            hasSetInSelection   = !pastInSelection && nowInSelection;
+
+        if (hasUnsetInSelection){
+            window.removeEventListener('dragenter', this.handleWindowDragEnter);
+            window.removeEventListener('dragover',  this.handleWindowDragOver);
+            window.removeEventListener('drop',      this.handleDrop);
+            this.closeWindowDropReceiver();
+            if (this.childWindowClosedInterval){
+                clearInterval(this.childWindowClosedInterval);
+                delete this.childWindowClosedInterval;
+                this.cleanChildWindowEventHandlers();
+            }
+            console.warn('Removed window event handlers for field', this.props.field);
+            //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
+        } else if (hasSetInSelection){
+            var _this = this;
+            setTimeout(function(){
+                if (!_this || !_this.isInSelectionField(_this.props)) return false;
+                window.addEventListener('dragenter', _this.handleWindowDragEnter);
+                window.addEventListener('dragover',  _this.handleWindowDragOver);
+                window.addEventListener('drop',      _this.handleDrop);
+                console.warn('Added window event handlers for field', _this.props.field);
+                //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
+            }, 250);
+        }
+    }
+
+    setSubmissionStateToLinkedToItem(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var intKey = parseInt(this.props.value);
+        if (isNaN(intKey)) throw new Error('Expected an integer for props.value, received', this.props.value);
+        this.props.setSubmissionState('currKey', intKey);
+    }
+
+    isInSelectionField(props = this.props){ return LinkedObj.isInSelectionField(props); }
+
+    showAlertInChildWindow(){
+        var { schema, nestedField, title } = this.props;
+        var itemType = schema.linkTo;
+        var prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
+        var childAlerts = this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts;
+        if (childAlerts){
+            childAlerts.queue({
+                'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
+                'message' : (
+                    <div>
+                        <p className="mb-0">
+                            Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
+                        </p>
+                        <p className="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
+                    </div>
+                ),
+                'style' : 'info'
+            });
+        }
+    }
+
+    handleSelectItemClick(e){
+        e.preventDefault();
+
+        if (!window) return;
+
+        var { schema, nestedField, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+
+        var itemType    = schema.linkTo,
+            searchURL   = '/search/?type=' + itemType + '#!selection';
+
+        if (linkedObjChildWindow && !linkedObjChildWindow.closed && linkedObjChildWindow.fourfront && typeof linkedObjChildWindow.fourfront.navigate === 'function'){
+            // We have access to the JS of our child window. Call app.navigate(URL) directly instead of reloading entire HTML. May not work for some browsers.
+            this.windowObjectReference = linkedObjChildWindow;
+            this.windowObjectReference.fourfront.navigate(searchURL, {}, this.showAlertInChildWindow);
+            this.windowObjectReference.focus();
+        } else {
+            // Some browsers (*cough* MS Edge *cough*) are strange and will encode '#' to '%23' initially.
+            this.windowObjectReference = linkedObjChildWindow = window.open(
+                "about:blank",
+                "selection-search",
+                "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1,width=1010,height=600"
+            );
+            setTimeout(()=>{
+                this.windowObjectReference.location.assign(searchURL);
+                this.windowObjectReference.location.hash = '#!selection';
+            }, 100);
+        }
+        this.setChildWindowMessageHandler();
+
+        selectObj(itemType, nestedField, linkType, arrayIdx);
+
+        this.childWindowClosedInterval = setInterval(()=>{
+            if (!this || !this.windowObjectReference || this.windowObjectReference.closed) {
+                clearInterval(this.childWindowClosedInterval);
+                delete this.childWindowClosedInterval;
+                if (this && this.windowObjectReference && this.windowObjectReference.closed){
+                    selectCancel();
+                }
+                this.cleanChildWindowEventHandlers();
+                this.windowObjectReference = linkedObjChildWindow = null;
+            }
+        }, 1000);
+    }
+
+    handleChildWindowMessage(evt){
+        var eventType = evt && evt.data && evt.data.eventType;
+        if (!eventType) {
+            console.error("No eventType specified in message. Canceling.");
+            return;
+        }
+
+        // Authenticate message origin to prevent XSS attacks.
+        var eventOriginParts = url.parse(evt.origin);
+        if (window.location.host !== eventOriginParts.host){
+            console.error('Received message from unauthorized host. Canceling.');
+            return;
+        }
+        if (window.location.protocol !== eventOriginParts.protocol){
+            console.error('Received message from unauthorized protocol. Canceling.');
+            return;
+        }
+
+        if (eventType === 'fourfrontselectionclick') {
+            return this.handleChildFourFrontSelectionClick(evt);
+        }
+
+        if (eventType === 'fourfrontinitialized') {
+            return this.showAlertInChildWindow();
+        }
+    }
+
+    setChildWindowMessageHandler(){
+        setTimeout(()=>{
+            window && window.addEventListener('message', this.handleChildWindowMessage);
+            console.log('Updated \'message\' event handler');
+        }, 200);
+    }
+
+    cleanChildWindowEventHandlers(){
+        window.removeEventListener('message', this.handleChildWindowMessage);
+        if (!this || !this.windowObjectReference) {
+            console.warn('Child window no longer available to unbind event handlers. Fine if closed.');
+            return;
+        }
+    }
+
+    cleanChildWindow(){
+        if (this && this.windowObjectReference){
+            if (!this.windowObjectReference.closed) this.windowObjectReference.close();
+            this.cleanChildWindowEventHandlers();
+            this.windowObjectReference = linkedObjChildWindow = null;
+        }
+    }
+
+    handleCreateNewItemClick(e){
+        e.preventDefault();
+        if (this.props.fieldBeingSelected !== null) {
+            this.props.selectCancel();
+        }
+        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.schema.linkTo);
+    }
+
+    handleChildFourFrontSelectionClick(evt){
+        // Grab from custom event
+        var atId = evt && ((evt.data && evt.data.id) || (evt.detail && evt.detail.id) || null);
+
+        if (!object.isValidAtIDFormat(atId)) {
+            // Possibly unnecessary as all #!selection clicked items would have evt.detail.id in proper format, or not have it.
+            // Also more validation performed in SubmissionView.prototype.fetchAndValidateItem().
+
+            // TODO: Perhaps turn failureCallback to own func on SubmissionView.prototype and pass it in as prop here to be called.
+            throw new Error('No valid @id available.');
+        } else {
+            Alerts.deQueue({ 'title' : "Invalid Item Dropped" });
+        }
+
+        console.log('Fourfront Submissions - CLICKED SELECT BUTTON FOR', atId, evt, evt.detail);
+
+        this.props.selectComplete(atId);
+        this.cleanChildWindow();
+    }
+
+    /**
+     * Handles drop event for the (temporarily-existing-while-dragging-over) window drop receiver element.
+     * Grabs @ID of Item from evt.dataTransfer, attempting to grab from 'text/4dn-item-id', 'text/4dn-item-json', or 'text/plain'.
+     * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
+     */
+    handleDrop(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json'),
+            draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain'),
+            draggedID = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-id'),
+            atId = draggedID || (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname || null;
+
+        var isValidAtId = object.isValidAtIDFormat(atId),
+            invalidTitle = "Invalid Item Dropped";
+
+        if (!atId || !isValidAtId){
+            Alerts.queue({
+                'title' : invalidTitle,
+                'message': "You have dragged & dropped an item or link which doesn't have a valid 4DN ID or URL associated with it. Please try again.",
+                'style': 'danger'
+            });
+            throw new Error('No valid @id available.');
+        } else {
+            Alerts.deQueue({ 'title' : invalidTitle });
+        }
+
+        console.log('Fourfront Submissions - DROPPED', atId, evt, this.props);
+
+        this.props.selectComplete(atId);
+        this.cleanChildWindow();
+    }
+
+    handleWindowDragEnter(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
+
+    handleWindowDragOver(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.refreshWindowDropReceiver(evt);
+    }
+
+    closeWindowDropReceiver(evt){
+        var elem = this.windowDropReceiverElement;
+        if (!elem) return;
+        elem.style.opacity = 0;
+        setTimeout(()=>{
+            document.body.removeChild(elem);
+            this.windowDropReceiverElement = null;
+            this.windowDropReceiverHideTimeout = null;
+        }, 250);
+    }
+
+    refreshWindowDropReceiver(evt){
+        if (!document || !document.createElement) return;
+
+        if (this.windowDropReceiverHideTimeout !== null) {
+            clearTimeout(this.windowDropReceiverHideTimeout);
+            this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+            return;
+        }
+
+        var { schema, nestedField } = this.props,
+            itemType = schema.linkTo,
+            prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
+
+        var element = document.createElement('div');
+        element.className = "full-window-drop-receiver";
+
+        var innerText = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'";
+        var innerBoldElem = document.createElement('h2');
+        innerBoldElem.appendChild(document.createTextNode(innerText));
+        element.appendChild(innerBoldElem);
+        element.appendChild(document.createElement('br'));
+        document.body.appendChild(element);
+        this.windowDropReceiverElement = element;
+
+        setTimeout(()=>{
+            this.windowDropReceiverElement.style.opacity = 1;
+        }, 10);
+
+        this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+    }
+
+    handleAcceptTypedID(evt){
+        console.log(evt);
+        if (!this || !this.state || !this.state.textInputValue){
+            throw new Error('Invalid @id format.');
+        }
+        this.props.selectComplete(this.state.textInputValue);
+        this.cleanChildWindow();
+    }
+
+    handleTextInputChange(evt){
+        this.setState({ 'textInputValue' : evt.target.value });
+    }
+
+    renderSelectInputField(){
+        var { value, selectCancel, selectComplete } = this.props;
+        var textInputValue              = this.state.textInputValue,
+            canShowAcceptTypedInput     = typeof textInputValue === 'string' && textInputValue.length > 3,
+            extClass                    = !canShowAcceptTypedInput && textInputValue ? ' has-error' : '';
+        return (
+            <div className="linked-object-text-input-container row flexrow">
+                <div className="field-column col-xs-10">
+                    <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
+                </div>
+                { canShowAcceptTypedInput ? <SquareButton show onClick={this.handleAcceptTypedID} icon="check" bsStyle="success" tip="Accept typed identifier and look it up in database." /> : null }
+                <SquareButton show onClick={(e)=>{ selectCancel(); this.cleanChildWindow(); }} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
+            </div>
+        );
+    }
+
+    renderEmptyField(){
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState } = this.props;
+        return (
+            <div className="linked-object-buttons-container">
+                <Button className="select-create-linked-item-button" onClick={this.handleSelectItemClick}>
+                    <i className="icon icon-fw icon-search"/> Select existing
+                </Button>
+                <Button className="select-create-linked-item-button" onClick={this.handleCreateNewItemClick}>
+                    <i className="icon icon-fw icon-file-o"/> Create new
+                </Button>
+            </div>
+        );
+    }
+
+    render(){
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, fieldBeingSelected } = this.props;
+
+        if (this.isInSelectionField()){
+            return this.renderSelectInputField();
+        }
+
         // object chosen or being created
-        if(this.props.value){
-            var keyDisplay = this.props.keyDisplay;
-            var thisDisplay;
-            if(isNaN(this.props.value)){
-                thisDisplay = keyDisplay[this.props.value] || this.props.value;
+        if (value){
+            var thisDisplay = keyDisplay[value] || value;
+            if (isNaN(value)) {
+                //thisDisplay = keyDisplay[value] || value;
                 return(
-                    <div className="submitted-linked-object-display-container">
-                        <a href={this.props.value} target="_blank" className="inline-block" data-tip="This Item is already in the database">
-                            <span>{thisDisplay}</span>
-                        </a>
-                        &nbsp;<i style={{'marginLeft':'5px', 'fontSize' : '0.85rem'}} className="icon icon-external-link"/>
+                    <div className="submitted-linked-object-display-container text-ellipsis-container">
+                        <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
+                        <a href={value} target="_blank" data-tip={"This Item, '" + thisDisplay + "' is already in the database"} children={thisDisplay} />
+                        &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-external-link"/>
                     </div>
                 );
-            }else{
+            } else {
                 // it's a custom object. Either render a link to editing the object
                 // or a pop-up link to the object if it's already submitted
-                var intKey = parseInt(this.props.value);
-                thisDisplay = keyDisplay[this.props.value] || this.props.value;
+                var intKey = parseInt(value);
+                //thisDisplay = keyDisplay[value] || value;
                 // this is a fallback - shouldn't be int because value should be
                 // string once the obj is successfully submitted
-                if(this.props.keyComplete[intKey]){
+                if (keyComplete[intKey]){
                     return(
                         <div>
-                            <a href="#" onClick={function(e){
-                                e.preventDefault();
-                                var win = window.open(this.props.keyComplete[intKey], '_blank');
-                                if(win){
-                                    win.focus();
-                                }else{
-                                    alert('Object page popup blocked!');
-                                }
-                            }.bind(this)}>
-                                <span>{thisDisplay}</span>
-                                <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
-                            </a>
+                            <a href={keyComplete[intKey]} target="_blank" children={thisDisplay}/>
+                            <i style={{'marginLeft': 5}} className="icon icon-fw icon-external-link"/>
                         </div>
                     );
-                }else{
+                } else {
                     return(
-                        <div className="incomplete-linked-object-display-container" data-tip="Continue editing/submitting">
-                            <a href="#" onClick={function(e){
-                                e.preventDefault();
-                                this.props.setSubmissionState('currKey', intKey);
-                            }.bind(this)}>
-                                {thisDisplay}
-                            </a>
+                        <div className="incomplete-linked-object-display-container text-ellipsis-container">
+                            <i className="icon icon-fw icon-sticky-note-o" />&nbsp;&nbsp;
+                            <a href="#" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting" children={thisDisplay} />
+                            &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-pencil"/>
                         </div>
                     );
                 }
             }
+        } else {
+            // nothing chosen/created yet
+            return this.renderEmptyField();
         }
-        // nothing chosen/created yet
-        return(
-            <div className="linked-object-buttons-container">
-                <Button className="select-create-linked-item-button" onClick={function(e){
-                    e.preventDefault();
-                    this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
-                }.bind(this)}>Select existing</Button>
-                <Button className="select-create-linked-item-button" onClick={function(e){
-                    e.preventDefault();
-                    this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
-                }.bind(this)}>Create new</Button>
+    }
+}
+
+
+
+class PreviewField extends React.Component {
+
+    render(){
+        var { value, filetype, field, onChange } = this.props;
+        return (
+            <div className="preview-field-container">
+                { value && <h6 className="mt-0 text-600">Preview:</h6> }
+                { value && <hr className="mb-1 mt-05" /> }
+                { value &&  <BasicStaticSectionBody content={value || ''} filetype={filetype} /> }
+                { value && <hr className="mb-05 mt-05" /> }
+                <FormControl onChange={onChange} id={"field_for_" + field} name={field} value={value} type="text" inputMode="latin" componentClass="textarea" rows={8}
+                    wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />
             </div>
         );
     }
+
 }
 
 
@@ -417,10 +827,6 @@ class ArrayField extends React.Component{
         return false;
     }
 
-    constructor(props){
-        super(props);
-    }
-
     /**
      * If empty array, add initial 'null' element. On Mount & Update.
      */
@@ -462,24 +868,16 @@ class ArrayField extends React.Component{
             arrayIdxList = [];
         }
         arrayIdxList.push(arrayIdx);
+        fieldSchema = _.extend({}, fieldSchema, { 'parentSchema' : this.props.schema });
         return(
             <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')} data-field-type={fieldType}>
                 <BuildField
-                    value={value}
-                    schema={fieldSchema}
-                    fieldType={fieldType}
-                    fieldTip={fieldTip}
-                    title={title}
-                    enumValues={enumValues}
-                    disabled={false}
-                    required={false}
-                    arrayIdx={arrayIdxList}
-                    isArray={true}
-                    isLastItemInArray={allItems.length - 1 === index}
-                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj',
-                        'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState',
-                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo') }
-                />
+                    {...{ value, fieldTip, fieldType, title, enumValues }}
+                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'selectComplete', 'selectCancel',
+                        'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx',
+                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo', 'currType' ) }
+                    isArray={true} isLastItemInArray={allItems.length - 1 === index} arrayIdx={arrayIdxList}
+                    schema={fieldSchema} disabled={false} required={false} key={arrayIdx} />
             </div>
         );
     }
@@ -507,6 +905,8 @@ class ArrayField extends React.Component{
         );
     }
 }
+
+
 
 /**
  * Builds a field that represents a sub-object. Essentially serves to hold
@@ -546,9 +946,7 @@ class ObjectField extends React.Component {
         return schemaVal;
     }
 
-    initiateField = (fieldInfo) => {
-        var field = fieldInfo[0];
-        var fieldSchema = fieldInfo[1];
+    initiateField = ([ field, fieldSchema ]) => {
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
@@ -571,50 +969,29 @@ class ObjectField extends React.Component {
         var nestedField = this.props.nestedField + '.' + field;
         return (
             <BuildField
-                value={fieldValue}
-                key={field}
-                schema={fieldSchema}
-                field={field}
-                fieldType={fieldType}
-                fieldTip={fieldTip}
-                enumValues={enumValues}
-                disabled={false}
-                modifyNewContext={this.props.modifyNewContext}
-                required={false}
-                linkType={this.props.linkType}
-                selectObj={this.props.selectObj}
-                title={title}
-                nestedField={nestedField}
-                isArray={false}
-                arrayIdx={this.props.arrayIdx}
-                keyDisplay={this.props.keyDisplay}
-                keyComplete={this.props.keyComplete}
-                setSubmissionState= {this.props.setSubmissionState}
-                updateUpload={this.props.updateUpload}
-                upload={this.props.upload}
-                uploadStatus={this.props.uploadStatus}
-                md5Progress={this.props.md5Progress}
-            />
+                { ..._.pick(this.props, 'modifyNewContext', 'linkType', 'setSubmissionState',
+                    'selectObj', 'selectComplete', 'selectCancel', 'arrayIdx', 'keyDisplay', 'keyComplete', 'currType',
+                    'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx'
+                )}
+                { ...{ field, fieldType, fieldTip, enumValues, nestedField, title } }
+                value={fieldValue} key={field} schema={fieldSchema}
+                disabled={false} required={false} isArray={false} />
         );
     }
 
     render(){
-        var schema = this.props.schema;
-        var fields = schema['properties'] ? _.keys(schema['properties']) : [];
-        var buildFields = [];
-        for (var i=0; i<fields.length; i++){
-            var fieldSchema = this.includeField(schema, fields[i]);
-            if (fieldSchema){
-                buildFields.push([fields[i], fieldSchema]);
-            }
-        }
-        return(
-            <div className="object-field-container">
-                {buildFields.map((field) => this.initiateField(field))}
-            </div>
-        );
+        var objectSchema = this.props.schema,
+            allFieldsInSchema = objectSchema['properties'] ? _.keys(objectSchema['properties']) : [],
+            fieldsToBuild = _.filter(_.map(allFieldsInSchema, (f)=>{ // List of [field, fieldSchema] pairs.
+                var fieldSchemaToUseOrNull = this.includeField(objectSchema, f);
+                return (fieldSchemaToUseOrNull && [f, fieldSchemaToUseOrNull]) || null;
+            }));
+
+        return <div className="object-field-container" children={_.map(fieldsToBuild, this.initiateField)} />;
     }
 }
+
+
 
 /**
  * For version 1. A simple local file upload that gets the name, type,
@@ -699,6 +1076,8 @@ class AttachmentInput extends React.Component{
         );
     }
 }
+
+
 
 /**
  * Input for an s3 file upload. Context value set is local value of the filename.
@@ -899,6 +1278,8 @@ class S3FileInput extends React.Component{
     }
 }
 
+
+
 /**
  * Accepts a 'value' prop (which should contain a colon, at minimum) and present two fields for modifying its two parts.
  *
@@ -947,6 +1328,7 @@ export class AliasInputField extends React.Component {
         super(props); // Inherits this.onHide() function.
         this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
         this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
+        this.onAliasFirstPartChangeTyped = this.onAliasFirstPartChangeTyped.bind(this);
     }
 
     getInitialSubmitsForPart(){
@@ -962,6 +1344,11 @@ export class AliasInputField extends React.Component {
             aliasParts[1] = '';
         }
         this.props.onAliasChange(aliasParts.join(':'));
+    }
+
+    onAliasFirstPartChangeTyped(evt){
+        var newValue = evt.target.value || '';
+        return this.onAliasFirstPartChange(newValue, evt);
     }
 
     onAliasFirstPartChange(evtKey, e){
@@ -981,26 +1368,30 @@ export class AliasInputField extends React.Component {
     }
 
     render(){
-        var firstPartSelect = null;
-        var parts = AliasInputField.splitInTwo(this.props.value);
-        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
-        if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ this.getInitialSubmitsForPart() }</InputGroup.Addon>;
+        var { currentSubmittingUser, errorMessage, withinModal, value } = this.props;
+        var parts = AliasInputField.splitInTwo(value),
+            submits_for_list = (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0 && currentSubmittingUser.submits_for) || null,
+            initialDefaultFirstPartValue = this.getInitialSubmitsForPart(),
+            firstPartSelect;
+
+        if (currentSubmittingUser && Array.isArray(currentSubmittingUser.groups) && currentSubmittingUser.groups.indexOf('admin') > -1){
+            // Render an ordinary input box for admins (can specify any lab).
+            firstPartSelect = (
+                <FormControl id="aliasFirstPartInput" type="text" inputMode="latin"
+                    value={(parts.length > 1 && parts[0]) || ''} placeholder={"Lab (default: " + initialDefaultFirstPartValue + ")"}
+                    onChange={this.onAliasFirstPartChangeTyped} style={{ 'paddingRight' : 8, 'borderRight' : 'none' }} />
+            );
+        } else if (submits_for_list && submits_for_list.length === 1){
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ initialDefaultFirstPartValue }</InputGroup.Addon>;
         } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
-                <DropdownButton
-                    className="alias-lab-select form-control alias-first-part-input"
-                    onSelect={this.onAliasFirstPartChange}
-                    componentClass={InputGroup.Button}
-                    id="aliasFirstPartInput"
-                    title={(parts.length > 1 && (
+                <DropdownButton className="alias-lab-select form-control alias-first-part-input"
+                    onSelect={this.onAliasFirstPartChange} componentClass={InputGroup.Button}
+                    id="aliasFirstPartInput" title={(parts.length > 1 && (
                         <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right text-ellipsis-container" style={{ maxWidth : '80%' }}>{ ((parts[0] !== '' && parts[0]) || this.getInitialSubmitsForPart()) }</span></span>
-                    )) || 'Select a Lab'}
-                >
-                    { _.map(submits_for_list, function(lab){
-                        return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
-                    }) }
-                </DropdownButton>
+                    )) || 'Select a Lab'} children={_.map(submits_for_list, (lab) =>
+                        <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>
+                    )} />
             );
         }
         return (
@@ -1024,6 +1415,8 @@ export class AliasInputField extends React.Component {
     }
 
 }
+
+
 
 class InfoIcon extends React.Component{
 
@@ -1052,6 +1445,8 @@ class InfoIcon extends React.Component{
         );
     }
 }
+
+
 
 export function isValueNull(value){
     if (value === null) return true;

@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { Alert, Fade } from 'react-bootstrap';
+import {  Button, Fade } from 'react-bootstrap';
 import _ from 'underscore';
 import * as store from '../store';
 
@@ -23,15 +23,25 @@ export default class Alerts extends React.Component {
     /**
      * Open an alert box.
      * More specifically, saves a new alert to Redux store 'alerts' field.
-     * 
+     *
      * @public
-     * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
-     * @returns {undefined} Nothing
+     * @param {Object} alert                    Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+     * @param {string} alert.title              Title to be shown at top of alert box.
+     * @param {string|JSXElement} alert.message Message to be shown in body of alert box. May be JSX if no plans for alert to be rendered server-side.
+     * @param {string} alert.style              Style of alert box. May be any Bootstrap-compliant style, e.g. "danger", "warning", "info".
+     * @returns {undefined}                     Nothing
      */
     static queue(alert, callback, currentAlerts = null){
         if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
-        if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
-        var newAlerts = currentAlerts.concat([alert]);
+        var duplicateTitleAlertIdx = _.findIndex(currentAlerts, { 'title' : alert.title }),
+            newAlerts = currentAlerts.slice(0);
+
+        if (typeof duplicateTitleAlertIdx === 'number' && duplicateTitleAlertIdx > -1){
+            // Same alert already set, lets update it instead of adding new one.
+            newAlerts.splice(duplicateTitleAlertIdx, 1, alert);
+        } else {
+            newAlerts.push(alert);
+        }
         store.dispatch({
             type: { 'alerts' : newAlerts }
         });
@@ -39,7 +49,7 @@ export default class Alerts extends React.Component {
 
     /**
      * Close an alert box.
-     * 
+     *
      * @public
      * @param {Object} alert - Object with at least 'title'.
      * @returns {undefined} Nothing
@@ -103,65 +113,74 @@ export default class Alerts extends React.Component {
 
     constructor(props){
         super(props);
+        this.setDismissing = this.setDismissing.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'dismissing' : []
         };
     }
 
+    setDismissing(dismissing){ this.setState({ dismissing }); }
+
     /**
      * Renders out Bootstrap Alerts for any queued alerts.
-     * 
-     * @memberof module:alerts
-     * @private
-     * @instance
+     *
      * @returns {JSX.Element} A <div> element.
      */
     render(){
         if (this.props.alerts.length === 0) return null;
 
-        function dismiss(index){
-            var currentAlert = this.props.alerts.slice(index, index + 1)[0];
-            var dismissing = _.clone(this.state.dismissing);
-            if (_.findIndex(dismissing, currentAlert) === -1) dismissing.push(currentAlert);
-            this.setState({ 'dismissing' : dismissing });
-        }
-
-        function finishDismiss(index){
-            var currentAlert = this.props.alerts.slice(index, index + 1)[0];
-            this.setState({ 'dismissing' : _.without(this.state.dismissing, currentAlert) });
-            store.dispatch({
-                type: { 'alerts' : _.without(this.props.alerts, currentAlert) }
-            });
-        }
-
         return (
-            <div className="alerts">
-            {
-                this.props.alerts.map(function(alert,i){
-                    return (
-                        <Fade
-                            key={'alert-' + i}
-                            timeout={500}
-                            in={ _.findIndex(this.state.dismissing, alert) === -1 }
-                            onExited={finishDismiss.bind(this, i)}
-                            unmountOnExit={true}
-                        >
-                            <div>
-                                <Alert
-                                    bsStyle={alert.style || 'danger'}
-                                    onDismiss={alert.noCloseButton === true ? null : dismiss.bind(this, i)}
-                                    className={alert.noCloseButton === true ? 'no-close-button' : null}
-                                >
-                                    <h4>{ alert.title }</h4>
-                                    <p>{ alert.message }</p>
-                                </Alert>
-                            </div>
-                        </Fade>
-                    );
-                }.bind(this))
-            }
-            </div>
+            <div className="alerts mt-2" {..._.omit(this.props, 'children', 'alerts')} children={_.map(this.props.alerts, (alert, index, alerts) =>
+                <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={this.state.dismissing} key={index} />
+            )} />
         );
     }
+}
+
+class AlertItem extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.dismiss = this.dismiss.bind(this);
+        this.finishDismiss = this.finishDismiss.bind(this);
+    }
+
+    dismiss(e){
+        e.stopPropagation();
+        e.preventDefault();
+        var { alert, dismissing, setDismissing } = this.props;
+        dismissing = dismissing.slice(0);
+        if (_.findIndex(dismissing, alert) === -1) dismissing.push(alert);
+        setDismissing(dismissing);
+    }
+
+    finishDismiss(){
+        var { alert, dismissing, setDismissing, alerts } = this.props;
+        setDismissing(_.without(dismissing, alert));
+        store.dispatch({
+            type: { 'alerts' : _.without(alerts, alert) }
+        });
+    }
+
+    render(){
+        var { index, alert, dismissing } = this.props;
+        return (
+            <Fade timeout={500}
+                in={ _.findIndex(dismissing, alert) === -1 }
+                onExited={this.finishDismiss} unmountOnExit={true}>
+                <div className={"alert alert-dismissable alert-" + (alert.style || 'danger') + (alert.noCloseButton === true ? ' no-close-button' : '')}>
+                    { alert.noCloseButton === true ? null :
+                        <button type="button" className="close" onClick={this.dismiss}>
+                            <span aria-hidden="true">×</span>
+                            <span className="sr-only">Close alert</span>
+                        </button>
+                    }
+                    <h4>{ alert.title }</h4>
+                    <div className="mb-0" children={alert.message} />
+                </div>
+            </Fade>
+        );
+    }
+
 }

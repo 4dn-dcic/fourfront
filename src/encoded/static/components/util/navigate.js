@@ -62,6 +62,9 @@ navigate.setNavigateFunction = function(navFxn){
 
 
 navigate.getBrowseBaseParams = function(browseBaseState = null){
+    if (browseBaseState === 'item_search') {
+        return {};
+    }
     if (!browseBaseState){
         if (store === null){
             store = require('../../store');
