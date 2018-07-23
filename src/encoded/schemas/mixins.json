@@ -419,7 +419,7 @@
     "spikein_info": {
         "spikein_sequences": {
             "title": "Spike In Sequences",
-            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences",
+            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
             "type": "string",
             "lookup": 196,
             "linkTo": "FileReference"
@@ -430,53 +430,6 @@
             "type": "string",
             "linkTo": "Vendor",
             "lookup": 198
-        },
-        "spikein_concentrations": {
-            "title": "Attached file of spikein concentrations",
-            "description" : "tsv formatted text file of spikein species concentrations used.",
-            "type": "object",
-            "lookup": 197,
-            "additionalProperties": false,
-            "formInput": "file",
-            "attachment": true,
-            "ff_flag": "clear clone",
-            "properties": {
-                "download": {
-                    "title": "File Name",
-                    "description" : "File Name of the attachment.",
-                    "type": "string"
-                },
-                "href": {
-                    "internal_comment": "Internal webapp URL for document file",
-                    "title" : "href",
-                    "description" : "Path to download the file attached to this Item.",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "MIME type",
-                    "type": "string",
-                    "enum": [
-                        "text/plain",
-                        "text/tab-separated-values"
-                    ]
-                },
-                "md5sum": {
-                    "title": "MD5 Checksum",
-                    "description" : "Use this to ensure that your file was downloaded without errors or corruption.",
-                    "type": "string",
-                    "format": "md5sum"
-                },
-                "size": {
-                    "title": "File size",
-                    "description" : "Size of the file on disk",
-                    "type": "integer"
-                },
-                "blob_id":{
-                    "title": "Blob ID",
-                    "type": "string",
-                    "internal_comment": "blob storage ID. Use to like with s3/rds"
-                }
-            }
         }
     },
     "sop_mapping": {

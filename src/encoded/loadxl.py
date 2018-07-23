@@ -95,7 +95,6 @@ ORDER = [
 
 IS_ATTACHMENT = [
     'attachment',
-    'spikein_concentrations',
     'IDR_plot_true',
     'IDR_plot_rep1_pr',
     'IDR_plot_rep2_pr',
