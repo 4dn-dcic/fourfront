@@ -157,46 +157,22 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             # print('Missing assertion.', 'unauthenticated_userid', request)
             return None
 
-        user_info = self.get_token_info(id_token, request)
+        jwt_info = self.get_token_info(id_token, request)
         if not user_info:
             return None
 
-        email = request._auth0_authenticated = user_info['email'].lower()
+        email = request._auth0_authenticated = jwt_info['email'].lower()
 
         # Allow access basic user credentials from request obj after authenticating & saving request
         def get_user_info(request):
             user_props = request.embed('/session-properties', as_user=email)
             user_props.update({
-                "details": self.get_user_details(request),
                 "id_token": id_token
             })
             return user_props
 
         request.set_property(get_user_info, "user_info", True)
         return email
-
-    def get_user_details(self, request):
-        '''Grabs some details about user (if logged in), including email, first name, last name, timezone, groups, and return them from ES (if available) or DB.'''
-        for principal in request.effective_principals:
-            if principal.startswith('userid.'):
-                break
-        else:
-            raise HTTPForbidden(title="Not logged in.")
-
-        # Only include certain/applicable fields from profile
-        include_detail_fields = ['email', 'first_name', 'last_name', 'groups', 'timezone', 'status']
-        namespace, userid = principal.split('.', 1)
-        user_model = request.registry[CONNECTION].storage.get_by_uuid(userid)
-
-        # For the returned fields (`included_detail_fields` list), user_dict is same whether from ES or DB.
-        # --BUT--, linkTo items are @ids in ES and UUIDs in DB, so keep in mind if extending this method to return submits_for, labs, etc.
-        if hasattr(user_model, 'source') and user_model.source.get('object'):
-            user_dict = user_model.source['object']
-        else:
-            from .types.user import User as UserClass # Prevent overriding existing User (same thing?)
-            user_dict = UserClass(request.registry, user_model).__json__(request)
-
-        return {p: v for p, v in user_dict.items() if p in include_detail_fields}
 
     def get_token_info(self, token, request):
         '''
@@ -313,11 +289,16 @@ def session_properties(request):
 
     namespace, userid = principal.split('.', 1)
     user = request.registry[COLLECTIONS]['user'][userid]
+    user_dict = user.__json__(request)
+
+    # Only include certain/applicable fields from profile
+    include_detail_fields = ['email', 'first_name', 'last_name', 'groups', 'timezone', 'status']
     user_actions = calculate_properties(user, request, category='user_action')
 
     properties = {
         #'user': request.embed(request.resource_path(user)),
-        'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
+        'details' : { p:v for p, v in user_dict.items() if p in include_detail_fields },
+        'user_actions' : [ v for k, v in sorted(user_actions.items(), key=itemgetter(0)) ]
     }
 
     #if 'auth.userid' in request.session:
