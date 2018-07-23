@@ -317,11 +317,18 @@ export function productClick(item, extraData = {}, callback = null){
 
 
 /**
- * This will be created once we upgrade to React 16, where-in we'll be able to catch exceptions from React in a streamlined fashion.
  * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/exceptions
  */
-export function exception(){
-    return;
+export function exception(message, fatal = false){
+    // Doesn't test whether should track or not -- assume always track errors.
+    var excObj = {
+        'hitType'       : 'exception',
+        'exDescription' : message,
+        'exFatal'       : fatal
+    };
+    excObj.hitCallback = function(){ console.info('Successfully sent exception', excObj); }
+    ga('send', excObj);
+    return true;
 }
 
 

@@ -908,6 +908,11 @@ export default class App extends React.Component {
                 if (typeof callback === 'function'){
                     callback(response);
                 }
+                if (response.code === 404){
+                    // This may not be caught as a server or network error.
+                    // If is explicit 404 (vs just 0 search results), pyramid will send it as 'code' property.
+                    analytics.exception('Page Not Found - ' + href);
+                }
             });
 
             if (!options.replace && !options.dontScrollToTop) {
@@ -922,6 +927,14 @@ export default class App extends React.Component {
                 if (typeof fallbackCallback == 'function'){
                     fallbackCallback(err);
                 }
+
+                if (err.status === 500){
+                    analytics.exception('Server Error: ' + err.status + ' - ' + href);
+                }
+                if (err.status === 404){
+                    analytics.exception('Page Not Found - ' + href);
+                }
+
                 // Err could be an XHR object if could not parse JSON.
                 if (
                     typeof err.status === 'number' &&
@@ -929,6 +942,7 @@ export default class App extends React.Component {
                 ) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
+                    analytics.exception('Network Error: ' + err.status + ' - ' + href);
                 } else if (err.message !== 'HTTPForbidden'){
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.

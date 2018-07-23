@@ -128,7 +128,9 @@ export default class Login extends React.Component {
                         'eventLabel' : (profile.lab && object.itemUtil.atId(profile.lab)) || 'No Lab'
                     });
                 });
-            } else throw new Error('No profile URL found in user_actions.');
+            } else if (!profileURL){
+                throw new Error('No profile URL found in user_actions.');
+            }
         }).catch((error)=>{
             // Handle Errors
             console.error("Error during login: ", error.description);
