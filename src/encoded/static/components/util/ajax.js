@@ -8,9 +8,9 @@ var console = require('./patched-console').default;
  * @private
  */
 const defaultHeaders = {
-    "Content-Type" : "application/json; charset=UTF-8",
-    "Accept" : "application/json",
-    "X-Requested-With" : "XMLHttpRequest" // Allows some server-side libs (incl. pyramid) to identify using `request.is_xhr`.
+    "Content-Type"      : "application/json; charset=UTF-8",
+    "Accept"            : "application/json",
+    "X-Requested-With"  : "XMLHttpRequest" // Allows some server-side libs (incl. pyramid) to identify using `request.is_xhr`.
 };
 
 /**

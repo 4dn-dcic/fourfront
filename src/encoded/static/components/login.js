@@ -4,10 +4,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as store from '../store';
-import { JWT, ajax, navigate, isServerSide } from './util';
+import { JWT, ajax, navigate, isServerSide, analytics, object } from './util';
 import { MenuItem } from 'react-bootstrap';
 import Alerts from './alerts';
 import Auth0Lock from 'auth0-lock';
+
+
 
 /** Component that contains auth0 functions */
 export default class Login extends React.Component {
@@ -116,6 +118,17 @@ export default class Login extends React.Component {
             if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
                 navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
             }
+
+            // Fetch user profile and use their primary lab as the eventLabel.
+            var profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
+            var isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
+            if (profileURL && !isAdmin){
+                ajax.load(profileURL, (profile)=>{
+                    analytics.event('Authentication', 'UILogin', {
+                        'eventLabel' : (profile.lab && object.itemUtil.atId(profile.lab)) || 'No Lab'
+                    });
+                });
+            } else throw new Error('No profile URL found in user_actions.');
         }).catch((error)=>{
             // Handle Errors
             console.error("Error during login: ", error.description);
@@ -129,7 +142,9 @@ export default class Login extends React.Component {
                 navigate('/error/login-failed');
             } else {
                 navigate('/', ()=>{
-                    setTimeout( Alerts.queue.bind(Alerts, Alerts.LoginFailed), 1000);
+                    setTimeout(()=>{
+                        Alerts.queue(Alerts.LoginFailed);
+                    }, 1000);
                 });
             }
             Alerts.deQueue(Alerts.LoggedOut);

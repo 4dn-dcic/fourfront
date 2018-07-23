@@ -241,6 +241,10 @@ export default class App extends React.Component {
     componentDidMount() {
         globals.bindEvent(window, 'keydown', this.handleKey);
 
+        // Load up analytics
+        analytics.initializeGoogleAnalytics( analytics.getTrackingId(this.props.href), this.props.context );
+
+        // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
@@ -279,9 +283,6 @@ export default class App extends React.Component {
             window.onhashchange = this.onHashChange;
         }
         window.onbeforeunload = this.handleBeforeUnload;
-
-        // Load up analytics
-        analytics.initializeGoogleAnalytics( analytics.getTrackingId(this.props.href), this.props.context );
 
         // Save some stuff to global window variables so we can access it in tests:
         // Normally would call this 'window.app' but ENCODE already sets this in browser.js to be the top-level Redux provider (not really useful, remove?)
@@ -619,12 +620,10 @@ export default class App extends React.Component {
     authenticateUser(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
-
+        if (idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
+            console.info('AUTHENTICATING USER; JWT PRESENT BUT NO STATE.SESSION OR USER_ACTIONS'); // This is very unlikely due to us rendering re: session server-side.
             ajax.promise('/login', 'POST', {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+idToken
+                'Authorization' : 'Bearer ' + idToken
             }, JSON.stringify({id_token: idToken}))
             .then(response => {
                 if (response.code || response.status || response.id_token !== idToken) throw response;
@@ -633,6 +632,9 @@ export default class App extends React.Component {
             .then(response => {
                 JWT.saveUserInfo(response);
                 this.updateUserInfo(callback);
+                analytics.event('Authentication', 'ExistingSessionLogin', {
+                    'eventLabel' : 'Authenticated ClientSide'
+                });
             }, error => {
                 // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
                 // and unset state.session & state.user_actions (via this.updateUserInfo())
@@ -640,6 +642,11 @@ export default class App extends React.Component {
                 this.updateUserInfo(callback);
             });
             return idToken;
+        } else if (idToken && this.state.session && this.state.user_actions){
+            console.info('User is logged in already, continuing session.');
+            analytics.event('Authentication', 'ExistingSessionLogin', {
+                'eventLabel' : 'Authenticated ServerSide'
+            });
         }
         return null;
     }

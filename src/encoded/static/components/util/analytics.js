@@ -446,7 +446,7 @@ function impressionListOfItems(itemList, href, listName = null, context = null){
         commonProductObj.list = 'Browse Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
     } else if (navigate.isSearchHref(href)){
-        commonProductObj.list = href.hash.indexOf('selection') > -1 ? 'Selection Search Results' : 'Search Results';
+        commonProductObj.list = (href.hash && href.hash.indexOf('selection')) > -1 ? 'Selection Search Results' : 'Search Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
     } else {
         commonProductObj.list = 'Collection Results';
