@@ -294,11 +294,13 @@ export default class StaticPage extends React.PureComponent {
             redirected_from = hrefParts.query && hrefParts.query.redirected_from;
 
         if (redirected_from){
-            Alerts.queue({
-                'title' : "Redirected",
-                'message': <span>You have been redirected from old page <span className="text-500">{ redirected_from }</span> to <span className="text-500">{ hrefParts.pathname }</span>. Please update your bookmarks.</span>,
-                'style': 'warning'
-            });
+            setTimeout(function(){
+                Alerts.queue({
+                    'title' : "Redirected",
+                    'message': <span>You have been redirected from old page <span className="text-500">{ redirected_from }</span> to <span className="text-500">{ hrefParts.pathname }</span>. Please update your bookmarks.</span>,
+                    'style': 'warning'
+                });
+            }, 0);
         }
     }
 
