@@ -149,7 +149,8 @@ def test_patch_extra_files(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
 
-    # now patch this guy with just the extra files
+    # now patch this guy with just the extra files changing the format of extfile first
+    extra_files[0]['file_format'] = 'pairsam_px2'
     patch = {'uuid': resobj['uuid'], 'extra_files': extra_files}
     res = testapp.patch_json('/file_processed/' + resobj['uuid'], patch, status=200)
     resobj = res.json['@graph'][0]
@@ -157,7 +158,7 @@ def test_patch_extra_files(testapp, proc_file_json):
     # ensure we get correct stuff back after a patch
     # bug was that we were only getting back the file_format
     assert len(resobj['extra_files']) == len(extra_files)
-    file_name = ("%s.pairs.gz.px2" % (resobj['accession']))
+    file_name = ("%s.sam.pairs.gz.px2" % (resobj['accession']))
     expected_key = "%s/%s" % (resobj['uuid'], file_name)
     assert resobj['extra_files'][0]['upload_key'] == expected_key
     assert resobj['extra_files'][0]['href']
@@ -617,24 +618,23 @@ def test_validate_extra_files_extra_files_bad_post_extra_same_as_primary(testapp
 
 def test_validate_extra_files_extra_files_bad_patch_extra_same_as_primary(testapp, processed_file_data):
     extf = {'file_format': 'pairs'}
-    # import pdb; pdb.set_trace()
     res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
     pfid = res1.json['@graph'][0]['@id']
     res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=422)
     assert "'pairs' format cannot be the same for file and extra_file" == res2.json.get('errors')[0].get('description')
 
 
-def test_validate_extra_files_extra_files_bad_post_extra_format_not_in_map(testapp, processed_file_data):
-    extf = {'file_format': 'wiggly'}
-    processed_file_data['extra_files'] = [extf]
+def test_validate_extra_files_extra_files_bad_post_existing_extra_format(testapp, processed_file_data):
+    extfs = [{'file_format': 'pairs_px2'}, {'file_format': 'pairs_px2'}]
+    processed_file_data['extra_files'] = extfs
     res = testapp.post_json('/files-processed', processed_file_data, status=422)
-    assert "'wiggly' not found in the file_format_file_extension_mapping" == res.json.get('errors')[0].get('description')
+    assert "More than one extra file with 'pairs_px2' format is not allowed" == res.json.get('errors')[0].get('description')
 
 
-def test_validate_extra_files_extra_files_bad_patch_extra_format_not_in_map(testapp, processed_file_data):
-    extf = {'file_format': 'wiggly'}
-    # import pdb; pdb.set_trace()
+def test_validate_extra_files_extra_files_bad_patch_existing_extra_format(testapp, processed_file_data):
+    extf = {'file_format': 'pairs_px2'}
+    processed_file_data['extra_files'] = [extf]
     res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
     pfid = res1.json['@graph'][0]['@id']
     res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=422)
-    assert "'wiggly' not found in the file_format_file_extension_mapping" == res2.json.get('errors')[0].get('description')
+    assert "More than one extra file with 'pairs_px2' format is not allowed" == res2.json.get('errors')[0].get('description')

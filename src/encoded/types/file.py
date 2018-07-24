@@ -1006,14 +1006,27 @@ def validate_extra_file_format(context, request):
         if not fid:
             return
         finfo = get_item_if_you_can(request, fid, 'files')
-        fformat = finfo.get('file_format')
+        try:
+            fformat = finfo.get('file_format')
+        except AttributeError:
+            fformat = None
+        else:
+            existing_extras = finfo.get('extra_files')
+            if existing_extras:
+                extras.extend(existing_extras)
         if not fformat:
             # this in theory should never happen
             request.errors.add('body', None, "Can't find parent file format for extra_files")
             return
     valid_schema = context.type_info.schema
+    seen_ext_formats = []
     for i, ef in enumerate(extras):
         eformat = ef.get('file_format')
+        if eformat in seen_ext_formats:
+            request.errors.add('body', ['extra_files', i], "More than one extra file with '%s' format is not allowed" % eformat)
+            files_ok = False
+        else:
+            seen_ext_formats.append(eformat)
         if eformat == fformat:
             request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % fformat)
             files_ok = False
