@@ -317,11 +317,18 @@ export function productClick(item, extraData = {}, callback = null){
 
 
 /**
- * This will be created once we upgrade to React 16, where-in we'll be able to catch exceptions from React in a streamlined fashion.
  * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/exceptions
  */
-export function exception(){
-    return;
+export function exception(message, fatal = false){
+    // Doesn't test whether should track or not -- assume always track errors.
+    var excObj = {
+        'hitType'       : 'exception',
+        'exDescription' : message,
+        'exFatal'       : fatal
+    };
+    excObj.hitCallback = function(){ console.info('Successfully sent exception', excObj); }
+    ga('send', excObj);
+    return true;
 }
 
 
@@ -446,7 +453,7 @@ function impressionListOfItems(itemList, href, listName = null, context = null){
         commonProductObj.list = 'Browse Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
     } else if (navigate.isSearchHref(href)){
-        commonProductObj.list = href.hash.indexOf('selection') > -1 ? 'Selection Search Results' : 'Search Results';
+        commonProductObj.list = (href.hash && href.hash.indexOf('selection')) > -1 ? 'Selection Search Results' : 'Search Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
     } else {
         commonProductObj.list = 'Collection Results';
