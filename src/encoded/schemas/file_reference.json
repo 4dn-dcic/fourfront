@@ -58,6 +58,7 @@
                 "restriction sites",
                 "blacklisted regions",
                 "repeats",
+                "spike-in",
                 "other"
             ]
         },
