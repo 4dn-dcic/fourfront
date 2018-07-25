@@ -628,13 +628,13 @@ def test_validate_extra_files_extra_files_bad_post_existing_extra_format(testapp
     extfs = [{'file_format': 'pairs_px2'}, {'file_format': 'pairs_px2'}]
     processed_file_data['extra_files'] = extfs
     res = testapp.post_json('/files-processed', processed_file_data, status=422)
-    assert "More than one extra file with 'pairs_px2' format is not allowed" == res.json.get('errors')[0].get('description')
+    assert "Multple extra files with 'pairs_px2' format cannot be submitted at the same time" == res.json.get('errors')[0].get('description')
 
 
-def test_validate_extra_files_extra_files_bad_patch_existing_extra_format(testapp, processed_file_data):
+def test_validate_extra_files_extra_files_ok_patch_existing_extra_format(testapp, processed_file_data):
     extf = {'file_format': 'pairs_px2'}
     processed_file_data['extra_files'] = [extf]
     res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
     pfid = res1.json['@graph'][0]['@id']
-    res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=422)
-    assert "More than one extra file with 'pairs_px2' format is not allowed" == res2.json.get('errors')[0].get('description')
+    res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=200)
+    assert not res2.json.get('errors')

@@ -1010,10 +1010,6 @@ def validate_extra_file_format(context, request):
             fformat = finfo.get('file_format')
         except AttributeError:
             fformat = None
-        else:
-            existing_extras = finfo.get('extra_files')
-            if existing_extras:
-                extras.extend(existing_extras)
         if not fformat:
             # this in theory should never happen
             request.errors.add('body', None, "Can't find parent file format for extra_files")
@@ -1023,7 +1019,7 @@ def validate_extra_file_format(context, request):
     for i, ef in enumerate(extras):
         eformat = ef.get('file_format')
         if eformat in seen_ext_formats:
-            request.errors.add('body', ['extra_files', i], "More than one extra file with '%s' format is not allowed" % eformat)
+            request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
             files_ok = False
         else:
             seen_ext_formats.append(eformat)
