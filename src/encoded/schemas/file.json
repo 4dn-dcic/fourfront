@@ -103,6 +103,7 @@
                 "type": "object",
                 "required": ["file_format"],
                 "additionalProperties": true,
+                "required": ["file_format"],
                 "properties": {
                     "file_format": {
                         "title": "File Format",
