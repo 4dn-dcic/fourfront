@@ -25,6 +25,8 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/antibody_info" },
+        { "$ref": "mixins.json#/spikein_info" },
+        { "$ref": "mixins.json#/attachment" },
         { "$ref": "experiment.json#/properties" }
     ],
     "dependencies": {
@@ -52,8 +54,7 @@
             "MARGI",
             "GAM",
             "CUT&RUN",
-            "TrAC-loop",
-            "TSA-seq"
+            "TrAC-loop"
           ]
         },
         "targeted_factor": {
@@ -82,13 +83,6 @@
             "type": "number",
             "lookup": 115,
             "use_for": ["CUT&RUN"]
-        },
-        "affinity_rounds": {
-            "title": "Number of rounds of affinity purification",
-            "description": "If there are multiple rounds of purification - eg. 2 biotin affinity purifications for TSA-seq",
-            "type": "integer",
-            "lookup": 120,
-            "use_for": ["TSA-seq"]
         }
     },
     "columns": {

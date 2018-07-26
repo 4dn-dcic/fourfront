@@ -42,6 +42,7 @@
                 "compressed_fasta",
                 "fasta",
                 "juicer_format_restriction_site_file",
+                "conc",
                 "other"
             ]
         },
@@ -57,6 +58,7 @@
                 "restriction sites",
                 "blacklisted regions",
                 "repeats",
+                "spike-in",
                 "other"
             ]
         },
@@ -85,6 +87,7 @@
         "compressed_fasta": ".fasta.gz",
         "fasta": ".fasta",
         "juicer_format_restriction_site_file": ".txt",
+        "conc": ".fasta.conc",
         "other": ""
     }
 }

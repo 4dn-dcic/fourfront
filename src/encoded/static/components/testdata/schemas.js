@@ -3480,7 +3480,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -9103,7 +9107,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -17865,7 +17873,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -19595,7 +19607,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -20703,15 +20719,21 @@ module.exports = {
                         "title": "MIME type",
                         "type": "string",
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
-                            "image/png",
                             "image/tiff",
                             "image/gif",
-                            "text/html"
-                        ]
+                            "text/html",
+                            "image/png",
+                            "image/svs",
+                            "text/autosql"
+                        ],
                     },
                     "size": {
                         "title": "File size",
@@ -23563,7 +23585,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -25710,7 +25736,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
