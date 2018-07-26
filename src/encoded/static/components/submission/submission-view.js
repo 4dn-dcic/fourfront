@@ -42,7 +42,7 @@ import { Detail } from '../item-pages/components';
  * @prop {boolean} create   Is this a new Item being created?
  * @prop {boolean} edit     Is this an Item being edited?
  */
-export default class SubmissionView extends React.Component{
+export default class SubmissionView extends React.PureComponent{
 
     constructor(props){
         super(props);
@@ -111,7 +111,9 @@ export default class SubmissionView extends React.Component{
             'file'                  : null,
             'upload'                : null,
             'uploadStatus'          : null,
-            'currentSubmittingUser' : null
+            'currentSubmittingUser' : null,
+            'edit'                  : props.currentAction === 'edit',
+            'create'                : (props.currentAction === 'create' || props.currentAction === 'add')
         };
     }
 
@@ -120,7 +122,7 @@ export default class SubmissionView extends React.Component{
      * available.
      */
     componentDidMount(){
-        if(this.props.schemas && _.keys(this.props.schemas).length > 0){
+        if (this.props.schemas && _.keys(this.props.schemas).length > 0){
             this.initializePrincipal(this.props.context, this.props.schemas);
         }
     }
@@ -131,10 +133,15 @@ export default class SubmissionView extends React.Component{
      * available on componentDidMount.
      */
     componentWillReceiveProps(nextProps){
-        if(this.props.schemas !== nextProps.schemas){
-            if(this.state.currKey === null){
+        if (this.props.schemas !== nextProps.schemas){
+            if (this.state.currKey === null){
                 this.initializePrincipal(nextProps.context, nextProps.schemas);
             }
+        }
+        if (this.props.currentAction !== nextProps.currentAction){
+            var edit = nextProps.currentAction === 'edit';
+            var create = (nextProps.currentAction === 'create' || nextProps.currentAction === 'add');
+            this.setState({ edit, create });
         }
     }
 
@@ -146,8 +153,8 @@ export default class SubmissionView extends React.Component{
      * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = cloneObj(this.state.keyContext);
-        var validCopy = cloneObj(this.state.keyValid);
+        var contextCopy = object.deepClone(this.state.keyContext);
+        var validCopy = object.deepClone(this.state.keyValid);
         contextCopy[objKey] = newContext;
         validCopy[objKey] = this.findValidationState(objKey);
         this.setState({
@@ -163,7 +170,7 @@ export default class SubmissionView extends React.Component{
      * 1 (ready to validate). Otherwise return 0 (not ready to validate)
      */
     findValidationState = (keyIdx) => {
-        var hierarchy = cloneObj(this.state.keyHierarchy);
+        var hierarchy = object.deepClone(this.state.keyHierarchy);
         var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
         if (keyHierarchy === null) return 0;
         var validationReturn = 1;
@@ -182,9 +189,9 @@ export default class SubmissionView extends React.Component{
             context = this.props.context;
         }
         var principalDisplay; // Name of our current Item being created.
-        if (this.props.create === true && !this.props.edit){
+        if (this.state.create === true && !this.state.edit){
             principalDisplay = 'New ' + itemType;
-        } else if (this.props.edit === true && !this.props.create){
+        } else if (this.state.edit === true && !this.state.create){
             if (context && typeof context.accession === 'string'){
                 principalDisplay = context.accession;
             } else {
@@ -233,9 +240,9 @@ export default class SubmissionView extends React.Component{
         // Step B : Callback for after grabbing user w/ submits_for
         var continueInitProcess = function(){
             // if @id cannot be found or we are creating from scratch, start with empty fields
-            if(!contextID || this.props.create){
+            if(!contextID || this.state.create){
                 // We may not have schema (if Abstract type). If so, leave empty and allow initCreateObj ... -> createObj() to create it.
-                if (schema) initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                if (schema) initContext[0] = buildContext({}, schema, bookmarksList, this.state.edit, this.state.create);
                 initBookmarks[0] = bookmarksList;
 
                 this.setState({
@@ -252,9 +259,9 @@ export default class SubmissionView extends React.Component{
                 ajax.promise(contextID + '?frame=object&datastore=database').then(response => {
                     var initObjs = [];
                     if (response['@id'] && response['@id'] === contextID){
-                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, initObjs);
+                        initContext[0] = buildContext(response, schema, bookmarksList, this.state.edit, this.state.create, initObjs);
                         initBookmarks[0] = bookmarksList;
-                        if(this.props.edit && response.aliases && response.aliases.length > 0){
+                        if(this.state.edit && response.aliases && response.aliases.length > 0){
                             // we already have an alias for editing, so use it for title
                             // setting creatingIdx and creatingType to null prevents alias creation
                             initDisplay[0] = response.aliases[0];
@@ -262,7 +269,7 @@ export default class SubmissionView extends React.Component{
                         }
                     }else{
                         // something went wrong with fetching context. Just use an empty object
-                        initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                        initContext[0] = buildContext({}, schema, bookmarksList, this.state.edit, this.state.create);
                         initBookmarks[0] = bookmarksList;
                     }
                     this.setState({
@@ -279,7 +286,7 @@ export default class SubmissionView extends React.Component{
                     // if we are cloning and there is not an existing alias
                     // never prompt alias creation on edit
                     // do not initiate ambiguous type lookup on edit or create
-                    if(!this.props.edit && !existingAlias){
+                    if(!this.state.edit && !existingAlias){
                         this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
                     }
                 });
@@ -509,46 +516,51 @@ export default class SubmissionView extends React.Component{
      * so the view changes to it.
      */
     createObj = (type, newIdx, newLink, alias, extraState={}) => {
-        var contextCopy = this.state.keyContext;
-        var validCopy = this.state.keyValid;
-        var typesCopy = this.state.keyTypes;
-        var parentKeyIdx = this.state.currKey;
-        var hierarchy = this.state.keyHierarchy;
-        var keyDisplay = this.state.keyDisplay;
-        var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = cloneObj(this.state.keyLinks);
-        var bookmarksList = [];
-        // increase key iter by 1 for a new unique key
-        var keyIdx;
-        var newHierarchy;
-        if(newIdx === 0){ // initial object creation
+        var { keyTypes, currKey, keyHierarchy, keyIter } = this.state;
+        var contextCopy     = _.clone(this.state.keyContext),
+            validCopy       = _.clone(this.state.keyValid),
+            typesCopy       = _.clone(keyTypes),
+            parentKeyIdx    = currKey,
+            bookmarksCopy   = _.clone(this.state.keyLinkBookmarks),
+            linksCopy       = object.deepClone(this.state.keyLinks),
+            keyDisplay      = _.clone(this.state.keyDisplay),
+            bookmarksList   = [],
+            keyIdx,
+            newHierarchy;
+
+
+        if (newIdx === 0){ // initial object creation
             keyIdx = 0;
-            newHierarchy = hierarchy;
-        }else{
-            keyIdx = this.state.keyIter + 1;
-            if(newIdx !== keyIdx){
+            newHierarchy = _.clone(keyHierarchy);
+        } else {
+            keyIdx = keyIter + 1; // increase key iter by 1 for a new unique key
+            if (newIdx !== keyIdx) {
                 console.error('ERROR: KEY INDEX INCONSISTENCY!');
                 return;
             }
-            newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
+            newHierarchy = modifyHierarchy(_.clone(keyHierarchy), keyIdx, parentKeyIdx);
             validCopy[keyIdx] = 1; // new object has no incomplete children yet
             validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
         }
+
         typesCopy[keyIdx] = type;
         var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
-        if(contextWithAlias.aliases){
+        if (contextWithAlias.aliases) {
             contextWithAlias.aliases.push(alias);
-        }else{
+        } else {
             contextWithAlias.aliases = [alias];
         }
+
         contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], bookmarksList, true, false);
         bookmarksCopy[keyIdx] = bookmarksList;
         linksCopy[keyIdx] = newLink;
         keyDisplay[keyIdx] = alias;
+
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
         }
+
         this.setState(_.extend({
             'keyContext': contextCopy,
             'keyValid': validCopy,
@@ -577,16 +589,15 @@ export default class SubmissionView extends React.Component{
      * @param {number} key - Key of item to remove.
      */
     removeObj = (key) => {
-        var contextCopy = cloneObj(this.state.keyContext);
-        var validCopy = cloneObj(this.state.keyValid);
-        var typesCopy = cloneObj(this.state.keyTypes);
-        var keyDisplay = this.state.keyDisplay;
-        var keyComplete = this.state.keyComplete;
-        var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = this.state.keyLinks;
+        var contextCopy = object.deepClone(this.state.keyContext);
+        var validCopy = object.deepClone(this.state.keyValid);
+        var typesCopy = object.deepClone(this.state.keyTypes);
+        var keyComplete = _.clone(this.state.keyComplete);
+        var bookmarksCopy = _.clone(this.state.keyLinkBookmarks);
+        var linksCopy = _.clone(this.state.keyLinks);
         var roundTwoCopy = this.state.roundTwoKeys.slice();
-        var hierarchy = this.state.keyHierarchy;
-        var dummyHierarchy = cloneObj(hierarchy);
+        var hierarchy = _.clone(this.state.keyHierarchy);
+        var dummyHierarchy = object.deepClone(hierarchy);
         var hierKey = key;
 
         // the key may be a @id string and not keyIdx if already submitted
@@ -631,7 +642,6 @@ export default class SubmissionView extends React.Component{
         });
         this.setState({
             'keyHierarchy': newHierarchy,
-            'keyDisplay': keyDisplay,
             'keyContext': contextCopy,
             'keyValid': validCopy,
             'keyTypes': typesCopy,
@@ -659,14 +669,13 @@ export default class SubmissionView extends React.Component{
      * isNan() for the key of a pre-existing object will return true.
      */
     addExistingObj = (path, display, type, newLink, init=false) => {
+        var { currKey, keyHierarchy } = this.state;
         // on init=true, all objects are children of the principal object (keyIdx = 0)
-        var parentKeyIdx = init ? 0 : this.state.currKey;
-        var hierarchy = this.state.keyHierarchy;
-        var keyDisplay = this.state.keyDisplay;
-        var keyTypes = this.state.keyTypes;
-        var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = this.state.keyLinks;
-        hierarchy = modifyHierarchy(hierarchy, path, parentKeyIdx);
+        var parentKeyIdx = init ? 0 : currKey;
+        var keyDisplay = _.clone(this.state.keyDisplay);
+        var keyTypes = _.clone(this.state.keyTypes);
+        var linksCopy = _.clone(this.state.keyLinks);
+        var hierarchy = modifyHierarchy(_.clone(keyHierarchy), path, parentKeyIdx);
         keyDisplay[path] = display;
         keyTypes[path] = type;
         linksCopy[path] = newLink;
@@ -674,7 +683,6 @@ export default class SubmissionView extends React.Component{
             'keyHierarchy': hierarchy,
             'keyDisplay': keyDisplay,
             'keyTypes': keyTypes,
-            'keyLinkBookmarks': bookmarksCopy,
             'keyLinks': linksCopy
         });
     }
@@ -689,10 +697,10 @@ export default class SubmissionView extends React.Component{
      * remove any hanging Alert error messages from validation.
      */
     setSubmissionState = (key, value) => {
-        var stateToSet = this.state;
-        if(key in stateToSet){
+        var stateToSet = {};
+        if (typeof this.state[key] !== 'undefined'){
             // this means we're navigating to a new object if true
-            if(key === 'currKey' && value !== this.state.currKey){
+            if (key === 'currKey' && value !== this.state.currKey){
                 // don't allow navigation when we have an uploading file
                 // or calculating md5
                 if(this.state.upload !== null || this.state.md5Progress !== null){
@@ -709,13 +717,14 @@ export default class SubmissionView extends React.Component{
                 if(!this.state.roundTwo){
                     // if current key is ready for validation, first try that
                     // but suppress warning messages
-                    if(keyValid[this.state.currKey] == 1){
+                    if (keyValid[this.state.currKey] === 1) {
                         this.submitObject(this.state.currKey, true, true);
                     }
                     // see if newly-navigated obj is ready for validation
                     if(keyValid[value] === 0){
                         var validState = this.findValidationState(value);
                         if(validState === 1){
+                            keyValid = _.clone(keyValid);
                             keyValid[value] = 1;
                             stateToSet['keyValid'] = keyValid;
                         }
@@ -893,7 +902,7 @@ export default class SubmissionView extends React.Component{
      * with a null value.
      */
     removeNullsFromContext = (inKey) => {
-        var finalizedContext = cloneObj(this.state.keyContext[inKey]);
+        var finalizedContext = object.deepClone(this.state.keyContext[inKey]);
         var noNulls = removeNulls(finalizedContext);
         return noNulls;
     }
@@ -934,13 +943,13 @@ export default class SubmissionView extends React.Component{
     buildDeleteFields = (patchContext, origContext, schema) => {
         var deleteFields = [];
         // must remove nulls from the orig copy to sync with patchContext
-        var origCopy = cloneObj(origContext);
+        var origCopy = object.deepClone(origContext);
         origCopy = removeNulls(origCopy);
         var userGroups = JWT.getUserGroups();
         _.keys(origCopy).forEach(function(field, index){
             // if patchContext already has a value (such as admin edited
             // import_items fields), don't overwrite
-            if(patchContext[field]){
+            if(patchContext[field] !== null){
                 return;
             }
             if(schema.properties[field]){
@@ -1041,7 +1050,7 @@ export default class SubmissionView extends React.Component{
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 // this should only be done on the primary object
-                if(this.props.edit && inKey === 0 && propContext.award && propContext.lab){
+                if(this.state.edit && inKey === 0 && propContext.award && propContext.lab){
                     if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = object.atIdFromObject(propContext.award);
                     }
@@ -1074,13 +1083,13 @@ export default class SubmissionView extends React.Component{
                 var deleteFields;
                 // change actionMethod and destination based on edit/round two
                 if(!test){
-                    if(this.state.roundTwo){
+                    if (this.state.roundTwo){
                         actionMethod = 'PATCH';
                         destination = this.state.keyComplete[inKey];
                         var alreadySubmittedContext = this.state.keyContext[destination];
                         // roundTwo flag set to true for second round
                         deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
-                    }else if(this.props.edit && inKey == 0){
+                    } else if (this.state.edit && inKey == 0){
                         // PATCH for principal obj on edit
                         actionMethod = 'PATCH';
                         destination = propContext['@id'];
@@ -1362,7 +1371,7 @@ export default class SubmissionView extends React.Component{
                             setSubmissionState={this.setSubmissionState}
                             hierarchy={this.state.keyHierarchy}
                             schemas={this.props.schemas}
-                            {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks')}
+                            {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks', 'keyHierarchy')}
                         />
                     </div>
                     <div className={bodyCol}>
@@ -1388,7 +1397,7 @@ export default class SubmissionView extends React.Component{
     }
 }
 
-class WarningBanner extends React.Component {
+class WarningBanner extends React.PureComponent {
     render() {
         return(
             <div className="mb-2 mt-1 text-400 warning-banner">
@@ -1405,7 +1414,7 @@ class WarningBanner extends React.Component {
     }
 }
 
-class DetailTitleBanner extends React.Component {
+class DetailTitleBanner extends React.PureComponent {
 
     /**
      * Traverse keyHierarchy option to get a list of hierarchical keys, e.g. 0,1,4 if are on currKey 4 that is a child of currKey 1 that is a child of currKey 0.
@@ -1512,19 +1521,21 @@ class DetailTitleBanner extends React.Component {
     }
 
     generateHierarchicalTitles(){
-        return _.map(DetailTitleBanner.getListOfKeysInPath(this.props.hierarchy, this.props.currKey), this.generateCrumbTitle);
+        var { hierarchy, currKey } = this.props;
+        return _.map(DetailTitleBanner.getListOfKeysInPath(hierarchy, currKey), this.generateCrumbTitle);
     }
 
     render(){
-        if (this.props.fullScreen) return null;
+        var { fullScreen, currKey } = this.props;
+        if (fullScreen) return null;
         return (
             <h3 className="crumbs-title mb-2">
                 <div className="subtitle-heading form-section-heading mb-08">
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        Currently Editing { this.props.currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} /> : null }
+                        Currently Editing { currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} /> : null }
                     </span>
                 </div>
-                { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(this.props.currKey) }
+                { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(currKey) }
             </h3>
         );
     }
@@ -1634,51 +1645,6 @@ class AliasSelectModal extends TypeSelectModal {
     }
 }
 
-class SelectExistingItemModal extends React.Component {
-
-    render(){
-        var { onCancel, selectData, navigate, submissionBase  } = this.props;
-
-        var selecting = false;
-        if(selectData !== null){
-            selecting = true;
-        }
-
-        if (!selecting) return null;
-
-        /*
-        return (
-            <Modal bsSize="xlarge" show onHide={onCancel} className="submission-view-modal select-existing-item-modal">
-                <Modal.Header closeButton>
-                    <Modal.Title>Select an existing Item</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="text-right">
-                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
-                    </div>
-                    <SearchView
-                        {..._.pick(this.props, 'navigate', 'selectCallback', 'submissionBase')}
-                        context={selectData}
-                    />
-                </Modal.Body>
-            </Modal>
-        );
-        */
-
-        return(
-            <Fade in appear>
-                <div>
-                    <div className="text-right">
-                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
-                    </div>
-                    <SearchView {...this.props} context={selectData}/>
-                </div>
-            </Fade>
-        );
-    }
-
-}
-
 
 /**
  * Main view for editing a specific object. This includes all non-same level
@@ -1705,18 +1671,13 @@ class IndividualObjectView extends React.Component{
          * State in this component mostly has to do with selection of existing objs
          *
          * @prop {!string} selectType           Type of existing object being selected (i.e. ExperimentHiC).
-         * @prop {!Object} selectData           Initial collection context fed to Search, given by LinkedObj in submission-fields.js.
-         * @prop {!string} selectQuery          Search query held by this component for in-place navigation
          * @prop {!string} selectField          Actual fieldname that we're selecting the existing obj for. May be nested in the case of subobjects, e.g. experiments_in_set.experiment
          * @prop {!number[]} selectArrayIdx     List of int numbers keeping track of list positions of the object we're selecting for. Since you can have arrays within arrays, one int won't do. Example: [1,2] would mean the current field is the second item within the first item of the array given by the top level field. When null, no arrays involved.
          * @prop {boolean} fadeState            Controls whether a fade animation should be triggered in render
          */
         this.state = {
             'selectType'    : null,
-            'selectData'    : null,
-            'selectQuery'   : null,
             'selectField'   : null,
-            'selectLink'    : null,
             'selectArrayIdx': null,
             'fadeState'     : false
         };
@@ -1763,6 +1724,12 @@ class IndividualObjectView extends React.Component{
                 return;
             }
         }
+
+        if (!field || typeof field !== 'string'){
+            // Throw error instead?
+            console.error('No field supplied', ...arguments);
+        }
+
         var splitField = field.split('.');
         var splitFieldLeaf = splitField[splitField.length-1];
         var arrayIdxPointer = 0;
@@ -1825,15 +1792,52 @@ class IndividualObjectView extends React.Component{
      * Use ajax to get the display_title for an existing object. Use that to kicks
      * of the addExistingObj process; if a title can't be found, use the object
      * path as a fallback.
+     *
+     * @param {string} value    The @ID or unique key of the Item for which we want to validate and get title for.
+     * @param {string} type     The Item type of value.
+     * @param {any} newLink     No idea what this is.
      */
-    fetchObjTitle = (value, type, newLink) => {
-        ajax.promise(value).then(data => {
-            if (data['display_title']){
-                this.props.addExistingObj(value, data['display_title'], type, newLink);
-            }else{
-                this.props.addExistingObj(value, value, type, newLink);
+    fetchAndValidateItem = (value, field, type, arrayIdx, newLink = null) => {
+        var hrefToFetch = value,
+            failureAlertTitle = "Validation error for field '" + field + "'" + (typeof arrayIdx === 'number' ? ' [' + arrayIdx + ']' : ''),
+            failureCallback = ()=>{
+                Alerts.queue({
+                    "title"     : failureAlertTitle,
+                    "message"   : "Could not find valid" + (type ? " '" + type + "'" : '') + " Item in database for value '" + value + "'.",
+                    "style"     : "danger"
+                });
+                layout.animateScrollTo(0); // Scroll to top of page so alert b visible to end-user.
+                this.modifyNewContext(field, null, 'existing linked object', null, arrayIdx);
+            },
+            successCallback = (result)=>{
+                Alerts.deQueue({ 'title' : failureAlertTitle });
+                this.modifyNewContext(field, value, 'existing linked object', null, arrayIdx);
+                this.props.addExistingObj(value, result.display_title, type, newLink);
+            };
+
+        if (typeof hrefToFetch !== 'string') {
+            failureCallback();
+            return;
+        }
+
+        if (hrefToFetch.charAt(0) !== '/'){ // Pre-pend slash so will request hostname + '/' + value.
+            hrefToFetch = '/' + hrefToFetch;
+        }
+
+        ajax.load(hrefToFetch, (result)=>{
+            if (result && result.display_title && Array.isArray(result['@type']) ){
+                if (type) { // Check for matching Type validity.
+                    if (result['@type'].indexOf(type) > -1) {
+                        successCallback(result);
+                        return;
+                    }
+                } else { // Any Item type == valid, is assumed (e.g. linkTo type Item)
+                    successCallback(result);
+                    return;
+                }
             }
-        });
+            failureCallback();
+        }, 'GET', failureCallback);
     }
 
     /**
@@ -1850,6 +1854,7 @@ class IndividualObjectView extends React.Component{
      * Navigation function passed to Search so that faceting can be done in-place
      * through ajax. If no results are returned from the search, abort.
      */
+    /*
     inPlaceNavigate = (destination, options, callback) => {
         if(this.state.selectQuery){
             var dest = destination;
@@ -1883,74 +1888,42 @@ class IndividualObjectView extends React.Component{
             });
         }
     }
+    */
 
     /**
      * Initializes the first search (with just type=<type>) and sets state
      * accordingly. Set the fullScreen state in SubmissionView to alter its render
      * and hide the object navigation tree.
      */
-    selectObj = (collection, field, newLink, array=null) => {
-        ajax.promise('/' + collection + '/?format=json').then(data => {
-            if (data && data['@graph']){
-                var results = data['@graph'];
-                if(results.length > 0){
-                    setTimeout(layout.animateScrollTo(0), 100);
-                    this.setState({
-                        'selectType': collection,
-                        'selectData': data,
-                        'selectQuery': '/search/?type=' + collection,
-                        'selectField': field,
-                        'selectLink': field,
-                        'selectArrayIdx': array
-                    });
-                    this.props.setSubmissionState('fullScreen', true);
-                }else{ // this is not a great long-term solution
-                    alert('No objects of this type exist yet! Please use "Create new"');
-                }
-            }
-        });
+    selectObj = (collection, field, newLink, arrayIdx=null) => {
+        this.setState({ 'selectField' : field, 'selectArrayIdx': arrayIdx, 'selectType' : collection });
     }
 
     /**
      * Callback passed to Search to select a pre-existing object. Cleans up
-     * object selection state, modifies context, and initializes the fetchObjTitle
+     * object selection state, modifies context, and initializes the fetchAndValidateItem
      * process.
      */
     selectComplete = (value) => {
-        var isRepeat = false;
-        var current = this.props.currContext[this.state.selectField];
-        if(current instanceof Array && _.contains(current, value)){
-            isRepeat = true;
+        var { selectField, selectArrayIdx, selectType } = this.state;
+        if (!selectField) throw new Error('No field being selected for');
+        var current = selectField && this.props.currContext[selectField],
+            isRepeat = (Array.isArray(current) && _.contains(current, value));
+
+        if (!isRepeat) {
+            //this.modifyNewContext(selectField, value, 'existing linked object', null, selectArrayIdx);
+            this.fetchAndValidateItem(value, selectField, selectType, selectArrayIdx, null);
+        } else {
+            this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
         }
-        if(this.state.selectField && !isRepeat){
-            this.modifyNewContext(this.state.selectField, value, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
-            this.fetchObjTitle(value, this.state.selectType, this.state.selectLink);
-        }else{
-            this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
-        }
-        this.setState({
-            'selectType': null,
-            'selectData': null,
-            'selectQuery': null,
-            'selectField': null,
-            'selectLink': null,
-            'selectArrayIdx': null
-        });
-        this.props.setSubmissionState('fullScreen', false);
+        this.setState({ 'selectField': null, 'selectArrayIdx': null, 'selectType': null });
     }
 
     /** Exit out of the selection process and clean up state */
     selectCancel(e){
-        this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
-        this.setState({
-            'selectType': null,
-            'selectData': null,
-            'selectQuery': null,
-            'selectField': null,
-            'selectLink': null,
-            'selectArrayIdx': null
-        });
-        this.props.setSubmissionState('fullScreen', false);
+        var { selectField, selectArrayIdx } = this.state;
+        this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
+        this.setState({ 'selectType': null, 'selectField': null, 'selectArrayIdx': null });
     }
 
     /**
@@ -1959,21 +1932,23 @@ class IndividualObjectView extends React.Component{
      * for roundOne and roundTwo.
      */
     initiateField(field) {
-        var currSchema = this.props.schemas[this.props.currType];
-        var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
-        if(!fieldSchema) return null;
-        var secondRoundField = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
-        var fieldTitle = fieldSchema.title || field;
-        if(this.props.roundTwo && !secondRoundField){
+        var { schemas, currType, currKey, roundTwo, currContext, keyComplete, keyContext, edit } = this.props;
+        var currSchema  = schemas[currType],
+            fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
+
+        if (!fieldSchema) return null;
+
+        var secondRoundField    = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round',
+            fieldTitle          = fieldSchema.title || field;
+
+        if(roundTwo && !secondRoundField){
             return null;
-        }else if(!this.props.roundTwo && secondRoundField){
+        } else if (!roundTwo && secondRoundField){
             // return a placeholder informing user that this field is for roundTwo
             return(
                 <div key={fieldTitle} className="row field-row" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
                     <div className="col-sm-12 col-md-4">
-                        <h5 className="facet-title submission-field-title">
-                            {fieldTitle}
-                        </h5>
+                        <h5 className="facet-title submission-field-title" children={fieldTitle}/>
                     </div>
                     <div className="col-sm-12 col-md-8">
                         <div className="field-container">
@@ -1983,78 +1958,56 @@ class IndividualObjectView extends React.Component{
                 </div>
             );
         }
+
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
-        var fieldValue = this.props.currContext[field] || null;
-        var enumValues = [];
-        var isLinked = false;
+
+        var fieldType   = BuildField.fieldTypeFromFieldSchema(fieldSchema),
+            fieldValue  = currContext[field] !== null ? currContext[field] : null,
+            enumValues  = [],
+            isLinked    = false,
+            linked      = delveObject(fieldSchema);
 
         // check if this is an enum
         if(fieldType === 'enum'){
             enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
+
         // check for linkTo if further down in object or array
-        var linked = delveObject(fieldSchema);
         if(linked !== null){
             linked = fieldSchema.title ? fieldSchema.title : linked;
             isLinked = true;
         }
+
         // handle a linkTo object on the the top level
         // check if any schema-specific adjustments need to made:
         if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
             // when editing a File principal object.
-            var path = this.props.keyComplete[this.props.currKey];
-            var completeContext = this.props.keyContext[path];
-            var statusCheck = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
-            if(this.props.edit){
-                if(statusCheck){
+            var path            = keyComplete[currKey],
+                completeContext = keyContext[path],
+                statusCheck     = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
+
+            if (edit) {
+                if (statusCheck) {
                     fieldType = 'file upload';
-                }else{
+                } else {
                     return null;
                 }
-            }else{
+            } else {
                 fieldType = 'file upload';
             }
         }
-        // set a required flag if this field is required
-        var required = _.contains(currSchema.required, field);
-        return(
+        return (
             <BuildField
-                value={fieldValue}
-                key={field}
-                schema={fieldSchema}
-                field={field}
-                fieldType={fieldType}
-                fieldTip={fieldTip}
-                nestedField={field}
-                enumValues={enumValues}
-                disabled={false}
-                modifyNewContext={this.modifyNewContext}
-                modifyFile={null}
-                md5Progress={this.props.md5Progress}
-                required={required}
-                linkType={linked}
-                isLinked={isLinked}
-                selectObj={this.selectObj}
-                getCurrContext={this.getCurrContext}
-                getCurrSchema={this.getCurrSchema}
-                title={fieldTitle}
-                arrayIdx={null}
-                edit={this.props.edit}
-                create={this.props.create}
-                keyDisplay={this.props.keyDisplay}
-                keyComplete={this.props.keyComplete}
-                setSubmissionState={this.props.setSubmissionState}
-                updateUpload={this.props.updateUpload}
-                upload={this.props.upload}
-                uploadStatus={this.props.uploadStatus}
-                currentSubmittingUser={this.props.currentSubmittingUser}
-                roundTwo={this.props.roundTwo}
-            />
+                {...{ field, fieldType, fieldTip, enumValues, isLinked, currType }}
+                {..._.pick(this.props, 'md5Progress', 'edit', 'create', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'upload', 'uploadStatus', 'updateUpload', 'currentSubmittingUser', 'roundTwo')}
+                value={fieldValue} key={field} schema={fieldSchema} nestedField={field} title={fieldTitle} modifyFile={null} linkType={linked} disabled={false}
+                getCurrContext={this.getCurrContext} getCurrSchema={this.getCurrSchema} arrayIdx={null} required={_.contains(currSchema.required, field)}
+                modifyNewContext={this.modifyNewContext} selectObj={this.selectObj} selectComplete={this.selectComplete} selectCancel={this.selectCancel}
+                fieldBeingSelected={this.state.selectField} fieldBeingSelectedArrayIdx={this.state.selectArrayIdx} />
         );
     }
 
@@ -2067,55 +2020,25 @@ class IndividualObjectView extends React.Component{
      * object.
      */
     render(){
-        var fields = this.props.currContext ? _.keys(this.props.currContext) : [];
-        var buildFields = [];
-        var linkedObjs = [];
-        var detailContext;
-        var i;
-        var built;
-        var fieldComponents = sortPropFields(_.filter(
-            _.map(fields, this.initiateField),
-            function(f){ return !!f; } // Removes falsy (e.g. null) items.
-        ));
-        if(this.props.roundTwo){
-            var path = this.props.keyComplete[this.props.currKey];
-            detailContext = this.props.keyContext[path];
-        }
-        // sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
-        //fieldComponents = sortPropFields(fieldComponents);
-        var selecting = false;
-        if(this.state.selectData !== null){
-            selecting = true;
-        }
+        var { currContext, keyComplete, keyContext, currKey, schemas, roundTwo } = this.props;
+        var fields = currContext ? _.keys(currContext) : [],
+            fieldJSXComponents = sortPropFields(_.filter( // Sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
+                _.map(fields, this.initiateField),
+                function(f){ return !!f; } // Removes falsy (e.g. null) items.
+            )),
+            roundTwoDetailContext = roundTwo && keyComplete[currKey] && keyContext[keyComplete[currKey]];
+
         return(
             <div>
-                <SelectExistingItemModal
-                    {...this.props}
-                    navigate={this.inPlaceNavigate}         // Override global navigate func
-                    selectCallback={this.selectComplete}
-                    submissionBase={this.state.selectQuery} // Base HREF used, overrides props.href
-                    onCancel={this.selectCancel}
-                    selectData={this.state.selectData}
-                    selectObj={this.selectObj}
-                />
-                <Fade in={!selecting || this.state.fadeState} appear>
-                    <div>
-                        <FormFieldsContainer children={fieldComponents} currKey={this.props.currKey}/>
-                        {
-                            this.props.roundTwo ?
-                            <RoundTwoDetailPanel schemas={this.props.schemas} context={detailContext} open={true} />
-                            :
-                            null
-                        }
-                    </div>
-                </Fade>
+                <FormFieldsContainer currKey={currKey} children={fieldJSXComponents}/>
+                { roundTwo ? <RoundTwoDetailPanel schemas={schemas} context={roundTwoDetailContext} open={true} /> : null }
             </div>
         );
     }
 }
 
 
-class FormFieldsContainer extends React.Component {
+class FormFieldsContainer extends React.PureComponent {
 
     static defaultProps = {
         'title' : 'Fields & Dependencies',
@@ -2170,6 +2093,10 @@ class RoundTwoDetailPanel extends React.Component{
     }
 }
 
+globals.content_views.register(SubmissionView, 'Item', 'edit');
+globals.content_views.register(SubmissionView, 'Item', 'create');
+globals.content_views.register(SubmissionView, 'Search', 'add');
+
 /***** MISC. FUNCIONS *****/
 
 /**
@@ -2178,6 +2105,8 @@ class RoundTwoDetailPanel extends React.Component{
  * All linkTo fields are added to objList.
  * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
  * Also checks user info to see if user is admin, which affects which fields are displayed.
+ *
+ * @returns {Object} A new object represent context.
  */
 export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
     var built = {};
@@ -2206,16 +2135,16 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
             if(edit){
-                if(!context[fields[i]] || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
+                if(context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
                     built[fields[i]] = null;
                 }else{
-                    built[fields[i]] = context[fields[i]];
+                    built[fields[i]] = context[fields[i]] || null;
                 }
             }else if(!create){ //clone
-                if(!context[fields[i]] || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
+                if(context[fields[i]] === null || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
                     built[fields[i]] = null;
                 }else{
-                    built[fields[i]] = context[fields[i]];
+                    built[fields[i]] = context[fields[i]] || null;
                 }
             }else{
                 built[fields[i]] = null;
@@ -2435,11 +2364,3 @@ var removeNulls = function myself(context){
     });
     return context;
 };
-
-
-/**
- * Clone a given object using JSON techniques
- */
-function cloneObj(obj){
-    return JSON.parse(JSON.stringify(obj));
-}

@@ -44,7 +44,7 @@ let callbackFunctions = [];
 var navigate = function(href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}){
     if (typeof cachedNavFunction !== 'function') throw new Error('No navigate function cached.');
     var callbackFxn = function(jsonResponse){
-        if (callbackFunctions.length > 0) callbackFunctions.forEach(function(cb){ cb(jsonResponse); }); // Any registered callbacks.
+        if (callbackFunctions.length > 0) _.forEach(callbackFunctions, function(cb){ cb(jsonResponse); }); // Any registered callbacks.
         if (typeof callback === 'function') callback(jsonResponse); // Original callback
     };
     return cachedNavFunction.call(cachedNavFunction, href, options, callbackFxn, fallbackCallback, includeReduxDispatch);
@@ -62,6 +62,9 @@ navigate.setNavigateFunction = function(navFxn){
 
 
 navigate.getBrowseBaseParams = function(browseBaseState = null){
+    if (browseBaseState === 'item_search') {
+        return {};
+    }
     if (!browseBaseState){
         if (store === null){
             store = require('../../store');

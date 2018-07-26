@@ -1172,6 +1172,7 @@ $small-label-accession-font-size : 0.75rem;
 	}
 	&[data-field="lab.display_title"]{
 		i.user-icon {
+			cursor: help;
 			margin-right: 5px;
 		}
 	}
@@ -1278,9 +1279,6 @@ $small-label-accession-font-size : 0.75rem;
 		margin-top: 16px;
 		> .flexible-description-box {
 			margin-left: 28px;
-		}
-		.description-expand-button {
-			margin-top: -2px;
 		}
 		> h5, > h6 {
 			margin-bottom: 5px;
@@ -1431,11 +1429,13 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 
 				.search-result-row {
-					border-bottom: 1px solid rgba(0,0,0,0.125);
+					border-bottom: 1px solid rgb(220,220,220);
 					position: relative;
-					transform: translate3d(0,0,0);
-					> .columns {
+					> .columns.result-table-row {
+
 						display: flex;
+						background-color: #fff;
+
 						> .search-result-column-block {
 							@include search-result-column-block;
 							> .inner {
@@ -1490,6 +1490,37 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 								}
 							}
 
+						}
+
+					}
+
+					&.is-draggable {
+
+						&:hover {
+							//border-bottom-color: rgb(100,100,100);
+							//border-top: 1px solid rgb(100,100,100);
+							///margin-top: -1px;
+							z-index: 10;
+						}
+	
+						> .columns.result-table-row {
+							&[draggable="true"]{
+								&:hover {
+									box-shadow: 0 0 9px #888;
+									cursor: move;
+									cursor: grab;
+									cursor: -moz-grab;
+									cursor: -webkit-grab;
+								}
+								&:active {
+									//box-shadow: none; //inset 0 0 8px -2px #888;
+									background-color: #f8f8f8;
+									cursor: move;
+									cursor: grabbing;
+									cursor: -moz-grabbing;
+									cursor: -webkit-grabbing;
+								}
+							}
 						}
 					}
 
@@ -1617,11 +1648,11 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 .search-headers-row {
 	background-color: #22656d;
-	z-index: 10;
+	z-index: 50;
 	transform: translate3d(0,0,0) !important;
 	overflow-x: hidden;
 	&.stickied {
-		top : 40px;
+		top : 0px;
 		.browse-page-container & {
 			top: 80px;
 		}
@@ -1727,6 +1758,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	}
 
 } // .search-headers-row
+
 
 .above-results-table-row {
 	min-height: 40px;

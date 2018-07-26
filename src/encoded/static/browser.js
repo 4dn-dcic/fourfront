@@ -11,7 +11,6 @@ var App = require('./components');
 var domready = require('domready');
 import * as store from './store';
 var { Provider, connect } = require('react-redux');
-import { convertExpSetFiltersTerms } from './components/util/experiments-filters';
 import * as JWT from './components/util/json-web-token';
 
 

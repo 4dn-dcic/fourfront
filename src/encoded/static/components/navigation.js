@@ -274,7 +274,7 @@ export default class Navigation extends React.Component {
 
     render() {
         var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state;
-        var { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState } = this.props;
+        var { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction } = this.props;
 
         var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top") +
             (openDropdown ? ' big-menu-open' : '');
@@ -319,7 +319,7 @@ export default class Navigation extends React.Component {
                             </Nav>
                             {/*<Nav children={_.map(listActionsFor('global_sections'), function(a){ return Navigation.buildDropdownMenu(a, mounted, href); })} />*/}
                             <UserActions closeMobileMenu={this.closeMobileMenu} {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
-                            <SearchBar href={href} />
+                            <SearchBar href={href} currentAction={currentAction} />
                         </Navbar.Collapse>
                     </Navbar>
                     { includeBigDropDownMenuComponents ?
@@ -551,7 +551,7 @@ class SearchBar extends React.Component{
     onSearchInputChange(e){
         var newValue = e.target.value;
         var state = { 'typedSearchQuery' : newValue };
-        if (!this.hasInput(newValue)) {
+        if (!this.hasInput(newValue) && this.props.currentAction !== 'selection') {
             state.searchAllItems = false;
         }
         this.setState(state);
@@ -576,6 +576,7 @@ class SearchBar extends React.Component{
     }
 
     selectItemTypeDropdown(inProp = false){
+        if (this.props.currentAction === 'selection') return null;
         return (
             <Fade in={inProp} appear>
                 <DropdownButton
@@ -609,12 +610,14 @@ class SearchBar extends React.Component{
             resetIconButton = <i className="reset-button icon icon-close" onClick={this.onResetSearch}/>;
         }
 
-        var query = {};
+        var query = {}; // Don't preserve facets.
         var browseBaseParams = navigate.getBrowseBaseParams();
-        if (searchAllItems) {   // Don't preserve facets.
+        if (this.props.currentAction === 'selection'){
+            _.extend(query, _.omit(id.query || {}, 'q')); // Preserve facets, incl type facet.
+        } else if (searchAllItems && this.props.currentAction !== 'selection') {
             _.extend(query, { 'type' : 'Item' });
-        } else {                // Preserve facets?
-            _.extend(query, _.omit(id.query || {}, 'q'), browseBaseParams);
+        } else {
+            _.extend(query, _.omit(id.query || {}, 'q'), browseBaseParams); // Preserve facets.
         }
         
         return (
