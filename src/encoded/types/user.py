@@ -135,7 +135,7 @@ class User(Item):
             }
             labs[properties['lab']] = my_lab
         # if submitter, add subscriptions to this user submissions for each lab
-        for submits_lab in properties.get('submits_for'):
+        for submits_lab in properties.get('submits_for', []):
             submit_lab = labs.get(submits_lab, self.collection.get(submits_lab))
             lab_title = submit_lab.properties.get('title', 'NO TITLE FOUND')
             curr_subs_dict['My submissions for ' + lab_title] = {
