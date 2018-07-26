@@ -58,6 +58,9 @@
                 "raw file"
               ]
         },
+        "extra_files": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "read_length": {
             "title": "Sequencing Read Length (bp)",
             "description": "Length of sequencing reads in base pairs for fastq files",
