@@ -19,6 +19,7 @@ require('./static-pages/HomePage');
 require('./static-pages/PlannedDataSubmission');
 require('./static-pages/JointAnalysis');
 require('./static-pages/ReleaseUpdates');
+require('./static-pages/StatisticsPage');
 require('./submissions');
 require('./item-pages/DefaultItemView');
 require('./item-pages/ExperimentSetView');

@@ -227,7 +227,11 @@ export class StaticEntry extends React.PureComponent {
 
 }
 
-
+/**
+ * This component shows an alert on mount if have been redirected from a different page, and
+ * then renders out a list of StaticEntry components within a Wrapper in its render() method.
+ * May be used by extending and then overriding the render() method. 
+ */
 export default class StaticPage extends React.PureComponent {
 
     static Entry = StaticEntry

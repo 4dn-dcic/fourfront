@@ -7,7 +7,9 @@
         "award": "1U01CA200059-01",
         "file_format":"fasta",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fadd",
-        "status": "uploaded",
+        "status": "released",
+        "public_release" : "2016-01-04",
+        "file_size" : 12312312,
         "filename": "test_fasta1.fasta.gz"
     },
     {
@@ -18,7 +20,9 @@
         "award": "1U01CA200059-01",
         "file_format":"fasta",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fafa",
-        "status": "uploaded",
+        "status": "released",
+        "public_release" : "2016-02-25",
+        "file_size" : 3525235235,
         "filename": "test_fasta2.fasta.gz"
     }
 ]

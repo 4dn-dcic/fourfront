@@ -277,7 +277,7 @@ class ResultTableContainer extends React.PureComponent {
                             orientation="vertical" className="with-header-bg"
                             facets={context.facets} filters={context.filters}
                             isTermSelected={this.isTermSelected} onFilter={this.onFilter}
-                            itemTypeForSchemas="ExperimentSetReplicates" session={session}
+                            itemTypeForSchemas="ExperimentSetReplicate" session={session}
                             href={href || searchBase} browseBaseState={browseBaseState} schemas={schemas}
                             showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
                             onClearFilters={this.handleClearFilters}

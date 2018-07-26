@@ -181,6 +181,46 @@
         },
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
+        },
+        "public_release" : {
+            "title" : "Public Release Date",
+            "aggregation_type" : "date_histogram"
+        },
+        "internal_release" : {
+            "title" : "Internal Release Date",
+            "aggregation_type" : "date_histogram"
+        }
+    },
+    "aggregations" : {
+        "weekly_interval_public_release" : {
+            "date_histogram" : {
+                "field": "embedded.public_release",
+                "interval": "week",
+                "format": "yyyy-MM-dd"
+            },
+            "aggs" : {
+                "group_by_award" : {
+                    "terms" : {
+                        "field": "embedded.award.project.raw",
+                        "missing" : "No value"
+                    }
+                }
+            }
+        },
+        "weekly_interval_internal_release" : {
+            "date_histogram" : {
+                "field": "embedded.internal_release",
+                "interval": "week",
+                "format": "yyyy-MM-dd"
+            },
+            "aggs" : {
+                "group_by_award" : {
+                    "terms" : {
+                        "field": "embedded.award.center.raw",
+                        "missing" : "No value"
+                    }
+                }
+            }
         }
     },
     "columns": {
