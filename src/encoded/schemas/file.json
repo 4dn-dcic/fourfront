@@ -101,6 +101,7 @@
             "items": {
                 "title": "Extra File",
                 "type": "object",
+                "required": ["file_format"],
                 "additionalProperties": true,
                 "properties": {
                     "file_format": {

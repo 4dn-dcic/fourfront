@@ -1018,6 +1018,8 @@ def validate_extra_file_format(context, request):
     seen_ext_formats = []
     for i, ef in enumerate(extras):
         eformat = ef.get('file_format')
+        if eformat is None:
+            return  # will fail the required extra_file.file_format
         if eformat in seen_ext_formats:
             request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
             files_ok = False
