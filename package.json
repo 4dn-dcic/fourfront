@@ -83,7 +83,7 @@
     "classnames": "^2.2.5",
     "color": "^0.10.1",
     "crypto-js": "^3.1.9-1",
-    "d3": "^4.13.0",
+    "d3": "^5.5.0",
     "detect-browser": "^3.0.0",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
