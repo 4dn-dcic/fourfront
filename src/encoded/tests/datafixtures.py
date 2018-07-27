@@ -24,6 +24,17 @@ def lab(testapp, award):
 
 
 @pytest.fixture
+def another_lab(testapp, award):
+    item = {
+        'name': 'another-encode-lab',
+        'title': 'Another ENCODE lab',
+        'status': 'current',
+        'awards': [award['@id']]
+    }
+    return testapp.post_json('/lab', item).json['@graph'][0]
+
+
+@pytest.fixture
 def admin(testapp):
     item = {
         'first_name': 'Test',
