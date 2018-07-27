@@ -6,6 +6,7 @@ import _ from 'underscore';
 import { console, layout, navigate, ajax } from'./../util';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
+import * as d3 from 'd3';
 
 
 export default class StatisticsPageView extends StaticPage {
@@ -128,8 +129,85 @@ export class StatisticsChartsView extends React.PureComponent {
         if (!mounted || loadingStatus === 'loading')    return this.loadingIcon();
         if (loadingStatus === 'failed')                 return this.errorIcon();
         return (
-            <div>Test</div>
+            <div className="stats-charts-container row">
+                <div className="col-xs-12 col-lg-6">
+                    <AreaChart/>
+                </div>
+            </div>
         );
+    }
+
+}
+
+export const aggregationsToChartData = [
+    {
+        'requires'  : 'ExperimentSetReplicate',
+        'title'     : '4DN Experiment Sets Public Releases',
+        'function'  : function(resp){
+
+        }
+    }
+];
+
+
+export class AreaChart extends React.PureComponent {
+
+    static defaultProps = {
+        'margin' : { 'top': 20, 'right': 20, 'bottom': 30, 'left': 50 },
+        'data'   : null
+    };
+
+    constructor(props){
+        super(props);
+        this.drawNewChart = this.drawNewChart.bind(this);
+        this.state = {
+            'drawingError' : false,
+            'drawn' : false
+        };
+    }
+
+    componentDidMount(){
+        this.drawNewChart();
+    }
+
+    componentDidUpdate(){
+        // TODO: this.updateExistingChart();
+    }
+
+    /**
+     * Draws D3 area chart using the DOM a la https://bl.ocks.org/mbostock/3883195 in the rendered <svg> element.
+     *
+     * TODO: We should try to instead render out <path>, <g>, etc. SVG elements directly out of React to be more Reactful and performant.
+     * But this can probably wait (?).
+     */
+    drawNewChart(){
+        if (!this.refs || !this.refs.svg){
+            this.setState({ 'drawingError' : true });
+            return;
+        }
+        var { margin } = this.props;
+        var svg     = d3.select(this.refs.svg),
+            width   = (this.props.width  || parseInt(svg.style('width' ))) - margin.left - margin.right,
+            height  = (this.props.height || parseInt(svg.style('height'))) - margin.top - margin.bottom;
+
+        var x       = d3.scaleTime().rangeRound([0, width]),
+            y       = d3.scaleLinear.rangeRound([height, 0]);
+
+        var area = d3.area()
+            .x(function(d){ return x(d.date); })
+            .y1(function(d){ return y(d.close); });
+
+        var g = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
+
+        window.svg = svg;
+
+    }
+
+    render(){
+        if (!this.props.data || this.state.drawingError) {
+            return <div>Error</div>;
+        }
+        return <svg ref="svg" className="area-chart" width={this.props.width || "100%"} height={this.props.height || null} />;
     }
 
 }
