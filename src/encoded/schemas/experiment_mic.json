@@ -43,8 +43,11 @@
             "enum": [
                 "DNA-paint",
                 "DNA-FiSH",
+                "DNA FISH",
                 "RNA-FiSH",
+                "RNA FISH",
                 "FiSH",
+                "FISH",
                 "Immunofluorescence",
                 "Fluorescence",
                 "Cryo-EM",
