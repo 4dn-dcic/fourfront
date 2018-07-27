@@ -79,7 +79,7 @@ class Target(Item):
         # for key, val in targets.items():
         #     if val:
         #         return key
-        types = [key for key in targets.keys() if targets[key]]
+        types = sorted([key for key in targets.keys() if targets[key]])
         return types
 
     @calculated_property(schema={
