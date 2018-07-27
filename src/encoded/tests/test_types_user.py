@@ -58,7 +58,7 @@ def test_subscriptions_dont_duplicate_on_update(registry, lab, user_w_lab):
         'last_name': 'McUser',
         'email': 'user@mcuser.org',
         'status': 'current',
-        'subscriptions': [{'url': '?lab.uuid' + lab['uuid'] + '&sort=-date_created',
+        'subscriptions': [{'url': '?lab.uuid=' + lab['uuid'] + '&sort=-date_created',
                            'title': 'All submissions for ENCODE lab'}]
     }
     test_user = User.create(registry, None, user_data)
