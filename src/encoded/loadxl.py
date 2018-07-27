@@ -80,6 +80,7 @@ ORDER = [
     'experiment_chiapet',
     'experiment_damid',
     'experiment_seq',
+    'experiment_tsaseq',
     'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
@@ -534,7 +535,9 @@ def attachment(path):
             'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
         }
 
-        if mime_type in ('application/pdf', "application/zip", 'text/plain', 'text/tab-separated-values', 'text/html'):
+        if mime_type in ('application/pdf', "application/zip", 'text/plain',
+                         'text/tab-separated-values', 'text/html', 'application/msword',
+                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
 
@@ -671,6 +674,9 @@ PHASE1_PIPELINES = {
     'experiment_seq': [
         remove_keys('experiment_relation'),
     ],
+    'experiment_tsaseq': [
+        remove_keys('experiment_relation'),
+    ],
     'publication': [
         remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -746,6 +752,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_seq': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ],
+    'experiment_tsaseq': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'publication': [
