@@ -24,7 +24,8 @@ export function set(schemas){
 export const itemTypeHierarchy = {
     'Experiment': [
         'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq',
-        'ExperimentAtacseq', 'ExperimentDamid', 'ExperimentChiapet', 'ExperimentSeq'
+        'ExperimentAtacseq', 'ExperimentDamid', 'ExperimentTsaseq',
+        'ExperimentChiapet', 'ExperimentSeq'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
