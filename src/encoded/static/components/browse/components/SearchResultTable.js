@@ -375,7 +375,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                     console.error('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
                     this.setState({ 'isLoading' : false }, ()=>{
                         navigate('', { 'inPlace' : true }, ()=>{
-                            ChartDataController.isInitializaed() && ChartDataController.sync();
+                            ChartDataController.isInitialized() && ChartDataController.sync();
                             Alerts.queue({ 'title' : 'Results Refreshed', 'message' : 'Results have changed while loading and have been refreshed.', 'navigateDisappearThreshold' : 1 });
                         });
                     });
