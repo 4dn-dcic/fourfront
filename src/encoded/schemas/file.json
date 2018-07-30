@@ -272,6 +272,13 @@
                     "terms" : {
                         "field": "embedded.award.center.raw",
                         "missing" : "No value"
+                    },
+                    "aggs" : {
+                        "file_size_volume" : {
+                            "sum" : {
+                                "field" : "embedded.file_size"
+                            }
+                        }
                     }
                 }
             }
