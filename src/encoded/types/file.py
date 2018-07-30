@@ -230,6 +230,7 @@ class File(Item):
     schema = load_schema('encoded:schemas/file.json')
     embedded_list = [
         "award.project",
+        "award.center_title",
         "lab.city",
         "lab.state",
         "lab.country",

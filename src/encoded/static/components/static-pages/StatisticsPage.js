@@ -184,20 +184,28 @@ export const aggregationsToChartData = [
             var subTotals = {};
             var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
                 total += bucket.doc_count;
+                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                    _.pluck((bucket.group_by_award && bucket.group_by_award.buckets) || [], 'key')
+                ));
                 return {
                     'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
                     'count'    : bucket.doc_count,
                     'total'    : total,
-                    'children' : _.map((bucket.group_by_award && bucket.group_by_award.buckets) || [], function(subBucket){
-                        subTotals[subBucket.key] = (subTotals[subBucket.key] || 0) + subBucket.doc_count;
+                    'children' : _.map(subBucketKeysToDate, function(termKey){
+                        var subBucket = bucket.group_by_award && bucket.group_by_award.buckets && _.findWhere(bucket.group_by_award.buckets, { 'key' : termKey });
+                        var subCount = ((subBucket && subBucket.doc_count) || 0);
+                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
                         return {
-                            'term'  : subBucket.key,
-                            'count' : subBucket.doc_count,
-                            'total' : subTotals[subBucket.key]
+                            'term'  : termKey,
+                            'count' : subCount,
+                            'total' : subTotals[termKey]
                         };
                     })
                 };
             });
+
+            // Ensure each datum has all child terms, even if blank.
+            fillMissingChildBuckets(aggsList, _.keys(subTotals));
 
             return aggsList;
         }
@@ -224,26 +232,50 @@ export const aggregationsToChartData = [
                 aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
                     var fileSizeVol = ((bucket.file_size_volume && bucket.file_size_volume.value) || 0) / gigabyte;
                     total += fileSizeVol;
+                    var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                        _.pluck((bucket.group_by_award && bucket.group_by_award.buckets) || [], 'key')
+                    ));
                     return {
                         'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
                         'count'    : fileSizeVol,
                         'total'    : total,
-                        'children' : _.map((bucket.group_by_award && bucket.group_by_award.buckets) || [], function(subBucket){
-                            var subFileSizeVol = ((subBucket.file_size_volume && subBucket.file_size_volume.value) || 0) / gigabyte;
-                            subTotals[subBucket.key] = (subTotals[subBucket.key] || 0) + subFileSizeVol;
+                        'children' : _.map(subBucketKeysToDate, function(termKey){
+                            var subBucket = bucket.group_by_award && bucket.group_by_award.buckets && _.findWhere(bucket.group_by_award.buckets, { 'key' : termKey });
+                            var subFileSizeVol = ((subBucket && subBucket.file_size_volume && subBucket.file_size_volume.value) || 0) / gigabyte;
+                            subTotals[termKey] = (subTotals[termKey] || 0) + subFileSizeVol;
                             return {
-                                'term'  : subBucket.key,
+                                'term'  : termKey,
                                 'count' : subFileSizeVol,
-                                'total' : subTotals[subBucket.key]
+                                'total' : subTotals[termKey]
                             };
                         })
                     };
                 });
 
+            // Ensure each datum has all child terms, even if blank.
+            fillMissingChildBuckets(aggsList, _.keys(subTotals));
+
             return aggsList;
         }
     }
 ];
+
+function fillMissingChildBuckets(aggsList, subAggKeys){
+    _.forEach(aggsList, function(datum){
+
+        _.forEach(subAggKeys, function(k){
+            var foundChild = _.findWhere(datum.children, { 'term' : k });
+            if (!foundChild){
+                datum.children.push({
+                    'term' : k,
+                    'count' : 0,
+                    'total' : 0
+                });
+            }
+        });
+
+    });
+}
 
 
 export class AreaChart extends React.PureComponent {
@@ -310,11 +342,15 @@ export class AreaChart extends React.PureComponent {
 
             var x       = d3.scaleTime().rangeRound([0, width]),
                 y       = d3['scale' + yAxisScale]().rangeRound([height, 0]),
+                z       = d3.scaleOrdinal(d3.schemeCategory10),
                 area    = d3.area()
-                    .x ( function(d){ return x(d.date || d.data.data);  } )
-                    .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } )
-                    .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } ),
-                stack   = d3.stack().value(function(d){ return d.total; }),
+                    .x ( function(d){ return x(d.date || d.data.date);  } )
+                    .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
+                    .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } ),
+                stack   = d3.stack().value(function(d, key){
+                    var currChild = _.findWhere(d.children || [], { 'term' : key });
+                    if (currChild) return currChild.total;
+                }),
                 childKeys;
 
             if (yAxisScale === 'Pow' && yAxisPower !== null){
@@ -340,7 +376,7 @@ export class AreaChart extends React.PureComponent {
             y.domain([ 0, d3.max(data, function(d) { return d.total; }) ]);
             if (childKeys.length > 0){
                 stack.keys(childKeys);
-                console.log('CXCCC', childKeys, stack(data));
+                console.log('CXCCC', data, childKeys, stack(data));
             }
 
             var bottomAxisGenerator = d3.axisBottom(x)
@@ -357,24 +393,30 @@ export class AreaChart extends React.PureComponent {
                         .attr("stroke-dasharray", "2,2");
                 };
 
-            drawn.g = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
-
-            console.log('CXCCC', stack(data));
+            drawn.root = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
         
-            //drawn.layer = drawn.g.selectAll('.layer')
-            //    .data(data)
-            //    .enter().append('g').attr('class', 'layer');
+            drawn.layers = drawn.root.selectAll('.layer')
+                .data(stack(data))
+                .enter().append('g').attr('class', 'layer');
 
+
+            drawn.path = drawn.layers.append('path')
+                .attr('class', 'area')
+                .style('fill', function(d){ return z((d.data || d).key); })
+                .attr('d', area);
+            
+            /*
             drawn.path = drawn.g.append('path')
                 .datum(data)
                 .attr('fill', 'steelblue')
                 .attr('d', area);
-
-            drawn.xAxis = drawn.g.append('g')
+            */
+        
+            drawn.xAxis = drawn.root.append('g')
                 .attr("transform", "translate(0," + height + ")")
                 .call(bottomAxisGenerator);
 
-            drawn.yAxis = drawn.g.append('g')
+            drawn.yAxis = drawn.root.append('g')
                 .call(d3.axisLeft(y))
                 .append('text')
                 .attr("fill", "#000")
@@ -387,7 +429,7 @@ export class AreaChart extends React.PureComponent {
                 .attr("text-anchor", "end")
                 .text(yAxisLabel);
 
-            drawn.rightAxis = drawn.g.append('g').call(rightAxisFxn);
+            drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
 
             this.drawnD3Elements = drawn;
 

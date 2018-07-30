@@ -270,7 +270,7 @@
                 },
                 "group_by_award" : {
                     "terms" : {
-                        "field": "embedded.award.center.raw",
+                        "field": "embedded.award.center_title.raw",
                         "missing" : "No value"
                     },
                     "aggs" : {
