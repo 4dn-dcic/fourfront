@@ -488,7 +488,7 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
 
 def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_testapp,
                                                remc_member_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
+    statuses = ['released', 'revoked', 'archived', 'released to project',
                 'archived to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
     for status in statuses:
@@ -499,7 +499,7 @@ def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_t
 # Submitter created item and lab member wants to patch
 def test_contributing_lab_member_cannot_patch(expt_w_cont_lab_item, submitter_testapp,
                                               remc_member_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project',
+    statuses = ['released', 'revoked', 'archived', 'released to project', 'archived to project',
                 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
     for status in statuses:
