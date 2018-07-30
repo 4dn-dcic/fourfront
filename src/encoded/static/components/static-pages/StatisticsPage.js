@@ -113,6 +113,20 @@ export class StatisticsViewController extends React.PureComponent {
 
 export class StatisticsChartsView extends React.Component {
 
+    constructor(props){
+        super(props);
+        this.generateAggs = this.generateAggs.bind(this);
+        //this.state = {
+        //    'aggs' : this.generateAggs(props)
+        //};
+    }
+
+    generateAggs(props){
+        return _.map(aggregationsToChartData, function(aggDef){
+            return aggDef.function( props['resp' + aggDef.requires] );
+        });
+    }
+
     loadingIcon(){
         return (
             <div className="mt-5 mb-5 text-center">
@@ -139,14 +153,14 @@ export class StatisticsChartsView extends React.Component {
             <div className="stats-charts-container">
                 <div className="row">
 
-                    <div className="col-xs-12 col-lg-6">
+                    <div className="col-xs-12">
                         <h4 className="text-300">
                             <span className="text-500">Experiment Sets</span> released over time
                         </h4>
                         <AreaChart data={aggregationsToChartData[0].function(respExperimentSetReplicate)} />
                     </div>
 
-                    <div className="col-xs-12 col-lg-6">
+                    <div className="col-xs-12">
                         <h4 className="text-300">
                             <span className="text-500">Files</span> released over time
                         </h4>
@@ -157,11 +171,11 @@ export class StatisticsChartsView extends React.Component {
 
                 <div className="row mt-3">
 
-                    <div className="col-xs-12 col-lg-6">
+                    <div className="col-xs-12">
                         <h4 className="text-300">
                             <span className="text-500">Total File Size</span> released over time
                         </h4>
-                        <AreaChart data={aggregationsToChartData[2].function(respFile)} yAxisScale="Pow" yAxisPower={2} yAxisLabel="MB" />
+                        <AreaChart data={aggregationsToChartData[2].function(respFile)} yAxisLabel="GB" />
                     </div>
 
                 </div>
@@ -293,12 +307,20 @@ export class AreaChart extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
         this.drawNewChart = this.drawNewChart.bind(this);
-        this.parseTime = d3.timeParse(props.d3TimeFormat);
         this.state = {
             'drawingError' : false,
             'drawn' : false
         };
+
+        // D3 things
+        this.parseTime = d3.timeParse(props.d3TimeFormat);
+        this.stack = d3.stack().value(function(d, key){
+            var currChild = _.findWhere(d.children || [], { 'term' : key });
+            if (currChild) return currChild.total;
+            return 0;
+        });
     }
 
     componentDidMount(){
@@ -313,6 +335,79 @@ export class AreaChart extends React.PureComponent {
 
     componentDidUpdate(pastProps, pastState){
         // TODO: this.updateExistingChart();
+        var shouldDrawNewChart = false;
+
+        _.forEach(_.keys(this.props), (k) => {
+            if (this.props[k] !== pastProps[k]){
+                if (['data', 'd3TimeFormat'].indexOf(k) > -1){
+                    shouldDrawNewChart = true;
+                    console.log('CHANGED', k);
+                }
+            }
+        });
+
+        if (!shouldDrawNewChart) {
+            this.updateExistingChart();
+            return;
+        } else {
+            this.destroyExistingChart();
+            this.drawNewChart();
+        }
+    }
+    
+
+    commonDrawingSetup(){
+        var { margin, data, yAxisScale, yAxisPower } = this.props;
+        var svg         = d3.select(this.refs.svg),
+            width       = (this.props.width  || parseInt(svg.style('width' ))) - margin.left - margin.right,
+            height      = (this.props.height || parseInt(svg.style('height'))) - margin.top - margin.bottom,
+            x           = d3.scaleTime().rangeRound([0, width]),
+            y           = d3['scale' + yAxisScale]().rangeRound([height, 0]),
+            z           = d3.scaleOrdinal(d3.schemeCategory10),
+            area        = d3.area()
+                .x ( function(d){ return x(d.date || d.data.date);  } )
+                .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
+                .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
+
+        if (yAxisScale === 'Pow' && yAxisPower !== null){
+            y.exponent(yAxisPower);
+        }
+
+        // Convert timestamps to D3 date objects.
+        data = _.map(data, (d) => {
+            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
+            return _.extend({}, d, {
+                'date' : this.parseTime(formattedDate),
+                'origDate' : formattedDate
+            });
+        });
+
+        // Get child keys if needed.
+        var childKeys = Array.from(_.reduce(data, function(m,d){
+            _.forEach(d.children || [], function(child){ m.add(child.term); });
+            return m;
+        }, new Set()));
+
+        x.domain(d3.extent(data, function(d){ return d.date; }));
+        y.domain([ 0, d3.max(data, function(d) { return d.total; }) ]);
+        this.stack.keys(childKeys);
+
+        var bottomAxisGenerator = d3.axisBottom(x)
+            .ticks(d3.timeMonth.every(1)); // One tick every month
+
+        var leftAxisGenerator   = d3.axisLeft(y),
+            rightAxisGenerator  = d3.axisRight(y).tickSize(width),
+            rightAxisFxn        = function(g){
+                g.call(rightAxisGenerator);
+                g.select('.domain').remove();
+                g.selectAll('.tick > text').remove();
+                g.selectAll('.tick > line')
+                    .attr('opacity', 0.2)
+                    .attr("stroke", "#777")
+                    .attr("stroke-dasharray", "2,2");
+            };
+
+        return { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn };
     }
 
     /**
@@ -332,86 +427,23 @@ export class AreaChart extends React.PureComponent {
             return;
         }
 
+        var { yAxisLabel, margin } = this.props;
+        var { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        var drawn = { svg };
+
         requestAnimationFrame(()=>{
-
-            var { margin, data, stackChildren, yAxisLabel, yAxisScale, yAxisPower } = this.props;
-            var svg         = d3.select(this.refs.svg),
-                width       = (this.props.width  || parseInt(svg.style('width' ))) - margin.left - margin.right,
-                height      = (this.props.height || parseInt(svg.style('height'))) - margin.top - margin.bottom,
-                drawn       = { svg };
-
-            var x       = d3.scaleTime().rangeRound([0, width]),
-                y       = d3['scale' + yAxisScale]().rangeRound([height, 0]),
-                z       = d3.scaleOrdinal(d3.schemeCategory10),
-                area    = d3.area()
-                    .x ( function(d){ return x(d.date || d.data.date);  } )
-                    .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
-                    .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } ),
-                stack   = d3.stack().value(function(d, key){
-                    var currChild = _.findWhere(d.children || [], { 'term' : key });
-                    if (currChild) return currChild.total;
-                }),
-                childKeys;
-
-            if (yAxisScale === 'Pow' && yAxisPower !== null){
-                y.exponent(yAxisPower);
-            }
-
-            // Convert timestamps to D3 date objects.
-            data = _.map(data, (d) => {
-                var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
-                return _.extend({}, d, {
-                    'date' : this.parseTime(formattedDate),
-                    'origDate' : formattedDate
-                });
-            });
-
-            // Get child keys if needed.
-            childKeys = Array.from(_.reduce(data, function(m,d){
-                _.forEach(d.children || [], function(child){ m.add(child.term); });
-                return m;
-            }, new Set()));
-
-            x.domain(d3.extent(data, function(d){ return d.date; }));
-            y.domain([ 0, d3.max(data, function(d) { return d.total; }) ]);
-            if (childKeys.length > 0){
-                stack.keys(childKeys);
-                console.log('CXCCC', data, childKeys, stack(data));
-            }
-
-            var bottomAxisGenerator = d3.axisBottom(x)
-                .ticks(d3.timeMonth.every(2)); // One tick every 2 months
-
-            var rightAxisGenerator = d3.axisRight(y).tickSize(width),
-                rightAxisFxn = function(g){
-                    g.call(rightAxisGenerator);
-                    g.select('.domain').remove();
-                    g.selectAll('.tick > text').remove();
-                    g.selectAll('.tick > line')
-                        .attr('opacity', 0.2)
-                        .attr("stroke", "#777")
-                        .attr("stroke-dasharray", "2,2");
-                };
 
             drawn.root = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
         
             drawn.layers = drawn.root.selectAll('.layer')
-                .data(stack(data))
+                .data(this.stack(data))
                 .enter().append('g').attr('class', 'layer');
-
 
             drawn.path = drawn.layers.append('path')
                 .attr('class', 'area')
                 .style('fill', function(d){ return z((d.data || d).key); })
                 .attr('d', area);
-            
-            /*
-            drawn.path = drawn.g.append('path')
-                .datum(data)
-                .attr('fill', 'steelblue')
-                .attr('d', area);
-            */
-        
+
             drawn.xAxis = drawn.root.append('g')
                 .attr("transform", "translate(0," + height + ")")
                 .call(bottomAxisGenerator);
@@ -455,6 +487,36 @@ export class AreaChart extends React.PureComponent {
         // TODO:
         // If width or height has changed, transition existing DOM elements to larger dimensions
         // If data has changed.... decide whether to re-draw graph or try to transition it.
+
+        if (!this.drawnD3Elements) {
+            throw new Error('No existing elements to transition.');
+        }
+
+        var { yAxisLabel, margin } = this.props;
+        var { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+
+        var drawn = this.drawnD3Elements;
+
+        requestAnimationFrame(()=>{
+
+            var allLayers = drawn.root.selectAll('.layer')
+                .data(this.stack(data))
+                .selectAll('path.area')
+                .transition()
+                .duration(1000)
+                .attr('d', area);
+            /*
+            allLayers.entering()
+                .append('path')
+                .attr('class', 'area')
+                .style('fill', function(d){ return z((d.data || d).key); })
+                .attr('d', area);
+
+            allLayers.leaving()
+                .remove();
+            */
+
+        });
 
     }
 
