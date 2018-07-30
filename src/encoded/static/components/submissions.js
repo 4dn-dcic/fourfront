@@ -59,7 +59,6 @@ export default class Submissions extends React.Component {
         }
         return(
             <div>
-                <h1 className="page-title">Submission tracking</h1>
                 <div className="flexible-description-box item-page-heading" style={{'marginBottom':'25px'}}>
                     <p className="text-larger">{main_message}</p>
                 </div>
