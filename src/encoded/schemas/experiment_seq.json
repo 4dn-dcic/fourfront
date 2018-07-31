@@ -46,7 +46,6 @@
         },
         "experiment_type": {
             "enum": [
-            "CHIP-seq",
             "ChIP-seq",
             "RNA-seq",
             "NAD-seq",

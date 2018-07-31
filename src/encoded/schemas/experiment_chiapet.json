@@ -47,7 +47,6 @@
         },
         "experiment_type": {
             "enum": [
-            "CHIA-pet",
             "ChIA-PET",
             "PLAC-seq",
             "Hi-ChIP"
