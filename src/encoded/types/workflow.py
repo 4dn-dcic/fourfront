@@ -244,7 +244,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         """
         if not options.get('group_similar_workflow_runs') or len(workflow_run_tuples) < 3:
             return (workflow_run_tuples, [])
-        filtered_tuples = []
+        filtered_in_tuples = []
         filtered_out_tuples = []
         tuples_by_workflow = {}
 
@@ -257,10 +257,19 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         for workflow_atid, wfr_tuples_for_wf in tuples_by_workflow.items():
             # Get most recent workflow_run (of all workflow_runs that share a workflow for upstream step input arg), 'filter out' the rest
             sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=lambda wfr_tuple: wfr_tuple[0].get('date_created'))
-            filtered_tuples.append(sorted_wfr_tuples[0])
-            filtered_out_tuples = filtered_out_tuples + sorted_wfr_tuples[1:]
+            filtered_in_tuples.append(sorted_wfr_tuples[0])
+            for remaining_wfr_tuple in sorted_wfr_tuples[1:]:
+                # Ensure our File only goes into 1 WFR
+                # Implicitly, this would be the workflow_run_model_obj being traced at moment in trace_history function.
+                if len(remaining_wfr_tuple[1].get('workflow_run_inputs', [])) == 1:
+                    filtered_out_tuples.append(remaining_wfr_tuple)
+                else:
+                    filtered_in_tuples.append(remaining_wfr_tuple)
 
-        return (filtered_tuples, filtered_out_tuples)
+        if len(filtered_out_tuples) < 3: # No point returning group if only 1 or 2 files to be in it.
+            return (workflow_run_tuples, [])
+
+        return (filtered_in_tuples, filtered_out_tuples)
 
 
     def generate_sources_for_input(in_file_models, workflow_argument_name, depth = 0):
