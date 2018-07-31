@@ -227,67 +227,75 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
 
     def filter_workflow_runs(workflow_run_tuples):
-        """Takes a list of tuples of this form: (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) """
+        """
+        Sifts workflow_run_tuples (which consist of reference to a file and the latest WFR that that file
+        is output of) which signify the collection of input files (and the WFR they came from) for a
+        subsequent workflow_run step input argument.
+
+        Those tuples which have a workflow_run which shares a workflow w/ other tuple>workflow_run get sifted out
+        and treated as if they are part of a group of files, and not traced further.
+
+        Arguments:
+            workflow_run_tuples: A list of tuples of this form - (workflow_run_model, in_file_model)
+
+        Returns:
+            A tuple containing (0) a list of filtered-in tuples (to continue tracing) and (1) list of filtered-out tuples, to be treated
+            as a group.
+        """
         if not options.get('group_similar_workflow_runs') or len(workflow_run_tuples) < 3:
             return (workflow_run_tuples, [])
         filtered_tuples = []
         filtered_out_tuples = []
         tuples_by_workflow = {}
 
-        for wfr_tuple in workflow_run_tuples:
-            workflow_atid = wfr_tuple[2].get('workflow')
+        for wfr_tuple in workflow_run_tuples: # Group up into dict of { workflow-id : list-of-tuples }
+            workflow_atid = wfr_tuple[0].get('workflow')
             if not tuples_by_workflow.get(workflow_atid):
                 tuples_by_workflow[workflow_atid] = []
             tuples_by_workflow[workflow_atid].append(wfr_tuple)
 
         for workflow_atid, wfr_tuples_for_wf in tuples_by_workflow.items():
-            # Get most recent workflow
-            sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=lambda wfr_tuple: wfr_tuple[2].get('date_created'))
+            # Get most recent workflow_run (of all workflow_runs that share a workflow for upstream step input arg), 'filter out' the rest
+            sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=lambda wfr_tuple: wfr_tuple[0].get('date_created'))
             filtered_tuples.append(sorted_wfr_tuples[0])
             filtered_out_tuples = filtered_out_tuples + sorted_wfr_tuples[1:]
 
         return (filtered_tuples, filtered_out_tuples)
 
 
-    def generate_sources_for_input(in_files, workflow_argument_name, depth = 0):
+    def generate_sources_for_input(in_file_models, workflow_argument_name, depth = 0):
 
         sources = [] # Our output
         step_uuids = set()
 
-        def try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model_obj, workflow_run_uuid, in_file, in_file_uuid):
+        def try_match_input_with_workflow_run_output_to_generate_source(workflow_run, in_file):
             sources_for_in_file = [] # We only are looking for 1 source, but might re-use for trace_future later
-            for out_file in workflow_run_model_obj.get('output_files', []):
+            for out_file in workflow_run.get('output_files', []):
                 out_file_uuid = out_file.get('value', 'a')
                 if out_file_uuid == in_file.get('uuid', 'b'):
-                    step_uuid = workflow_run_uuid
+                    step_uuid = workflow_run['uuid']
                     if step_uuid:
-                        step_uuids.add( (step_uuid, in_file_uuid) )
+                        step_uuids.add( (step_uuid, in_file['uuid']) )
                     sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
-                        "step" : workflow_run_model_obj['@id'],
-                        "for_file" : in_file_uuid,
-                        "workflow" : workflow_run_model_obj.get('workflow')
+                        "step" : workflow_run['@id'],
+                        "for_file" : in_file['uuid'],
+                        "workflow" : workflow_run.get('workflow')
                     })
             return sources_for_in_file
 
         # Gather all workflow_runs out of which our input files (1 run per file) come from
         all_workflow_runs = []
 
-        for in_file in in_files:
-            in_file_uuid = in_file.get('uuid')
-
-            input_file_model_obj = in_file.get('TEMP_MODEL')
-            del in_file['TEMP_MODEL']
+        for in_file_model in in_file_models:
+            in_file_uuid = in_file_model['uuid']
 
             if uuidCacheTracedHistory.get(in_file_uuid):
                 sources = sources + uuidCacheTracedHistory[in_file_uuid]
                 continue
 
-            if not input_file_model_obj:
-                continue
-
             # Get @ids from ES source.
-            output_of_workflow_runs = input_file_model_obj.get('workflow_run_outputs', [])
+            output_of_workflow_runs = in_file_model.get('workflow_run_outputs', [])
             if len(output_of_workflow_runs) == 0:
                 continue
             # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
@@ -295,33 +303,37 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             workflow_run_uuid = last_workflow_run_output_of
             if not workflow_run_uuid:
                 continue
-            workflow_run_model_obj = get_model_obj(workflow_run_uuid)
-            if not workflow_run_model_obj:
+            workflow_run_model = get_model_obj(workflow_run_uuid)
+            if not workflow_run_model:
                 continue
-            all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
+            all_workflow_runs.append( (workflow_run_model, in_file_model) )
+
+
 
         filtered_in_workflow_runs, filtered_out_workflow_runs = filter_workflow_runs(all_workflow_runs)
 
-        for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_in_workflow_runs:
-            sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model_obj, workflow_run_uuid, in_file, in_file_uuid)
-            uuidCacheTracedHistory[in_file_uuid] = sources_for_in_file
+        for workflow_run_model, in_file_model in filtered_in_workflow_runs:
+            sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model, in_file_model)
+            uuidCacheTracedHistory[in_file_model['uuid']] = sources_for_in_file
             sources = sources + sources_for_in_file
 
+
         untraced_in_files = []
-        for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_out_workflow_runs:
-            untraced_in_files.append(in_file_uuid)
+        for workflow_run_model, in_file_model in filtered_out_workflow_runs:
+            untraced_in_files.append(in_file_model['uuid'])
             source_for_in_file = {
-                "for_file"   : in_file_uuid,
-                "step"       : workflow_run_model_obj['@id'],
+                "for_file"   : in_file_model['uuid'],
+                "step"       : workflow_run_model['@id'],
                 "grouped_by" : "workflow",
-                "workflow"   : workflow_run_model_obj.get('workflow')
+                "workflow"   : workflow_run_model.get('workflow')
             }
-            uuidCacheTracedHistory[in_file_uuid] = [source_for_in_file]
-            uuidCacheGroupSourcesByRun[workflow_run_uuid] = uuidCacheGroupSourcesByRun.get(workflow_run_uuid, []) + [in_file_uuid] #[source_for_in_file]
+            uuidCacheTracedHistory[in_file_model['uuid']] = [source_for_in_file]
+            uuidCacheGroupSourcesByRun[workflow_run_model['uuid']] = uuidCacheGroupSourcesByRun.get(workflow_run_model['uuid'], []) + [in_file_model['uuid']] #[source_for_in_file]
             sources.append(source_for_in_file)
 
+
         if len(sources) == 0:
-            for_files = [ f['uuid'] for f in in_files ]
+            for_files = [ f['uuid'] for f in in_file_models ]
             if len(for_files) == 1:
                 for_files = for_files[0]
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
@@ -461,19 +473,19 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         for argument_name, input_files_for_arg in input_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
             files = [ f.get('value') for f in input_files_for_arg ]
-            file_items = []
+            file_item_models = []
             file_format = (workflow_step_io and workflow_step_io.get('meta', {}).get('file_format')) or None
             io_type = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             for file_uuid in files:
                 got_item = get_model_obj(file_uuid)
                 if got_item is not None:
-                    file_items.append(dict(common_props_from_file(got_item), TEMP_MODEL = got_item))
+                    file_item_models.append(got_item)
                     if not file_format:
                         file_format = got_item.get('file_format')
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "source" : generate_sources_for_input(file_items, argument_name, depth),
+                "source" : generate_sources_for_input(file_item_models, argument_name, depth),
                 "meta" : {
                     "in_path" : True,
                     "file_format" : file_format,
@@ -481,7 +493,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     "type" : io_type
                 },
                 "run_data" : {
-                    "file" : file_items,
+                    "file" : [ common_props_from_file(file_model) for file_model in file_item_models ],
                     "type" : "input",
                     "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in input_files_for_arg ]
                 }

@@ -636,10 +636,6 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                         return;
                     }
 
-                    if (n.id.indexOf('group') > -1){
-                        console.log(n, n.meta.run_data.file, inNode.meta.run_data.file);
-                    }
-
                     // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
                     var combinedMeta = _.extend({}, n.meta, inNode.meta, {
                         'global' : n.meta.global || inNode.meta.global || false, // Make true if either is true.
