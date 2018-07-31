@@ -497,8 +497,28 @@ $margin-util-sizes-mini: 2, 3, 5, 7, 8; 		// * 1px
 
 }
 
+// Do same for padding.
+@each $util-size in $margin-util-sizes {
+	.pb-#{$util-size}, * > .pb-#{$util-size}{
+		padding-bottom : $util-size * 10px !important;
+	}
+	.pt-#{$util-size}, * > .pt-#{$util-size}{
+		padding-top : $util-size * 10px !important;
+	}
+
+	@each $util-mini-size in $margin-util-sizes-mini {
+		.pb-#{$util-size}#{$util-mini-size}, * > .pb-#{$util-size}#{$util-mini-size}{
+			padding-bottom : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+		.pmt-#{$util-size}#{$util-mini-size}, * > .pt-#{$util-size}#{$util-mini-size}{
+			padding-top : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+	}
+
+}
 
 
+// Margin left/right
 @each $util-size in $margin-util-sizes {
 	.ml-#{$util-size}, * > .ml-#{$util-size}{
 		margin-left : $util-size * 10px !important;

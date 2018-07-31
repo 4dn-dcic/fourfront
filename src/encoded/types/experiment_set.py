@@ -82,6 +82,10 @@ class ExperimentSet(Item):
         "lab.postal_code",
         "lab.city",
         "lab.title",
+        "static_headers.content",
+        "static_headers.title",
+        "static_headers.filetype",
+        "static_headers.section_type",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",

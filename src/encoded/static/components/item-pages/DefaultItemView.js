@@ -7,8 +7,10 @@ import { Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { panel_views, itemClass, content_views } from './../globals';
 import Alerts from './../alerts';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
+    FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax } from './../util';
+import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -136,7 +138,10 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     itemMidSection(){
-        return <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />;
+        return [
+            <Publications.ProducedInPublicationBelowHeaderRow {...this.props} produced_in_pub={this.props.context.produced_in_pub} key="publication-info" />,
+            <StaticHeadersSection context={this.props.context} key="static-headers-section" />
+        ];
     }
 
     tabbedView(){
@@ -171,7 +176,15 @@ content_views.register(DefaultItemView, 'Item');
 
 
 
-/** Helper Components */
+
+
+
+
+
+/*******************************
+ ****** Helper Components ******
+ *******************************/
+
 
 export class OverviewHeadingContainer extends React.Component {
 
@@ -192,6 +205,8 @@ export class OverviewHeadingContainer extends React.Component {
     constructor(props){
         super(props);
         this.toggle = _.throttle(this.toggle.bind(this), 500);
+        this.renderInner = this.renderInner.bind(this);
+        this.renderInnerBody = this.renderInnerBody.bind(this);
         this.state = { 'open' : props.defaultOpen };
     }
 
@@ -200,22 +215,69 @@ export class OverviewHeadingContainer extends React.Component {
     }
 
     renderTitle(){
-        return <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.headingTitle } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>;
+        return (
+            <span>
+                <i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>
+                { this.props.headingTitle } &nbsp;<i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/>
+            </span>
+        );
+    }
+
+    renderInner(){
+        return (
+            <div className="inner">
+                <hr className="tab-section-title-horiz-divider"/>
+                { this.renderInnerBody() }
+            </div>
+        );
+    }
+
+    renderInnerBody(){
+        return <div className="row overview-blocks" children={this.props.children}/>;
     }
 
     render(){
         return (
             <div className={"overview-blocks-header" + (this.state.open ? ' is-open' : ' is-closed') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
                 { this.props.headingTitleElement ? React.createElement(this.props.headingTitleElement, { 'className' : 'tab-section-title clickable with-accent', 'onClick' : this.toggle }, this.renderTitle()) : null }
-                <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
-                    <div className="inner">
-                        <hr className="tab-section-title-horiz-divider"/>
-                        <div className="row overview-blocks">{ this.props.children }</div>
-                    </div>
-                </Collapse>
+                <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose} children={this.renderInner()} />
             </div>
         );
     }
+}
+
+
+export class StaticHeadersSection extends OverviewHeadingContainer {
+
+    static propTypes = {
+        'context' : PropTypes.object.isRequired
+    }
+
+    static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
+        'className'     : 'with-background mb-1 mt-1',
+        'headingTitle' : "Information"
+    })
+
+    renderInnerBody(){
+        var context = this.props.context;
+        return (
+            <div className="sections-list-container" children={ _.map(context.static_headers, (section)=>
+                <div className="static-section-header pt-08 pb-08">
+                    { section.title ? <h4>{ section.title }</h4> : null }
+                    <BasicStaticSectionBody content={section.content} filetype={section.filetype} />
+                </div>
+            )}/>
+        );
+    }
+
+    render(){
+        var context = this.props.context;
+        if (!context.static_headers || context.static_headers.length === 0 || !_.every(context.static_headers, function(s){ return s.content; })){
+            return null;
+        }
+        return super.render();
+    }
+
 }
 
 

@@ -138,10 +138,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} schemas={this.props.schemas} key="publication-info" />,
-            <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview" />
-        ];
+        return (super.itemMidSection() || []).concat(<OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview" />);
     }
 
     tabbedView(){

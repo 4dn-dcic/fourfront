@@ -50,7 +50,8 @@
             "enum" : [
                 "Page Section",
                 "Announcement",
-                "Search Info Header"
+                "Search Info Header",
+                "Item Page Header"
             ]
         },
         "title": {
