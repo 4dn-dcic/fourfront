@@ -1,0 +1,60 @@
+[
+    {
+        "description": "EtBr staining of H1 and HFFc6 tier 1 cell MePCR material",
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:H1_R1_R2_HFF_R2_MePCRgel"
+        ],
+        "status": "released",
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "date_created": "2017-12-14T15:48:38.739452+00:00",
+        "public_release": "2018-02-14",
+        "protocol_type": "Authentication document",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "uuid": "237569f1-f169-45d7-97af-6026f128d47b"
+    },
+    {
+        "description": "Protocol for culturing H1-hESC and H9 human embryonic stem cells",
+        "schema_version": "1",
+        "aliases": [
+            "4dn-dcic-lab:pro_h1sop_v4"
+        ],
+        "status": "released",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267227777",
+            "date_modified": "2018-07-03T17:41:56.967192+00:00"
+        },
+        "date_created": "2018-07-03T17:41:56.956869+00:00",
+        "public_release": "2018-07-03",
+        "protocol_type": "Cell culture protocol",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "tags": [
+            "4DN Standard"
+        ],
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267227777",
+        "uuid": "50f8300d-400f-4ce1-8163-42f417cbbada"
+    },
+    {
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:H1_R3_MePCRgel"
+        ],
+        "description": "EtBr staining of H1 tier 1 cell MePCR material",
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "date_created": "2017-12-14T15:48:40.057070+00:00",
+        "status": "released",
+        "public_release": "2018-02-14",
+        "protocol_type": "Authentication document",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "uuid": "7d02daa1-5fda-442d-890d-7473ed261331"
+    }
+]

@@ -392,42 +392,41 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
 
         if (groupSources.length > 0){
 
-            var groups = _.reduce(groupSources, function(m,v){
-                if (typeof m[v.grouped_by] === 'undefined'){
-                    m[v.grouped_by] = {};
-                }
-                if (typeof m[v.grouped_by][v[v.grouped_by]] === 'undefined'){
-                    m[v.grouped_by][v[v.grouped_by]] = new Set();
-                }
-                m[v.grouped_by][v[v.grouped_by]].add(v.for_file) ;
-                return m;
-            }, {});
-
-            var groupKeys = _.keys(groups);
-            var filesNotInGroups = [];
-            var filesByGroup = _.reduce(stepIOArgument.run_data.file, function(m, file, idx){
-                var incl = false;
-                _.forEach(groupKeys, function(groupingTypeKey){
-                    _.forEach(_.keys(groups[groupingTypeKey]), function(group){
-                        if (groups[groupingTypeKey][group].has(file.uuid || file)){
-                            if (typeof m[groupingTypeKey] === 'undefined'){
-                                m[groupingTypeKey] = {};
+            var groups = _.reduce(groupSources, function(filesByGroup, groupSource){
+                    if (typeof filesByGroup[groupSource.grouped_by] === 'undefined'){
+                        filesByGroup[groupSource.grouped_by] = {};
+                    }
+                    if (typeof filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]] === 'undefined'){
+                        filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]] = new Set();
+                    }
+                    filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]].add(groupSource.for_file) ;
+                    return filesByGroup;
+                }, {}),
+                groupKeys = _.keys(groups),
+                filesNotInGroups = [],
+                filesByGroup = _.reduce(stepIOArgument.run_data.file, function(m, file, idx){
+                    var incl = false;
+                    _.forEach(groupKeys, function(groupingTypeKey){ // = 'workflow'
+                        _.forEach(_.keys(groups[groupingTypeKey]), function(group){ // id of workflow
+                            if (groups[groupingTypeKey][group].has(file.uuid || file)){
+                                if (typeof m[groupingTypeKey] === 'undefined'){
+                                    m[groupingTypeKey] = {};
+                                }
+                                if (typeof m[groupingTypeKey][group] === 'undefined'){
+                                    m[groupingTypeKey][group] = new Set();
+                                }
+                                m[groupingTypeKey][group].add(file);
+                                incl = true;
                             }
-                            if (typeof m[groupingTypeKey][group] === 'undefined'){
-                                m[groupingTypeKey][group] = new Set();
-                            }
-                            m[groupingTypeKey][group].add(file);
-                            incl = true;
-                        }
+                        });
+                        
                     });
-                    
-                });
-                if (!incl) {
-                    filesNotInGroups.push([idx, file]);
-                }
-                return m;
+                    if (!incl) {
+                        filesNotInGroups.push([idx, file]);
+                    }
+                    return m;
 
-            }, {}); // Returns e.g. { 'workflow' : { '/someWorkflow/@id/' : Set([ { ..file.. },{ ..file.. },{ ..file.. }  ]) } }
+                }, {}); // Returns e.g. { 'workflow' : { '/someWorkflow/@id/' : Set([ { ..file.. },{ ..file.. },{ ..file.. }  ]) } }
 
             // Should only be one groupingName for now.
             var groupingName = 'workflow';
@@ -597,6 +596,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
 
                 // Extend each existing node `n` that we've matched with data from nodes that would've been newly created otherwise `inNode`.
                 _.forEach(currentIONodesMatched, function(n){
+
                     // Sub-Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentIONodesMatched`.
                     try {
                         //console.log('FIND', n.id, ioNodeIDsMatched[n.id], stepNode);
@@ -606,8 +606,26 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                             inNode = inNodes[0];
                         } else {
                             inNode = _.find(inNodes, function(inMore){
-                                if (inMore && inMore.meta && inMore.meta.run_data && inMore.meta.run_data.file && n.meta && n.meta.run_data && n.meta.run_data.file){
-                                    return compareTwoFilesByUUID(n.meta.run_data.file, inMore.meta.run_data.file);
+                                if (inMore.meta.run_data && inMore.meta.run_data.file && n.meta.run_data && n.meta.run_data.file){
+                                    var origFile = n.meta.run_data.file,
+                                        fileToCheck = inMore.meta.run_data.file;
+                                    if (!Array.isArray(origFile) && !Array.isArray(fileToCheck)){ // Common case. Other cases are re: groups.
+                                        return compareTwoFilesByUUID(n.meta.run_data.file, inMore.meta.run_data.file);
+                                    } else if (Array.isArray(origFile) && !Array.isArray(fileToCheck)){
+                                        return _.any(origFile, function(oF){
+                                            return compareTwoFilesByUUID(oF, fileToCheck);
+                                        });
+                                    } else if (!Array.isArray(origFile) && Array.isArray(fileToCheck)){
+                                        return _.any(fileToCheck, function(fTC){
+                                            return compareTwoFilesByUUID(origFile, fTC);
+                                        });
+                                    } else if (Array.isArray(origFile) && Array.isArray(fileToCheck)){
+                                        return _.any(fileToCheck, function(fTC){
+                                            return _.any(origFile, function(oF){
+                                                return compareTwoFilesByUUID(oF, fTC);
+                                            });
+                                        });
+                                    }
                                 }
                                 return false;
                             });
@@ -618,12 +636,39 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                         return;
                     }
 
+                    if (n.id.indexOf('group') > -1){
+                        console.log(n, n.meta.run_data.file, inNode.meta.run_data.file);
+                    }
+
                     // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
-                    var combinedMeta = _.extend(n.meta, inNode.meta, {
+                    var combinedMeta = _.extend({}, n.meta, inNode.meta, {
                         'global' : n.meta.global || inNode.meta.global || false, // Make true if either is true.
                         'type' : (n.meta && n.meta.type) || (inNode.meta && inNode.meta.type),
-                        'file_format' : (n.meta && n.meta.file_format) || (inNode.meta && inNode.meta.file_format)
+                        'file_format' : (n.meta && n.meta.file_format) || (inNode.meta && inNode.meta.file_format),
                     });
+
+                    // TEMP: Re Grouping
+                    if (n.meta.run_data && Array.isArray(n.meta.run_data.file)){ // Combine run data (files) from both nodes, in case of groups.
+                        var runDataToUse            = n.meta.run_data, //useNewRunData ? n.meta.run_data : inNode.meta.run_data,
+                            runDataToUseFileUUIDs   = _.pluck(runDataToUse.file, 'uuid');
+
+                        if (Array.isArray(inNode.meta.run_data.file)){
+                            _.forEach(inNode.meta.run_data.file, function(f, idx){
+                                if (runDataToUseFileUUIDs.indexOf(f.uuid) === -1){
+                                    runDataToUse.file.push(f);
+                                    runDataToUse.meta.push(inNode.meta.run_data.meta[idx]);
+                                }
+                            });
+                        } else {
+                            if (runDataToUseFileUUIDs.indexOf(inNode.meta.run_data.file.uuid) === -1){
+                                runDataToUse.file.push(inNode.meta.run_data.file);
+                                runDataToUse.meta.push(inNode.meta.run_data.meta);
+                            }
+                        }
+
+                        combinedMeta.run_data = runDataToUse;
+                    }
+
                     _.extend(n, {
                         'meta'              : combinedMeta,
                         'name'              : ioNodeType === 'output' ? (inNode.name || n.name) : (n.name || inNode.name),

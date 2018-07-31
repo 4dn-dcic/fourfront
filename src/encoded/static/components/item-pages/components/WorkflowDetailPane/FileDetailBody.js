@@ -47,7 +47,8 @@ export class FileDetailBody extends React.Component {
     }
 
     maybeLoadFile(file = this.state.file){
-        var hrefToRequest = null;
+        var hrefToRequest = null,
+            node = this.props.node;
 
         if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
             if (file === 'Forbidden' || file.length === 0) return false;
@@ -55,8 +56,13 @@ export class FileDetailBody extends React.Component {
             else hrefToRequest = '/' + file + '/';
         } else if (file && typeof file === 'object' && !Array.isArray(file)){ // If we have file object but has little info. TODO: REMOVE
             if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.itemUtil.atId(file);
-        } else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){ // If we have a group of files
-            hrefToRequest = this.props.node.meta.workflow;
+        } else if (Array.isArray(file) && node && node.meta && node.meta.workflow){ // If we have a group of files
+            hrefToRequest = node.meta.workflow;
+            if (object.isUUID(hrefToRequest)){
+                hrefToRequest = '/workflows/' + hrefToRequest + '/';
+            } else if (hrefToRequest.charAt(0) !== '/') {
+                hrefToRequest = '/' + hrefToRequest;
+            }
         }
 
         if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.

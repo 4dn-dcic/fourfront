@@ -1,0 +1,320 @@
+[
+    {
+        "preferred_name": "H1-hESC",
+        "parents": [
+            "b83d9e9c-64d7-4c24-881b-64117aad2a20",
+            "ba0db777-83bc-4bc4-beb5-f37f2828ad5c",
+            "e99de3e8-531e-4578-9a70-0f0893813311"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "definition": "H1 human embryonic stem cell line, usually called H1-hESC and on occasion just H1",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0003042",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T14:55:29.540019+00:00"
+        },
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "term_id": "EFO:0003042",
+        "date_created": "2017-05-11T15:58:28.045574+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "synonyms": [
+            "H1"
+        ],
+        "term_name": "H1-hESC",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "uuid": "c3f6e06f-900e-45f9-9c23-983c5673f58d"
+    },
+    {
+        "preferred_name": "ESC derived cell line",
+        "parents": [
+            "14259df3-e653-4a60-be96-e90e4af9c765"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "definition": "ESC derived cell line is a cell line that derives from an embryonic stem call",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0005738",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T04:58:56.967388+00:00"
+        },
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "term_id": "EFO:0005738",
+        "date_created": "2017-05-11T16:02:24.376236+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "synonyms": [
+            "embryonic stem cell derived cell line",
+            "ESC cell line"
+        ],
+        "term_name": "ESC derived cell line",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "uuid": "b83d9e9c-64d7-4c24-881b-64117aad2a20"
+    },
+    {
+        "preferred_name": "stem cell derived cell line",
+        "parents": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "definition": "Cell lines derived from stem cells.",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002886",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T05:51:31.409985+00:00"
+        },
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "term_id": "EFO:0002886",
+        "date_created": "2017-05-11T15:52:42.939070+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "14259df3-e653-4a60-be96-e90e4af9c765",
+        "term_name": "stem cell derived cell line",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "is_slim_for": "cell",
+        "parents": [
+            "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "preferred_name": "cell line",
+        "status": "released",
+        "definition": "A cell line is a population of cells cultured in vitro that are descended through one or more generations (and possible sub-cultures) from a single primary culture which was originally derived from part of an organism.",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322",
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:01.759065+00:00"
+        },
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "term_id": "EFO:0000322",
+        "date_created": "2017-04-26T07:22:26.586071+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "synonyms": [
+            "cell_line"
+        ],
+        "term_name": "cell line",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "uuid": "111189bc-8535-4448-903e-854af460a233"
+    },
+    {
+        "preferred_name": "material entity",
+        "parents": [
+            "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ifomis.org/bfo/1.1/snap",
+        "status": "released",
+        "definition": "A material entity is an entity that exists in full during the length of time of its existence, persists through this time while maintaining its identity and has no temporal parts. For example a heart, a human, a fly, a microarray.",
+        "term_url": "http://www.ifomis.org/bfo/1.1/snap#MaterialEntity",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T02:09:20.727509+00:00"
+        },
+        "term_id": "MaterialEntity",
+        "date_created": "2017-05-11T17:30:41.711681+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "synonyms": [
+            "material type"
+        ],
+        "term_name": "material entity",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "uuid": "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
+    },
+    {
+        "preferred_name": "experimental factor",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "definition": "An experimental factor in Array Express which are essentially the variable aspects of an experiment design which can be used to describe an experiment, or set of experiments, in an increasingly detailed manner. This upper level class is really used to give a root class from which applications can rely on and not be tied to upper ontology classses which do change.",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000001",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:08:19.967522+00:00"
+        },
+        "term_id": "EFO:0000001",
+        "date_created": "2017-05-11T15:42:00.141073+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "synonyms": [
+            "ExperimentalFactor"
+        ],
+        "term_name": "experimental factor",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "uuid": "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
+    },
+    {
+        "preferred_name": "alternative_term",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.",
+        "term_url": "http://www.ebi.ac.uk/efo/alternative_term",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:20.223179+00:00"
+        },
+        "term_id": "EFO:alternative_term",
+        "date_created": "2017-04-26T07:22:23.156086+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "111111bc-8535-4448-903e-854af460a233",
+        "term_name": "alternative_term",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "has_exact_synonym",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.geneontology.org/formats/oboInOwl",
+        "status": "released",
+        "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:20.003491+00:00"
+        },
+        "term_id": "oboInOwl:hasExactSynonym",
+        "date_created": "2017-04-26T07:22:23.197018+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "111112bc-8535-4448-903e-854af460a233",
+        "term_name": "has_exact_synonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "has_narrow_synonym",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.geneontology.org/formats/oboInOwl",
+        "status": "released",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:19.750829+00:00"
+        },
+        "term_id": "oboInOwl:hasNarrowSynonym",
+        "date_created": "2017-04-26T07:22:23.231967+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "111113bc-8535-4448-903e-854af460a233",
+        "term_name": "has_narrow_synonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "has_related_synonym",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.geneontology.org/formats/oboInOwl",
+        "status": "released",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:19.506084+00:00"
+        },
+        "term_id": "oboInOwl:hasRelatedSynonym",
+        "date_created": "2017-04-26T07:22:23.265915+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "111114bc-8535-4448-903e-854af460a233",
+        "term_name": "has_related_synonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "definition",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "term_url": "http://www.ebi.ac.uk/efo/definition",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:19.271218+00:00"
+        },
+        "term_id": "EFO:definition",
+        "date_created": "2017-04-26T07:22:23.300338+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "111115bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "definition",
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://purl.obolibrary.org/obo",
+        "status": "released",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T06:16:19.056459+00:00"
+        },
+        "term_id": "IAO:0000115",
+        "date_created": "2017-04-26T07:22:23.334452+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "111116bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "Homo sapiens cell line",
+        "parents": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002888",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T01:04:16.736448+00:00"
+        },
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "term_id": "EFO:0002888",
+        "date_created": "2017-05-11T18:28:25.753472+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "ba0db777-83bc-4bc4-beb5-f37f2828ad5c",
+        "term_name": "Homo sapiens cell line",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    },
+    {
+        "preferred_name": "embryonic cell line",
+        "parents": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "schema_version": "1",
+        "references": [],
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "status": "released",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0003040",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-11T00:39:16.892438+00:00"
+        },
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ],
+        "term_id": "EFO:0003040",
+        "date_created": "2017-05-11T18:53:18.333313+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "e99de3e8-531e-4578-9a70-0f0893813311",
+        "term_name": "embryonic cell line",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254"
+    }
+]

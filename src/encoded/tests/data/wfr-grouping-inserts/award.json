@@ -1,0 +1,38 @@
+[
+    {
+        "schema_version": "1",
+        "end_date": "2020-07-31",
+        "status": "current",
+        "name": "1U54DK107965-01",
+        "title": "COMBINED CYTOLOGICAL, GENOMIC, AND FUNCTIONAL MAPPING OF NUCLEAR GENOME ORGANIZATION",
+        "url": "https://projectreporter.nih.gov/project_description.cfm?projectnumber=1U54DK107965-01",
+        "viewing_group": "4DN",
+        "description": "NOFIC: Decades of microscopy have revealed that the nucleus is not a homogeneous organelle, but rather consists of distinct compartments such as nucleoli, nuclear speckles, the nuclear lamina, among other structures. Increasing evidence indicates that specific genomic regions each associate with these compartments. This genome compartmentalization has been linked to various functions, but these links are still poorly understood. Interestingly, Lamina Associated Domains (LADs) share specific heterochromatin marks, defining chromatin domains with distinct genetic and epigenetic properties. Genomic regions associating with other nuclear compartments may similarly define distinct classes of chromatin domains. One major bottleneck towards a deeper understanding of nuclear organization has been the inability to convert microscopy views of nuclear compartments into genome-wide maps that show which loci are associated with which compartment, and how the chromosomal fiber traverses between compartments. In addition, there is an urgent need for more efficient methods to dissect the mechanisms by which large genomic regions are targeted to specific nuclear compartments. Finally, there is an urgent need for high-throughput approaches that query the functional relevance of genome compartmentalization. For this Center grant, we propose to meet these needs through the following Aims: 1. Develop a strategy that connects microscopy views to genome-wide maps that, together with modeling, reveal the localization and dynamics of genomic regions relative to all major nuclear compartments. 2. Develop methods for efficient manipulation of the genome in order to elucidate mechanisms that target loci to specific compartments. 3. Develop methods to measure, model, and validate the functional relevance of nuclear compartments. The combined results of these approaches will reveal causal relationships now hidden among entangled genomic, epigenetic, and nuclear organization features. Deliverables of this proposal include a wide range of structural and functional maps of nuclear organization, reagents for visualizing endogenous chromosome loci, a powerful pipeline for synthesis of ~100kb DNA fragments, and cell lines facilitating repeated, high-fidelity insertio of these large fragments back into selected sites in the genome. These resources will provide a powerful complement to other 4D Nucleome Consortium efforts. A key strength of this Center proposal is the experience and complementary research capabilities of its five Investigators. Together they will pool their expertise for a concerted investigation into the biological functions of nuclear compartmentalization.",
+        "project": "4DN",
+        "date_created": "2017-04-08T13:01:31.699715+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "pi": "92f90aed-7df1-4bd9-9e74-a472cb50d663",
+        "start_date": "2015-09-28"
+    },
+    {
+        "schema_version": "1",
+        "end_date": "2020-08-31",
+        "status": "current",
+        "name": "1U01CA200059-01",
+        "title": "4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER",
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-05-30T17:41:40.960700+00:00"
+        },
+        "viewing_group": "4DN",
+        "description": "DCIC: The goals of the 4D Nucleome (4DN) Data Coordination and Integration Center (DCIC) are to collect, store, curate, display, and analyze data generated in the 4DN Network. We have assembled a team of investigators with a strong track record in analysis of chromatin interaction data, image processing and three-dimensional data visualization, integrative analysis of genomic and epigenomic data, data portal development, large-scale computing, and development of secure and flexible cloud technologies. In Aim 1, we will develop efficient submission pipelines for data and metadata from 4DN data production groups. We will define data/metadata requirements and quality metrics in conjunction with the production groups and ensure that high-quality, well- annotated data become available to the wider scientific community in a timely manner. In Aim 2, we will develop a user-friendly data portal for the broad scientific community. This portal will provide an easy-to-navigate interface for accessing raw and intermediate data files, allow for programmatic access via APIs, and will incorporate novel analysis and visualization tools developed by DCIC as well as other Network members. For computing and storage scalability and cost-effectiveness, significant efforts will be devoted to development and deployment of cloud-based technology. We will conduct tutorials and workshops to facilitate the use of 4DN data and tools by external investigators. In Aim 3, we will coordinate and assist in conducting integrative analysis of the multiple data types. These efforts will examine key questions in higher-order chromatin organization using both sequence and image data, and the tools and algorithms developed here will be incorporated into the data portal for use by other investigators. These three aims will ensure that the data generated in 4DN will have maximal impact for the scientific community.",
+        "project": "4DN",
+        "date_created": "2017-04-07T19:56:09.579997+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "pi": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "start_date": "2015-09-07"
+    }
+]
