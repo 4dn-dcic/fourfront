@@ -94,5 +94,15 @@
                 "Chromosomes"
             ]
         }
+    },
+    "facets": {
+        "target_type": {
+            "title": "Target type"
+        }
+    },
+    "columns": {
+        "target_type": {
+          "title": "Target type"
+        }
     }
 }

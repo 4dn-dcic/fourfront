@@ -29,7 +29,7 @@ def mic_data(lab, award, human_biosample):
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'DNA-FiSH'
+        'experiment_type': 'DNA FISH'
     }
 
 

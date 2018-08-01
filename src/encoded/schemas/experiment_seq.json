@@ -1,5 +1,5 @@
 {
-    "title": "ChIP seq and Others",
+    "title": "1D Enrichment Sequencing Experiments",
     "description": "Schema for ChIP-seq, RNA-seq and other related genomics experiments.",
     "id": "/profiles/experiment_seq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -42,11 +42,11 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "experiment_type": {
             "enum": [
-            "CHIP-seq",
+            "ChIP-seq",
             "RNA-seq",
             "NAD-seq",
             "DNA SPRITE",

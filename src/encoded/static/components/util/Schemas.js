@@ -31,19 +31,20 @@ export const itemTypeHierarchy = {
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
+        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
     ],
     'Individual': [
         'IndividualHuman', 'IndividualMouse', 'IndividualFly'
     ],
     'Treatment': [
-        'TreatmentChemical', 'TreatmentAgent', 'TreatmentRnai'
+        'TreatmentAgent', 'TreatmentRnai'
     ],
     'QualityMetric' : [
-        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc',
+        'QualityMetricDedupqcRepliseq'
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'

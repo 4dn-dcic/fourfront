@@ -171,5 +171,29 @@
             "workflow_argument_name": "outputs"
         }
     ]
-  }
+},
+{
+    "uuid":"3b7066ef-f9e4-43ce-85b5-a994a15bbcaf",
+    "lab":"4dn-dcic-lab",
+    "award":"1U01CA200059-01",
+    "workflow": "c77a117b-9a58-477e-aaa5-291a109a99f6",
+    "run_status": "complete",
+    "status": "in review by lab",
+    "metadata_only": true,
+    "input_files": [
+        {
+            "ordinal": 1,
+            "value": "4ecd9cfb-369b-4f8e-866c-cfb2cc3c8ad2",
+            "workflow_argument_name": "inputs",
+            "format_if_extra": "pairs_px2"
+        }
+    ],
+    "title": "Some md5 workflow run on an extra file",
+    "output_files": [
+        {
+            "type": "Output report file",
+            "workflow_argument_name": "report"
+        }
+    ]
+}
 ]
