@@ -86,6 +86,9 @@ export const Term = {
 
         switch (field) {
             case 'biosource_type':
+            case 'organism.name':
+            case 'individual.organism.name':
+            case 'biosource.individual.organism.name':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;
