@@ -153,51 +153,6 @@
                 "linkTo": "FileProcessed"
             }
         },
-        "other_processed_files": {
-            "title": "Archived or Preliminary Processed Files",
-            "description": "Archived or preliminary processed filesets that are derived from files in this experiment set.",
-            "type": "array",
-            "lookup": 410,
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "items": {
-                "title": "Archived/Preliminary Processed Filesets",
-                "description": "Fileset metadata",
-                "type": "object",
-                "required": ["title", "files"],
-                "properties": {
-                    "title": {
-                        "title": "Fileset Title",
-                        "type": "string",
-                        "lookup": 411
-                    },
-                    "type": {
-                        "title": "Fileset Type",
-                        "type": "string",
-                        "lookup": 412,
-                        "enum": [
-                            "archived",
-                            "preliminary",
-                            "visualization"
-                        ]
-                    },
-                    "description": {
-                        "title": "Description",
-                        "type": "string",
-                        "lookup": 413
-                    },
-                    "files": {
-                        "title": "Files",
-                        "type": "array",
-                        "lookup": 414,
-                        "items": {
-                            "title": "File",
-                            "type": "string",
-                            "linkTo": "FileProcessed"
-                        }
-                    }
-                }
-            }
-        },
         "reference_files": {
             "title": "Reference Files",
             "description": "Reference files associated with this experiment (ex. file of sequencing barcodes).",
