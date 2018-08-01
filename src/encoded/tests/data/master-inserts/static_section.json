@@ -180,7 +180,12 @@
         "title" : "FastQ",
         "body" : "This is a static block with plaintext body (`options.filetype === 'md'`) and title of 'fastq'. Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "status" : "draft",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "md",
+            "collapsible" : true,
+            "default_open" : false
+        }
     },
     {
         "name" : "help.analysis.file-formats.bam",
@@ -188,7 +193,9 @@
         "title" : "BAM",
         "body" : "### Why BAM Files?\n\nBAM files are awesome get used to it.\n\nLorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### Header A\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "collapsible" : true,
+            "default_open" : false
         },
         "status" : "draft",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
@@ -199,7 +206,9 @@
         "title" : "Pairs",
         "body" : "Pairs files are pretty sweet too. \n\nLorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### Header B\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "collapsible" : true,
+            "default_open" : false
         },
         "status" : "draft",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
@@ -210,7 +219,9 @@
         "title" : "COOL and MCOOL",
         "body" : "COOL and MCOOL files may cause efficiency of access to Hi-C contact matrices. Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### A Header\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "collapsible" : true,
+            "default_open" : false
         },
         "status" : "draft",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
@@ -221,7 +232,9 @@
         "title" : "Hi-C",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### Another Header\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "collapsible" : true,
+            "default_open" : false
         },
         "status" : "draft",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
@@ -1004,14 +1017,22 @@
         "name" : "release-updates.TEST1",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b987",
         "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All data released to public between 2018-02-13 and 2018-02-14 with tag 4DN Joint Analysis 2018</h4>",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "html",
+            "default_open" : false
+        }
     },
 
     {
         "name" : "release-updates.TEST2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b787",
         "body" : "<h4 style=\"margin-top:0px;font-weight:400\">All 4DN data released to network members between 2018-02-11 and 2018-02-18</h4>",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "html",
+            "default_open" : false
+        }
     },
 
 
@@ -1023,7 +1044,8 @@
         "title" : "Public Data Usage Guidelines",
         "uuid":  "621e8359-3885-40ce-965d-91894aa7b758",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "default_open" : true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "section_type": "Item Page Header",

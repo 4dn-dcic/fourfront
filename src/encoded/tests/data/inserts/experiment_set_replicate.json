@@ -16,7 +16,7 @@
         "status": "in review by lab",
         "accession": "4DNESAAAAAA1",
         "processed_files": ["4DNFIAAAAAA4", "4DNFIAAAAAA5"],
-        "static_headers": ["item-page-headers.ExperimentSet.data-usage-guidelines"]
+        "static_headers": ["item-page-headers.ExperimentSet.data-usage-guidelines", "release-updates.TEST1", "help.analysis.file-formats.hic"]
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b261",

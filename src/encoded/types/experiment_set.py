@@ -86,6 +86,7 @@ class ExperimentSet(Item):
         "static_headers.title",
         "static_headers.filetype",
         "static_headers.section_type",
+        "static_headers.options.default_open",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",

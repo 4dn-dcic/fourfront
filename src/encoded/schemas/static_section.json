@@ -76,11 +76,25 @@
                     "lookup" : 1,
                     "enum" : [ "md", "html", "txt", "csv" ]
                 },
+                "collapsible" : {
+                    "title" : "Is Collapsible",
+                    "type" : "boolean",
+                    "description": "Whether this StaticSection should be collapsible (wherever collapsibility is an option). This property is ignored in some places, e.g. lists where all sections are explicitly collapsible.",
+                    "lookup": 2,
+                    "default" : false
+                },
+                "default_open" : {
+                    "title" : "Is Expanded by Default",
+                    "type" : "boolean",
+                    "description": "Whether this StaticSection should appear as expanded by default (in places where it may be collapsible). Does not necessarily depend on 'collapsible' being true, e.g. in lists where all sections are explicitly collapsible.",
+                    "lookup": 3,
+                    "default": true
+                },
                 "startCell" : {
                     "type" : "array",
                     "title" : "(CSV) First Table Cell",
                     "description" : "For filetype:csv, from which [row integer, column integer] to start parsing table.",
-                    "lookup" : 3,
+                    "lookup" : 20,
                     "items" : {
                         "type" : "integer"
                     }
@@ -89,7 +103,7 @@
                     "type" : "array",
                     "title" : "(CSV) Columns for Y-Axis",
                     "description" : "For filetype:csv, which columns (ints) should be used for Y-axis.",
-                    "lookup" : 4,
+                    "lookup" : 21,
                     "items" : {
                         "type" : "integer"
                     }
@@ -97,13 +111,13 @@
                 "yaxisTitle" : {
                     "type" : "string",
                     "title" : "(CSV) Title for Y-Axis",
-                    "lookup" : 5
+                    "lookup" : 22
                 },
                 "xaxisRows" : {
                     "type" : "array",
                     "title" : "(CSV) Rows for X-Axis",
                     "description" : "For filetype:csv, which rows (ints) should be used for X-Axis.",
-                    "lookup" : 6,
+                    "lookup" : 23,
                     "items" : {
                         "type" : "integer"
                     }
@@ -111,13 +125,13 @@
                 "xaxisTitle" : {
                     "type" : "string",
                     "title" : "(CSV) Title for X-Axis",
-                    "lookup" : 7
+                    "lookup" : 24
                 },
                 "titleCell" : {
                     "type" : "array",
                     "title" : "(CSV) Title Cell",
                     "description" : "For filetype:csv, which table cell [row int, column int] to use to grab title of section/table.",
-                    "lookup" : 8,
+                    "lookup" : 25,
                     "items" : {
                         "type" : "integer"
                     }
@@ -126,7 +140,7 @@
                     "type" : "array",
                     "title" : "(CSV) Rows Skipped",
                     "description" : "For filetype:csv, which table rows (ints) to skip in table (e.g. due to blank rows).",
-                    "lookup" : 9,
+                    "lookup" : 26,
                     "items" : {
                         "type" : "integer"
                     }
