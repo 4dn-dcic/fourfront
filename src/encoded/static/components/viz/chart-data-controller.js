@@ -270,7 +270,6 @@ class Provider extends React.Component {
     render(){
         var childChartProps = _.extend({}, this.props.children.props);
 
-        childChartProps.expSetFilters = Filters.contextFiltersToExpSetFilters();
         childChartProps.barplot_data_filtered = state.barplot_data_filtered;
         childChartProps.barplot_data_unfiltered = state.barplot_data_unfiltered;
         childChartProps.updateBarPlotFields = ChartDataController.updateBarPlotFields;

@@ -62,9 +62,8 @@ describe('Testing viz/QuickInfoBar.js', function() {
                 return <QuickInfoBar {...this.props} {...this.state} />;
             }
         }
-        
-        expSetFilters = Filters.contextFiltersToExpSetFilters(contextFilters);
-        page = TestUtils.renderIntoDocument(<QuickWrapper href={href} expSetFilters={expSetFilters} />);
+
+        page = TestUtils.renderIntoDocument(<QuickWrapper href={href} context={_.extend(context, { 'filters' : contextFilters })} />);
     });
 
     it('Has elements for stats (file, exps, expsets)', function() {

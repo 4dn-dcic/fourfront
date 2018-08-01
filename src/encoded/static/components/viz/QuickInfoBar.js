@@ -85,7 +85,8 @@ export default class QuickInfoBar extends React.Component {
         this.state = {
             'mounted'               : false,
             'show'                  : false,
-            'reallyShow'            : false
+            'reallyShow'            : false,
+            'expSetFilters'         : Filters.contextFiltersToExpSetFilters((props.context && props.context.filters) || null)
         };
     }
 
@@ -98,9 +99,13 @@ export default class QuickInfoBar extends React.Component {
      * @returns {undefined}
      */
     componentWillReceiveProps(nextProps){
-        if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.show){
-            this.setState({ 'show' : false });
+        var nextState = {
+            'expSetFilters' : Filters.contextFiltersToExpSetFilters((nextProps.context && nextProps.context.filters) || null)
+        };
+        if (!this.anyFiltersSet(nextState.expSetFilters) && this.state.show){
+            nextState.show = false;
         }
+        this.setState(nextState);
     }
 
     /** @private */
@@ -139,8 +144,8 @@ export default class QuickInfoBar extends React.Component {
         return false;
     }
 
-    anyFiltersSet(props = this.props){
-        return (props.expSetFilters && _.keys(props.expSetFilters).length > 0);
+    anyFiltersSet(expSetFilters = this.state.expSetFilters){
+        return (expSetFilters && _.keys(expSetFilters).length > 0);
     }
 
     className(){
@@ -156,7 +161,7 @@ export default class QuickInfoBar extends React.Component {
         if (areAnyFiltersSet) this.setState({ 'show' : 'activeFilters', 'reallyShow' : true });
         analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
             'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
-            'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+            'dimension1' : analytics.getStringifiedCurrentFilters(this.state.expSetFilters)
         });
     }
 
@@ -185,7 +190,7 @@ export default class QuickInfoBar extends React.Component {
                 'files'             : total.files || 0
             };
         }
-        var statProps = _.pick(this.props, 'id', 'expSetFilters', 'href', 'isLoadingChartData');
+        var statProps = _.extend(_.pick(this.props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : this.state.expSetFilters });
         return (
             <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
                 <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
@@ -222,7 +227,7 @@ export default class QuickInfoBar extends React.Component {
                         Filtered by
                     </div>
                     <ActiveFiltersBar
-                        expSetFilters={this.props.expSetFilters}
+                        expSetFilters={this.state.expSetFilters}
                         orderedFieldNames={null}
                         href={this.props.href}
                         showTitle={false}
