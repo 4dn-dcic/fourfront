@@ -944,7 +944,7 @@ export class ItemDetailList extends React.Component {
 
     static getTabObject(context, schemas = null){
         return {
-            tab : <span><i className="icon icon-list-ul icon-fw"/> Details</span>,
+            tab : <span><i className="icon icon-list icon-fw"/> Details</span>,
             key : 'details',
             content : (
                 <div>

@@ -138,7 +138,12 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        return (super.itemMidSection() || []).concat(<OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview" />);
+        return (super.itemMidSection() || []).concat(
+            <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview"
+                className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
+                    <i className="expand-icon icon icon-th-list" />
+                } />
+        );
     }
 
     tabbedView(){

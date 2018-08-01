@@ -222,7 +222,7 @@ export class OverviewHeadingContainer extends React.Component {
         var { title, prependTitleIcon, prependTitleIconFxn } = this.props, open = this.state.open;
         return (
             <span>
-                { prependTitleIcon && prependTitleIconFxn ? prependTitleIcon(open, this.props) : null }
+                { prependTitleIcon && prependTitleIconFxn ? prependTitleIconFxn(open, this.props) : null }
                 { title } &nbsp;<i className={"icon icon-angle-right" + (open ? ' icon-rotate-90' : '')}/>
             </span>
         );
@@ -264,10 +264,15 @@ export class StaticHeadersArea extends React.PureComponent {
         if (!context.static_headers || context.static_headers.length === 0 || !_.every(context.static_headers, function(s){ return s.content; })){
             return null;
         }
-        return <div className="static-headers-area" children={_.map(context.static_headers, (section, i) =>
-            <ExpandableStaticHeader title={section.title || 'Informational Notice ' + (i + 1)} content={section.content}
-                defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i} />
-        )} />;
+        return (
+            <div className="static-headers-area">
+                { _.map(context.static_headers, (section, i) =>
+                    <ExpandableStaticHeader title={section.title || 'Informational Notice ' + (i + 1)} content={section.content}
+                        defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i} />
+                )}
+                <hr />
+            </div>
+        );
     }
 
 }
