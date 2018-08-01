@@ -23,7 +23,6 @@
             "permission": "import_items",
             "enum": [
                 "released",
-                "current",
                 "revoked",
                 "archived",
                 "deleted",
@@ -227,11 +226,11 @@
         "biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
-        "lab.display_title": {
-            "title": "Lab"
-        },
         "publications_of_exp.display_title": {
             "title": "Publications"
+        },
+        "award.center_title": {
+            "title": "Center"
         }
     },
     "columns": {

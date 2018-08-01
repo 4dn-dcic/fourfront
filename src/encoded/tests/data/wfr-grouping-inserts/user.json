@@ -1,0 +1,118 @@
+[
+    {
+        "email": "asbel@illinois.edu",
+        "schema_version": "1",
+        "aliases": [
+            "dcic:andrew_belmont"
+        ],
+        "submits_for": [
+            "b2c2deeb-e883-4ac0-b9e2-906e598884d6"
+        ],
+        "status": "current",
+        "viewing_groups": [
+            "4DN"
+        ],
+        "groups": [],
+        "job_title": "PI",
+        "subscriptions": [
+            {
+                "url": "?submitted_by.link_id=~users~92f90aed-7df1-4bd9-9e74-a472cb50d663~&sort=-date_created",
+                "title": "My submissions"
+            },
+            {
+                "url": "?lab.link_id=~labs~andrew-belmont-lab~&sort=-date_created",
+                "title": "My lab"
+            },
+            {
+                "url": "?lab.link_id=~labs~andrew-belmont-lab~&sort=-date_created",
+                "title": "My lab"
+            },
+            {
+                "url": "?lab.link_id=~labs~andrew-belmont-lab~&sort=-date_created",
+                "title": "My lab"
+            },
+            {
+                "url": "?lab.link_id=~labs~andrew-belmont-lab~&sort=-date_created",
+                "title": "Andrew Belmont, ILLINOIS"
+            },
+            {
+                "url": "?lab.link_id=~labs~andrew-belmont-lab~&sort=-date_created",
+                "title": "Andrew Belmont, ILLINOIS"
+            }
+        ],
+        "last_name": "Belmont",
+        "lab": "b2c2deeb-e883-4ac0-b9e2-906e598884d6",
+        "timezone": "US/Eastern",
+        "date_created": "2017-04-08T13:01:07.973447+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "first_name": "Andrew",
+        "uuid": "92f90aed-7df1-4bd9-9e74-a472cb50d663"
+    },
+    {
+        "job_title": "co-I",
+        "schema_version": "1",
+        "aliases": [
+            "dcic:bas_vansteensel"
+        ],
+        "submits_for": [],
+        "status": "current",
+        "viewing_groups": [
+            "4DN"
+        ],
+        "groups": [],
+        "email": "b.v.steensel@nki.nl",
+        "date_created": "2017-05-22T17:35:42.630088+00:00",
+        "last_name": "van Steensel",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "timezone": "US/Eastern",
+        "subscriptions": [
+            {
+                "url": "?lab.link_id=~labs~bas-van-steensel-lab~&sort=-date_created",
+                "title": "My lab"
+            },
+            {
+                "url": "?lab.link_id=~labs~bas-van-steensel-lab~&sort=-date_created",
+                "title": "Bas van Steensel, NKI"
+            },
+            {
+                "url": "?lab.link_id=~labs~bas-van-steensel-lab~&sort=-date_created",
+                "title": "Bas van Steensel, NKI"
+            }
+        ],
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "first_name": "Bas",
+        "uuid": "dd8b1cd6-93cd-41e5-b184-caf1369cb39f"
+    },
+    {
+        "email": "d.peric@nki.nl",
+        "schema_version": "1",
+        "aliases": [
+            "dcic:daan_peric-hupkes"
+        ],
+        "submits_for": [
+            "6343d57a-213e-4ac7-89ec-8b5e74c21bd2"
+        ],
+        "status": "current",
+        "viewing_groups": [
+            "4DN"
+        ],
+        "groups": [],
+        "date_created": "2017-05-22T17:35:18.792734+00:00",
+        "last_name": "Peric-Hupkes",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "timezone": "US/Eastern",
+        "subscriptions": [
+            {
+                "url": "?submitted_by.link_id=~users~95deb527-6d19-45fa-ace9-4e5d4ed1e023~&sort=-date_created",
+                "title": "My submissions"
+            },
+            {
+                "url": "?lab.link_id=~labs~bas-van-steensel-lab~&sort=-date_created",
+                "title": "Bas van Steensel, NKI"
+            }
+        ],
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "first_name": "Daan"
+    }
+]

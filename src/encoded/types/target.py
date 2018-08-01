@@ -55,14 +55,32 @@ class Target(Item):
                 genomic_region = request.embed(each_target, '@@object')
                 value = ""
                 value += genomic_region['genome_assembly']
-                if genomic_region['chromosome']:
+                if genomic_region.get('chromosome'):
                     value += ':'
                     value += genomic_region['chromosome']
-                if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
+                if genomic_region.get('start_coordinate') and genomic_region.get('end_coordinate'):
                     value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
                 values.append(value)
             return ",".join(filter(None, values))
         return "no target"
+
+
+    @calculated_property(schema={
+        "title": "Target type",
+        "description": "Type of target (gene, RNA, protein)",
+        "type": "string",
+    })
+    def target_type(self, request, targeted_genes=None, targeted_genome_regions=None,
+                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
+        targets = {'Gene': targeted_genes, 'RNA': targeted_rnas, 'Protein': targeted_proteins,
+                   'Genomic Region': targeted_genome_regions, 'Structure': targeted_structure}
+        # if len([val for val in targets.values() if val]) > 1:
+        #     return 'Hybrid target type'
+        # for key, val in targets.items():
+        #     if val:
+        #         return key
+        types = sorted([key for key in targets.keys() if targets[key]])
+        return types
 
     @calculated_property(schema={
         "title": "Display Title",

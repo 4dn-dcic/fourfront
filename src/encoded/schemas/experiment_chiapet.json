@@ -44,11 +44,11 @@
     },
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "experiment_type": {
             "enum": [
-            "CHIA-pet",
+            "ChIA-PET",
             "PLAC-seq",
             "Hi-ChIP"
           ]

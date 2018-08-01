@@ -52,6 +52,7 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
     embedded_list = ["award.project",
+                     "award.center_title",
                      "lab.city",
                      "lab.state",
                      "lab.country",

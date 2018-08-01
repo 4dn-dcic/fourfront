@@ -963,6 +963,10 @@ def load_jin_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='jin_inserts',
               clear_tables=clear_tables)
 
+def load_wfr_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
+              clear_tables=clear_tables)
+
 
 def load_ontology_terms(app,
                         post_json='tests/data/ontology-term-inserts/ontology_post.json',

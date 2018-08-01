@@ -24,25 +24,27 @@ export function set(schemas){
 export const itemTypeHierarchy = {
     'Experiment': [
         'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq',
-        'ExperimentAtacseq', 'ExperimentDamid', 'ExperimentTsaseq'
+        'ExperimentAtacseq', 'ExperimentDamid', 'ExperimentTsaseq',
+        'ExperimentChiapet', 'ExperimentSeq'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
+        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
     ],
     'Individual': [
         'IndividualHuman', 'IndividualMouse', 'IndividualFly'
     ],
     'Treatment': [
-        'TreatmentChemical', 'TreatmentAgent', 'TreatmentRnai'
+        'TreatmentAgent', 'TreatmentRnai'
     ],
     'QualityMetric' : [
-        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc',
+        'QualityMetricDedupqcRepliseq'
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
