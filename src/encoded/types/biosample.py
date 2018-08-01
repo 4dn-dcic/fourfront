@@ -125,6 +125,48 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 return 'None'
         return 'None'
 
+    @calculated_property(schema={
+        "title": "Sample type",
+        "description": "The type of biosample used in an experiment.",
+        "type": "string",
+    })
+    def biosample_type(self, request):
+        biosources = self.properties.get('biosource')
+        biosource_types = []
+        for bs in biosources:
+            # silliness in case we ever have multiple biosources
+            biosource = request.embed(bs, '@@object')
+            btype = biosource.get('biosource_type')
+            if btype is not None:
+                biosource_types.append(btype)
+        biosource_types = list(set(biosource_types))
+        if len(biosource_types) > 1:
+            # hopefully rare or never happen
+            return 'mixed sample'
+        elif len(biosource_types) < 1:  # pragma: no cover
+            # shouldn't happen so raise an exception
+            raise "Biosource always needs type - why can't we find it"
+
+        # we've got a single type of biosource
+        bcc = self.properties.get('cell_culture_details')
+        if bcc is not None:
+            cell_culture = request.embed(bcc)
+            ds = cell_culture.get('differentiation_state')
+            dt = cell_culture.get('differentiation_term')
+            if ds or dt:
+                return 'in vitro differentiated cells'
+
+        biosource_type = biosource_types[0]
+        if biosource_type == 'multicellular organism':
+            biosource_type = 'whole organism'
+        elif biosource_type == 'stem cell derived cell line':
+            biosource_type = 'stem cell'
+        elif biosource_type.endswith(' line'):
+            biosource_type = biosource_type[:-5]
+        if biosource_type == 'tissue':
+            return biosource_type
+        return biosource_type + 's'
+
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties
         super(Biosample, self)._update(properties, sheets)
