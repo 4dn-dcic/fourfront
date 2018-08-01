@@ -1,0 +1,83 @@
+[
+    {
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "alternate_accessions": [],
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:H1_R1_LmnB1"
+        ],
+        "references": [],
+        "date_created": "2017-12-14T16:18:44.469772+00:00",
+        "biosource": [
+            "68172441-97c4-40cc-b73f-d0f5dbc5cc05"
+        ],
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "modifications": [],
+        "status": "released",
+        "public_release": "2018-02-14",
+        "description": "Replicate 1 H1 Biosample LaminB1 DamID",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "accession": "4DNBS5PK6X9E",
+        "treatments": [],
+        "cell_culture_details": "d4d816ff-44ca-40cd-b800-5079a78b26bd",
+        "uuid": "d1da185c-ca4c-41d8-8bf6-1d0003e60455",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "dbxrefs": []
+    },
+    {
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "alternate_accessions": [],
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:H1_R2_LmnB1"
+        ],
+        "references": [],
+        "date_created": "2017-12-14T16:18:46.542957+00:00",
+        "biosource": [
+            "68172441-97c4-40cc-b73f-d0f5dbc5cc05"
+        ],
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "modifications": [],
+        "status": "released",
+        "public_release": "2018-02-14",
+        "description": "Replicate 2 H1 Biosample LaminB1 DamID",
+        "dbxrefs": [],
+        "accession": "4DNBST7ZM51V",
+        "treatments": [],
+        "cell_culture_details": "f43fe84f-842c-4bea-8d6f-08bb1d3b2049",
+        "uuid": "15918da6-2476-4a01-a736-621e01e636b4",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2"
+    },
+    {
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "alternate_accessions": [],
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:H1_R3_LmnB1"
+        ],
+        "references": [],
+        "date_created": "2017-12-14T16:18:48.589639+00:00",
+        "biosource": [
+            "68172441-97c4-40cc-b73f-d0f5dbc5cc05"
+        ],
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "modifications": [],
+        "status": "released",
+        "public_release": "2018-02-14",
+        "description": "Replicate 3 H1 Biosample LaminB1 DamID",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "accession": "4DNBSW44B6J2",
+        "treatments": [],
+        "cell_culture_details": "214cfbfc-1139-4905-b54f-1b48c15d5f95",
+        "uuid": "3dcc1971-9c0f-42d6-933f-e4770147b827",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "dbxrefs": []
+    }
+]
