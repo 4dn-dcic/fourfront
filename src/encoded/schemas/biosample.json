@@ -137,8 +137,11 @@
         }
     },
     "facets": {
-        "biosource_summary": {
+        "biosample_type": {
             "title": "Sample Type"
+        },
+        "biosample_summary": {
+            "title": "Biosample Summary"
         },
         "biosource.cell_line_tier": {
             "title": "4DN Cell Line Tier"

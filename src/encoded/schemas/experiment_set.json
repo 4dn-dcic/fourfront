@@ -114,8 +114,11 @@
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "experiments_in_set.biosample.biosource_summary": {
-            "title": "Sample"
+        "experiments_in_set.biosample.biosample_type": {
+            "title": "Sample Type"
+        },
+        "experiments_in_set.biosample.biosample_summary": {
+            "title": "Biosample Summary"
         },
         "publications_of_set.display_title": {
             "title": "Publication"
@@ -125,9 +128,6 @@
         },
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
-        },
-        "experiments_in_set.biosample.biosource.biosource_type": {
-            "title": "Biosource type"
         },
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"

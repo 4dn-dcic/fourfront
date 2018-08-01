@@ -214,8 +214,8 @@
         "biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
+        "biosample.biosample_type": {
+            "title": "Sample Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
