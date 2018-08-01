@@ -1,0 +1,19 @@
+[
+    {
+        "schema_version": "1",
+        "aliases": [],
+        "references": [],
+        "status": "released",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "version": "0.11.4",
+        "software_type": [
+            "quality metric generator"
+        ],
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "title": "fastqc_0.11.4",
+        "date_created": "2017-05-30T21:43:41.517466+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
+        "name": "fastqc"
+    }
+]

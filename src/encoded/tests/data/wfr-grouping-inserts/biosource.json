@@ -1,0 +1,32 @@
+[
+    {
+        "cell_line": "c3f6e06f-900e-45f9-9c23-983c5673f58d",
+        "alternate_accessions": [],
+        "schema_version": "2",
+        "description": "Homo sapiens male H1 embryonic stem cell (WA01)",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267227777",
+            "date_modified": "2018-07-03T17:42:35.083296+00:00"
+        },
+        "biosource_vendor": "41784f69-697d-42c2-82b1-b52bc5ea3519",
+        "SOP_cell_line": "50f8300d-400f-4ce1-8163-42f417cbbada",
+        "status": "released",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "68172441-97c4-40cc-b73f-d0f5dbc5cc05",
+        "aliases": [
+            "dcic:h1wa01T1",
+            "4dn-dcic-lab:h1wa01T1"
+        ],
+        "references": [],
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "url": "https://www.wicell.org/home/stem-cell-lines/catalog-of-stem-cell-lines/wa01.cmsx",
+        "modifications": [],
+        "public_release": "2017-07-26",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "accession": "4DNSRV3SKQ8M",
+        "date_created": "2017-04-10T01:14:03.094143+00:00",
+        "biosource_type": "stem cell derived cell line",
+        "cell_line_tier": "Tier 1",
+        "individual": "c97775b7-3d00-4132-9598-863797b8ef14"
+    }
+]

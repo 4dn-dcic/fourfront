@@ -1,0 +1,24 @@
+[
+    {
+        "schema_version": "1",
+        "aliases": [
+            "dcic:wicell",
+            "4dn-dcic-lab:wicell"
+        ],
+        "status": "released",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "url": "https://www.wicell.org/",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-02T20:21:52.226240+00:00"
+        },
+        "description": "",
+        "public_release": "2017-09-17",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "title": "WiCell.org",
+        "date_created": "2017-04-08T13:04:56.689206+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "41784f69-697d-42c2-82b1-b52bc5ea3519",
+        "name": "wicellorg"
+    }
+]
