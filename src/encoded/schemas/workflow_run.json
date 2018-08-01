@@ -74,6 +74,11 @@
                         "description": "Ordinal of the file in the argument",
                         "type": "number",
                         "default": 1
+                    },
+                    "format_if_extra": {
+                        "title": "Format of extra file",
+                        "description": "the file format if the input file is an extra file of a file object",
+                        "type": "string"
                     }
                 }
             }

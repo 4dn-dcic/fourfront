@@ -23,7 +23,6 @@
             "permission": "import_items",
             "enum": [
                 "released",
-                "current",
                 "revoked",
                 "archived",
                 "deleted",
