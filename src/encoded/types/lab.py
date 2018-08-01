@@ -51,7 +51,7 @@ class Lab(Item):
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
-    embedded_list = ['awards.project']
+    embedded_list = ['awards.project', 'awards.center_title']
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,
