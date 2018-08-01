@@ -102,7 +102,7 @@ describe('Testing viz/QuickInfoBar.js', function() {
 
         var crumbs = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-crumb');
 
-        var filterTerms = _.reduce(_.values(expSetFilters), function(m,v){ return m.concat(Array.from(v.values())); }, []);
+        var filterTerms = _.reduce(_.values(Filters.contextFiltersToExpSetFilters(contextFilters)), function(m,v){ return m.concat(Array.from(v.values())); }, []);
 
         console.log("Testing for presence of terms in ActiveFiltersBar: ", filterTerms.join(', '));
         crumbs.forEach(function(c,i){
