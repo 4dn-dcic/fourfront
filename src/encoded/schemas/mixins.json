@@ -482,10 +482,32 @@
             "exclude_from" : ["submit4dn"],
             "permission": "import-items",
             "items": {
-                "title": "Badge",
-                "description": "A badge for the item.",
-                "type":  "string",
-                "linkTo": "Badge"
+                "description": "A badge (and possibly message) for the item.",
+                "type":  "object",
+                "required": ["badge"],
+                "additionalProperties": false,
+                "properties": {
+                    "badge": {
+                        "title": "Badge",
+                        "type": "string",
+                        "linkTo": "Badge"
+                    },
+                    "badge_status": {
+                        "title": "Cause",
+                        "description": "The general reason for the badge",
+                        "type": "string",
+                        "comment": "Not sure this should be an enum or if this is even necessary",
+                        "enum": [
+                            "WARNING",
+                            "KUDOS"
+                        ]
+                    },
+                    "message": {
+                        "title": "Info",
+                        "description": "Information about why the badge was added",
+                        "type": "string"
+                    }
+                }
             }
         }
     },

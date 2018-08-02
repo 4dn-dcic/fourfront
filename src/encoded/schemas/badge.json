@@ -20,6 +20,7 @@
             "default": "released",
             "enum" : [
                 "released",
+                "in review by lab",
                 "deleted"
             ]
         },
