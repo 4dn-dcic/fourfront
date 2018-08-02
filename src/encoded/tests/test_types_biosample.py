@@ -144,12 +144,10 @@ def test_biosample_sample_type_bs_lines_and_to_pluralize(testapp, biosample_1, h
 
 
 def test_biosample_sample_type_bs_multiple_same_type(testapp, biosample_1, human_biosource, GM12878_biosource):
-    bty = 'immortalized cell line'
     res = testapp.patch_json(biosample_1['@id'], {'biosource': [human_biosource['@id'], GM12878_biosource['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'immortalized cells'
 
 
 def test_biosample_sample_type_bs_multiple_diff_types(testapp, biosample_1, human_biosource, lung_biosource):
-    bty = 'immortalized cell line'
     res = testapp.patch_json(biosample_1['@id'], {'biosource': [human_biosource['@id'], lung_biosource['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'mixed sample'
