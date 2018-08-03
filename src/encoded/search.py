@@ -31,7 +31,7 @@ def includeme(config):
 sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?]')
 
 @view_config(route_name='search', request_method='GET', permission='search')
-def search(context, request, search_type=None, return_generator=False, forced_type='Search'):
+def search(context, request, search_type=None, return_generator=False, forced_type='Search', custom_aggregations=None):
     """
     Search view connects to ElasticSearch and returns the results
     """
@@ -103,8 +103,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Set starting facets
     facets = initialize_facets(types, doc_types, prepared_terms, schemas)
 
-    ### Adding facets to the query
-    search = set_facets(search, facets, query_filters, string_query, types, doc_types)
+    ### Adding facets, plus any optional custom aggregations and script fields to the query
+    search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -768,6 +768,15 @@ def schema_for_field(field, types, doc_types):
                 return schema['properties'][prop]
     return None
 
+def is_linkto_or_object_array_root_field(field, types, doc_types):
+    '''Not used currently. May be useful for if we want to enabled "type" : "nested" mappings on lists of dictionaries'''
+    schema = types[doc_types[0]].schema
+    field_root = field.split('.')[0]
+    fr_schema = (schema and schema.get('properties', {}).get(field_root, None)) or None
+    if fr_schema and fr_schema['type'] == 'array' and (fr_schema['items'].get('linkTo') is not None or fr_schema['items']['type'] == 'object'):
+        return True
+    return False
+
 def generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query):
     '''
     We add a copy of our filters to each facet, minus that of
@@ -827,7 +836,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
-def set_facets(search, facets, search_filters, string_query, types, doc_types):
+def set_facets(search, facets, search_filters, string_query, types, doc_types, custom_aggregations=None):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
     filtered by search_filters minus filter affecting facet field in order to get counts
@@ -961,26 +970,32 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types):
             'aggs': aggs
         }
     }
-    set_additional_aggregations(search_as_dict, types, doc_types)
+    set_additional_aggregations_and_script_fields(search_as_dict, types, doc_types, custom_aggregations)
     search.update_from_dict(search_as_dict)
 
 
     return search
 
 
-def set_additional_aggregations(search_as_dict, types, doc_types):
+def set_additional_aggregations_and_script_fields(search_as_dict, types, doc_types, extra_aggregations=None):
     '''
-    Extra aggs may be defined in schemas. Apply them OUTSIDE of globals so they act on our current search filters.
-    search_as_dict is modified in place.
+    Per-type aggregations may be defined in schemas. Apply them OUTSIDE of globals so they act on our current search filters.
+    Warning: `search_as_dict` is modified IN PLACE.
     '''
 
     schema = types[doc_types[0]].schema
 
     if schema.get('aggregations'):
-        for extra_agg in schema['aggregations'].keys():
-            if extra_agg == 'all_items':
+        for schema_agg_name in schema['aggregations'].keys():
+            if schema_agg_name == 'all_items':
                 raise Exception('all_items is a reserved agg name and not allowed as an extra aggregation name.')
-            search_as_dict['aggs'][extra_agg] = schema['aggregations'][extra_agg]
+            search_as_dict['aggs'][schema_agg_name] = schema['aggregations'][schema_agg_name]
+
+    if extra_aggregations:
+        for extra_agg_name in extra_aggregations.keys():
+            if extra_agg_name == 'all_items':
+                raise Exception('all_items is a reserved agg name and not allowed as an extra aggregation name.')
+            search_as_dict['aggs'][extra_agg_name] = extra_aggregations[extra_agg_name]
 
     return search_as_dict
 
@@ -1116,7 +1131,7 @@ DEFAULT_BROWSE_PARAM_LISTS = {
     'award.project'         : ['4DN']
 }
 
-def get_iterable_search_results(request, search_path='/search/', param_lists=None):
+def get_iterable_search_results(request, search_path='/search/', param_lists=None, **kwargs):
     '''
     Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain.from_iterable to get one big iterable of results.
     TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
@@ -1134,12 +1149,12 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
     param_lists['from'] = [0]
     param_lists['sort'] = param_lists.get('sort','uuid')
     subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
-    return iter_search_results(None, subreq)
+    return iter_search_results(None, subreq, **kwargs)
 
 
 # Update? used in ./batch_download.py
-def iter_search_results(context, request):
-    return search(context, request, return_generator=True)
+def iter_search_results(context, request, **kwargs):
+    return search(context, request, return_generator=True, **kwargs)
 
 def list_visible_columns_for_schemas(request, schemas):
     columns = OrderedDict()

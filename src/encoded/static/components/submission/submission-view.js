@@ -2095,6 +2095,7 @@ class RoundTwoDetailPanel extends React.Component{
 
 globals.content_views.register(SubmissionView, 'Item', 'edit');
 globals.content_views.register(SubmissionView, 'Item', 'create');
+globals.content_views.register(SubmissionView, 'Item', 'clone');
 globals.content_views.register(SubmissionView, 'Search', 'add');
 
 /***** MISC. FUNCIONS *****/
