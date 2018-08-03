@@ -22,25 +22,29 @@
             "description": "Unique name or ID of this section.",
             "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. search-info-header.WorkflowRun --> '/static-section/search-info-header.WorkflowRun'.",
             "type": "string",
-            "uniqueKey": "static_section:name"
+            "uniqueKey": "static_section:name",
+            "lookup" : 1
         },
-        "status": {
-            "title": "Status",
+        "title": {
+            "title": "Title",
+            "description": "Title for the section. Optional.",
             "type": "string",
-            "default": "released",
-            "enum" : [
-                "released",
-                "released to project",
-                "draft",
-                "deleted"
-            ]
+            "lookup" : 5
         },
-        "award": {
-            "title": "Grant",
-            "description": "Grant associated with the submission.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+        "body":{
+            "title": "Raw Body",
             "type": "string",
-            "linkTo": "Award"
+            "comment" : "There should be no 'file' if this is set.",
+            "description": "Plain html or text content of this section.",
+            "formInput": "code",
+            "lookup" : 6
+        },
+        "file": {
+            "title": "Source File Location",
+            "type": "string",
+            "comment" : "There should be no 'body' if this is set.",
+            "description": "Source file to use for populating content. Is superceded by contents of 'body', if one present.",
+            "lookup" : 7
         },
         "section_type": {
             "title": "Section Type",
@@ -52,17 +56,26 @@
                 "Announcement",
                 "Search Info Header",
                 "Item Page Header"
-            ]
+            ],
+            "lookup" : 10
         },
-        "title": {
-            "title": "Title",
-            "description": "Title for the section",
-            "type": "string"
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "released",
+            "enum" : [
+                "released",
+                "released to project",
+                "draft",
+                "deleted"
+            ],
+            "lookup" : 20
         },
         "description": {
             "title": "Description",
             "type": "string",
-            "formInput" : "textarea"
+            "formInput" : "textarea",
+            "lookup" : 21
         },
         "options": {
             "title": "Options",
@@ -89,6 +102,12 @@
                     "description": "Whether this StaticSection should appear as expanded by default (in places where it may be collapsible). Does not necessarily depend on 'collapsible' being true, e.g. in lists where all sections are explicitly collapsible.",
                     "lookup": 3,
                     "default": true
+                },
+                "title_icon" : {
+                    "title" : "Title Icon",
+                    "description": "Icon to be showed next to title in selected places.",
+                    "type" : "string",
+                    "lookup" : 5
                 },
                 "startCell" : {
                     "type" : "array",
@@ -145,21 +164,17 @@
                         "type" : "integer"
                     }
                 }
-            }
+            },
+            "lookup" : 25
         },
-        "file": {
-            "title": "Source File Location",
+        "award": {
+            "title": "Grant",
+            "description": "Grant associated with the submission.",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
-            "comment" : "There should be no 'body' if this is set.",
-            "description": "Source file to use for populating content. Is superceded by contents of 'body', if one present."
-        },
-        "body":{
-            "title": "Raw Body",
-            "type": "string",
-            "comment" : "There should be no 'file' if this is set.",
-            "description": "Plain html or text content of this section.",
-            "formInput": "code"
+            "linkTo": "Award"
         }
+        
     },
     "facets" : {
         "section_type" : {

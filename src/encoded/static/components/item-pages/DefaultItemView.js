@@ -268,7 +268,8 @@ export class StaticHeadersArea extends React.PureComponent {
             <div className="static-headers-area">
                 { _.map(context.static_headers, (section, i) =>
                     <ExpandableStaticHeader title={section.title || 'Informational Notice ' + (i + 1)} content={section.content}
-                        defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i} />
+                        defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i}
+                        titleIcon={section.options && section.options.title_icon} />
                 )}
                 <hr />
             </div>
@@ -286,7 +287,12 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
         'className' : 'with-background mb-1 mt-1',
-        'title'     : "Information"
+        'title'     : "Information",
+        'prependTitleIconFxn' : function(open, props){
+            if (!props.titleIcon) return null;
+            return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
+        },
+        'prependTitleIcon' : true
     })
 
     renderInnerBody(){

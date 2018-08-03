@@ -1045,7 +1045,8 @@
         "uuid":  "621e8359-3885-40ce-965d-91894aa7b758",
         "options" : {
             "filetype" : "md",
-            "default_open" : true
+            "default_open" : true,
+            "title_icon" : "exclamation-circle"
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "section_type": "Item Page Header",
