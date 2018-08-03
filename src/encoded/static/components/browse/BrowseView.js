@@ -399,14 +399,7 @@ export default class BrowseView extends React.Component {
             return;
         }
 
-        // If we get different count in Browse result total, then refetch chart data.
-        if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
-            var cdcState = ChartDataController.getState();
-            var cdcExpSetCount = cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets;
-            if (cdcExpSetCount && cdcExpSetCount !== context.total && !cdcState.fetching){
-                ChartDataController.sync();
-            }
-        }
+        this.checkResyncChartData(hrefParts, context);
     }
 
     componentWillReceiveProps(nextProps){
@@ -416,12 +409,31 @@ export default class BrowseView extends React.Component {
     }
 
     componentDidUpdate(pastProps){
-        if (pastProps.href !== this.props.href){
-            var hrefParts = url.parse(this.props.href, true);
+        var { context, href } = this.props;
+        var hrefParts = url.parse(href, true);
+        if (pastProps.href !== href){
             if (!navigate.isValidBrowseQuery(hrefParts.query)){
                 this.redirectToCorrectBrowseView(hrefParts);
+                return;
             }
         }
+
+        this.checkResyncChartData(hrefParts, context);
+    }
+
+    /**
+     * If we get different count in Browse result total, then refetch chart data.
+     */
+    checkResyncChartData(hrefParts, context = this.props.context){
+        setTimeout(()=>{
+            if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
+                var cdcState = ChartDataController.getState();
+                var cdcExpSetCount = cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets;
+                if (cdcExpSetCount && cdcExpSetCount !== context.total && !cdcState.fetching){
+                    ChartDataController.sync();
+                }
+            }
+        });
     }
 
     redirectToCorrectBrowseView(hrefParts = null){
