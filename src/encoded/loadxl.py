@@ -831,19 +831,13 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
     return errors
 
 
-def generate_access_key(testapp, store_access_key=None,
+def generate_access_key(testapp, store_access_key,
                         email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
         admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
-
-        # don't create one if we already have
-        for key in admin['access_keys']:
-            if key.get('description') == 'key for submit4dn':
-                print("key found not generating new one")
-                return
 
         access_key_req = {
             'user': admin['@id'],
@@ -882,11 +876,12 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                     keypairs.write(keys)
 
         elif store_access_key == 's3':
+            # if access_key_loc == 's3', always generate new keys
             s3bucket = app.registry.settings['system_bucket']
             secret = os.environ.get('AWS_SECRET_KEY')
             if not secret:
                 print("no secrets for s3 upload, you probably shouldn't be doing"
-                      "this from yourlocal machine")
+                      "this from your local machine")
                 print("halt and catch fire")
                 return
 
