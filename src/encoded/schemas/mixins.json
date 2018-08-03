@@ -479,33 +479,31 @@
             "type": "array",
             "lookup": 1000,
             "ff_flag": "clear clone",
-            "exclude_from" : ["submit4dn"],
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "permission": "import-items",
             "items": {
                 "description": "A badge (and possibly message) for the item.",
                 "type":  "object",
-                "required": ["badge"],
+                "required": ["badge", "originating_item_id"],
                 "additionalProperties": false,
+                "exclude_from" : ["submit4dn", "FFedit-create"],
+                "permission": "import-items",
                 "properties": {
                     "badge": {
                         "title": "Badge",
                         "type": "string",
                         "linkTo": "Badge"
                     },
-                    "badge_status": {
-                        "title": "Cause",
-                        "description": "The general reason for the badge",
-                        "type": "string",
-                        "comment": "Not sure this should be an enum or if this is even necessary",
-                        "enum": [
-                            "WARNING",
-                            "KUDOS"
-                        ]
-                    },
                     "message": {
                         "title": "Info",
                         "description": "Information about why the badge was added",
                         "type": "string"
+                    },
+                    "originating_item_id": {
+                        "title": "Originating Item uuid",
+                        "description": "The uuid of the item for which this badge is directly associated.",
+                        "type": "string",
+                        "format": "uuid"
                     }
                 }
             }

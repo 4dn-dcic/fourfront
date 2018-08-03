@@ -17,7 +17,7 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "released",
+            "default": "in review by lab",
             "enum" : [
                 "released",
                 "in review by lab",
@@ -28,6 +28,17 @@
             "title": "Name",
             "description": "The display name for the badge",
             "type": "string"
+        },
+        "badge_classification": {
+            "title": "Badge Classification",
+            "description": "The classification of a badge",
+            "type": "string",
+            "comment": "Not sure this should be an enum or if this is even necessary",
+            "enum": [
+                "WARNING",
+                "KUDOS",
+                "INTERNAL"
+            ]
         },
         "description": {
             "title": "Description",
