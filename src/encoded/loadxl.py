@@ -831,19 +831,13 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
     return errors
 
 
-def generate_access_key(testapp, store_access_key=None,
+def generate_access_key(testapp, store_access_key,
                         email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
         admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
-
-        # don't create one if we already have
-        for key in admin['access_keys']:
-            if key.get('description') == 'key for submit4dn':
-                print("key found not generating new one")
-                return
 
         access_key_req = {
             'user': admin['@id'],
@@ -886,7 +880,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
             secret = os.environ.get('AWS_SECRET_KEY')
             if not secret:
                 print("no secrets for s3 upload, you probably shouldn't be doing"
-                      "this from yourlocal machine")
+                      "this from your local machine")
                 print("halt and catch fire")
                 return
 
@@ -901,7 +895,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
+def load_data(app, access_key_loc='s3', indir='inserts', docsdir=None, clear_tables=False):
     '''
     generic load data function
     indir for inserts should be relative to tests/data/
@@ -945,25 +939,26 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
             docsdir += '/'
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
     load_all(testapp, inserts, docsdir)
+    # always generate a new access key for s3
     keys = generate_access_key(testapp, access_key_loc)
     store_keys(app, access_key_loc, keys)
 
 
-def load_test_data(app, access_key_loc=None, clear_tables=False):
+def load_test_data(app, access_key_loc='s3', clear_tables=False):
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
               clear_tables=clear_tables)
 
 
-def load_prod_data(app, access_key_loc=None, clear_tables=False):
+def load_prod_data(app, access_key_loc='s3', clear_tables=False):
     load_data(app, access_key_loc, indir='prod-inserts',
               clear_tables=clear_tables)
 
 
-def load_jin_data(app, access_key_loc=None, clear_tables=False):
+def load_jin_data(app, access_key_loc='s3', clear_tables=False):
     load_data(app, access_key_loc, indir='jin_inserts',
               clear_tables=clear_tables)
 
-def load_wfr_data(app, access_key_loc=None, clear_tables=False):
+def load_wfr_data(app, access_key_loc='s3', clear_tables=False):
     load_data(app, access_key_loc, indir='wfr-grouping-inserts',
               clear_tables=clear_tables)
 
