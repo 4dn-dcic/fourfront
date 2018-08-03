@@ -876,6 +876,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                     keypairs.write(keys)
 
         elif store_access_key == 's3':
+            # if access_key_loc == 's3', always generate new keys
             s3bucket = app.registry.settings['system_bucket']
             secret = os.environ.get('AWS_SECRET_KEY')
             if not secret:
@@ -895,7 +896,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc='s3', indir='inserts', docsdir=None, clear_tables=False):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
     '''
     generic load data function
     indir for inserts should be relative to tests/data/
@@ -939,26 +940,25 @@ def load_data(app, access_key_loc='s3', indir='inserts', docsdir=None, clear_tab
             docsdir += '/'
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
     load_all(testapp, inserts, docsdir)
-    # always generate a new access key for s3
     keys = generate_access_key(testapp, access_key_loc)
     store_keys(app, access_key_loc, keys)
 
 
-def load_test_data(app, access_key_loc='s3', clear_tables=False):
+def load_test_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
               clear_tables=clear_tables)
 
 
-def load_prod_data(app, access_key_loc='s3', clear_tables=False):
+def load_prod_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='prod-inserts',
               clear_tables=clear_tables)
 
 
-def load_jin_data(app, access_key_loc='s3', clear_tables=False):
+def load_jin_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='jin_inserts',
               clear_tables=clear_tables)
 
-def load_wfr_data(app, access_key_loc='s3', clear_tables=False):
+def load_wfr_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='wfr-grouping-inserts',
               clear_tables=clear_tables)
 
