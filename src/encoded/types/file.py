@@ -622,7 +622,9 @@ class FileProcessed(File):
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
         'experiments': ('Experiment', 'processed_files'),
-        'experiment_sets': ('ExperimentSet', 'processed_files')
+        'experiment_sets': ('ExperimentSet', 'processed_files'),
+        'other_experiments': ('Experiment', 'other_processed_files.files'),
+        'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
 
     @classmethod
@@ -666,7 +668,20 @@ class FileProcessed(File):
         }
     })
     def experiment_sets(self, request):
-        return self.rev_link_atids(request, "experiment_sets")
+        return self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")
+
+    @calculated_property(schema={
+        "title": "Experiments",
+        "description": "Experiments that this file belongs to",
+        "type": "array",
+        "items": {
+            "title": "Experiment",
+            "type": "string",
+            "linkTo": "Experiment"
+        }
+    })
+    def experiments(self, request):
+        return self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
