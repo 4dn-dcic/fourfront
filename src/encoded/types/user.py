@@ -92,27 +92,27 @@ class User(Item):
         owner = 'userid.%s' % self.uuid
         return {owner: 'role.owner'}
 
-    @calculated_property(schema={
-        "title": "Access Keys",
-        "type": "array",
-        "items": {
-            "type": ['string', 'object'],
-            "linkTo": "AccessKey"
-        }
-    }, category='page')
-    def access_keys(self, request):
-        if not request.has_permission('view_details'):
-            return []
-        key_coll = self.registry['collections']['AccessKey']
-        # need to handle both esstorage and db storage results
-        uuids = [str(uuid) for uuid in key_coll]
-        acc_keys = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, uuids)]
-        my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
-        if my_keys:
-            return [key for key in my_keys if key['status'] not in ('deleted', 'replaced')]
-        else:
-            return []
+    #@calculated_property(schema={
+    #    "title": "Access Keys",
+    #    "type": "array",
+    #    "items": {
+    #        "type": ['string', 'object'],
+    #        "linkTo": "AccessKey"
+    #    }
+    #}, category='page')
+    #def access_keys(self, request):
+    #    if not request.has_permission('view_details'):
+    #        return []
+    #    key_coll = self.registry['collections']['AccessKey']
+    #    # need to handle both esstorage and db storage results
+    #    uuids = [str(uuid) for uuid in key_coll]
+    #    acc_keys = [request.embed('/', uuid, '@@object')
+    #            for uuid in paths_filtered_by_status(request, uuids)]
+    #    my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
+    #    if my_keys:
+    #        return [key for key in my_keys if key['status'] not in ('deleted', 'replaced')]
+    #    else:
+    #        return []
 
     def _update(self, properties, sheets=None):
         # update user subscriptions to ensure that they include the labs

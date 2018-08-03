@@ -359,6 +359,10 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 	cursor: pointer;
 }
 
+.no-user-select {
+	@include user-select(none);
+}
+
 @media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {

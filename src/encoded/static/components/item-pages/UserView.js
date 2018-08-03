@@ -6,7 +6,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, Alert } from 'react-bootstrap';
+import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
 import { panel_views, content_views } from './../globals';
@@ -84,8 +84,9 @@ class AccessKeyTable extends React.Component {
         this.render = this.render.bind(this);
         
         this.store = new AccessKeyStore(props.access_keys, this, 'access_keys');
+
         this.state = {
-            access_keys : props.access_keys
+            'access_keys' : props.access_keys || null
         };
     }
 
@@ -125,24 +126,29 @@ class AccessKeyTable extends React.Component {
     }
 
     showNewSecret(title, response) {
-        this.setState({modal:
+        this.setState({ 'modal' :
             <Modal show={true} onHide={this.hideModal}>
-            <Modal.Header>
-                <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
+                <Modal.Header><Modal.Title children={title} /></Modal.Header>
                 <Modal.Body>
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
-                    <dl className="key-value">
-                        <div>
-                            <dt>Access Key ID</dt>
-                            <dd>{response.access_key_id}</dd>
+
+                    <div className="row mt-12">
+                        <div className="col-xs-4 text-600 text-right no-user-select">
+                            Access Key ID
                         </div>
-                        <div>
-                            <dt>Secret Access Key</dt>
-                            <dd>{response.secret_access_key}</dd>
+                        <div className="col-xs-8">
+                            <code>{response.access_key_id}</code>
                         </div>
-                    </dl>
+                    </div>
+                    <div className="row mt-05">
+                        <div className="col-xs-4 text-600 text-right no-user-select">
+                            Secret Access Key
+                        </div>
+                        <div className="col-xs-8">
+                            <code>{response.secret_access_key}</code>
+                        </div>
+                    </div>
                 </Modal.Body>
             </Modal>
         });
@@ -237,7 +243,7 @@ class AccessKeyTable extends React.Component {
                     :
                     <div className="no-access-keys"><hr/>No access keys set.</div>
                 }
-                <a href="#add-access-key" id="add-access-key" className="btn btn-success" onClick={this.create}>Add Access Key</a>
+                <a href="#add-access-key" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</a>
                 {this.state.modal}
             </div>
         );
@@ -631,7 +637,7 @@ class BasicForm extends React.Component {
     }
 
     handleChange(e) {
-        this.setState({ value: e.target.value });
+        this.setState({ 'value': e.target.value });
     }
 
     handleSubmit(e){
@@ -639,16 +645,18 @@ class BasicForm extends React.Component {
         if(this.state.value.length == 0){
             return;
         }
-        this.props.submitImpersonate(this.state.value);
-        this.setState({ value: '' });
+        this.props.onSubmit(this.state.value);
+        this.setState({ 'value': '' });
     }
 
     render() {
         return(
             <form onSubmit={this.handleSubmit}>
-                <input className="impersonate-user impersonate-user-field" type='text' placeholder='Enter an email to impersonate...'
+                <FormControl className="mt-08" type='text' placeholder='Enter an email to impersonate...'
                     onChange={this.handleChange} value={this.state.value}/>
-                <input className="impersonate-user" type="submit" value="Submit" />
+                <Button className="mt-15 pull-right" type="submit" bsStyle="primary" bsSize="md">
+                    <i className="icon icon-fw icon-user"/>&nbsp; Impersonate
+                </Button>
             </form>
         );
     }
@@ -663,7 +671,7 @@ class BasicForm extends React.Component {
 export class ImpersonateUserForm extends React.Component {
 
     static propTypes = {
-        updateUserInfo: PropTypes.func.isRequired
+        'updateUserInfo': PropTypes.func.isRequired
     }
 
     /**
@@ -700,11 +708,15 @@ export class ImpersonateUserForm extends React.Component {
     }
 
     render() {
-        var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
-            <div style={{marginTop : 30}}>
-                <h2>Impersonate User</h2>
-                {form}
+            <div className="mt-3">
+                <hr />
+                <h2 className="text-400 mt-5">Impersonate a User</h2>
+                <div className="row">
+                    <div className="col-xs-12 col-lg-6">
+                        <BasicForm onSubmit={this.handleSubmit} />
+                    </div>
+                </div>
             </div>
         );
     }
