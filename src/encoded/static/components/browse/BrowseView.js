@@ -11,6 +11,7 @@ import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
 import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
+import { ChartDataController } from './../viz/chart-data-controller';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
     SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
@@ -391,9 +392,20 @@ export default class BrowseView extends React.Component {
     }
 
     componentDidMount(){
-        var hrefParts = url.parse(this.props.href, true);
+        var { href, context } = this.props;
+        var hrefParts = url.parse(href, true);
         if (!navigate.isValidBrowseQuery(hrefParts.query)){
             this.redirectToCorrectBrowseView(hrefParts);
+            return;
+        }
+
+        // If we get different count in Browse result total, then refetch chart data.
+        if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
+            var cdcState = ChartDataController.getState();
+            var cdcExpSetCount = cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets;
+            if (cdcExpSetCount && cdcExpSetCount !== context.total && !cdcState.fetching){
+                ChartDataController.sync();
+            }
         }
     }
 

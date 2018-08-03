@@ -474,7 +474,7 @@ export const ChartDataController = {
      * @static
      * @returns {Object}
      */
-    getState : function(){ return state; },
+    getState : function(){ return state || {}; },
 
     /**
      * Analogous to a component's setState. Updates the private state of
