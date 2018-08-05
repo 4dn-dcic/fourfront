@@ -112,8 +112,8 @@ class AccessKeyTable extends React.Component {
         var requestFailed = () => {
                 this.setState({ 'loadingStatus' : 'failed', 'access_keys' : null });
             },
-            requestSucceeded = (resp) => {
-                if (!Array.isArray(resp['@graph'])) return requestFailed();
+            requestSucceeded = (resp) => { // Use for both load success+fail ajax callback in case of 404 (no results)
+                if (!resp || !Array.isArray(resp['@graph'])) return requestFailed();
                 this.store = new AccessKeyStore(resp['@graph'], this, 'access_keys');
                 this.setState({
                     'loadingStatus' :' loaded',
@@ -122,7 +122,7 @@ class AccessKeyTable extends React.Component {
             },
             loadFxn = () => {
                 var hrefToRequest = '/search/?type=AccessKey&limit=500&user.uuid=' + user.uuid;
-                ajax.load(hrefToRequest, requestSucceeded, 'GET', requestFailed);
+                ajax.load(hrefToRequest, requestSucceeded, 'GET', requestSucceeded);
             };
 
         if (this.state.loadingStatus !== 'loading'){
@@ -159,19 +159,16 @@ class AccessKeyTable extends React.Component {
         this.store[action](arg);
     }
 
-    onResetSecret(response) {
-        this.showNewSecret('Your secret key has been reset.', response);
-    }
-
-    showNewSecret(title, response) {
+    showNewSecret(response, reset = false) {
         this.setState({ 'modal' :
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header><Modal.Title children={title} /></Modal.Header>
+            <Modal show onHide={this.hideModal}>
+                <Modal.Header>{ reset ? <Modal.Title>Your secret key has been created.</Modal.Title> : <Modal.Title>Your secret key has been reset.</Modal.Title> }</Modal.Header>
                 <Modal.Body>
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
+                    <br/>(It might take a few minutes for the access key to show up in table after page refresh.)
 
-                    <div className="row mt-12">
+                    <div className="row mt-15">
                         <div className="col-xs-4 text-600 text-right no-user-select">
                             Access Key ID
                         </div>
@@ -194,30 +191,26 @@ class AccessKeyTable extends React.Component {
 
     /**** Methods which are CALLED BY ITEMSTORE VIA DISPATCH(); TODO: Refactor, more Reactful ****/
 
-    onCreate(response) {
-        this.showNewSecret('Your secret key has been created.', response);
-    }
+    onCreate(response) { this.showNewSecret(response); }
+
+    onResetSecret(response) { this.showNewSecret(response, true); }
 
     onDelete(item) {
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
+        this.setState({ 'modal' :
+            <Modal show onHide={this.hideModal}>
                 <Modal.Header>
-                    <Modal.Title>{'Access key ' + item['access_key_id'] + ' has been deleted.'}</Modal.Title>
+                    <Modal.Title className="text-400">Access key <span className="mono-text">{ item['access_key_id'] }</span> has been deleted.</Modal.Title>
                 </Modal.Header>
             </Modal>
         });
     }
 
     onError(error) {
-        var View = content_views.lookup(error);
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header>
-                    <Modal.Title>Error</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <View context={error} loadingComplete={true} />
-                </Modal.Body>
+        var errorViewComponent = content_views.lookup(error);
+        this.setState({ 'modal' :
+            <Modal onHide={this.hideModal}>
+                <Modal.Header><Modal.Title>Error</Modal.Title></Modal.Header>
+                <Modal.Body><errorViewComponent context={error} loadingComplete /></Modal.Body>
             </Modal>
         });
     }
@@ -231,11 +224,7 @@ class AccessKeyTable extends React.Component {
         return (
             <tr key={key.access_key_id}>
                 <td className="access-key-id">{ key.access_key_id }</td>
-                <td>
-                    { key.date_created ?
-                        <DateUtility.LocalizedTime timestamp={key.date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A'
-                    }
-                </td>
+                <td>{ key.date_created ? <DateUtility.LocalizedTime timestamp={key.date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
                 <td>{ key.description }</td>
                 <td className="access-key-buttons">
                     <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
