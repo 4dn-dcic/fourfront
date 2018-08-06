@@ -115,16 +115,31 @@ export class StatisticsChartsView extends React.Component {
 
     constructor(props){
         super(props);
-        this.generateAggs = this.generateAggs.bind(this);
-        //this.state = {
-        //    'aggs' : this.generateAggs(props)
-        //};
+        this.generateAggsToState = this.generateAggsToState.bind(this);
+        this.state = this.generateAggsToState(props);
     }
 
-    generateAggs(props){
-        return _.map(aggregationsToChartData, function(aggDef){
-            return aggDef.function( props['resp' + aggDef.requires] );
+    componentWillReceiveProps(nextProps){
+        var updateState = false;
+        _.forEach(_.keys(nextProps), (k) => {
+            if (updateState) return;
+            if (k.slice(0,4) === 'resp'){
+                if (nextProps[k] !== this.props[k]){
+                    updateState = true;
+                    return;
+                }
+            }
         });
+
+        if (updateState){
+            this.setState(this.generateAggsToState(nextProps));
+        }
+    }
+
+    generateAggsToState(props){
+        return _.object(_.map(_.keys(aggregationsToChartData), function(k){
+            return [k, aggregationsToChartData[k].function(props['resp' + aggregationsToChartData[k].requires])];
+        }));
     }
 
     loadingIcon(){
@@ -149,49 +164,54 @@ export class StatisticsChartsView extends React.Component {
         var { loadingStatus, mounted, respFile, respExperimentSetReplicate } = this.props;
         if (!mounted || loadingStatus === 'loading')    return this.loadingIcon();
         if (loadingStatus === 'failed')                 return this.errorIcon();
+
         return (
             <div className="stats-charts-container">
-                <div className="row">
 
-                    <div className="col-xs-12">
-                        <h4 className="text-300">
-                            <span className="text-500">Experiment Sets</span> released over time
-                        </h4>
-                        <AreaChart data={aggregationsToChartData[0].function(respExperimentSetReplicate)} />
-                    </div>
+                <AreaChartContainer title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
+                    <AreaChart data={this.state.expsets_released} />
+                </AreaChartContainer>
 
-                    <div className="col-xs-12">
-                        <h4 className="text-300">
-                            <span className="text-500">Files</span> released over time
-                        </h4>
-                        <AreaChart data={aggregationsToChartData[1].function(respFile)} />
-                    </div>
+                <AreaChartContainer title={<span><span className="text-500">Files</span> released over time</span>}>
+                    <AreaChart data={this.state.files_released} />
+                </AreaChartContainer>
 
-                </div>
+                <AreaChartContainer title={<span><span className="text-500">Total File Size</span> released over time</span>}>
+                    <AreaChart data={this.state.file_volume_released} yAxisLabel="GB" />
+                </AreaChartContainer>
 
-                <div className="row mt-3">
-
-                    <div className="col-xs-12">
-                        <h4 className="text-300">
-                            <span className="text-500">Total File Size</span> released over time
-                        </h4>
-                        <AreaChart data={aggregationsToChartData[2].function(respFile)} yAxisLabel="GB" />
-                    </div>
-
-                </div>
             </div>
         );
     }
 
 }
 
-export const aggregationsToChartData = [
-    {
+
+export class AreaChartContainer extends React.Component {
+
+    getRefWidth(){
+        var rawWidth = this.refs && this.refs.elem && this.refs.elem.clientWidth;
+        return rawWidth && rawWidth - 20;
+    }
+
+    render(){
+        var { title, children, width } = this.props;
+        return (
+            <div className="col-xs-12 col-lg-6" ref="elem">
+                <h4 className="text-300">{ title }</h4>
+                { React.cloneElement(this.props.children, { 'width' : width || this.getRefWidth() }) }
+            </div>
+        );
+    }
+}
+
+
+export const aggregationsToChartData = {
+    'expsets_released' : {
         'requires'  : 'ExperimentSetReplicate',
-        'title'     : 'Experiment Set Public Releases',
         'function'  : function(resp){
-            if (!resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
+            if (!resp || !resp.aggregations) return null;
+            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
             var total = 0;
@@ -224,19 +244,17 @@ export const aggregationsToChartData = [
             return aggsList;
         }
     },
-    {
+    'files_released' : {
         'requires'  : 'File',
-        'title'     : 'File Public Releases',
         'function'  : function(resp){
             // Same as for ExpSets
-            return aggregationsToChartData[0].function(resp);
+            return aggregationsToChartData.expsets_released.function(resp);
         }
     },
-    {
+    'file_volume_released' : {
         'requires'  : 'File',
-        'title'     : 'File Volume Released',
         'function'  : function(resp){
-            if (!resp.aggregations) return null;
+            if (!resp || !resp.aggregations) return null;
             var weeklyIntervalBuckets = resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
@@ -272,7 +290,7 @@ export const aggregationsToChartData = [
             return aggsList;
         }
     }
-];
+};
 
 function fillMissingChildBuckets(aggsList, subAggKeys){
     _.forEach(aggsList, function(datum){
@@ -309,6 +327,7 @@ export class AreaChart extends React.PureComponent {
         super(props);
         this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
         this.drawNewChart = this.drawNewChart.bind(this);
+        this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
         this.state = {
             'drawingError' : false,
             'drawn' : false
@@ -346,21 +365,23 @@ export class AreaChart extends React.PureComponent {
             }
         });
 
-        if (!shouldDrawNewChart) {
-            this.updateExistingChart();
-            return;
-        } else {
-            this.destroyExistingChart();
-            this.drawNewChart();
-        }
+        setTimeout(()=>{
+            // Wait for other UI stuff to finish updating, e.g. element widths.
+            if (!shouldDrawNewChart) {
+                this.updateExistingChart();
+            } else {
+                this.destroyExistingChart();
+                this.drawNewChart();
+            }
+        }, 300);
     }
     
 
     commonDrawingSetup(){
         var { margin, data, yAxisScale, yAxisPower } = this.props;
         var svg         = d3.select(this.refs.svg),
-            width       = (this.props.width  || parseInt(svg.style('width' ))) - margin.left - margin.right,
-            height      = (this.props.height || parseInt(svg.style('height'))) - margin.top - margin.bottom,
+            width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
+            height      = (  this.props.height || parseInt( this.refs.svg.clientHeight || svg.style('height') )  ) - margin.top - margin.bottom,
             x           = d3.scaleTime().rangeRound([0, width]),
             y           = d3['scale' + yAxisScale]().rangeRound([height, 0]),
             z           = d3.scaleOrdinal(d3.schemeCategory10),
@@ -444,28 +465,35 @@ export class AreaChart extends React.PureComponent {
                 .style('fill', function(d){ return z((d.data || d).key); })
                 .attr('d', area);
 
-            drawn.xAxis = drawn.root.append('g')
-                .attr("transform", "translate(0," + height + ")")
-                .call(bottomAxisGenerator);
-
-            drawn.yAxis = drawn.root.append('g')
-                .call(d3.axisLeft(y))
-                .append('text')
-                .attr("fill", "#000")
-                .attr("x", 0)
-                //.attr("y", -12)
-                //.attr('transform', 'rotate(-45)')
-                .attr("y", -20)
-                .attr("dy", "0.71em")
-                //.attr("text-anchor", "start")
-                .attr("text-anchor", "end")
-                .text(yAxisLabel);
-
-            drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
-
+            this.drawAxes(drawn, { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn });
             this.drawnD3Elements = drawn;
-
         });
+    }
+
+    drawAxes(drawn, reqdFields){
+        var { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn } = reqdFields;
+        if (!drawn){
+            drawn = this.drawnD3Elements || {};
+        }
+
+        drawn.xAxis = drawn.root.append('g')
+            .attr("transform", "translate(0," + height + ")")
+            .call(bottomAxisGenerator);
+
+        drawn.yAxis = drawn.root.append('g')
+            .call(d3.axisLeft(y));
+
+        drawn.yAxis.append('text')
+            .attr("fill", "#000")
+            .attr("x", 0)
+            .attr("y", -20)
+            .attr("dy", "0.71em")
+            .attr("text-anchor", "end")
+            .text(yAxisLabel);
+
+        drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
+
+        return drawn;
     }
 
     /**
@@ -482,7 +510,7 @@ export class AreaChart extends React.PureComponent {
         delete this.drawnD3Elements;
     }
 
-    updateExistingChart(){
+    updateExistingChart(transitionDuration = 2500){
 
         // TODO:
         // If width or height has changed, transition existing DOM elements to larger dimensions
@@ -499,22 +527,17 @@ export class AreaChart extends React.PureComponent {
 
         requestAnimationFrame(()=>{
 
+            drawn.xAxis.transition().duration(2500).call(bottomAxisGenerator);
+            drawn.yAxis.transition().duration(2500).call(d3.axisLeft(y));
+            drawn.rightAxis.remove();
+            drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);          
+
             var allLayers = drawn.root.selectAll('.layer')
                 .data(this.stack(data))
                 .selectAll('path.area')
                 .transition()
-                .duration(1000)
+                .duration(2500)
                 .attr('d', area);
-            /*
-            allLayers.entering()
-                .append('path')
-                .attr('class', 'area')
-                .style('fill', function(d){ return z((d.data || d).key); })
-                .attr('d', area);
-
-            allLayers.leaving()
-                .remove();
-            */
 
         });
 
