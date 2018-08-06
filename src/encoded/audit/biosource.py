@@ -4,7 +4,7 @@ from snovault import (
 )
 
 
-@audit_checker('biosource')
+#@audit_checker('biosource')
 def audit_biosource_type_cell_lines_have_cell_line_value(value, system):
     '''
     biosource types that correspond to cell lines or primary cells should have
