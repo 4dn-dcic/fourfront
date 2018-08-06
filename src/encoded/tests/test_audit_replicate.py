@@ -107,16 +107,16 @@ def one_experiment_replicate_set(testapp, rep_set_data, experiments):
     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
-@pytest.fixture
-def external_exp_set(testapp, rep_set_data, experiments, external_award):
-    rep_set_data['description'] = 'External Experiment Set no pub'
-    rep_set_data['replicate_exps'] = [
-        {'replicate_exp': experiments[0]['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 1}
-    ]
-    rep_set_data['award'] = external_award['@id']
-    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+# @pytest.fixture
+# def external_exp_set(testapp, rep_set_data, experiments, external_award):
+#     rep_set_data['description'] = 'External Experiment Set no pub'
+#     rep_set_data['replicate_exps'] = [
+#         {'replicate_exp': experiments[0]['@id'],
+#          'bio_rep_no': 1,
+#          'tec_rep_no': 1}
+#     ]
+#     rep_set_data['award'] = external_award['@id']
+#     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
 @pytest.fixture
