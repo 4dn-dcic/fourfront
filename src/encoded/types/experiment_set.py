@@ -98,6 +98,7 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
+        "experiments_in_set.badges.*",
 
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
@@ -113,6 +114,7 @@ class ExperimentSet(Item):
         'experiments_in_set.biosample.treatments.treatment_type',
         'experiments_in_set.biosample.treatments.display_title',
         'experiments_in_set.biosample.treatments_summary',
+        "experiments_in_set.biosample.badges.*",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
@@ -141,6 +143,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
+        "experiments_in_set.files.badges.*",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -325,4 +328,3 @@ def experiment_set_replicate_add(context, request, render=None):
              decorator=if_match_tid)
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)
-
