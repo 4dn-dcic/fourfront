@@ -58,6 +58,7 @@
                 "bg_px2",
                 "bw",
                 "bed",
+                "bedpe",
                 "txt",
                 "csv",
                 "spt",
@@ -81,6 +82,10 @@
                 "peaks",
                 "image",
                 "locus distances, submitter format",
+                "dot calls",
+                "compartments",
+                "insulation score - diamond",
+                "insulation score - potential",
                 "other"
             ]
         },
@@ -139,6 +144,7 @@
         "bg_px2": ".bedGraph.gz.px2",
         "bw": ".bw",
         "bed": ".bed.gz",
+        "bedpe": "bedpe.gz",
         "txt": ".txt.gz",
         "csv": ".csv",
         "spt": ".spt",

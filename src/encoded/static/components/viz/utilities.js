@@ -102,6 +102,45 @@ export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, a
 }
 
 
+/** Renders out the 4DN Logo SVG as a React element(s) */
+export class FourfrontLogo extends React.PureComponent {
+
+    static defaultProps = {
+        'id' : 'fourfront_logo_svg'
+    }
+
+    renderDefs(){
+        return (
+            <defs>
+                <linearGradient id="fourfront_linear_gradient" x1="1" y1="30" x2="59" y2="30" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#238bae"/>
+                    <stop offset="1" stopColor="#8ac640"/>
+                </linearGradient>
+                <linearGradient id="fourfront_linear_gradient_spinning" x1="1" y1="30" x2="59" y2="30" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#238b8e"/>
+                    <stop offset="1" stopColor="#8aa640"/>
+                </linearGradient>
+            </defs>
+        );
+    }
+
+    render(){
+        var { id } = this.props;
+        return (
+            <svg id={id} viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
+                { this.renderDefs() }
+                <title>4DN Logo</title>
+                <ellipse cx="30" cy="30" rx="29" ry="29"/>
+                <text transform="translate(7.5, 37.5)">4DN</text>
+            </svg>
+        );
+    }
+
+}
+
+
+
+
 export const style = {
     
     translate3d : function(x=0, y=0, z=0, append = 'px'){

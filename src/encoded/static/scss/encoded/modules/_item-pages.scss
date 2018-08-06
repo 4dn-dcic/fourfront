@@ -1045,6 +1045,7 @@ $download-button-width : 100px;
 			padding-bottom: 13px;
 			font-weight: 400;
 			user-select: none;
+			color: #000;
 		}
 
 		> h5.release-section-title:first-child {
@@ -1072,7 +1073,7 @@ $download-button-width : 100px;
 				margin-right: -17px;
 				margin-top: -1px; // Account for border
 				margin-bottom: -3px;
-				padding-top: 13px;
+				padding-top: 14px;
 				padding-bottom: 14px;
 				//background-color: #22656d;
 				//color: #fff;

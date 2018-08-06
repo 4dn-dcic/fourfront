@@ -93,7 +93,8 @@ export class FileDownloadButtonAuto extends React.Component {
             'released',
             'replaced',
             'submission in progress',
-            'released to project'
+            'released to project',
+            'archived'
         ]
     }
 

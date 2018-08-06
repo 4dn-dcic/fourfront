@@ -268,15 +268,13 @@ class Provider extends React.Component {
      * @instance
      */
     render(){
-        var childChartProps = _.extend({}, this.props.children.props);
-
-        childChartProps.expSetFilters = Filters.contextFiltersToExpSetFilters();
-        childChartProps.barplot_data_filtered = state.barplot_data_filtered;
-        childChartProps.barplot_data_unfiltered = state.barplot_data_unfiltered;
-        childChartProps.updateBarPlotFields = ChartDataController.updateBarPlotFields;
-        childChartProps.barplot_data_fields = state.barplot_data_fields;
-        childChartProps.isLoadingChartData = state.isLoadingChartData;
-        childChartProps.providerId = this.id;
+        var childChartProps = _.extend({}, this.props.children.props,
+            _.pick(state, 'barplot_data_filtered', 'barplot_data_unfiltered', 'barplot_data_fields', 'isLoadingChartData'),
+            {
+                'updateBarPlotFields'   : ChartDataController.updateBarPlotFields,
+                'providerId'            : this.id
+            }
+        );
 
         return React.cloneElement(this.props.children, childChartProps);
     }
@@ -476,7 +474,7 @@ export const ChartDataController = {
      * @static
      * @returns {Object}
      */
-    getState : function(){ return state; },
+    getState : function(){ return state || {}; },
 
     /**
      * Analogous to a component's setState. Updates the private state of

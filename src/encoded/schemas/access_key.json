@@ -47,5 +47,10 @@
             "comment": "Only admins are allowed to set this value.",
             "type": "string"
         }
+    },
+    "facets" : {
+        "user.display_title" : {
+            "title" : "User Name"
+        }
     }
 }
