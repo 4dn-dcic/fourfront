@@ -15,7 +15,6 @@ from snovault.validators import (
     validate_item_content_patch,
     validate_item_content_put,
 )
-from snovault.etag import if_match_tid
 from .base import (
     Item,
     paths_filtered_by_status,
@@ -324,11 +323,8 @@ def experiment_set_replicate_add(context, request, render=None):
 
 
 @view_config(context=ExperimentSetReplicate, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_experiment_set_replicate_experiments],
-             decorator=if_match_tid)
+             validators=[validate_item_content_put, validate_experiment_set_replicate_experiments])
 @view_config(context=ExperimentSetReplicate, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments],
-             decorator=if_match_tid)
+             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments])
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)
-

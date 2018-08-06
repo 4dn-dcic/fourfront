@@ -483,9 +483,17 @@ class Item(snovault.Item):
         return principals
 
     def rev_link_atids(self, request, rev_name):
+        """
+        Returns the list of reverse linked items given a defined reverse link,
+        which should be formatted like:
+        rev = {
+            '<reverse field name>': ('<reverse item class>', '<reverse field to find>'),
+        }
+
+        """
         conn = request.registry[CONNECTION]
         return [request.resource_path(conn[uuid]) for uuid in
-                paths_filtered_by_status(request, self.get_rev_links(rev_name))]
+                paths_filtered_by_status(request, self.get_rev_links(rev_name, request))]
 
 
 class SharedItem(Item):

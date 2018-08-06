@@ -419,12 +419,12 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
             for item_res in res.json.get('@graph', []):
                 index_view_res = es.get(index=item_type, doc_type=item_type,
                                         id=item_res['uuid'])['_source']
-                # make sure that the referenced_uuids match the embedded data
-                assert 'referenced_uuids' in index_view_res
+                # make sure that the embedded_uuids match the embedded data
+                assert 'embedded_uuids' in index_view_res
                 assert 'embedded' in index_view_res
                 found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
-                # all found uuids must be within the referenced_uuids
-                assert found_uuids <= set(index_view_res['referenced_uuids'])
+                # all found uuids must be within the embedded_uuids
+                assert found_uuids <= set(index_view_res['embedded_uuids'])
                 # previously test_html_pages
                 try:
                     html_res = htmltestapp.get(item_res['@id'])
