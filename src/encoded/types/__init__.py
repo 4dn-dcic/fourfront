@@ -1,11 +1,12 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 from snovault.attachment import ItemWithAttachment
-
+from snovault.crud_views import collection_add as sno_collection_add
 from snovault import (
     # calculated_property,
     collection,
     load_schema,
+    CONNECTION
 )
 # from pyramid.traversal import find_root
 from .base import (
@@ -140,14 +141,6 @@ class Organism(Item):
     name_key = 'name'
     embedded_list = []
 
-    def display_title(self):
-        if self.properties.get('scientific_name'): # Defaults to "" so check if falsy not if is None
-            scientific_name_parts = self.properties['scientific_name'].split(' ')
-            if len(scientific_name_parts) > 1:
-                return ' '.join([ scientific_name_parts[0][0].upper() + '.' ] + scientific_name_parts[1:])
-            else:
-                return self.properties['scientific_name']
-
 
 @collection(
     name='protocols',
@@ -188,3 +181,36 @@ class Sysinfo(Item):
     schema = load_schema('encoded:schemas/sysinfo.json')
     name_key = 'name'
     embedded_list = []
+
+
+@collection(
+    name='tracking-items',
+    properties={
+        'title': 'TrackingItem',
+        'description': 'For internal tracking of Fourfront events',
+    })
+class TrackingItem(Item):
+    """tracking-item class."""
+
+    item_type = 'tracking_item'
+    schema = load_schema('encoded:schemas/tracking_item.json')
+    embedded_list = []
+
+    @classmethod
+    def create_and_commit(cls, request, properties, render=False):
+        """
+        Create a TrackingItem with a given request and properties, committing
+        it directly to the DB. This works by manually committing the
+        transaction, which may cause issues if this function is called as
+        part of another POST. For this reason, this function should be used to
+        track GET requests -- otherwise, use the standard POST method.
+        """
+        import transaction
+        import uuid
+        tracking_uuid = str(uuid.uuid4())
+        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
+        properties['uuid'] = tracking_uuid
+        request.validated = properties
+        sno_collection_add(TrackingItem(request.registry, model), request, render)
+        transaction.get().commit()
+        del request.response.headers['Location']

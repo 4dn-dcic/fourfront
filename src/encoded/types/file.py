@@ -621,9 +621,7 @@ class FileProcessed(File):
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
         'experiments': ('Experiment', 'processed_files'),
-        'experiment_sets': ('ExperimentSet', 'processed_files'),
-        'other_experiments': ('Experiment', 'other_processed_files.files'),
-        'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
+        'experiment_sets': ('ExperimentSet', 'processed_files')
     })
 
     @classmethod
@@ -667,20 +665,7 @@ class FileProcessed(File):
         }
     })
     def experiment_sets(self, request):
-        return self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")
-
-    @calculated_property(schema={
-        "title": "Experiments",
-        "description": "Experiments that this file belongs to",
-        "type": "array",
-        "items": {
-            "title": "Experiment",
-            "type": "string",
-            "linkTo": "Experiment"
-        }
-    })
-    def experiments(self, request):
-        return self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")
+        return self.rev_link_atids(request, "experiment_sets")
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
@@ -838,6 +823,17 @@ def is_file_to_download(properties, mapping, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    from . import TrackingItem
+    from ..authentication import session_properties
+    try:
+        user_props = session_properties(request)
+    except Exception as e:
+        user_props = {'error': str(e)}
+    tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
+                       'user_email': user_props.get('details', {}).get('email', 'anonymous'),
+                       'request_path': request.path_info, 'tracking_type': 'file_download',
+                       'date_created': datetime.datetime.now(datetime.timezone.utc),
+                       'status': 'in review by lab'}
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
@@ -869,6 +865,7 @@ def download(context, request):
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
+    tracking_values['filename'] = filename
 
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
@@ -880,7 +877,10 @@ def download(context, request):
             'ResponseContentDisposition': "attachment; filename=" + filename
         }
         if 'Range' in request.headers:
+            tracking_values['range_query'] = True
             param_get_object.update({'Range': request.headers.get('Range')})
+        else:
+            tracking_values['range_query'] = False
         location = conn.generate_presigned_url(
             ClientMethod='get_object',
             Params=param_get_object,
@@ -888,6 +888,10 @@ def download(context, request):
         )
     else:
         raise ValueError(external.get('service'))
+
+    # create a tracking_item to track this download
+    TrackingItem.create_and_commit(request, tracking_values)
+
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
         return {
