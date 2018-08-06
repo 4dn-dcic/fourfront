@@ -4,7 +4,7 @@ import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
-import { Field } from './Schemas';
+import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
 import { isServerSide } from './misc';
 import url from 'url';
@@ -26,7 +26,7 @@ export function atIdFromObject(o){
 }
 
 
-export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps, suppressErrors = false){
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps = {}, suppressErrors = false){
     var href = atIdFromObject(item);
     var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href;
     if (!href || !title){
@@ -38,7 +38,7 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
         return null;
     }
     
-    var propsToInclude = elementProps && _.clone(elementProps) || {};
+    var propsToInclude = elementProps && _.clone(elementProps);
 
     if (typeof propsToInclude.key === 'undefined'){
         propsToInclude.key = href;
@@ -156,6 +156,29 @@ export function isValidJSON(content) {
         isJson = false;
     }
     return isJson;
+}
+
+
+/**
+ * Deep-clone a given object using JSON stringify/parse.
+ */
+export function deepClone(obj){
+    return JSON.parse(JSON.stringify(obj));
+}
+
+
+/**
+ * Check if param is in form of an @id. Doesn't validate whether proper collection, etc. just URL format.
+ *
+ * @param {string} value - String to test.
+ * @returns {boolean} - Whether is valid-ish.
+ */
+export function isValidAtIDFormat(value){
+    return (
+        value && typeof value === 'string' && value.length > 3 &&
+        value.charAt(0) === '/' && value[value.length - 1] === '/' &&
+        (value.match(/\//g) || []).length === 3
+    );
 }
 
 /**

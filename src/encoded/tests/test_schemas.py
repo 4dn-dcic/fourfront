@@ -21,16 +21,21 @@ def master_mixins():
         'aliases',
         'status',
         'submitted',
+        'release_dates',
         'modified',
         'references',
         'attribution',
         'notes',
         'documents',
         'attachment',
-        'attachments',
         'dbxrefs',
         'library',
-        'sop_mapping'
+        'antibody_info',
+        'spikein_info',
+        'sop_mapping',
+        'tags',
+        'badges',
+        'facets_common'
     ]
     for key in mixin_keys:
         assert(mixins[key])

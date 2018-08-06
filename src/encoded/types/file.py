@@ -620,7 +620,9 @@ class FileProcessed(File):
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
         'experiments': ('Experiment', 'processed_files'),
-        'experiment_sets': ('ExperimentSet', 'processed_files')
+        'experiment_sets': ('ExperimentSet', 'processed_files'),
+        'other_experiments': ('Experiment', 'other_processed_files.files'),
+        'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
 
     @classmethod
@@ -664,7 +666,20 @@ class FileProcessed(File):
         }
     })
     def experiment_sets(self, request):
-        return self.rev_link_atids(request, "experiment_sets")
+        return self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")
+
+    @calculated_property(schema={
+        "title": "Experiments",
+        "description": "Experiments that this file belongs to",
+        "type": "array",
+        "items": {
+            "title": "Experiment",
+            "type": "string",
+            "linkTo": "Experiment"
+        }
+    })
+    def experiments(self, request):
+        return self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
@@ -985,16 +1000,67 @@ def validate_processed_file_produced_from_field(context, request):
         request.validated.update({})
 
 
+def validate_extra_file_format(context, request):
+    '''validator to check to be sure that file_format of extrafile is not the
+       same as the file and is a known format for the schema
+    '''
+    files_ok = True
+    data = request.json
+    if 'extra_files' not in data:
+        return
+    extras = data['extra_files']
+    # post should always have file_format as it is required patch may or may not
+    fformat = data.get('file_format')
+    if not fformat:
+        # must be a patch so get the last part of url
+        url = request.url
+        if url.endswith('/'):
+            url = url[:-1]
+        fid = url.split('/')[-1]
+        if not fid:
+            return
+        finfo = get_item_if_you_can(request, fid, 'files')
+        try:
+            fformat = finfo.get('file_format')
+        except AttributeError:
+            fformat = None
+        if not fformat:
+            # this in theory should never happen
+            request.errors.add('body', None, "Can't find parent file format for extra_files")
+            return
+    valid_schema = context.type_info.schema
+    seen_ext_formats = []
+    for i, ef in enumerate(extras):
+        eformat = ef.get('file_format')
+        if eformat is None:
+            return  # will fail the required extra_file.file_format
+        if eformat in seen_ext_formats:
+            request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
+            files_ok = False
+        else:
+            seen_ext_formats.append(eformat)
+        if eformat == fformat:
+            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % fformat)
+            files_ok = False
+        if valid_schema.get('file_format_file_extension'):
+            if eformat not in valid_schema['file_format_file_extension']:
+                request.errors.add('body', ['extra_files', i], "'%s' not found in the file_format_file_extension_mapping" % eformat)
+                files_ok = False
+    if files_ok:
+        request.validated.update({})
+
+
 @view_config(context=File.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_file_filename,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field])
+                         validate_processed_file_produced_from_field,
+                         validate_extra_file_format])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
 
 @view_config(context=File, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_file_filename])
+             validators=[validate_item_content_patch, validate_file_filename, validate_extra_file_format])
 def file_edit(context, request, render=None):
     return item_edit(context, request, render)
 
@@ -1002,10 +1068,12 @@ def file_edit(context, request, render=None):
 @view_config(context=FileProcessed, permission='edit', request_method='PUT',
              validators=[validate_item_content_put,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field])
+                         validate_processed_file_produced_from_field,
+                         validate_extra_file_format], decorator=if_match_tid)
 @view_config(context=FileProcessed, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field])
+                         validate_processed_file_produced_from_field,
+                         validate_extra_file_format])
 def procesed_edit(context, request, render=None):
     return item_edit(context, request, render)

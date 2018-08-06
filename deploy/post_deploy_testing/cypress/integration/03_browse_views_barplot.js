@@ -37,12 +37,17 @@ describe('Browse Views - Redirection & Visualization', function () {
             cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 99);
         });
 
-        it('"/browse/?q=public_release:[* TO 2017-10-31]" redirects to correct URL, includes 40 < x < 50 results.', function(){
+        it('"/browse/?q=public_release:[* TO 2017-10-31]" redirects to correct URL, includes 35 < x < 50 results.', function(){
             cy.visit('/browse/?q=public_release:[* TO 2017-10-31]').end()
                 .location('search').should('include', 'award.project=4DN').should('include', 'q=public_release').should('include', '2017-10-31').end()
                 .get('input[name="q"]').should('have.value', 'public_release:[* TO 2017-10-31]')
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
-                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 40).should('be.lessThan', 50);
+                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 35).should('be.lessThan', 50);
+        });
+
+        it('There is at least one Replaced item under the Status facet', function(){
+            cy.get('.facet.row.closed[data-field="status"] > h5').scrollToCenterElement().click({ force: true }).end()
+                .get('.facet.row[data-field="status"]').should('have.class', 'open').contains('Replaced');
         });
 
     });

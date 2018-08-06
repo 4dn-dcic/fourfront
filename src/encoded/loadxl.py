@@ -80,6 +80,7 @@ ORDER = [
     'experiment_chiapet',
     'experiment_damid',
     'experiment_seq',
+    'experiment_tsaseq',
     'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
@@ -534,7 +535,9 @@ def attachment(path):
             'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
         }
 
-        if mime_type in ('application/pdf', "application/zip", 'text/plain', 'text/tab-separated-values', 'text/html'):
+        if mime_type in ('application/pdf', "application/zip", 'text/plain',
+                         'text/tab-separated-values', 'text/html', 'application/msword',
+                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
 
@@ -671,6 +674,9 @@ PHASE1_PIPELINES = {
     'experiment_seq': [
         remove_keys('experiment_relation'),
     ],
+    'experiment_tsaseq': [
+        remove_keys('experiment_relation'),
+    ],
     'publication': [
         remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -748,6 +754,9 @@ PHASE2_PIPELINES = {
     'experiment_seq': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
+    'experiment_tsaseq': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ],
     'publication': [
         skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -822,19 +831,13 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
     return errors
 
 
-def generate_access_key(testapp, store_access_key=None,
+def generate_access_key(testapp, store_access_key,
                         email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
         admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
-
-        # don't create one if we already have
-        for key in admin['access_keys']:
-            if key.get('description') == 'key for submit4dn':
-                print("key found not generating new one")
-                return
 
         access_key_req = {
             'user': admin['@id'],
@@ -873,11 +876,12 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                     keypairs.write(keys)
 
         elif store_access_key == 's3':
+            # if access_key_loc == 's3', always generate new keys
             s3bucket = app.registry.settings['system_bucket']
             secret = os.environ.get('AWS_SECRET_KEY')
             if not secret:
                 print("no secrets for s3 upload, you probably shouldn't be doing"
-                      "this from yourlocal machine")
+                      "this from your local machine")
                 print("halt and catch fire")
                 return
 
@@ -952,6 +956,10 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False):
 
 def load_jin_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='jin_inserts',
+              clear_tables=clear_tables)
+
+def load_wfr_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
               clear_tables=clear_tables)
 
 

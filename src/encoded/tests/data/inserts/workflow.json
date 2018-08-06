@@ -1032,7 +1032,7 @@
                             "description": "File on which MD5 calculation is run on.",
                             "file_format": "fastq",
                             "global": true,
-                            "type": "reference file"
+                            "type": "data file"
                         },
                         "name": "input_file",
                         "source": [

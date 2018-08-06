@@ -139,7 +139,8 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         'debug' : false,
         'linesOfText' : 1,
         'lineHeight' : 19,
-        'defaultExpanded' : false
+        'defaultExpanded' : false,
+        'collapsedHeight' : null
     }
 
     constructor(props){
@@ -282,7 +283,8 @@ export class FlexibleDescriptionBox extends React.PureComponent {
     }
 
     render(){
-        if (this.props.debug) console.log('render FlexibleDescriptionBox');
+        var { debug, showOnMount, lineHeight, linesOfText, collapsedHeight } = this.props;
+        if (debug) console.log('render FlexibleDescriptionBox');
         var expandButton;
         var expanded = (this.state.descriptionExpanded || this.props.expanded);
 
@@ -297,14 +299,14 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         var containerHeightSet = (expanded ?
             this.descriptionHeight
             :
-            !this.state.mounted && this.props.showOnMount ? (
+            !this.state.mounted && showOnMount ? (
                 0
-            ) : Math.min(
+            ) : collapsedHeight || Math.min(
                 Math.max(
                     this.dimensions().initialHeight,
-                    this.props.lineHeight * (this.props.linesOfText || 1)
+                    lineHeight * (linesOfText || 1)
                 ),
-                this.state.mounted && this.descriptionHeight ? this.descriptionHeight : 1000
+                this.state.mounted && this.descriptionHeight || 1000
             )
         );
 

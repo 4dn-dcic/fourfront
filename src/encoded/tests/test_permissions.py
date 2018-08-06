@@ -325,15 +325,11 @@ def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, hu
 def test_user_view_details_admin(submitter, access_key, testapp):
     res = testapp.get(submitter['@id'])
     assert 'email' in res.json
-    assert 'access_keys' in res.json
-    assert 'access_key_id' in res.json['access_keys'][0]
 
 
 def test_users_view_details_self(submitter, access_key, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
     assert 'email' in res.json
-    assert 'access_keys' in res.json
-    assert 'access_key_id' in res.json['access_keys'][0]
 
 
 def test_users_patch_self(submitter, access_key, submitter_testapp):
@@ -357,7 +353,6 @@ def test_users_can_see_their_own_user_info(submitter, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
     assert 'title' in res.json
     assert 'email' in res.json
-    assert 'access_keys' in res.json
 
 
 def test_users_view_basic_anon(submitter, anontestapp):
@@ -488,7 +483,7 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
 
 def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_testapp,
                                                remc_member_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
+    statuses = ['released', 'revoked', 'archived', 'released to project',
                 'archived to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
     for status in statuses:
@@ -499,7 +494,7 @@ def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_t
 # Submitter created item and lab member wants to patch
 def test_contributing_lab_member_cannot_patch(expt_w_cont_lab_item, submitter_testapp,
                                               remc_member_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project',
+    statuses = ['released', 'revoked', 'archived', 'released to project', 'archived to project',
                 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
     for status in statuses:

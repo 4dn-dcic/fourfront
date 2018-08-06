@@ -23,25 +23,28 @@ export function set(schemas){
 
 export const itemTypeHierarchy = {
     'Experiment': [
-        'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq', 'ExperimentAtacseq', 'ExperimentDamid'
+        'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq',
+        'ExperimentAtacseq', 'ExperimentDamid', 'ExperimentTsaseq',
+        'ExperimentChiapet', 'ExperimentSeq'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
+        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
     ],
     'Individual': [
         'IndividualHuman', 'IndividualMouse', 'IndividualFly'
     ],
     'Treatment': [
-        'TreatmentChemical', 'TreatmentAgent', 'TreatmentRnai'
+        'TreatmentAgent', 'TreatmentRnai'
     ],
     'QualityMetric' : [
-        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc',
+        'QualityMetricDedupqcRepliseq'
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
@@ -83,6 +86,9 @@ export const Term = {
 
         switch (field) {
             case 'biosource_type':
+            case 'organism.name':
+            case 'individual.organism.name':
+            case 'biosource.individual.organism.name':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;

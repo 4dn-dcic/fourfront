@@ -49,7 +49,10 @@ export class FacetCharts extends React.Component {
                 {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
             ]
         },
-        'initialFields' : ['experiments_in_set.experiment_type',"experiments_in_set.biosample.biosource.individual.organism.name"]
+        'initialFields' : [
+            'experiments_in_set.experiment_type',
+            'experiments_in_set.biosample.biosource.individual.organism.name'
+        ]
     }
 
     constructor(props){
@@ -169,7 +172,7 @@ export class FacetCharts extends React.Component {
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
-                    <BarPlot.UIControlsWrapper legend chartHeight={height} href={this.props.href}>
+                    <BarPlot.UIControlsWrapper legend chartHeight={height} href={this.props.href} expSetFilters={Filters.currentExpSetFilters()} >
                         <BarPlot.Chart
                             width={this.width(1) - 20}
                             height={height}

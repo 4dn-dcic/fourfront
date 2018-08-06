@@ -12,7 +12,7 @@ import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
+import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax, analytics } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { ColumnSorterIcon } from './LimitAndPageControls';
 
@@ -115,17 +115,39 @@ export const defaultColumnDefinitionMap = {
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
         'render' : function(result: Object, columnDefinition: Object, props: Object, width: number, popLink = false){
-            var title = object.itemUtil.getTitleStringFromContext(result);
-            var link = object.itemUtil.atId(result);
-            var tooltip;
-            var hasPhoto = false;
+            var title = object.itemUtil.getTitleStringFromContext(result),
+                link = object.itemUtil.atId(result),
+                tooltip,
+                hasPhoto = false;
+
+            function handleClick(evt){
+                var tableType = navigate.isBrowseHref(props.href) ? 'browse' : (navigate.isSearchHref(props.href) ? 'search' : 'other');
+                if (tableType === 'browse' || tableType === 'search'){
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    analytics.productClick(result, {
+                        'list'      : tableType === 'browse' ? 'Browse Results' : (props.currentAction === 'selection' ? 'Selection Search Results' : 'Search Results'),
+                        'position'  : props.rowNumber + 1
+                    }, function(){
+                        (props.navigate || navigate)(link);
+                    });
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
-                var linkProps = { 'href' : link || '#', 'target' : (popLink ? '_blank' : null) };
-                title = <a key="title" {...linkProps}>{ title }</a>;
+                title = <a key="title" href={link || '#'} children={title} onClick={handleClick} />;
                 if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
                     hasPhoto = true;
-                    title = <span key="title">{ object.itemUtil.User.gravatar(result.email, 32, { 'className' : 'in-search-table-title-image', 'data-tip' : result.email }, 'mm') }{ title }</span>;
+                    title = (
+                        <span key="title">
+                            { object.itemUtil.User.gravatar(result.email, 32, { 'className' : 'in-search-table-title-image', 'data-tip' : result.email }, 'mm') }
+                            { title }
+                        </span>
+                    );
                 }
             }
 

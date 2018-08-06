@@ -1,0 +1,56 @@
+[
+    {
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:image_H1_BF_LmnB1"
+        ],
+        "caption": "Bright field morphology of H1 Tier 1 cells for DamID",
+        "status": "released",
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "date_created": "2017-12-14T15:48:44.392530+00:00",
+        "public_release": "2018-02-14",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "uuid": "a3f1f14e-dd1d-439d-8bc6-32a1228a48cf",
+        "attachment": "photo.jpg"
+    },
+    {
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:image_H1_R2_BF_LmnB1"
+        ],
+        "caption": "Bright field morphology of H1 Tier 1 cells for DamID",
+        "status": "released",
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "public_release": "2018-02-14",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "date_created": "2017-12-14T15:48:48.101239+00:00",
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "uuid": "66d83ee4-2757-4a6b-a3b9-cbde81eccb21",
+        "attachment": "photo.jpg"
+    },
+    {
+        "schema_version": "1",
+        "aliases": [
+            "vanSteensel-lab:image_H1_R3_BF_LmnB1"
+        ],
+        "caption": "Bright field morphology of H1 Tier 1 cells for DamID",
+        "status": "released",
+        "award": "91b694c3-f4d7-4ddd-8278-16f94e15c1c5",
+        "tags": [
+            "4DN Joint Analysis 2018"
+        ],
+        "public_release": "2018-02-14",
+        "lab": "6343d57a-213e-4ac7-89ec-8b5e74c21bd2",
+        "date_created": "2017-12-14T15:48:52.725831+00:00",
+        "submitted_by": "95deb527-6d19-45fa-ace9-4e5d4ed1e023",
+        "uuid": "d9f064e6-6c98-41f0-bb61-03d3b7a327ed",
+        "attachment": "photo.jpg"
+    }
+]

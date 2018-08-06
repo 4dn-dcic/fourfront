@@ -92,69 +92,39 @@ class User(Item):
         owner = 'userid.%s' % self.uuid
         return {owner: 'role.owner'}
 
-    @calculated_property(schema={
-        "title": "Access Keys",
-        "type": "array",
-        "items": {
-            "type": ['string', 'object'],
-            "linkTo": "AccessKey"
-        }
-    }, category='page')
-    def access_keys(self, request):
-        if not request.has_permission('view_details'):
-            return []
-        key_coll = self.registry['collections']['AccessKey']
-        # need to handle both esstorage and db storage results
-        uuids = [str(uuid) for uuid in key_coll]
-        acc_keys = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, uuids)]
-        my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
-        if my_keys:
-            return [key for key in my_keys if key['status'] not in ('deleted', 'replaced')]
-        else:
-            return []
-
     def _update(self, properties, sheets=None):
-        # fill default submission entries. There are two possible:
-        # 1. if user has submits_for, subscribe to yourself
-        # 2. if user has lab, subscribe to all lab submissions
-        # if these are already present, don't add them again
-        my_uuid = self.uuid.__str__()
-        needs_sub = True
-        needs_lab = True
-        lab_id = properties.get('lab')
-        if lab_id:
-            lab_obj = self.collection.get(lab_id)
-            lab_props = lab_obj.properties
-            lab_title = lab_props.get('title')
-        else:
-            lab_obj = lab_props = lab_title = None
-        curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
-        for sub in curr_subs:
-            if 'title' in sub:
-                if sub['title'] == 'My submissions':
-                    needs_sub = False
-                if sub['title'] == lab_title:
-                    needs_sub = False
-        if needs_sub and 'submits_for' in properties and len(properties['submits_for']) > 0:
-            submission_creds = {}
-            submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
-            submission_creds['title'] = 'My submissions'
-            curr_subs.append(submission_creds)
-        if needs_lab and lab_obj is not None:
-            if 'name' in lab_props:
-                lab_id = lab_props['name']
-            elif 'uuid' in lab_props:
-                lab_id = lab_props['uuid']
-            else:
-                lab_id = lab_props['title']
-            submission_creds2 = {}
-            submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
-            submission_creds2['title'] = lab_title
-            curr_subs.append(submission_creds2)
-        if len(curr_subs) > 0 and (needs_sub or needs_lab):
-            properties['subscriptions'] = curr_subs
+        # update user subscriptions to ensure that they include the labs
+        # that the user is associated with, as well as their own submissions
+        # if they are a sumbitter
+        curr_subs = properties.get('subscriptions', [])
+        # subscriptions is a list but change to dict here for processing
+        curr_subs_dict = {sub['title']: sub for sub in curr_subs}
+        labs = {}  # cache lab info. keyed by @id
+        # remove old subscriptions
+        if 'My submissions' in curr_subs_dict: del curr_subs_dict['My submissions']
+        if 'My lab' in curr_subs_dict: del curr_subs_dict['My lab']
+        # if user has a lab, include all submissions to that lab
+        if properties.get('lab'):
+            my_lab = self.collection.get(properties['lab'])
+            my_lab_title = my_lab.properties.get('title', 'NO TITLE FOUND')
+            curr_subs_dict['All submissions for ' + my_lab_title] = {
+                'title': 'All submissions for ' + my_lab_title,
+                'url': '?lab.uuid=' + str(my_lab.uuid) + '&sort=-date_created'
+            }
+            labs[properties['lab']] = my_lab
+        # if submitter, add subscriptions to this user submissions for each lab
+        for submits_lab in properties.get('submits_for', []):
+            submit_lab = labs.get(submits_lab, self.collection.get(submits_lab))
+            lab_title = submit_lab.properties.get('title', 'NO TITLE FOUND')
+            curr_subs_dict['My submissions for ' + lab_title] = {
+                'title': 'My submissions for ' + lab_title,
+                'url': '?submitted_by.uuid=' + str(self.uuid) + '&lab.uuid=' +
+                       str(submit_lab.uuid) + '&sort=-date_created'
+            }
+        # sort alphabetically by title
+        properties['subscriptions'] = sorted(list(curr_subs_dict.values()), key= lambda v:v['title'])
         super(User, self)._update(properties, sheets)
+
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
 def user_page_view(context, request):

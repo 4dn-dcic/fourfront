@@ -279,6 +279,8 @@
                     "type": "string",
                     "enum": [
                         "application/msword",
+                        "application/vnd.ms-excel",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         "application/pdf",
                         "application/zip",
                         "text/plain",
@@ -321,23 +323,8 @@
             }
         }
     },
-    "attachments": {
-        "attachments": {
-            "title": "Attached Documents",
-            "type": "array",
-            "additionalProperties": false,
-            "uniqueItems": true,
-            "items": {
-                "title": "Attached Document",
-                "description": "A document to upload.",
-                "type":  { "$ref": "#/attachment" },
-                "formInput": "file",
-                "attachment": true
-            }
-        }
-    },
     "dbxrefs": {
-      "dbxrefs": {
+        "dbxrefs": {
             "@type": "@id",
             "rdfs:subPropertyOf": "rdfs:seeAlso",
             "title": "External identifiers",
@@ -429,6 +416,22 @@
             "lookup": 92
         }
     },
+    "spikein_info": {
+        "spikein_sequences": {
+            "title": "Spike In Sequences",
+            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
+            "type": "string",
+            "lookup": 196,
+            "linkTo": "FileReference"
+        },
+        "spikein_source": {
+            "title": "Spike in source",
+            "description": "The vendor or lab that provided the spikein",
+            "type": "string",
+            "linkTo": "Vendor",
+            "lookup": 198
+        }
+    },
     "sop_mapping": {
         "sop_mapping": {
             "title": "SOP Mappping",
@@ -486,8 +489,20 @@
             }
         }
     },
-
-
+    "static_headers": {
+        "static_headers": {
+            "title": "Static Headers",
+            "description": "Array of linkTos for static sections to be displayed at the top of an item page",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Static Header",
+                "description": "Static section displayed at the top of an item page",
+                "type": "string",
+                "linkTo": "StaticSection"
+            }
+        }
+    },
     "facets_common" : {
         "award.project": {
             "title": "Project"

@@ -1,0 +1,29 @@
+[
+    {
+        "alternate_accessions": [],
+        "schema_version": "1",
+        "aliases": [
+            "dcic:h1human",
+            "4dn-dcic-lab:h1human"
+        ],
+        "organism": "7745b647-ff15-4ff3-9ced-b897d4e2983c",
+        "status": "released",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "ethnicity": "Caucasian",
+        "sex": "male",
+        "health_status": "healthy",
+        "last_modified": {
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+            "date_modified": "2018-07-02T20:22:35.204973+00:00"
+        },
+        "life_stage": "embryonic",
+        "public_release": "2017-09-17",
+        "documents": [],
+        "dbxrefs": [],
+        "accession": "4DNIN3RG3ZKE",
+        "date_created": "2017-04-10T01:13:54.196372+00:00",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "c97775b7-3d00-4132-9598-863797b8ef14",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+    }
+]

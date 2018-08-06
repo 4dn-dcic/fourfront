@@ -1,7 +1,7 @@
 """Collection for ExperimentSet and ExperimentSetReplicate."""
 
 from pyramid.threadlocal import get_current_request
-
+from pyramid.view import view_config
 from snovault import (
     calculated_property,
     collection,
@@ -10,10 +10,17 @@ from snovault import (
     BeforeModified
 )
 from snovault.calculated import calculate_properties
-
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
+from snovault.etag import if_match_tid
 from .base import (
     Item,
-    paths_filtered_by_status
+    paths_filtered_by_status,
+    collection_add,
+    item_edit
 )
 
 import datetime
@@ -75,6 +82,12 @@ class ExperimentSet(Item):
         "lab.postal_code",
         "lab.city",
         "lab.title",
+        "static_headers.content",
+        "static_headers.title",
+        "static_headers.filetype",
+        "static_headers.section_type",
+        "static_headers.options.default_open",
+        "static_headers.options.title_icon",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",
@@ -274,3 +287,48 @@ class ExperimentSetReplicate(ExperimentSet):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+    class Collection(Item.Collection):
+        pass
+
+
+def validate_experiment_set_replicate_experiments(context, request):
+    '''
+    Validates that each replicate_exps.replicate_exp in context (ExperimentSetReplicate Item) is unique within the ExperimentSetReplicate.
+    '''
+    data = request.json
+    replicate_exp_objects = data.get('replicate_exps', [])
+
+    have_seen_exps = set()
+    any_failures = False
+    for replicate_idx, replicate_exp_object in enumerate(replicate_exp_objects):
+        experiment = replicate_exp_object.get('replicate_exp')
+        if experiment is None:
+            request.errors.add('body', None, 'No experiment supplied for replicate_exps[' + str(replicate_idx) + ']')
+            any_failures = True
+            continue
+        if experiment in have_seen_exps:
+            request.errors.add('body', None, 'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']')
+            any_failures = True
+            continue
+        have_seen_exps.add(experiment)
+
+    if not any_failures:
+        request.validated.update({})
+
+
+@view_config(context=ExperimentSetReplicate.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_experiment_set_replicate_experiments])
+def experiment_set_replicate_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=ExperimentSetReplicate, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_experiment_set_replicate_experiments],
+             decorator=if_match_tid)
+@view_config(context=ExperimentSetReplicate, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments],
+             decorator=if_match_tid)
+def experiment_set_replicate_edit(context, request, render=None):
+    return item_edit(context, request, render)
+

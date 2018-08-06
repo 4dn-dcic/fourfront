@@ -6,7 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
-var jwt = require('jsonwebtoken');
+import { detect } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
@@ -65,7 +65,7 @@ const portal = {
     ],
     "user_section": [
         {id: 'login-menu-item', title: 'Log in', url: '/'},
-        {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
+        {id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}
         // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
@@ -229,42 +229,40 @@ export default class App extends React.Component {
         console.log("App Initial State: ", this.state);
     }
 
-    // Once the app component is mounted, bind keydowns to handleKey function
+    /**
+     * Perform various actions once component is mounted which depend on browser environment.
+     *
+     * - Add URI hash from window.location.hash/href to Redux store (doesn't get sent server-side).
+     * - Bind 'handlePopState' function to window popstate event (e.g. back/forward button navigation).
+     * - Initializes Google Analytics
+     * - Exposes 'API' from browser window object via property {Object} 'fourfront' which has reference to Alerts, JWT, navigate, and this app component.
+     * - Emits an event from browser window named 'fourfrontinitialized', letting any listeners (parent windows, etc.) know that JS of this window has initialized. Posts message with same 'eventType' as well.
+     */
     componentDidMount() {
         globals.bindEvent(window, 'keydown', this.handleKey);
 
+        // Load up analytics
+        analytics.initializeGoogleAnalytics( analytics.getTrackingId(this.props.href), this.props.context );
+
+        // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
 
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and update props.href (via Redux), if it is different.
-        var query_href;
+        var query_href = this.props.href;
         // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
         if (document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        } else {
-            query_href = this.props.href;
         }
-        // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
-        //query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
+        // Grab window.location.href w/ query_href as fallback.
         query_href = globals.windowHref(query_href);
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
             });
         }
-
-        // If the window href has a hash, which SHOULD NOT remain (!== globals.maybeRemoveHash()), strip it on mount to match app's props.href.
-        var parts = url.parse(query_href);
-        if (
-            typeof window.location.hash === 'string' &&
-            window.location.hash.length > 0 &&
-            (!parts.hash || parts.hash === '')
-        ){
-            window.location.hash = '';
-        }
-
 
         if (this.historyEnabled) {
             var data = this.props.context;
@@ -286,22 +284,48 @@ export default class App extends React.Component {
         }
         window.onbeforeunload = this.handleBeforeUnload;
 
-        // Load up analytics
-        analytics.initializeGoogleAnalytics(
-            analytics.getTrackingId(this.props.href),
-            this.props.context
-        );
-
         // Save some stuff to global window variables so we can access it in tests:
         // Normally would call this 'window.app' but ENCODE already sets this in browser.js to be the top-level Redux provider (not really useful, remove?)
         window.fourfront = _.extend(window.fourfront || {}, {
-            'app' : this,
-            'alerts' : Alerts,
-            'JWT' : JWT,
-            'navigate' : navigate
+            'app'       : this,
+            'alerts'    : Alerts,
+            'JWT'       : JWT,
+            'navigate'  : navigate
         });
 
-        this.setState({ 'mounted' : true });
+        // Detect browser and save it to state. Show alert to inform people we're too ~lazy~ under-resourced to support MS Edge to the max.
+        var browserInfo = detect(),
+            mounted = true;
+
+        console.log('BROWSER', browserInfo);
+
+        if (browserInfo && typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
+            Alerts.queue({
+                'title' : 'Browser Suggestion',
+                'message' : (
+                    <div>
+                        <p className="mb-0">
+                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            the recommended browser(s) for using the 4DN Data Portal.
+                        </p>
+                        <p className="mb-0">
+                            Microsoft Edge, Safari, etc. should work for a majority of portal functions but are not explicitly supported and may present some glitches, e.g. during submission.
+                        </p>
+                    </div>
+                ),
+                'style' : 'warning'
+            });
+        }
+
+        this.setState({ mounted, browserInfo }, ()=>{
+            // Emit event from our window object to notify that fourfront JS has initialized.
+            // This is to be used by, e.g. submissions view which might control a child window.
+            console.log('App is mounted, dispatching fourfrontinitialized event.');
+            window.dispatchEvent(new Event('fourfrontinitialized'));
+            if (window.opener) { // If we have parent window, post a message to it as well.
+                window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
+            }
+        });
     }
 
     componentWillUpdate(nextProps, nextState){
@@ -388,7 +412,7 @@ export default class App extends React.Component {
         if (hash.slice(0, 2) === '#!') {
             name = hash.slice(2);
         }
-        return name;
+        return name || null;
     }
 
     loadSchemas(callback, forceFetch = false){
@@ -491,7 +515,8 @@ export default class App extends React.Component {
 
     // Submitted forms are treated the same as links
     handleSubmit(event) {
-        var target = event.target;
+        var target = event.target,
+            hrefParts = url.parse(this.props.href);
 
         // Skip POST forms
         if (target.method != 'get') return;
@@ -504,7 +529,7 @@ export default class App extends React.Component {
 
         var options = {};
         var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
+        options.replace = action_url.pathname == hrefParts.pathname;
         var search = serialize(target);
         if (target.getAttribute('data-removeempty')) {
             search = _.map(
@@ -521,6 +546,12 @@ export default class App extends React.Component {
         if (search) {
             href += '?' + search;
         }
+
+        var currentAction = this.currentAction();
+        if (currentAction === 'selection'){
+            href += '#!' + currentAction;
+        }
+
         options.skipRequest = target.getAttribute('data-skiprequest');
 
         if (this.historyEnabled) {
@@ -589,12 +620,10 @@ export default class App extends React.Component {
     authenticateUser(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
-
+        if (idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
+            console.info('AUTHENTICATING USER; JWT PRESENT BUT NO STATE.SESSION OR USER_ACTIONS'); // This is very unlikely due to us rendering re: session server-side.
             ajax.promise('/login', 'POST', {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+idToken
+                'Authorization' : 'Bearer ' + idToken
             }, JSON.stringify({id_token: idToken}))
             .then(response => {
                 if (response.code || response.status || response.id_token !== idToken) throw response;
@@ -603,6 +632,9 @@ export default class App extends React.Component {
             .then(response => {
                 JWT.saveUserInfo(response);
                 this.updateUserInfo(callback);
+                analytics.event('Authentication', 'ExistingSessionLogin', {
+                    'eventLabel' : 'Authenticated ClientSide'
+                });
             }, error => {
                 // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
                 // and unset state.session & state.user_actions (via this.updateUserInfo())
@@ -610,6 +642,11 @@ export default class App extends React.Component {
                 this.updateUserInfo(callback);
             });
             return idToken;
+        } else if (idToken && this.state.session && this.state.user_actions){
+            console.info('User is logged in already, continuing session.');
+            analytics.event('Authentication', 'ExistingSessionLogin', {
+                'eventLabel' : 'Authenticated ServerSide'
+            });
         }
         return null;
     }
@@ -773,13 +810,7 @@ export default class App extends React.Component {
                 return null;
             }
 
-            var request = ajax.fetch(
-                href,
-                {
-                    'headers': {}, // Filled in by ajax.promise
-                    'cache' : options.cache === false ? false : true
-                }
-            );
+            var request = ajax.fetch(href, { 'cache' : options.cache === false ? false : true });
 
             this.requestCurrent = true; // Remember we have an outstanding GET request
             var timeout = new Timeout(App.SLOW_REQUEST_TIME);
@@ -865,15 +896,22 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                dispatch_dict.href = href + fragment;
+
+                var hrefToSet = (request && request.xhr && request.xhr.responseURL) || href; // Get correct URL from XHR, in case we hit a redirect during the request.
+                dispatch_dict.href = hrefToSet + fragment;
 
                 return response;
             })
             .then(response => this.receiveContextResponse(response, includeReduxDispatch, options))
             .then(response => {
                 this.state.slowLoad && this.setState({'slowLoad' : false});
-                if (typeof callback == 'function'){
+                if (typeof callback === 'function'){
                     callback(response);
+                }
+                if (response.code === 404){
+                    // This may not be caught as a server or network error.
+                    // If is explicit 404 (vs just 0 search results), pyramid will send it as 'code' property.
+                    analytics.exception('Page Not Found - ' + href);
                 }
             });
 
@@ -889,6 +927,14 @@ export default class App extends React.Component {
                 if (typeof fallbackCallback == 'function'){
                     fallbackCallback(err);
                 }
+
+                if (err.status === 500){
+                    analytics.exception('Server Error: ' + err.status + ' - ' + href);
+                }
+                if (err.status === 404){
+                    analytics.exception('Page Not Found - ' + href);
+                }
+
                 // Err could be an XHR object if could not parse JSON.
                 if (
                     typeof err.status === 'number' &&
@@ -896,6 +942,7 @@ export default class App extends React.Component {
                 ) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
+                    analytics.exception('Network Error: ' + err.status + ' - ' + href);
                 } else if (err.message !== 'HTTPForbidden'){
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.
@@ -1012,7 +1059,7 @@ export default class App extends React.Component {
             if (routeLeaf != 'help' && routeLeaf != 'about' && routeLeaf !== 'home' && routeLeaf !== 'submissions'){
                 status = 'not_found';
             }
-        } else if (routeLeaf == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (routeLeaf == 'submissions' && !_.contains(_.pluck(this.state.user_actions, 'id'), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1029,7 +1076,8 @@ export default class App extends React.Component {
             'listActionsFor'    : this.listActionsFor,
             'updateUserInfo'    : this.updateUserInfo,
             'browseBaseState'   : this.props.browseBaseState,
-            'currentAction'     : currentAction
+            'currentAction'     : currentAction,
+            'setIsSubmitting'   : this.setIsSubmitting
         };
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1040,7 +1088,7 @@ export default class App extends React.Component {
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context);
+            var ContentView = globals.content_views.lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
@@ -1053,19 +1101,13 @@ export default class App extends React.Component {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';
-            } else if (currentAction && currentAction !== 'selection') {
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
 
                 var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
-
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     content = <ErrorPage status="forbidden" />;
                     title = 'Action not permitted';
-                } else if (_.contains(['edit', 'add', 'create'], currentAction)) {
-                    content = (
-                        <SubmissionView {...commonContentViewProps} setIsSubmitting={this.setIsSubmitting}
-                            create={currentAction === 'create' || currentAction === 'add'} edit={currentAction === 'edit'} />
-                    );
                 }
             }
 
@@ -1091,7 +1133,7 @@ export default class App extends React.Component {
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-                    <meta name="google-site-verification" content="t0PnhAqm80xyWalBxJHZdld9adAk40SHjUyPspYNm7I" />
+                    <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
@@ -1106,7 +1148,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
+                <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
@@ -1116,15 +1158,14 @@ export default class App extends React.Component {
                     <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
                         <div className="inner">
                             <i className="icon icon-circle-o-notch"/>
-                            { /*<img src="/static/img/ajax-loader.gif"/>*/ }
                         </div>
                     </div>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
-                            <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation
                                     href={this.props.href}
+                                    currentAction={currentAction}
                                     session={this.state.session}
                                     updateUserInfo={this.updateUserInfo}
                                     portal={portal}
@@ -1135,21 +1176,12 @@ export default class App extends React.Component {
                                     browseBaseState={this.props.browseBaseState}
                                 />
                                 <div id="pre-content-placeholder"/>
-                                <PageTitle context={this.props.context} session={this.state.session} href={this.props.href} schemas={this.state.schemas} />
+                                <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts')} {..._.pick(this.state, 'session', 'schemas')} currentAction={currentAction} />
                                 <div id="facet-charts-container" className="container">
-                                    <FacetCharts
-                                        href={this.props.href}
-                                        context={this.props.context}
-                                        navigate={navigate}
-                                        schemas={this.state.schemas}
-                                        session={this.state.session}
-                                    />
+                                    <FacetCharts {..._.pick(this.props, 'context', 'href')} {..._.pick(this.state, 'session', 'schemas')} navigate={navigate} />
                                 </div>
-                                <div id="content" className="container">
-                                    <Alerts alerts={this.props.alerts} />
-                                    { content }
-                                </div>
-                                <div id="layout-footer"></div>
+                                <div id="content" className="container" children={content} />
+                                <div id="layout-footer"/>
                             </div>
                             <Footer version={this.props.context.app_version} />
                         </div>
