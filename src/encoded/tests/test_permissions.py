@@ -325,15 +325,11 @@ def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, hu
 def test_user_view_details_admin(submitter, access_key, testapp):
     res = testapp.get(submitter['@id'])
     assert 'email' in res.json
-    assert 'access_keys' in res.json
-    assert 'access_key_id' in res.json['access_keys'][0]
 
 
 def test_users_view_details_self(submitter, access_key, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
     assert 'email' in res.json
-    assert 'access_keys' in res.json
-    assert 'access_key_id' in res.json['access_keys'][0]
 
 
 def test_users_patch_self(submitter, access_key, submitter_testapp):
@@ -357,7 +353,6 @@ def test_users_can_see_their_own_user_info(submitter, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
     assert 'title' in res.json
     assert 'email' in res.json
-    assert 'access_keys' in res.json
 
 
 def test_users_view_basic_anon(submitter, anontestapp):

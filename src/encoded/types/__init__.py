@@ -140,6 +140,14 @@ class Organism(Item):
     name_key = 'name'
     embedded_list = []
 
+    def display_title(self):
+        if self.properties.get('scientific_name'): # Defaults to "" so check if falsy not if is None
+            scientific_name_parts = self.properties['scientific_name'].split(' ')
+            if len(scientific_name_parts) > 1:
+                return ' '.join([ scientific_name_parts[0][0].upper() + '.' ] + scientific_name_parts[1:])
+            else:
+                return self.properties['scientific_name']
+
 
 @collection(
     name='protocols',

@@ -1158,12 +1158,10 @@ export default class App extends React.Component {
                     <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
                         <div className="inner">
                             <i className="icon icon-circle-o-notch"/>
-                            { /*<img src="/static/img/ajax-loader.gif"/>*/ }
                         </div>
                     </div>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
-                            <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation
                                     href={this.props.href}
