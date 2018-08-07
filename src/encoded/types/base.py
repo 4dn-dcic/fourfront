@@ -145,6 +145,18 @@ def get_item_if_you_can(request, value, itype=None):
                 return value
 
 
+def set_namekey_from_title(properties):
+    name = None
+    if properties.get('title'):
+        exclude = set(string.punctuation)
+        name = properties['title']
+        name = ''.join(ch for ch in name if ch not in exclude)
+        name = re.sub(r"\s+", '-', name)
+        name = name.lower()
+    return name
+
+
+
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
 
@@ -351,16 +363,6 @@ class Item(snovault.Item):
             if 'admin' in user.properties['groups']:
                 return True
         return False
-
-    def set_namekey_from_title(self, properties):
-        name = None
-        if properties.get('title'):
-            exclude = set(string.punctuation)
-            name = properties['title']
-            name = ''.join(ch for ch in name if ch not in exclude)
-            name = re.sub(r"\s+", '-', name)
-            name = name.lower()
-        return name
 
     def _update(self, properties, sheets=None):
         props = {}

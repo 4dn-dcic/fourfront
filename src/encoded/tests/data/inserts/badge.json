@@ -5,5 +5,10 @@
         "description": "Given for exemplary data sets",
         "badge_icon": "&#xf2cd;",
         "uuid": "ddd03a23-49e5-4c33-afab-9ec90d65faf3"
+    },
+    {
+        "title": "Shower",
+        "badge_classification": "WARNING",
+        "uuid": "dee03a23-49e5-4c33-afab-9ec90d65faf3"
     }
 ]

@@ -9,7 +9,8 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
+    Item,
+    set_namekey_from_title
     # paths_filtered_by_status,
 )
 
@@ -50,7 +51,7 @@ class Badge(Item):
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
-        properties['badge_name'] = self.set_namekey_from_title(properties)
+        properties['badge_name'] = set_namekey_from_title(properties)
 
         super(Badge, self)._update(properties, sheets)
 
@@ -214,6 +215,6 @@ class Vendor(Item):
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
-        properties['name'] = self.set_namekey_from_title(properties)
+        properties['name'] = set_namekey_from_title(properties)
 
         super(Vendor, self)._update(properties, sheets)
