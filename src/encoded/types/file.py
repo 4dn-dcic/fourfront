@@ -1013,7 +1013,8 @@ def validate_extra_file_format(context, request):
     fformat = data.get('file_format')
     if not fformat:
         # must be a patch so get the last part of url
-        url = request.url
+        # use path_url to exclude query params
+        url = request.path_url
         if url.endswith('/'):
             url = url[:-1]
         fid = url.split('/')[-1]

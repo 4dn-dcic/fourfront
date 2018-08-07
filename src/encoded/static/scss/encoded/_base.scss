@@ -184,3 +184,20 @@ blockquote {
     margin: 10px;
     text-align: center;
 }
+
+// Fourfront SVG logo
+
+svg.fourfront_logo_svg_instance {
+    > ellipse {
+        fill:url(#fourfront_linear_gradient);
+        stroke:url(#fourfront_linear_gradient);
+        stroke-width: 1px;
+    }
+    > text {
+        font-size:25px;
+        fill:#fff;
+        font-family: "Mada","Work Sans",Helvetica,Arial,sans-serif;
+        font-weight: 600;
+    }
+}
+
