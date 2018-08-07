@@ -71,6 +71,7 @@ class Experiment(Item):
                      "biosample.modifications_summary",
                      "biosample.treatments_summary",
                      "biosample.biosource_summary",
+                     "biosample.biosample_type",
                      "biosample.biosource.biosource_type",
                      "biosample.biosource.cell_line.slim_terms",
                      "biosample.biosource.cell_line.synonyms",
