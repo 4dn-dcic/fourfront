@@ -189,7 +189,7 @@ export class StatisticsChartsView extends React.Component {
         var anyExpandedCharts = _.any(_.values(this.state.chartToggles));
         var commonContainerProps = {
             'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
-            'defaultColSize' : '12', 'defaultHeight' : 250
+            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
         };
 
         return (
@@ -248,18 +248,17 @@ export class AreaChartContainer extends React.Component {
     }
 
     getRefWidth(){
-        var rawWidth = this.refs && this.refs.elem && this.refs.elem.clientWidth;
-        return rawWidth && rawWidth - 20;
+        return this.refs && this.refs.elem && this.refs.elem.clientWidth;
     }
 
     xAxisGeneratorFull(x){
         return d3.axisBottom(x).ticks(d3.timeMonth.every(1)); // Every 1 month
     }
 
-    expandButton(expanded){
+    expandButton(expanded, className){
         if (this.props.gridState && this.props.gridState !== 'lg') return null;
         return (
-            <Button className="pull-right" bsSize="sm" onClick={this.toggleExpanded} style={{ 'marginTop' : -6 }}>
+            <Button className={className} bsSize="sm" onClick={this.toggleExpanded} style={{ 'marginTop' : -6 }}>
                 <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
             </Button>
         );
@@ -269,17 +268,27 @@ export class AreaChartContainer extends React.Component {
         var { title, children, width, defaultColSize, defaultHeight } = this.props,
             expanded = this.isExpanded(),
             useWidth = width || this.getRefWidth(),
+            chartInnerWidth = expanded ? useWidth * 3 : useWidth,
             className = 'mt-2 col-xs-12 col-lg-' + (expanded ? '12' : (defaultColSize || '6')),
             useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
 
         return (
-            <div className={className} ref="elem">
-                <h4 className="text-300">{ title }{ this.expandButton(expanded) }</h4>
-                { React.cloneElement(children, {
-                    'width' : useWidth,
-                    'height' : useHeight,
-                    'xAxisGenerator' : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) )
-                }) }
+            <div className={className}>
+                <div className="row">
+                    <div className="col-xs-12 col-lg-1">
+                        <h4 className="text-300">{ title }</h4>
+                        { this.expandButton(expanded) }
+                    </div>
+                    <div className={"col-xs-12 col-lg-11"}>
+                        <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
+                            { React.cloneElement(children, {
+                                'width' : chartInnerWidth,
+                                'height' : useHeight,
+                                'xAxisGenerator' : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) )
+                            }) }
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -646,11 +655,12 @@ export class AreaChart extends React.PureComponent {
     }
 
     render(){
-        var { data, width, height } = this.props;
-        if (!this.props.data || this.state.drawingError) {
+        var { data, width, height, transitionDuration } = this.props;
+        if (!data || this.state.drawingError) {
             return <div>Error</div>;
         }
-        return <svg ref="svg" className="area-chart" width={this.props.width || "100%"} height={this.props.height || null} />;
+        return <svg ref="svg" className="area-chart" width={width || "100%"} height={height || null}
+            style={{ height, 'width' : width || '100%', 'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s') }} />;
     }
 
 }
