@@ -119,6 +119,37 @@ navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
     });
 };
 
+navigate.isBaseBrowseQuery = function(hrefQuery, browseBaseState = null){
+    var baseParams = navigate.getBrowseBaseParams(browseBaseState),
+        field_diff1 = _.difference(_.keys(hrefQuery), _.keys(baseParams)),
+        field_diff2 = _.difference(_.keys(baseParams), _.keys(hrefQuery)),
+        failed = false;
+
+    if (field_diff1.length > 0 || field_diff2.length > 0){
+        return false;
+    }
+
+    _.forEach(_.pairs(hrefQuery), function([field, term]){
+        if (failed) return;
+        var baseParamTermList = baseParams[field];
+        if (!Array.isArray(term)) term = [term];
+
+        var term_diff1 = _.difference(term, baseParamTermList),
+            term_diff2 = _.difference(baseParamTermList, term);
+
+        if (term_diff1.length > 0 || term_diff2.length > 0){
+            failed = true;
+            return;
+        }
+    });
+
+    if (failed) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
 
 navigate.setBrowseBaseStateAndRefresh = function(newBrowseBaseState = 'all', currentHref = null, context = null, navOptions = { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true }){
 
