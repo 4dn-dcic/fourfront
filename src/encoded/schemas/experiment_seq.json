@@ -27,6 +27,7 @@
         { "$ref": "mixins.json#/antibody_info" },
         { "$ref": "mixins.json#/spikein_info" },
         { "$ref": "mixins.json#/attachment" },
+        { "$ref": "mixins.json#/supplementary_files" },
         { "$ref": "experiment.json#/properties" }
     ],
     "dependencies": {

@@ -144,7 +144,7 @@
         "bg_px2": ".bedGraph.gz.px2",
         "bw": ".bw",
         "bed": ".bed.gz",
-        "bedpe": "bedpe.gz",
+        "bedpe": ".bedpe.gz",
         "txt": ".txt.gz",
         "csv": ".csv",
         "spt": ".spt",
