@@ -143,8 +143,8 @@
         "biosource.cell_line_tier": {
             "title": "4DN Cell Line Tier"
         },
-        "biosource.biosource_summary": {
-            "title": "Biosource Info"
+        "biosource_summary": {
+            "title": "Biosource"
         },
         "biosource.individual.organism.name": {
             "title": "Organism"

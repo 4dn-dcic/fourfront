@@ -118,8 +118,8 @@
         "experiments_in_set.biosample.biosample_type": {
             "title": "Sample Type"
         },
-        "experiments_in_set.biosample.biosample_summary": {
-            "title": "Biosample Summary"
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Sample"
         },
         "publications_of_set.display_title": {
             "title": "Publication"
