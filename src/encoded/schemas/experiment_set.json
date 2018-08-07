@@ -59,7 +59,6 @@
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
             "exclude_from": ["submit4dn"],
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Experiment",

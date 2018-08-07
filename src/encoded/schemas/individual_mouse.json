@@ -66,7 +66,6 @@
             "title": "External identifiers",
             "description": "Unique identifiers from external resources.",
             "type": "array",
-            "default": [],
             "lookup": 1000,
             "uniqueItems": true,
             "items": {

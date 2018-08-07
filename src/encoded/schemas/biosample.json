@@ -83,7 +83,6 @@
             "comment": "See Modifications sheet or collection for existing items",
             "type": "array",
             "lookup": 40,
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Modifications",
@@ -97,7 +96,6 @@
             "type": "array",
             "lookup": 50,
             "comment": "See Treatment sheet or collection for exisiting items",
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Treatment",
