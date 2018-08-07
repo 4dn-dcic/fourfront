@@ -204,6 +204,7 @@ class TrackingItem(Item):
         transaction, which may cause issues if this function is called as
         part of another POST. For this reason, this function should be used to
         track GET requests -- otherwise, use the standard POST method.
+        Setting render to True/None may cause permission issues
         """
         import transaction
         import uuid
@@ -211,6 +212,7 @@ class TrackingItem(Item):
         model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
         properties['uuid'] = tracking_uuid
         request.validated = properties
-        sno_collection_add(TrackingItem(request.registry, model), request, render)
+        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
         transaction.get().commit()
         del request.response.headers['Location']
+        return res
