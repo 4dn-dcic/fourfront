@@ -22,7 +22,8 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/supplementary_files" },
-        { "$ref": "mixins.json#/badges" }
+        { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

@@ -105,19 +105,23 @@ $navbar-transition-easing: ease-out;
                 float: left;
                 margin-right: 15px;
                 text-align: center;
-                > img, 
-                > .navbar-logo-img {
+                //> img, 
+                //> .navbar-logo-img,
+                > svg#fourfront_logo_svg {
                     vertical-align: middle;
                     display: inline-block;
                     height: 100%;
                     padding-bottom: 10px;
                     padding-top: 10px;
                     .navbar-container.nav-initialized & {
-                        transition: padding $navbar-transition-length;
+                        transition: padding $navbar-transition-length, transform $navbar-transition-length;
                     }
                     .navbar-container.scrolled-past-top & {
                         padding-top: 6px;
                         padding-bottom: 6px;
+                    }
+                    > text {
+                        transition: fill .5s;
                     }
                 }
             }
@@ -138,17 +142,30 @@ $navbar-transition-easing: ease-out;
                     transform: translate3d(-5px,0,0);
                 }
             }
-            &:hover .navbar-title {
-                color: #000;
-                text-shadow: 0 0 0 #000;
-                &:after {
-                    content: "\f105";
-                    font-family: FontAwesome;
-                    margin-left: 12px;
-                    font-size: 1.25rem;
-                    line-height: inherit;
-                    vertical-align: bottom;
-                    color: $navbar-default-link-active-bg;
+
+            // Hover over title link state
+            &:hover {
+                .navbar-title {
+                    color: #000;
+                    text-shadow: 0 0 0 #000;
+                    &:after {
+                        content: "\f105";
+                        font-family: FontAwesome;
+                        margin-left: 12px;
+                        font-size: 1.25rem;
+                        line-height: inherit;
+                        vertical-align: bottom;
+                        color: $navbar-default-link-active-bg;
+                    }
+                }
+                > .img-container > svg#fourfront_logo_svg {
+                    > ellipse {
+                        fill:url(#fourfront_linear_gradient_spinning);
+                        stroke: #6969698c;
+                        //-webkit-animation: fa-spin 2s infinite linear;
+    		            //animation: fa-spin 2s infinite linear;
+                        //fourfront_linear_gradient_reversed
+                    }
                 }
             }
         }

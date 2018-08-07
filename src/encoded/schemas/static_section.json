@@ -22,7 +22,42 @@
             "description": "Unique name or ID of this section.",
             "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. search-info-header.WorkflowRun --> '/static-section/search-info-header.WorkflowRun'.",
             "type": "string",
-            "uniqueKey": "static_section:name"
+            "uniqueKey": "static_section:name",
+            "lookup" : 1
+        },
+        "title": {
+            "title": "Title",
+            "description": "Title for the section. Optional.",
+            "type": "string",
+            "lookup" : 5
+        },
+        "body":{
+            "title": "Raw Body",
+            "type": "string",
+            "comment" : "There should be no 'file' if this is set.",
+            "description": "Plain html or text content of this section.",
+            "formInput": "code",
+            "lookup" : 6
+        },
+        "file": {
+            "title": "Source File Location",
+            "type": "string",
+            "comment" : "There should be no 'body' if this is set.",
+            "description": "Source file to use for populating content. Is superceded by contents of 'body', if one present.",
+            "lookup" : 7
+        },
+        "section_type": {
+            "title": "Section Type",
+            "type": "string",
+            "description": "What this section is used for. Defaults to 'Page Section'.",
+            "default": "Page Section",
+            "enum" : [
+                "Page Section",
+                "Announcement",
+                "Search Info Header",
+                "Item Page Header"
+            ],
+            "lookup" : 10
         },
         "status": {
             "title": "Status",
@@ -33,35 +68,14 @@
                 "released to project",
                 "draft",
                 "deleted"
-            ]
-        },
-        "award": {
-            "title": "Grant",
-            "description": "Grant associated with the submission.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "type": "string",
-            "linkTo": "Award"
-        },
-        "section_type": {
-            "title": "Section Type",
-            "type": "string",
-            "description": "What this section is used for. Defaults to 'Page Section'.",
-            "default": "Page Section",
-            "enum" : [
-                "Page Section",
-                "Announcement",
-                "Search Info Header"
-            ]
-        },
-        "title": {
-            "title": "Title",
-            "description": "Title for the section",
-            "type": "string"
+            ],
+            "lookup" : 20
         },
         "description": {
             "title": "Description",
             "type": "string",
-            "formInput" : "textarea"
+            "formInput" : "textarea",
+            "lookup" : 21
         },
         "options": {
             "title": "Options",
@@ -75,11 +89,31 @@
                     "lookup" : 1,
                     "enum" : [ "md", "html", "txt", "csv" ]
                 },
+                "collapsible" : {
+                    "title" : "Is Collapsible",
+                    "type" : "boolean",
+                    "description": "Whether this StaticSection should be collapsible (wherever collapsibility is an option). This property is ignored in some places, e.g. lists where all sections are explicitly collapsible.",
+                    "lookup": 2,
+                    "default" : false
+                },
+                "default_open" : {
+                    "title" : "Is Expanded by Default",
+                    "type" : "boolean",
+                    "description": "Whether this StaticSection should appear as expanded by default (in places where it may be collapsible). Does not necessarily depend on 'collapsible' being true, e.g. in lists where all sections are explicitly collapsible.",
+                    "lookup": 3,
+                    "default": true
+                },
+                "title_icon" : {
+                    "title" : "Title Icon",
+                    "description": "Icon to be showed next to title in selected places.",
+                    "type" : "string",
+                    "lookup" : 5
+                },
                 "startCell" : {
                     "type" : "array",
                     "title" : "(CSV) First Table Cell",
                     "description" : "For filetype:csv, from which [row integer, column integer] to start parsing table.",
-                    "lookup" : 3,
+                    "lookup" : 20,
                     "items" : {
                         "type" : "integer"
                     }
@@ -88,7 +122,7 @@
                     "type" : "array",
                     "title" : "(CSV) Columns for Y-Axis",
                     "description" : "For filetype:csv, which columns (ints) should be used for Y-axis.",
-                    "lookup" : 4,
+                    "lookup" : 21,
                     "items" : {
                         "type" : "integer"
                     }
@@ -96,13 +130,13 @@
                 "yaxisTitle" : {
                     "type" : "string",
                     "title" : "(CSV) Title for Y-Axis",
-                    "lookup" : 5
+                    "lookup" : 22
                 },
                 "xaxisRows" : {
                     "type" : "array",
                     "title" : "(CSV) Rows for X-Axis",
                     "description" : "For filetype:csv, which rows (ints) should be used for X-Axis.",
-                    "lookup" : 6,
+                    "lookup" : 23,
                     "items" : {
                         "type" : "integer"
                     }
@@ -110,13 +144,13 @@
                 "xaxisTitle" : {
                     "type" : "string",
                     "title" : "(CSV) Title for X-Axis",
-                    "lookup" : 7
+                    "lookup" : 24
                 },
                 "titleCell" : {
                     "type" : "array",
                     "title" : "(CSV) Title Cell",
                     "description" : "For filetype:csv, which table cell [row int, column int] to use to grab title of section/table.",
-                    "lookup" : 8,
+                    "lookup" : 25,
                     "items" : {
                         "type" : "integer"
                     }
@@ -125,26 +159,22 @@
                     "type" : "array",
                     "title" : "(CSV) Rows Skipped",
                     "description" : "For filetype:csv, which table rows (ints) to skip in table (e.g. due to blank rows).",
-                    "lookup" : 9,
+                    "lookup" : 26,
                     "items" : {
                         "type" : "integer"
                     }
                 }
-            }
+            },
+            "lookup" : 25
         },
-        "file": {
-            "title": "Source File Location",
+        "award": {
+            "title": "Grant",
+            "description": "Grant associated with the submission.",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
-            "comment" : "There should be no 'body' if this is set.",
-            "description": "Source file to use for populating content. Is superceded by contents of 'body', if one present."
-        },
-        "body":{
-            "title": "Raw Body",
-            "type": "string",
-            "comment" : "There should be no 'file' if this is set.",
-            "description": "Plain html or text content of this section.",
-            "formInput": "code"
+            "linkTo": "Award"
         }
+        
     },
     "facets" : {
         "section_type" : {

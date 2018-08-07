@@ -6,7 +6,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, Alert } from 'react-bootstrap';
+import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
 import { panel_views, content_views } from './../globals';
@@ -53,11 +53,11 @@ class AccessKeyStore extends ItemStore {
 class AccessKeyTable extends React.Component {
 
     static propTypes = {
-        'access_keys' : PropTypes.array.isRequired,
+        'access_keys' : PropTypes.array,
         'session' : PropTypes.bool,
         'user' : PropTypes.shape({
             '@id' : PropTypes.string.isRequired,
-            'access_keys' : PropTypes.array.isRequired,
+            'uuid' : PropTypes.string.isRequired,
             'email' : PropTypes.string,
             'first_name' : PropTypes.string,
             'last_name' : PropTypes.string,
@@ -71,6 +71,7 @@ class AccessKeyTable extends React.Component {
 
     constructor(props){
         super(props);
+        this.syncAccessKeysFromSearch = this.syncAccessKeysFromSearch.bind(this);
         this.create = this.create.bind(this);
         this.doAction = this.doAction.bind(this);
         this.onCreate = this.onCreate.bind(this);
@@ -80,13 +81,55 @@ class AccessKeyTable extends React.Component {
         this.onError = this.onError.bind(this);
         this.hideModal = this.hideModal.bind(this);
 
+        this.renderTableRow = this.renderTableRow.bind(this);
         this.renderTable = this.renderTable.bind(this);
         this.render = this.render.bind(this);
-        
-        this.store = new AccessKeyStore(props.access_keys, this, 'access_keys');
+
+        var accessKeys = props.access_keys || null;
+        if (accessKeys){
+            this.store = new AccessKeyStore(props.access_keys, this, 'access_keys');
+        } else {
+            this.store = null;
+        }
         this.state = {
-            access_keys : props.access_keys
+            'access_keys'   : accessKeys,
+            'loadingStatus' : accessKeys ? 'loaded' : 'loading',
+            'modal'         : null
         };
+    }
+
+    componentDidMount(){
+        if (!this.state.access_keys || !this.store){
+            this.syncAccessKeysFromSearch();
+        }
+    }
+
+    syncAccessKeysFromSearch(){
+        var { user } = this.props;
+        if (!user || !user.uuid || !object.isUUID(user.uuid)){
+            throw new Error("No user, or invalid user.uuid supplied.");
+        }
+        var requestFailed = () => {
+                this.setState({ 'loadingStatus' : 'failed', 'access_keys' : null });
+            },
+            requestSucceeded = (resp) => { // Use for both load success+fail ajax callback in case of 404 (no results)
+                if (!resp || !Array.isArray(resp['@graph'])) return requestFailed();
+                this.store = new AccessKeyStore(resp['@graph'], this, 'access_keys');
+                this.setState({
+                    'loadingStatus' :' loaded',
+                    'access_keys' : resp['@graph']
+                });
+            },
+            loadFxn = () => {
+                var hrefToRequest = '/search/?type=AccessKey&limit=500&user.uuid=' + user.uuid;
+                ajax.load(hrefToRequest, requestSucceeded, 'GET', requestSucceeded);
+            };
+
+        if (this.state.loadingStatus !== 'loading'){
+            this.setState({ 'loadingStatus' : 'loading' }, loadFxn);
+        } else {
+            loadFxn();
+        }
     }
 
 
@@ -116,59 +159,58 @@ class AccessKeyTable extends React.Component {
         this.store[action](arg);
     }
 
-    onCreate(response) {
-        this.showNewSecret('Your secret key has been created.', response);
-    }
-
-    onResetSecret(response) {
-        this.showNewSecret('Your secret key has been reset.', response);
-    }
-
-    showNewSecret(title, response) {
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-            <Modal.Header>
-                <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
+    showNewSecret(response, reset = false) {
+        this.setState({ 'modal' :
+            <Modal show onHide={this.hideModal}>
+                <Modal.Header>{ reset ? <Modal.Title>Your secret key has been created.</Modal.Title> : <Modal.Title>Your secret key has been reset.</Modal.Title> }</Modal.Header>
                 <Modal.Body>
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
-                    <dl className="key-value">
-                        <div>
-                            <dt>Access Key ID</dt>
-                            <dd>{response.access_key_id}</dd>
+                    <br/>(It might take a few minutes for the access key to show up in table after page refresh.)
+
+                    <div className="row mt-15">
+                        <div className="col-xs-4 text-600 text-right no-user-select">
+                            Access Key ID
                         </div>
-                        <div>
-                            <dt>Secret Access Key</dt>
-                            <dd>{response.secret_access_key}</dd>
+                        <div className="col-xs-8">
+                            <code>{response.access_key_id}</code>
                         </div>
-                    </dl>
+                    </div>
+                    <div className="row mt-05">
+                        <div className="col-xs-4 text-600 text-right no-user-select">
+                            Secret Access Key
+                        </div>
+                        <div className="col-xs-8">
+                            <code>{response.secret_access_key}</code>
+                        </div>
+                    </div>
                 </Modal.Body>
             </Modal>
         });
     }
 
+    /**** Methods which are CALLED BY ITEMSTORE VIA DISPATCH(); TODO: Refactor, more Reactful ****/
+
+    onCreate(response) { this.showNewSecret(response); }
+
+    onResetSecret(response) { this.showNewSecret(response, true); }
 
     onDelete(item) {
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
+        this.setState({ 'modal' :
+            <Modal show onHide={this.hideModal}>
                 <Modal.Header>
-                    <Modal.Title>{'Access key ' + item['access_key_id'] + ' has been deleted.'}</Modal.Title>
+                    <Modal.Title className="text-400">Access key <span className="mono-text">{ item['access_key_id'] }</span> has been deleted.</Modal.Title>
                 </Modal.Header>
             </Modal>
         });
     }
 
     onError(error) {
-        var View = content_views.lookup(error);
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header>
-                    <Modal.Title>Error</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <View context={error} loadingComplete={true} />
-                </Modal.Body>
+        var errorViewComponent = content_views.lookup(error);
+        this.setState({ 'modal' :
+            <Modal onHide={this.hideModal}>
+                <Modal.Header><Modal.Title>Error</Modal.Title></Modal.Header>
+                <Modal.Body><errorViewComponent context={error} loadingComplete /></Modal.Body>
             </Modal>
         });
     }
@@ -178,37 +220,31 @@ class AccessKeyTable extends React.Component {
     }
 
 
+    renderTableRow(key){
+        return (
+            <tr key={key.access_key_id}>
+                <td className="access-key-id">{ key.access_key_id }</td>
+                <td>{ key.date_created ? <DateUtility.LocalizedTime timestamp={key.date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
+                <td>{ key.description }</td>
+                <td className="access-key-buttons">
+                    <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
+                    <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', {'@id':key['@id'],'uuid':key.uuid})}>Delete</a>
+                </td>
+            </tr>
+        );
+    }
+
+
     renderTable(){
-        if (!this.state.access_keys || !this.state.access_keys.length){
+        var { access_keys, loadingStatus } = this.state;
+
+        if (!access_keys.length){
             return (
                 <div className="no-access-keys">
                     <hr/><span>No access keys set.</span>
                 </div>
             );
         }
-        var row = function(key){
-            return (
-                <tr key={key.access_key_id}>
-                    <td className="access-key-id">{ key.access_key_id }</td>
-                    <td>
-                        { key.date_created ?
-                            <DateUtility.LocalizedTime
-                                timestamp={key.date_created}
-                                formatType="date-time-md"
-                                dateTimeSeparator=" - "
-                            />
-                            :
-                            'N/A'
-                        }
-                    </td>
-                    <td>{ key.description }</td>
-                    <td className="access-key-buttons">
-                        <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
-                        <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', {'@id':key['@id'],'uuid':key.uuid})}>Delete</a>
-                    </td>
-                </tr>
-            );
-        }.bind(this);
 
         return (
             <table className="table access-keys-table">
@@ -220,26 +256,54 @@ class AccessKeyTable extends React.Component {
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
-                    { this.state.access_keys.map(row) }
-                </tbody>
+                <tbody children={_.map(access_keys, this.renderTableRow)} />
             </table>
         );
 
     }
 
+    wrapInContainer(){
+        return (
+            <div className="access-keys-container">
+                <h3 className="text-300">Access Keys</h3>
+                <div className="access-keys-table-container clearfix" children={[...arguments]}/>
+            </div>
+        );
+    }
+
 
     render() {
-        return (
-            <div className="access-keys-table-container clearfix">
-                { this.state.access_keys.length ?
-                    this.renderTable()
-                    :
-                    <div className="no-access-keys"><hr/>No access keys set.</div>
-                }
-                <a href="#add-access-key" id="add-access-key" className="btn btn-success" onClick={this.create}>Add Access Key</a>
-                {this.state.modal}
-            </div>
+        var { access_keys, loadingStatus, modal } = this.state;
+        var className = "access-keys-table-container clearfix";
+
+        if (!Array.isArray(access_keys) || !this.store){
+            if (loadingStatus === 'loading'){
+                return this.wrapInContainer(
+                    <div className="text-center pt-3 pb-3">
+                        <i className="icon icon-2x icon-fw icon-circle-o-notch icon-spin" style={{ 'color' : '#999' }}/>
+                    </div>
+                );
+            } else if (loadingStatus === 'failed'){
+                return this.wrapInContainer(
+                    <div className="text-center pt-3 pb-3">
+                        <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                        <h4 className="text-400">Failed to load Access Keys</h4>
+                    </div>
+                );
+            } else if (loadingStatus === 'loaded'){
+                return this.wrapInContainer(
+                    <div className="text-center pt-3 pb-3">
+                        <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                        <h4 className="text-400">Unknown Error</h4>
+                    </div>
+                );
+            }
+        }
+
+        return this.wrapInContainer(
+            this.renderTable(),
+            <a href="#add-access-key" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</a>,
+            modal
         );
     }
 
@@ -368,17 +432,7 @@ export default class UserView extends React.Component {
 
                     </div>
 
-                    {
-                        typeof user.access_keys !== 'undefined' ?
-
-                        <div className="access-keys-container">
-                            <h3 className="text-300">Access Keys</h3>
-                            <div className="data-display">
-                                <AccessKeyTable user={user} access_keys={user.access_keys} />
-                            </div>
-                        </div>
-
-                    : '' }
+                    <AccessKeyTable user={user} access_keys={user.access_keys} />
 
                 </div>
             </div>
@@ -631,7 +685,7 @@ class BasicForm extends React.Component {
     }
 
     handleChange(e) {
-        this.setState({ value: e.target.value });
+        this.setState({ 'value': e.target.value });
     }
 
     handleSubmit(e){
@@ -639,16 +693,18 @@ class BasicForm extends React.Component {
         if(this.state.value.length == 0){
             return;
         }
-        this.props.submitImpersonate(this.state.value);
-        this.setState({ value: '' });
+        this.props.onSubmit(this.state.value);
+        this.setState({ 'value': '' });
     }
 
     render() {
         return(
             <form onSubmit={this.handleSubmit}>
-                <input className="impersonate-user impersonate-user-field" type='text' placeholder='Enter an email to impersonate...'
+                <FormControl className="mt-08" type='text' placeholder='Enter an email to impersonate...'
                     onChange={this.handleChange} value={this.state.value}/>
-                <input className="impersonate-user" type="submit" value="Submit" />
+                <Button className="mt-15 pull-right" type="submit" bsStyle="primary" bsSize="md">
+                    <i className="icon icon-fw icon-user"/>&nbsp; Impersonate
+                </Button>
             </form>
         );
     }
@@ -663,7 +719,7 @@ class BasicForm extends React.Component {
 export class ImpersonateUserForm extends React.Component {
 
     static propTypes = {
-        updateUserInfo: PropTypes.func.isRequired
+        'updateUserInfo': PropTypes.func.isRequired
     }
 
     /**
@@ -700,11 +756,15 @@ export class ImpersonateUserForm extends React.Component {
     }
 
     render() {
-        var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
-            <div style={{marginTop : 30}}>
-                <h2>Impersonate User</h2>
-                {form}
+            <div className="mt-3">
+                <hr />
+                <h2 className="text-400 mt-5">Impersonate a User</h2>
+                <div className="row">
+                    <div className="col-xs-12 col-lg-6">
+                        <BasicForm onSubmit={this.handleSubmit} />
+                    </div>
+                </div>
             </div>
         );
     }

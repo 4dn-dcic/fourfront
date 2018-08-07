@@ -1,0 +1,20 @@
+<svg id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 61.68 61.43">
+    <defs>
+        <style>.cls-1{fill:url(#linear-gradient);}.cls-2{fill:#fff;}</style>
+        <linearGradient id="linear-gradient" x1="2.24" y1="30.42" x2="58.97" y2="30.42" gradientUnits="userSpaceOnUse">
+            <stop offset="0.09" stop-color="#e71e25"/>
+            <stop offset="0.33" stop-color="#ed8916"/>
+            <stop offset="0.45" stop-color="#eab411"/>
+            <stop offset="0.56" stop-color="#e7de0d"/>
+            <stop offset="0.7" stop-color="#d8d913"/>
+            <stop offset="0.75" stop-color="#c3d21a"/>
+            <stop offset="0.85" stop-color="#8dc12e"/>
+            <stop offset="1" stop-color="#3ba64b"/>
+        </linearGradient>
+    </defs>
+    <title>4DN Foursight Logo</title>
+    <ellipse class="cls-1" cx="30.61" cy="30.42" rx="28.36" ry="28.33"/>
+    <path class="cls-2" d="M19.73,34.68H17.06v3.87H13.93V34.68H5.71V32.85l7.22-10.8h4.13V32.18h2.67ZM9,32.18h4.9V27.13l.08-2.7h0a18.92,18.92,0,0,1-1.5,2.72Z"/>
+    <path class="cls-2" d="M34.26,24.2a8.33,8.33,0,0,1,2.12,6.1,8.33,8.33,0,0,1-2.12,6.1,8,8,0,0,1-6,2.15H21.88V22.05h6.38A8.08,8.08,0,0,1,34.26,24.2ZM31.62,34.39a6.2,6.2,0,0,0,1.19-4.09,6.23,6.23,0,0,0-1.19-4.09,4.36,4.36,0,0,0-3.54-1.41H25.33v11h2.75A4.36,4.36,0,0,0,31.62,34.39Z"/>
+    <path class="cls-2" d="M53.16,38.55H49.21l-5.78-9.7L42,26.08h0l.1,2.92v9.55H39V22.05h3.93l5.77,9.68,1.43,2.8h0l-.1-2.93V22.05h3.1Z"/>
+</svg>

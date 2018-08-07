@@ -537,8 +537,20 @@
             }
         }
     },
-
-
+    "static_headers": {
+        "static_headers": {
+            "title": "Static Headers",
+            "description": "Array of linkTos for static sections to be displayed at the top of an item page",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Static Header",
+                "description": "Static section displayed at the top of an item page",
+                "type": "string",
+                "linkTo": "StaticSection"
+            }
+        }
+    },
     "facets_common" : {
         "award.project": {
             "title": "Project"

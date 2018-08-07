@@ -8,7 +8,7 @@ import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
 import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './util';
-import { requestAnimationFrame } from './viz/utilities';
+import { requestAnimationFrame, FourfrontLogo } from './viz/utilities';
 import QuickInfoBar from './viz/QuickInfoBar';
 import { ChartDataController } from './viz/chart-data-controller';
 import TestWarning from './testwarning';
@@ -197,36 +197,12 @@ export default class Navigation extends React.Component {
         // We add as property of class instance so we can remove event listener on unmount, for example.
         this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(requestAnimationFrame, handleScroll.bind(this)), 10);
 
-        // Save logo/brand element's 'full width' before any height transitions.
-        // Ideally wait until logo/brand image has loaded before doing so.
-        var navBarBrandImg = document.getElementsByClassName('navbar-logo-image')[0];
-        if (typeof navBarBrandImg === 'undefined') return;
-
-        // Window resize & logo img load handler
-        function saveWidth(){
-            var navBarBrandImgContainer = navBarBrandImg.parentElement;
-            var navBarBrand = navBarBrandImgContainer.parentElement.parentElement;
-            navBarBrand.style.width = ''; // Clear any earlier width
-            if (['xs','sm'].indexOf(layout.responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
-            //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
-            navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
-        }
-
-        this.throttledResizeHandler = _.throttle(saveWidth, 300);
-
-        navBarBrandImg.addEventListener('load', saveWidth);
-        // Execute anyway in case image is loaded, in addition to the 1 time on-img-load if any (some browsers do not support img load event; it's not part of W3 spec).
-        // Alternatively we can define width in stylesheet (e.g. 200px)
-        saveWidth();
-
         window.addEventListener("scroll", this.throttledScrollHandler);
-        window.addEventListener("resize", this.throttledResizeHandler);
         setTimeout(this.throttledScrollHandler, 100, null, { 'navInitialized' : true });
     }
 
     componentWillUnmount(){
         // Unbind events | probably not needed but lets be safe & cleanup.
-        window.removeEventListener("resize", this.throttledResizeHandler);
         window.removeEventListener("scroll", this.throttledScrollHandler);
         delete this.throttledResizeHandler;
         delete this.throttledScrollHandler;
@@ -276,8 +252,13 @@ export default class Navigation extends React.Component {
         var { testWarning, navInitialized, scrolledPastTop, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state;
         var { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction } = this.props;
 
-        var navClass = "navbar-container" + (testWarning ? ' test-warning-visible' : '') + (navInitialized ? ' nav-initialized' : '') + (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top") +
-            (openDropdown ? ' big-menu-open' : '');
+        var navClass = (
+            "navbar-container" + 
+            (testWarning ? ' test-warning-visible' : '') + 
+            (navInitialized ? ' nav-initialized' : '') + 
+            (scrolledPastTop ? " scrolled-past-top" : " scrolled-at-top") +
+            (openDropdown ? ' big-menu-open' : '')
+        );
 
         var primaryActions = listActionsFor('global_sections');
         var browseMenuItemOpts = _.findWhere(primaryActions, { 'id' : 'browse-menu-item' });
@@ -296,7 +277,12 @@ export default class Navigation extends React.Component {
                         <Navbar.Header>
                             <Navbar.Brand>
                                 <NavItem href="/" onClick={(e)=>{ this.setOpenDropdownID(null); }}>
-                                    <span className="img-container"><img src="/static/img/4dn_icon.svg" className="navbar-logo-image"/></span>
+                                    <span className="img-container">
+                                        {/*
+                                        <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
+                                        */}
+                                        <FourfrontLogo />
+                                    </span>
                                     <span className="navbar-title">Data Portal</span>
                                 </NavItem>
                             </Navbar.Brand>
