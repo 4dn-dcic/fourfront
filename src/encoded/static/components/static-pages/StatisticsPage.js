@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { console, layout, navigate, ajax } from'./../util';
+import { Button } from 'react-bootstrap';
+import { console, layout, navigate, ajax, isServerSide } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
@@ -18,7 +19,7 @@ export default class StatisticsPageView extends StaticPage {
             <StaticPage.Wrapper>
                 <StatisticsViewController>
                     <layout.WindowResizeUpdateTrigger>
-                        <StatisticsChartsView />
+                        <StatisticsChartsView session={this.props.session} />
                     </layout.WindowResizeUpdateTrigger>
                 </StatisticsViewController>
             </StaticPage.Wrapper>
@@ -55,6 +56,12 @@ export class StatisticsViewController extends React.PureComponent {
         var nextState = { 'mounted' : true };
         this.performSearchRequests();
         this.setState(nextState);
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.session !== this.props.session){
+            this.performSearchRequests();
+        }
     }
 
     performSearchRequests(chartUris = StatisticsViewController.CHART_SEARCH_URIS){ // TODO: Perhaps make search uris a prop.
@@ -115,8 +122,9 @@ export class StatisticsChartsView extends React.Component {
 
     constructor(props){
         super(props);
+        this.handleToggle = this.handleToggle.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
-        this.state = this.generateAggsToState(props);
+        this.state = _.extend(this.generateAggsToState(props), { 'chartToggles' : {} });
     }
 
     componentWillReceiveProps(nextProps){
@@ -133,6 +141,20 @@ export class StatisticsChartsView extends React.Component {
 
         if (updateState){
             this.setState(this.generateAggsToState(nextProps));
+        }
+    }
+
+    handleToggle(key, cb){
+        this.setState(function(currState){
+            var nextTogglesState = _.extend({}, currState.chartToggles);
+            nextTogglesState[key] = !(nextTogglesState[key]);
+            return { 'chartToggles' : nextTogglesState };
+        }, cb);
+    }
+
+    componentWillUpdate(nextProps, nextState){
+        if (!isServerSide()){
+            this.currGridState = layout.responsiveGridState();
         }
     }
 
@@ -161,22 +183,35 @@ export class StatisticsChartsView extends React.Component {
     }
 
     render(){
-        var { loadingStatus, mounted, respFile, respExperimentSetReplicate } = this.props;
+        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session } = this.props;
         if (!mounted || loadingStatus === 'loading')    return this.loadingIcon();
         if (loadingStatus === 'failed')                 return this.errorIcon();
+        var anyExpandedCharts = _.any(_.values(this.state.chartToggles));
+        var commonContainerProps = {
+            'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
+            'defaultColSize' : '12', 'defaultHeight' : 250
+        };
 
         return (
             <div className="stats-charts-container">
 
-                <AreaChartContainer title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
+                <AreaChartContainer {...commonContainerProps} id="expsets_released" title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
                     <AreaChart data={this.state.expsets_released} />
                 </AreaChartContainer>
 
-                <AreaChartContainer title={<span><span className="text-500">Files</span> released over time</span>}>
+                { session && this.state.expsets_released_internal ?
+
+                    <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={<span><span className="text-500">Experiment Sets</span> released over time &mdash; Internal</span>}>
+                        <AreaChart data={this.state.expsets_released_internal} />
+                    </AreaChartContainer>
+
+                : null }
+
+                <AreaChartContainer {...commonContainerProps} id="files_released" title={<span><span className="text-500">Files</span> released over time</span>}>
                     <AreaChart data={this.state.files_released} />
                 </AreaChartContainer>
 
-                <AreaChartContainer title={<span><span className="text-500">Total File Size</span> released over time</span>}>
+                <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={<span><span className="text-500">Total File Size</span> released over time</span>}>
                     <AreaChart data={this.state.file_volume_released} yAxisLabel="GB" />
                 </AreaChartContainer>
 
@@ -189,20 +224,96 @@ export class StatisticsChartsView extends React.Component {
 
 export class AreaChartContainer extends React.Component {
 
+    constructor(props){
+        super(props);
+        this.isExpanded = this.isExpanded.bind(this);
+        this.toggleExpanded = _.throttle(this.toggleExpanded.bind(this), 1000);
+        this.expandButton = this.expandButton.bind(this);
+    }
+
+    isExpanded(props = this.props){
+        return !!((props.chartToggles || {})[props.id]);
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.defaultColSize !== this.props.defaultColSize || this.isExpanded(pastProps) !== this.isExpanded(this.props)){
+            setTimeout(()=>{ // Update w. new width.
+                this.forceUpdate();
+            }, 0);
+        }
+    }
+
+    toggleExpanded(e){
+        return typeof this.props.onToggle === 'function' && this.props.id && this.props.onToggle(this.props.id);
+    }
+
     getRefWidth(){
         var rawWidth = this.refs && this.refs.elem && this.refs.elem.clientWidth;
         return rawWidth && rawWidth - 20;
     }
 
-    render(){
-        var { title, children, width } = this.props;
+    xAxisGeneratorFull(x){
+        return d3.axisBottom(x).ticks(d3.timeMonth.every(1)); // Every 1 month
+    }
+
+    expandButton(expanded){
+        if (this.props.gridState && this.props.gridState !== 'lg') return null;
         return (
-            <div className="col-xs-12 col-lg-6" ref="elem">
-                <h4 className="text-300">{ title }</h4>
-                { React.cloneElement(this.props.children, { 'width' : width || this.getRefWidth() }) }
+            <Button className="pull-right" bsSize="sm" onClick={this.toggleExpanded} style={{ 'marginTop' : -6 }}>
+                <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
+            </Button>
+        );
+    }
+
+    render(){
+        var { title, children, width, defaultColSize, defaultHeight } = this.props,
+            expanded = this.isExpanded(),
+            useWidth = width || this.getRefWidth(),
+            className = 'mt-2 col-xs-12 col-lg-' + (expanded ? '12' : (defaultColSize || '6')),
+            useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
+
+        return (
+            <div className={className} ref="elem">
+                <h4 className="text-300">{ title }{ this.expandButton(expanded) }</h4>
+                { React.cloneElement(children, {
+                    'width' : useWidth,
+                    'height' : useHeight,
+                    'xAxisGenerator' : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) )
+                }) }
             </div>
         );
     }
+}
+
+export function dateHistogramToD3Data(dateIntervalBuckets){
+    var total = 0;
+    var subTotals = {};
+    var aggsList = _.map(dateIntervalBuckets, function(bucket, index){
+        total += bucket.doc_count;
+        var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+            _.pluck((bucket.group_by_award && bucket.group_by_award.buckets) || [], 'key')
+        ));
+        return {
+            'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+            'count'    : bucket.doc_count,
+            'total'    : total,
+            'children' : _.map(subBucketKeysToDate, function(termKey){
+                var subBucket = bucket.group_by_award && bucket.group_by_award.buckets && _.findWhere(bucket.group_by_award.buckets, { 'key' : termKey });
+                var subCount = ((subBucket && subBucket.doc_count) || 0);
+                subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
+                return {
+                    'term'  : termKey,
+                    'count' : subCount,
+                    'total' : subTotals[termKey]
+                };
+            })
+        };
+    });
+
+    // Ensure each datum has all child terms, even if blank.
+    fillMissingChildBuckets(aggsList, _.keys(subTotals));
+
+    return aggsList;
 }
 
 
@@ -214,34 +325,17 @@ export const aggregationsToChartData = {
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var total = 0;
-            var subTotals = {};
-            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                total += bucket.doc_count;
-                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-                    _.pluck((bucket.group_by_award && bucket.group_by_award.buckets) || [], 'key')
-                ));
-                return {
-                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                    'count'    : bucket.doc_count,
-                    'total'    : total,
-                    'children' : _.map(subBucketKeysToDate, function(termKey){
-                        var subBucket = bucket.group_by_award && bucket.group_by_award.buckets && _.findWhere(bucket.group_by_award.buckets, { 'key' : termKey });
-                        var subCount = ((subBucket && subBucket.doc_count) || 0);
-                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
-                        return {
-                            'term'  : termKey,
-                            'count' : subCount,
-                            'total' : subTotals[termKey]
-                        };
-                    })
-                };
-            });
+            return dateHistogramToD3Data(weeklyIntervalBuckets);
+        }
+    },
+    'expsets_released_internal' : {
+        'requires'  : 'ExperimentSetReplicate',
+        'function'  : function(resp){
+            if (!resp || !resp.aggregations) return null;
+            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_internal_release && resp.aggregations.weekly_interval_internal_release.buckets;
+            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            // Ensure each datum has all child terms, even if blank.
-            fillMissingChildBuckets(aggsList, _.keys(subTotals));
-
-            return aggsList;
+            return dateHistogramToD3Data(weeklyIntervalBuckets);
         }
     },
     'files_released' : {
@@ -313,14 +407,18 @@ function fillMissingChildBuckets(aggsList, subAggKeys){
 export class AreaChart extends React.PureComponent {
 
     static defaultProps = {
-        'margin'        : { 'top': 30, 'right': 20, 'bottom': 30, 'left': 50 },
-        'data'          : null,
-        'd3TimeFormat'  : '%Y-%m-%d',
-        'stackChildren' : true,
-        'height'        : 300,
-        'yAxisLabel'    : 'Count',
-        'yAxisScale'    : 'Linear', // Must be one of 'Linear', 'Log', 'Pow'
-        'yAxisPower'    : null
+        'margin'                : { 'top': 30, 'right': 20, 'bottom': 30, 'left': 50 },
+        'data'                  : null,
+        'd3TimeFormat'          : '%Y-%m-%d',
+        'stackChildren'         : true,
+        'height'                : 300,
+        'yAxisLabel'            : 'Count',
+        'yAxisScale'            : 'Linear', // Must be one of 'Linear', 'Log', 'Pow'
+        'yAxisPower'            : null,
+        'xAxisGenerator'        : function(x){ // One tick every 2 months
+            return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
+        },
+        'transitionDuration'    : 1500
     };
 
     constructor(props){
@@ -378,7 +476,7 @@ export class AreaChart extends React.PureComponent {
     
 
     commonDrawingSetup(){
-        var { margin, data, yAxisScale, yAxisPower } = this.props;
+        var { margin, data, yAxisScale, yAxisPower, xAxisGenerator } = this.props;
         var svg         = d3.select(this.refs.svg),
             width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
             height      = (  this.props.height || parseInt( this.refs.svg.clientHeight || svg.style('height') )  ) - margin.top - margin.bottom,
@@ -413,8 +511,7 @@ export class AreaChart extends React.PureComponent {
         y.domain([ 0, d3.max(data, function(d) { return d.total; }) ]);
         this.stack.keys(childKeys);
 
-        var bottomAxisGenerator = d3.axisBottom(x)
-            .ticks(d3.timeMonth.every(1)); // One tick every month
+        var bottomAxisGenerator = xAxisGenerator(x);
 
         var leftAxisGenerator   = d3.axisLeft(y),
             rightAxisGenerator  = d3.axisRight(y).tickSize(width),
@@ -510,7 +607,7 @@ export class AreaChart extends React.PureComponent {
         delete this.drawnD3Elements;
     }
 
-    updateExistingChart(transitionDuration = 2500){
+    updateExistingChart(){
 
         // TODO:
         // If width or height has changed, transition existing DOM elements to larger dimensions
@@ -520,15 +617,20 @@ export class AreaChart extends React.PureComponent {
             throw new Error('No existing elements to transition.');
         }
 
-        var { yAxisLabel, margin } = this.props;
+        var { yAxisLabel, margin, transitionDuration } = this.props;
         var { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
 
         var drawn = this.drawnD3Elements;
 
         requestAnimationFrame(()=>{
 
-            drawn.xAxis.transition().duration(2500).call(bottomAxisGenerator);
-            drawn.yAxis.transition().duration(2500).call(d3.axisLeft(y));
+            drawn.xAxis
+                .transition().duration(transitionDuration)
+                .attr("transform", "translate(0," + height + ")")
+                .call(bottomAxisGenerator);
+            drawn.yAxis
+                .transition().duration(transitionDuration)
+                .call(d3.axisLeft(y));
             drawn.rightAxis.remove();
             drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);          
 
@@ -536,7 +638,7 @@ export class AreaChart extends React.PureComponent {
                 .data(this.stack(data))
                 .selectAll('path.area')
                 .transition()
-                .duration(2500)
+                .duration(transitionDuration)
                 .attr('d', area);
 
         });

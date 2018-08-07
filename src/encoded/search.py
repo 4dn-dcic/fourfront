@@ -103,8 +103,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Set starting facets
     facets = initialize_facets(types, doc_types, prepared_terms, schemas)
 
-    ### Adding facets, plus any optional custom aggregations and script fields to the query
-    search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations)
+    ### Adding facets, plus any optional custom aggregations. Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
+    search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations, size, from_)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -836,7 +836,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
-def set_facets(search, facets, search_filters, string_query, types, doc_types, custom_aggregations=None):
+def set_facets(search, facets, search_filters, string_query, types, doc_types, custom_aggregations=None, size=25, from_=0):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
     filtered by search_filters minus filter affecting facet field in order to get counts
@@ -848,6 +848,9 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
         :param search_filters: Dict of filters which are set for the ES query in set_filters
         :param string_query:   Dict holding the query_string used in the search
     """
+
+    if from_ != 0:
+        return search
 
     aggs = OrderedDict()
 
@@ -970,14 +973,17 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
             'aggs': aggs
         }
     }
-    set_additional_aggregations_and_script_fields(search_as_dict, types, doc_types, custom_aggregations)
+
+    if size == 0:
+        # Only perform aggs if size==0 requested, to improve performance for search page queries.
+        # We do currently have (hidden) monthly date histogram facets which may yet to be utilized for common size!=0 agg use cases.
+        set_additional_aggregations(search_as_dict, types, doc_types, custom_aggregations)
+
     search.update_from_dict(search_as_dict)
-
-
     return search
 
 
-def set_additional_aggregations_and_script_fields(search_as_dict, types, doc_types, extra_aggregations=None):
+def set_additional_aggregations(search_as_dict, types, doc_types, extra_aggregations=None):
     '''
     Per-type aggregations may be defined in schemas. Apply them OUTSIDE of globals so they act on our current search filters.
     Warning: `search_as_dict` is modified IN PLACE.
