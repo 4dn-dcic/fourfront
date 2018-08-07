@@ -493,7 +493,7 @@ class Item(snovault.Item):
         """
         conn = request.registry[CONNECTION]
         return [request.resource_path(conn[uuid]) for uuid in
-                paths_filtered_by_status(request, self.get_rev_links(rev_name, request))]
+                paths_filtered_by_status(request, self.get_rev_links(request, rev_name))]
 
 
 class SharedItem(Item):
