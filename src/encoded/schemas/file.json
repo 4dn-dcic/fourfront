@@ -57,18 +57,6 @@
                 "other file"
             ]
         },
-        "file_format_specifications": {
-            "title": "File format specifications documents",
-            "description": "Text or pdf files that further explain the file format",
-            "type": "array",
-            "lookup": 1000,
-            "uniqueItems": true,
-            "items": {
-                "comment": "See document.json for a list of available identifiers.",
-                "type": "string",
-                "linkTo": "Document"
-            }
-        },
         "md5sum": {
             "title": "MD5sum",
             "description": "The md5sum of the file being transferred.",

@@ -554,51 +554,6 @@ class FileFastq(File):
 
 
 @collection(
-    name='files-fasta',
-    unique_key='accession',
-    properties={
-        'title': 'FASTA Files',
-        'description': 'Listing of FASTA Files',
-    })
-class FileFasta(File):
-    """Collection for individual fasta files."""
-    item_type = 'file_fasta'
-    schema = load_schema('encoded:schemas/file_fasta.json')
-    embedded_list = File.embedded_list
-    name_key = 'accession'
-    rev = dict(File.rev, **{
-        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
-        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
-    })
-
-    @calculated_property(schema={
-        "title": "Input of Workflow Runs",
-        "description": "All workflow runs that this file serves as an input to",
-        "type": "array",
-        "items": {
-            "title": "Input of Workflow Run",
-            "type": ["string", "object"],
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_run_inputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_inputs")
-
-    @calculated_property(schema={
-        "title": "Output of Workflow Runs",
-        "description": "All workflow runs that this file serves as an output from",
-        "type": "array",
-        "items": {
-            "title": "Output of Workflow Run",
-            "type": "string",
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_run_outputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_outputs")
-
-
-@collection(
     name='files-processed',
     unique_key='accession',
     properties={

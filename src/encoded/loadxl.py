@@ -32,6 +32,7 @@ ORDER = [
     'page',
     'ontology',
     'ontology_term',
+    'file_format',
     'badge',
     'organism',
     'genomic_region',
@@ -65,7 +66,6 @@ ORDER = [
     'microscope_setting_a1',
     'microscope_setting_a2',
     'file_fastq',
-    'file_fasta',
     'file_processed',
     'file_reference',
     'file_calibration',
@@ -95,6 +95,7 @@ ORDER = [
 
 IS_ATTACHMENT = [
     'attachment',
+    'file_format_specification',
     'IDR_plot_true',
     'IDR_plot_rep1_pr',
     'IDR_plot_rep2_pr',
