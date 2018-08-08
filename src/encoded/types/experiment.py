@@ -82,6 +82,7 @@ class Experiment(Item):
                      'biosample.modifications.display_title',
                      'biosample.treatments.treatment_type',
                      'biosample.treatments.display_title',
+                     'biosample.badges.*',
 
                      "files.href",
                      "files.accession",
@@ -91,6 +92,7 @@ class Experiment(Item):
                      "files.file_format",
                      "files.file_classification",
                      "files.paired_end",
+                     'files.badges.*',
 
                      "processed_files.href",
                      "processed_files.accession",
