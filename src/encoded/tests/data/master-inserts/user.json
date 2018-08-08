@@ -113,6 +113,16 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
+        "email": "shannon.ehmsen@gmail.com",
+        "first_name": "Shannon",
+        "job_title": "Graphic designer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Ehmsen",
+        "uuid": "52b6954c-c1cc-4f56-9e40-b8a777c8b42f",
+        "viewing_groups": ["4DN"],
+        "groups": ["read-only-admin"]
+    },
+    {
         "timezone": "US/Eastern",
         "email": "ud4dntest@gmail.com",
         "status": "current",
