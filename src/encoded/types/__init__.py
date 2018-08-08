@@ -204,6 +204,7 @@ class TrackingItem(Item):
         transaction, which may cause issues if this function is called as
         part of another POST. For this reason, this function should be used to
         track GET requests -- otherwise, use the standard POST method.
+        Skips validators.
         Setting render to True/None may cause permission issues
         """
         import transaction
@@ -211,6 +212,9 @@ class TrackingItem(Item):
         tracking_uuid = str(uuid.uuid4())
         model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
         properties['uuid'] = tracking_uuid
+        # no validators run, so status must be set manually if we want it
+        if 'status' not in properties:
+            properties['status'] = 'in review by lab'
         request.validated = properties
         res = sno_collection_add(TrackingItem(request.registry, model), request, render)
         transaction.get().commit()

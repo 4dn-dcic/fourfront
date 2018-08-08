@@ -186,7 +186,7 @@ def test_extra_files_download(testapp, registry, proc_file_json):
     # ensure the download tracking items were created
     ti_coll = registry['collections']['TrackingItem']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
-    tracked_filenames = [ti.properties.get('filename') for ti in tracking_items]
+    tracked_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items]
     assert download_filename in tracked_filenames
     assert download_extra_filename in tracked_filenames
 
@@ -207,8 +207,8 @@ def test_range_download(testapp, registry, proc_file_json):
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
-    tracked_rng_filenames = [ti.properties.get('filename') for ti in tracking_items
-                             if ti.properties.get('range_query') is True]
+    tracked_rng_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items
+                             if ti.properties.get('download_tracking', {}).get('range_query') is True]
     assert download_filename in tracked_rng_filenames
 
     # delete first so cleanup even if test fails

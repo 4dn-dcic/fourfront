@@ -831,9 +831,7 @@ def download(context, request):
         user_props = {'error': str(e)}
     tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
                        'user_email': user_props.get('details', {}).get('email', 'anonymous'),
-                       'request_path': request.path_info, 'tracking_type': 'file_download',
-                       'date_created': datetime.datetime.now(datetime.timezone.utc),
-                       'status': 'in review by lab'}
+                       'request_path': request.path_info}
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
@@ -890,7 +888,10 @@ def download(context, request):
         raise ValueError(external.get('service'))
 
     # create a tracking_item to track this download
-    TrackingItem.create_and_commit(request, tracking_values)
+    tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
+                     'status': 'in review by lab', 'tracking_type': 'download_tracking',
+                     'download_tracking': tracking_values}
+    TrackingItem.create_and_commit(request, tracking_item)
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])

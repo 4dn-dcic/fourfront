@@ -6,7 +6,7 @@
     "type": "object",
     "required": ["tracking_type"],
     "identifyingProperties": ["uuid"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
@@ -24,11 +24,51 @@
         "tracking_type": {
             "title": "Tracking Type",
             "type": "string",
-            "description": "What this item tracks. Defaults to file_download",
-            "default": "file_download",
+            "description": "What this item tracks. Defaults to other",
+            "default": "other",
             "enum" : [
+                "other",
                 "file_download"
             ]
-		}
+		},
+        "download_tracking": {
+            "title": "Download Tracking",
+            "type": "object",
+            "description": "Subobject to hold download tracking field. Allows additional properties",
+            "additionalProperties": true,
+            "properties": {
+                "user_agent" : {
+                    "title": "User Agent",
+                    "type": "string"
+                },
+                "remote_ip" : {
+                    "title": "Remote IP",
+                    "type": "string"
+                },
+                "user_email" : {
+                    "title": "User Email",
+                    "type": "string"
+                },
+                "request_path" : {
+                    "title": "User Agent",
+                    "type": "string"
+                },
+                "filename" : {
+                    "title": "Filename",
+                    "type": "string"
+                },
+                "range_query" : {
+                    "title": "Range Query",
+                    "type": "boolean"
+                }
+            }
+        },
+        "other_tracking": {
+            "title": "Other Tracking",
+            "type": "object",
+            "description": "Subobject to misc. tracking fields. Allows additional properties",
+            "additionalProperties": true,
+            "properties": {}
+        }
     }
 }
