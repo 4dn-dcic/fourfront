@@ -102,6 +102,17 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
+        "email": "luisa_mercado@hms.harvard.edu",
+        "first_name": "Luisa",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Mercado",
+        "uuid": "56c9c683-bb11-471b-b590-c656f7dc03c1",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "timezone": "US/Eastern",
         "email": "ud4dntest@gmail.com",
         "status": "current",
