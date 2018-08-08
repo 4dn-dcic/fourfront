@@ -70,5 +70,15 @@
             "additionalProperties": true,
             "properties": {}
         }
+    },
+    "facets": {
+        "tracking_type": {
+            "title": "Tracking Type"
+        }
+    },
+    "columns": {
+        "tracking_type": {
+            "title": "Tracking Type"
+        }
     }
 }
