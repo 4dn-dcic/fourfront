@@ -59,7 +59,7 @@
     "codacy-coverage": "^2.1.1",
     "coveralls": "^2.13.3",
     "create-react-class": "^15.6.3",
-    "cypress": "^3.0.2",
+    "cypress": "^3.0.3",
     "eslint": "^3.19.0",
     "eslint-plugin-class-property": "^1.1.0",
     "eslint-plugin-cypress": "^2.0.1",
