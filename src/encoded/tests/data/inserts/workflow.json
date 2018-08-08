@@ -7834,6 +7834,33 @@
         "name": "chip-seq-alignment",
         "steps": [
             {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "fastqs",
+                        "source": [
+                            {
+                                "name": "fastqs1"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "global": true
+                        },
+                        "name": "cpu",
+                        "source": [
+                            {
+                                "name": "nthreads_merge_fastq"
+                            }
+                        ]
+                    }
+                ],
                 "meta": {
                     "analysis_step_types": [
                         "merging"
@@ -7854,6 +7881,33 @@
                 ]
             },
             {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "fastqs",
+                        "source": [
+                            {
+                                "name": "fastqs2"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "global": true
+                        },
+                        "name": "cpu",
+                        "source": [
+                            {
+                                "name": "nthreads_merge_fastq"
+                            }
+                        ]
+                    }
+                ],
                 "meta": {
                     "analysis_step_types": [
                         "merging"
@@ -7874,6 +7928,23 @@
                 ]
             },
             {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "fastq",
+                        "source": [
+                            {
+                                "name": "merged_fastq",
+                                "step": "merge_fastq"
+                            }
+                        ]
+                    }
+                ],
                 "meta": {
                     "analysis_step_types": [
                         "trimming"
@@ -7900,6 +7971,23 @@
                 ]
             },
             {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "fastq",
+                        "source": [
+                            {
+                                "name": "merged_fastq",
+                                "step": "merge_fastq2"
+                            }
+                        ]
+                    }
+                ],
                 "meta": {
                     "analysis_step_types": [
                         "trimming"
@@ -7926,6 +8014,74 @@
                 ]
             },
             {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "fastq1",
+                        "source": [
+                            {
+                                "name": "trimmed_fastq",
+                                "step": "trim_fastq"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "fastq2",
+                        "source": [
+                            {
+                                "name": "trimmed_fastq",
+                                "step": "trim_fastq2"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "bwa_index",
+                        "source": [
+                            {
+                                "name": "bwaIndex"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "global": true
+                        },
+                        "name": "paired_end",
+                        "source": [
+                            {
+                                "name": "paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "global": true
+                        },
+                        "name": "cpu",
+                        "source": [
+                            {
+                                "name": "nthreads_bwa"
+                            }
+                        ]
+                    }
+                ],
                 "meta": {
                     "analysis_step_types": [
                         "alignment"
@@ -7968,6 +8124,6 @@
         ],
         "title": "Alignment for ChIP-seq using bwa-mem",
         "uuid": "431a0c2a-7d08-4e3c-8c64-882c4fc1b2b0",
-        "workflow_type": "Other"
+        "workflow_type": "ChIP-seq data analysis"
     }
 ]
