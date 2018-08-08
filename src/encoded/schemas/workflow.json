@@ -69,6 +69,7 @@
                 "Image processing",
                 "Visualization processing",
                 "Repli-seq data processing",
+                "ChIP-seq data analysis",
                 "Data QC",
                 "Other"
             ]
