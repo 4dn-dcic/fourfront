@@ -794,7 +794,7 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     onHorizontalScroll(e){
-        e.stopPropagation();
+        e && e.stopPropagation();
         var nextScrollLeft = e.target.scrollLeft,
             detailPanes = DimensioningContainer.findDetailPaneElements();
 
@@ -813,7 +813,7 @@ class DimensioningContainer extends React.PureComponent {
     onVerticalScroll(e){
         //if (!document || !window || !this.refs.innerContainer) return null;
 
-        e.stopPropagation();
+        e && e.stopPropagation();
 
         setTimeout(()=>{
 

@@ -108,6 +108,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
         "experiments_in_set.biosample.biosource_summary",
+        "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
@@ -331,4 +332,3 @@ def experiment_set_replicate_add(context, request, render=None):
              decorator=if_match_tid)
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)
-
