@@ -44,7 +44,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
 
         // Hover over all bar parts and count up counts
         var barPartCounts = { 'experiment_sets' : 0, 'experiments' : 0, 'files' : 0 };
-        return cy.get('#navbar-icon .navbar-header').hoverIn().wait(1000).end().then(()=>{
+        return cy.get('#navbar-icon .navbar-header').hoverIn().end().wait(1000).then(()=>{
 
             return cy.get('.bar-plot-chart.chart-container .chart-bar').each(($bar)=>{
                 return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
