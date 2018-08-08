@@ -486,5 +486,131 @@
         "title": "bedGraphToBigWig_v302.1.0",
         "uuid": "00eda937-3149-4252-8dc9-c27de59d75ed",
         "version": "v302.1.0"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "MACS2",
+        "software_type": [
+            "peak caller"
+        ],
+        "title": "MACS2_2.1.1.20160309",
+        "uuid": "b96e6b97-2347-4e9e-b69e-15550d6268f4",
+        "version": "2.1.1.20160309"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "IDR",
+        "software_type": [
+            "quality metric generator"
+        ],
+        "source_url": "https://github.com/kundajelab/idr",
+        "title": "IDR_2.0.4.2",
+        "uuid": "e97ffd0c-4bc7-4e9a-95d9-c7d90febf49e",
+        "version": "2.0.4.2"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bedClip",
+        "software_type": [
+            "filter"
+        ],
+        "source_url": "http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedClip",
+        "title": "bedClip",
+        "uuid": "42da1570-12a6-458b-b4a8-0a6c9ddf21d6"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bedGraphToBigWig",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig",
+        "title": "bedGraphToBigWig",
+        "uuid": "ccb61480-9b2a-441b-8af2-4c14b2d3f090"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "Picard",
+        "software_type": [
+            "filter"
+        ],
+        "source_url": "https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar",
+        "title": "Picard_2.10.6",
+        "uuid": "23c2feec-5009-44f0-9ebc-814112671d01",
+        "version": "2.10.6"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "sambamba",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "https://github.com/lomereiter/sambamba/releases/download/v0.6.6/sambamba_v0.6.6_linux.tar.bz2",
+        "title": "sambamba_0.6.6",
+        "uuid": "2e1ab766-a572-46f7-869a-80f9a5d063fd",
+        "version": "0.6.6"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "spp",
+        "software_type": [
+            "peak caller"
+        ],
+        "source_url": "https://github.com/hms-dbmi/spp/archive/1.13.tar.gz",
+        "title": "spp_1.13",
+        "uuid": "f1c13b57-afab-40d9-bdf8-77d7149ad75b",
+        "version": "1.13"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "phantompeakqualtools",
+        "software_type": [
+            "quality metric generator"
+        ],
+        "source_url": "https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz",
+        "title": "phantompeakqualtools_1.2",
+        "uuid": "d16d427b-0ebf-4922-88ac-1cb0e44c1201",
+        "version": "1.2"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "deeptools",
+        "software_type": [
+            "file format converter"
+        ],
+        "title": "deeptools_2.5.4",
+        "uuid": "7fdb158d-ff13-4f10-b228-383062aa6840",
+        "version": "2.5.4"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "pyfaidx",
+        "software_type": [
+            "file format converter"
+        ],
+        "title": "pyfaidx_0.4.7.1",
+        "uuid": "5185d0c1-3737-46bd-a52e-c57278db94fd",
+        "version": "0.4.7.1"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bedToBigBed",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed",
+        "title": "bedToBigBed",
+        "uuid": "c460cd2e-fca9-446d-9a13-884d7788c7ef"
     }
 ]

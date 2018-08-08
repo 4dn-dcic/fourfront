@@ -768,8 +768,6 @@
         "accession": "4DNWFHB26CID",
         "app_name": "pairsqc-single",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
-        "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -815,6 +813,7 @@
         "description": "PairsQC quality control step for pairs files",
         "lab": "4dn-dcic-lab",
         "name": "pairsqc-single",
+        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
         "status": "released",
         "steps": [
             {
@@ -916,6 +915,7 @@
         ],
         "title": "PairsQC",
         "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3",
+        "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
     },
@@ -1075,8 +1075,6 @@
         "accession": "4DNWF2HFF82B",
         "app_name": "md5",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
-        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -1107,6 +1105,7 @@
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "md5",
+        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
         "steps": [
             {
                 "inputs": [
@@ -1152,6 +1151,7 @@
         ],
         "title": "md5",
         "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
+        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
     },
@@ -3927,8 +3927,6 @@
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
         "app_version": "0.2.5",
-        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
-        "version_upgrade_log": "use of official release of bwa",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3974,6 +3972,7 @@
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
+        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
         "steps": [
             {
                 "inputs": [
@@ -4062,6 +4061,7 @@
         ],
         "title": "Alignment for Hi-C using bwa-mem",
         "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
+        "version_upgrade_log": "use of official release of bwa",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
     },
@@ -7771,5 +7771,203 @@
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme",
         "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
         "workflow_type": "Hi-C data analysis"
+    },
+    {
+        "app_name": "chip-seq-alignment",
+        "arguments": [
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "fastqs1"
+            },
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "fastqs2"
+            },
+            {
+                "argument_format": "bwaIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bwaIndex"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads_merge_fastq"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads_bwa"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "paired_end"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "bai"
+                ],
+                "workflow_argument_name": "bam"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "alignment_qc"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "alignment",
+        "cwl_child_filenames": [
+            "merge_fastq.cwl",
+            "merge_fastq.cwl",
+            "trim_fastq.cwl",
+            "trim_fastq.cwl",
+            "bwa.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/chipseq",
+        "cwl_main_filename": "chip-seq-alignment.cwl",
+        "data_types": [
+            "ChIP-seq"
+        ],
+        "description": "This is a subworkflow of the ChIP-seq data processing pipeline. It takes a set of fastq files as input and performs merging, trimming and alignment. It produces a lossless, filter-annotated bam file and a qc summary text.",
+        "lab": "4dn-dcic-lab",
+        "name": "chip-seq-alignment",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "merging"
+                    ],
+                    "description": "Merging raw fastq files"
+                },
+                "name": "merge_fastq",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "merged_fastq1"
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "merging"
+                    ],
+                    "description": "Merging raw fastq files"
+                },
+                "name": "merge_fastq2",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "merged_fastq2"
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "trimming"
+                    ],
+                    "description": "Trimming fastq files"
+                },
+                "name": "trim_fastq",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "trimmed_fastq",
+                        "target": [
+                            {
+                                "name": "fastq1",
+                                "step": "bwa"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "trimming"
+                    ],
+                    "description": "Trimming fastq files"
+                },
+                "name": "trim_fastq2",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "trimmed_fastq",
+                        "target": [
+                            {
+                                "name": "fastq2",
+                                "step": "bwa"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "alignment"
+                    ],
+                    "description": "Aligning reads to genome",
+                    "software_used": [
+                        "/software/42adeb1b-c46c-4ba8-b191-56036ddcd544/"
+                    ]
+                },
+                "name": "bwa",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bam",
+                        "target": [
+                            {
+                                "name": "bam"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "global": true,
+                            "type": "QC file"
+                        },
+                        "name": "flagstat_qc",
+                        "target": [
+                            {
+                                "name": "alignment_qc"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Alignment for ChIP-seq using bwa-mem",
+        "uuid": "431a0c2a-7d08-4e3c-8c64-882c4fc1b2b0",
+        "workflow_type": "Other"
     }
 ]
