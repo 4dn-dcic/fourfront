@@ -232,6 +232,7 @@ export class AreaChartContainer extends React.Component {
     }
 
     isExpanded(props = this.props){
+        if (this.props.gridState && this.props.gridState !== 'lg') return false;
         return !!((props.chartToggles || {})[props.id]);
     }
 
