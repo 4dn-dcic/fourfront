@@ -236,7 +236,7 @@ def add_schemas_to_html_responses(config):
     # Exclude some keys, to make response smaller.
     exclude_schema_keys = [
         'AccessKey', 'Image', 'ImagingPath', 'OntologyTerm', 'PublicationTracking', 'Modification',
-        'QualityMetricBamqc', 'QualityMetricFastqc', 'QualityMetricFlag', 'QualityMetricPairsqc',
+        'QualityMetricBamqc', 'QualityMetricFastqc', 'QualityMetricFlag', 'QualityMetricPairsqc', 'QualityMetricAlignmentQcChipseq'
         'TestingDependencies', 'TestingDownload', 'TestingKey', 'TestingLinkSource', 'TestingPostPutPatch',
         'TestingServerDefault'
     ]

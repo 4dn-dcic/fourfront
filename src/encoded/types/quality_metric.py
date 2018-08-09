@@ -95,3 +95,17 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
     embedded_list = QualityMetric.embedded_list
 
+
+@collection(
+    name='quality-metrics-alignment_qc-chipseq',
+    properties={
+        'title': 'Alignment QC Quality Metrics for ChIP-seq',
+        'description': 'Listing of Alignment QC Quality Metrics for ChIP-seq',
+    })
+class QualityMetricDedupqcRepliseq(QualityMetric):
+    """Subclass of quality matrics for chip-seq alignment."""
+
+    item_type = 'quality_metric_alignment_qc_chipseq'
+    schema = load_schema('encoded:schemas/quality_metric_alignment_qc_chipseq.json')
+    embedded_list = QualityMetric.embedded_list
+
