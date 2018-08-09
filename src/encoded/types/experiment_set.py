@@ -231,9 +231,8 @@ class ExperimentSet(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
-        uuids = [str(pub) for pub in self.get_rev_links(request, 'publications_produced')]
-        pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, uuids)]
+        pub_paths = self.rev_link_atids(request, 'publications_produced')
+        pubs = [request.embed('/', path, '@@object') for path in pub_paths]
         if pubs:
             return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']),
                           reverse=True)[0].get('@id')
@@ -249,11 +248,9 @@ class ExperimentSet(Item):
         }
     })
     def publications_of_set(self, request):
-        pubs = set([str(pub) for pub in self.get_rev_links(request, 'publications_produced') +
-                   self.get_rev_links(request, 'publications_using')])
-        pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, pubs)]
-        return [pub['@id'] for pub in pubs]
+        pubs_produced = self.rev_link_atids(request, 'publications_produced')
+        pubs_using = self.rev_link_atids(request, 'publications_using')
+        return list(set(pubs_produced + pubs_using))
 
     @calculated_property(schema={
         "title": "Number of Experiments",
