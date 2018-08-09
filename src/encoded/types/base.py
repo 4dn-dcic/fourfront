@@ -33,6 +33,8 @@ from snovault.schema_utils import SERVER_DEFAULTS
 from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date
+import string
+import re
 
 
 @lru_cache()
@@ -141,6 +143,18 @@ def get_item_if_you_can(request, value, itype=None):
                 return request.embed(svalue, '@@object')
             except:
                 return value
+
+
+def set_namekey_from_title(properties):
+    name = None
+    if properties.get('title'):
+        exclude = set(string.punctuation)
+        name = properties['title']
+        name = ''.join(ch for ch in name if ch not in exclude)
+        name = re.sub(r"\s+", '-', name)
+        name = name.lower()
+    return name
+
 
 
 class AbstractCollection(snovault.AbstractCollection):

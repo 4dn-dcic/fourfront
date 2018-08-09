@@ -10,7 +10,8 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
+    Item,
+    set_namekey_from_title
     # paths_filtered_by_status,
 )
 
@@ -37,7 +38,7 @@ class AnalysisStep(Item):
 
 @collection(
     name='badges',
-    unique_key='badge:badgename',
+    unique_key='badge:name',
     properties={
         'title': 'Badges',
         'description': 'Listing of badges for 4DN items',
@@ -47,6 +48,13 @@ class Badge(Item):
 
     item_type = 'badge'
     schema = load_schema('encoded:schemas/badge.json')
+    name_key = 'name'
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['badge_name'] = set_namekey_from_title(properties)
+
+        super(Badge, self)._update(properties, sheets)
 
 
 @collection(
@@ -141,6 +149,14 @@ class Organism(Item):
     name_key = 'name'
     embedded_list = []
 
+    def display_title(self):
+    if self.properties.get('scientific_name'): # Defaults to "" so check if falsy not if is None
+        scientific_name_parts = self.properties['scientific_name'].split(' ')
+        if len(scientific_name_parts) > 1:
+            return ' '.join([ scientific_name_parts[0][0].upper() + '.' ] + scientific_name_parts[1:])
+        else:
+            return self.properties['scientific_name']
+
 
 @collection(
     name='protocols',
@@ -220,3 +236,25 @@ class TrackingItem(Item):
         transaction.get().commit()
         del request.response.headers['Location']
         return res
+
+
+@collection(
+    name='vendors',
+    unique_key='vendor:name',
+    properties={
+        'title': 'Vendors',
+        'description': 'Listing of sources and vendors for 4DN material',
+    })
+class Vendor(Item):
+    """The Vendor class that contains the company/lab sources for reagents/cells... used."""
+
+    item_type = 'vendor'
+    schema = load_schema('encoded:schemas/vendor.json')
+    name_key = 'name'
+    embedded_list = ['award.project']
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['name'] = set_namekey_from_title(properties)
+
+        super(Vendor, self)._update(properties, sheets)
