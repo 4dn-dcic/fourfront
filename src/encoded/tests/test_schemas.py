@@ -52,7 +52,7 @@ def pluralize(name):
                 'quality-metric', 'summary-statistic', 'workflow-run',
                 'microscope-setting']
     for sp in specials:
-        if name.startswith(sp) and re.search('-(set|flag)', name) is None:
+        if name.startswith(sp) and re.search('-(set|flag|format)', name) is None:
             return name.replace(sp, sp + 's')
         elif name.startswith(sp) and re.search('setting', name):
             return name.replace(sp, sp + 's')
