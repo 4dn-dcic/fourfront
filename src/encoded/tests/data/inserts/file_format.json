@@ -15,6 +15,16 @@
         "description": "This format is used for something to do with paired mapped read locations",
         "file_format_specification": "test.pdf",
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "extrafile_formats": ["d13d06cf-218e-4f61-aaf0-91f226348b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairs_px2",
+        "standard_file_extension": "pairs.gz.px2",
+        "allowed_extensions": ["pairs.gz.px2"],
+        "description": "This format is used for extra index files for paired mapped read locations",
+        "uuid": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     },

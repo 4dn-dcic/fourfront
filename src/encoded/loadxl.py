@@ -627,10 +627,10 @@ PHASE1_PIPELINES = {
     'user': [
         remove_keys('lab', 'submits_for'),
     ],
-    'file_fastq': [
-        remove_keys('related_files'),
+    'file_format': [
+        remove_keys('extrafile_formats'),
     ],
-    'file_fasta': [
+    'file_fastq': [
         remove_keys('related_files'),
     ],
     'file_processed': [
@@ -707,10 +707,10 @@ PHASE2_PIPELINES = {
     'user': [
         skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
-    'file_fastq': [
-        skip_rows_missing_all_keys('related_files'),
+    'file_format': [
+        skip_rows_missing_all_keys('extrafile_formats'),
     ],
-    'file_fasta': [
+    'file_fastq': [
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [

@@ -55,6 +55,16 @@
             "title": "File Format Description",
             "type": "string"
         },
+        "extrafile_formats": {
+            "title": "Extrafile Formats",
+            "type": "array",
+            "items": {
+                "title": "Format",
+                "description": "A file format for an extrafile of the file",
+                "type": "string",
+                "linkTo": "FileFormat"
+            }
+        },
         "file_format_specification": {
             "title": "File format specification",
             "description": "Text or pdf file that further explains the file format",

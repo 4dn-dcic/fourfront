@@ -4,7 +4,7 @@
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "b4002377-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
-    "file_format": "other",
+    "file_format": "bam",
     "notes": "sample dcic notes",
     "accession": "4DNFIFYGNO9R",
     "lab": "4dn-dcic-lab",
@@ -15,18 +15,18 @@
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "ccf48ccd-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
-    "file_format": "other",
+    "file_format": "cool",
     "notes": "sample dcic notes",
     "accession": "4DNFIEOP3UAO",
     "lab": "4dn-dcic-lab",
-    "filename": "_6_HiC_norm_binning.hdf5"
+    "filename": "_6_HiC_norm_binning.cool"
 
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "165e9eeb-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
-    "file_format": "other",
+    "file_format": "bam",
     "notes": "sample dcic notes",
     "accession": "4DNFIM172I2T",
     "lab": "4dn-dcic-lab",
