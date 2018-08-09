@@ -119,7 +119,6 @@ describe('Browse Views - Redirection & Visualization', function () {
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
                 .end().window().scrollTo(0, 200)
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(1000).end()
-                .window().screenshot().end()
                 .then(()=>{
                     compareQuickInfoCountsVsBarPlotCounts();
                 });
@@ -136,7 +135,8 @@ describe('Browse Views - Redirection & Visualization', function () {
                         .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
                         .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
                         .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
-                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end().window().screenshot().end().then(()=>{
+                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end()
+                        .then(()=>{
                             compareQuickInfoCountsVsBarPlotCounts();
                         });
                 });
@@ -171,7 +171,6 @@ describe('Browse Views - Redirection & Visualization', function () {
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
-                        cy.window().screenshot();
                         compareQuickInfoCountsVsBarPlotCounts();
                     }).end();
             });
@@ -189,7 +188,6 @@ describe('Browse Views - Redirection & Visualization', function () {
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
                         return cy.wait(100).end().get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).wait(100).end().then(()=>{ // Wait until bars have transitioned.
-                            cy.window().screenshot().end();
                             compareQuickInfoCountsVsBarPlotCounts();
                         });
                     }).end();

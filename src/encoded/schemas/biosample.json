@@ -137,14 +137,14 @@
         }
     },
     "facets": {
-        "biosource_summary": {
+        "biosample_type": {
             "title": "Sample Type"
         },
         "biosource.cell_line_tier": {
             "title": "4DN Cell Line Tier"
         },
-        "biosource.biosource_type": {
-            "title": "Biosource Type"
+        "biosource_summary": {
+            "title": "Biosource"
         },
         "biosource.individual.organism.name": {
             "title": "Organism"
@@ -160,10 +160,10 @@
         "biosource.individual.organism.name": {
           "title": "Organism"
         },
-        "biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
         "biosource_summary": {
+            "title": "Biosource"
+        },
+        "biosample_type": {
             "title": "Sample Type"
         },
         "modifications.display_title": {

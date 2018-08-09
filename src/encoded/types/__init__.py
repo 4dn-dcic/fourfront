@@ -1,15 +1,17 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 from snovault.attachment import ItemWithAttachment
-
+from snovault.crud_views import collection_add as sno_collection_add
 from snovault import (
     # calculated_property,
     collection,
     load_schema,
+    CONNECTION
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
+    Item,
+    set_namekey_from_title
     # paths_filtered_by_status,
 )
 
@@ -36,7 +38,7 @@ class AnalysisStep(Item):
 
 @collection(
     name='badges',
-    unique_key='badge:badgename',
+    unique_key='badge:name',
     properties={
         'title': 'Badges',
         'description': 'Listing of badges for 4DN items',
@@ -46,6 +48,13 @@ class Badge(Item):
 
     item_type = 'badge'
     schema = load_schema('encoded:schemas/badge.json')
+    name_key = 'name'
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['badge_name'] = set_namekey_from_title(properties)
+
+        super(Badge, self)._update(properties, sheets)
 
 
 @collection(
@@ -207,3 +216,64 @@ class Sysinfo(Item):
     schema = load_schema('encoded:schemas/sysinfo.json')
     name_key = 'name'
     embedded_list = []
+
+
+@collection(
+    name='tracking-items',
+    properties={
+        'title': 'TrackingItem',
+        'description': 'For internal tracking of Fourfront events',
+    })
+class TrackingItem(Item):
+    """tracking-item class."""
+
+    item_type = 'tracking_item'
+    schema = load_schema('encoded:schemas/tracking_item.json')
+    embedded_list = []
+
+    @classmethod
+    def create_and_commit(cls, request, properties, render=False):
+        """
+        Create a TrackingItem with a given request and properties, committing
+        it directly to the DB. This works by manually committing the
+        transaction, which may cause issues if this function is called as
+        part of another POST. For this reason, this function should be used to
+        track GET requests -- otherwise, use the standard POST method.
+        Skips validators.
+        Setting render to True/None may cause permission issues
+        """
+        import transaction
+        import uuid
+        tracking_uuid = str(uuid.uuid4())
+        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
+        properties['uuid'] = tracking_uuid
+        # no validators run, so status must be set manually if we want it
+        if 'status' not in properties:
+            properties['status'] = 'in review by lab'
+        request.validated = properties
+        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
+        transaction.get().commit()
+        del request.response.headers['Location']
+        return res
+
+
+@collection(
+    name='vendors',
+    unique_key='vendor:name',
+    properties={
+        'title': 'Vendors',
+        'description': 'Listing of sources and vendors for 4DN material',
+    })
+class Vendor(Item):
+    """The Vendor class that contains the company/lab sources for reagents/cells... used."""
+
+    item_type = 'vendor'
+    schema = load_schema('encoded:schemas/vendor.json')
+    name_key = 'name'
+    embedded_list = ['award.project']
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['name'] = set_namekey_from_title(properties)
+
+        super(Vendor, self)._update(properties, sheets)
