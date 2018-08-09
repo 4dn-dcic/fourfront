@@ -168,29 +168,49 @@ def test_patch_extra_files(testapp, proc_file_json):
     assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
-def test_extra_files_download(testapp, proc_file_json):
+def test_extra_files_download(testapp, registry, proc_file_json):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
+
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    download_filename = resobj['upload_key'].split('/')[1]
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'], Body=str.encode(''))
+    download_extra_filename = resobj['extra_files'][0]['upload_key'].split('/')[1]
     download_link = resobj['extra_files'][0]['href']
     testapp.get(download_link, status=307)
     testapp.get(resobj['href'], status=307)
+
+    # ensure the download tracking items were created
+    ti_coll = registry['collections']['TrackingItem']
+    tracking_items = [ti_coll.get(id) for id in ti_coll]
+    tracked_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items]
+    assert download_filename in tracked_filenames
+    assert download_extra_filename in tracked_filenames
+
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['extra_files'][0]['upload_key'])
 
 
-def test_range_download(testapp, proc_file_json):
+def test_range_download(testapp, registry, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
                   Body=str.encode('12346789abcd'))
+    download_filename = resobj['upload_key'].split('/')[1]
     download_link = resobj['href']
     resp = testapp.get(download_link, status=206, headers={'Range': 'bytes=2-5'})
+
+    # ensure that the download tracking item was created
+    ti_coll = registry['collections']['TrackingItem']
+    tracking_items = [ti_coll.get(id) for id in ti_coll]
+    tracked_rng_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items
+                             if ti.properties.get('download_tracking', {}).get('range_query') is True]
+    assert download_filename in tracked_rng_filenames
+
     # delete first so cleanup even if test fails
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
     assert resp.text == '3467'

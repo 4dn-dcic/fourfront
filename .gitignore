@@ -33,6 +33,7 @@ package-lock.json
 /src/encoded/static/scss/_variables.original.scss
 
 *.swp
+*.hprof
 *.DS_Store
 *.egg-info
 *.pyc
