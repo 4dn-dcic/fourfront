@@ -432,6 +432,54 @@
             "lookup": 198
         }
     },
+    "supplementary_files": {
+        "other_processed_files": {
+            "title": "Supplementary Processed Files",
+            "description": "Additional, archived or preliminary processed filesets that are derived from files in this experiment set.",
+            "type": "array",
+            "lookup": 410,
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Supplementary Processed Filesets",
+                "description": "Fileset metadata",
+                "type": "object",
+                "required": ["title", "files"],
+                "properties": {
+                    "title": {
+                        "title": "Fileset Title",
+                        "type": "string",
+                        "lookup": 411
+                    },
+                    "type": {
+                        "title": "Fileset Type",
+                        "type": "string",
+                        "lookup": 412,
+                        "enum": [
+                            "supplementary",
+                            "archived",
+                            "preliminary",
+                            "visualization"
+                        ]
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string",
+                        "lookup": 413
+                    },
+                    "files": {
+                        "title": "Files",
+                        "type": "array",
+                        "lookup": 414,
+                        "items": {
+                            "title": "File",
+                            "type": "string",
+                            "linkTo": "FileProcessed"
+                        }
+                    }
+                }
+            }
+        }
+    },
     "sop_mapping": {
         "sop_mapping": {
             "title": "SOP Mappping",
@@ -477,15 +525,28 @@
             "title": "Badges",
             "description": "Badges that can be added to an item.",
             "type": "array",
-            "lookup": 1000,
             "ff_flag": "clear clone",
-            "exclude_from" : ["submit4dn"],
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "permission": "import-items",
             "items": {
-                "title": "Badge",
-                "description": "A badge for the item.",
-                "type":  "string",
-                "linkTo": "Badge"
+                "description": "A badge (and possibly message) for the item.",
+                "type":  "object",
+                "required": ["badge"],
+                "additionalProperties": false,
+                "exclude_from" : ["submit4dn", "FFedit-create"],
+                "permission": "import-items",
+                "properties": {
+                    "badge": {
+                        "title": "Badge",
+                        "type": "string",
+                        "linkTo": "Badge"
+                    },
+                    "message": {
+                        "title": "Info",
+                        "description": "Information about why the badge was added",
+                        "type": "string"
+                    }
+                }
             }
         }
     },

@@ -19,6 +19,7 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
