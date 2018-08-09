@@ -2,14 +2,14 @@ import pytest
 pytestmark = pytest.mark.working
 
 
-@pytest.fixture
-def external_award(testapp):
-    item = {
-        'name': 'some-award',
-        'description': 'test award',
-        'project': 'External'
-    }
-    return testapp.post_json('/award', item).json['@graph'][0]
+# @pytest.fixture
+# def external_award(testapp):
+#     item = {
+#         'name': 'some-award',
+#         'description': 'test award',
+#         'project': 'External'
+#     }
+#     return testapp.post_json('/award', item).json['@graph'][0]
 
 
 @pytest.fixture
