@@ -4,10 +4,10 @@ from snovault import (
 )
 
 
-@audit_checker(
-    'ExperimentSet',
-    frame=['other_processed_files']
-)
+# @audit_checker(
+#     'ExperimentSet',
+#     frame=['other_processed_files']
+# )
 def audit_experiment_sets_unique_titles_in_other_processed_files_list(value, system):
     '''
     Ensure that each collection (dict) in the `other_processed_files` field (list) has a `title` field
@@ -33,10 +33,10 @@ def audit_experiment_sets_unique_titles_in_other_processed_files_list(value, sys
     return
 
 
-@audit_checker(
-    'ExperimentSet',
-    frame=['other_processed_files', 'experiments_in_set', 'experiments_in_set.other_processed_files']
-)
+# @audit_checker(
+#     'ExperimentSet',
+#     frame=['other_processed_files', 'experiments_in_set', 'experiments_in_set.other_processed_files']
+# )
 def audit_experiment_sets_unique_files_in_other_processed_files_list_with_experiments(value, system):
     '''
     Ensure that each combination on title between ExperimentSet other_processed_files.files and
