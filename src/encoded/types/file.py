@@ -44,6 +44,8 @@ from pyramid.traversal import resource_path
 
 from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
+from . import TrackingItem
+from ..authentication import session_properties
 
 import logging
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
@@ -838,6 +840,13 @@ def is_file_to_download(properties, mapping, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    try:
+        user_props = session_properties(request)
+    except Exception as e:
+        user_props = {'error': str(e)}
+    tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
+                       'user_email': user_props.get('details', {}).get('email', 'anonymous'),
+                       'request_path': request.path_info}
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
@@ -869,6 +878,7 @@ def download(context, request):
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
+    tracking_values['filename'] = filename
 
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
@@ -880,7 +890,10 @@ def download(context, request):
             'ResponseContentDisposition': "attachment; filename=" + filename
         }
         if 'Range' in request.headers:
+            tracking_values['range_query'] = True
             param_get_object.update({'Range': request.headers.get('Range')})
+        else:
+            tracking_values['range_query'] = False
         location = conn.generate_presigned_url(
             ClientMethod='get_object',
             Params=param_get_object,
@@ -888,6 +901,13 @@ def download(context, request):
         )
     else:
         raise ValueError(external.get('service'))
+
+    # create a tracking_item to track this download
+    tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
+                     'status': 'in review by lab', 'tracking_type': 'download_tracking',
+                     'download_tracking': tracking_values}
+    TrackingItem.create_and_commit(request, tracking_item)
+
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
         return {

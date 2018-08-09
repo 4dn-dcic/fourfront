@@ -524,15 +524,28 @@
             "title": "Badges",
             "description": "Badges that can be added to an item.",
             "type": "array",
-            "lookup": 1000,
             "ff_flag": "clear clone",
-            "exclude_from" : ["submit4dn"],
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "permission": "import-items",
             "items": {
-                "title": "Badge",
-                "description": "A badge for the item.",
-                "type":  "string",
-                "linkTo": "Badge"
+                "description": "A badge (and possibly message) for the item.",
+                "type":  "object",
+                "required": ["badge"],
+                "additionalProperties": false,
+                "exclude_from" : ["submit4dn", "FFedit-create"],
+                "permission": "import-items",
+                "properties": {
+                    "badge": {
+                        "title": "Badge",
+                        "type": "string",
+                        "linkTo": "Badge"
+                    },
+                    "message": {
+                        "title": "Info",
+                        "description": "Information about why the badge was added",
+                        "type": "string"
+                    }
+                }
             }
         }
     },
