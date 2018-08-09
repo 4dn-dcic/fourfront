@@ -949,7 +949,7 @@ export default class SubmissionView extends React.PureComponent{
         _.keys(origCopy).forEach(function(field, index){
             // if patchContext already has a value (such as admin edited
             // import_items fields), don't overwrite
-            if(patchContext[field] !== null){
+            if(!isValueNull(patchContext[field])){
                 return;
             }
             if(schema.properties[field]){
@@ -1095,7 +1095,8 @@ export default class SubmissionView extends React.PureComponent{
                         destination = propContext['@id'];
                         deleteFields = this.buildDeleteFields(finalizedContext, propContext, currSchema);
                     }
-
+                    console.log('FINALIZED PAYLOAD:', finalizedContext);
+                    console.log('DELETE FIELDS:', deleteFields);
                 }
                 var payload = JSON.stringify(finalizedContext);
                 // add delete_fields parameter to request if necessary
