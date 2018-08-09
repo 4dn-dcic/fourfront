@@ -7778,7 +7778,7 @@
             {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
-                "workflow_argument_name": "fastqs1"
+                "workflow_argument_name": "fastqs"
             },
             {
                 "argument_format": "fastq",
@@ -7845,13 +7845,15 @@
                         "name": "fastqs",
                         "source": [
                             {
-                                "name": "fastqs1"
+                                "name": "fastqs"
                             }
                         ]
                     },
                     {
                         "meta": {
-                            "global": true
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "cpu",
                         "source": [
@@ -7876,7 +7878,13 @@
                             "global": false,
                             "type": "data file"
                         },
-                        "name": "merged_fastq1"
+                        "name": "merged_fastq",
+                        "target": [
+                            {
+                                "name": "fastq",
+                                "step": "trim_fastq"
+                            }
+                        ]
                     }
                 ]
             },
@@ -7898,7 +7906,9 @@
                     },
                     {
                         "meta": {
-                            "global": true
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "cpu",
                         "source": [
@@ -7923,7 +7933,13 @@
                             "global": false,
                             "type": "data file"
                         },
-                        "name": "merged_fastq2"
+                        "name": "merged_fastq",
+                        "target": [
+                            {
+                                "name": "fastq",
+                                "step": "trim_fastq2"
+                            }
+                        ]
                     }
                 ]
             },
@@ -8061,7 +8077,9 @@
                     },
                     {
                         "meta": {
-                            "global": true
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "paired_end",
                         "source": [
@@ -8072,7 +8090,9 @@
                     },
                     {
                         "meta": {
-                            "global": true
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
                         },
                         "name": "cpu",
                         "source": [
@@ -8110,7 +8130,7 @@
                     {
                         "meta": {
                             "global": true,
-                            "type": "QC file"
+                            "type": "QC"
                         },
                         "name": "flagstat_qc",
                         "target": [
