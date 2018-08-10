@@ -8,7 +8,7 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { Collapse, Button } from 'react-bootstrap';
 import * as store from '../../store';
 import * as globals from './../globals';
-import { Announcements } from './components';
+import { Announcements, BasicStaticSectionBody } from './components';
 
 
 /**
@@ -48,7 +48,7 @@ export default class HomePage extends React.PureComponent {
         return (
             <div className="col-md-6 col-xs-12">
                 <h2 className="homepage-section-title">{ (introContent && introContent.display_title) || "Introduction" }</h2>
-                <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: (introContent && introContent.content) || "<p>Introduction content not yet indexed.</p>" }}/>
+                { introContent ? <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} className="text-justify" /> : <p className="text-center">Introduction content not yet indexed.</p> }
                 <layout.WindowResizeUpdateTrigger>
                     <LinksRow session={this.props.session} />
                 </layout.WindowResizeUpdateTrigger>
