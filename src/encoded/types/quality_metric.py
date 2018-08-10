@@ -98,15 +98,15 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
 
 
 @collection(
-    name='quality-metrics-alignment_qc-chipseq',
+    name='quality-metrics-flagstat_qc',
     properties={
-        'title': 'Alignment QC Quality Metrics for ChIP-seq',
-        'description': 'Listing of Alignment QC Quality Metrics for ChIP-seq',
+        'title': 'Samtools Flagstat QC Quality Metrics',
+        'description': 'Listing of Samtools Flagstat QC Quality Metrics',
     })
-class QualityMetricAlignmentqcChipseq(QualityMetric):
-    """Subclass of quality matrics for chip-seq alignment."""
+class QualityMetricFlagstatQc(QualityMetric):
+    """Subclass of flagstat quality matrics"""
 
-    item_type = 'quality_metric_alignment_qc_chipseq'
-    schema = load_schema('encoded:schemas/quality_metric_alignment_qc_chipseq.json')
+    item_type = 'quality_metric_flagstat_qc'
+    schema = load_schema('encoded:schemas/quality_metric_flagstat_qc.json')
     embedded_list = QualityMetric.embedded_list
 

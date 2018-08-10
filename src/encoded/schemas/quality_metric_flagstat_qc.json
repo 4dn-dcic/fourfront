@@ -1,7 +1,7 @@
 {
-    "title" : "Quality Metric for ChIP-seq Alignment",
+    "title" : "Flagstat Quality Metric for Alignments",
     "description": "Schema for reporting the specific calculation of an quality metrics",
-    "id": "/profiles/quality_metric_alignment_qc_chipseq.json",
+    "id": "/profiles/quality_metric_flagstat_qc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
@@ -28,55 +28,55 @@
         },
         "in total (QC-passed reads + QC-failed reads)": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "secondary": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "supplementary": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "duplicates": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "mapped (0.00%:-nan%)": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "paired in sequencing": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "read1": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "read2": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "properly paired (0.00%:-nan%)": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "with itself and mate mapped": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "singletons (0.00%:-nan%)": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "with mate mapped to a different chr": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         },
         "with mate mapped to a different chr (mapQ>=5)": {
             "type": "string",
-            "description": "Alignment QC Summary metric for ChIP-seq"
+            "description": "Flagstat Quality Metric for Alignments"
         }
     },
     "facets": {
