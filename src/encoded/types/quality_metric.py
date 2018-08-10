@@ -82,6 +82,7 @@ class QualityMetricPairsqc(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
     embedded_list = QualityMetric.embedded_list
 
+
 @collection(
     name='quality-metrics-dedupqc-repliseq',
     properties={
@@ -102,7 +103,7 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
         'title': 'Alignment QC Quality Metrics for ChIP-seq',
         'description': 'Listing of Alignment QC Quality Metrics for ChIP-seq',
     })
-class QualityMetricDedupqcRepliseq(QualityMetric):
+class QualityMetricAlignmentqcChipseq(QualityMetric):
     """Subclass of quality matrics for chip-seq alignment."""
 
     item_type = 'quality_metric_alignment_qc_chipseq'
