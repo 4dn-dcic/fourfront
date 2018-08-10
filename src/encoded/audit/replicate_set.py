@@ -244,10 +244,10 @@ def audit_replicate_sets_consistency_check(value, system):
             return
 
 
-@audit_checker(
-    'experiment_set',
-    frame=['award', 'publications_of_set']
-)
+# @audit_checker(
+#     'experiment_set',
+#     frame=['award', 'publications_of_set']
+# )
 def audit_external_experiment_sets_have_pub(value, system):
     '''
     an experiment set from an external group should have an associated pub

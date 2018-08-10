@@ -2,14 +2,14 @@ import pytest
 pytestmark = pytest.mark.working
 
 
-@pytest.fixture
-def external_award(testapp):
-    item = {
-        'name': 'some-award',
-        'description': 'test award',
-        'project': 'External'
-    }
-    return testapp.post_json('/award', item).json['@graph'][0]
+# @pytest.fixture
+# def external_award(testapp):
+#     item = {
+#         'name': 'some-award',
+#         'description': 'test award',
+#         'project': 'External'
+#     }
+#     return testapp.post_json('/award', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -107,16 +107,16 @@ def one_experiment_replicate_set(testapp, rep_set_data, experiments):
     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
-@pytest.fixture
-def external_exp_set(testapp, rep_set_data, experiments, external_award):
-    rep_set_data['description'] = 'External Experiment Set no pub'
-    rep_set_data['replicate_exps'] = [
-        {'replicate_exp': experiments[0]['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 1}
-    ]
-    rep_set_data['award'] = external_award['@id']
-    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+# @pytest.fixture
+# def external_exp_set(testapp, rep_set_data, experiments, external_award):
+#     rep_set_data['description'] = 'External Experiment Set no pub'
+#     rep_set_data['replicate_exps'] = [
+#         {'replicate_exp': experiments[0]['@id'],
+#          'bio_rep_no': 1,
+#          'tec_rep_no': 1}
+#     ]
+#     rep_set_data['award'] = external_award['@id']
+#     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -305,21 +305,20 @@ def test_audit_more_replicate_set_inconsistency_checks(testapp, more_invalid_rep
                 assert any('Experiment field' in error['detail'] for error in errors)
 
 
-def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
-    res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
-    assert any(error['detail'].startswith('External ExperimentSet') for error in errors)
-
-
-def test_audit_external_experiment_set_w_pub_no_warn(testapp, external_exp_set, publication):
-    testapp.patch_json(publication['@id'], {'exp_sets_prod_in_pub': [external_exp_set['@id']]}, status=200)
-    res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
-
-
-def test_audit_project_experiment_set_wo_pub_no_warn(testapp, one_experiment_replicate_set):
-    res = testapp.get(one_experiment_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+# def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
+#     res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert any(error['category'] == 'missing mandatory metadata' for error in errors)
+#     assert any(error['detail'].startswith('External ExperimentSet') for error in errors)
+#
+# def test_audit_external_experiment_set_w_pub_no_warn(testapp, external_exp_set, publication):
+#     testapp.patch_json(publication['@id'], {'exp_sets_prod_in_pub': [external_exp_set['@id']]}, status=200)
+#     res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+#
+#
+# def test_audit_project_experiment_set_wo_pub_no_warn(testapp, one_experiment_replicate_set):
+#     res = testapp.get(one_experiment_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
