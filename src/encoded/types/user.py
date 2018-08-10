@@ -87,6 +87,11 @@ class User(Item):
     def display_title(self):
         return self.title(self.properties['first_name'], self.properties['last_name'])
 
+    @calculated_property()
+    def contact_email(self):
+        """Returns `email` if `contact_email` is not defined."""
+        return self.properties.get('contact_email', self.properties['email'])
+
     def __ac_local_roles__(self):
         """return the owner user."""
         owner = 'userid.%s' % self.uuid

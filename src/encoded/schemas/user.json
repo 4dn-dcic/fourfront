@@ -72,7 +72,8 @@
             }
         },
         "email": {
-            "title": "Email",
+            "title": "Account Email",
+            "description": "Email used to log in to the 4DN Portal.",
             "type": "string",
             "format": "email",
             "lookup": 20,
@@ -89,6 +90,13 @@
             "description": "The user's last (family) name.",
             "type": "string",
             "lookup": 40
+        },
+        "contact_email" : {
+            "title" : "Contact Email",
+            "description": "Email to contact by, if different from account/sign-in e-mail address",
+            "type" : "string",
+            "format" : "email",
+            "lookup" : 45
         },
         "job_title": {
             "title": "Job title",

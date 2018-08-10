@@ -49,6 +49,18 @@
             "type": "string",
             "linkTo": "User"
         },
+        "contact_persons" : {
+            "title" : "Lab Contacts",
+            "description": "Users designated as points of contact for this Lab.",
+            "type" : "array",
+            "uniqueItems": true,
+            "items" : {
+                "title" : "Lab Contact",
+                "description": "A User associated with the lab who is also a point of contact.",
+                "type" : "string",
+                "linkTo" : "User"
+            }
+        },
         "awards": {
             "title": "Grants",
             "description": "Grants associated with the lab.",

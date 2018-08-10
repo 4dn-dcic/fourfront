@@ -12,6 +12,7 @@ from pyramid.security import (
 from snovault import (
     collection,
     load_schema,
+    calculated_property
 )
 from .base import (
     Item
@@ -59,6 +60,25 @@ class Lab(Item):
         'revoked': ALLOW_EVERYONE_VIEW,
         'inactive': ALLOW_EVERYONE_VIEW,
     }
+
+    @calculated_property()
+    def contact_persons(self):
+        """Override basic property `contact_persons` to include Lab PI, if not already included."""
+
+        ppl = self.properties.get('contact_persons', [])
+        pi  = self.properties.get('pi')
+
+        if pi is None and not ppl:
+            return None # No PI defined, no contact people defined... oh no
+
+        if pi is None or pi in ppl:
+            return ppl
+
+        if not ppl and pi:
+            return [pi]
+
+        return [pi] + ppl
+
 
     def __init__(self, registry, models):
         super().__init__(registry, models)
