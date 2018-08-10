@@ -48,7 +48,7 @@ class Badge(Item):
 
     item_type = 'badge'
     schema = load_schema('encoded:schemas/badge.json')
-    name_key = 'name'
+    name_key = 'badge_name'
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
