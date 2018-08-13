@@ -172,7 +172,6 @@ def test_download_update_bad_change(testapp, testing_download, href):
 @pytest.mark.parametrize(
     'href',
     [
-        '@@download/attachment/another.png',
         'http://example.com/another.png',
         'data:image/png;base64,NOT_BASE64',
         'data:image/png;NOT_A_PNG',
@@ -185,6 +184,15 @@ def test_download_create_bad_change(testapp, href):
         'href': href,
     }}
     testapp.post_json(url, item, status=422)
+
+
+def test_download_create_force_extension(testapp):
+    url = '/testing-downloads/'
+    item = {'attachment': {
+        'download': 'red-dot.png',
+        'href': '@@download/attachment/another.png',
+    }}
+    testapp.post_json(url, item, status=201)
 
 
 def test_download_create_wrong_extension(testapp):
