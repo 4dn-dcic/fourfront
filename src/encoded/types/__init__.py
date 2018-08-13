@@ -38,7 +38,7 @@ class AnalysisStep(Item):
 
 @collection(
     name='badges',
-    unique_key='badge:name',
+    unique_key='badge:badge_name',
     properties={
         'title': 'Badges',
         'description': 'Listing of badges for 4DN items',
