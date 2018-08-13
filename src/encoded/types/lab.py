@@ -52,7 +52,10 @@ class Lab(Item):
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
-    embedded_list = ['awards.project', 'awards.center_title']
+    embedded_list = [
+        'awards.project',
+        'awards.center_title'
+    ]
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,
@@ -61,24 +64,35 @@ class Lab(Item):
         'inactive': ALLOW_EVERYONE_VIEW,
     }
 
-    @calculated_property()
-    def contact_persons(self):
-        """Override basic property `contact_persons` to include Lab PI, if not already included."""
+    @calculated_property(schema={
+        "title": "Correspondence",
+        "description": "Point of contact(s) for this Lab.",
+        "type" : "array",
+        "uniqueItems": True,
+        "items" : {
+            "title" : "Lab Contact",
+            "description": "A User associated with the lab who is also a point of contact.",
+            "type" : "string",
+            "linkTo" : "User"
+        }
+    })
+    def correspondence(self):
+        """
+        Definitive list of users (linkTo User) who are designated as point of contact(s) for this Lab.
+
+        Returns:
+            List of @IDs which refer to either PI or alternate list of contacts defined in `contact_persons`.
+        """
 
         ppl = self.properties.get('contact_persons', [])
-        pi  = self.properties.get('pi')
+        pi  = self.properties.get('pi', None)
 
-        if pi is None and not ppl:
-            return None # No PI defined, no contact people defined... oh no
-
-        if pi is None or pi in ppl:
+        if ppl:
             return ppl
-
-        if not ppl and pi:
+        elif not ppl and pi:
             return [pi]
-
-        return [pi] + ppl
-
+        else:
+            return None
 
     def __init__(self, registry, models):
         super().__init__(registry, models)

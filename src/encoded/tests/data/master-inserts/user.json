@@ -22,7 +22,7 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"],
-        "contact_email" : "fake_email_address@email.com"
+        "preferred_email" : "fake_email_address@email.com"
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",

@@ -156,6 +156,21 @@ def set_namekey_from_title(properties):
     return name
 
 
+# Common lists of embeds to be re-used in certain files (similar to schema mixins)
+
+lab_award_attribution_embed_list = [
+    "award.project",
+    "award.center_title",
+    "lab.city",
+    "lab.state",
+    "lab.country",
+    "lab.postal_code",
+    "lab.city",
+    "lab.display_title",
+    "lab.correspondence.display_title",
+    "lab.correspondence.contact_email"
+]
+
 
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
