@@ -296,7 +296,6 @@ class File(Item):
         return outString
 
     def _update(self, properties, sheets=None):
-        import pdb; pdb.set_trace()
         if not properties:
             return
         # ensure we always have s3 links setup
@@ -311,41 +310,38 @@ class File(Item):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
 
+        file_formats = [properties.get('file_format'), ]
+
         # handle extra files
-        xfiles = properties.get('extra_files', [])
-        if xfiles:
-            updated_extra_files = []
-            file_formats = []
-            try:
-                at_id = resource_path(self)
-            except:
-                at_id = "/" + str(uuid) + "/"
-            # ensure at_id ends with a slash
-            if not at_id.endswith('/'):
-                at_id += '/'
-            for xfile in xfiles:
-                # ensure a file_format (identifier for extra_file) is given and non-null
-                if not('file_format' in xfile and bool(xfile['file_format'])):
-                    continue
-                # todo, make sure file_format is unique
-                if xfile['file_format'] in file_formats:
-                    raise Exception("Each file in extra_files must have unique file_format")
-                file_formats.append(xfile['file_format'])
-                xfile['accession'] = properties.get('accession')
-                # just need a filename to trigger creation of credentials
-                xfile['filename'] = xfile['accession']
-                xfile['uuid'] = str(uuid)
-                xfile['status'] = properties.get('status')
-                ext = self.build_external_creds(self.registry, uuid, xfile)
-                # build href
-                # TODO get this bad boy to work
-                file_format = self.registry['collections']['FileFormat'].get(properties.get('file_format'))
-                file_extension = file_format.get('standard_file_extension')
-                filename = '{}{}'.format(xfile['accession'], file_extension)
-                xfile['href'] = at_id + '@@download/' + filename
-                xfile['upload_key'] = ext['key']
-                sheets['external' + xfile['file_format']] = ext
-                updated_extra_files.append(xfile)
+        updated_extra_files = []
+        try:
+            at_id = resource_path(self)
+        except:
+            at_id = "/" + str(uuid) + "/"
+        # ensure at_id ends with a slash
+        if not at_id.endswith('/'):
+            at_id += '/'
+        for idx, xfile in enumerate(properties.get('extra_files', [])):
+            # ensure a file_format (identifier for extra_file) is given and non-null
+            if not('file_format' in xfile and bool(xfile['file_format'])):
+                continue
+            # todo, make sure file_format is unique
+            if xfile['file_format'] in file_formats:
+                raise Exception("Each file in extra_files must have unique file_format")
+            file_formats.append(xfile['file_format'])
+            xfile['accession'] = properties.get('accession')
+            # just need a filename to trigger creation of credentials
+            xfile['filename'] = xfile['accession']
+            xfile['uuid'] = str(uuid)
+            xfile['status'] = properties.get('status')
+            ext = self.build_external_creds(self.registry, uuid, xfile)
+            # build href
+            file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
+            filename = '{}{}'.format(xfile['accession'], file_extension)
+            xfile['href'] = at_id + '@@download/' + filename
+            xfile['upload_key'] = ext['key']
+            sheets['external' + xfile['file_format']] = ext
+            updated_extra_files.append(xfile)
 
         if properties.get('extra_files', False):
             properties['extra_files'] = updated_extra_files
