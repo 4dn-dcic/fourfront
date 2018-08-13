@@ -32,58 +32,66 @@ export class AttributionTabView extends React.PureComponent {
 
 
     render(){
-        var context = this.props.context;
-        var { produced_in_pub, publications_of_set, lab, award, submitted_by } = context;
+        var context = this.props.context,
+            { produced_in_pub, publications_of_set, lab, award, submitted_by } = context,
+            awardExists = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
+            submittedByExists = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
+    
         return (
-            <div className="row info-area">
-                <div className="col-sm-12">
-                    <div className="row">
+            <div className="info-area">
 
-                        { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ?
-                            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                <Publications context={context} />
-                                <hr className="mt-1 mb-2"/>
-                            </div>
-                        : null }
+                { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ?
+                    <div>
+                        <Publications context={context} />
+                        <hr className="mt-1 mb-2"/>
+                    </div>
+                : null }
 
-                        <LabsSection context={context}/>
+                <div className="row">
 
-                        { award && typeof award !== 'string' ?
-                            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                { FormattedInfoBlock.Award(award) }
-                            </div>
-                        : null }
+                    <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
 
-                        { submitted_by && typeof submitted_by !== 'string' ?
-                            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                { FormattedInfoBlock.User(submitted_by) }
-                            </div>
-                        : null }
+                        <LabsSection context={context} />
+
+                        { awardExists ? FormattedInfoBlock.Award(award) : null }
 
                     </div>
 
+                    { submittedByExists ?
+                        <div className="col-xs-12 col-md-5">
+                            { FormattedInfoBlock.User(submitted_by) }
+                        </div>
+                    : null }
+
+                    
                 </div>
-                <div className="col-sm-12">
-                    <ItemFooterRow context={context} schemas={this.props.schemas} />
-                </div>
+
+                <ItemFooterRow context={context} schemas={this.props.schemas} />
             </div>
         );
     }
 
 }
 
-class LabsSection extends React.Component {
+class LabsSection extends React.PureComponent {
+
+    static defaultProps = {
+        'className' : null
+    }
+
     render(){
-        var context = this.props.context;
-        var primary_lab_exists = context.lab && typeof context.lab !== 'string';
-        var contributing_labs_exist = (Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0);
-        if (!primary_lab_exists && !contributing_labs_exist) return null;
+        var { context, className } = this.props,
+            primaryLab = (typeof context.lab !== 'string' && context.lab) || null,
+            contributingLabs = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
+
+        if (!primaryLab && !contributingLabs) return null;
         return (
-            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                { primary_lab_exists ? FormattedInfoBlock.Lab(context.lab) : null }
-                { contributing_labs_exist ? <WrappedCollapsibleList items={context.contributing_labs} singularTitle="Contributing Lab" itemClassName="publication" iconClass='user-plus' /> : null }
-                { primary_lab_exists && contributing_labs_exist ? <hr className="mt-1 mb-2"/> : null }
+            <div className={className}>
+                { primaryLab ? FormattedInfoBlock.Lab(primaryLab) : null }
+                { contributingLabs ? <WrappedCollapsibleList items={contributingLabs} singularTitle="Contributing Lab" itemClassName="publication" iconClass='user-plus' /> : null }
+                { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
             </div>
         );
+
     }
 }

@@ -70,13 +70,27 @@ class Lab(Item):
         "type" : "array",
         "uniqueItems": True,
         "items" : {
-            "title" : "Lab Contact",
+            "title" : "Lab Contact - Public Snippet",
             "description": "A User associated with the lab who is also a point of contact.",
-            "type" : "string",
-            "linkTo" : "User"
+            "type" : "object",
+            "additionalProperties" : False,
+            "properties" : {
+                "display_title" : {
+                    "type" : "string"
+                },
+                "contact_email" : {
+                    "type" : "string",
+                    "format" : "email"
+                },
+                "@id" : {
+                    "type" : "string"
+                }
+            }
+            #"type" : "string",
+            #"linkTo" : "User"
         }
     })
-    def correspondence(self):
+    def correspondence(self, request):
         """
         Definitive list of users (linkTo User) who are designated as point of contact(s) for this Lab.
 
@@ -87,12 +101,28 @@ class Lab(Item):
         ppl = self.properties.get('contact_persons', [])
         pi  = self.properties.get('pi', None)
 
+        contact_people = None
+
         if ppl:
-            return ppl
+            contact_people = ppl
         elif not ppl and pi:
-            return [pi]
-        else:
-            return None
+            contact_people = [pi]
+
+        def fetch_and_pick_embedded_properties(person_at_id):
+            '''Clear out some properties from person'''
+            try:
+                person = request.embed(person_at_id, '@@object')
+            except:
+                return None
+            return {
+                "contact_email" : person.get('contact_email'),
+                "@id"           : person.get('@id'),
+                "display_title" : person.get('display_title')
+            }
+
+        if contact_people is not None:
+            contact_people_dicts = [ fetch_and_pick_embedded_properties(person) for person in contact_people ]
+            return [ person for person in contact_people_dicts if person is not None ]
 
     def __init__(self, registry, models):
         super().__init__(registry, models)
