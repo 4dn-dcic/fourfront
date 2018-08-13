@@ -188,7 +188,7 @@ class FileSetCalibration(FileSet):
                      "files_in_set.href",
                      "files_in_set.file_size",
                      "files_in_set.upload_key",
-                     "files_in_set.file_format",
+                     "files_in_set.file_format.file_format",
                      "files_in_set.file_classification"
                      ]
 
@@ -212,7 +212,7 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
                      "files_in_set.href",
                      "files_in_set.file_size",
                      "files_in_set.upload_key",
-                     "files_in_set.file_format",
+                     "files_in_set.file_format.file_format",
                      "files_in_set.file_classification"
                      ]
 
@@ -251,6 +251,7 @@ class File(Item):
         'experiments.biosample.treatments_summary',
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.digestion_enzyme.name',
+        'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession'
     ]
@@ -279,7 +280,8 @@ class File(Item):
     })
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
-        file_extension = self.schema['file_format_file_extension'][file_format]
+        file_format_item = request.embed(file_format)
+        file_extension = file_format_item.get('standard_file_extension')
         return '{}{}'.format(accession, file_extension)
 
     @calculated_property(schema={
@@ -316,36 +318,48 @@ class File(Item):
 
         # handle extra files
         updated_extra_files = []
-        try:
-            at_id = resource_path(self)
-        except:
-            at_id = "/" + str(uuid) + "/"
-        # ensure at_id ends with a slash
-        if not at_id.endswith('/'):
-            at_id += '/'
-        for idx, xfile in enumerate(properties.get('extra_files', [])):
-            # ensure a file_format (identifier for extra_file) is given and non-null
-            if not('file_format' in xfile and bool(xfile['file_format'])):
-                continue
-            # todo, make sure file_format is unique
-            if xfile['file_format'] in file_formats:
-                raise Exception("Each file in extra_files must have unique file_format")
-            file_formats.append(xfile['file_format'])
-            xfile['accession'] = properties.get('accession')
-            # just need a filename to trigger creation of credentials
-            xfile['filename'] = xfile['accession']
-            xfile['uuid'] = str(uuid)
-            xfile['status'] = properties.get('status')
-            ext = self.build_external_creds(self.registry, uuid, xfile)
-            # build href
-            file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
-            filename = '{}{}'.format(xfile['accession'], file_extension)
-            xfile['href'] = at_id + '@@download/' + filename
-            xfile['upload_key'] = ext['key']
-            sheets['external' + xfile['file_format']] = ext
-            updated_extra_files.append(xfile)
+        extra_files = properties.get('extra_files', [])
+        if extra_files:
+            # get @id for parent file
+            try:
+                at_id = resource_path(self)
+            except:
+                at_id = "/" + str(uuid) + "/"
+            # ensure at_id ends with a slash
+            if not at_id.endswith('/'):
+                at_id += '/'
 
-        if properties.get('extra_files', False):
+            file_formats = []
+            for xfile in extra_files:
+                # ensure a file_format (identifier for extra_file) is given and non-null
+                if not('file_format' in xfile and bool(xfile['file_format'])):
+                    continue
+                # todo, make sure file_format is unique
+                import pdb; pdb.set_trace()
+                fformat = xfile['file_format']
+                if fformat.startswith('/file-formats/'):
+                    fformat = fformat[len('/file-formats/'):-1]
+                xfile_format = self.registry['collections']['FileFormat'].get(fformat)
+
+                if xfile_format in file_formats:
+                    raise Exception("Each file in extra_files must have unique file_format")
+                file_formats.append(xfile_format)
+
+                xfile['accession'] = properties.get('accession')
+                # just need a filename to trigger creation of credentials
+                xfile['filename'] = xfile['accession']
+                xfile['uuid'] = str(uuid)
+                xfile['status'] = properties.get('status')
+                ext = self.build_external_creds(self.registry, uuid, xfile)
+                # build href
+                file_extension = xfile_format.properties.get('standard_file_extension')
+                filename = '{}{}'.format(xfile['accession'], file_extension)
+                xfile['href'] = at_id + '@@download/' + filename
+                xfile['upload_key'] = ext['key']
+                sheets['external' + xfile['file_format']] = ext
+                updated_extra_files.append(xfile)
+
+        if extra_files:
             properties['extra_files'] = updated_extra_files
 
         if old_creds:
@@ -475,10 +489,12 @@ class File(Item):
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = cls.get_bucket(registry)
-        mapping = cls.schema['file_format_file_extension']
-        prop_format = properties['file_format']
+        fformat = properties.get('file_format')
+        if fformat.startswith('/file-formats/'):
+            fformat = fformat[len('/file-formats/'):-1]
+        prop_format = registry['collections']['FileFormat'].get(fformat)
         try:
-            file_extension = mapping[prop_format]
+            file_extension = prop_format.properties['standard_file_extension']
         except KeyError:
             raise Exception('File format not in list of supported file types')
         key = '{uuid}/{accession}{file_extension}'.format(
@@ -902,21 +918,18 @@ def validate_file_filename(context, request):
     if 'filename' not in data or 'file_format' not in data:
         return
     filename = data['filename']
-    file_format = data['file_format']
-    valid_schema = context.type_info.schema
-    file_extensions = valid_schema['file_format_file_extension'][file_format]
-    if not isinstance(file_extensions, list):
-        file_extensions = [file_extensions]
-    found_match = False
+    file_format_item = request.embed(data['file_format'])
+    file_extensions = file_format_item.get('allowed_extensions', [])
+    if not file_extensions and file_format_item.get('file_format') == 'other':
+        found_match = True
+    else:
+        found_match = False
     for extension in file_extensions:
-        if extension == "":
-            found_match = True
-            break
-        elif filename[-len(extension):] == extension:
+        if filename[-len(extension):] == extension:
             found_match = True
             break
     if not found_match:
-        file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
+        file_extensions_msg = ["'" + ext + "'" for ext in file_extensions]
         file_extensions_msg = ', '.join(file_extensions_msg)
         request.errors.add('body', None, 'Filename extension does not '
                            'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)

@@ -383,6 +383,37 @@ def two_experiment_replicate_set(testapp, rep_set_data, experiments):
 
 
 @pytest.fixture
+def file_formats(testapp, lab, award):
+    formats = {}
+    ef_format_info = {
+        'pairs_px2': {'standard_file_extension': 'pairs.gz.px2', 'allowed_extensions': ['pairs.gz.px2']},
+        'pairsam_px2': {'standard_file_extension': '.sam.pairs.gz.px2', 'allowed_extensions': ['.sam.pairs.gz.px2']},
+    }
+    format_info = {
+        'fastq': {'standard_file_extension': 'fastq.gz', 'allowed_extensions': ['fastq.gz', 'fq.gz']},
+        'pairs': {'standard_file_extension': 'pairs.gz', 'allowed_extensions': ['pairs.gz'], "extrafile_formats": ['pairs_px2', 'pairsam_px2']},
+        'mcool': {'standard_file_extension': 'mcool', 'allowed_extensions': ['mcool']},
+    }
+
+    for eff, info in ef_format_info.items():
+        info['file_format'] = eff
+        info['lab'] = lab['@id']
+        info['award'] = award['@id']
+        formats[eff] = testapp.post_json('/file_format', info, status=201).json['@graph'][0]
+    for ff, info in format_info.items():
+        info['file_format'] = ff
+        if info.get('extrafile_formats'):
+            eff2add = []
+            for eff in info.get('extrafile_formats'):
+                eff2add.append(formats[eff].get('@id'))
+            info['extrafile_formats'] = eff2add
+        info['lab'] = lab['@id']
+        info['award'] = award['@id']
+        formats[ff] = testapp.post_json('/file_format', info, status=201).json['@graph'][0]
+    return formats
+
+
+@pytest.fixture
 def file(testapp, lab, award):
     item = {
         'file_format': 'fastq',

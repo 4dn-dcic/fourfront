@@ -72,12 +72,12 @@ def fastq_json(award, experiment, lab):
 
 
 @pytest.fixture
-def proc_file_json(award, experiment, lab):
+def proc_file_json(award, experiment, lab, file_formats):
     return {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'pairs',
+        'file_format': file_formats.get('pairs').get('@id'),
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
@@ -127,7 +127,7 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
-def test_extra_files(testapp, proc_file_json):
+def test_extra_files_stuff(testapp, proc_file_json):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
