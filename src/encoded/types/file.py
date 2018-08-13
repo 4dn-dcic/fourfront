@@ -43,8 +43,6 @@ from pyramid.traversal import resource_path
 
 from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
-from . import TrackingItem
-from ..authentication import session_properties
 
 import logging
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
@@ -839,6 +837,8 @@ def is_file_to_download(properties, mapping, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    from . import TrackingItem
+    from ..authentication import session_properties
     try:
         user_props = session_properties(request)
     except Exception as e:
