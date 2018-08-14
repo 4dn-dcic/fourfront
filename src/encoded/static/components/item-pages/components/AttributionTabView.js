@@ -11,6 +11,34 @@ import { ItemFooterRow } from './ItemFooterRow';
 
 
 
+
+export function generateAddressString(lab){
+    return (
+        (lab.city ? lab.city + ', ' : '') +
+        (lab.state ? lab.state : '') +
+        (lab.postal_code ? ' ' + lab.postal_code : '' ) +
+        (lab.country ? ', ' + lab.country : '')
+    );
+}
+
+
+export function generateContactPersonListItem(contactPerson, idx){
+    return (
+        <div className="contact-person row" key={contactPerson.contact_email || idx}>
+            <div className="col-sm-4 text-ellipsis-container">
+                &nbsp;&nbsp;&bull;&nbsp; { contactPerson.display_title }
+            </div>
+            <div className="col-sm-8 text-ellipsis-container">
+                <i className="icon icon-fw icon-envelope-o"/>&nbsp;&nbsp;
+                <a href={"mailto:" + contactPerson.contact_email}>{ contactPerson.contact_email }</a>
+            </div>
+        </div>
+    );
+}
+
+
+
+
 export class AttributionTabView extends React.PureComponent {
 
     static getTabObject(context){
@@ -76,6 +104,29 @@ class LabsSection extends React.PureComponent {
         'className' : null
     }
 
+    constructor(props){
+        super(props);
+        this.contributingLabRenderFxn = this.contributingLabRenderFxn.bind(this);
+    }
+
+    contributingLabRenderFxn(lab, idx, all){
+        var atId = object.itemUtil.atId(lab),
+            contactPersons = Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
+                return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
+            });
+
+        return (
+            <div className="lab" key={atId || idx}>
+                <h5>
+                    <a className="text-500" href={atId}>{ lab.display_title }</a>
+                </h5>
+                { contactPersons && contactPersons.length > 0 ?
+                    <div className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</div>
+                : null }
+            </div>
+        );
+    }
+
     render(){
         var { context, className } = this.props,
             primaryLab = (typeof context.lab !== 'string' && context.lab) || null,
@@ -85,7 +136,10 @@ class LabsSection extends React.PureComponent {
         return (
             <div className={className}>
                 { primaryLab ? FormattedInfoBlock.Lab(primaryLab) : null }
-                { contributingLabs ? <WrappedCollapsibleList items={contributingLabs} singularTitle="Contributing Lab" itemClassName="publication" iconClass='user-plus' /> : null }
+                { contributingLabs ?
+                    <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
+                        iconClass='user-plus' itemRenderFxn={this.contributingLabRenderFxn} />
+                : null }
                 { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
             </div>
         );

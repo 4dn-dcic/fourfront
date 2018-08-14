@@ -167,9 +167,12 @@ lab_award_attribution_embed_list = [
     "lab.postal_code",
     "lab.city",
     "lab.display_title",
-    "lab.correspondence.display_title", # Not a real linkTo - temp workaround
-    "lab.correspondence.contact_email", # Not a real linkTo - temp workaround
-    "lab.correspondence.@id",           # Not a real linkTo - temp workaround
+    "lab.correspondence.display_title",                 # Not a real linkTo - temp workaround
+    "lab.correspondence.contact_email",                 # Not a real linkTo - temp workaround
+    "lab.correspondence.@id",                           # Not a real linkTo - temp workaround
+    "contributing_labs.correspondence.display_title",   # Not a real linkTo - temp workaround
+    "contributing_labs.correspondence.contact_email",   # Not a real linkTo - temp workaround
+    "contributing_labs.correspondence.@id",             # Not a real linkTo - temp workaround
     "submitted_by.timezone",
     "submitted_by.job_title"
 ]

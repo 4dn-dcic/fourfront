@@ -6,6 +6,7 @@ import _ from 'underscore';
 import { Button } from 'react-bootstrap';
 import { ajax, console, isServerSide, analytics, object } from './../../util';
 import { PartialList } from './PartialList';
+import { generateAddressString, generateContactPersonListItem } from './AttributionTabView';
 
 
 
@@ -74,15 +75,18 @@ export class WrappedCollapsibleList extends React.Component {
      * @memberof ListBlock
      */
     static defaultProps = {
-        'persistentCount' : 3,
-        'publications' : [],
-        'singularTitle' : 'Publication',
-        'itemClassName' : null,
-        'iconClass' : 'book'
+        'persistentCount'   : 3,
+        'publications'      : [],
+        'singularTitle'     : 'Publication',
+        'itemClassName'     : null,
+        'iconClass'         : 'book',
+        'itemRenderFxn'     : null,
+        'wrapperElement'    : 'ul'
     }
 
     constructor(props){
         super(props);
+        this.itemRenderFxnFallback = this.itemRenderFxnFallback.bind(this);
         this.renderItems = this.renderItems.bind(this);
         this.render = this.render.bind(this);
         this.state = {
@@ -90,21 +94,21 @@ export class WrappedCollapsibleList extends React.Component {
         };
     }
 
+    itemRenderFxnFallback(item, idx, all){
+        return <WrappedListBlock className={this.props.itemClassName} context={item} key={object.itemUtil.atId(item) || idx} />;
+    }
+
     renderItems(){
-        var { itemClassName, persistentCount, items } = this.props;
+        var { itemClassName, persistentCount, items, itemRenderFxn, wrapperElement } = this.props;
 
-        function itemsToElements(pubs){
-            return _.map(pubs, function(pub, i){
-                return <WrappedListBlock className={itemClassName} context={pub} key={pub.link_id || i} />;
-            });
-        }
+        var itemsToElements = ((pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback));
 
-        if (items.length <= this.props.persistentCount){
-            return <ul>{ itemsToElements(items) }</ul>;
+        if (items.length <= persistentCount){
+            return React.createElement(wrapperElement || 'ul', {}, itemsToElements(items));
         } else {
             // Only show first 3 (props.persistentCount), then a 'more' button.
             return (
-                <PartialList containerType="ul" open={this.state && this.state.open}
+                <PartialList containerType={wrapperElement} open={this.state && this.state.open}
                     persistent={itemsToElements(items.slice(0, persistentCount))}
                     collapsible={itemsToElements(items.slice(persistentCount)) } />
             );
@@ -415,29 +419,6 @@ export class FormattedInfoBlock extends React.Component {
             //return FormattedInfoBlock.Error.apply(this, arguments);
         }
 
-        function generateAddressString(){
-            return (
-                (details_lab.city ? details_lab.city + ', ' : '') +
-                (details_lab.state ? details_lab.state : '') +
-                (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
-                (details_lab.country ? ', ' + details_lab.country : '')
-            );
-        }
-
-        function generateContactPersonListItem(contactPerson, idx){
-            return (
-                <div className="contact-person row" key={contactPerson.contact_email || idx}>
-                    <div className="col-sm-4 text-ellipsis-container">
-                        &nbsp;&nbsp;&bull;&nbsp; { contactPerson.display_title }
-                    </div>
-                    <div className="col-sm-8 text-ellipsis-container">
-                        <i className="icon icon-fw icon-envelope-o"/>&nbsp;&nbsp;
-                        <a href={"mailto:" + contactPerson.contact_email}>{ contactPerson.contact_email }</a>
-                    </div>
-                </div>
-            );
-        }
-
         var innerContent = null,
             contactPersons = null;
 
@@ -451,7 +432,7 @@ export class FormattedInfoBlock extends React.Component {
                 // Point of contact(s) for Lab which has view permission(s)
                 innerContent = (
                     <div>
-                        <div className="address">{ generateAddressString() }</div>
+                        <div className="address">{ generateAddressString(details_lab) }</div>
                         <div className="correspondence">
                             <h6 className="mt-08 mb-03 text-500">Correspondence:</h6>
                             { _.map(contactPersons, generateContactPersonListItem) }
@@ -459,7 +440,7 @@ export class FormattedInfoBlock extends React.Component {
                     </div>
                 );
             } else {
-                innerContent = generateAddressString();
+                innerContent = generateAddressString(details_lab);
             }
         }
 
