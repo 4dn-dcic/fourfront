@@ -10,7 +10,8 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/modified" }
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "properties": {
         "schema_version": {
