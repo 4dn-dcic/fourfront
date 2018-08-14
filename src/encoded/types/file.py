@@ -440,9 +440,10 @@ class File(Item):
     })
     def href(self, request):
         file_format = self.properties.get('file_format')
+        fformat = request.embed(file_format)
+        file_extension = fformat.get('standard_file_extension')
         accession = self.properties.get('accession', self.properties.get('external_accession'))
-        file_extension = self.schema['file_format_file_extension'][file_format]
-        filename = '{}{}'.format(accession, file_extension)
+        filename = '{}.{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(schema={
@@ -497,7 +498,7 @@ class File(Item):
             file_extension = prop_format.properties['standard_file_extension']
         except KeyError:
             raise Exception('File format not in list of supported file types')
-        key = '{uuid}/{accession}{file_extension}'.format(
+        key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
 
