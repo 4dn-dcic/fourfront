@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import * as d3 from 'd3';
+import { NavItem, Navbar } from 'react-bootstrap';
 import { console, isServerSide } from './../util';
 
 /**
@@ -106,7 +107,51 @@ export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, a
 export class FourfrontLogo extends React.PureComponent {
 
     static defaultProps = {
-        'id' : 'fourfront_logo_svg'
+        'id'                        : 'fourfront_logo_svg',
+        'circlePathDefinitionOrig'  : "m1,30c0,-16.0221 12.9779,-29 29,-29c16.0221,0 29,12.9779 29,29c0,16.0221 -12.9779,29 -29,29c-16.0221,0 -29,-12.9779 -29,-29z",
+        'circlePathDefinitionHover' : "m3.33331,34.33326c-2.66663,-17.02208 2.97807,-23.00009 29.99997,-31.33328c27.02188,-8.33321 29.66667,22.31102 16.6669,34.66654c-12.99978,12.35552 -13.64457,21.33348 -34.9999,19.33351c-21.35533,-1.99997 -9.00035,-5.6447 -11.66697,-22.66677z",
+        'textTransformOrig'         : "translate(7.5, 37.5)",
+        'textTransformHover'        : "translate(20, 35) scale(0.3, 0.6)"
+    }
+    
+    constructor(props){
+        super(props);
+        this.setHoverState = _.throttle(this.setHoverState, 2000);
+        this.setHoverStateOn = this.setHoverState.bind(this, true);
+        this.setHoverStateOff = this.setHoverState.bind(this, false);
+    }
+
+    setHoverState(hover, e){
+        var svg = d3.select(this.refs.svg);
+        if (hover) {
+            setTimeout(()=>{
+                svg.select(".fourfront-logo-background-circle")
+                    .transition()
+                    .duration(1000)
+                    .attr('d', this.props.circlePathDefinitionHover);
+
+                svg.select(".fourfront-logo-text")
+                    .transition()
+                    .duration(1000)
+                    .attr('transform', this.props.textTransformHover)
+                    .style('fill', 'rgba(0,0,0,0)')
+                    .style('stroke', 'rgba(0,0,0,0.3)')
+                    .style('stroke-width', '15px');
+            }, 800);
+        } else {
+            svg.select(".fourfront-logo-background-circle")
+                .transition()
+                .duration(1000)
+                .attr('d', this.props.circlePathDefinitionOrig);
+
+            svg.select(".fourfront-logo-text")
+                .transition()
+                .duration(1000)
+                .attr('transform', this.props.textTransformOrig)
+                .style('fill', '#fff')
+                .style('stroke', 'transparent')
+                .style('stroke-width', '0px');
+        }
     }
 
     renderDefs(){
@@ -125,14 +170,20 @@ export class FourfrontLogo extends React.PureComponent {
     }
 
     render(){
-        var { id } = this.props;
+        var { id, circlePathDefinitionOrig, circlePathDefinitionHover, onClick } = this.props;
         return (
-            <svg id={id} viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
-                { this.renderDefs() }
-                <title>4DN Logo</title>
-                <ellipse cx="30" cy="30" rx="29" ry="29"/>
-                <text transform="translate(7.5, 37.5)">4DN</text>
-            </svg>
+            <Navbar.Brand>
+                <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
+                    <span className="img-container">
+                        <svg id={id} ref="svg" viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
+                            { this.renderDefs() }
+                            <path d={circlePathDefinitionOrig} className="fourfront-logo-background-circle" />
+                            <text transform="translate(7.5, 37.5)" className="fourfront-logo-text">4DN</text>
+                        </svg>
+                    </span>
+                    <span className="navbar-title">Data Portal</span>
+                </NavItem>
+            </Navbar.Brand>
         );
     }
 
