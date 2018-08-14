@@ -80,7 +80,7 @@ export default class JointAnalysisPlansPage extends StaticPage {
             'experiment_type'       : experimentType,
             'data_source'           : 'ENCODE',
             'short_description'     : result.description || null,
-            'lab_name'              : (result.lab && result.lab.title) || FALLBACK_NAME_FOR_UNDEFINED,
+            'lab_name'              : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
             'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
         });
     }

@@ -119,7 +119,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                     <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
                         <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-                        <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual file in the 'files.txt' download list below.">
+                        <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
                         {' '}

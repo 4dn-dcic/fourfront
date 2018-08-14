@@ -47,7 +47,7 @@ export class UIControlsWrapper extends React.PureComponent {
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             { title : "Project", field : "award.project" },
-            { title : "Lab", field : "lab.title" },
+            { title : "Lab", field : "lab.display_title" },
             { title : "Status", field : "status" }
         ],
         'availableFields_Subdivision' : [
@@ -58,7 +58,7 @@ export class UIControlsWrapper extends React.PureComponent {
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Project", field : "award.project" },
             { title : "Center", field : "award.center_title" },
-            { title : "Lab", field : "lab.title" },
+            { title : "Lab", field : "lab.display_title" },
             { title : "Status", field : "status" }
         ],
         'legend' : false,

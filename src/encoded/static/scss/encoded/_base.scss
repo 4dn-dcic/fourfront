@@ -188,9 +188,11 @@ blockquote {
 // Fourfront SVG logo
 
 svg.fourfront_logo_svg_instance {
-    > ellipse, > .fourfront-logo-background-circle {
+    > ellipse,
+    > .fourfront-logo-background-circle {
         fill:url(#fourfront_linear_gradient);
-        stroke:url(#fourfront_linear_gradient);
+        //stroke:url(#fourfront_linear_gradient);
+        stroke: transparent;
         stroke-width: 1px;
     }
     > text {
@@ -201,6 +203,12 @@ svg.fourfront_logo_svg_instance {
         stroke: transparent;
         stroke-width: 0px;
         stroke-linejoin: round;
+    }
+    > .fourfront-logo-foreground-circle {
+        opacity : 0;
+        fill : transparent;
+        stroke-Width : 15px;
+        stroke: rgba(0,0,0,0.2);
     }
 }
 

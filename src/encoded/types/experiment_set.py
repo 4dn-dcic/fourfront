@@ -86,6 +86,7 @@ class ExperimentSet(Item):
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
+        "produced_in_pub.short_attribution",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",
