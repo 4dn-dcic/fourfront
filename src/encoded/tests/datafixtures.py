@@ -334,17 +334,6 @@ def base_experiment(testapp, experiment_data):
     return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
 
 
-#@pytest.fixture
-#def experiment_data(lab, award, human_biosample, mboI):
-#    return {
-#        'lab': lab['@id'],
-#        'award': award['@id'],
-#        'biosample': human_biosample['@id'],
-#        'experiment_type': 'micro-C',
-#        'digestion_enzyme': mboI['@id']
-#    }
-
-
 @pytest.fixture
 def experiments(testapp, experiment_data):
     expts = []
@@ -384,6 +373,7 @@ def two_experiment_replicate_set(testapp, rep_set_data, experiments):
 
 @pytest.fixture
 def file_formats(testapp, lab, award):
+    from uuid import uuid4
     formats = {}
     ef_format_info = {
         'pairs_px2': {'standard_file_extension': 'pairs.gz.px2', 'allowed_extensions': ['pairs.gz.px2']},
@@ -393,15 +383,21 @@ def file_formats(testapp, lab, award):
         'fastq': {'standard_file_extension': 'fastq.gz', 'allowed_extensions': ['fastq.gz', 'fq.gz']},
         'pairs': {'standard_file_extension': 'pairs.gz', 'allowed_extensions': ['pairs.gz'], "extrafile_formats": ['pairs_px2', 'pairsam_px2']},
         'mcool': {'standard_file_extension': 'mcool', 'allowed_extensions': ['mcool']},
+        'tiff': {'standard_file_extension': 'tiff', 'allowed_extensions': ['tiff', 'tif']},
+        'zip': {'standard_file_extension': 'zip', 'allowed_extensions': ['zip']},
+        'chromsizes': {'standard_file_extension': 'chrom.sizes', 'allowed_extensions': ['chrom.sizes']},
+        'other': {'standard_file_extension': 'other', 'allowed_extensions': []}
     }
 
     for eff, info in ef_format_info.items():
         info['file_format'] = eff
+        info['uuid'] = str(uuid4())
         info['lab'] = lab['@id']
         info['award'] = award['@id']
         formats[eff] = testapp.post_json('/file_format', info, status=201).json['@graph'][0]
     for ff, info in format_info.items():
         info['file_format'] = ff
+        info['uuid'] = str(uuid4())
         if info.get('extrafile_formats'):
             eff2add = []
             for eff in info.get('extrafile_formats'):

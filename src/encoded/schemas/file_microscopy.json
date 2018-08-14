@@ -31,7 +31,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "description": {
             "type": "string",
@@ -41,18 +41,8 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "lookup": 30,
-            "default": "zip",
-            "enum": [
-                "zip",
-                "tiff",
-                "ome.tiff",
-                "flex",
-                "dv",
-                "r3d",
-                "nd2",
-                "other"
-            ]
+            "linkTo": "FileFormat",
+            "lookup": 30
         },
         "file_type": {
             "title": "File Type",

@@ -34,8 +34,8 @@
         },
         "file_format": {
             "title": "File Format",
-            "description": "Format or extension of this file.",
             "type": "string",
+            "linkTo": "FileFormat",
             "lookup": 20
         },
         "file_type": {

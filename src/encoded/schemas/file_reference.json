@@ -30,21 +30,12 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
-                "bwaIndex",
-                "chromsizes",
-                "barcode_file",
-                "compressed_fasta",
-                "fasta",
-                "juicer_format_restriction_site_file",
-                "conc",
-                "other"
-            ]
+            "linkTo": "FileFormat"
         },
         "file_type": {
             "title": "File Type",

@@ -335,7 +335,6 @@ class File(Item):
                 if not('file_format' in xfile and bool(xfile['file_format'])):
                     continue
                 # todo, make sure file_format is unique
-                import pdb; pdb.set_trace()
                 fformat = xfile['file_format']
                 if fformat.startswith('/file-formats/'):
                     fformat = fformat[len('/file-formats/'):-1]

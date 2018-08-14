@@ -31,7 +31,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "description": {
             "type": "string",
@@ -40,12 +40,7 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "default": "zip",
-            "enum": [
-                "zip",
-                "tiff",
-                "other"
-            ]
+            "linkTo": "FileFormat"
         },
         "file_type": {
             "title": "File Type",

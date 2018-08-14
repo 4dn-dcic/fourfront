@@ -30,7 +30,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "higlass_uid": {
             "title": "Higlass UID",
@@ -39,28 +39,7 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "suggested_enum": [
-                "bam",
-                "bai",
-                "pairs",
-                "pairsam",
-                "pairs_px2",
-                "pairsam_px2",
-                "cool",
-                "hic",
-                "mcool",
-                "normvector_juicerformat",
-                "zip",
-                "bg",
-                "bg_px2",
-                "bw",
-                "bed",
-                "bedpe",
-                "txt",
-                "csv",
-                "spt",
-                "other"
-            ]
+            "linkTo": "FileFormat"
         },
         "file_type": {
             "title": "File Type",
