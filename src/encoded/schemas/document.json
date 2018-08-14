@@ -53,7 +53,6 @@
             "title": "URLs",
             "description": "External resources with additional information to the document.",
             "type": "array",
-            "default": [],
             "lookup": 40,
             "uniqueItems": true,
             "items": {

@@ -36,7 +36,6 @@
             "description": "List of data files to be associated together.",
             "type": "array",
             "lookup": 40,
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Data File",

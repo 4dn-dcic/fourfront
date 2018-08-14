@@ -33,7 +33,6 @@
             "title": "Submits for",
             "description": "Labs user is authorized to submit data for.",
             "type": "array",
-            "default": [],
             "permission": "import-items",
             "lookup": 70,
             "uniqueItems": true,
@@ -47,7 +46,6 @@
             "title": "Groups",
             "description": "Additional access control groups",
             "type": "array",
-            "default": [],
             "lookup": 80,
             "uniqueItems": true,
             "permission": "import-items",
@@ -135,7 +133,6 @@
             "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "URLs and matching titles for this user's submission subscriptions",
             "type": "array",
-            "default": [],
             "items": {
                 "type": "object",
                 "title": "Subscription",

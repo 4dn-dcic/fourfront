@@ -54,7 +54,6 @@
             "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
             "type": "array",
             "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
-            "default": [],
             "lookup": 1,
             "uniqueItems": true,
             "ff_flag": "clear clone",

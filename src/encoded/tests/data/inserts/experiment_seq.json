@@ -63,5 +63,28 @@
         "3p_adenylation_time": 20,
         "3p_adenylation_temperature": 58,
         "reaction_time": 9
+    },
+    {
+        "accession":"4DNEXPROC001",
+        "biosample":"234511bc-8535-4448-903e-854af460b255",
+        "experiment_type": "CUT&RUN",
+        "description": "Only processed files here",
+        "processed_files" : ["4DNFIVDR5QTI"],
+        "award": "1U01CA200059-01",
+        "lab": "test-4dn-lab",
+        "uuid": "66741e2f-3e43-4388-8bbb-e861f209c556",
+        "submitted_by": "4dndcic@gmail.com",
+        "biosample_quantity": 2000000,
+        "biosample_quantity_units": "cells",
+        "status": "in review by lab",
+        "targeted_factor": "dcic:test_targ4",
+        "antibody": "4d44d12c-b37c-478b-9bc7-d843cba4ba99",
+        "antibody_lot_id": "11111111",
+        "average_fragment_size": 100,
+        "fragmentation_method": "chemical",
+        "library_preparation_date": "2017-01-05",
+        "3p_adenylation_time": 20,
+        "3p_adenylation_temperature": 58,
+        "reaction_time": 9
     }
 ]
