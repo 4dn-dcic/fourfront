@@ -59,12 +59,12 @@ def test_replaced_file_not_uniqued(testapp, file):
 
 
 @pytest.fixture
-def fastq_json(award, experiment, lab):
+def fastq_json(award, experiment, lab, file_formats):
     return {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('uuid'),
         'filename': 'test.fastq.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploaded',
@@ -77,48 +77,15 @@ def proc_file_json(award, experiment, lab, file_formats):
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': file_formats.get('pairs').get('@id'),
+        'file_format': file_formats.get('pairs').get('uuid'),
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
     }
 
 
-@pytest.fixture
-def fasta_json(award, experiment, lab):
-    return {
-        'accession': '4DNFIO67APA2',
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'file_format': 'fasta',
-        'filename': 'test.fasta.gz',
-        'md5sum': '0123456789abcdef0123456789111111',
-        'status': 'uploaded',
-    }
-
-
-@pytest.fixture
-def all_file_jsons(fastq_json, fasta_json):
-    return [fastq_json, fasta_json]
-
-
-@pytest.fixture
-def related_files(all_file_jsons):
-    r_files = []
-    for f in all_file_jsons:
-        item = f.copy()
-        item['related_files'] = [{'relationship_type': 'derived from',
-                                  'file': f['accession']}]
-        item['md5sum'] = '2123456789abcdef0123456789abcdef'
-        item['accession'] = ''
-        r_files.append(item)
-    return(zip(all_file_jsons, r_files))
-
-
-def test_file_post_all(testapp, all_file_jsons):
-    for f in all_file_jsons:
-        file_url = '/file_' + f['file_format']
-        testapp.post_json(file_url, f, status=201)
+def test_file_post_fastq(testapp, fastq_json):
+    testapp.post_json('/file_fastq', fastq_json, status=201)
 
 
 @pytest.fixture
@@ -225,7 +192,7 @@ def test_extra_files_get_upload(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
 
-    get_res = testapp.get(resobj['@id']+'/upload')
+    get_res = testapp.get(resobj['@id'] + '/upload')
     get_resobj = get_res.json['@graph'][0]
     assert get_resobj['upload_credentials']
     assert get_resobj['extra_files_creds'][0]
@@ -261,14 +228,14 @@ def test_files_aws_credentials(testapp, fastq_uploading):
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
 
 
-def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
+def test_files_aws_credentials_change_filename(testapp, fastq_uploading, file_formats):
     fastq_uploading['filename'] = 'test.zip'
-    fastq_uploading['file_format'] = 'zip'
+    fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')
     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
     resobj = res.json['@graph'][0]
 
     fastq_uploading['filename'] = 'test.tiff'
-    fastq_uploading['file_format'] = 'tiff'
+    fastq_uploading['file_format'] = file_formats.get('tiff').get('uuid')
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
     assert resobj['upload_credentials']['key'].endswith('zip')
@@ -277,9 +244,9 @@ def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
     assert res_put.json['@graph'][0]['href'].endswith('tiff')
 
 
-def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
+def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading, file_formats):
     fastq_uploading['filename'] = 'test.zip'
-    fastq_uploading['file_format'] = 'zip'
+    fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')
     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
     resobj = res.json['@graph'][0]
 
@@ -293,27 +260,23 @@ def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
     assert resobj['href'] == res_put.json['@graph'][0]['href']
 
 
-def test_s3_filename_validation(testapp, fastq_uploading):
+def test_s3_filename_validation(testapp, fastq_uploading, file_formats):
     """
     s3 won't allow certain characters in filenames, hence the regex validator
     created in file.json schema. Required regex is: "^[\\w+=,.@-]*$"
     """
     # first a working one
     fastq_uploading['filename'] = 'test_file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
+    fastq_uploading['file_format'] = file_formats.get('fastq').get('uuid')
     testapp.post_json('/file_fastq', fastq_uploading, status=201)
     # now some bad boys that don't pass
     fastq_uploading['filename'] = 'test file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test|file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test~file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test#file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
 
 
@@ -355,11 +318,11 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
 
 
 @pytest.fixture
-def mcool_file_json(award, experiment, lab):
+def mcool_file_json(award, experiment, lab, file_formats):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'mcool',
+        'file_format': file_formats.get('mcool').get('uuid'),
         'md5sum': '00000000000000000000000000000000',
         'filename': 'my.cool.mcool',
         'status': 'uploaded',
@@ -374,12 +337,12 @@ def mcool_file(testapp, mcool_file_json):
 
 
 @pytest.fixture
-def file(testapp, award, experiment, lab):
+def file(testapp, award, experiment, lab, file_formats):
 
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('uuid'),
         'md5sum': '00000000000000000000000000000000',
         'filename': 'my.fastq.gz',
         'status': 'uploaded',

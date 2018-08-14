@@ -280,9 +280,9 @@ class File(Item):
     })
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
-        file_format_item = request.embed(file_format)
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
         file_extension = file_format_item.get('standard_file_extension')
-        return '{}{}'.format(accession, file_extension)
+        return '{}.{}'.format(accession, file_extension)
 
     @calculated_property(schema={
         "title": "File Type",
@@ -291,12 +291,10 @@ class File(Item):
     })
     def file_type_detailed(self, request, file_format, file_type=None):
         outString = (file_type or 'other')
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+        fformat = file_format_item.get('file_format')
         if file_format is not None:
             outString = outString + ' (' + file_format + ')'
-
-        # accession = accession or external_accession
-        # file_extension = self.schema['file_format_file_extension'][file_format]
-        # return '{}{}'.format(accession, file_extension)
         return outString
 
     def _update(self, properties, sheets=None):
@@ -313,8 +311,6 @@ class File(Item):
                                               'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
-
-        file_formats = [properties.get('file_format'), ]
 
         # handle extra files
         updated_extra_files = []
@@ -352,7 +348,7 @@ class File(Item):
                 ext = self.build_external_creds(self.registry, uuid, xfile)
                 # build href
                 file_extension = xfile_format.properties.get('standard_file_extension')
-                filename = '{}{}'.format(xfile['accession'], file_extension)
+                filename = '{}.{}'.format(xfile['accession'], file_extension)
                 xfile['href'] = at_id + '@@download/' + filename
                 xfile['upload_key'] = ext['key']
                 sheets['external' + xfile['file_format']] = ext
@@ -439,7 +435,7 @@ class File(Item):
     })
     def href(self, request):
         file_format = self.properties.get('file_format')
-        fformat = request.embed(file_format)
+        fformat = get_item_if_you_can(request, file_format, 'file-formats')
         file_extension = fformat.get('standard_file_extension')
         accession = self.properties.get('accession', self.properties.get('external_accession'))
         filename = '{}.{}'.format(accession, file_extension)
@@ -477,7 +473,12 @@ class File(Item):
         if external is not None:
             extras = []
             for extra in self.properties.get('extra_files', []):
-                extra_creds = self.propsheets.get('external' + extra['file_format'])
+                eformat = extra.get('file_format')
+                if eformat.startswith('/file-formats/'):
+                    eformat = eformat[len('/file-formats/'):-1]
+                format_item = self.registry['collections']['FileFormat'].get(eformat)
+                eff = format_item.properties['file_format']
+                extra_creds = self.propsheets.get('external' + eff)
                 extra['upload_credentials'] = extra_creds['upload_credentials']
                 extras.append(extra)
             return extras
@@ -755,10 +756,10 @@ def post_upload(context, request):
         bucket = request.registry.settings['file_upload_bucket']
         # maybe this should be properties.uuid
         uuid = context.uuid
-        mapping = context.schema['file_format_file_extension']
-        file_extension = mapping[properties['file_format']]
+        file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
+        file_extension = file_format.get('file_format')
 
-        key = '{uuid}/{accession}{file_extension}'.format(
+        key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid, **properties)
 
     elif external.get('service') == 's3':
@@ -794,12 +795,13 @@ def post_upload(context, request):
     return result
 
 
-def is_file_to_download(properties, mapping, expected_filename=None):
-    file_extension = mapping[properties['file_format']]
+def is_file_to_download(properties, file_format, expected_filename=None):
+    file_extension = file_format.get('standard_file_extension')
     accession_or_external = properties.get('accession') or properties.get('external_accession')
     if not accession_or_external:
         return False
-    filename = accession_or_external + file_extension
+    filename = '{accession}.{file_extension}'.format(
+        accession=accession_or_external, file_extension=file_extension)
     if expected_filename is None:
         return filename
     elif expected_filename != filename:
@@ -830,16 +832,17 @@ def download(context, request):
     # or one of the files in extra files, the following logic will
     # search to find the "right" file and redirect to a download link for that one
     properties = context.upgrade_properties()
-    mapping = context.schema['file_format_file_extension']
+    file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
 
     _filename = None
     if request.subpath:
         _filename, = request.subpath
-    filename = is_file_to_download(properties, mapping, _filename)
+    filename = is_file_to_download(properties, file_format, _filename)
     if not filename:
         found = False
-        for extra in properties.get('extra_files'):
-            filename = is_file_to_download(extra, mapping, _filename)
+        for extra in properties.get('extra_files', []):
+            eformat = get_item_if_you_can(request, extra.get('file_format'), 'file-formats')
+            filename = is_file_to_download(extra, eformat, _filename)
             if filename:
                 found = True
                 properties = extra

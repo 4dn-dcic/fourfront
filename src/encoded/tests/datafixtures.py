@@ -377,7 +377,7 @@ def file_formats(testapp, lab, award):
     formats = {}
     ef_format_info = {
         'pairs_px2': {'standard_file_extension': 'pairs.gz.px2', 'allowed_extensions': ['pairs.gz.px2']},
-        'pairsam_px2': {'standard_file_extension': '.sam.pairs.gz.px2', 'allowed_extensions': ['.sam.pairs.gz.px2']},
+        'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2', 'allowed_extensions': ['.sam.pairs.gz.px2']},
     }
     format_info = {
         'fastq': {'standard_file_extension': 'fastq.gz', 'allowed_extensions': ['fastq.gz', 'fq.gz']},
