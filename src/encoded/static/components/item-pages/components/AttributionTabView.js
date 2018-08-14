@@ -50,11 +50,8 @@ export class AttributionTabView extends React.PureComponent {
                 <div className="row">
 
                     <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
-
                         <LabsSection context={context} />
-
                         { awardExists ? FormattedInfoBlock.Award(award) : null }
-
                     </div>
 
                     { submittedByExists ?

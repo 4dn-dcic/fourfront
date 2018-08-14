@@ -424,20 +424,38 @@ export class FormattedInfoBlock extends React.Component {
             );
         }
 
-        var innerContent = null, contact_person = null;
+        function generateContactPersonListItem(contactPerson, idx){
+            return (
+                <div className="contact-person row" key={contactPerson.contact_email || idx}>
+                    <div className="col-sm-4 text-ellipsis-container">
+                        &nbsp;&nbsp;&bull;&nbsp; { contactPerson.display_title }
+                    </div>
+                    <div className="col-sm-8 text-ellipsis-container">
+                        <i className="icon icon-fw icon-envelope-o"/>&nbsp;&nbsp;
+                        <a href={"mailto:" + contactPerson.contact_email}>{ contactPerson.contact_email }</a>
+                    </div>
+                </div>
+            );
+        }
+
+        var innerContent = null,
+            contactPersons = null;
 
         if (includeDetail && details_lab){
 
-            contact_person = Array.isArray(details_lab.correspondence) && _.find(details_lab.correspondence, function(contact_person){
+            contactPersons = Array.isArray(details_lab.correspondence) && _.filter(details_lab.correspondence, function(contact_person){
                 return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
             });
 
-            if (contact_person){
+            if (contactPersons && contactPersons.length > 0){
                 // Point of contact(s) for Lab which has view permission(s)
                 innerContent = (
                     <div>
                         <div className="address">{ generateAddressString() }</div>
-                        <span data-tip="Primary point of contact for lab" className="text-500">{ contact_person.display_title }</span> - <a className="text-ellipsis-container" href={"mailto:" + contact_person.contact_email}>{ contact_person.contact_email }</a>
+                        <div className="correspondence">
+                            <h6 className="mt-08 mb-03 text-500">Correspondence:</h6>
+                            { _.map(contactPersons, generateContactPersonListItem) }
+                        </div>
                     </div>
                 );
             } else {
@@ -451,7 +469,7 @@ export class FormattedInfoBlock extends React.Component {
             includeLabel ? "Lab" : null,                                                                // includeLabel
             innerContent,                                                                               // contents
             'lab',                                                                                      // extraContainerClassName
-            contact_person ? 'contact' : 'address',                                                     // extraDetailClassName
+            contactPersons ? 'contact' : 'address',                                                      // extraDetailClassName
             key                                                                                         // key
         );
     }
@@ -492,7 +510,7 @@ export class FormattedInfoBlock extends React.Component {
             details_user && includeDetail ? (
                 (details_user.lab && details_user.lab.display_title) || details_user.job_title || details_user.timezone
             ) : null,
-            'award',
+            'user',
             'project',
             key
         );
