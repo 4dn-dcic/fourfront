@@ -21,7 +21,6 @@ from .base import (
     collection_add,
     item_edit
 )
-
 import datetime
 
 
@@ -284,7 +283,7 @@ class ExperimentSetReplicate(ExperimentSet):
     ]
 
     def _update(self, properties, sheets=None):
-        all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
+        all_experiments = [exp['replicate_exp'] for exp in properties.get('replicate_exps', [])]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
 
