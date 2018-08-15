@@ -21,7 +21,8 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/dbxrefs" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -83,7 +84,6 @@
             "comment": "See Modifications sheet or collection for existing items",
             "type": "array",
             "lookup": 40,
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Modifications",
@@ -97,7 +97,6 @@
             "type": "array",
             "lookup": 50,
             "comment": "See Treatment sheet or collection for exisiting items",
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Treatment",

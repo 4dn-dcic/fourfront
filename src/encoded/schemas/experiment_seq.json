@@ -28,6 +28,7 @@
         { "$ref": "mixins.json#/spikein_info" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/supplementary_files" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "experiment.json#/properties" }
     ],
     "dependencies": {

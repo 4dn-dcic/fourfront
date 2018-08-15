@@ -11,7 +11,8 @@ from .base import (
     Item,
     paths_filtered_by_status,
     get_item_if_you_can,
-    ALLOW_SUBMITTER_ADD
+    ALLOW_SUBMITTER_ADD,
+    lab_award_attribution_embed_list
 )
 
 EXP_CATEGORIZER_SCHEMA = {
@@ -48,60 +49,53 @@ class Experiment(Item):
 
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
+    name_key = 'accession'
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded_list = ["award.project",
-                     "award.center_title",
-                     "lab.city",
-                     "lab.state",
-                     "lab.country",
-                     "lab.postal_code",
-                     "lab.city",
-                     "lab.title",
+    embedded_list = lab_award_attribution_embed_list + [
+        "experiment_sets.experimentset_type",
+        "experiment_sets.@type",
+        "experiment_sets.accession",
 
-                     "experiment_sets.experimentset_type",
-                     "experiment_sets.@type",
-                     "experiment_sets.accession",
+        "produced_in_pub.*",
+        "publications_of_exp.*",
 
-                     "produced_in_pub.*",
-                     "publications_of_exp.*",
+        "biosample.accession",
+        "biosample.modifications_summary",
+        "biosample.treatments_summary",
+        "biosample.biosource_summary",
+        "biosample.biosample_type",
+        "biosample.biosource.biosource_type",
+        "biosample.biosource.cell_line.slim_terms",
+        "biosample.biosource.cell_line.synonyms",
+        "biosample.biosource.tissue.slim_terms",
+        "biosample.biosource.tissue.synonyms",
+        "biosample.biosource.individual.organism.name",
+        'biosample.modifications.modification_type',
+        'biosample.modifications.display_title',
+        'biosample.treatments.treatment_type',
+        'biosample.treatments.display_title',
+        'biosample.badges.*',
 
-                     "biosample.accession",
-                     "biosample.modifications_summary",
-                     "biosample.treatments_summary",
-                     "biosample.biosource_summary",
-                     "biosample.biosample_type",
-                     "biosample.biosource.biosource_type",
-                     "biosample.biosource.cell_line.slim_terms",
-                     "biosample.biosource.cell_line.synonyms",
-                     "biosample.biosource.tissue.slim_terms",
-                     "biosample.biosource.tissue.synonyms",
-                     "biosample.biosource.individual.organism.name",
-                     'biosample.modifications.modification_type',
-                     'biosample.modifications.display_title',
-                     'biosample.treatments.treatment_type',
-                     'biosample.treatments.display_title',
-                     'biosample.badges.*',
+        "files.href",
+        "files.accession",
+        "files.uuid",
+        "files.file_size",
+        "files.upload_key",
+        "files.file_format",
+        "files.file_classification",
+        "files.paired_end",
+        'files.badges.*',
 
-                     "files.href",
-                     "files.accession",
-                     "files.uuid",
-                     "files.file_size",
-                     "files.upload_key",
-                     "files.file_format",
-                     "files.file_classification",
-                     "files.paired_end",
-                     'files.badges.*',
-
-                     "processed_files.href",
-                     "processed_files.accession",
-                     "processed_files.uuid",
-                     "processed_files.file_size",
-                     "processed_files.upload_key",
-                     "processed_files.file_format",
-                     "processed_files.file_classification"]
-    name_key = 'accession'
+        "processed_files.href",
+        "processed_files.accession",
+        "processed_files.uuid",
+        "processed_files.file_size",
+        "processed_files.upload_key",
+        "processed_files.file_format",
+        "processed_files.file_classification"
+    ]
 
     def generate_mapid(self, experiment_type, num):
         delim = '_'

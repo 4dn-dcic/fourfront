@@ -21,7 +21,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
     getFilesTabs(width){
         var context = this.props.context;
-        
+
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
         ];
@@ -29,13 +29,18 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
         var tabs = [];
 
-        if (Array.isArray(context.files) && context.files.length > 0) {
-            
+        var rawFilesWithViewPermissions = Array.isArray(context.files) && context.files.length > 0 && _.filter(context.files, function(rf){
+            if (rf.error && !object.itemUtil.atId(rf)) return false;
+            return true;
+        });
+
+        if (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length > 0) {
+
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'raw-files',
                 content : <RawFilesTableSection
-                    rawFiles={context.files}
+                    files={rawFilesWithViewPermissions}
                     width={width}
                     {..._.pick(this.props, 'context', 'schemas')}
                     {...this.state}
@@ -50,7 +55,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
                 content : <ProcessedFilesTableSection
-                    processedFiles={context.processed_files}
+                    files={context.processed_files}
                     width={width}
                     {..._.pick(this.props, 'context', 'schemas')}
                     {...this.state}
@@ -81,7 +86,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));
         }
-        
+
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
             initTabs.push(FileViewGraphSection.getTabObject(
                 _.extend({}, this.props, {
@@ -257,7 +262,7 @@ class OverviewHeadingMic extends React.Component {
 
 export class RawFilesTableSection extends React.Component {
     render(){
-        var rawFiles = this.props.rawFiles;
+        var files = this.props.files;
         var columns = _.clone(SimpleFilesTableLoaded.defaultProps.columns);
         var columnDefinitionOverrideMap = _.clone(SimpleFilesTableLoaded.defaultProps.columnDefinitionOverrideMap);
 
@@ -275,7 +280,7 @@ export class RawFilesTableSection extends React.Component {
         };
 
         // Add column for paired end if any files have one.
-        if (_.any(rawFiles, function(f) { return typeof f.paired_end !== 'undefined'; })){
+        if (_.any(files, function(f) { return typeof f.paired_end !== 'undefined'; })){
             columns['paired_end'] = {
                 "title" : 'End',
                 'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 },
@@ -286,15 +291,10 @@ export class RawFilesTableSection extends React.Component {
         return (
             <div className="raw-files-table-section">
                 <h3 className="tab-section-title">
-                    <span><span className="text-400">{ rawFiles.length }</span> Raw File{ rawFiles.length === 1 ? '' : 's' }</span>
+                    <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
                 </h3>
-                <SimpleFilesTableLoaded
-                    files={rawFiles}
-                    schemas={this.props.schemas}
-                    columns={columns}
-                    columnDefinitionOverrideMap={columnDefinitionOverrideMap}
-                    width={this.props.width}
-                />
+                <SimpleFilesTableLoaded {..._.pick(this.props, 'files', 'schemas', 'width')}
+                    columns={columns} columnDefinitionOverrideMap={columnDefinitionOverrideMap} />
             </div>
         );
     }
@@ -302,17 +302,13 @@ export class RawFilesTableSection extends React.Component {
 
 export class ProcessedFilesTableSection extends React.Component {
     render(){
-        var processedFiles = this.props.processedFiles;
+        var files = this.props.files;
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
-                    <span><span className="text-400">{ processedFiles.length }</span> Processed File{ processedFiles.length === 1 ? '' : 's' }</span>
+                    <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
                 </h3>
-                <SimpleFilesTableLoaded
-                    files={processedFiles}
-                    schemas={this.props.schemas}
-                    width={this.props.width}
-                />
+                <SimpleFilesTableLoaded {..._.pick(this.props, 'files', 'schemas', 'width')} />
             </div>
         );
     }

@@ -20,6 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -89,7 +90,6 @@
             "title": "Flowcells",
             "description": "For high-throughput sequencing, the flowcells used for the sequencing of the replicate.",
             "type": "array",
-            "default": [],
             "items": {
                 "title": "Flowcell details",
                 "type": "object",

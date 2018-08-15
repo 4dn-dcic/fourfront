@@ -80,9 +80,11 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         //context = SET;
 
-        var processedFiles = expFxn.allProcessedFilesFromExperimentSet(context),
-            width = this.getTabViewWidth(),
-            tabs = [];
+        var processedFiles  = expFxn.allProcessedFilesFromExperimentSet(context),
+            rawFiles        = expFxn.allFilesFromExperimentSet(context, false),
+            width           = this.getTabViewWidth(),
+            commonProps     = { width, context, schemas },
+            tabs            = [];
 
         if (processedFiles && processedFiles.length > 0){
 
@@ -90,17 +92,17 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
-                content : <ProcessedFilesStackedTableSection processedFiles={processedFiles} width={width} context={context} schemas={schemas} {...this.state} />
+                content : <ProcessedFilesStackedTableSection files={processedFiles} {...commonProps} {...this.state} />
             });
 
         }
 
-        // Raw files tab, if have experiments
-        if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
+        // Raw files tab, if have experiments with raw files
+        if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0 && Array.isArray(rawFiles) && rawFiles.length > 0){
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
-                content : <RawFilesStackedTableSection width={width} context={context} schemas={schemas} {...this.state} />
+                content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} {...this.state} />
             });
         }
 
@@ -121,7 +123,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
                 key : 'other-processed-files',
-                content : <OtherProcessedFilesStackedTableSection width={width} context={context} schemas={schemas} {...this.state} />
+                content : <OtherProcessedFilesStackedTableSection {...commonProps} {...this.state} />
             });
         }
 
@@ -218,17 +220,17 @@ class ExperimentSetHeader extends React.PureComponent {
 export class RawFilesStackedTableSection extends React.PureComponent {
     render(){
 
+        var { context, files } = this.props;
+
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
-            { columnClass: 'file-detail', title: 'File Info'},
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
-        ];
+                { columnClass: 'file-detail', title: 'File Info'},
+                { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
+            ],
+            fileCount = files.length,
+            expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0,
+            anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
 
-        var context = this.props.context;
-        var files = expFxn.allFilesFromExperimentSet(context, false);
-        var fileCount = files.length;
-        var expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0;
-        var anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
         return (
             <div className="exp-table-section">
                 { expSetCount ? 
@@ -454,15 +456,15 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         super(props);
         this.state = {
             'currentlyVisualizedFiles' : ProcessedFilesStackedTableSection.findAllFilesToVisualize(props.context), // TODO: May change, act on some 'currentVisualizedFileType' param or state, etc.
-            'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.processedFiles)
+            'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.files)
         };
         this.columnHeaders = ProcessedFilesStackedTableSection.extendedColumnHeaders();
     }
 
     componentWillReceiveProps(nextProps){
         var nextState = {};
-        if (nextProps.processedFiles !== this.props.processedFiles){
-            nextState.filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(nextProps.processedFiles);
+        if (nextProps.files !== this.props.files){
+            nextState.filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(nextProps.files);
         }
         if (nextProps.context !== this.props.context){
             nextState.currentlyVisualizedFiles = ProcessedFilesStackedTableSection.findAllFilesToVisualize(nextProps.context);
@@ -473,13 +475,13 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 
     renderTopRow(){
-        const { mounted, width, processedFiles, context } = this.props;
+        const { mounted, width, files, context } = this.props;
         if (!mounted) return null;
 
         // Used in ProcessedFilesStackedTable for icons/buttons
         const currentlyVisualizedFiles = this.state.currentlyVisualizedFiles;
         const processedFilesTableProps = {
-            'files' : processedFiles, currentlyVisualizedFiles,
+            files, currentlyVisualizedFiles,
             'experimentSetAccession' : context.accession || null,
             'experimentArray' : context.experiments_in_set,
             'replicateExpsArray' : context.replicate_exps,
@@ -500,13 +502,13 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, processedFiles, context, leftPanelCollapseWidth } = this.props;
+        var { mounted, width, files, context, leftPanelCollapseWidth } = this.props;
         if (!mounted) return null;
 
         return (
             <div className="processed-files-table-section exp-table-section">
                 <h3 className="tab-section-title">
-                    <span><span className="text-400">{ processedFiles.length }</span> Processed Files</span>
+                    <span><span className="text-400">{ files.length }</span> Processed Files</span>
                 </h3>
                 { this.renderTopRow() }
                 <div className="row">

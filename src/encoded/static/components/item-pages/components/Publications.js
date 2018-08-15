@@ -22,30 +22,38 @@ var testData = [ // Use this to test list view(s) as none defined in test data.
 
 /**
  * Display a FormattedInfoBlock-style block with custom detail (defined via props.children).
- * 
+ *
  * @memberof module:item-pages/components.Publications
  * @class DetailBlock
  * @extends {React.Component}
- * 
+ *
  * @prop {string} singularTitle         - Title to show in top left of block. 'S' gets added to end of title if more than 1 item.
  * @prop {Object} publication           - Publication whose link and display_title to display.
  * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
  */
-class DetailBlock extends React.Component {
+class DetailBlock extends React.PureComponent {
 
     defaultProps = {
         'singularTitle' : 'Publication'
     }
 
     render(){
-        var publication = this.props.publication;
+        var { publication, singularTitle, children } = this.props;
         if (typeof publication !== 'object' || !publication) return null;
+
+        var title =  publication.display_title;
+
+        if (publication.short_attribution && title.indexOf(publication.short_attribution + ' ') > -1){
+            // Short Attribution is added to display_title on back-end; clear it off here since we craft our own attribution string manually.
+            title = title.replace(publication.short_attribution + ' ', '');
+        }
+
         return (
-            <FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
+            <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
                 <h5 className="block-title">
-                    <a href={object.atIdFromObject(publication)}>{ publication.display_title }</a>
+                    <a href={object.atIdFromObject(publication)}>{ title }</a>
                 </h5>
-                <div className="details">{ this.props.children }</div>
+                <div className="details" children={children} />
             </FormattedInfoWrapper>
         );
     }
@@ -122,9 +130,9 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
 /**
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
- * 
+ *
  * @class Publications
- * 
+ *
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
 export class Publications extends React.PureComponent {

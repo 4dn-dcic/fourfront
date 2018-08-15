@@ -11,6 +11,57 @@ import { ItemFooterRow } from './ItemFooterRow';
 
 
 
+
+export function generateAddressString(lab){
+    return (
+        (lab.city ? lab.city + ', ' : '') +
+        (lab.state ? lab.state : '') +
+        (lab.postal_code ? ' ' + lab.postal_code : '' ) +
+        (lab.country ? ', ' + lab.country : '')
+    );
+}
+
+/**
+ * Generate a list element for a contact person.
+ * We base64-encode emails for security against scrapers;
+ * instead of providing a mailto: link, we make the email
+ * visible only when email icon is hovered over.
+ *
+ * @param {Object} contactPerson - Faux Item representation of User.
+ * @param {string} contactPerson.display_title - Name of User
+ * @param {string} contactPerson.contact_email - Base64-encoded email of User.
+ * @param {number} [idx] - Index of person in correspondence list.
+ * @returns {JSX.Element} A `li` JSX element.
+ */
+export function generateContactPersonListItem(contactPerson, idx){
+    var decodedEmail = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
+        decodedEmailParts = decodedEmail && decodedEmail.split('@'),
+        onClick = (decodedEmail && function(e){
+            if (typeof window.location.assign !== 'function') return false;
+            window.location.assign('mailto:' + decodedEmail);
+            return false;
+        }) || null,
+        dataTip = (decodedEmailParts && (
+            'Click to send e-mail message to <br/>' +
+            '<span class="text-500">' +
+            decodedEmailParts[0] +
+            '</span> <span class="text-300">(at)</span> <span class="text-500">' +
+            decodedEmailParts[1] +
+            '</span>'
+        )) || null;
+
+    return (
+        <li className="contact-person" key={contactPerson.contact_email || idx}>
+            <i className="icon icon-fw icon-envelope-o clickable" data-html data-tip={dataTip} onClick={onClick} />
+            &nbsp;&nbsp;
+            { contactPerson.display_title }
+        </li>
+    );
+}
+
+
+
+
 export class AttributionTabView extends React.PureComponent {
 
     static getTabObject(context){
@@ -32,58 +83,94 @@ export class AttributionTabView extends React.PureComponent {
 
 
     render(){
-        var context = this.props.context;
-        var { produced_in_pub, publications_of_set, lab, award, submitted_by } = context;
+        var context = this.props.context,
+            { produced_in_pub, publications_of_set, lab, award, submitted_by } = context,
+            awardExists = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
+            submittedByExists = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
+
         return (
-            <div className="row info-area">
-                <div className="col-sm-12">
-                    <div className="row">
+            <div className="info-area">
 
-                        { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ?
-                            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                <Publications context={context} />
-                                <hr className="mt-1 mb-2"/>
-                            </div>
-                        : null }
+                { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ?
+                    <div>
+                        <Publications context={context} />
+                        <hr className="mt-1 mb-2"/>
+                    </div>
+                : null }
 
-                        <LabsSection context={context}/>
+                <div className="row">
 
-                        { award && typeof award !== 'string' ?
-                            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                { FormattedInfoBlock.Award(award) }
-                            </div>
-                        : null }
-
-                        { submitted_by && typeof submitted_by !== 'string' ?
-                            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                { FormattedInfoBlock.User(submitted_by) }
-                            </div>
-                        : null }
-
+                    <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
+                        <LabsSection context={context} />
+                        { awardExists ? FormattedInfoBlock.Award(award) : null }
                     </div>
 
+                    { submittedByExists ?
+                        <div className="col-xs-12 col-md-5">
+                            { FormattedInfoBlock.User(submitted_by) }
+                        </div>
+                    : null }
+
+                    
                 </div>
-                <div className="col-sm-12">
-                    <ItemFooterRow context={context} schemas={this.props.schemas} />
-                </div>
+
+                <ItemFooterRow context={context} schemas={this.props.schemas} />
             </div>
         );
     }
 
 }
 
-class LabsSection extends React.Component {
-    render(){
-        var context = this.props.context;
-        var primary_lab_exists = context.lab && typeof context.lab !== 'string';
-        var contributing_labs_exist = (Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0);
-        if (!primary_lab_exists && !contributing_labs_exist) return null;
+class LabsSection extends React.PureComponent {
+
+    static defaultProps = {
+        'className' : null
+    }
+
+    constructor(props){
+        super(props);
+        this.contributingLabRenderFxn = this.contributingLabRenderFxn.bind(this);
+        this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true }, ReactTooltip.rebuild);
+    }
+
+    contributingLabRenderFxn(lab, idx, all){
+        var atId = object.itemUtil.atId(lab),
+            contactPersons = Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
+                return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
+            });
+
         return (
-            <div className="col-sm-12 col-md-12 col-sm-float-right">
-                { primary_lab_exists ? FormattedInfoBlock.Lab(context.lab) : null }
-                { contributing_labs_exist ? <WrappedCollapsibleList items={context.contributing_labs} singularTitle="Contributing Lab" itemClassName="publication" iconClass='user-plus' /> : null }
-                { primary_lab_exists && contributing_labs_exist ? <hr className="mt-1 mb-2"/> : null }
+            <div className="lab" key={atId || idx}>
+                <h5>
+                    <a className="text-500" href={atId}>{ lab.display_title }</a>
+                </h5>
+                { contactPersons && contactPersons.length > 0 ?
+                    <ul className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</ul>
+                : null }
             </div>
         );
+    }
+
+    render(){
+        var { context, className } = this.props,
+            primaryLab = (typeof context.lab !== 'string' && context.lab) || null,
+            contributingLabs = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
+
+        if (!primaryLab && !contributingLabs) return null;
+        return (
+            <div className={className}>
+                { primaryLab ? FormattedInfoBlock.Lab(primaryLab) : null }
+                { contributingLabs ?
+                    <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
+                        iconClass='user-plus' itemRenderFxn={this.contributingLabRenderFxn} />
+                : null }
+                { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
+            </div>
+        );
+
     }
 }
