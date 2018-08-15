@@ -295,11 +295,11 @@ export default class PageTitle extends React.PureComponent {
 
         return (
             <div id="page-title-container" className="container">
-                <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
+                <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" pageTitleStyle={elementStyle} />
                 <layout.WindowResizeUpdateTrigger>
                     <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} style={elementStyle} />
                 </layout.WindowResizeUpdateTrigger>
-                <Alerts alerts={this.props.alerts} style={{ width : elementStyle.width || null }} />
+                <Alerts alerts={this.props.alerts} style={{ 'width' : elementStyle.width || null }} />
             </div>
         );
     }
@@ -360,6 +360,10 @@ export class StaticPageBreadcrumbs extends React.Component {
         return list;
     }
 
+    static defaultProps = {
+        'pageTitleStyle' : {}
+    }
+
     constructor(props){
         super(props);
         this.renderCrumb = this.renderCrumb.bind(this);
@@ -381,14 +385,14 @@ export class StaticPageBreadcrumbs extends React.Component {
     }
 
     editButton(){
-        var { session, context } = this.props;
+        var { session, context, pageTitleStyle } = this.props;
         if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
 
             if (Array.isArray(context.actions)){
                 var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
                 if (editAction && editAction.href){
                     return (
-                        <div className="static-edit-button pull-right">
+                        <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
                             <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );

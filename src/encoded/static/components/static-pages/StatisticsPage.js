@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
 import { Button } from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
 import { console, layout, navigate, ajax, isServerSide } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import * as globals from './../globals';
@@ -17,9 +18,9 @@ export default class StatisticsPageView extends StaticPage {
     render(){
         return (
             <StaticPage.Wrapper>
-                <StatisticsViewController>
+                <StatisticsViewController {..._.pick(this.props, 'session', 'browseBaseState')}>
                     <layout.WindowResizeUpdateTrigger>
-                        <StatisticsChartsView session={this.props.session} />
+                        <StatisticsChartsView {..._.pick(this.props, 'session')} />
                     </layout.WindowResizeUpdateTrigger>
                 </StatisticsViewController>
             </StaticPage.Wrapper>
@@ -36,9 +37,12 @@ export default class StatisticsPageView extends StaticPage {
 export class StatisticsViewController extends React.PureComponent {
 
     static CHART_SEARCH_URIS = {
-        'File'                      : '/search/?type=File&experiments.display_title!=No%20value&limit=0',
-        'ExperimentSetReplicate'    : function(props) {
-            return '/search/?' + stringify(navigate.getBrowseBaseParams()) + '&limit=0';
+        //'File' : '/search/?type=File&experiments.display_title!=No%20value&limit=0',
+        'File' : function(props) {
+            return '/search/?' + stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) + '&limit=0';
+        },
+        'ExperimentSetReplicate' : function(props) {
+            return '/search/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
         }
     };
 
@@ -59,7 +63,7 @@ export class StatisticsViewController extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        if (pastProps.session !== this.props.session){
+        if (pastProps.session !== this.props.session || pastProps.browseBaseState !== this.props.browseBaseState){
             this.performSearchRequests();
         }
     }
@@ -433,21 +437,30 @@ export class AreaChart extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.correctDatesInData = this.correctDatesInData.bind(this);
+        this.childKeysFromData = this.childKeysFromData.bind(this);
+        this.updateDataInState = this.updateDataInState.bind(this);
         this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
         this.drawNewChart = this.drawNewChart.bind(this);
         this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
-        this.state = {
-            'drawingError' : false,
-            'drawn' : false
-        };
 
         // D3 things
         this.parseTime = d3.timeParse(props.d3TimeFormat);
+        this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         this.stack = d3.stack().value(function(d, key){
             var currChild = _.findWhere(d.children || [], { 'term' : key });
             if (currChild) return currChild.total;
             return 0;
         });
+        this.stack.keys(this.childKeysFromData(props.data));
+
+        this.state = {
+            'drawingError'  : false,
+            'drawn'         : false,
+            'stackedData'   : this.stack(this.correctDatesInData(props.data))
+        };
+
+        
     }
 
     componentDidMount(){
@@ -457,6 +470,9 @@ export class AreaChart extends React.PureComponent {
     componentWillReceiveProps(nextProps){
         if (nextProps.d3TimeFormat !== this.props.d3TimeFormat){
             this.parseTime = d3.timeParse(nextProps.d3TimeFormat);
+        }
+        if (nextProps.data !== this.props.data){
+            this.updateDataInState(nextProps.data);
         }
     }
 
@@ -484,15 +500,40 @@ export class AreaChart extends React.PureComponent {
         }, 300);
     }
     
+    /**
+     * Convert timestamps to D3 date objects.
+     */
+    correctDatesInData(data = this.props.data){
+        return _.map(data, (d) => {
+            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
+            return _.extend({}, d, {
+                'date' : this.parseTime(formattedDate),
+                'origDate' : formattedDate
+            });
+        });
+    }
+
+    childKeysFromData(data = this.props.data){
+        return Array.from(_.reduce(data, function(m,d){
+            _.forEach(d.children || [], function(child){ m.add(child.term); });
+            return m;
+        }, new Set()));
+    }
+
+    updateDataInState(data = this.props.data){
+        data = this.correctDatesInData(data);
+        this.stack.keys(this.childKeysFromData(data));
+        this.setState({ 'stackedData' : this.stack(data) });
+    }
 
     commonDrawingSetup(){
-        var { margin, data, yAxisScale, yAxisPower, xAxisGenerator } = this.props;
+        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator } = this.props;
+        var data = this.state.stackedData;
         var svg         = d3.select(this.refs.svg),
             width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
             height      = (  this.props.height || parseInt( this.refs.svg.clientHeight || svg.style('height') )  ) - margin.top - margin.bottom,
             x           = d3.scaleTime().rangeRound([0, width]),
             y           = d3['scale' + yAxisScale]().rangeRound([height, 0]),
-            z           = d3.scaleOrdinal(d3.schemeCategory10),
             area        = d3.area()
                 .x ( function(d){ return x(d.date || d.data.date);  } )
                 .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
@@ -502,24 +543,14 @@ export class AreaChart extends React.PureComponent {
             y.exponent(yAxisPower);
         }
 
-        // Convert timestamps to D3 date objects.
-        data = _.map(data, (d) => {
-            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
-            return _.extend({}, d, {
-                'date' : this.parseTime(formattedDate),
-                'origDate' : formattedDate
+        var mergedDataForExtents = d3.merge(_.map(data, function(d2){
+            return _.map(d2, function(d){
+                return d.data;
             });
-        });
+        }));
 
-        // Get child keys if needed.
-        var childKeys = Array.from(_.reduce(data, function(m,d){
-            _.forEach(d.children || [], function(child){ m.add(child.term); });
-            return m;
-        }, new Set()));
-
-        x.domain(d3.extent(data, function(d){ return d.date; }));
-        y.domain([ 0, d3.max(data, function(d) { return d.total; }) ]);
-        this.stack.keys(childKeys);
+        x.domain(d3.extent(mergedDataForExtents, function(d){ return d.date; }));
+        y.domain([ 0, d3.max(mergedDataForExtents, function(d) { return d.total; }) ]);
 
         var bottomAxisGenerator = xAxisGenerator(x);
 
@@ -535,7 +566,7 @@ export class AreaChart extends React.PureComponent {
                     .attr("stroke-dasharray", "2,2");
             };
 
-        return { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn };
+        return { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn };
     }
 
     /**
@@ -556,24 +587,33 @@ export class AreaChart extends React.PureComponent {
         }
 
         var { yAxisLabel, margin } = this.props;
-        var { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
         var drawn = { svg };
 
         requestAnimationFrame(()=>{
 
             drawn.root = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
-        
+
             drawn.layers = drawn.root.selectAll('.layer')
-                .data(this.stack(data))
-                .enter().append('g').attr('class', 'layer');
+                .data(data)
+                .enter()
+                .append('g')
+                .attr('class', 'layer')
+                .attr('data-effect', 'float')
+                .attr('data-tip', function(d){ return (d.data || d).key; });
 
             drawn.path = drawn.layers.append('path')
                 .attr('class', 'area')
-                .style('fill', function(d){ return z((d.data || d).key); })
+                .style('fill', (d) => { return this.colorScale((d.data || d).key); })
                 .attr('d', area);
+                
 
             this.drawAxes(drawn, { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn });
             this.drawnD3Elements = drawn;
+
+            setTimeout(function(){
+                ReactTooltip.rebuild();
+            }, 10);
         });
     }
 
@@ -628,7 +668,7 @@ export class AreaChart extends React.PureComponent {
         }
 
         var { yAxisLabel, margin, transitionDuration } = this.props;
-        var { data, svg, x, y, z, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
 
         var drawn = this.drawnD3Elements;
 
@@ -638,14 +678,16 @@ export class AreaChart extends React.PureComponent {
                 .transition().duration(transitionDuration)
                 .attr("transform", "translate(0," + height + ")")
                 .call(bottomAxisGenerator);
+
             drawn.yAxis
                 .transition().duration(transitionDuration)
                 .call(d3.axisLeft(y));
+
             drawn.rightAxis.remove();
             drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);          
 
             var allLayers = drawn.root.selectAll('.layer')
-                .data(this.stack(data))
+                .data(data)
                 .selectAll('path.area')
                 .transition()
                 .duration(transitionDuration)

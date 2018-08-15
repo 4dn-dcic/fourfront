@@ -584,7 +584,7 @@
     {
         "name": "statistics",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff040000",
-        "title": "Portal Statistics",
+        "title": "Portal Statistics (BETA)",
         "content": [],
         "schema_version" : "3"
     }
