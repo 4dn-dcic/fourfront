@@ -802,7 +802,7 @@ def bar_plot_chart(request):
             # Terminal field aggregation -- return just totals, nothing else.
             returned_buckets[bucket_result['key']] = curr_bucket_totals
 
- 
+
     for bucket in search_result['aggregations']['field_0']['buckets']:
         format_bucket_result(bucket, ret_result['terms'], 0)
 

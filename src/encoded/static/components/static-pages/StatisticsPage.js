@@ -498,7 +498,7 @@ export class AreaChart extends React.PureComponent {
             }
         }, 300);
     }
-    
+
     /**
      * Convert timestamps to D3 date objects.
      */
