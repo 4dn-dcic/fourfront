@@ -111,22 +111,22 @@ export class FourfrontLogo extends React.PureComponent {
         'circlePathDefinitionOrig'  : "m1,30c0,-16.0221 12.9779,-29 29,-29c16.0221,0 29,12.9779 29,29c0,16.0221 -12.9779,29 -29,29c-16.0221,0 -29,-12.9779 -29,-29z",
         'circlePathDefinitionHover' : "m3.33331,34.33326c-2.66663,-17.02208 2.97807,-23.00009 29.99997,-31.33328c27.02188,-8.33321 29.66667,22.31102 16.6669,34.66654c-12.99978,12.35552 -15.64454,20.00017 -28.66669,19.00018c-13.02214,-0.99998 -15.33356,-5.31137 -18.00018,-22.33344z",
         'textTransformOrig'         : "translate(9, 37)",
-        'textTransformHover'        : "translate(25, 30) scale(0.2, 0.6)",
+        'textTransformHover'        : "translate(28, 28) scale(0.2, 0.6)",
         'fgCircleTransformOrig'     : "translate(50, 20) scale(0.35, 0.35) rotate(-135)",
         'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)"
     }
     
     constructor(props){
         super(props);
-        this.setHoverState = _.throttle(this.setHoverState, 2000);
-        this.setHoverStateOn = this.setHoverState.bind(this, true);
-        this.setHoverStateOff = this.setHoverState.bind(this, false);
+        this.setHoverStateOn    = _.throttle(this.setHoverStateOn.bind(this), 1000);
+        this.setHoverStateOff   = this.setHoverStateOff.bind(this);
     }
 
-    setHoverState(hover, e){
+    setHoverStateOn(e){
         var svg = d3.select(this.refs.svg);
-        if (hover) {
+        this.setState({ 'hover': true }, ()=>{
             setTimeout(()=>{
+                if (!this.state.hover) return; // No longer hovering. Cancel.
                 svg.select(".fourfront-logo-background-circle")
                     .transition()
                     .duration(1000)
@@ -148,13 +148,20 @@ export class FourfrontLogo extends React.PureComponent {
                     .attr('transform', this.props.fgCircleTransformHover);
 
             }, 800);
-        } else {
+        });
+    }
+
+    setHoverStateOff(e){
+        this.setState({ 'hover' : false }, ()=>{
+            var svg = d3.select(this.refs.svg);
             svg.select(".fourfront-logo-background-circle")
+                .interrupt()
                 .transition()
                 .duration(1000)
                 .attr('d', this.props.circlePathDefinitionOrig);
 
             svg.select(".fourfront-logo-text")
+                .interrupt()
                 .transition()
                 .duration(1200)
                 .attr('transform', this.props.textTransformOrig)
@@ -164,11 +171,12 @@ export class FourfrontLogo extends React.PureComponent {
                 .style('stroke-width', '0px');
 
             svg.select(".fourfront-logo-foreground-circle")
+                .interrupt()
                 .transition()
                 .duration(1000)
                 .style('opacity', '0')
                 .attr('transform', this.props.fgCircleTransformOrig);
-        }
+        });
     }
 
     renderDefs(){
