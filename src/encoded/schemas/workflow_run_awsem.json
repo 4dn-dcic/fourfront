@@ -18,6 +18,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "workflow_run.json#/properties" }
     ],
     "mixinFacets": [

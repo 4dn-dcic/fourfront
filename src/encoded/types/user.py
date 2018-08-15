@@ -66,7 +66,13 @@ class User(Item):
 
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
-    embedded_list = ['lab.awards.project', 'lab.name', 'submits_for.name', 'lab.display_title', 'submits_for.display_title']
+    embedded_list = [
+        'lab.awards.project',
+        'lab.name',
+        'lab.display_title',
+        'submits_for.name',
+        'submits_for.display_title'
+    ]
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
@@ -86,6 +92,16 @@ class User(Item):
 
     def display_title(self):
         return self.title(self.properties['first_name'], self.properties['last_name'])
+
+    @calculated_property(schema={
+        "title": "Contact Email",
+        "description": "E-Mail address by which this person should be contacted.",
+        "type": "string",
+        "format" : "email"
+    })
+    def contact_email(self):
+        """Returns `email` if `preferred_email` is not defined."""
+        return self.properties.get('preferred_email', self.properties['email'])
 
     def __ac_local_roles__(self):
         """return the owner user."""

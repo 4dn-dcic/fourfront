@@ -264,10 +264,14 @@ class EncodedRoot(Root):
     def content(self, request):
         '''Returns -object- with pre-named sections'''
         sections_to_get = ['home.introduction']
-        try:
-            return [ request.embed('/static-sections', section_name, '@@embedded', as_user=True) for section_name in sections_to_get ]
-        except KeyError:
-            return [ ]
+        return_list = []
+        for section_name in sections_to_get:
+            try:
+                res = request.embed('/static-sections', section_name, '@@embedded', as_user=True)
+                return_list.append(res)
+            except:
+                pass
+        return return_list
 
 #    @calculated_property(schema={
 #        "title": "Announcements",

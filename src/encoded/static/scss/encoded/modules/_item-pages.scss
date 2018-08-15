@@ -937,6 +937,20 @@ $download-button-width : 100px;
 				white-space: normal;
 				opacity: 0.5;
 			}
+
+			div.correspondence { 
+				> ol, > ul {
+					padding-left: 25px;
+					> li.contact-person {
+						font-size: 0.925rem;
+						float: none;
+						clear: both;
+						> .pull-right {
+							max-width: 90%;
+						}
+					}
+				}
+			}
 		}
 
 	}

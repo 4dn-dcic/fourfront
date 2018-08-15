@@ -68,22 +68,25 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         );
     }
 
+    /**
+     * This function renders out a React-Bootstrap Modal component.
+     * Part of the rendered output is a literal form which may be submitted, with 'accession triples'
+     * ([ExpSetAccession, ExpAccession, FileAccession]) included in the POSTed form fields which
+     * identify the individual files to download.
+     *
+     * @param {number} countSelectedFiles - Number of files to show in modal title.
+     * @returns {JSX.Element} A modal instance.
+     */
     renderModal(countSelectedFiles){
         if (!this.state.modalOpen) return null;
-        var textAreaStyle = {
-            'minWidth' : '100%',
-            'minHeight' : 400,
-            'fontFamily' : 'monospace'
-        };
 
-        var meta_download_filename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
-
-        var userInfo = JWT.getUserInfo();
-        var isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
-        var profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
+        var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
+            userInfo = JWT.getUserInfo(),
+            isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
+            profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
 
         return (
-            <Modal show={true} className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
+            <Modal show className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
                 <Modal.Header closeButton>
                     <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
                 </Modal.Header>
@@ -93,7 +96,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
 
-                    { this.renderModalCodeSnippet(meta_download_filename, isSignedIn) }
+                    { this.renderModalCodeSnippet(suggestedFilename, isSignedIn) }
 
                     <h4 className="mt-2 mb-07 text-500">Notes</h4>
                     <ul className="mb-25">
@@ -106,12 +109,17 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                         <li className="mb-05">
                             {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
                         </li>
+                        <li>
+                            For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
+                            In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                            Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
+                        </li>
                     </ul>
 
                     <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
-                        <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
-                        <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual file in the 'files.txt' download list below.">
+                        <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
+                        <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
                         {' '}
