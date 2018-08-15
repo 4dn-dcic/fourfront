@@ -959,11 +959,15 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
        not to'''
     data = request.json
 
-    if 'md5sum' not in data or not data['md5sum']: return
-    if context.type_info.item_type != 'file_processed': return
-    if 'force_md5' in request.query_string: return
+    if 'md5sum' not in data or not data['md5sum']:
+        return
+    if context.type_info.item_type != 'file_processed':  # is this necessary?
+        return
+    if 'force_md5' in request.query_string:
+        return
     # we can of course patch / put to ourselves the same md5 we previously had
-    if context.properties.get('md5sum') == data['md5sum']: return
+    if context.properties.get('md5sum') == data['md5sum']:
+        return
 
     if ELASTIC_SEARCH in request.registry:
         search = make_search_subreq(request, '/search/?type=File&md5sum=%s' % data['md5sum'])
@@ -1018,25 +1022,31 @@ def validate_extra_file_format(context, request):
     # post should always have file_format as it is required patch may or may not
     fformat = data.get('file_format')
     if not fformat:
-        # must be a patch so get the last part of url
-        # use path_url to exclude query params
-        url = request.path_url
-        if url.endswith('/'):
-            url = url[:-1]
-        fid = url.split('/')[-1]
-        if not fid:
-            return
-        finfo = get_item_if_you_can(request, fid, 'files')
-        try:
-            fformat = finfo.get('file_format')
-        except AttributeError:
-            fformat = None
-        if not fformat:
-            # this in theory should never happen
-            request.errors.add('body', None, "Can't find parent file format for extra_files")
-            return
-    valid_schema = context.type_info.schema
+        # must be a patch so get the regular file file_format from context
+        fformat = context.properties.get('file_format')
+
+    ff_item = get_item_if_you_can(request, fformat, 'file-formats')
+    try:
+        fformat = ff_item.get('file_format')
+    except AttributeError:
+        # this in theory should never happen
+        request.errors.add('body', None, "Can't find parent file format for extra_files")
+        return
+    schema_eformats = ff_item.get('extrafile_formats')
+    if not schema_eformats:  # means this parent file shouldn't have any extra files
+        request.errors.add('body', None, "File with format %s should not have extra_files" % fformat)
+        return
+    else:
+        valid_ext_formats = []
+        for of in schema_eformats:
+            of_item = get_item_if_you_can(request, of, 'file-formats')
+            try:
+                oef = of_item.get('file_format')
+            except AttributeError:
+                raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % ff_item.get('uuid')
+            valid_ext_formats.append(oef)
     seen_ext_formats = []
+    # formats = request.registry['collections']['FileFormat']
     for i, ef in enumerate(extras):
         eformat = ef.get('file_format')
         if eformat is None:
@@ -1049,10 +1059,10 @@ def validate_extra_file_format(context, request):
         if eformat == fformat:
             request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % fformat)
             files_ok = False
-        if valid_schema.get('file_format_file_extension'):
-            if eformat not in valid_schema['file_format_file_extension']:
-                request.errors.add('body', ['extra_files', i], "'%s' not found in the file_format_file_extension_mapping" % eformat)
-                files_ok = False
+
+        if eformat not in valid_ext_formats:
+            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, fformat))
+            files_ok = False
     if files_ok:
         request.validated.update({})
 
