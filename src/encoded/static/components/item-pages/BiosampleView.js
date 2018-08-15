@@ -54,16 +54,7 @@ export class BiosourcesTable extends React.PureComponent {
     }
 
     render(){
-        return (
-            <ItemPageTable
-                results={this.props.biosources}
-                renderDetailPane={null}
-                schemas={this.props.schemas}
-                columns={this.props.columns}
-                columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
-                width={this.props.width}
-            />
-        );
+        return <ItemPageTable {..._.pick(this.props, 'schemas', 'columns', 'columnDefinitionOverrideMap', 'width')} results={this.props.biosources} renderDetailPane={null} />;
     }
 
 }
@@ -139,11 +130,10 @@ class OverViewBody extends React.Component {
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
 
         var commonProps = {
+            result, tips,
+            'wrapInColumn' : true,
             //'listItemElement' : 'div',
             //'listWrapperElement' : 'div',
-            'result' : result,
-            'tips' : tips,
-            'wrapInColumn' : true,
             //'singleItemClassName' : 'block'
         };
 

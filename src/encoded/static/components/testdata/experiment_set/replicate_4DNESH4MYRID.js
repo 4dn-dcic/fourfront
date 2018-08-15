@@ -107,7 +107,7 @@ module.exports = {
         "address2":"10 Schattuck Street",
         "address1":"Biomedical Bioinfomatics",
         "state":"MA",
-        "title":"4DN DCIC Lab, HMS",
+        "display_title":"4DN DCIC Lab, HMS",
         "city":"Boston",
         "schema_version":"1",
         "name":"4dn-dcic-lab",

@@ -6,25 +6,22 @@ import _ from 'underscore';
 import { Button } from 'react-bootstrap';
 import { ajax, console, isServerSide, analytics, object } from './../../util';
 import { PartialList } from './PartialList';
+import { generateAddressString, generateContactPersonListItem } from './AttributionTabView';
+
 
 
 // TODO: CLEANUP FILE
 
 /**
  * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
- * 
- * @memberof module:item-pages/components.Publications
- * @class FormattedInfoWrapper
- * @extends {React.Component}
- * @type {Component}
- * 
+ *
  * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
  * @prop {Element[]} children       - React Elements or Components to be wrapped.
  * @prop {string} [singularTitle]   - Optional. Title displayed in top left label. Defaults to 'Publication'.
  * @prop {string} [className]       - Additional className to be added to wrapper element.
  * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
  */
-export class FormattedInfoWrapper extends React.Component {
+export class FormattedInfoWrapper extends React.PureComponent {
 
     static defaultProps = {
         'isSingleItem'  : false,
@@ -34,20 +31,20 @@ export class FormattedInfoWrapper extends React.Component {
     }
 
     render(){
+        var { isSingleItem, className, singularTitle, iconClass, children } = this.props;
+        var outerClassName = (
+            "publications-block formatted-info-panel formatted-wrapper" +
+            (isSingleItem ? ' single-item' : '') +
+            (className ? ' ' + className : '')
+        );
         return (
-            <div className={
-                "publications-block formatted-info-panel formatted-wrapper" +
-                (this.props.isSingleItem ? ' single-item' : '') +
-                (this.props.className ? ' ' + this.props.className : '')
-            }>
-                <h6 className="publication-label">{ this.props.singularTitle }{ this.props.isSingleItem ? '' : 's' }</h6>
+            <div className={outerClassName}>
+                <h6 className="publication-label">{ singularTitle }{ isSingleItem ? '' : 's' }</h6>
                 <div className="row">
                     <div className="icon-container col-xs-2 col-lg-1">
-                        <i className={"icon icon-" + this.props.iconClass} />
+                        <i className={"icon icon-" + iconClass} />
                     </div>
-                    <div className="col-xs-10 col-lg-11">
-                        { this.props.children }
-                    </div>
+                    <div className="col-xs-10 col-lg-11" children={children}/>
                 </div>
             </div>
         );
@@ -55,12 +52,13 @@ export class FormattedInfoWrapper extends React.Component {
 
 }
 
-export class WrappedListBlock extends React.Component {
+
+export class WrappedListBlock extends React.PureComponent {
     render(){
-        var context = this.props.context;
-        var atId = object.itemUtil.atId(context);
+        var { context, className } = this.props,
+            atId = object.itemUtil.atId(context);
         return (
-            <li className={this.props.className} key={atId}>
+            <li className={className} key={atId}>
                 <a className="text-500" href={atId}>{ context.display_title || context.title }</a>
             </li>
         );
@@ -70,47 +68,43 @@ export class WrappedListBlock extends React.Component {
 
 export class WrappedCollapsibleList extends React.Component {
 
-    /**
-     * Default props.
-     * 
-     * @static
-     * @memberof ListBlock
-     */
     static defaultProps = {
-        'persistentCount' : 3,
-        'publications' : [],
-        'singularTitle' : 'Publication',
-        'itemClassName' : null,
-        'iconClass' : 'book'
-    }
-
-    state = {
-        'open' : false
+        'persistentCount'   : 3,
+        'publications'      : [],
+        'singularTitle'     : 'Publication',
+        'itemClassName'     : null,
+        'iconClass'         : 'book',
+        'itemRenderFxn'     : null,
+        'wrapperElement'    : 'ul'
     }
 
     constructor(props){
         super(props);
+        this.itemRenderFxnFallback = this.itemRenderFxnFallback.bind(this);
         this.renderItems = this.renderItems.bind(this);
         this.render = this.render.bind(this);
+        this.state = {
+            'open' : false
+        };
     }
 
-    renderItems(items = this.props.items){
+    itemRenderFxnFallback(item, idx, all){
+        return <WrappedListBlock className={this.props.itemClassName} context={item} key={object.itemUtil.atId(item) || idx} />;
+    }
 
-        var itemsToElements = function(pubs){
-            return pubs.map((pub, i) => <WrappedListBlock className={this.props.itemClassName} context={pub} key={pub.link_id || i} /> );
-        }.bind(this);
+    renderItems(){
+        var { itemClassName, persistentCount, items, itemRenderFxn, wrapperElement } = this.props;
 
-        if (items.length <= this.props.persistentCount){
-            return <ul>{ itemsToElements(items) }</ul>;
+        var itemsToElements = ((pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback));
+
+        if (items.length <= persistentCount){
+            return React.createElement(wrapperElement || 'ul', {}, itemsToElements(items));
         } else {
-            // Only show first 3, then a 'more' button.
+            // Only show first 3 (props.persistentCount), then a 'more' button.
             return (
-                <PartialList
-                    persistent={itemsToElements(items.slice(0, this.props.persistentCount))}
-                    collapsible={itemsToElements(items.slice(this.props.persistentCount)) }
-                    containerType="ul"
-                    open={this.state && this.state.open}
-                />
+                <PartialList containerType={wrapperElement} open={this.state && this.state.open}
+                    persistent={itemsToElements(items.slice(0, persistentCount))}
+                    collapsible={itemsToElements(items.slice(persistentCount)) } />
             );
         }
     }
@@ -119,20 +113,18 @@ export class WrappedCollapsibleList extends React.Component {
         var { items, iconClass, singularTitle, persistentCount } = this.props;
         // publications = testData; // Uncomment to test listview.
 
-        if (!Array.isArray(items) || items.length < 1){
-            return null;
-        }
+        if (!Array.isArray(items) || items.length < 1) return null;
 
         var isSingleItem = items.length === 1;
 
         return (
             <FormattedInfoWrapper isSingleItem={isSingleItem} singularTitle={singularTitle} iconClass={iconClass}>
                 <div>
-                    { this.renderItems(items) }
+                    { this.renderItems() }
                     { items.length > persistentCount ?
                         <Button bsStyle="default" bsSize="small" onClick={()=>{
-                            this.setState({ open : !(this.state && this.state.open) });
-                        }}>{ this.state && this.state.open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }</Button>
+                            this.setState({ open : !this.state.open });
+                        }}>{ this.state.open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }</Button>
                     : null }
                 </div>
             </FormattedInfoWrapper>
@@ -146,16 +138,13 @@ export class WrappedCollapsibleList extends React.Component {
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
  * Encapsulates all required ajax/aggregation for fetching array of fields/data.
  * Available via FormattedInfoBlock.List
- * 
- * @namespace
- * @type {Component}
- * @memberof module:item-pages/components.FormattedInfoBlock
+ *
  * @prop {Object[]} details         - Array of complete details to display.
  * @prop {string[]} endpoints       - Array of endpoints to AJAX details from.
  * @prop {function} renderItem      - Render function for items. Should return a FormattedInfoBlock component.
  * @prop {Component|Element|string} fallbackMsg - What to display if both details and endpoints don't exist or are empty.
  * @prop {string} [propertyName]    - Descriptive unique ID of property/ies displayed.
- * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX. 
+ * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX.
  */
 class FormattedInfoBlockList extends React.Component {
 
@@ -264,14 +253,12 @@ class FormattedInfoBlockList extends React.Component {
     componentDidUpdate(prevProps, prevState){
         if (prevState.loading === true && this.state.loading === false && !this.state.transitionDelayElapsed){
             if (this.props.debug) console.info('FormattedInfoBlock.List > updated this.props.loading');
-            
             if (this.state.mounted && !isServerSide()){
                 setTimeout(()=>{
                     if (this.props.debug) console.info('FormattedInfoBlock.List > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
                 }, 100);
             }
-            
         }
     }
 
@@ -300,11 +287,11 @@ class FormattedInfoBlockList extends React.Component {
                 );
             });
         }
-        
+
         return (
             <ul
                 className={
-                    "formatted-info-panel-list" + 
+                    "formatted-info-panel-list" +
                     (this.state.loading ? ' loading' : (this.state.loading === false ? ' loaded' : '')) +
                     (this.state.transitionDelayElapsed ? ' transitioned' : '')
                 }
@@ -332,7 +319,8 @@ export class FormattedInfoBlock extends React.Component {
      * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
      * Must supply 'this' from parent component, via .call/.apply/.bind(this, args...),
      * AKA use like a mixin.
-     * 
+     *
+     * @deprecated
      * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
      * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
      * @param {function} [callback] - Optional callback.
@@ -373,9 +361,10 @@ export class FormattedInfoBlock extends React.Component {
         }.bind(this));
     }
 
-    /** 
+    /**
      * Use like a mixin from a component which parents a FormattedInfoBlock(s).
-     * 
+     *
+     * @deprecated
      * @param {string} propertyName - Name/key of linkTo property to fetch.
      * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with link_id.
      * @param {function} cb - Callback function passed down to ajaxPropertyDetails.
@@ -385,19 +374,13 @@ export class FormattedInfoBlock extends React.Component {
         if (typeof contextProperty == 'string' && contextProperty.length > 0){
             FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
             return true;
-        } 
+        }
         if (contextProperty && typeof contextProperty === 'object'){
 
             if (typeof contextProperty.error === 'string' && contextProperty.error.toLowerCase() === 'no view permissions') return false;
-
-            if (
-                _.keys(contextProperty).length <= 3 &&
-                typeof contextProperty.link_id === 'string' &&
-                typeof contextProperty.display_title === 'string'
-            ){
-                FormattedInfoBlock.ajaxPropertyDetails.call(
-                    this, contextProperty.link_id.replace(/~/g,'/'), propertyName, cb
-                );
+            var atId = object.itemUtil.atId(contextProperty);
+            if (_.keys(contextProperty).length <= 3 && atId && typeof contextProperty.display_title === 'string'){
+                FormattedInfoBlock.ajaxPropertyDetails.call(this, atId, propertyName, cb);
                 return true;
             }
         }
@@ -407,7 +390,7 @@ export class FormattedInfoBlock extends React.Component {
     /**
      * Preset generator for Lab detail block.
      * @see FormattedInfoBlock.generate
-     * 
+     *
      * @param {Object} details_lab - Object containing Lab Details.
      * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
      * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
@@ -415,23 +398,45 @@ export class FormattedInfoBlock extends React.Component {
      * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
      */
     static Lab(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+
         if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
             return null;
             //return FormattedInfoBlock.Error.apply(this, arguments);
         }
+
+        var innerContent = null,
+            contactPersons = null;
+
+        if (includeDetail && details_lab){
+
+            contactPersons = Array.isArray(details_lab.correspondence) && _.filter(details_lab.correspondence, function(contact_person){
+                return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
+            });
+
+            if (contactPersons && contactPersons.length > 0){
+                // Point of contact(s) for Lab which has view permission(s)
+                innerContent = (
+                    <div>
+                        <div className="address">{ generateAddressString(details_lab) }</div>
+                        <div className="correspondence">
+                            <h6 className="mt-08 mb-03 text-500">Correspondence:</h6>
+                            <ul>{ _.map(contactPersons, generateContactPersonListItem) }</ul>
+                        </div>
+                    </div>
+                );
+            } else {
+                innerContent = generateAddressString(details_lab);
+            }
+        }
+
         return FormattedInfoBlock.generate(
-            details_lab,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
-            includeLabel ? "Lab" : null,
-            details_lab && includeDetail ?
-                    (details_lab.city ? details_lab.city + ', ' : '') + 
-                    (details_lab.state ? details_lab.state : '') + 
-                    (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
-                    (details_lab.country ? ', ' + details_lab.country : '')
-                : ( includeDetail ? true : null ),
-            'lab',
-            'address',
-            key
+            details_lab,                                                                                // detail
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null), // includeIcon
+            includeLabel ? "Lab" : null,                                                                // includeLabel
+            innerContent,                                                                               // contents
+            'lab',                                                                                      // extraContainerClassName
+            contactPersons ? 'contact' : 'address',                                                      // extraDetailClassName
+            key                                                                                         // key
         );
     }
 
@@ -471,7 +476,7 @@ export class FormattedInfoBlock extends React.Component {
             details_user && includeDetail ? (
                 (details_user.lab && details_user.lab.display_title) || details_user.job_title || details_user.timezone
             ) : null,
-            'award',
+            'user',
             'project',
             key
         );
@@ -491,23 +496,10 @@ export class FormattedInfoBlock extends React.Component {
 
     static generate(detail, iconClass = null, label = null, contents = null, extraContainerClassName = null, extraDetailClassName = null, key = null){
         return (
-            <FormattedInfoBlock
-                key={key}
-                label={label}
-                iconClass={iconClass}
-                title={(detail && (detail.display_title || detail.title)) || null }
-                titleHref={
-                    (detail && 
-                        (detail['@id'] || 
-                            (detail.link_id && detail.link_id.replace(/~/g, "/"))
-                    )) || null
-                }
-                extraContainerClassName={extraContainerClassName}
-                extraDetailClassName={extraDetailClassName}
-                loading={!detail}
-            >
-                { contents }
-            </FormattedInfoBlock>
+            <FormattedInfoBlock key={key} label={label} iconClass={iconClass}
+                title={detail.display_title} titleHref={object.itemUtil.atId(detail)}
+                extraContainerClassName={extraContainerClassName} extraDetailClassName={extraDetailClassName}
+                loading={!detail} children={contents}/>
         );
     }
 
@@ -540,6 +532,7 @@ export class FormattedInfoBlock extends React.Component {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.outerClassName = this.outerClassName.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             transitionDelayElapsed : !props.loading,
@@ -565,24 +558,26 @@ export class FormattedInfoBlock extends React.Component {
             
         }
     }
-    
+
+    outerClassName(){
+        var { iconClass, label, detailContent, children, title, loading, extraContainerClassName } = this.props;
+        var classes = ["formatted-info-panel"];
+        if (!iconClass) classes.push('no-icon');
+        if (!label) classes.push('no-label');
+        if (detailContent === null && children === null) classes.push('no-details');
+        if (!title) classes.push('no-title');
+        if (loading) classes.push('loading');
+        else classes.push('loaded');
+        if (this.state.transitionDelayElapsed) classes.push('transitioned');
+        if (extraContainerClassName) classes.push(extraContainerClassName);
+        return classes.join(' ');
+    }
+
     render(){
+        var { loading, iconClass, detailContent, children, title, titleHref, extraDetailClassName, label } = this.props;
         var innerContent;
 
-        var blockClassName = function(){
-            var classes = ["formatted-info-panel"];
-            if (!this.props.iconClass) classes.push('no-icon');
-            if (!this.props.label) classes.push('no-label');
-            if (this.props.detailContent == null && this.props.children == null) classes.push('no-details');
-            if (!this.props.title) classes.push('no-title');
-            if (this.props.loading) classes.push('loading');
-            else classes.push('loaded');
-            if (this.state.transitionDelayElapsed) classes.push('transitioned');         
-            if (this.props.extraContainerClassName) classes.push(this.props.extraContainerClassName);
-            return classes.join(' ');
-        }.bind(this);
-
-        if (this.props.loading) {
+        if (loading) {
             innerContent = (
                 <div className="row">
                     <div className="col-xs-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
@@ -593,31 +588,21 @@ export class FormattedInfoBlock extends React.Component {
         } else {
             innerContent = (
                 <div className="row loaded">
-                    { this.props.iconClass ? 
-                    <div className="col-xs-2 col-lg-1 icon-container">
-                        <i className={"icon " + this.props.iconClass}></i>
-                    </div>
-                    : null }
-                    <div className={"details-col " + (this.props.iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") + (!this.props.detailContent && !this.props.children ? ' no-more-details' : '')}>
-                        { this.props.title ?
-                        
-                            this.props.titleHref ? 
-                                <h5 className="block-title"><a href={ this.props.titleHref } title={this.props.title}>{ this.props.title }</a></h5>
-                              : <h5 className="block-title no-link">{ this.props.title }</h5>
-                        
+                    { iconClass ? <div className="col-xs-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
+                    <div className={"details-col " + (iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
+                        { title ?
+                            titleHref ?
+                                <h5 className="block-title"><a href={ titleHref } title={title}>{ title }</a></h5>
+                                : <h5 className="block-title no-link">{ title }</h5>
                         : null }
-                        { this.props.detailContent || this.props.children ?
-                        <div className={"more-details " + this.props.extraDetailClassName}>
-                            { this.props.detailContent || this.props.children }
-                        </div>
-                        : null }
+                        { detailContent || children ? <div className={"more-details " + extraDetailClassName} children={detailContent || children} /> : null }
                     </div>
                 </div>
             );
         }
         return (
-            <div className={ blockClassName() }>
-                { this.props.label ? <h6 className="info-panel-label">{ this.props.label }</h6> : null }
+            <div className={ this.outerClassName() }>
+                { label ? <h6 className="info-panel-label">{ label }</h6> : null }
                 { innerContent }
             </div>
         );

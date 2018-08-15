@@ -19,7 +19,8 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/release_dates" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -52,7 +53,6 @@
             "title": "URLs",
             "description": "External resources with additional information to the document.",
             "type": "array",
-            "default": [],
             "lookup": 40,
             "uniqueItems": true,
             "items": {

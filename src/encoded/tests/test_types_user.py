@@ -46,7 +46,7 @@ def test_user_subscriptions(testapp, submitter, admin, user_w_lab, lab, another_
     assert lab['uuid'] in user_w_lab['subscriptions'][0]['url']
     # admin has no submits_for and no lab, thus should have no subscriptions
     assert 'lab' not in admin
-    assert admin['submits_for'] == []
+    assert admin.get('submits_for', []) == []
     assert len(admin['subscriptions']) == 0
 
 

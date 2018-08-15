@@ -275,17 +275,7 @@ export default class Navigation extends React.Component {
                         this.setState({ 'mobileDropdownOpen' : open });
                     }} expanded={mobileDropdownOpen}>
                         <Navbar.Header>
-                            <Navbar.Brand>
-                                <NavItem href="/" onClick={(e)=>{ this.setOpenDropdownID(null); }}>
-                                    <span className="img-container">
-                                        {/*
-                                        <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
-                                        */}
-                                        <FourfrontLogo />
-                                    </span>
-                                    <span className="navbar-title">Data Portal</span>
-                                </NavItem>
-                            </Navbar.Brand>
+                            <FourfrontLogo onClick={(e)=>{ this.setOpenDropdownID(null); }} />
                             <Navbar.Toggle>
                                 <i className="icon icon-bars icon-fw"></i>
                             </Navbar.Toggle>
