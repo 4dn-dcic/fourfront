@@ -420,7 +420,7 @@ export class FormattedInfoBlock extends React.Component {
                         <div className="address">{ generateAddressString(details_lab) }</div>
                         <div className="correspondence">
                             <h6 className="mt-08 mb-03 text-500">Correspondence:</h6>
-                            { _.map(contactPersons, generateContactPersonListItem) }
+                            <ul>{ _.map(contactPersons, generateContactPersonListItem) }</ul>
                         </div>
                     </div>
                 );

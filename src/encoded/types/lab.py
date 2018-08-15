@@ -8,7 +8,7 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-
+from base64 import b64encode
 from snovault import (
     collection,
     load_schema,
@@ -114,8 +114,9 @@ class Lab(Item):
                 person = request.embed(person_at_id, '@@object')
             except:
                 return None
+            encoded_email = b64encode(person['contact_email'].encode('utf-8')).decode('utf-8') if person.get('contact_email') else None
             return {
-                "contact_email" : person.get('contact_email'),
+                "contact_email" : encoded_email, # Security against web scrapers
                 "@id"           : person.get('@id'),
                 "display_title" : person.get('display_title')
             }

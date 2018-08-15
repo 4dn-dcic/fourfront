@@ -21,18 +21,41 @@ export function generateAddressString(lab){
     );
 }
 
-
+/**
+ * Generate a list element for a contact person.
+ * We base64-encode emails for security against scrapers;
+ * instead of providing a mailto: link, we make the email
+ * visible only when email icon is hovered over.
+ *
+ * @param {Object} contactPerson - Faux Item representation of User.
+ * @param {string} contactPerson.display_title - Name of User
+ * @param {string} contactPerson.contact_email - Base64-encoded email of User.
+ * @param {number} [idx] - Index of person in correspondence list.
+ * @returns {JSX.Element} A `li` JSX element.
+ */
 export function generateContactPersonListItem(contactPerson, idx){
+    var decodedEmail = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
+        decodedEmailParts = decodedEmail && decodedEmail.split('@'),
+        onClick = (decodedEmail && function(e){
+            if (typeof window.location.assign !== 'function') return false;
+            window.location.assign('mailto:' + decodedEmail);
+            return false;
+        }) || null,
+        dataTip = (decodedEmailParts && (
+            'Click to send e-mail message to <br/>' +
+            '<span class="text-500">' +
+            decodedEmailParts[0] +
+            '</span> <span class="text-300">(at)</span> <span class="text-500">' +
+            decodedEmailParts[1] +
+            '</span>'
+        )) || null;
+
     return (
-        <div className="contact-person row" key={contactPerson.contact_email || idx}>
-            <div className="col-sm-4 text-ellipsis-container">
-                &nbsp;&nbsp;&bull;&nbsp; { contactPerson.display_title }
-            </div>
-            <div className="col-sm-8 text-ellipsis-container">
-                <i className="icon icon-fw icon-envelope-o"/>&nbsp;&nbsp;
-                <a href={"mailto:" + contactPerson.contact_email}>{ contactPerson.contact_email }</a>
-            </div>
-        </div>
+        <li className="contact-person" key={contactPerson.contact_email || idx}>
+            <i className="icon icon-fw icon-envelope-o clickable" data-html data-tip={dataTip} onClick={onClick} />
+            &nbsp;&nbsp;
+            { contactPerson.display_title }
+        </li>
     );
 }
 
@@ -107,6 +130,11 @@ class LabsSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.contributingLabRenderFxn = this.contributingLabRenderFxn.bind(this);
+        this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true }, ReactTooltip.rebuild);
     }
 
     contributingLabRenderFxn(lab, idx, all){
@@ -121,7 +149,7 @@ class LabsSection extends React.PureComponent {
                     <a className="text-500" href={atId}>{ lab.display_title }</a>
                 </h5>
                 { contactPersons && contactPersons.length > 0 ?
-                    <div className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</div>
+                    <ul className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</ul>
                 : null }
             </div>
         );
