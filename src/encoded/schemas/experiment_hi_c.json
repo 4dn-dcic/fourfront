@@ -25,6 +25,7 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/supplementary_files" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [

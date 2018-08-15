@@ -68,10 +68,11 @@ TSV_MAPPING = OrderedDict([
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
     ('Related File',                (FILE,      ['related_files.file.accession'])),
     ('Paired end',                  (FILE,      ['paired_end'])),
-    ('Lab',                         (EXP_SET,   ['lab.title'])),
+    ('Lab',                         (EXP_SET,   ['lab.display_title'])),
     ('Project',                     (EXP_SET,   ['award.project'])),
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
+    ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
@@ -107,7 +108,7 @@ TSV_MAPPING = OrderedDict([
 ])
 
 EXTRA_FIELDS = {
-    EXP_SET : ['replicate_exps.replicate_exp.accession'],
+    EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
     EXP     : [],
     FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum']
 }
@@ -442,6 +443,12 @@ def metadata_tsv(context, request):
         # Add Bio & Tech Rep Nos re: all_row_vals['Experiment Accession']
         all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
         all_row_vals['Bio Rep No']  = get_correct_rep_no('Bio Rep No',  all_row_vals, exp_set)
+
+        # If we do not have any publication info carried over from ExpSet, list out lab.correspondence instead
+        if not all_row_vals.get('Publication'):
+            lab_correspondence = exp_set.get('lab', {}).get('correspondence', [])
+            if len(lab_correspondence) > 0:
+                all_row_vals['Publication'] = "Correspondence: " + ", ".join([ c.get('contact_email', '') for c in lab_correspondence ])
 
         # Add file to our return list which is to be bubbled upwards to iterable.
         files_returned.append(all_row_vals)

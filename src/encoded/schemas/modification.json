@@ -18,7 +18,8 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

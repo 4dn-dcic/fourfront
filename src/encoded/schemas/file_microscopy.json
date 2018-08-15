@@ -20,6 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
