@@ -101,7 +101,7 @@ export class StatisticsViewController extends React.PureComponent {
 
     stateToChildProps(state = this.state){
         return _.object(_.filter(_.pairs(state), (pair)=>{
-            // Which key:value pairs to pass to children.                
+            // Which key:value pairs to pass to children.
             if (pair[0] === 'mounted' || pair[0] === 'loadingStatus') return true;
             if (!state.mounted || state.loadingStatus !== 'complete') return false; // Don't pass responses in until finished.
             return true;
@@ -460,7 +460,6 @@ export class AreaChart extends React.PureComponent {
             'stackedData'   : this.stack(this.correctDatesInData(props.data))
         };
 
-        
     }
 
     componentDidMount(){
@@ -684,7 +683,7 @@ export class AreaChart extends React.PureComponent {
                 .call(d3.axisLeft(y));
 
             drawn.rightAxis.remove();
-            drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);          
+            drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
 
             var allLayers = drawn.root.selectAll('.layer')
                 .data(data)

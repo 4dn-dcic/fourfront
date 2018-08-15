@@ -832,7 +832,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     if string_query and string_query['must']:
         # combine statements within 'must' for each
         facet_filters['must'].append(string_query['must'])
-    
+
     return facet_filters
 
 

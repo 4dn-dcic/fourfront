@@ -204,10 +204,9 @@ class HealthChart extends React.PureComponent {
 
         if (!dataToShow || !mounted) return null;
 
-        var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
-
-        var fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); };
-        var colorFallback = d3.scaleOrdinal(d3.schemeCategory20.map(fader));
+        var svg = this.refs && this.refs.svg && d3.select(this.refs.svg),
+            fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); },
+            colorFallback = d3.scaleOrdinal(d3.schemeCategory10.map(fader));
 
         function colorStatus(origColor, status){
             var d3Color;

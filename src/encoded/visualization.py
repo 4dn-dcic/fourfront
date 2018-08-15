@@ -640,12 +640,10 @@ def bar_plot_chart(request):
         json_body = request.json_body
         search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
         fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
-        collect_value_from      = json_body.get('collect_value',            request.params.get('collect_value'))
     except json.JSONDecodeError:
         search_param_lists      = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
         del search_param_lists['award.project']
         fields_to_aggregate_for = request.params.getall('field')
-        collect_value_from      = request.params.get('collect_value')
 
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")

@@ -367,7 +367,6 @@ class Facet extends React.PureComponent {
         }
 
         var description = facet.description || null;
-        
         if (!description){
             try {
                 var schemaProperty = Schemas.Field.getSchemaProperty(facet.field, schemas, itemTypeForSchemas || 'ExperimentSet');
@@ -663,7 +662,7 @@ export class FacetList extends React.PureComponent {
             return m;
         }, { facetIndex : 0, termCount: 0, end : false }).facetIndex;
 
-        return _.map(facets, (facet, i) => 
+        return _.map(facets, (facet, i) =>
             <Facet onFilter={onFilter} key={facet.field}
                 facet={facet} href={href} isTermSelected={isTermSelected}
                 schemas={schemas} itemTypeForSchemas={itemTypeForSchemas} mounted={this.state.mounted}
