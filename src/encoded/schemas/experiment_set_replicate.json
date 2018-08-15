@@ -56,7 +56,6 @@
             "title": "Replicates",
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
-            "default": [],
             "exclude_from": ["submit4dn"],
             "uniqueItems": true,
             "items": {

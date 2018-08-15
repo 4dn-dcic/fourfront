@@ -68,9 +68,8 @@ class SoftwareDetailsForWorkflowNodeRow extends React.Component {
 
         if (Array.isArray(softwareList) && softwareList.length > 0){
             softwareElements = _.map(softwareList, function(sw){
-                return (
-                    <a href={object.atIdFromObject(sw)}>{ sw.display_title }</a>
-                );
+                var atId = object.atIdFromObject(sw);
+                return <a href={atId} key={atId}>{ sw.display_title }</a>;
             });
         } else {
             softwareElements = <em>N/A</em>;

@@ -300,15 +300,11 @@ export class FileOverViewBody extends React.Component {
     render(){
         var file = this.props.result, tips = this.props.tips;
         var extVizButton = this.visualizeExternallyButton();
-        console.log('sdfsdf', this.props, extVizButton);
         return (
             <div className="row overview-blocks">
-
                 { extVizButton }
-
-                <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn="col-md-6 pull-right" schemas={this.props.schemas} />
-                <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn="col-md-6" />
-
+                <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn="col-md-6" hideIfNoValue />
+                <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn="col-md-6" schemas={this.props.schemas} />
             </div>
         );
 
