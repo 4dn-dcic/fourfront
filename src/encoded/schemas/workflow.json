@@ -18,7 +18,8 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

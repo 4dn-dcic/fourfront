@@ -188,16 +188,27 @@ blockquote {
 // Fourfront SVG logo
 
 svg.fourfront_logo_svg_instance {
-    > ellipse {
+    > ellipse,
+    > .fourfront-logo-background-circle {
         fill:url(#fourfront_linear_gradient);
-        stroke:url(#fourfront_linear_gradient);
+        //stroke:url(#fourfront_linear_gradient);
+        stroke: transparent;
         stroke-width: 1px;
     }
     > text {
-        font-size:25px;
+        font-size: 23px;
         fill:#fff;
         font-family: "Mada","Work Sans",Helvetica,Arial,sans-serif;
         font-weight: 600;
+        stroke: transparent;
+        stroke-width: 0px;
+        stroke-linejoin: round;
+    }
+    > .fourfront-logo-foreground-circle {
+        opacity : 0;
+        fill : transparent;
+        stroke-Width : 15px;
+        stroke: rgba(0,0,0,0.2);
     }
 }
 

@@ -19,7 +19,8 @@ from .base import (
     Item,
     paths_filtered_by_status,
     collection_add,
-    item_edit
+    item_edit,
+    lab_award_attribution_embed_list
 )
 import datetime
 
@@ -54,6 +55,7 @@ def invalidate_linked_items(item, field, updates=None):
             registry.notify(AfterModified(linked_item, request))
 
 
+
 @collection(
     name='experiment-sets',
     unique_key='accession',
@@ -71,15 +73,7 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
-    embedded_list = [
-        "award.project",
-        "award.center_title",
-        "lab.city",
-        "lab.state",
-        "lab.country",
-        "lab.postal_code",
-        "lab.city",
-        "lab.title",
+    embedded_list = lab_award_attribution_embed_list + [
         "static_headers.content",
         "static_headers.title",
         "static_headers.filetype",
@@ -91,6 +85,7 @@ class ExperimentSet(Item):
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
+        "produced_in_pub.short_attribution",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",

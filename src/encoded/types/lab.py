@@ -8,10 +8,11 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-
+from base64 import b64encode
 from snovault import (
     collection,
     load_schema,
+    calculated_property
 )
 from .base import (
     Item
@@ -51,7 +52,10 @@ class Lab(Item):
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
-    embedded_list = ['awards.project', 'awards.center_title']
+    embedded_list = [
+        'awards.project',
+        'awards.center_title'
+    ]
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,
@@ -59,6 +63,67 @@ class Lab(Item):
         'revoked': ALLOW_EVERYONE_VIEW,
         'inactive': ALLOW_EVERYONE_VIEW,
     }
+
+    @calculated_property(schema={
+        "title": "Correspondence",
+        "description": "Point of contact(s) for this Lab.",
+        "type" : "array",
+        "uniqueItems": True,
+        "items" : {
+            "title" : "Lab Contact - Public Snippet",
+            "description": "A User associated with the lab who is also a point of contact.",
+            "type" : "object",
+            "additionalProperties" : False,
+            "properties" : {
+                "display_title" : {
+                    "type" : "string"
+                },
+                "contact_email" : {
+                    "type" : "string",
+                    "format" : "email"
+                },
+                "@id" : {
+                    "type" : "string"
+                }
+            }
+            #"type" : "string",
+            #"linkTo" : "User"
+        }
+    })
+    def correspondence(self, request):
+        """
+        Definitive list of users (linkTo User) who are designated as point of contact(s) for this Lab.
+
+        Returns:
+            List of @IDs which refer to either PI or alternate list of contacts defined in `contact_persons`.
+        """
+
+        ppl = self.properties.get('contact_persons', [])
+        pi  = self.properties.get('pi', None)
+
+        contact_people = None
+
+        if ppl:
+            contact_people = ppl
+        elif not ppl and pi:
+            contact_people = [pi]
+
+        def fetch_and_pick_embedded_properties(person_at_id):
+            '''Clear out some properties from person'''
+            try:
+                person = request.embed(person_at_id, '@@object')
+            except:
+                return None
+            encoded_email = b64encode(person['contact_email'].encode('utf-8')).decode('utf-8') if person.get('contact_email') else None
+            return {
+                "contact_email" : encoded_email, # Security against web scrapers
+                "@id"           : person.get('@id'),
+                "display_title" : person.get('display_title')
+            }
+
+        if contact_people is not None:
+            contact_people_dicts = [ fetch_and_pick_embedded_properties(person) for person in contact_people ]
+            return [ person for person in contact_people_dicts if person is not None ]
 
     def __init__(self, registry, models):
         super().__init__(registry, models)

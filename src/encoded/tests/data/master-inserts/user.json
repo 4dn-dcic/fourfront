@@ -21,7 +21,8 @@
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
+        "submits_for": ["4dn-dcic-lab"],
+        "preferred_email" : "fake_email_address@email.com"
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",
@@ -64,7 +65,6 @@
         "last_name": "Kirli",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
         "viewing_groups": ["4DN"],
-        "groups": ["read-only-admin"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
     },

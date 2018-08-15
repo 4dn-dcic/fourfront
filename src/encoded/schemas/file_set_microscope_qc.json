@@ -19,7 +19,8 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attachment" },
-        { "$ref": "mixins.json#/accession" }
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

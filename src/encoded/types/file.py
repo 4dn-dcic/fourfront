@@ -19,7 +19,8 @@ from .base import (
     collection_add,
     item_edit,
     ALLOW_SUBMITTER_ADD,
-    get_item_if_you_can
+    get_item_if_you_can,
+    lab_award_attribution_embed_list
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -181,15 +182,16 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded_list = ['files_in_set.submitted_by.job_title',
-                     'files_in_set.lab.title',
-                     'files_in_set.accession',
-                     "files_in_set.href",
-                     "files_in_set.file_size",
-                     "files_in_set.upload_key",
-                     "files_in_set.file_format",
-                     "files_in_set.file_classification"
-                     ]
+    embedded_list = [
+        'files_in_set.submitted_by.job_title',
+        'files_in_set.lab.title',
+        'files_in_set.accession',
+        'files_in_set.href',
+        'files_in_set.file_size',
+        'files_in_set.upload_key',
+        'files_in_set.file_format',
+        'files_in_set.file_classification'
+    ]
 
 
 @collection(
@@ -205,15 +207,16 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
     item_type = 'file_set_microscope_qc'
     schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
     name_key = 'accession'
-    embedded_list = ['files_in_set.submitted_by.job_title',
-                     'files_in_set.lab.title',
-                     'files_in_set.accession',
-                     "files_in_set.href",
-                     "files_in_set.file_size",
-                     "files_in_set.upload_key",
-                     "files_in_set.file_format",
-                     "files_in_set.file_classification"
-                     ]
+    embedded_list = [
+        'files_in_set.submitted_by.job_title',
+        'files_in_set.lab.title',
+        'files_in_set.accession',
+        'files_in_set.href',
+        'files_in_set.file_size',
+        'files_in_set.upload_key',
+        'files_in_set.file_format',
+        'files_in_set.file_classification'
+    ]
 
 
 @abstract_collection(
@@ -229,14 +232,7 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded_list = [
-        "award.project",
-        "lab.city",
-        "lab.state",
-        "lab.country",
-        "lab.postal_code",
-        "lab.city",
-        "lab.title",
+    embedded_list = lab_award_attribution_embed_list + [
         'experiments.display_title',
         'experiments.accession',
         'experiments.experiment_type',
