@@ -544,17 +544,58 @@ def test_force_beanstalk_env(mocker):
 
 
 @pytest.fixture
-def processed_file_data(award, lab):
+def processed_file_data(award, lab, file_formats):
     return {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'pairs'
+        'file_format': file_formats.get('pairs').get('uuid'),
     }
 
 
-def test_validate_produced_from_files_no_produced_by(testapp, processed_file_data):
+def test_validate_produced_from_files_no_produced_by_and_filename_no_filename(
+        testapp, processed_file_data):
     res = testapp.post_json('/files-processed', processed_file_data, status=201)
     assert not res.json.get('errors')
+
+
+def test_validate_filename_invalid_file_format_post(testapp, processed_file_data):
+    processed_file_data['file_format'] = 'stringy file format'
+    processed_file_data['filename'] = 'test_file.pairs.gz'
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert 'Problem getting file_format for test_file.pairs.gz' in descriptions
+
+
+def test_validate_filename_valid_file_format_post(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file.pairs.gz'
+    res = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_filename_valid_filename_patch(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file1.pairs.gz'
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res1.json.get('errors')
+    res1_props = res1.json['@graph'][0]
+    assert res1_props['filename'] == 'test_file1.pairs.gz'
+    filename2patch = 'test_file2.pairs.gz'
+    res2 = testapp.patch_json(res1_props['@id'], {'filename': filename2patch}, status=200)
+    assert not res2.json.get('errors')
+    assert res2.json['@graph'][0]['filename'] == 'test_file2.pairs.gz'
+
+
+def test_validate_filename_invalid_filename_patch(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file1.pairs.gz'
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res1.json.get('errors')
+    res1_props = res1.json['@graph'][0]
+    assert res1_props['filename'] == 'test_file1.pairs.gz'
+    filename2patch = 'test_file2.bam'
+    res2 = testapp.patch_json(res1_props['@id'], {'filename': filename2patch}, status=422)
+    errors = res2.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "Filename test_file2.bam extension does not agree with specified file format. Valid extension(s): 'pairs.gz'" in descriptions
 
 
 def test_validate_produced_from_files_invalid_post(testapp, processed_file_data):

@@ -916,28 +916,42 @@ def download(context, request):
 
 def validate_file_filename(context, request):
     ''' validator for filename field '''
-
     data = request.json
-    if 'filename' not in data or 'file_format' not in data:
+    if 'filename' not in data:
         return
     filename = data['filename']
-    file_format_item = request.embed(data['file_format'])
-    file_extensions = file_format_item.get('allowed_extensions', [])
-    if not file_extensions and file_format_item.get('file_format') == 'other':
-        found_match = True
-    else:
+    file_format_item = None
+    if data.get('file_format'):
+        file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
+    try:
+        file_format_item.get('uuid')
+    except AttributeError:
+        file_format = context.properties.get('file_format')
+        if file_format:
+            file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+    msg = None
+    try:
+        file_extensions = file_format_item.get('allowed_extensions', [])
+    except AttributeError:
         found_match = False
-    for extension in file_extensions:
-        if filename[-len(extension):] == extension:
-            found_match = True
-            break
-    if not found_match:
-        file_extensions_msg = ["'" + ext + "'" for ext in file_extensions]
-        file_extensions_msg = ', '.join(file_extensions_msg)
-        request.errors.add('body', None, 'Filename extension does not '
-                           'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+        msg = 'Problem getting file_format for %s' % filename
     else:
+        if not file_extensions and file_format_item.get('file_format') == 'other':
+            found_match = True
+        else:
+            found_match = False
+        for extension in file_extensions:
+            if filename[-len(extension):] == extension:
+                found_match = True
+                break
+    if found_match:
         request.validated.update({})
+    else:
+        if not msg:
+            msg = ["'" + ext + "'" for ext in file_extensions]
+            msg = ', '.join(msg)
+            msg = 'Filename %s extension does not agree with specified file format. Valid extension(s): %s' % (filename, msg)
+        request.errors.add('body', None, msg)
 
 
 def validate_processed_file_unique_md5_with_bypass(context, request):
@@ -1065,9 +1079,9 @@ def file_edit(context, request, render=None):
                          validate_processed_file_produced_from_field,
                          validate_extra_file_format], decorator=if_match_tid)
 @view_config(context=FileProcessed, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch,
+             validators=[validate_item_content_patch, validate_file_filename,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field,
                          validate_extra_file_format], decorator=if_match_tid)
-def procesed_edit(context, request, render=None):
+def processed_edit(context, request, render=None):
     return item_edit(context, request, render)
