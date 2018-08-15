@@ -168,7 +168,8 @@
                         "items": {
                              "title": "secondary_file_format",
                              "description": "formats for secondary file",
-                             "type": "string"
+                             "type": "string",
+                             "linkTo": "FileFormat"
                         }
                     },
                     "is_primaryfile": {
@@ -199,6 +200,7 @@
                         "title": "Format",
                         "description": "Argument Format",
                         "type": "string",
+                        "linkTo": "FileFormat",
                         "suggested_enum" : [
                             "fastq",
                             "bam",
@@ -269,7 +271,8 @@
                                         },
                                         "file_format" : {
                                             "title" : "File Format",
-                                            "type" : "string"
+                                            "type" : "string",
+                                            "linkTo": "FileFormat"
                                         },
                                         "cardinality" : {
                                             "title" : "Cardinality",

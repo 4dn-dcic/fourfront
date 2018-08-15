@@ -11,11 +11,55 @@
     {
         "file_format": "pairs",
         "standard_file_extension": "pairs.gz",
-        "allowed_extensions": ["pairs.gz"],
         "description": "This format is used for something to do with paired mapped read locations",
         "file_format_specification": "test.pdf",
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
         "extrafile_formats": ["d13d06cf-218e-4f61-aaf0-91f226348b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairsam",
+        "standard_file_extension": "sam.pairs.gz",
+        "description": "This format is used for something to do with paired mapped read locations",
+        "uuid": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+        "extrafile_formats": ["d13d06cf-218e-6f61-aaf0-91f226248b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairsam_px2",
+        "standard_file_extension": "sam.pairs.gz.px2",
+        "description": "This format is used for something to do with paired mapped read locations",
+        "uuid": "d13d06cf-218e-6f61-aaf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bw",
+        "standard_file_extension": "bw",
+        "allowed_extensions": ["bw"],
+        "description": "Bigwig file format",
+        "uuid": "d1311111-218e-4f61-aaf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bg",
+        "standard_file_extension": "bedGraph.gz",
+        "allowed_extensions": ["bedGraph.gz"],
+        "description": "Bedgraph format",
+        "uuid": "d1312212-218e-4f61-aaf0-91f226248b2c",
+        "extrafile_formats": ["d1311112-218e-4f61-aaf0-91f226248b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bg_px2",
+        "standard_file_extension": "bedGraph.gz.px2",
+        "allowed_extensions": ["bedGraph.gz.px2"],
+        "description": "Bedgraph index",
+        "uuid": "d1311112-218e-4f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     },
@@ -34,6 +78,25 @@
         "allowed_extensions": ["bam"],
         "description": "This format is used for aligned reads",
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+        "extrafile_formats": ["d13d06c1-218e-4f61-aaf0-91f226248b3c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bai",
+        "standard_file_extension": "bam.bai",
+        "allowed_extensions": ["bam.bai"],
+        "description": "Bam index format",
+        "uuid": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bed",
+        "standard_file_extension": "bed.gz",
+        "allowed_extensions": ["bed.gz"],
+        "description": "Bed format",
+        "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     },
@@ -43,6 +106,31 @@
         "allowed_extensions": ["cool"],
         "description": "This format is used for contact matrices",
         "uuid": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "hdf5",
+        "standard_file_extension": "hdf5",
+        "allowed_extensions": ["hdf5"],
+        "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "matrix",
+        "standard_file_extension": "matrix",
+        "allowed_extensions": ["matrix"],
+        "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "hic",
+        "standard_file_extension": "hic",
+        "allowed_extensions": ["hic"],
+        "description": "This format is used for contact matrices",
+        "uuid": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     },
@@ -110,6 +198,15 @@
         "award": "1U01CA200059-01"
     },
     {
+        "file_format": "fasta",
+        "standard_file_extension": "fasta",
+        "allowed_extensions": ["fasta", "fsa"],
+        "description": "This format is used for uncompressed FASTA files",
+        "uuid": "d13d16cf-218e-4f61-55f0-92f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
         "file_format": "chromsizes",
         "standard_file_extension": "chrom.sizes",
         "allowed_extensions": ["chrom.sizes"],
@@ -124,6 +221,14 @@
         "allowed_extensions": ["txt"],
         "description": "This format is used as a reference for restriction enzyme site info",
         "uuid": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "normvector_juicerformat",
+        "standard_file_extension": "normvector.juicerformat.gz",
+        "allowed_extensions": ["normvector.juicerformat.gz"],
+        "uuid": "d13d06cf-218e-4f61-55f0-94f226118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     }

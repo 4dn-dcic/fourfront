@@ -79,7 +79,8 @@
                     "format_if_extra": {
                         "title": "Format of extra file",
                         "description": "the file format if the input file is an extra file of a file object",
-                        "type": "string"
+                        "type": "string",
+                        "linkTo": "FileFormat"
                     }
                 }
             }

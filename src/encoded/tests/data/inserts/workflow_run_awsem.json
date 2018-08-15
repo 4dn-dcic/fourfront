@@ -185,7 +185,7 @@
             "ordinal": 1,
             "value": "4ecd9cfb-369b-4f8e-866c-cfb2cc3c8ad2",
             "workflow_argument_name": "inputs",
-            "format_if_extra": "pairs_px2"
+            "format_if_extra":   "d13d06cf-218e-4f61-aaf0-91f226348b2c"
         }
     ],
     "title": "Some md5 workflow run on an extra file",
