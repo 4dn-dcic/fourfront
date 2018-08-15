@@ -113,7 +113,8 @@ export class FourfrontLogo extends React.PureComponent {
         'textTransformOrig'         : "translate(9, 37)",
         'textTransformHover'        : "translate(28, 28) scale(0.2, 0.6)",
         'fgCircleTransformOrig'     : "translate(50, 20) scale(0.35, 0.35) rotate(-135)",
-        'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)"
+        'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)",
+        "hoverDelayUntilTransform"  : 400
     }
     
     constructor(props){
@@ -134,7 +135,7 @@ export class FourfrontLogo extends React.PureComponent {
 
                 svg.select(".fourfront-logo-text")
                     .transition()
-                    .duration(900)
+                    .duration(700)
                     .attr('transform', this.props.textTransformHover)
                     .style('fill', 'rgba(0,0,0,0)')
                     .style('opacity', '0')
@@ -147,7 +148,7 @@ export class FourfrontLogo extends React.PureComponent {
                     .style('opacity', '1')
                     .attr('transform', this.props.fgCircleTransformHover);
 
-            }, 800);
+            }, this.props.hoverDelayUntilTransform);
         });
     }
 
