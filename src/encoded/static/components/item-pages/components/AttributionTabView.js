@@ -64,7 +64,7 @@ export class AttributionTabView extends React.PureComponent {
             { produced_in_pub, publications_of_set, lab, award, submitted_by } = context,
             awardExists = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
             submittedByExists = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
-    
+
         return (
             <div className="info-area">
 

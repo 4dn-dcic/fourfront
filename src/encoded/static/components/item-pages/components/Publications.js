@@ -22,11 +22,11 @@ var testData = [ // Use this to test list view(s) as none defined in test data.
 
 /**
  * Display a FormattedInfoBlock-style block with custom detail (defined via props.children).
- * 
+ *
  * @memberof module:item-pages/components.Publications
  * @class DetailBlock
  * @extends {React.Component}
- * 
+ *
  * @prop {string} singularTitle         - Title to show in top left of block. 'S' gets added to end of title if more than 1 item.
  * @prop {Object} publication           - Publication whose link and display_title to display.
  * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
@@ -130,9 +130,9 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
 /**
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
- * 
+ *
  * @class Publications
- * 
+ *
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
 export class Publications extends React.PureComponent {

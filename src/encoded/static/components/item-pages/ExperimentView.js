@@ -21,7 +21,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
     getFilesTabs(width){
         var context = this.props.context;
-        
+
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
         ];
@@ -35,7 +35,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         });
 
         if (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length > 0) {
-            
+
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'raw-files',
@@ -86,7 +86,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));
         }
-        
+
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
             initTabs.push(FileViewGraphSection.getTabObject(
                 _.extend({}, this.props, {

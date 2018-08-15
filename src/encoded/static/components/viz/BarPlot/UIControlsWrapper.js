@@ -13,8 +13,6 @@ import { boundActions } from './ViewContainer';
 /**
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
  * Passes props to BarPlot.Chart.
- * 
- * @type {Component}
  */
 export class UIControlsWrapper extends React.PureComponent {
 
@@ -31,14 +29,14 @@ export class UIControlsWrapper extends React.PureComponent {
     static defaultProps = {
         'titleMap' : {
             // Aggr type
-            'experiment_sets' : "Experiment Sets",
-            'experiments' : 'Experiments',
-            'files' : "Files",
+            'experiment_sets'   : "Experiment Sets",
+            'experiments'       : 'Experiments',
+            'files'             : "Files",
 
             // Show state
-            'all' : 'All',
-            'filtered' : 'Selected',
-            'both' : 'All & Selected'
+            'all'               : 'All',
+            'filtered'          : 'Selected',
+            'both'              : 'All & Selected'
         },
         'availableFields_XAxis' : [
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
@@ -209,7 +207,7 @@ export class UIControlsWrapper extends React.PureComponent {
         if (!this.props.barplot_data_fields) return null;
         if (!Array.isArray(this.props.barplot_data_fields)) return null;
         if (this.props.barplot_data_fields.length < fieldIndex + 1) return null;
-        
+
         return (
             _.findWhere(this.props.availableFields_Subdivision.slice(0).concat(this.props.availableFields_XAxis.slice(0)), { 'field' : this.props.barplot_data_fields[fieldIndex] })
         ) || {

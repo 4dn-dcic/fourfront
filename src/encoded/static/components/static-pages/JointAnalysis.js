@@ -208,20 +208,20 @@ export default class JointAnalysisPlansPage extends StaticPage {
             () => {
                 _.forEach(dataSetNames, (source_name)=>{
                     var req_url = this.props[source_name + '_url'];
-        
+
                     if (typeof req_url !== 'string' || !req_url) return;
-        
+
                     // For testing
                     if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
                         req_url = 'https://data.4dnucleome.org' + req_url;
                     }
-        
+
                     if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
                         ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
                     } else {
                         ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name));
                     }
-        
+
                 });
             }
         );

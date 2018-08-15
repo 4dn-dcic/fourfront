@@ -68,12 +68,6 @@ export class WrappedListBlock extends React.PureComponent {
 
 export class WrappedCollapsibleList extends React.Component {
 
-    /**
-     * Default props.
-     * 
-     * @static
-     * @memberof ListBlock
-     */
     static defaultProps = {
         'persistentCount'   : 3,
         'publications'      : [],
@@ -144,16 +138,13 @@ export class WrappedCollapsibleList extends React.Component {
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
  * Encapsulates all required ajax/aggregation for fetching array of fields/data.
  * Available via FormattedInfoBlock.List
- * 
- * @namespace
- * @type {Component}
- * @memberof module:item-pages/components.FormattedInfoBlock
+ *
  * @prop {Object[]} details         - Array of complete details to display.
  * @prop {string[]} endpoints       - Array of endpoints to AJAX details from.
  * @prop {function} renderItem      - Render function for items. Should return a FormattedInfoBlock component.
  * @prop {Component|Element|string} fallbackMsg - What to display if both details and endpoints don't exist or are empty.
  * @prop {string} [propertyName]    - Descriptive unique ID of property/ies displayed.
- * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX. 
+ * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX.
  */
 class FormattedInfoBlockList extends React.Component {
 
@@ -262,14 +253,12 @@ class FormattedInfoBlockList extends React.Component {
     componentDidUpdate(prevProps, prevState){
         if (prevState.loading === true && this.state.loading === false && !this.state.transitionDelayElapsed){
             if (this.props.debug) console.info('FormattedInfoBlock.List > updated this.props.loading');
-            
             if (this.state.mounted && !isServerSide()){
                 setTimeout(()=>{
                     if (this.props.debug) console.info('FormattedInfoBlock.List > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
                 }, 100);
             }
-            
         }
     }
 
@@ -298,11 +287,11 @@ class FormattedInfoBlockList extends React.Component {
                 );
             });
         }
-        
+
         return (
             <ul
                 className={
-                    "formatted-info-panel-list" + 
+                    "formatted-info-panel-list" +
                     (this.state.loading ? ' loading' : (this.state.loading === false ? ' loaded' : '')) +
                     (this.state.transitionDelayElapsed ? ' transitioned' : '')
                 }
@@ -330,7 +319,8 @@ export class FormattedInfoBlock extends React.Component {
      * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
      * Must supply 'this' from parent component, via .call/.apply/.bind(this, args...),
      * AKA use like a mixin.
-     * 
+     *
+     * @deprecated
      * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
      * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
      * @param {function} [callback] - Optional callback.
@@ -371,9 +361,10 @@ export class FormattedInfoBlock extends React.Component {
         }.bind(this));
     }
 
-    /** 
+    /**
      * Use like a mixin from a component which parents a FormattedInfoBlock(s).
-     * 
+     *
+     * @deprecated
      * @param {string} propertyName - Name/key of linkTo property to fetch.
      * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with link_id.
      * @param {function} cb - Callback function passed down to ajaxPropertyDetails.
@@ -383,19 +374,13 @@ export class FormattedInfoBlock extends React.Component {
         if (typeof contextProperty == 'string' && contextProperty.length > 0){
             FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
             return true;
-        } 
+        }
         if (contextProperty && typeof contextProperty === 'object'){
 
             if (typeof contextProperty.error === 'string' && contextProperty.error.toLowerCase() === 'no view permissions') return false;
-
-            if (
-                _.keys(contextProperty).length <= 3 &&
-                typeof contextProperty.link_id === 'string' &&
-                typeof contextProperty.display_title === 'string'
-            ){
-                FormattedInfoBlock.ajaxPropertyDetails.call(
-                    this, contextProperty.link_id.replace(/~/g,'/'), propertyName, cb
-                );
+            var atId = object.itemUtil.atId(contextProperty);
+            if (_.keys(contextProperty).length <= 3 && atId && typeof contextProperty.display_title === 'string'){
+                FormattedInfoBlock.ajaxPropertyDetails.call(this, atId, propertyName, cb);
                 return true;
             }
         }
@@ -405,7 +390,7 @@ export class FormattedInfoBlock extends React.Component {
     /**
      * Preset generator for Lab detail block.
      * @see FormattedInfoBlock.generate
-     * 
+     *
      * @param {Object} details_lab - Object containing Lab Details.
      * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
      * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
@@ -583,7 +568,7 @@ export class FormattedInfoBlock extends React.Component {
         if (!title) classes.push('no-title');
         if (loading) classes.push('loading');
         else classes.push('loaded');
-        if (this.state.transitionDelayElapsed) classes.push('transitioned');         
+        if (this.state.transitionDelayElapsed) classes.push('transitioned');
         if (extraContainerClassName) classes.push(extraContainerClassName);
         return classes.join(' ');
     }
@@ -606,9 +591,9 @@ export class FormattedInfoBlock extends React.Component {
                     { iconClass ? <div className="col-xs-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
                     <div className={"details-col " + (iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
                         { title ?
-                            titleHref ? 
+                            titleHref ?
                                 <h5 className="block-title"><a href={ titleHref } title={title}>{ title }</a></h5>
-                              : <h5 className="block-title no-link">{ title }</h5>
+                                : <h5 className="block-title no-link">{ title }</h5>
                         : null }
                         { detailContent || children ? <div className={"more-details " + extraDetailClassName} children={detailContent || children} /> : null }
                     </div>
