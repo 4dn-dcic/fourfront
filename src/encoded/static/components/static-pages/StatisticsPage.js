@@ -605,7 +605,6 @@ export class AreaChart extends React.PureComponent {
                 .attr('class', 'area')
                 .style('fill', (d) => { return this.colorScale((d.data || d).key); })
                 .attr('d', area);
-                
 
             this.drawAxes(drawn, { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn });
             this.drawnD3Elements = drawn;
