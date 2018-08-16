@@ -567,10 +567,18 @@ def test_validate_filename_invalid_file_format_post(testapp, processed_file_data
     assert 'Problem getting file_format for test_file.pairs.gz' in descriptions
 
 
-def test_validate_filename_valid_file_format_post(testapp, processed_file_data):
+def test_validate_filename_valid_file_format_and_name_post(testapp, processed_file_data):
     processed_file_data['filename'] = 'test_file.pairs.gz'
     res = testapp.post_json('/files-processed', processed_file_data, status=201)
     assert not res.json.get('errors')
+
+
+def test_validate_filename_invalid_filename_post(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file_pairs.gz'
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "Filename test_file_pairs.gz extension does not agree with specified file format. Valid extension(s): '.pairs.gz'" in descriptions
 
 
 def test_validate_filename_valid_filename_patch(testapp, processed_file_data):
@@ -595,7 +603,7 @@ def test_validate_filename_invalid_filename_patch(testapp, processed_file_data):
     res2 = testapp.patch_json(res1_props['@id'], {'filename': filename2patch}, status=422)
     errors = res2.json['errors']
     descriptions = ''.join([e['description'] for e in errors])
-    assert "Filename test_file2.bam extension does not agree with specified file format. Valid extension(s): 'pairs.gz'" in descriptions
+    assert "Filename test_file2.bam extension does not agree with specified file format. Valid extension(s): '.pairs.gz'" in descriptions
 
 
 def test_validate_produced_from_files_invalid_post(testapp, processed_file_data):

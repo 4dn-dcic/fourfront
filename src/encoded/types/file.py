@@ -939,14 +939,14 @@ def validate_file_filename(context, request):
         elif not file_extensions:  # this shouldn't happen
             pass
         for extension in file_extensions:
-            if filename[-len(extension):] == extension:
+            if filename[-(len(extension) + 1):] == '.' + extension:
                 found_match = True
                 break
     if found_match:
         request.validated.update({})
     else:
         if not msg:
-            msg = ["'" + ext + "'" for ext in file_extensions]
+            msg = ["'." + ext + "'" for ext in file_extensions]
             msg = ', '.join(msg)
             msg = 'Filename %s extension does not agree with specified file format. Valid extension(s): %s' % (filename, msg)
         request.errors.add('body', None, msg)
