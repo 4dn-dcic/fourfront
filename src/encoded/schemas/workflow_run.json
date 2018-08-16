@@ -40,8 +40,8 @@
         "metadata_only": {
             "title": "File Provenance Graph",
             "description": "When True the file provenance graph was generated without a run of a 4dn-dcic pipeline.",
-		    "type": "boolean",
-			"default": false
+		        "type": "boolean",
+			      "default": false
         },
         "description_only": {
             "title": "File Provenance Graph",
@@ -81,6 +81,10 @@
                         "description": "the file format if the input file is an extra file of a file object",
                         "type": "string",
                         "linkTo": "FileFormat"
+                    },
+                    "notes": {
+                        "description": "internal notes",
+                        "type": "string"
                     }
                 }
             }
