@@ -410,9 +410,9 @@ def file_formats(testapp, lab, award):
 
 
 @pytest.fixture
-def file(testapp, lab, award):
+def file(testapp, lab, award, file_formats):
     item = {
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'md5sum': 'd41d8cd98f00b204e9800998ecf8427e',
         'lab': lab['@id'],
         'award': award['@id'],
@@ -422,27 +422,15 @@ def file(testapp, lab, award):
 
 
 @pytest.fixture
-def file_fastq(testapp, lab, award):
+def file_fastq(testapp, lab, award, file_formats):
     item = {
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'md5sum': 'd41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],
         'award': award['@id'],
         'status': 'uploaded',  # avoid s3 upload codepath
     }
     return testapp.post_json('/file_fastq', item).json['@graph'][0]
-
-
-@pytest.fixture
-def file_fasta(testapp, lab, award):
-    item = {
-        'file_format': 'fasta',
-        'md5sum': 'c41d8cd9f00b204e9800998ecf8427e',
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'status': 'uploaded',  # avoid s3 upload codepath
-    }
-    return testapp.post_json('/file_fasta', item).json['@graph'][0]
 
 
 RED_DOT = """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA

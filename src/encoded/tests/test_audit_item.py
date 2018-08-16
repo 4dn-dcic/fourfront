@@ -59,10 +59,10 @@ def test_audit_item_schema_upgrade_validation_failure(testapp, organism):
         for error in errors_list)
 
 
-def test_audit_item_schema_permission(testapp, file, embed_testapp):
+def test_audit_item_schema_permission(testapp, file, embed_testapp, file_formats):
     # Redmine 2915
     patch = {
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'status': 'deleted',
     }
     testapp.patch_json(file['@id'], patch)

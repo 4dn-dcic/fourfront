@@ -3,11 +3,11 @@ pytestmark = pytest.mark.working
 
 
 @pytest.fixture
-def file_data(lab, award):
+def file_data(lab, award, file_formats):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
-        'file_format': file_formats.get('fastq').get('@id'),
+        'file_format': file_formats.get('fastq').get('uuid'),
         'status': 'uploaded',
         'file_classification': 'raw file'
     }
