@@ -140,13 +140,13 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
 
 
 @pytest.fixture
-def item_uuid(testapp, award, experiment, lab):
+def item_uuid(testapp, award, experiment, lab, file_formats):
     # this is a processed file
     item = {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'pairs',
+        'file_format': file_formats.get('pairs'),
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
