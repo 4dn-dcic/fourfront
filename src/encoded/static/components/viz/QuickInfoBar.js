@@ -36,6 +36,7 @@ export default class QuickInfoBar extends React.Component {
         // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
         var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
         if (pathParts[0] === 'browse') return false;
+        if (pathParts.length === 1 && pathParts[0] === 'statistics') return false;
         if (pathParts[0] === 'search') return true;
         if (pathParts[0] === 'home') return false;
         if (pathParts.length === 1 && pathParts[0] === "") return false;

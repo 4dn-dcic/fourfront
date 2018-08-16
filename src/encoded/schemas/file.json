@@ -203,13 +203,16 @@
     },
     "facets": {
         "file_type" : {
-            "title" : "File Type"
+            "title" : "File Type",
+            "descripton" : "Type or categorization of this file."
         },
         "file_format": {
-            "title" : "File Format"
+            "title" : "File Format",
+            "description" : "Format of the file, i.e. the file extension."
         },
         "experiments.experiment_type" : {
-            "title" : "Experiment Type"
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
         },
         "experiments.biosample.biosource.individual.organism.name" : {
             "title" : "Organism"
@@ -225,6 +228,60 @@
         },
         "lab.display_title": {
             "title": "Lab"
+        },
+        "file_size" : {
+            "title" : "File Size",
+            "description" : "Filter using range of size of the file",
+            "aggregation_type" : "range",
+            "ranges" : [
+                { "to" : 1024 },
+                { "from" : 1024, "to" : 10240 },
+                { "from" : 10240, "to" : 102400 },
+                { "from" : 102400, "to" : 1048576 },
+                { "from" : 1048576, "to" : 10485760 },
+                { "from" : 10485760, "to" : 104857600 },
+                { "from" : 104857600, "to" : 1073741824 },
+                { "from" : 1073741824, "to" : 10737418240 },
+                { "from" : 10737418240, "to" : 107374182400 },
+                { "from" : 107374182400 }
+            ],
+            "disabled" : true,
+            "comment" : "disabled flag may be removed once we (a) can handle ?field=val1-to-val2 (ranges) in filters and (b) send ranges from FacetList to search URI."
+        },
+        "public_release" : {
+            "title" : "Public Release Date",
+            "aggregation_type" : "date_histogram",
+            "disabled" : true,
+            "comment" : "disabled flag may be removed after we can handle ranges in URI filters."
+        }
+    },
+    "aggregations" : {
+        "weekly_interval_public_release" : {
+            "date_histogram" : {
+                "field": "embedded.public_release",
+                "interval": "week",
+                "format": "yyyy-MM-dd"
+            },
+            "aggs" : {
+                "file_size_volume" : {
+                    "sum" : {
+                        "field" : "embedded.file_size"
+                    }
+                },
+                "group_by_award" : {
+                    "terms" : {
+                        "field": "embedded.award.center_title.raw",
+                        "missing" : "No value"
+                    },
+                    "aggs" : {
+                        "file_size_volume" : {
+                            "sum" : {
+                                "field" : "embedded.file_size"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "columns": {

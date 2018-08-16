@@ -194,14 +194,16 @@ export const defaultColumnDefinitionMap = {
         'title' : 'Date Created',
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
-            return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
+            if (!result.date_created) return null;
+            return <DateUtility.LocalizedTime timestamp={result.date_created} formatType='date-sm' />;
         },
         'order' : 500
     },
     'public_release' : {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
-            return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
+            if (!result.public_release) return null;
+            return <DateUtility.LocalizedTime timestamp={result.public_release} formatType='date-sm' />;
         }
     },
     'number_of_experiments' : {
