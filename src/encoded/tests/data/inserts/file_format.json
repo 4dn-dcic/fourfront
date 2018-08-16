@@ -146,7 +146,6 @@
     {
         "file_format": "other",
         "standard_file_extension": "other",
-        "allowed_extensions": [""],
         "description": "This format is used for other files",
         "uuid": "d13d06cf-218e-4f61-11f0-91f226248b2c",
         "lab": "4dn-dcic-lab",

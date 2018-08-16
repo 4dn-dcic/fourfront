@@ -926,7 +926,7 @@ def validate_file_filename(context, request):
             file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
     msg = None
     try:
-        file_extensions = file_format_item.get('allowed_extensions', [])
+        file_extensions = file_format_item.get('allowed_extensions')
     except AttributeError:
         found_match = False
         msg = 'Problem getting file_format for %s' % filename

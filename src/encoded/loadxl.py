@@ -96,15 +96,6 @@ ORDER = [
 IS_ATTACHMENT = [
     'attachment',
     'file_format_specification',
-    'IDR_plot_true',
-    'IDR_plot_rep1_pr',
-    'IDR_plot_rep2_pr',
-    'IDR_plot_pool_pr',
-    'IDR_parameters_true',
-    'IDR_parameters_rep1_pr',
-    'IDR_parameters_rep2_pr',
-    'IDR_parameters_pool_pr',
-    'cross_correlation_plot'
 ]
 
 
