@@ -843,10 +843,7 @@ def generate_access_key(testapp, store_access_key,
             'user': admin['@id'],
             'description': 'key for submit4dn',
         }
-        try:
-            res = testapp.post_json('/access_key', access_key_req).json
-        except:
-            return None
+        res = testapp.post_json('/access_key', access_key_req).json
         if store_access_key == 'local':
             # for local storing we always connecting to local server
             server = 'http://localhost:8000'
