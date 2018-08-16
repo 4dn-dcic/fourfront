@@ -151,7 +151,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         # we've got a single type of biosource
         bcc = self.properties.get('cell_culture_details')
         if bcc is not None:
-            cell_culture = request.embed(bcc)
+            cell_culture = request.embed(bcc, '@@object')
             ds = cell_culture.get('differentiation_state')
             dt = cell_culture.get('differentiation_term')
             if ds or dt:
