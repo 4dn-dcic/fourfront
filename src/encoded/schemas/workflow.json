@@ -26,7 +26,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "accession": {
             "accessionType": "WF"
@@ -225,6 +225,10 @@
                         "title": "Description",
                         "description": "Argument Description",
                         "type": "string"
+                    },
+                    "notes": {
+                        "description": "internal notes",
+                        "type": "string"
                     }
                 }
             }
@@ -282,6 +286,10 @@
                                         "global" : {
                                             "title" : "Global Argument",
                                             "type" : "boolean"
+                                        },
+                                        "notes": {
+                                            "description": "internal notes",
+                                            "type": "string"
                                         }
                                     }
                                 },

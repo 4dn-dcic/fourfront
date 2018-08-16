@@ -346,3 +346,68 @@ def workflow_3_4(value, system):
 
     return value
 
+
+@upgrade_step('workflow', '4', '5')
+def workflow_4_5(value, system):
+    formats = system['registry']['collections']['FileFormat']
+
+    # first deal with the 2 argument properties
+    arguments = value.get('arguments')
+    for a, argument in enumerate(arguments):
+        secondary_formats = argument.get('secondary_file_formats')
+        if secondary_formats:
+            for s, sformat in enumerate(secondary_formats):
+                sformat_item = formats.get(sformat)
+                sfuuid = None
+                try:
+                    sfuuid = str(sformat_item.uuid)
+                except AttributeError:
+                    pass
+                if not sfuuid:
+                    del value['arguments'][a]['secondary_file_formats'][s]
+                    msg = ' SECONDARY_FILE_FORMAT: %s NOT FOUND' % sformat
+                    note = value['arguments'][a].get('notes', '')
+                    msg = note + msg
+                    value['arguments'][a]['notes'] = msg
+                else:
+                    value['arguments'][a]['secondary_file_formats'][s] = sfuuid
+
+        argument_format = argument.get('argument_format')
+        if argument_format:
+            aformat_item = formats.get(argument_format)
+            afuuid = None
+            try:
+                afuuid = str(aformat_item.uuid)
+            except AttributeError:
+                pass
+            if not afuuid:
+                del value['arguments'][a]['argument_format']
+                msg = ' ARGUMENT_FORMAT: %s NOT FOUND' % argument_format
+                note = value['arguments'][a].get('notes', '')
+                msg = note + msg
+                value['arguments'][a]['notes'] = msg
+            else:
+                value['arguments'][a]['argument_format'] = afuuid
+
+    # and then the steps.inputs.meta.file_format
+    steps = value.get('steps')
+    for s, step in enumerate(steps):
+        inputs = step.get('inputs', [])
+        for i, input in enumerate(inputs):
+            meta = input.get('meta', {})
+            fformat = meta.get('file_format')
+            if fformat:
+                fformat_item = formats.get(fformat)
+            ffuuid = None
+            try:
+                ffuuid = str(fformat_item.uuid)
+            except AttributeError:
+                pass
+            if not ffuuid:
+                del value['steps'][s]['inputs'][i]['meta']['file_format']
+                msg = ' STEP FILE_FORMAT: %s NOT FOUND' % fformat
+                note = value['steps'][s]['inputs'][i]['meta'].get('notes', '')
+                msg = note + msg
+                value['steps'][s]['inputs'][i]['meta']['notes'] = msg
+            else:
+                value['steps'][s]['inputs'][i]['meta']['file_format'] = ffuuid
