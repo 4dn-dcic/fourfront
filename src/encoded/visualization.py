@@ -661,6 +661,8 @@ def bar_plot_chart(request):
         # Alternate approaches -- saved for record / potential future usage:
         #
         # (a) Needs to have "type" : "nested" mapping, but then faceting & filtering needs to be changed (lots of effort)
+        #     Without "type" : "nested", "value_count" agg will not account for nested arrays and _unique_ on file accessions within a hit (exp set).
+        #
         #"total_exp_raw_files_new2" : {
         #    "nested" : {
         #        "path" : "embedded.experiments_in_set"
@@ -677,6 +679,8 @@ def bar_plot_chart(request):
         #},
         #
         # (b) Returns only 1 value per exp-set
+        #     When using a script without "type" : "nested". If "type" : "nested" exists, need to loop over the array (2nd example -ish).
+        #
         #"total_exp_raw_files_new" : {
         #    "terms" : {
         #        "script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value"
@@ -686,6 +690,7 @@ def bar_plot_chart(request):
         #},
         #
         # (c) Same as (b)
+        #
         #"test" : {
         #    "terms" : {
         #        "script" : "return doc['embedded.experiments_in_set.accession.raw'].getValue().concat('~').concat(doc['embedded.experiments_in_set.accession.raw'].getValue()).concat('~').concat(doc['embedded.experiments_in_set.files.accession.raw'].getValue());",

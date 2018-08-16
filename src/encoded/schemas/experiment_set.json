@@ -140,11 +140,13 @@
         },
         "public_release" : {
             "title" : "Public Release Date",
-            "aggregation_type" : "date_histogram"
+            "aggregation_type" : "date_histogram",
+            "disabled" : true
         },
         "internal_release" : {
             "title" : "Internal Release Date",
-            "aggregation_type" : "date_histogram"
+            "aggregation_type" : "date_histogram",
+            "disabled" : true
         }
     },
     "aggregations" : {

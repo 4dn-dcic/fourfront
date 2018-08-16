@@ -103,7 +103,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Set starting facets
     facets = initialize_facets(types, doc_types, prepared_terms, schemas)
 
-    ### Adding facets, plus any optional custom aggregations. Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
+    ### Adding facets, plus any optional custom aggregations.
+    ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
     search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations, size, from_)
 
     ### Add preference from session, if available
@@ -709,11 +710,15 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
     """
 
     facets = [
-        ('type', {'title': 'Data Type'}) # More will be appended to here from schemas & any currently-active filters.
+        # More facets will be appended to this list from item schema plus from any currently-active filters (as requested in URI params).
+        ('type', {'title': 'Data Type'})
     ]
     append_facets = [
+        # Facets which will be appended after those which are in & added to `facets`
         ('status', {'title': 'Status'}),
-        ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
+
+        # TODO: Re-enable below line if/when 'range' URI param queries for date & numerical fields are implemented.
+        # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
     audit_facets = [
         ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
@@ -723,12 +728,15 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
     ]
 
     # Add facets from schema if one Item type is defined.
-    # Also, conditionally add extra appendable facets if relevant for type.
+    # Also, conditionally add extra appendable facets if relevant for type from schema.
     if len(doc_types) == 1 and doc_types[0] != 'Item':
         current_type_schema = types[doc_types[0]].schema
         if 'facets' in current_type_schema:
             schema_facets = OrderedDict(current_type_schema['facets'])
-            facets += schema_facets.items()
+            for schema_facet in schema_facets.items():
+                if schema_facet[1].get('disabled', False):
+                    continue # Skip disabled facets.
+                facets.append(schema_facet)
 
     ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
     used_facets = [ facet[0] for facet in facets + append_facets ]
@@ -763,9 +771,7 @@ def schema_for_field(field, types, doc_types):
     '''Filter down schemas to the one for our field'''
     schema = types[doc_types[0]].schema
     if schema and schema.get('properties') is not None:
-        for prop in schema['properties'].keys():
-            if prop == field:
-                return schema['properties'][prop]
+        return schema['properties'].get(field, None)
     return None
 
 def is_linkto_or_object_array_root_field(field, types, doc_types):
@@ -926,7 +932,6 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
         elif is_date_field and facet.get('aggregation_type') == 'date_histogram':
             # Date histogram
 
-            facet['hide_from_view'] = False if facet.get('hide_from_view') == False else True # Ensure hidden from FacetList unless explicitly visible
             facet['aggregation_definition'] = date_histogram_aggregation = {
                 "date_histogram" : {
                     'field'         : query_field,

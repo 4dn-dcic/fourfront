@@ -570,11 +570,6 @@
         },
         "lab.display_title": {
             "title": "Lab"
-        },
-        "public_release" : {
-            "title" : "Public Release Date",
-            "aggregation_type" : "date_histogram",
-            "hide_from_view" : true
         }
     }
 

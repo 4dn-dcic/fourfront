@@ -212,7 +212,7 @@
         },
         "experiments.experiment_type" : {
             "title" : "Experiment Type",
-            "description" : "Type of experiment of which this file is a part of."
+            "description" : "Type of experiment to which this file belongs"
         },
         "experiments.biosample.biosource.individual.organism.name" : {
             "title" : "Organism"
@@ -245,14 +245,14 @@
                 { "from" : 10737418240, "to" : 107374182400 },
                 { "from" : 107374182400 }
             ],
-            "hide_from_view" : true,
-            "comment" : "hide_from_view flag may be removed once we (a) can handle ?field=val1-to-val2 (ranges) in filters and (b) send ranges from FacetList to search URI."
+            "disabled" : true,
+            "comment" : "disabled flag may be removed once we (a) can handle ?field=val1-to-val2 (ranges) in filters and (b) send ranges from FacetList to search URI."
         },
         "public_release" : {
             "title" : "Public Release Date",
             "aggregation_type" : "date_histogram",
-            "hide_from_view" : true,
-            "comment" : "hide_from_view flag is auto-added in search.py anyway; will/may be removed after we can handle ranges in URI filters."
+            "disabled" : true,
+            "comment" : "disabled flag may be removed after we can handle ranges in URI filters."
         }
     },
     "aggregations" : {
