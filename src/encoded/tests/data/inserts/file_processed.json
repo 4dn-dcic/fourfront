@@ -217,6 +217,7 @@
     "status":"uploaded",
     "filename":"4DNFIN232ZZZ.pairs.gz",
     "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+    "notes": "pairs format item",
     "uuid":"0048955c-7cb6-4e56-a4d8-56fad52f9999"
 },{
     "lab":"/labs/4dn-dcic-lab/",

@@ -911,6 +911,7 @@ def download(context, request):
 
 def validate_file_filename(context, request):
     ''' validator for filename field '''
+    found_match = False
     data = request.json
     if 'filename' not in data:
         return
@@ -926,15 +927,17 @@ def validate_file_filename(context, request):
             file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
     msg = None
     try:
-        file_extensions = file_format_item.get('allowed_extensions')
+        file_extensions = [file_format_item.get('standard_file_extension')]
+        if file_format_item.get('other_allowed_extensions'):
+            file_extensions.extend(file_format_item.get('other_allowed_extensions'))
+            file_extensions = list(set(file_extensions))
     except AttributeError:
-        found_match = False
         msg = 'Problem getting file_format for %s' % filename
     else:
-        if not file_extensions and file_format_item.get('file_format') == 'other':
+        if file_format_item.get('file_format') == 'other':
             found_match = True
-        else:
-            found_match = False
+        elif not file_extensions:  # this shouldn't happen
+            pass
         for extension in file_extensions:
             if filename[-len(extension):] == extension:
                 found_match = True

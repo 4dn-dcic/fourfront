@@ -376,17 +376,17 @@ def file_formats(testapp, lab, award):
     from uuid import uuid4
     formats = {}
     ef_format_info = {
-        'pairs_px2': {'standard_file_extension': 'pairs.gz.px2', 'allowed_extensions': ['pairs.gz.px2']},
-        'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2', 'allowed_extensions': ['.sam.pairs.gz.px2']},
+        'pairs_px2': {'standard_file_extension': 'pairs.gz.px2'},
+        'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2'},
     }
     format_info = {
-        'fastq': {'standard_file_extension': 'fastq.gz', 'allowed_extensions': ['fastq.gz', 'fq.gz']},
-        'pairs': {'standard_file_extension': 'pairs.gz', 'allowed_extensions': ['pairs.gz'], "extrafile_formats": ['pairs_px2', 'pairsam_px2']},
-        'mcool': {'standard_file_extension': 'mcool', 'allowed_extensions': ['mcool']},
-        'tiff': {'standard_file_extension': 'tiff', 'allowed_extensions': ['tiff', 'tif']},
-        'zip': {'standard_file_extension': 'zip', 'allowed_extensions': ['zip']},
-        'chromsizes': {'standard_file_extension': 'chrom.sizes', 'allowed_extensions': ['chrom.sizes']},
-        'other': {'standard_file_extension': 'other', 'allowed_extensions': []}
+        'fastq': {'standard_file_extension': 'fastq.gz', 'other_allowed_extensions': ['fq.gz']},
+        'pairs': {'standard_file_extension': 'pairs.gz', "extrafile_formats": ['pairs_px2', 'pairsam_px2']},
+        'mcool': {'standard_file_extension': 'mcool'},
+        'tiff': {'standard_file_extension': 'tiff', 'other_allowed_extensions': ['tif']},
+        'zip': {'standard_file_extension': 'zip'},
+        'chromsizes': {'standard_file_extension': 'chrom.sizes'},
+        'other': {'standard_file_extension': 'other'}
     }
 
     for eff, info in ef_format_info.items():

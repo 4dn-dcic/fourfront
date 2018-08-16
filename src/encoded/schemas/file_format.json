@@ -41,9 +41,9 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
-        "allowed_extensions": {
+        "other_allowed_extensions": {
             "title": "Allowed Extensions",
-            "description": "Allowable extensions for uploading filenames of this format",
+            "description": "Additional allowable extensions for uploading filenames of this format",
             "type": "array",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {

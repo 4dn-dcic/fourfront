@@ -99,7 +99,6 @@ IS_ATTACHMENT = [
 ]
 
 
-
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
     '''
@@ -596,7 +595,9 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=Non
     elif phase == 2:
         method = 'PUT'
         pipeline.extend(PHASE2_PIPELINES.get(item_type, []))
-
+    elif phase == 3:
+        method = 'PUT'
+        pipeline.extend(PHASE2_PIPELINES.get(item_type, []))
     pipeline.extend([
         request_url(item_type, method),
         remove_keys('uuid') if method in ('PUT', 'PATCH') else noop,
@@ -684,19 +685,13 @@ PHASE1_PIPELINES = {
 ##############################################################################
 # Phase 2 pipelines
 #
-# A second pass is required to cope with reference cycles. Only rows with
+# A second pass is required to cope with self reference cycles. Only rows with
 # filtered out keys are updated.
 
 
 PHASE2_PIPELINES = {
-    'ontology': [
-        skip_rows_missing_all_keys('synonym_terms', 'definition_terms', 'relation_terms'),
-    ],
     'ontology_term': [
         skip_rows_missing_all_keys('parents', 'slim_terms'),
-    ],
-    'user': [
-        skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
     'file_format': [
         skip_rows_missing_all_keys('extrafile_formats'),
@@ -705,7 +700,7 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [
-        skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments", 'produced_from'),
+        skip_rows_missing_all_keys('related_files', 'produced_from'),
     ],
     'file_reference': [
         skip_rows_missing_all_keys('related_files'),
@@ -715,15 +710,6 @@ PHASE2_PIPELINES = {
     ],
     'file_microscopy': [
         skip_rows_missing_all_keys('related_files'),
-    ],
-    'file_set': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'file_set_calibration': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'file_set_microscope_qc': [
-        skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hi_c': [
         skip_rows_missing_all_keys('experiment_relation'),
@@ -748,6 +734,30 @@ PHASE2_PIPELINES = {
     ],
     'experiment_tsaseq': [
         skip_rows_missing_all_keys('experiment_relation'),
+    ]
+}
+
+
+####
+# and a third phase is needed for non-self references
+PHASE3_PIPELINES = {
+    'ontology': [
+        skip_rows_missing_all_keys('synonym_terms', 'definition_terms', 'relation_terms'),
+    ],
+    'user': [
+        skip_rows_missing_all_keys('lab', 'submits_for'),
+    ],
+    'file_processed': [
+        skip_rows_missing_all_keys('workflow_run', 'source_experiments'),
+    ],
+    'file_set': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
+        skip_rows_missing_all_keys('files_in_set'),
     ],
     'publication': [
         skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
@@ -759,6 +769,16 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('cell_line')
     ]
 }
+
+
+def check_result(data, errors=[], exclude=[]):
+    for result in data:
+        if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+            errors.append({'uuid': result['uuid'],
+                           'error': result['_response'].json})
+
+            exclude.append(result['uuid'])
+            print("excluding uuid %s due to error" % result['uuid'])
 
 
 def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, from_json=False):
@@ -778,7 +798,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
         try:
             if from_json:
                 source = filename.get(item_type)
-                if source == None:
+                if source is None:
                     continue
             else:
                 source = read_single_sheet(filename, item_type)
@@ -795,30 +815,42 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, fro
 
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase)
         processed_data = combine(source, pipeline)
+        check_result(processed_data, exclude=exclude_list, errors=errors)
+        # for result in processed_data:
+        #     if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+        #         errors.append({'uuid': result['uuid'],
+        #                        'error': result['_response'].json})
+        #         # import pdb; pdb.set_trace()
+        #         exclude_list.append(result['uuid'])
+        #         print("excluding uuid %s due to error" % result['uuid'])
 
-        for result in processed_data:
-            if result.get('_response') and result.get('_response').status_code not in [200, 201]:
-                errors.append({'uuid': result['uuid'],
-                               'error': result['_response'].json})
-                # import pdb; pdb.set_trace()
-                exclude_list.append(result['uuid'])
-                print("excluding uuid %s do to error" % result['uuid'])
+        # load self referential phase2
+        if force_return:
+            continue
+        elif item_type not in PHASE2_PIPELINES:
+            continue
+        else:
+            phase = 2
+            pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase, exclude=exclude_list)
+            processed_data = combine(source, pipeline)
+            check_result(processed_data, exclude=exclude_list, errors=errors)
+
     if force_return:
         return
 
     for item_type in order:
-        if item_type not in PHASE2_PIPELINES:
+        if item_type not in PHASE3_PIPELINES:
             continue
         try:
             if from_json:
                 source = filename.get(item_type)
-                if source == None:
+                if source is None:
                     continue
             else:
                 source = read_single_sheet(filename, item_type)
         except ValueError:
             continue
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2, exclude=exclude_list)
+        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=3, exclude=exclude_list)
         process(combine(source, pipeline))
     return errors
 
