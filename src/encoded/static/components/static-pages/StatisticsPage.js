@@ -39,7 +39,11 @@ export class StatisticsViewController extends React.PureComponent {
     static CHART_SEARCH_URIS = {
         //'File' : '/search/?type=File&experiments.display_title!=No%20value&limit=0',
         'File' : function(props) {
-            return '/search/?' + stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) + '&limit=0';
+            return (
+                '/search/?type=File&' +
+                stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) +
+                '&limit=0'
+            );
         },
         'ExperimentSetReplicate' : function(props) {
             return '/search/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
@@ -128,7 +132,11 @@ export class StatisticsChartsView extends React.Component {
         super(props);
         this.handleToggle = this.handleToggle.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
-        this.state = _.extend(this.generateAggsToState(props), { 'chartToggles' : {} });
+        this.state = _.extend(this.generateAggsToState(props), {
+            'chartToggles'      : {},
+            // Passed down to & shared by multiple charts in order to have same color per key
+            'colorScale'  : d3.scaleOrdinal(d3.schemeCategory10)
+        });
     }
 
     componentWillReceiveProps(nextProps){
@@ -193,7 +201,7 @@ export class StatisticsChartsView extends React.Component {
         var anyExpandedCharts = _.any(_.values(this.state.chartToggles));
         var commonContainerProps = {
             'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
-            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
+            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250, 'colorScale' : this.state.colorScale
         };
 
         return (
@@ -270,7 +278,7 @@ export class AreaChartContainer extends React.Component {
     }
 
     render(){
-        var { title, children, width, defaultColSize, defaultHeight } = this.props,
+        var { title, children, width, defaultColSize, defaultHeight, colorScale } = this.props,
             expanded = this.isExpanded(),
             useWidth = width || this.getRefWidth(),
             chartInnerWidth = expanded ? useWidth * 3 : useWidth,
@@ -287,9 +295,10 @@ export class AreaChartContainer extends React.Component {
                     <div className={"col-xs-12 col-lg-11"}>
                         <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
                             { React.cloneElement(children, {
-                                'width' : chartInnerWidth,
-                                'height' : useHeight,
-                                'xAxisGenerator' : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) )
+                                'width'             : chartInnerWidth,
+                                'height'            : useHeight,
+                                'xAxisGenerator'    : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) ),
+                                'colorScale'        : colorScale || null
                             }) }
                         </div>
                     </div>
@@ -432,7 +441,8 @@ export class AreaChart extends React.PureComponent {
         'xAxisGenerator'        : function(x){ // One tick every 2 months
             return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
         },
-        'transitionDuration'    : 1500
+        'transitionDuration'    : 1500,
+        'colorScale'            : null // d3.scaleOrdinal(d3.schemeCategory10)
     };
 
     constructor(props){
@@ -446,13 +456,15 @@ export class AreaChart extends React.PureComponent {
 
         // D3 things
         this.parseTime = d3.timeParse(props.d3TimeFormat);
-        this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         this.stack = d3.stack().value(function(d, key){
             var currChild = _.findWhere(d.children || [], { 'term' : key });
             if (currChild) return currChild.total;
             return 0;
         });
         this.stack.keys(this.childKeysFromData(props.data));
+        if (!this.props.colorScale){
+            this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        }
 
         this.state = {
             'drawingError'  : false,
@@ -472,6 +484,9 @@ export class AreaChart extends React.PureComponent {
         }
         if (nextProps.data !== this.props.data){
             this.updateDataInState(nextProps.data);
+        }
+        if (this.props.colorScale && !nextProps.colorScale){
+            this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         }
     }
 
@@ -588,6 +603,7 @@ export class AreaChart extends React.PureComponent {
         var { yAxisLabel, margin } = this.props;
         var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
         var drawn = { svg };
+        var colorScale = this.props.colorScale || this.colorScale;
 
         requestAnimationFrame(()=>{
 
@@ -603,7 +619,7 @@ export class AreaChart extends React.PureComponent {
 
             drawn.path = drawn.layers.append('path')
                 .attr('class', 'area')
-                .style('fill', (d) => { return this.colorScale((d.data || d).key); })
+                .style('fill', function(d){ return colorScale((d.data || d).key); })
                 .attr('d', area);
 
             this.drawAxes(drawn, { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn });
