@@ -181,10 +181,10 @@ def other_lab(testapp):
 
 
 @pytest.fixture
-def simple_file(testapp, lab, award):
+def simple_file(testapp, lab, award, file_formats):
     item = {
         'uuid': '3413218c-3d86-498b-a0a2-9a406638e777',
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'paired_end': '1',
         'lab': lab['@id'],
         'award': award['@id'],
@@ -456,11 +456,11 @@ def ind_human_item(human, award, lab):
 
 
 @pytest.fixture
-def file_item(award, lab):
+def file_item(award, lab, file_formats):
     return {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'paired_end': '1'
     }
 
