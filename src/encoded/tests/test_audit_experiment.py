@@ -41,7 +41,7 @@ def fastq(testapp, file_data):
 @pytest.fixture
 def processed(testapp, file_data, file_formats):
     file_data['file_classification'] = 'processed file'
-    file_data['file_format'] = file_formats.get('bam').get('@id'),
+    file_data['file_format'] = file_formats.get('bam').get('@id')
     return testapp.post_json('/file_processed', file_data).json['@graph'][0]
 
 
