@@ -42,6 +42,9 @@ var DateUtility = module.exports = (function(){
                 case 'date-lg':
                     // Thursday, November 3rd, 2016
                     return "dddd, MMMM Do, YYYY";
+                case 'date-month':
+                    // November 2016
+                    return "MMMM YYYY";
             }
         }
 

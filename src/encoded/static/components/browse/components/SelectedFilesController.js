@@ -37,6 +37,10 @@ export class SelectedFilesController extends React.Component {
         );
     }
 
+    static uniqueFileCountByUUID(selectedFiles){
+        return _.uniq(_.pluck(_.values(selectedFiles), 'uuid')).length;
+    }
+
     static defaultProps = {
         'initiallySelectedFiles' : null,
         'resetSelectedFilesCheck' : function(nextProps, pastProps){
@@ -60,14 +64,18 @@ export class SelectedFilesController extends React.Component {
         this.unselectFile = this.unselectFile.bind(this);
         this.resetSelectedFiles = this.resetSelectedFiles.bind(this);
         this.getFlatList = this.getFlatList.bind(this);
-        this.state = {
-            'selectedFiles' : SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles)
-        };
+
+        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles),
+            selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(selectedFiles);
+
+        this.state = { selectedFiles, selectedFilesUniqueCount };
     }
 
     componentWillReceiveProps(nextProps){
         if (nextProps.resetSelectedFilesCheck(nextProps, this.props)){
-            this.setState({ 'selectedFiles' : SelectedFilesController.parseInitiallySelectedFiles(nextProps.initiallySelectedFiles) });
+            var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(nextProps.initiallySelectedFiles),
+                selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(selectedFiles);
+            this.setState({ selectedFiles, selectedFilesUniqueCount });
         }
     }
 
@@ -95,7 +103,8 @@ export class SelectedFilesController extends React.Component {
             add(uuid, memo);
         } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
 
-        this.setState({ 'selectedFiles' : newSelectedFiles });
+        var selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(newSelectedFiles);
+        this.setState({ 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount });
     }
 
     unselectFile(uuid: string){
@@ -120,11 +129,15 @@ export class SelectedFilesController extends React.Component {
             remove(uuid);
         } else throw new Error("Supplied uuid is not a string or array of strings:", uuid);
 
-        this.setState({ 'selectedFiles' : newSelectedFiles });
+        var selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(newSelectedFiles);
+        this.setState({ 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount });
     }
 
     resetSelectedFiles(props = this.props){
-        this.setState({ 'selectedFiles' : SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles) });
+        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles),
+            selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(selectedFiles);
+
+        this.setState({ selectedFiles, selectedFilesUniqueCount });
     }
 
     getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
@@ -136,10 +149,11 @@ export class SelectedFilesController extends React.Component {
         //console.log('SELTEST', this.state.selectedFiles);
         if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
         var propsToPass = _.extend(_.omit(this.props, 'children'), {
-            'selectedFiles'         : this.state.selectedFiles,
-            'selectFile'            : this.selectFile,
-            'unselectFile'          : this.unselectFile,
-            'resetSelectedFiles'    : this.resetSelectedFiles
+            'selectedFiles'             : this.state.selectedFiles,
+            'selectedFilesUniqueCount'  : this.state.selectedFilesUniqueCount,
+            'selectFile'                : this.selectFile,
+            'unselectFile'              : this.unselectFile,
+            'resetSelectedFiles'        : this.resetSelectedFiles
         });
         return React.cloneElement(this.props.children, propsToPass);
     }

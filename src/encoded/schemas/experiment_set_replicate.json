@@ -26,12 +26,15 @@
         { "$ref": "mixins.json#/static_headers" },
         { "$ref": "experiment_set.json#/properties" }
     ],
-    "mixinColumns": [
-        { "$ref": "experiment_set.json#/columns"}
-    ],
     "mixinFacets": [
         { "$ref": "experiment_set.json#/facets"},
         { "$ref": "mixins.json#/facets_common" }
+    ],
+    "mixinAggregations": [
+        { "$ref": "experiment_set.json#/aggregations"}
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment_set.json#/columns"}
     ],
     "properties": {
         "schema_version": {
