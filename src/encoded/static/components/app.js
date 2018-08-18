@@ -8,6 +8,7 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
+import queryString from 'query-string';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import Navigation from './navigation';
@@ -21,6 +22,7 @@ import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
+import { searchQueryStringFromHref } from './util/experiments-filters';
 
 /**
  * The top-level component for this application.
@@ -1137,16 +1139,18 @@ export default class App extends React.Component {
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
-                    <script async src='//www.google-analytics.com/analytics.js'></script>
+                    <script async src="//www.google-analytics.com/analytics.js"/>
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
-                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
+                    <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
-                    }}></script>
-                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
-                    <script data-prop-name="lastCSSBuildTime" type="application/ld+json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}></script>
+                    }}/>
+                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/>
+                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}/>
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
+                    <SearchEngineMetadataCurrentContext context={context} hrefParts={href_url} />
+                    <SearchEngineMetadataFullSite />
                 </head>
                 <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
@@ -1205,4 +1209,131 @@ export default class App extends React.Component {
     }
 
 }
+
+
+
+class SearchEngineMetadataCurrentContext extends React.PureComponent {
+
+    static propTypes = {
+        'context' : PropTypes.object.isRequired
+    };
+
+    static commonSchemaBase(context, hrefParts){
+        var currentURL = (hrefParts ? ((hrefParts.protocol || '') + '//' + hrefParts.host) : '') + context['@id'];
+        var base = {
+            "@context": "http://schema.org",
+            "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": currentURL
+            },
+            "datePublished" : context.public_release || context.date_created || null,
+            "dateModified" : (context.last_modified && context.last_modified.date_modified) || null,
+            "url" : currentURL
+        };
+        // Optional but common
+        if (context.accession || context.uuid){
+            base['identifier'] = context.accession || context.uuid;
+        }
+        return base;
+    }
+
+    static transformationsByType = {
+        'User' : function(context){
+            return null;
+        },
+        'HelpPage' : function(context, hrefParts){
+            if (context['@id'].slice(0,6) !== '/help/'){
+                return null; // Skip if we're on Item page for a Static Page
+            }
+            return _.extend(SearchEngineMetadataCurrentContext.commonSchemaBase(context, hrefParts), {
+                "@type": "Article",
+                "headline" : context.display_title || context.title,
+                "author" : SearchEngineMetadataFullSite.dcicOrganization()
+
+            });
+        }
+    }
+
+    /**
+     * Go down `@type` list for this Item/context and find a transformation fxn, if any.
+     */
+    static getTransformFxnForItem(context){
+        var types = context['@type'];
+        if (!types) return null;
+        var currFxn = null;
+        for (var i = 0; i < types.length; i++){
+            console.log('TYPE:', types[i]);
+            currFxn = SearchEngineMetadataCurrentContext.transformationsByType[types[i]];
+            if (typeof currFxn === 'function') return currFxn;
+        }
+        return null;
+    }
+
+    render(){
+        var { context, hrefParts } = this.props,
+            transformFxn = context && SearchEngineMetadataCurrentContext.getTransformFxnForItem(context),
+            structuredDataJSON = transformFxn && transformFxn(context, hrefParts);
+
+        if (!structuredDataJSON) return null;
+        return (
+            <script type="application/ld+json" dangerouslySetInnerHTML={{
+                __html: '\n' + jsonScriptEscape(JSON.stringify(structuredDataJSON, null, 4)) + '\n'
+            }} />
+        );
+    }
+
+}
+
+
+class SearchEngineMetadataFullSite extends React.PureComponent {
+
+    static dcicOrganization(){
+        return {
+            "@type" : "Organization",
+            "name" : "4DN Data Coordination and Integration Center",
+            "url" : "http://dcic.4dnucleome.org/",
+            "parentOrganization" : {
+                "@type" : "EducationalOrganization",
+                "name" : "Department of Biomedical Informatics",
+                "alternateName" : "HMS DBMI",
+                "url" : "https://dbmi.hms.harvard.edu/",
+                "parentOrganization" : {
+                    // This part taken from https://www.harvard.edu source
+                    "@type" : "CollegeOrUniversity",
+                    "name": "Harvard",
+                    "alternateName": "Harvard University",
+                    "url": "http://www.harvard.edu",
+                    "logo": "http://www.harvard.edu/sites/default/files/content/harvard-university-logo-151.png",
+                }
+            }
+        };
+    }
+
+    render(){
+        var structuredDataJSON = {
+            "@context": "http://schema.org",
+            "@type": "WebSite",
+            "url": "https://data.4dnucleome.org/",
+            "description" : "The 4D Nucleome Data Portal hosts data generated by the 4DN Network and other reference nucleomics data sets, and an expanding tool set for open data processing and visualization.",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://data.4dnucleome.org/browse/?" + queryString.stringify(navigate.getBrowseBaseParams('only_4dn')) + 'q={search_term_string}',
+                "query-input": "required name=search_term_string"
+            },
+            "creator" : SearchEngineMetadataFullSite.dcicOrganization(),
+            "sponsor" : {
+                "@type" : "GovernmentOrganization",
+                "name" : "National Institutes of Health (NIH)",
+                "url" : "https://www.nih.gov/"
+            }
+        };
+        return (
+            <script type="application/ld+json" dangerouslySetInnerHTML={{
+                __html: '\n' + JSON.stringify(structuredDataJSON, null, 4) + '\n'
+            }} />
+        );
+    }
+
+}
+
 
