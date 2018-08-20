@@ -23,6 +23,7 @@
         "status": {
             "title": "Status",
             "type": "string",
+            "permission": "import_items",
             "default": "in review by lab",
             "enum" : [
                 "in review by lab",
@@ -33,19 +34,20 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
+            "permission": "import_items",
             "uniqueKey": true
         },
         "standard_file_extension": {
             "title": "Standard File Extension",
             "description": "The standard extension that is added to 4DN files for download.",
             "type": "string",
-            "exclude_from": ["submit4dn", "FFedit-create"]
+            "permission": "import_items"
         },
         "other_allowed_extensions": {
             "title": "Allowed Extensions",
             "description": "Additional allowable extensions for uploading filenames of this format",
             "type": "array",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "permission": "import_items",
             "items": {
                 "title": "OK Extension",
                 "type": "string"
@@ -58,6 +60,7 @@
         "extrafile_formats": {
             "title": "Extrafile Formats",
             "type": "array",
+            "permission": "import_items",
             "items": {
                 "title": "Format",
                 "description": "A file format for an extrafile of the file",
