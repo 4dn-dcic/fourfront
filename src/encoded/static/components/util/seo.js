@@ -52,12 +52,8 @@ export class CurrentContext extends React.PureComponent {
         }
         return labRetObj;
     }
-    /*
-    static publicationToSchema(pub, baseDomain){
-        if (!pub || !pub['@id'] || !pub.display_title) return null;
-        var
-    }
-    */
+
+
     static transformationsByType = {
         'User' : function(context){
             return null;
@@ -121,12 +117,18 @@ export class CurrentContext extends React.PureComponent {
                 publication = context.produced_in_pub && context.produced_in_pub.short_attribution && context.produced_in_pub.journal && context.produced_in_pub.title && context.produced_in_pub,
                 experimentTypes = getNestedProperty(context, 'experiments_in_set.experiment_type');
 
+            if (experimentTypes && Array.isArray(experimentTypes)){
+                experimentTypes = _.uniq(experimentTypes);
+            }
+
             var retObj = _.extend(CurrentContext.commonSchemaBase(context, hrefParts), {
                 "@type": "Dataset",
                 "includedInDataCatalog" : FullSite.catalog4DN(baseDomain),
                 "name" : "Experiment Set - " + context.accession,
                 "publisher" : dcicOrg,
-                "isAccessibleForFree" : true
+                "isAccessibleForFree" : true,
+                // TODO: Add correct 'variableMeasured'
+                // "variableMeasured" : "Biological Sequence"
             });
 
             if (labCreator){
@@ -139,15 +141,20 @@ export class CurrentContext extends React.PureComponent {
                 retObj.citation = publication.short_attribution + " '" + publication.title + "', " + publication.journal;
             }
 
+            if (experimentTypes && experimentTypes.length === 1){
+                retObj.measurementTechnique = experimentTypes[0];
+            } else if (experimentTypes && experimentTypes.length > 1){
+                retObj.measurementTechnique = experimentTypes;
+            }
+
             // Add some keywords from various properties.
-            var keywords = Array.isArray(experimentTypes) && experimentTypes.length > 0 ? _.uniq(experimentTypes) : [],
+            var keywords = Array.isArray(experimentTypes) && experimentTypes.length > 0 ? experimentTypes : [],
                 listOfPropsForKeyWords = [
                     'experiments_in_set.biosample.biosource_summary',
                     'experiments_in_set.biosample.biosource.biosource_type',
                     'experiments_in_set.biosample.biosource.individual.organism.display_title',
                     'experiments_in_set.biosample.treatments.treatment_type',
-                    'experiments_in_set.experiment_categorizer.value',
-                    //'experiments_in_set.experiment_type' // Added in manually
+                    'experiments_in_set.experiment_categorizer.value'
                 ];
 
             _.forEach(listOfPropsForKeyWords, function(field){
@@ -264,23 +271,7 @@ export class FullSite extends React.PureComponent {
                         "logo": "http://www.mit.edu/themes/mit/assets/favicon/android-icon-192x192.png",
                     }
                 }
-            ],
-            /*
-            "parentOrganization" : {
-                "@type" : "EducationalOrganization",
-                "name" : "Department of Biomedical Informatics",
-                "alternateName" : "HMS DBMI",
-                "url" : "https://dbmi.hms.harvard.edu/",
-                "parentOrganization" : {
-                    // This part taken from https://www.harvard.edu source
-                    "@type" : "CollegeOrUniversity",
-                    "name": "Harvard",
-                    "alternateName": "Harvard University",
-                    "url": "http://www.harvard.edu",
-                    "logo": "http://www.harvard.edu/sites/default/files/content/harvard-university-logo-151.png",
-                }
-            }
-            */
+            ]
         });
     }
 
