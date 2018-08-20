@@ -121,6 +121,25 @@ class Enzyme(Item):
 
 
 @collection(
+    name='file-formats',
+    unique_key='file_format:file_format',
+    properties={
+        'title': 'File Formats',
+        'description': 'Listing of file formats used by 4DN'
+    }
+)
+class FileFormat(Item, ItemWithAttachment):
+    """The class to store information about 4DN file formats"""
+    item_type = 'file_format'
+    schema = load_schema('encoded:schemas/file_format.json')
+    embedded_list = []
+    name_key = 'file_format'
+
+    def display_title(self):
+        return self.properties.get('file_format')
+
+
+@collection(
     name='genomic-regions',
     properties={
         'title': 'Genomic Regions',
@@ -150,10 +169,10 @@ class Organism(Item):
     embedded_list = []
 
     def display_title(self):
-        if self.properties.get('scientific_name'): # Defaults to "" so check if falsy not if is None
+        if self.properties.get('scientific_name'):  # Defaults to "" so check if falsy not if is None
             scientific_name_parts = self.properties['scientific_name'].split(' ')
             if len(scientific_name_parts) > 1:
-                return ' '.join([ scientific_name_parts[0][0].upper() + '.' ] + scientific_name_parts[1:])
+                return ' '.join([scientific_name_parts[0][0].upper() + '.'] + scientific_name_parts[1:])
             else:
                 return self.properties['scientific_name']
 

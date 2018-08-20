@@ -57,10 +57,14 @@ class Experiment(Item):
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
-
-        "produced_in_pub.*",
-        "publications_of_exp.*",
-
+        "produced_in_pub.title",
+        "produced_in_pub.abstract",
+        "produced_in_pub.journal",
+        "produced_in_pub.authors",
+        "publications_of_exp.title",
+        "publications_of_exp.abstract",
+        "publications_of_exp.journal",
+        "publications_of_exp.authors",
         "biosample.accession",
         "biosample.modifications_summary",
         "biosample.treatments_summary",

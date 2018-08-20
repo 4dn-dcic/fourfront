@@ -77,9 +77,6 @@
         "related_files": {
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
-        "file_format_specifications": {
-            "exclude_from": ["submit4dn", "FFedit-create"]
-        },
         "quality_metric": {
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
