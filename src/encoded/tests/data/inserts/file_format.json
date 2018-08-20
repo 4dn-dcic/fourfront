@@ -9,6 +9,15 @@
         "award": "1U01CA200059-01"
     },
     {
+        "file_format": "txt",
+        "standard_file_extension": "txt",
+        "description": "This format is used for plain text files",
+        "file_format_specification": "test.pdf",
+        "uuid": "dba26778-f40a-4561-a552-65539702ded4",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
         "file_format": "pairs",
         "standard_file_extension": "pairs.gz",
         "description": "This format is used for something to do with paired mapped read locations",
