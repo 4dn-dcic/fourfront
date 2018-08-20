@@ -120,8 +120,11 @@ $navbar-transition-easing: ease-out;
                         padding-top: 6px;
                         padding-bottom: 6px;
                     }
-                    > text {
-                        transition: all .5s;
+                    > text.fourfront-logo-text {
+                        transition: letter-spacing 1s, opacity .7s, stroke .7s, stroke-width .7s, fill .7s;
+                    }
+                    .fourfront-logo-foreground-circle {
+                        transition: opacity 1.2s;
                     }
                 }
             }
@@ -164,6 +167,20 @@ $navbar-transition-easing: ease-out;
                         //-webkit-animation: fa-spin 2s infinite linear;
     		            //animation: fa-spin 2s infinite linear;
                         //fourfront_linear_gradient_reversed
+                    }
+
+                    text.fourfront-logo-text {
+                        transition: letter-spacing 1s .4s linear, opacity .7s .4s, stroke .7s 4s, stroke-width .7s 4s, fill .7s .4s;
+                        letter-spacing: -14px;
+                        stroke: rgba(0,0,0,0.2);
+                        opacity: 0;
+                        fill: rgba(0,0,0,0);
+                        stroke-width: 15px;
+                    }
+
+                    .fourfront-logo-foreground-circle {
+                        transition: opacity 1.2s .6s;
+                        opacity: 1;
                     }
                 }
             }
