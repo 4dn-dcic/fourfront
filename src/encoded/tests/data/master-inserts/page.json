@@ -556,6 +556,9 @@
         ],
         "schema_version" : "3"
     },
+
+
+
     {
         "name": "privacy-policy",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-9991d90560b0",
@@ -565,10 +568,23 @@
         ],
         "schema_version" : "3"
     },
+
+
+
     {
         "name": "release-updates",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
         "title": "Release Updates",
+        "content": [],
+        "schema_version" : "3"
+    },
+
+
+
+    {
+        "name": "statistics",
+        "uuid": "f0f0f0f0-0000-0000-0000-ffffff040000",
+        "title": "Portal Statistics (BETA)",
         "content": [],
         "schema_version" : "3"
     }

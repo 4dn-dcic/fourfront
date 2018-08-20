@@ -205,13 +205,11 @@ export class AboveTableControls extends React.Component {
                 <Collapse in={!!(open)} appear>
                     <div>
                         <SelectedFilesFilterByContent
-                            selectedFiles={this.props.selectedFiles}
+                            {..._.pick(this.props, 'selectedFiles', 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
                             subSelectedFiles={selectedFiles}
                             currentFileTypeFilters={this.state.fileTypeFilters}
                             setFileTypeFilters={this.setFileTypeFilters}
                             closeButtonClickHandler={this.handleOpenToggle.bind(this, false)}
-                            includeFileSets={this.props.includeFileSets}
-                            includeProcessedFiles={this.props.includeProcessedFiles}
                         />
                     </div>
                 </Collapse>
@@ -225,7 +223,8 @@ export class AboveTableControls extends React.Component {
             return (
                 <ChartDataController.Provider id="selected_files_section">
                     <SelectedFilesControls
-                        {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'includeFileSets', 'includeProcessedFiles')}
+                        {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount', 'resetSelectedFiles',
+                            'includeFileSets', 'includeProcessedFiles')}
                         subSelectedFiles={selectedFiles}
                         onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')}
                         currentFileTypeFilters={this.state.fileTypeFilters}

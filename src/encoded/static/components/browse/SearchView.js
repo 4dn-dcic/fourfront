@@ -219,24 +219,16 @@ class ControlsAndResults extends React.PureComponent {
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList
-                            className="with-header-bg"
-                            facets={facets}
-                            filters={context.filters}
-                            onFilter={this.props.onFilter}
-                            filterFacetsFxn={FacetList.filterFacetsForSearch}
-                            isTermSelected={this.props.isTermSelected}
-                            itemTypeForSchemas={itemTypeForSchemas}
-                            session={this.props.session}
+                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter')}
+                            className="with-header-bg" facets={facets} filters={context.filters}
+                            onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
+                            itemTypeForSchemas={itemTypeForSchemas} hideDataTypeFacet={inSelectionMode}
                             showClearFiltersButton={(()=>{
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var urlPartQueryCorrectedForType = _.clone(urlParts.query);
                                 if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
                                 return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
-                            })()}
-                            onClearFilters={this.handleClearFilters}
-                            hideDataTypeFacet={inSelectionMode}
-                        />
+                            })()} />
                 </div> : null}
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                         <AboveTableControls {..._.pick(this.props,

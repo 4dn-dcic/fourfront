@@ -106,6 +106,7 @@
      "submitted_by": "4dndcic@gmail.com",
      "award": "1U01CA200059-01",
      "file_format": "d13d06cf-218e-4f61-55f0-92f226248b2c",
+     "file_size" : 12312312,
      "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fadd",
      "status": "uploaded",
      "filename": "test_fasta1.fasta.gz"
@@ -117,6 +118,7 @@
      "submitted_by": "wrangler@wrangler.com",
      "award": "1U01CA200059-01",
      "file_format": "d13d06cf-218e-4f61-55f0-92f226248b2c",
+     "file_size" : 3525235235,
      "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fafa",
      "status": "uploaded",
      "filename": "test_fasta2.fasta.gz"

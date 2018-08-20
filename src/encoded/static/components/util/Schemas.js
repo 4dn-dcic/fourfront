@@ -4,6 +4,7 @@ import _ from 'underscore';
 import url from 'url';
 import React from 'react';
 import { linkFromItem } from './object';
+import { LocalizedTime, format as dateFormat } from './date-utility';
 
 let cachedSchemas = null;
 
@@ -23,9 +24,8 @@ export function set(schemas){
 
 export const itemTypeHierarchy = {
     'Experiment': [
-        'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq',
-        'ExperimentAtacseq', 'ExperimentDamid', 'ExperimentTsaseq',
-        'ExperimentChiapet', 'ExperimentSeq'
+        'ExperimentAtacseq', 'ExperimentCaptureC', 'ExperimentChiapet', 'ExperimentDamid', 'ExperimentHiC',
+        'ExperimentMic', 'ExperimentRepliseq', 'ExperimentSeq', 'ExperimentTsaseq'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
@@ -75,6 +75,12 @@ export const Term = {
             case 'status':
                 name = Term.capitalizeSentence(term);
                 break;
+            case 'date_created':
+            case 'public_release':
+            case 'project_release':
+                if (allowJSXOutput) name = <LocalizedTime timestamp={term} />;
+                else name = dateFormat(term);
+                break;
             default:
                 name = null;
                 break;
@@ -83,6 +89,7 @@ export const Term = {
         if (typeof name === 'string') return name;
 
         // Remove 'experiments_in_set' and test as if an experiment field. So can work for both ?type=Experiment, ?type=ExperimentSet.
+        field = field.replace('experiments_in_set.', '');
 
         switch (field) {
             case 'biosource_type':

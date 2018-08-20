@@ -278,7 +278,7 @@ class ResultTableContainer extends React.PureComponent {
                             orientation="vertical" className="with-header-bg"
                             facets={context.facets} filters={context.filters}
                             isTermSelected={this.isTermSelected} onFilter={this.onFilter}
-                            itemTypeForSchemas="ExperimentSetReplicates" session={session}
+                            itemTypeForSchemas="ExperimentSetReplicate" session={session}
                             href={href || searchBase} browseBaseState={browseBaseState} schemas={schemas}
                             showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
                             onClearFilters={this.handleClearFilters}
@@ -288,10 +288,10 @@ class ResultTableContainer extends React.PureComponent {
                     null
                 }
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                    <AboveTableControls
-                        {..._.pick(this.props,
+                    <AboveTableControls {..._.pick(this.props,
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href', 'currentAction',
-                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles'
+                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles',
+                            'selectedFilesUniqueCount'
                         )}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount

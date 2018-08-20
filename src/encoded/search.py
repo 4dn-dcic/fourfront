@@ -9,6 +9,7 @@ from snovault import (
 )
 from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
+from snovault.elasticsearch.create_mapping import determine_if_is_date_field
 from snovault.resource_views import collection_view_listing_db
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from elasticsearch.helpers import scan
@@ -30,7 +31,7 @@ def includeme(config):
 sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?]')
 
 @view_config(route_name='search', request_method='GET', permission='search')
-def search(context, request, search_type=None, return_generator=False, forced_type='Search'):
+def search(context, request, search_type=None, return_generator=False, forced_type='Search', custom_aggregations=None):
     """
     Search view connects to ElasticSearch and returns the results
     """
@@ -98,11 +99,13 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Set filters
     search, query_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
-    ### Set starting facets
-    facets = initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas)
 
-    ### Adding facets to the query
-    search = set_facets(search, facets, query_filters, string_query)
+    ### Set starting facets
+    facets = initialize_facets(types, doc_types, prepared_terms, schemas)
+
+    ### Adding facets, plus any optional custom aggregations.
+    ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
+    search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations, size, from_)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -113,17 +116,14 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Execute the query
     if size == 'all':
         es_results = execute_search_for_all_results(search)
-    elif size:
-        offset_size = from_ + size
-        size_search = search[from_:offset_size]
-        es_results = execute_search(size_search)
     else:
-        # fallback size for elasticsearch is 10
-        es_results = execute_search(search)
+        size_search = search[from_:from_ + size]
+        es_results = execute_search(size_search)
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
     result['facets'] = format_facets(es_results, facets, total, search_frame)
+    result['aggregations'] = format_extra_aggregations(es_results)
 
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
@@ -692,14 +692,33 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     return search, final_filters
 
 
-def initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas):
+def initialize_facets(types, doc_types, prepared_terms, schemas):
     """
     Initialize the facets used for the search. If searching across multiple
     doc_types, only use the default 'Data Type' and 'Status' facets.
     Add facets for custom url filters whether or not they're in the schema
+
+        :param types:          Instance of TypesTool from app registry.
+        :type  types:          snovault.TypesTool
+        :param doc_types:      Item types (@type) for which we are performing a search for.
+        :type  doc_types:      List of strings
+        :param prepared_terms: Lists of terms to match in ElasticSearch, keyed by ElasticSearch field name.
+        :type  prepared_terms: dict
+        :param schemas:        List of schemas for our doc_types.
+        :type  schemas:        List of OrderedDicts
+        :returns: List of tuples containing (0) ElasticSearch-formatted field name (e.g. `embedded.status`) and (1) list of terms for it.
     """
+
     facets = [
+        # More facets will be appended to this list from item schema plus from any currently-active filters (as requested in URI params).
         ('type', {'title': 'Data Type'})
+    ]
+    append_facets = [
+        # Facets which will be appended after those which are in & added to `facets`
+        ('status', {'title': 'Status'}),
+
+        # TODO: Re-enable below line if/when 'range' URI param queries for date & numerical fields are implemented.
+        # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
     audit_facets = [
         ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
@@ -707,15 +726,20 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
         ('audit.WARNING.category', {'title': 'Audit category: WARNING'}),
         ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION'})
     ]
-    if len(doc_types) == 1 and doc_types[0] != 'Item' and 'facets' in types[doc_types[0]].schema:
-        schema_facets = OrderedDict(types[doc_types[0]].schema['facets'])
-        facets.extend(schema_facets.items())
 
-    used_facets = [facet[0] for facet in facets]
-    # add status to used_facets, which will be added to facets later
-    used_facets.append('status')
+    # Add facets from schema if one Item type is defined.
+    # Also, conditionally add extra appendable facets if relevant for type from schema.
+    if len(doc_types) == 1 and doc_types[0] != 'Item':
+        current_type_schema = types[doc_types[0]].schema
+        if 'facets' in current_type_schema:
+            schema_facets = OrderedDict(current_type_schema['facets'])
+            for schema_facet in schema_facets.items():
+                if schema_facet[1].get('disabled', False):
+                    continue # Skip disabled facets.
+                facets.append(schema_facet)
 
-    # add facets for any non-schema fields that are requested in the search
+    ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
+    used_facets = [ facet[0] for facet in facets + append_facets ]
     for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.')
@@ -723,121 +747,268 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
             # use the last part of the split field to get the title
             title_field = split_field[-1]
             if title_field in used_facets:
-                continue
+                continue # Cancel if already in facets.
             for schema in schemas:
                 if title_field in schema['properties']:
                     title_field = schema['properties'][title_field].get('title', title_field)
                     break
             facets.append((use_field, {'title': title_field}))
 
-    # append status and audit facets automatically at the end of facets list
-    facets.append(('status', {'title': 'Status'}))
-    facets = facets + audit_facets
+    ## Append additional facets (status, audit, ...) at the end of list unless were already added via schemas, etc.
+    used_facets = [ facet[0] for facet in facets ] # Reset this var
+    for ap_facet in append_facets + audit_facets:
+        if ap_facet[0] not in used_facets:
+            facets.append(ap_facet)
+        else: # Update with better title if not already defined from e.g. requested filters.
+            existing_facet_index = used_facets.index(ap_facet[0])
+            if facets[existing_facet_index][1].get('title') in (None, facets[existing_facet_index][0]):
+                facets[existing_facet_index][1]['title'] = ap_facet[1]['title']
 
     return facets
 
 
-def set_facets(search, facets, final_filters, string_query):
-    """
-    Sets facets in the query using filters
-    ES5: simply sets aggs by calling update_from_dict after adding them in
+def schema_for_field(field, types, doc_types):
+    '''Filter down schemas to the one for our field'''
+    schema = types[doc_types[0]].schema
+    if schema and schema.get('properties') is not None:
+        return schema['properties'].get(field, None)
+    return None
 
-    :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
-    :param final_filters: Dict of filters which are set for the ES query in set_filters
-    :param string_query: Dict holding the query_string used in the search
+def is_linkto_or_object_array_root_field(field, types, doc_types):
+    '''Not used currently. May be useful for if we want to enabled "type" : "nested" mappings on lists of dictionaries'''
+    schema = types[doc_types[0]].schema
+    field_root = field.split('.')[0]
+    fr_schema = (schema and schema.get('properties', {}).get(field_root, None)) or None
+    if fr_schema and fr_schema['type'] == 'array' and (fr_schema['items'].get('linkTo') is not None or fr_schema['items']['type'] == 'object'):
+        return True
+    return False
+
+def generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query):
+    '''
+    We add a copy of our filters to each facet, minus that of
+    facet's field itself so that we can get term counts for other terms filters.
+    And be able to filter w/ it.
+
+    Remove filters from fields they apply to.
+    For example, the 'biosource_type' aggs should not have any
+    biosource_type filter in place.
+    Handle 'must' and 'must_not' filters separately
+
+    Returns
+        Copy of search_filters, minus filter for current query_field (if one set).
+    '''
+
+    facet_filters = deepcopy(search_filters['bool'])
+
+    for filter_type in ['must', 'must_not']:
+        if search_filters['bool'][filter_type] == []:
+            continue
+        for active_filter in search_filters['bool'][filter_type]:
+            if 'bool' in active_filter and 'should' in active_filter['bool']:
+                # handle No value case
+                inner_bool = None
+                inner_should = active_filter.get('bool').get('should', [])
+                for or_term in inner_should:
+                    # this may be naive, but assume first non-terms
+                    # filter is the No value quqery
+                    if 'terms' in or_term:
+                        continue
+                    else:
+                        inner_bool = or_term
+                        break
+                if 'exists' in inner_bool:
+                    compare_field = inner_bool['exists'].get('field')
+                else:
+                    # attempt to get the field from the alternative No value syntax
+                    compare_field = inner_bool.get('bool', {}).get('must_not', {}).get('exists', {}).get('field')
+                if compare_field == query_field and query_field != 'embedded.@type.raw':
+                    facet_filters[filter_type].remove(active_filter)
+            # else if not a terms filter, dont do anything (do use as a filter)
+            if 'terms' not in active_filter:
+                continue
+            # there should only be one key here
+            for compare_field in active_filter['terms'].keys():
+                # remove filter for a given field for that facet
+                # skip this for type facet (field = 'type')
+                # since we always want to include that filter.
+                if compare_field == query_field and query_field != 'embedded.@type.raw':
+                    facet_filters[filter_type].remove(active_filter)
+
+    # add the string_query, if present, to the bool term with facet_filters
+    if string_query and string_query['must']:
+        # combine statements within 'must' for each
+        facet_filters['must'].append(string_query['must'])
+
+    return facet_filters
+
+
+def set_facets(search, facets, search_filters, string_query, types, doc_types, custom_aggregations=None, size=25, from_=0):
     """
+    Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
+    filtered by search_filters minus filter affecting facet field in order to get counts
+    for other facet term options.
+    ES5 - simply sets aggs by calling update_from_dict after adding them in
+
+        :param facets:         Facet field (0) in object dot notation, and a dict or OrderedDict with title property (1).
+        :type  facets:         List of tuples.
+        :param search_filters: Dict of filters which are set for the ES query in set_filters
+        :param string_query:   Dict holding the query_string used in the search
+    """
+
+    if from_ != 0:
+        return search
+
     aggs = OrderedDict()
 
     for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
+
+        field_schema = schema_for_field(field, types, doc_types)
+
+        is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
+        is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
+
         if field == 'type':
             query_field = 'embedded.@type.raw'
         elif field.startswith('audit'):
             query_field = field + '.raw'
+        elif facet.get('aggregation_type') in ('date_histogram', 'histogram', 'range'):
+            query_field = 'embedded.' + field
         else:
             query_field = 'embedded.' + field + '.raw'
 
+
+        ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
 
-        # default was size = 10, so only top 10 agg results were returned.
-        # set size to 100.
-        # https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
-        aggregation = {
-            'terms': {
-                'size': 100,
-                'field': query_field,
-                'missing': "No value"
+        if facet.get('aggregation_definition') is not None:
+            # Custom aggregation is defined. Rare / unused.
+
+            aggs[agg_name] = {
+                'aggs': {
+                    agg_name: facet['aggregation_definition']
+                },
+                'filter' : search_filters # Use current for now
             }
-        }
 
-        facet_filters = deepcopy(final_filters['bool'])
+        if is_numerical_field and facet.get('aggregation_type') == 'histogram':
+            # Make a histogram instead of term buckets. Rare / unused.
 
-        # Remove filters from fields they apply to.
-        # For example, the 'biosource_type' aggs should not have any
-        # biosource_type filter in place.
-        # Handle 'must' and 'must_not' filters separately
-        for filter_type in ['must', 'must_not']:
-            if final_filters['bool'][filter_type] == []:
-                continue
-            for compare_filter in final_filters['bool'][filter_type]:
-                if 'bool' in compare_filter and 'should' in compare_filter['bool']:
-                    # handle No value case
-                    inner_bool = None
-                    inner_should = compare_filter.get('bool').get('should', [])
-                    for or_term in inner_should:
-                        # this may be naive, but assume first non-terms
-                        # filter is the No value quqery
-                        if 'terms' in or_term:
-                            continue
-                        else:
-                            inner_bool = or_term
-                            break
-                    if 'exists' in inner_bool:
-                        compare_field = inner_bool['exists'].get('field')
-                    else:
-                        # attempt to get the field from the alternative No value syntax
-                        compare_field = inner_bool.get('bool', {}).get('must_not', {}).get('exists', {}).get('field')
-                    if compare_field == query_field and field != 'type':
-                        facet_filters[filter_type].remove(compare_filter)
-                # else if not a terms filter, dont do anything (do use as a filter)
-                if 'terms' not in compare_filter:
-                    continue
-                # there should only be one key here
-                for compare_field in compare_filter['terms'].keys():
-                    # remove filter for a given field for that facet
-                    # skip this for type facet (field = 'type')
-                    # since we always want to include that filter.
-                    if compare_field == query_field and field != 'type':
-                        facet_filters[filter_type].remove(compare_filter)
+            # TODO:
+            # facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
+            facet['aggregation_definition'] = histogram_aggregation = {
+                "histogram" : {
+                    'field'         : query_field,
+                    'interval'      : facet.get('interval', 100),
+                    "min_doc_count" : facet.get('min_doc_count', 1)
+                }
+            }
 
-        # add the string_query, if present, to the bool term with facet_filters
-        if string_query and string_query['must']:
-            # combine statements within 'must' for each
-            facet_filters['must'].append(string_query['must'])
+            aggs[agg_name] = {
+                'aggs': {
+                    agg_name: histogram_aggregation
+                },
+                'filter' : search_filters # Use current for now
+            }
 
-        aggs[agg_name] = {
-            'aggs': {
-                agg_name : aggregation
-            },
-            'filter': {'bool': facet_filters},
-        }
+        elif is_numerical_field and facet.get('aggregation_type') == 'range':
+            # Bucket into predefined ranges, e.g. for exponentially-scaling file_size.
+
+            # TODO:
+            # facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
+            facet['aggregation_definition'] = histogram_aggregation = {
+                "range" : {
+                    'field'         : query_field,
+                    "ranges"        : facet['ranges']
+                }
+            }
+
+            aggs[agg_name] = {
+                'aggs': {
+                    agg_name: histogram_aggregation
+                },
+                'filter' : search_filters # Use current for now
+            }
+
+        elif is_date_field and facet.get('aggregation_type') == 'date_histogram':
+            # Date histogram
+
+            facet['aggregation_definition'] = date_histogram_aggregation = {
+                "date_histogram" : {
+                    'field'         : query_field,
+                    'interval'      : facet.get('interval', "month"),
+                    'format'        : facet.get('interval', "yyyy-MM-dd"),
+                    "min_doc_count" : facet.get('min_doc_count', 1)
+                }
+            }
+
+            aggs[agg_name] = {
+                'aggs': {
+                    agg_name           : date_histogram_aggregation
+                },
+                'filter' : search_filters # Use search query filters as-is, don't need to remove own field from filter.
+            }
+
+        else: # Default -- facetable terms
+
+            facet['aggregation_type'] = 'terms'
+            facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
+            term_aggregation = {
+                "terms" : {
+                    'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
+                    'field'   : query_field,
+                    'missing' : facet.get("missing_value_replacement", "No value")
+                }
+            }
+
+            aggs[agg_name] = {
+                'aggs': {
+                    agg_name : term_aggregation
+                },
+                'filter': {'bool': facet_filters},
+            }
 
     # to achieve OR behavior within facets, search among GLOBAL results,
     # not just returned ones. to do this, wrap aggs in ['all_items']
     # and add "global": {} to top level aggs query
     # see elasticsearch global aggs for documentation (should be ES5 compliant)
-    final_aggs = {
+    search_as_dict = search.to_dict()
+    search_as_dict['aggs'] = {
         'all_items': {
             'global': {},
             'aggs': aggs
         }
     }
 
-    prev_search = search.to_dict()
-    prev_search['aggs'] = final_aggs
-    search.update_from_dict(prev_search)
+    if size == 0:
+        # Only perform aggs if size==0 requested, to improve performance for search page queries.
+        # We do currently have (hidden) monthly date histogram facets which may yet to be utilized for common size!=0 agg use cases.
+        set_additional_aggregations(search_as_dict, types, doc_types, custom_aggregations)
 
+    search.update_from_dict(search_as_dict)
     return search
 
+
+def set_additional_aggregations(search_as_dict, types, doc_types, extra_aggregations=None):
+    '''
+    Per-type aggregations may be defined in schemas. Apply them OUTSIDE of globals so they act on our current search filters.
+    Warning: `search_as_dict` is modified IN PLACE.
+    '''
+
+    schema = types[doc_types[0]].schema
+
+    if schema.get('aggregations'):
+        for schema_agg_name in schema['aggregations'].keys():
+            if schema_agg_name == 'all_items':
+                raise Exception('all_items is a reserved agg name and not allowed as an extra aggregation name.')
+            search_as_dict['aggs'][schema_agg_name] = schema['aggregations'][schema_agg_name]
+
+    if extra_aggregations:
+        for extra_agg_name in extra_aggregations.keys():
+            if extra_agg_name == 'all_items':
+                raise Exception('all_items is a reserved agg name and not allowed as an extra aggregation name.')
+            search_as_dict['aggs'][extra_agg_name] = extra_aggregations[extra_agg_name]
+
+    return search_as_dict
 
 def execute_search(search):
     """
@@ -874,12 +1045,23 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
             'total' : 0,
             'terms' : None
         }
+        result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
-        agg_name = field.replace('.', '-')
+        field_agg_name = field.replace('.', '-')
 
-        if agg_name in aggregations:
-            result_facet['total'] = aggregations[agg_name]['doc_count']
-            result_facet['terms'] = aggregations[agg_name][agg_name]['buckets']
+        if field_agg_name in aggregations:
+            result_facet['total'] = aggregations[field_agg_name]['doc_count']
+            result_facet['terms'] = aggregations[field_agg_name][field_agg_name]['buckets']
+
+            if len(aggregations[field_agg_name].keys()) > 2:
+                result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', field_agg_name) }
+
+            if facet['aggregation_type'] == 'date_histogram':
+                # By default these have integer timestamps as "key", we want their "key_as_string" which has more apt info for front-end usage/filter.
+                for bucket in result_facet['terms']:
+                    if bucket.get('key_as_string') is not None:
+                        bucket['raw_key_value'] = bucket['key']
+                        bucket['key'] = bucket['key_as_string']
 
         # Choosing to show facets with one term for summary info on search it provides
         if len(result_facet.get('terms', [])) < 1:
@@ -888,6 +1070,12 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         result.append(result_facet)
 
     return result
+
+def format_extra_aggregations(es_results):
+    if 'aggregations' not in es_results:
+        return {}
+    return { k:v for k,v in es_results['aggregations'].items() if k != 'all_items' }
+
 
 def format_results(request, hits, search_frame):
     """
@@ -954,7 +1142,7 @@ DEFAULT_BROWSE_PARAM_LISTS = {
     'award.project'         : ['4DN']
 }
 
-def get_iterable_search_results(request, search_path='/search/', param_lists=None):
+def get_iterable_search_results(request, search_path='/search/', param_lists=None, **kwargs):
     '''
     Loops through search results, returns 100 (or search_results_chunk_row_size) results at a time. Pass it through itertools.chain.from_iterable to get one big iterable of results.
     TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
@@ -972,12 +1160,12 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
     param_lists['from'] = [0]
     param_lists['sort'] = param_lists.get('sort','uuid')
     subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
-    return iter_search_results(None, subreq)
+    return iter_search_results(None, subreq, **kwargs)
 
 
 # Update? used in ./batch_download.py
-def iter_search_results(context, request):
-    return search(context, request, return_generator=True)
+def iter_search_results(context, request, **kwargs):
+    return search(context, request, return_generator=True, **kwargs)
 
 def list_visible_columns_for_schemas(request, schemas):
     columns = OrderedDict()
