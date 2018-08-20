@@ -1,39 +1,43 @@
 [
 {
-    "status": "uploaded",
+    "status": "released",
+    "public_release" : "2016-08-01",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "b4002377-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
-    "file_format": "other",
+    "file_format": "bam",
     "notes": "sample dcic notes",
     "accession": "4DNFIFYGNO9R",
     "lab": "4dn-dcic-lab",
     "filename": "_6_out_pair1.bam"
 },{
 
-    "status": "uploaded",
+    "status": "released",
+    "public_release" : "2016-08-05",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "ccf48ccd-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
-    "file_format": "other",
+    "file_format": "cool",
     "notes": "sample dcic notes",
     "accession": "4DNFIEOP3UAO",
     "lab": "4dn-dcic-lab",
-    "filename": "_6_HiC_norm_binning.hdf5"
+    "filename": "_6_HiC_norm_binning.cool"
 
 },{
-    "status": "uploaded",
+    "status": "released",
+    "public_release" : "2016-08-09",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "165e9eeb-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
-    "file_format": "other",
+    "file_format": "bam",
     "notes": "sample dcic notes",
     "accession": "4DNFIM172I2T",
     "lab": "4dn-dcic-lab",
     "filename": "_6_out_pair2.bam"
 
 },{
-    "status": "uploaded",
+    "status": "released",
+    "public_release" : "2016-08-15",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "9e316323-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
@@ -44,7 +48,8 @@
     "filename": "_6_HiCtool_expected_enrich_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
 
 },{
-    "status": "uploaded",
+    "status": "released",
+    "public_release" : "2016-08-24",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "fbd7e4ad-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
@@ -55,7 +60,8 @@
     "filename": "_5_HiCtool_expected_enrich_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
 
 },{
-    "status": "uploaded",
+    "status": "released",
+    "public_release" : "2016-09-05",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "7b24f953-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",

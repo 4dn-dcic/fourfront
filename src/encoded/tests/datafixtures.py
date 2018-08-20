@@ -406,18 +406,6 @@ def file_fastq(testapp, lab, award):
     return testapp.post_json('/file_fastq', item).json['@graph'][0]
 
 
-@pytest.fixture
-def file_fasta(testapp, lab, award):
-    item = {
-        'file_format': 'fasta',
-        'md5sum': 'c41d8cd9f00b204e9800998ecf8427e',
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'status': 'uploaded',  # avoid s3 upload codepath
-    }
-    return testapp.post_json('/file_fasta', item).json['@graph'][0]
-
-
 RED_DOT = """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA
 AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 9TXL0Y4OHwAAAABJRU5ErkJggg=="""

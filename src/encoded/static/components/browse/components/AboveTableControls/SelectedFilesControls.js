@@ -132,17 +132,27 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        var countSelectedFiles = _.keys(this.props.selectedFiles).length;
-        var disabled = countSelectedFiles === 0;
-        var countSubSelectedFiles = _.keys(this.props.subSelectedFiles).length;
-        if (countSubSelectedFiles && countSubSelectedFiles !== countSelectedFiles){
-            countSelectedFiles = countSubSelectedFiles;
+        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props,
+            selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length,
+            disabled = selectedFilesUniqueCount === 0,
+            countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount,
+            countToShow = selectedFilesUniqueCount,
+            tip = (
+                "Download metadata TSV sheet containing download URIs for " +
+                selectedFilesUniqueCount + " files" +
+                (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
+            );
+
+        var subSelectedFilesCount = _.keys(subSelectedFiles).length;
+        if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
+            countToShow = subSelectedFilesCount;
+            tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
         }
 
         return (
-            <Button key="download" onClick={this.handleClick} disabled={disabled} className={disabled ? "btn-secondary" : "btn-primary"}>
-                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> Selected Files</span>
-                { this.renderModal(countSelectedFiles) }
+            <Button key="download" onClick={this.handleClick} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
+                <i className="icon icon-download icon-fw"/> Download { countToShow }<span className="text-400"> Selected Files</span>
+                { this.renderModal(countToShow) }
             </Button>
         );
     }
@@ -163,8 +173,10 @@ export class SelectAllFilesButton extends React.PureComponent {
         'experiments_in_set.files.related_files.file.accession',
         'experiments_in_set.processed_files.accession',
         'experiments_in_set.processed_files.file_type_detailed',
+        'experiments_in_set.processed_files.uuid',
         'processed_files.accession',
         'processed_files.file_type_detailed',
+        'processed_files.uuid',
         'accession',
         'experiments_in_set.accession'
     ];
@@ -177,9 +189,16 @@ export class SelectAllFilesButton extends React.PureComponent {
         };
     }
 
+    isEnabled(){
+        if (!this.props.totalFilesCount) return true;
+        if (this.props.totalFilesCount > 8000) return false;
+        return true;
+    }
+
     isAllSelected(){
-        if (!this.props.totalFilesCount) return false;
-        if (this.props.totalFilesCount === _.keys(this.props.selectedFiles).length){
+        var { totalFilesCount, selectedFiles, selectedFilesUniqueCount } = this.props;
+        if (!totalFilesCount) return false;
+        if (totalFilesCount === selectedFilesUniqueCount){
             return true;
         }
         return false;
@@ -234,11 +253,14 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     render(){
-        var isAllSelected = this.isAllSelected(), selecting = this.state.selecting;
+        var isAllSelected = this.isAllSelected(),
+            isEnabled = this.isEnabled(),
+            selecting = this.state.selecting;
+
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button id="select-all-files-button" disabled={selecting} className="btn-secondary" onClick={this.handleSelect} children={this.buttonContent(isAllSelected)} />
+                    <Button id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)} className="btn-secondary" onClick={this.handleSelect} children={this.buttonContent(isAllSelected)} />
                 </ButtonGroup>
             </div>
         );
@@ -395,30 +417,13 @@ export class SelectedFilesControls extends React.PureComponent {
 
         return (
             <div>
-                <SelectAllFilesButton
-                    href={this.props.href}
-                    totalFilesCount={totalFilesCount}
-                    selectedFiles={this.props.selectedFiles}
-                    selectFile={this.props.selectFile}
-                    unselectFile={this.props.unselectFile}
-                    resetSelectedFiles={this.props.resetSelectedFiles}
-                    includeProcessedFiles={this.props.includeProcessedFiles}
-                />
-
+                <SelectAllFilesButton {..._.pick(this.props, 'href', 'selectedFilesUniqueCount', 'selectedFiles', 'selectFile',
+                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles')} totalFilesCount={totalFilesCount} />
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
-                        <SelectedFilesFilterByButton
-                            //files={allFiles}
-                            setFileTypeFilters={this.props.setFileTypeFilters}
-                            currentFileTypeFilters={this.props.currentFileTypeFilters}
-                            totalFilesCount={totalFilesCount}
-                            selectedFiles={this.props.selectedFiles}
-                            selectFile={this.props.selectFile}
-                            unselectFile={this.props.unselectFile}
-                            resetSelectedFiles={this.props.resetSelectedFiles}
-                            onFilterFilesByClick={this.props.onFilterFilesByClick}
-                            currentOpenPanel={this.props.currentOpenPanel}
-                        />
+                        <SelectedFilesFilterByButton {..._.pick(this.props, 'setFileTypeFilters', 'currentFileTypeFilters',
+                            'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
+                            'currentOpenPanel' )} totalFilesCount={totalFilesCount} />
                         <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                     </ButtonGroup>
                 </div>

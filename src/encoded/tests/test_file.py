@@ -85,21 +85,8 @@ def proc_file_json(award, experiment, lab):
 
 
 @pytest.fixture
-def fasta_json(award, experiment, lab):
-    return {
-        'accession': '4DNFIO67APA2',
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'file_format': 'fasta',
-        'filename': 'test.fasta.gz',
-        'md5sum': '0123456789abcdef0123456789111111',
-        'status': 'uploaded',
-    }
-
-
-@pytest.fixture
-def all_file_jsons(fastq_json, fasta_json):
-    return [fastq_json, fasta_json]
+def all_file_jsons(fastq_json):
+    return [fastq_json]
 
 
 @pytest.fixture
