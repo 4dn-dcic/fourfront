@@ -404,7 +404,6 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     split_counts = total_counts.split()  # 2nd item is db counts, 4th is es
     assert(int(split_counts[1]) == int(split_counts[3]))
     for item_type in TYPE_LENGTH.keys():
-        print('\n\n--> %s' % item_type)
         tries = 0
         item_len = None
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
@@ -428,6 +427,11 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
                 found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
                 # all found uuids must be within the linked_uuids
                 assert found_uuids <= set(index_view_res['linked_uuids'])
+                # if uuids_rev_linking to me, make sure they show up in @@links
+                if len(index_view_res.get('uuids_rev_linked_to_me', [])) > 0:
+                    links_res = testapp.get('/' + item_res['uuid'] + '/@@links', status=200)
+                    link_uuids = [lnk['uuid'] for lnk in links_res.json.get('uuids_linking_to')]
+                    assert set(index_view_res['uuids_rev_linked_to_me']) <= set(link_uuids)
                 # previously test_html_pages
                 try:
                     html_res = htmltestapp.get(item_res['@id'])
