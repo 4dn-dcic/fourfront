@@ -39,12 +39,23 @@ export class StatisticsViewController extends React.PureComponent {
     static CHART_SEARCH_URIS = {
         //'File' : '/search/?type=File&experiments.display_title!=No%20value&limit=0',
         'File' : function(props) {
-            return '/search/?' + stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) + '&limit=0';
+            return (
+                '/search/?type=File&' +
+                stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) +
+                '&limit=0'
+            );
         },
         'ExperimentSetReplicate' : function(props) {
             return '/search/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
         }
     };
+
+    static shouldRefetchAggregations(pastProps, nextProps){
+        return (
+            pastProps.session           !== nextProps.session ||
+            pastProps.browseBaseState   !== nextProps.browseBaseState
+        );
+    }
 
     constructor(props){
         super(props);
@@ -62,8 +73,16 @@ export class StatisticsViewController extends React.PureComponent {
         this.setState(nextState);
     }
 
+    /* Enabling this would temporarily replace charts w loading icon. It's too big of a jumpy visual change to people to be good UI IMO.
+    componentWillReceiveProps(nextProps){
+        if (StatisticsViewController.shouldRefetchAggregations(this.props, nextProps)){
+            this.setState({ 'loadingStatus' : 'loading' });
+        }
+    }
+    */
+
     componentDidUpdate(pastProps){
-        if (pastProps.session !== this.props.session || pastProps.browseBaseState !== this.props.browseBaseState){
+        if (StatisticsViewController.shouldRefetchAggregations(pastProps, this.props)){
             this.performSearchRequests();
         }
     }
@@ -124,11 +143,33 @@ export class StatisticsViewController extends React.PureComponent {
 
 export class StatisticsChartsView extends React.Component {
 
+    static loadingIcon(label = "Loading Chart Data"){
+        return (
+            <div className="mt-5 mb-5 text-center">
+                <i className="icon icon-fw icon-spin icon-circle-o-notch icon-2x" style={{ opacity : 0.5 }}/>
+                <h5 className="text-400">{ label }</h5>
+            </div>
+        );
+    }
+
+    static errorIcon(label = "Loading failed. Please try again later."){
+        return (
+            <div className="mt-5 mb-5 text-center">
+                <i className="icon icon-fw icon-times icon-2x"/>
+                <h5 className="text-400">{ label }</h5>
+            </div>
+        );
+    }
+
     constructor(props){
         super(props);
         this.handleToggle = this.handleToggle.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
-        this.state = _.extend(this.generateAggsToState(props), { 'chartToggles' : {} });
+        this.state = _.extend(this.generateAggsToState(props), {
+            'chartToggles'      : {},
+            // Passed down to & shared by multiple charts in order to have same color per key
+            'colorScale'  : d3.scaleOrdinal(d3.schemeCategory10)
+        });
     }
 
     componentWillReceiveProps(nextProps){
@@ -168,32 +209,14 @@ export class StatisticsChartsView extends React.Component {
         }));
     }
 
-    loadingIcon(){
-        return (
-            <div className="mt-5 mb-5 text-center">
-                <i className="icon icon-fw icon-spin icon-circle-o-notch icon-2x" style={{ opacity : 0.5 }}/>
-                <h5 className="text-400">Loading Chart Data</h5>
-            </div>
-        );
-    }
-
-    errorIcon(){
-        return (
-            <div className="mt-5 mb-5 text-center">
-                <i className="icon icon-fw icon-times icon-2x"/>
-                <h5 className="text-400">Loading failed. Please try again later.</h5>
-            </div>
-        );
-    }
-
     render(){
         var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session } = this.props;
-        if (!mounted || loadingStatus === 'loading')    return this.loadingIcon();
-        if (loadingStatus === 'failed')                 return this.errorIcon();
+        if (!mounted || loadingStatus === 'loading')    return StatisticsChartsView.loadingIcon();
+        if (loadingStatus === 'failed')                 return StatisticsChartsView.errorIcon();
         var anyExpandedCharts = _.any(_.values(this.state.chartToggles));
         var commonContainerProps = {
             'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
-            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
+            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250, 'colorScale' : this.state.colorScale
         };
 
         return (
@@ -240,6 +263,12 @@ export class AreaChartContainer extends React.Component {
         return !!((props.chartToggles || {})[props.id]);
     }
 
+    componentDidMount(){
+        setTimeout(()=>{ // Update w. new width.
+            this.forceUpdate();
+        }, 0);
+    }
+
     componentDidUpdate(pastProps){
         if (pastProps.defaultColSize !== this.props.defaultColSize || this.isExpanded(pastProps) !== this.isExpanded(this.props)){
             setTimeout(()=>{ // Update w. new width.
@@ -270,12 +299,24 @@ export class AreaChartContainer extends React.Component {
     }
 
     render(){
-        var { title, children, width, defaultColSize, defaultHeight } = this.props,
+        var { title, children, width, defaultColSize, defaultHeight, colorScale } = this.props,
             expanded = this.isExpanded(),
             useWidth = width || this.getRefWidth(),
             chartInnerWidth = expanded ? useWidth * 3 : useWidth,
             className = 'mt-2 col-xs-12 col-lg-' + (expanded ? '12' : (defaultColSize || '6')),
             useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
+
+        var visualToShow;
+        if (typeof useWidth === 'number' && useWidth){
+            visualToShow = React.cloneElement(children, {
+                'width'             : chartInnerWidth,
+                'height'            : useHeight,
+                'xAxisGenerator'    : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) ),
+                'colorScale'        : colorScale || null
+            });
+        } else { // If no width yet, just for stylistic purposes, don't render chart itself.
+            visualToShow = StatisticsChartsView.loadingIcon("Initializing...");
+        }
 
         return (
             <div className={className}>
@@ -286,11 +327,7 @@ export class AreaChartContainer extends React.Component {
                     </div>
                     <div className={"col-xs-12 col-lg-11"}>
                         <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
-                            { React.cloneElement(children, {
-                                'width' : chartInnerWidth,
-                                'height' : useHeight,
-                                'xAxisGenerator' : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) )
-                            }) }
+                            { visualToShow }
                         </div>
                     </div>
                 </div>
@@ -432,7 +469,8 @@ export class AreaChart extends React.PureComponent {
         'xAxisGenerator'        : function(x){ // One tick every 2 months
             return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
         },
-        'transitionDuration'    : 1500
+        'transitionDuration'    : 1500,
+        'colorScale'            : null // d3.scaleOrdinal(d3.schemeCategory10)
     };
 
     constructor(props){
@@ -446,13 +484,15 @@ export class AreaChart extends React.PureComponent {
 
         // D3 things
         this.parseTime = d3.timeParse(props.d3TimeFormat);
-        this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         this.stack = d3.stack().value(function(d, key){
             var currChild = _.findWhere(d.children || [], { 'term' : key });
             if (currChild) return currChild.total;
             return 0;
         });
         this.stack.keys(this.childKeysFromData(props.data));
+        if (!this.props.colorScale){
+            this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        }
 
         this.state = {
             'drawingError'  : false,
@@ -472,6 +512,9 @@ export class AreaChart extends React.PureComponent {
         }
         if (nextProps.data !== this.props.data){
             this.updateDataInState(nextProps.data);
+        }
+        if (this.props.colorScale && !nextProps.colorScale){
+            this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         }
     }
 
@@ -588,6 +631,7 @@ export class AreaChart extends React.PureComponent {
         var { yAxisLabel, margin } = this.props;
         var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
         var drawn = { svg };
+        var colorScale = this.props.colorScale || this.colorScale;
 
         requestAnimationFrame(()=>{
 
@@ -603,7 +647,7 @@ export class AreaChart extends React.PureComponent {
 
             drawn.path = drawn.layers.append('path')
                 .attr('class', 'area')
-                .style('fill', (d) => { return this.colorScale((d.data || d).key); })
+                .style('fill', function(d){ return colorScale((d.data || d).key); })
                 .attr('d', area);
 
             this.drawAxes(drawn, { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn });
