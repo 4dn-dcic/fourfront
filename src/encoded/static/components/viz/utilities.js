@@ -107,14 +107,15 @@ export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, a
 export class FourfrontLogo extends React.PureComponent {
 
     static defaultProps = {
-        'id'                        : 'fourfront_logo_svg',
+        'id'                        : "fourfront_logo_svg",
         'circlePathDefinitionOrig'  : "m1,30c0,-16.0221 12.9779,-29 29,-29c16.0221,0 29,12.9779 29,29c0,16.0221 -12.9779,29 -29,29c-16.0221,0 -29,-12.9779 -29,-29z",
         'circlePathDefinitionHover' : "m3.33331,34.33326c-2.66663,-17.02208 2.97807,-23.00009 29.99997,-31.33328c27.02188,-8.33321 29.66667,22.31102 16.6669,34.66654c-12.99978,12.35552 -15.64454,20.00017 -28.66669,19.00018c-13.02214,-0.99998 -15.33356,-5.31137 -18.00018,-22.33344z",
         'textTransformOrig'         : "translate(9, 37)",
-        'textTransformHover'        : "translate(28, 28) scale(0.2, 0.6)",
+        'textTransformHover'        : "translate(48, 24) scale(0.2, 0.6)",
         'fgCircleTransformOrig'     : "translate(50, 20) scale(0.35, 0.35) rotate(-135)",
         'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)",
-        "hoverDelayUntilTransform"  : 400
+        'hoverDelayUntilTransform'  : 400,
+        'title'                     : "Data Portal"
     }
     
     constructor(props){
@@ -132,6 +133,8 @@ export class FourfrontLogo extends React.PureComponent {
         var { circlePathDefinitionHover, textTransformHover, fgCircleTransformHover, hoverDelayUntilTransform } = this.props;
         var svg = d3.select(this.refs.svg);
 
+        // CSS styles controlled via stylesheets
+
         setTimeout(()=>{
             if (!this.state.hover) return; // No longer hovering. Cancel.
             svg.select(".fourfront-logo-background-circle")
@@ -142,16 +145,11 @@ export class FourfrontLogo extends React.PureComponent {
             svg.select(".fourfront-logo-text")
                 .transition()
                 .duration(700)
-                .attr('transform', textTransformHover)
-                .style('fill', 'rgba(0,0,0,0)')
-                .style('opacity', '0')
-                .style('stroke', 'rgba(0,0,0,0.2)')
-                .style('stroke-width', '15px');
+                .attr('transform', textTransformHover);
 
             svg.select(".fourfront-logo-foreground-circle")
                 .transition()
                 .duration(1200)
-                .style('opacity', '1')
                 .attr('transform', fgCircleTransformHover);
 
         }, hoverDelayUntilTransform);
@@ -170,17 +168,12 @@ export class FourfrontLogo extends React.PureComponent {
                 .interrupt()
                 .transition()
                 .duration(1200)
-                .attr('transform', this.props.textTransformOrig)
-                .style('fill', '#fff')
-                .style('opacity', '1')
-                .style('stroke', 'transparent')
-                .style('stroke-width', '0px');
+                .attr('transform', this.props.textTransformOrig);
 
             svg.select(".fourfront-logo-foreground-circle")
                 .interrupt()
                 .transition()
                 .duration(1000)
-                .style('opacity', '0')
                 .attr('transform', this.props.fgCircleTransformOrig);
         });
     }
@@ -201,7 +194,8 @@ export class FourfrontLogo extends React.PureComponent {
     }
 
     render(){
-        var { id, circlePathDefinitionOrig, circlePathDefinitionHover, textTransformOrig, textTransformHover, fgCircleTransformOrig, onClick } = this.props;
+        var { id, circlePathDefinitionOrig, circlePathDefinitionHover, textTransformOrig,
+            textTransformHover, fgCircleTransformOrig, onClick, title } = this.props;
         return (
             <Navbar.Brand>
                 <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
@@ -213,7 +207,7 @@ export class FourfrontLogo extends React.PureComponent {
                             <text transform={fgCircleTransformOrig} className="fourfront-logo-foreground-circle">O</text>
                         </svg>
                     </span>
-                    <span className="navbar-title">Data Portal</span>
+                    <span className="navbar-title">{ title }</span>
                 </NavItem>
             </Navbar.Brand>
         );
