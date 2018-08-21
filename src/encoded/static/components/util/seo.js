@@ -45,7 +45,7 @@ export class CurrentContext extends React.PureComponent {
             "@type"     : "EducationalOrganization",
             "name"      : lab.display_title,
             "url"       : baseDomain + lab['@id'],
-            "memberOf"  : FullSite.dcicOrganization(baseDomain)
+            "knowsAbout": FullSite.dcicOrganization(baseDomain)
         };
         if (lab.url && typeof lab.url === 'string'){
             labRetObj['sameAs'] = lab.url;
@@ -178,6 +178,31 @@ export class CurrentContext extends React.PureComponent {
             }
 
             return retObj;
+        },
+        "Lab" : function(context, hrefParts){
+            var baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
+                retObj = CurrentContext.labToSchema(context, baseDomain);
+
+            if (!retObj) return null;
+            retObj = _.extend(_.omit(CurrentContext.commonSchemaBase(context, hrefParts), 'datePublished', 'dateModified'), retObj);
+
+            // Add address if any defined.
+            if (context.country || context.postal_code || context.address1 || context.address2 || context.city || context.state){
+                retObj.contactPoint = {
+                    '@type' : "PostalAddress"
+                };
+                if (context.country) retObj.contactPoint.addressCountry = context.country;
+                if (context.postal_code) retObj.contactPoint.postalCode = context.postal_code;
+                if (context.address1) retObj.contactPoint.streetAddress = context.address1;
+                if (context.address2) {
+                    retObj.contactPoint.streetAddress = retObj.contactPoint.streetAddress ? retObj.contactPoint.streetAddress + ', ' + context.address2 : context.address2;
+                }
+                if (context.state) retObj.contactPoint.addressRegion = context.state;
+                if (context.city) retObj.contactPoint.addressLocality = context.city;
+            }
+
+            return retObj;
+
         }
     }
 
