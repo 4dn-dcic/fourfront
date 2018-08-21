@@ -17,14 +17,14 @@ export class CurrentContext extends React.PureComponent {
         'context' : PropTypes.object.isRequired
     };
 
-    static commonSchemaBase(context, hrefParts){
+    static commonSchemaBase(context, hrefParts, extraPageVals = {}){
         var currentURL = (hrefParts ? ((hrefParts.protocol || '') + '//' + hrefParts.host) : '') + context['@id'];
         var base = {
             "@context": "http://schema.org",
-            "mainEntityOfPage": {
+            "mainEntityOfPage": _.extend({
                 "@type": "WebPage",
                 "@id": currentURL
-            },
+            }, extraPageVals),
             "datePublished" : context.public_release || context.date_created || null,
             "url" : currentURL
         };
@@ -103,7 +103,7 @@ export class CurrentContext extends React.PureComponent {
                 dcicOrg = FullSite.dcicOrganization(baseDomain),
                 retObj = FullSite.catalog4DN(baseDomain);
 
-            _.extend(retObj, CurrentContext.commonSchemaBase(context, hrefParts), { 'sameAs' : retObj.url });
+            _.extend(retObj, CurrentContext.commonSchemaBase(context, hrefParts, { "@type" : "SearchResultsPage" }), { 'sameAs' : retObj.url });
 
             return retObj;
         },
@@ -121,7 +121,7 @@ export class CurrentContext extends React.PureComponent {
                 experimentTypes = _.uniq(experimentTypes);
             }
 
-            var retObj = _.extend(CurrentContext.commonSchemaBase(context, hrefParts), {
+            var retObj = _.extend(CurrentContext.commonSchemaBase(context, hrefParts, { "@type" : "ItemPage" }), {
                 "@type": "Dataset",
                 "includedInDataCatalog" : FullSite.catalog4DN(baseDomain),
                 "name" : "Experiment Set - " + context.accession,
@@ -184,7 +184,13 @@ export class CurrentContext extends React.PureComponent {
                 retObj = CurrentContext.labToSchema(context, baseDomain);
 
             if (!retObj) return null;
-            retObj = _.extend(_.omit(CurrentContext.commonSchemaBase(context, hrefParts), 'datePublished', 'dateModified'), retObj);
+            retObj = _.extend(
+                _.omit(
+                    CurrentContext.commonSchemaBase(context, hrefParts, { "@type" : "ItemPage" }),
+                    'datePublished', 'dateModified'
+                ),
+                retObj
+            );
 
             // Add address if any defined.
             if (context.country || context.postal_code || context.address1 || context.address2 || context.city || context.state){
