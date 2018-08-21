@@ -21,7 +21,6 @@
         "file_format": "pairs",
         "standard_file_extension": "pairs.gz",
         "description": "This format is used for something to do with paired mapped read locations",
-        "file_format_specification": "test.pdf",
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
         "extrafile_formats": ["d13d06cf-218e-4f61-aaf0-91f226348b2c"],
         "lab": "4dn-dcic-lab",
