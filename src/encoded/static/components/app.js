@@ -15,7 +15,7 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -1137,16 +1137,18 @@ export default class App extends React.Component {
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
-                    <script async src='//www.google-analytics.com/analytics.js'></script>
+                    <script async src="//www.google-analytics.com/analytics.js"/>
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
-                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
+                    <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
-                    }}></script>
-                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
-                    <script data-prop-name="lastCSSBuildTime" type="application/ld+json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}></script>
+                    }}/>
+                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/>
+                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}/>
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
+                    <SEO.CurrentContext context={context} hrefParts={href_url} />
+                    <SEO.FullSite baseDomain={(href_url.protocol || '') + '//' + href_url.host} />
                 </head>
                 <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{

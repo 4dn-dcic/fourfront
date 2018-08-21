@@ -9,6 +9,7 @@ import { content_views } from './globals';
 import { console, object, Schemas, JWT, layout, DateUtility } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
+import jsonScriptEscape from './../libs/jsonScriptEscape';
 
 var TITLE_PATHNAME_MAP = {
     '/' : {
@@ -295,7 +296,7 @@ export default class PageTitle extends React.PureComponent {
 
         return (
             <div id="page-title-container" className="container">
-                <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" pageTitleStyle={elementStyle} />
+                <StaticPageBreadcrumbs {...{ context, session, hasToc, href }} key="breadcrumbs" pageTitleStyle={elementStyle} />
                 <layout.WindowResizeUpdateTrigger>
                     <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} style={elementStyle} />
                 </layout.WindowResizeUpdateTrigger>
@@ -367,6 +368,7 @@ export class StaticPageBreadcrumbs extends React.Component {
     constructor(props){
         super(props);
         this.renderCrumb = this.renderCrumb.bind(this);
+        this.seoMetadata = this.seoMetadata.bind(this);
     }
 
     renderCrumb(ancestor, index, all){
@@ -402,14 +404,46 @@ export class StaticPageBreadcrumbs extends React.Component {
         return null;
     }
 
+    /**
+     * Renders out JSON-LD structured data version of our breadcrumbs for
+     * search engine consumption.
+     *
+     * @see https://developers.google.com/search/docs/data-types/breadcrumb
+     *
+     * @param {{ display_title: string }[]} ancestors - List of ancestors, including self.
+     * @returns {JSX.Element} A script element containing JSON-LD data.
+     */
+    seoMetadata(ancestors){
+        if (!ancestors || !Array.isArray(ancestors) || ancestors.length < 2) return null;
+        var hrefParts = url.parse(this.props.href),
+            baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
+            structuredJSON = {
+                "@context": "http://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement" : _.map(ancestors, function(item, idx){
+                    return {
+                        "@type" : "ListItem",
+                        "position" : idx + 1,
+                        "item" : {
+                            "name" : item.title || item.display_title,
+                            "@id" : baseDomain + object.itemUtil.atId(item)
+                        }
+                    };
+                })
+            };
+        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonScriptEscape(JSON.stringify(structuredJSON)) }} />;
+    }
+
     render(){
-        var { context, hasToc } = this.props;
-        var ancestors = StaticPageBreadcrumbs.getAncestors(context);
-        var crumbs = ancestors && _.map(ancestors, this.renderCrumb);
+        var { context, hasToc } = this.props,
+            ancestors = StaticPageBreadcrumbs.getAncestors(context),
+            crumbs = ancestors && _.map(ancestors, this.renderCrumb);
+
         return  (
             <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? 'empty' : '') + (hasToc ? ' page-has-toc' : '')}>
                 { crumbs }
                 { this.editButton() }
+                { this.seoMetadata(ancestors) }
             </div>
         );
     }

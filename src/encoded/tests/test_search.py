@@ -7,9 +7,25 @@ import json
 import time
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
+
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
+
+
+# just a little helper function
+def recursively_find_uuids(json, uuids):
+    for key, val in json.items():
+        if key == 'uuid':
+            uuids.add(val)
+        elif isinstance(val, list):
+            for item in val:
+                if isinstance(item, dict):
+                    uuids = recursively_find_uuids(item, uuids)
+        elif isinstance(val, dict):
+            uuids = recursively_find_uuids(val, uuids)
+    return uuids
+
 
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
@@ -388,7 +404,6 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     split_counts = total_counts.split()  # 2nd item is db counts, 4th is es
     assert(int(split_counts[1]) == int(split_counts[3]))
     for item_type in TYPE_LENGTH.keys():
-        print('\n\n--> %s' % item_type)
         tries = 0
         item_len = None
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
@@ -403,14 +418,26 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if item_len > 0:
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             res = res.follow()
-            random_id = random.choice(res.json['@graph'])['@id']
-            indexer_testapp.get(random_id + '@@index-data', status=200)
-            # previously test_html_pages
-            try:
-                res = htmltestapp.get(random_id)
-                assert res.body.startswith(b'<!DOCTYPE html>')
-            except Exception as e:
-                pass
+            for item_res in res.json.get('@graph', []):
+                index_view_res = es.get(index=item_type, doc_type=item_type,
+                                        id=item_res['uuid'])['_source']
+                # make sure that the linked_uuids match the embedded data
+                assert 'linked_uuids' in index_view_res
+                assert 'embedded' in index_view_res
+                found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
+                # all found uuids must be within the linked_uuids
+                assert found_uuids <= set(index_view_res['linked_uuids'])
+                # if uuids_rev_linking to me, make sure they show up in @@links
+                if len(index_view_res.get('uuids_rev_linked_to_me', [])) > 0:
+                    links_res = testapp.get('/' + item_res['uuid'] + '/@@links', status=200)
+                    link_uuids = [lnk['uuid'] for lnk in links_res.json.get('uuids_linking_to')]
+                    assert set(index_view_res['uuids_rev_linked_to_me']) <= set(link_uuids)
+                # previously test_html_pages
+                try:
+                    html_res = htmltestapp.get(item_res['@id'])
+                    assert html_res.body.startswith(b'<!DOCTYPE html>')
+                except Exception as e:
+                    pass
 
 
 ######################################
