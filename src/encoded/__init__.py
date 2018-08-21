@@ -14,7 +14,6 @@ from pyramid.path import (
     AssetResolver,
     caller_package,
 )
-
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import (
@@ -23,13 +22,7 @@ from pyramid.settings import (
 )
 from sqlalchemy import engine_from_config
 from webob.cookies import JSONSerializer
-from snovault.elasticsearch import (
-    PyramidJSONSerializer,
-    TimedUrllib3HttpConnection,
-)
-from snovault.elasticsearch.interfaces import SNP_SEARCH_ES
 from snovault.json_renderer import json_renderer
-from elasticsearch import Elasticsearch
 STATIC_MAX_AGE = 0
 from dcicutils.log_utils import set_logging
 import structlog

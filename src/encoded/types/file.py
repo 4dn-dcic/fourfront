@@ -13,7 +13,6 @@ from snovault.validators import (
     validate_item_content_put,
     validate_item_content_patch
 )
-from snovault.etag import if_match_tid
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
@@ -1033,8 +1032,7 @@ def file_add(context, request, render=None):
 
 
 @view_config(context=File, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_file_filename, validate_extra_file_format],
-             decorator=if_match_tid)
+             validators=[validate_item_content_patch, validate_file_filename, validate_extra_file_format])
 def file_edit(context, request, render=None):
     return item_edit(context, request, render)
 
@@ -1043,11 +1041,11 @@ def file_edit(context, request, render=None):
              validators=[validate_item_content_put,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field,
-                         validate_extra_file_format], decorator=if_match_tid)
+                         validate_extra_file_format])
 @view_config(context=FileProcessed, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field,
-                         validate_extra_file_format], decorator=if_match_tid)
+                         validate_extra_file_format])
 def procesed_edit(context, request, render=None):
     return item_edit(context, request, render)

@@ -28,7 +28,6 @@ from snovault.validators import (
     validate_item_content_patch
 )
 from snovault.interfaces import CONNECTION
-from snovault.etag import if_match_tid
 from snovault.schema_utils import SERVER_DEFAULTS
 from jsonschema_serialize_fork import NO_DEFAULT
 
@@ -245,9 +244,9 @@ def collection_add(context, request, render=None):
 
 
 @view_config(context=snovault.Item, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put], decorator=if_match_tid)
+             validators=[validate_item_content_put])
 @view_config(context=snovault.Item, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch], decorator=if_match_tid)
+             validators=[validate_item_content_patch])
 def item_edit(context, request, render=None):
     check_only = request.params.get('check_only', False)
 
@@ -516,9 +515,17 @@ class Item(snovault.Item):
         return principals
 
     def rev_link_atids(self, request, rev_name):
+        """
+        Returns the list of reverse linked items given a defined reverse link,
+        which should be formatted like:
+        rev = {
+            '<reverse field name>': ('<reverse item class>', '<reverse field to find>'),
+        }
+
+        """
         conn = request.registry[CONNECTION]
         return [request.resource_path(conn[uuid]) for uuid in
-                paths_filtered_by_status(request, self.get_rev_links(rev_name))]
+                paths_filtered_by_status(request, self.get_rev_links(request, rev_name))]
 
 
 class SharedItem(Item):

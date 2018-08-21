@@ -15,7 +15,6 @@ from snovault.validators import (
     validate_item_content_patch,
     validate_item_content_put,
 )
-from snovault.etag import if_match_tid
 from .base import (
     Item,
     paths_filtered_by_status,
@@ -229,9 +228,8 @@ class ExperimentSet(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
-        uuids = [str(pub) for pub in self.get_rev_links('publications_produced')]
-        pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, uuids)]
+        pub_paths = self.rev_link_atids(request, 'publications_produced')
+        pubs = [request.embed('/', path, '@@object') for path in pub_paths]
         if pubs:
             return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']),
                           reverse=True)[0].get('@id')
@@ -247,11 +245,9 @@ class ExperimentSet(Item):
         }
     })
     def publications_of_set(self, request):
-        pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
-                   self.get_rev_links('publications_using')])
-        pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, pubs)]
-        return [pub['@id'] for pub in pubs]
+        pubs_produced = self.rev_link_atids(request, 'publications_produced')
+        pubs_using = self.rev_link_atids(request, 'publications_using')
+        return list(set(pubs_produced + pubs_using))
 
     @calculated_property(schema={
         "title": "Number of Experiments",
@@ -322,10 +318,8 @@ def experiment_set_replicate_add(context, request, render=None):
 
 
 @view_config(context=ExperimentSetReplicate, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_experiment_set_replicate_experiments],
-             decorator=if_match_tid)
+             validators=[validate_item_content_put, validate_experiment_set_replicate_experiments])
 @view_config(context=ExperimentSetReplicate, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments],
-             decorator=if_match_tid)
+             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments])
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)
