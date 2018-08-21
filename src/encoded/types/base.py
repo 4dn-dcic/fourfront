@@ -166,6 +166,7 @@ lab_award_attribution_embed_list = [
     "lab.postal_code",
     "lab.city",
     "lab.display_title",
+    "lab.url",
     "lab.correspondence",                                # Not a real linkTo - temp workaround
     "contributing_labs.correspondence",                  # Not a real linkTo - temp workaround
     "submitted_by.timezone",

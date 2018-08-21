@@ -2,7 +2,9 @@
 
 /**
  * A directory of methods and maybe a mini-component or two for common use.
- * 
+ *
+ * TODO: Refactor to ES6 module syntax
+ *
  * @module util
  */
 
@@ -40,3 +42,5 @@ module.exports.Schemas      = require('./Schemas');
 
 /** Transforms, manipulations, parsers, etc. re: objects. **/
 module.exports.fileUtil     = require('./file');
+
+module.exports.SEO          = require('./seo');
