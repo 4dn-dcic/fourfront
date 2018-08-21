@@ -270,7 +270,14 @@ export class FullSite extends React.PureComponent {
                         "url": "http://web.mit.edu",
                         "logo": "http://www.mit.edu/themes/mit/assets/favicon/android-icon-192x192.png",
                     }
-                }
+                },
+            ],
+            "knowsAbout" : [
+                "http://higlass.io/",
+                "https://higlass.4dnucleome.org/",
+                "http://www.4dnucleome.org/",
+                "http://www.4dnucleome.org/",
+                "https://commonfund.nih.gov/4dnucleome"
             ]
         });
     }
@@ -304,6 +311,10 @@ export class FullSite extends React.PureComponent {
                 "sponsor" : {
                     "@type" : "GovernmentOrganization",
                     "name" : "National Institutes of Health (NIH)",
+                    "alternateName" : [
+                        "National Institutes of Health",
+                        "NIH"
+                    ],
                     "url" : "https://www.nih.gov/"
                 },
                 "mainEntity" : {
