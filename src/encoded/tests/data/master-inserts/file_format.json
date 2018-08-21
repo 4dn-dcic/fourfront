@@ -1,0 +1,226 @@
+[
+    {
+        "file_format": "fastq",
+        "standard_file_extension": "fastq.gz",
+        "other_allowed_extensions": ["fq.gz"],
+        "description": "This format is used for short read sequence data - more information can be found here https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/#fastq-files",
+        "uuid": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "txt",
+        "standard_file_extension": "txt",
+        "description": "This format is used for plain text files",
+        "file_format_specification": "test.pdf",
+        "uuid": "dba26778-f40a-4561-a552-65539702ded4",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairs",
+        "standard_file_extension": "pairs.gz",
+        "description": "This format is used for something to do with paired mapped read locations",
+        "file_format_specification": "test.pdf",
+        "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "extrafile_formats": ["d13d06cf-218e-4f61-aaf0-91f226348b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairsam",
+        "standard_file_extension": "sam.pairs.gz",
+        "description": "This format is used for something to do with paired mapped read locations",
+        "uuid": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+        "extrafile_formats": ["d13d06cf-218e-6f61-aaf0-91f226248b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairsam_px2",
+        "standard_file_extension": "sam.pairs.gz.px2",
+        "description": "This format is used for something to do with paired mapped read locations",
+        "uuid": "d13d06cf-218e-6f61-aaf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bw",
+        "standard_file_extension": "bw",
+        "description": "Bigwig file format",
+        "uuid": "d1311111-218e-4f61-aaf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bg",
+        "standard_file_extension": "bedGraph.gz",
+        "description": "Bedgraph format",
+        "uuid": "d1312212-218e-4f61-aaf0-91f226248b2c",
+        "extrafile_formats": ["d1311112-218e-4f61-aaf0-91f226248b2c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bg_px2",
+        "standard_file_extension": "bedGraph.gz.px2",
+        "description": "Bedgraph index",
+        "uuid": "d1311112-218e-4f61-aaf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "pairs_px2",
+        "standard_file_extension": "pairs.gz.px2",
+        "description": "This format is used for extra index files for paired mapped read locations",
+        "uuid": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bam",
+        "standard_file_extension": "bam",
+        "description": "This format is used for aligned reads",
+        "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+        "extrafile_formats": ["d13d06c1-218e-4f61-aaf0-91f226248b3c"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bai",
+        "standard_file_extension": "bam.bai",
+        "description": "Bam index format",
+        "uuid": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bed",
+        "standard_file_extension": "bed.gz",
+        "description": "Bed format",
+        "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "cool",
+        "standard_file_extension": "cool",
+        "description": "This format is used for contact matrices",
+        "uuid": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "hdf5",
+        "standard_file_extension": "hdf5",
+        "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "matrix",
+        "standard_file_extension": "matrix",
+        "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "hic",
+        "standard_file_extension": "hic",
+        "description": "This format is used for contact matrices",
+        "uuid": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "mcool",
+        "standard_file_extension": "mcool",
+        "description": "This format is used for multi-resolution contact matrices",
+        "uuid": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "other",
+        "standard_file_extension": "other",
+        "description": "This format is used for other files",
+        "uuid": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "ome.tiff",
+        "standard_file_extension": "ome.tiff",
+        "other_allowed_extensions": ["ome.tif"],
+        "description": "This format is used for Omero imaging files",
+        "uuid": "d13d06cf-218e-4f61-22f0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "tiff",
+        "standard_file_extension": "tiff",
+        "other_allowed_extensions": ["tif"],
+        "description": "This format is used for Tiff image files",
+        "uuid": "d13d06cf-218e-4f61-33f0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "zip",
+        "standard_file_extension": "zip",
+        "description": "This format is used for zip compressed files",
+        "uuid": "d13d06cf-218e-4f61-44f0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "bwaIndex",
+        "standard_file_extension": "bwaIndex.tgz",
+        "description": "This format is used for bwaIndex files",
+        "uuid": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "compressed_fasta",
+        "standard_file_extension": "fasta.gz",
+        "other_allowed_extensions": ["fsa.gz"],
+        "description": "This format is used for compressed FASTA files",
+        "uuid": "d13d06cf-218e-4f61-55f0-92f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "fasta",
+        "standard_file_extension": "fasta",
+        "other_allowed_extensions": ["fsa"],
+        "description": "This format is used for uncompressed FASTA files",
+        "uuid": "d13d16cf-218e-4f61-55f0-92f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "chromsizes",
+        "standard_file_extension": "chrom.sizes",
+        "description": "This format is used as a reference for an organisms chromosome sizes",
+        "uuid": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "juicer_format_restriction_site_file",
+        "standard_file_extension": "txt",
+        "description": "This format is used as a reference for restriction enzyme site info",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "file_format": "normvector_juicerformat",
+        "standard_file_extension": "normvector.juicerformat.gz",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    }
+]
