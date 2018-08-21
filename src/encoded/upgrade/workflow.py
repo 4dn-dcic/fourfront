@@ -398,16 +398,16 @@ def workflow_4_5(value, system):
             fformat = meta.get('file_format')
             if fformat:
                 fformat_item = formats.get(fformat)
-            ffuuid = None
-            try:
-                ffuuid = str(fformat_item.uuid)
-            except AttributeError:
-                pass
-            if not ffuuid:
-                del value['steps'][s]['inputs'][i]['meta']['file_format']
-                msg = ' STEP FILE_FORMAT: %s NOT FOUND' % fformat
-                note = value['steps'][s]['inputs'][i]['meta'].get('notes', '')
-                msg = note + msg
-                value['steps'][s]['inputs'][i]['meta']['notes'] = msg
-            else:
-                value['steps'][s]['inputs'][i]['meta']['file_format'] = ffuuid
+                ffuuid = None
+                try:
+                    ffuuid = str(fformat_item.uuid)
+                except AttributeError:
+                    pass
+                if not ffuuid:
+                    del value['steps'][s]['inputs'][i]['meta']['file_format']
+                    msg = ' STEP FILE_FORMAT: %s NOT FOUND' % fformat
+                    note = value['steps'][s]['inputs'][i]['meta'].get('notes', '')
+                    msg = note + msg
+                    value['steps'][s]['inputs'][i]['meta']['notes'] = msg
+                else:
+                    value['steps'][s]['inputs'][i]['meta']['file_format'] = ffuuid
