@@ -262,7 +262,7 @@ export class FullSite extends React.PureComponent {
             "@type" : "EducationalOrganization",
             "name" : "4DN Data Coordination and Integration Center",
             "sameAs" : "http://dcic.4dnucleome.org/",
-            "url" : "https://data.4dncucleome.org/",
+            "url" : "https://data.4dnucleome.org/",
             "logo" : FullSite.logo4DN(portalBaseDomain)
         };
         if (short) return shortVersion;
