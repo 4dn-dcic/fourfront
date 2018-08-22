@@ -40,12 +40,13 @@ export class CurrentContext extends React.PureComponent {
                 "url"               : currentURL
             }, extraPageVals),
             "datePublished"     : context.public_release || context.date_created || null,
-            "url"               : currentURL
+            "url"               : currentURL,
+            "@id"               : currentURL
         };
         // Optional but common
-        if (context.accession || context.uuid){
-            base.identifier = context.accession || context.uuid;
-        }
+        //if (context.accession || context.uuid){
+        //    base.identifier = context.accession || context.uuid;
+        //}
         if (context.description){
             base.description = context.description;
         }
@@ -86,29 +87,27 @@ export class CurrentContext extends React.PureComponent {
 
             if (context['@type'].indexOf('DirectoryPage') > -1){
                 return _.extend(
-                    _.omit(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain), 'datePublished', 'dateModified'),
+                    _.omit(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain, { '@type' : "CollectionPage", '@id' : baseDomain + context['@id'] }), 'datePublished', 'dateModified', '@id'),
                     {
-                        "@type":"ItemList",
-                        "itemListElement": _.map(context.children, function(childPage, idx){
+                        "@type"             :"ItemList",
+                        "itemListElement"   : _.map(context.children, function(childPage, idx){
                             return {
-                                "@type" : "ListItem",
-                                "@id" : baseDomain + '/' + childPage.name,
-                                "name" : childPage.display_title,
-                                "position" : idx + 1,
-                                "url" : baseDomain + '/' + childPage.name
+                                "@type"         : "ListItem",
+                                "position"      : idx + 1,
+                                "url"           : baseDomain + '/' + childPage.name
                             };
                         })
                     }
                 );
             } else {
-                return _.extend(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain), {
-                    "@type": "TechArticle",
-                    "headline" : context.display_title || context.title,
-                    "author" : dcicOrg,
-                    "publisher" : dcicOrg,
-                    "articleSection" : "Help",
-                    "isAccessibleForFree" : true,
-                    "image" : FullSite.logo4DN(baseDomain)
+                return _.extend(_.omit(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain, { '@id' : baseDomain + context['@id'] }), '@id'), {
+                    "@type"                 : "TechArticle",
+                    "headline"              : context.display_title || context.title,
+                    "author"                : dcicOrg,
+                    "publisher"             : dcicOrg,
+                    "articleSection"        : "Help",
+                    "isAccessibleForFree"   : true,
+                    "image"                 : FullSite.logo4DN(baseDomain)
                 });
             }
         },
