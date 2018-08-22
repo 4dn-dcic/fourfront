@@ -11,22 +11,36 @@ import { isServerSide } from './misc';
 import { getNestedProperty } from './object';
 
 
+
+
+export function shouldDisplayStructuredData(baseDomain){
+    if (baseDomain.indexOf('data.4dnucleome.org') > -1) return true;
+    if (baseDomain.indexOf('localhost:8000') > -1) return true;
+    return false;
+}
+
+
+
 export class CurrentContext extends React.PureComponent {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired
     };
 
-    static commonSchemaBase(context, hrefParts, extraPageVals = {}){
-        var currentURL = (hrefParts ? ((hrefParts.protocol || '') + '//' + hrefParts.host) : '') + context['@id'];
+    static commonSchemaBase(context, hrefParts, baseDomain, extraPageVals = {}){
+        var currentURL = baseDomain + context['@id'];
         var base = {
             "@context": "http://schema.org",
-            "mainEntityOfPage": _.extend({
-                "@type": "WebPage",
-                "@id": currentURL
+            "mainEntityOfPage"  : _.extend({
+                "@type"             : "WebPage",
+                "isPartOf"          : {
+                    "@type"             : "WebSite",
+                    "url"               : baseDomain
+                },
+                "url"               : currentURL
             }, extraPageVals),
-            "datePublished" : context.public_release || context.date_created || null,
-            "url" : currentURL
+            "datePublished"     : context.public_release || context.date_created || null,
+            "url"               : currentURL
         };
         // Optional but common
         if (context.accession || context.uuid){
@@ -56,6 +70,7 @@ export class CurrentContext extends React.PureComponent {
 
     static transformationsByType = {
         'User' : function(context){
+            // No permission to view currently.
             return null;
         },
 
@@ -63,16 +78,15 @@ export class CurrentContext extends React.PureComponent {
          * Generate an 'TechArticle' schema item for Help pages.
          * _OR_ a directory schema item if is a DirectoryPage, as well.
          */
-        'HelpPage' : function(context, hrefParts){
+        'HelpPage' : function(context, hrefParts, baseDomain){
             if (context['@id'].slice(0,6) !== '/help/'){
                 return null; // Skip if we're on Item page for a Static Page
             }
-            var baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
-                dcicOrg = FullSite.dcicOrganization(baseDomain);
+            var dcicOrg = FullSite.dcicOrganization(baseDomain);
 
             if (context['@type'].indexOf('DirectoryPage') > -1){
                 return _.extend(
-                    _.omit(CurrentContext.commonSchemaBase(context, hrefParts), 'datePublished', 'dateModified'),
+                    _.omit(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain), 'datePublished', 'dateModified'),
                     {
                         "@type":"ItemList",
                         "itemListElement": _.map(context.children, function(childPage, idx){
@@ -87,7 +101,7 @@ export class CurrentContext extends React.PureComponent {
                     }
                 );
             } else {
-                return _.extend(CurrentContext.commonSchemaBase(context, hrefParts), {
+                return _.extend(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain), {
                     "@type": "TechArticle",
                     "headline" : context.display_title || context.title,
                     "author" : dcicOrg,
@@ -98,18 +112,16 @@ export class CurrentContext extends React.PureComponent {
                 });
             }
         },
-        "Browse": function(context, hrefParts){
-            var baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
-                dcicOrg = FullSite.dcicOrganization(baseDomain),
+        "Browse": function(context, hrefParts, baseDomain){
+            var dcicOrg = FullSite.dcicOrganization(baseDomain),
                 retObj = FullSite.catalog4DN(baseDomain);
 
-            _.extend(retObj, CurrentContext.commonSchemaBase(context, hrefParts, { "@type" : "SearchResultsPage" }), { 'sameAs' : retObj.url });
+            _.extend(retObj, CurrentContext.commonSchemaBase(context, hrefParts, baseDomain, { "@type" : "SearchResultsPage" }), { 'sameAs' : retObj.url });
 
             return retObj;
         },
-        "ExperimentSet" : function(context, hrefParts){
-            var baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
-                dcicOrg = FullSite.dcicOrganization(baseDomain, false),
+        "ExperimentSet" : function(context, hrefParts, baseDomain){
+            var dcicOrg = FullSite.dcicOrganization(baseDomain, false),
                 labCreator = CurrentContext.labToSchema(context.lab, baseDomain),
                 labContributors = Array.isArray(context.contributing_labs) && _.map(context.contributing_labs, function(cLab){
                     return CurrentContext.labToSchema(cLab, baseDomain);
@@ -121,7 +133,7 @@ export class CurrentContext extends React.PureComponent {
                 experimentTypes = _.uniq(experimentTypes);
             }
 
-            var retObj = _.extend(CurrentContext.commonSchemaBase(context, hrefParts, { "@type" : "ItemPage" }), {
+            var retObj = _.extend(CurrentContext.commonSchemaBase(context, hrefParts, baseDomain, { "@type" : "ItemPage" }), {
                 "@type": "Dataset",
                 "includedInDataCatalog" : FullSite.catalog4DN(baseDomain),
                 "name" : "Experiment Set - " + context.accession,
@@ -179,14 +191,13 @@ export class CurrentContext extends React.PureComponent {
 
             return retObj;
         },
-        "Lab" : function(context, hrefParts){
-            var baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
-                retObj = CurrentContext.labToSchema(context, baseDomain);
-
+        "Lab" : function(context, hrefParts, baseDomain){
+            var retObj = CurrentContext.labToSchema(context, baseDomain);
             if (!retObj) return null;
+
             retObj = _.extend(
                 _.omit(
-                    CurrentContext.commonSchemaBase(context, hrefParts, { "@type" : "ItemPage" }),
+                    CurrentContext.commonSchemaBase(context, hrefParts, baseDomain, { "@type" : "ItemPage" }),
                     'datePublished', 'dateModified'
                 ),
                 retObj
@@ -227,9 +238,9 @@ export class CurrentContext extends React.PureComponent {
     }
 
     render(){
-        var { context, hrefParts } = this.props,
-            transformFxn = context && CurrentContext.getTransformFxnForItem(context),
-            structuredDataJSON = transformFxn && transformFxn(context, hrefParts);
+        var { context, hrefParts, baseDomain } = this.props,
+            transformFxn        = shouldDisplayStructuredData(baseDomain) && context && CurrentContext.getTransformFxnForItem(context),
+            structuredDataJSON  = transformFxn && transformFxn(context, hrefParts, baseDomain);
 
         if (!structuredDataJSON) return null;
         return (
@@ -328,7 +339,7 @@ export class FullSite extends React.PureComponent {
 
     render(){
         var baseDomain = this.props.baseDomain || "https://data.4dnucleome.org",
-            structuredDataJSON = {
+            structuredDataJSON = shouldDisplayStructuredData(baseDomain) && {
                 "@context": "http://schema.org",
                 "@type": "WebSite",
                 "url": baseDomain + '/',
@@ -353,6 +364,8 @@ export class FullSite extends React.PureComponent {
                     "url" : baseDomain + "/browse/?" + queryString.stringify(navigate.getBrowseBaseParams('only_4dn'))
                 }
             };
+
+        if (!structuredDataJSON) return null;
         return (
             <script type="application/ld+json" dangerouslySetInnerHTML={{
                 __html: '\n' + JSON.stringify(structuredDataJSON, null, 4) + '\n'
