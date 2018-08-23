@@ -1035,6 +1035,12 @@ export default class App extends React.Component {
             context = context.default_page;
         }
 
+        // `canonical` is meant to refer to the definitive URI for current resource.
+        // For example, https://data.4dnucleome.org/some-item, http://data.4dnucleome.org/some-item, http://www.data.4dnucleome.org/some-item
+        // refer to same item, and `canonical` URL is the one that should be used when referring to or citing "/some-item".
+        // In our case, it is "https://data.4dnucleome.org/"; this canonical code may be deprecated as we always redirect to https and
+        // [wwww.]4dnuclome.org is a separate domain/site.
+
         if (context.canonical_uri) {
             if (href_url.host) {
                 canonical = (href_url.protocol || '') + '//' + href_url.host + context.canonical_uri;
@@ -1118,13 +1124,16 @@ export default class App extends React.Component {
             throw new Error('No context is available. Some error somewhere.');
         }
         // Google does not update the content of 301 redirected pages
+        // We technically should never hit this condition as we redirect http to https, however leaving in
+        // as not 100% certain.
         var base;
         if (({'http://data.4dnucleome.org/': 1})[canonical]) {
-            base = canonical = 'http://data.4dnucleome.org/';
+            base = canonical = 'https://data.4dnucleome.org/';
             this.historyEnabled = false;
         }
 
-        var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4;
+        var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
+            baseDomain = (href_url.protocol || '') + '//' + href_url.host;
 
         return (
             <html lang="en">
@@ -1147,8 +1156,8 @@ export default class App extends React.Component {
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
-                    <SEO.CurrentContext context={context} hrefParts={href_url} />
-                    <SEO.FullSite baseDomain={(href_url.protocol || '') + '//' + href_url.host} />
+                    <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
+                    <SEO.FullSite baseDomain={baseDomain} />
                 </head>
                 <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
