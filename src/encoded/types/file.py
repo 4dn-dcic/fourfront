@@ -287,8 +287,8 @@ class File(Item):
         outString = (file_type or 'other')
         file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
         fformat = file_format_item.get('file_format')
-        if file_format is not None:
-            outString = outString + ' (' + file_format + ')'
+        if fformat is not None:
+            outString = outString + ' (' + fformat + ')'
         return outString
 
     def _update(self, properties, sheets=None):
