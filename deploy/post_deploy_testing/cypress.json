@@ -1,5 +1,5 @@
 {
-    "baseUrl" : "http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/",
+    "baseUrl" : "https://data.4dnucleome.org",
     "projectId": "4opx2c",
     "defaultCommandTimeout" : 60000,
     "pageLoadTimeout" : 120000,

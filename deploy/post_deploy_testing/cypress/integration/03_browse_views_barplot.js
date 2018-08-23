@@ -71,7 +71,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                     return cy.window().scrollTo('top').wait(200).end()
                         .get('.bar-plot-chart .chart-bar[data-term="dilution Hi-C"] .bar-part[data-term="human"]').should('have.attr', 'data-count').wait(300).end()
                         .wrap($barPart).hoverIn().wait(100).end()
-                        .get('.cursor-component-root .details-title').should('contain', 'human').end()
+                        .get('.cursor-component-root .details-title').should('contain', 'Human').end()
                         .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'Repli-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
                             return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').wait(300).click({ force : true }).wait(200).end()
