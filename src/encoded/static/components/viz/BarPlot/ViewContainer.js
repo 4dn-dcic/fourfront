@@ -318,15 +318,14 @@ export class ViewContainer extends React.Component {
      * @returns {Component[]} Array of 'Bar' React Components.
      */
     renderBars(){
-        var { bars, transitioning, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props;
+        var { bars, transitioning, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props,
+            barsToRender, currentBars;
 
         // Global/Module-level Variables
         cachedPastBars = _.clone(cachedBars);
         cachedBars = {};
         cachedPastBarSections = _.clone(cachedBarSections);
         cachedBarSections = {};
-
-        var barsToRender, currentBars;
 
         // Current Bars only (unless transitioning).
         barsToRender = currentBars = _.map(bars, (d)=>{
@@ -358,13 +357,13 @@ export class ViewContainer extends React.Component {
     }
 
     render(){
-
+        var { topLevelField, width, height, bars } = this.props,
+            anyHiddenOtherTerms = topLevelField.other_doc_count || _.any(_.values(topLevelField.terms), function(tV){
+                return tV.other_doc_count;
+            });
         return (
-            <div
-                className="bar-plot-chart chart-container no-highlight"
-                data-field={this.props.topLevelField.field}
-                style={{ height : this.props.height, width: this.props.width }}
-                ref="container"
+            <div className="bar-plot-chart chart-container no-highlight"
+                data-field={topLevelField.field} style={{ height, width }} ref="container"
                 /*
                 onMouseLeave={(evt)=>{
                     if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
@@ -383,6 +382,11 @@ export class ViewContainer extends React.Component {
                 }}
                 */
             >
+                { anyHiddenOtherTerms ?
+                    <div className="terms-excluded-notice text-smaller">
+                        <p className="mb-0">* Only up to the top 30 terms are shown.</p>
+                    </div>
+                : null }
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
                 { this.renderBars() }
