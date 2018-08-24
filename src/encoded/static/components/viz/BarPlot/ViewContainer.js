@@ -23,76 +23,51 @@ var cachedBars = {},
  * @class BarSection
  * @type {Component}
  */
-class BarSection extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.isSelected = this.isSelected.bind(this);
-        this.isHoveredOver = this.isHoveredOver.bind(this);
-    }
+class BarSection extends React.PureComponent {
 
     componentWillUnmount(){
-        if (this.refs.element && (this.isSelected() || this.isHoveredOver())){
-            this.props.onMouseLeave(this.props.node, { 'relatedTarget' : this.refs.element });
+        var { isSelected, isHoveredOver, onMouseLeave, node } = this.props;
+        if (this.refs.element && (isSelected || isHoveredOver)){
+            onMouseLeave(node, { 'relatedTarget' : this.refs.element });
         }
-    }
-
-    /**
-     * Check if component (aka props.node) is selected.
-     * Calls CursorViewBounds.isSelected(..) internally.
-     * 
-     * @returns {boolean} - True if selected.
-     */
-    isSelected(){
-        return CursorViewBounds.isSelected(this.props.node, this.props.selectedTerm, this.props.selectedParentTerm);
-    }
-
-    isHoveredOver(){
-        return CursorViewBounds.isSelected(this.props.node, this.props.hoverTerm, this.props.hoverParentTerm);
     }
 
     /**
      * @returns {Element} - A div element representing a bar section.
      */
     render(){
-        var d               = this.props.node;
-        var color           = d.color || barplot_color_cycler.colorForNode(d);
-        var isSelected      = this.isSelected(),
-            isHoveredOver   = this.isHoveredOver();
+        var d               = this.props.node,
+            color           = d.color || barplot_color_cycler.colorForNode(d),
+            { isSelected, isHoveredOver, canBeHighlighted, onMouseEnter, onMouseLeave, onClick } = this.props,
+            className = "bar-part";
 
-        var className = "bar-part";
-        if (d.parent) className += ' multiple-parts';
-        if (isSelected) className += ' selected';
-        if (isHoveredOver) className += ' hover';
-        if (!this.props.canBeHighlighted) className += ' no-highlight';
-        else className += ' no-highlight-color';
-        
+        if (d.parent)           className += ' multiple-parts';
+        if (isSelected)         className += ' selected';
+        if (isHoveredOver)      className += ' hover';
+        if (!canBeHighlighted)  className += ' no-highlight';
+        else                    className += ' no-highlight-color';
+
+        var height;
+        if (!d.parent) { // No sub-buckets
+            height = '100%';
+        } else {
+            // Use a percentage for styling purposes because we want the outermost bar height
+            // to transition and child bar sections to stay aligned to it.
+            height = (d.count / d.parent.count) * 100 + '%';
+        }
+
         return (
-            <div
-                className={className}
+            <div className={className} ref="element"
                 style={{
-                    height : d.parent ? (d.attr.height / d.parent.attr.height) * 100 + '%' : '100%',
+                    height, 'backgroundColor' : color
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
-                    backgroundColor : color
                 }}
-                ref="element"
-                data-key={this.props['data-key'] || null}
-                data-term={d.parent ? d.term : null}
-                data-count={d.count}
-                data-color={color}
-                data-target-height={d.attr.height}
+                data-key={this.props['data-key'] || null} data-term={d.parent ? d.term : null}
+                data-count={d.count} data-color={color} data-target-height={d.attr.height}
                 key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
-                onMouseEnter={(e)=>{
-                    //this.setState({'hover' : true});
-                    if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
-                }}
-                onMouseLeave={(e)=>{
-                    //this.setState({'hover' : false});
-                    if (typeof this.props.onMouseLeave === 'function') this.props.onMouseLeave(d, e);
-                }}
-                onClick={(e)=>{
-                    if (typeof this.props.onClick === 'function') this.props.onClick(d, e);
-                }}
+                onMouseEnter={(e)=>{ typeof onMouseEnter === 'function' && onMouseEnter(d, e); }}
+                onMouseLeave={(e)=>{ typeof onMouseLeave === 'function' && onMouseLeave(d, e); }}
+                onClick={(e)=>{ typeof onClick === 'function' && onClick(d, e); }}
             />
         );
     }
@@ -105,13 +80,46 @@ class BarSection extends React.Component {
  * @class Bar
  * @type {Component}
  */
-class Bar extends React.Component {
+class Bar extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.verifyCounts = this.verifyCounts.bind(this);
         this.barStyle = this.barStyle.bind(this);
         this.renderBarSection = this.renderBarSection.bind(this);
         this.render = this.render.bind(this);
+    }
+
+    componentDidMount(){
+        this.verifyCounts();
+    }
+
+    componentDidUpdate(pastProps){
+        if (this.props.node !== pastProps.node){
+            this.verifyCounts();
+        }
+    }
+
+    /**
+     * Double check sum of bar parts and report an Exception to Google Analytics if doesn't match.
+     * Do this in a setTimeout because it doesn't affect rendering or site UI.
+     */
+    verifyCounts(){
+        var d = this.props.node;
+        if (!d.bars) return;
+        setTimeout(()=>{
+            var combinedChildrenCount = _.reduce(d.bars, function(sum, bar){
+                return sum + bar.count;
+            }, 0);
+            if (combinedChildrenCount && d.count !== combinedChildrenCount){
+                var errorMsg = (
+                    "Data Error: 1 or more ExperimentSets was counted multiple times for 'group by' field '" +
+                    d.bars[0].field + "'."
+                );
+                analytics.exception(errorMsg);
+                console.error(errorMsg);
+            }
+        }, 0);
     }
 
     barStyle(){
@@ -131,7 +139,7 @@ class Bar extends React.Component {
         return style;
     }
 
-    renderBarSection(d,i,all){
+    renderBarSection(d, i, all){
         //var parentBarTerm = (d.parent || d).term;
         //cachedBarSections[parentBarTerm][d.term] = d;
         //var isNew = false;
@@ -139,7 +147,9 @@ class Bar extends React.Component {
         //    isNew = true;
         //}
 
-        var key = d.term || d.name || i;
+        var key = d.term || d.name || i,
+            isHoveredOver = CursorViewBounds.isSelected(d, this.props.hoverTerm, this.props.hoverParentTerm),
+            isSelected = CursorViewBounds.isSelected(d, this.props.selectedTerm, this.props.selectedParentTerm);
 
         return (
             <BarSection
@@ -150,11 +160,8 @@ class Bar extends React.Component {
                 onMouseEnter={this.props.onBarPartMouseEnter}
                 onMouseLeave={this.props.onBarPartMouseLeave}
                 aggregateType={this.props.aggregateType}
-                selectedParentTerm={this.props.selectedParentTerm}
-                selectedTerm={this.props.selectedTerm}
-                hoverParentTerm={this.props.hoverParentTerm}
-                hoverTerm={this.props.hoverTerm}
                 //isNew={isNew}
+                {...{ isHoveredOver, isSelected }}
                 isRemoving={d.removing}
                 transitioning={this.props.transitioning}
                 canBeHighlighted={this.props.canBeHighlighted}
@@ -163,22 +170,20 @@ class Bar extends React.Component {
     }
 
     render(){
-        var d = this.props.node;
+        var { transitioning, canBeHighlighted, showBarCount } = this.props,
+            d = this.props.node,
+            prevBarData = null;
 
-        var transitioning = this.props.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-        var styleOpts = this.props.styleOptions;
+        if (d.existing && transitioning && cachedPastBars)  prevBarData = cachedPastBars[d.term].__data__;
+        if (!cachedBarSections[d.term])                     cachedBarSections[d.term] = {};
 
-        var prevBarData = null;
-        if (d.existing && transitioning && cachedPastBars) prevBarData = cachedPastBars[d.term].__data__;
-
-        if (!cachedBarSections[d.term]) cachedBarSections[d.term] = {};
-
-        var hasSubSections = Array.isArray(d.bars);
-
-        var barSections = (hasSubSections ?
-            // If needed, remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
-            barplot_color_cycler.sortObjectsByColorPalette(d.bars).reverse() : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
-        );
+        var hasSubSections = Array.isArray(d.bars),
+            barSections = (hasSubSections ?
+                // If needed, remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
+                barplot_color_cycler.sortObjectsByColorPalette(d.bars).reverse() : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
+            ),
+            className = "chart-bar",
+            topLabel = showBarCount ? <span className="bar-top-label" key="text-label" children={d.count} /> : null;
 
         // If transitioning, add existing bar sections to fade out.
         /* Removed for now as we don't transition barSections currently
@@ -214,18 +219,12 @@ class Bar extends React.Component {
         }
         */
 
-        var className = "chart-bar";
-        if (!this.props.canBeHighlighted) className += ' no-highlight';
-        else className += ' no-highlight-color';
+        if (!canBeHighlighted)  className += ' no-highlight';
+        else                    className += ' no-highlight-color';
 
         if (transitioning)      className += ' transitioning';
         if (d.new)              className += ' new-bar';
         else if (d.existing)    className += ' existing-bar';
-
-        var topLabel = null;
-        if (this.props.showBarCount){
-            topLabel = <span className="bar-top-label" key="text-label" children={d.count} />;
-        }
 
         return (
             <div
@@ -271,8 +270,44 @@ export class ViewContainer extends React.Component {
 
     constructor(props){
         super(props);
+        this.verifyCounts = this.verifyCounts.bind(this);
         this.renderBars = this.renderBars.bind(this);
         this.render = this.render.bind(this);
+    }
+
+    componentDidMount(){
+        this.verifyCounts();
+    }
+
+    componentDidUpdate(pastProps){
+        if (this.props.bars !== pastProps.bars || this.props.aggregateType !== pastProps.aggregateType || this.props.topLevelField !== pastProps.topLevelField){
+            this.verifyCounts();
+        }
+    }
+
+    /**
+     * Double check sum of bar parts and report an Exception to Google Analytics if doesn't match.
+     * Do this in a setTimeout because it doesn't affect rendering or site UI.
+     */
+    verifyCounts(){
+        var { bars, topLevelField, aggregateType } = this.props,
+            totalCount = topLevelField && topLevelField.total && topLevelField.total[aggregateType];
+
+        if (!totalCount || !bars) return;
+
+        setTimeout(()=>{
+            var combinedChildrenCount = _.reduce(bars, function(sum, bar){
+                return sum + bar.count;
+            }, 0);
+            if (combinedChildrenCount && totalCount !== combinedChildrenCount){
+                var errorMsg = (
+                    "Data Error: 1 or more ExperimentSets was counted multiple times for 'group by' field '" +
+                    bars[0].field + "'."
+                );
+                analytics.exception(errorMsg);
+                console.error(errorMsg);
+            }
+        }, 0);
     }
 
     /**
@@ -283,6 +318,7 @@ export class ViewContainer extends React.Component {
      * @returns {Component[]} Array of 'Bar' React Components.
      */
     renderBars(){
+        var { bars, transitioning, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props;
 
         // Global/Module-level Variables
         cachedPastBars = _.clone(cachedBars);
@@ -293,7 +329,7 @@ export class ViewContainer extends React.Component {
         var barsToRender, currentBars;
 
         // Current Bars only (unless transitioning).
-        barsToRender = currentBars = this.props.bars.map((d)=>{
+        barsToRender = currentBars = _.map(bars, (d)=>{
             // Determine whether bar existed before.
             var isExisting = typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null;
             return _.extend(d, { 
@@ -303,37 +339,21 @@ export class ViewContainer extends React.Component {
         });
 
         // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
-        if (this.props.transitioning){
-            var barsToRemove = _.difference(  _.keys(cachedPastBars),  _.pluck(this.props.bars, 'term') ).map((barTerm) => {
+        if (transitioning){
+            var barsToRemove = _.map(_.difference(_.keys(cachedPastBars), _.pluck(bars, 'term')), function(barTerm){
                 return _.extend(cachedPastBars[barTerm].__data__, { 'removing' : true });
             });
             barsToRender = barsToRemove.concat(currentBars);
         }
 
-        return barsToRender.sort(function(a,b){ // key will be term or name, if available
+        return _.map(barsToRender.sort(function(a,b){ // key will be term or name, if available
             return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
-        }).map((d,i,a) =>
-            <Bar
-                key={d.term || d.name || i}
-                node={d}
+        }), (d,i,a) =>
+            <Bar key={d.term || d.name || i} node={d}
                 showBarCount={true /*!allExpsBarDataContainer */}
-
-                selectedParentTerm={this.props.selectedParentTerm}
-                selectedTerm={this.props.selectedTerm}
-                hoverParentTerm={this.props.hoverParentTerm}
-                hoverTerm={this.props.hoverTerm}
-
-                styleOptions={this.props.styleOptions}
-                transitioning={this.props.transitioning}
-                aggregateType={this.props.aggregateType}
-                showType={this.props.showType}
-
-                onBarPartMouseEnter={this.props.onNodeMouseEnter}
-                onBarPartMouseLeave={this.props.onNodeMouseLeave}
-                onBarPartClick={this.props.onNodeClick}
-
-                canBeHighlighted={this.props.canBeHighlighted}
-            />
+                {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
+                    'transitioning', 'aggregateType', 'showType', 'canBeHighlighted')}
+                onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
         );
     }
 
