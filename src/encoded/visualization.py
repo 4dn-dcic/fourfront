@@ -635,12 +635,14 @@ def bar_plot_chart_deprecated(request):
 def bar_plot_chart(request):
 
     TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
+    MAX_BUCKET_COUNT = 30               # Max amount of bars or bar sections to return, excluding 'other'.
+    OTHER_TERM_NAME = "Other"           # Set a name to be used for terms which are not included when too many unique values.
 
     try:
         json_body = request.json_body
         search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
         fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
-    except json.JSONDecodeError:
+    except json.decoder.JSONDecodeError:
         search_param_lists      = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
         del search_param_lists['award.project']
         fields_to_aggregate_for = request.params.getall('field')
@@ -732,7 +734,7 @@ def bar_plot_chart(request):
             "terms" : {
                 "field" : "embedded." + fields_to_aggregate_for[0] + '.raw',
                 "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : 40
+                "size" : MAX_BUCKET_COUNT
             },
             "aggs" : deepcopy(sum_files_and_exps_sub_agg)
         }
@@ -750,7 +752,7 @@ def bar_plot_chart(request):
             'terms' : {
                 "field" : "embedded." + field + '.raw',
                 "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : 40
+                "size" : MAX_BUCKET_COUNT
             },
             "aggs" : deepcopy(sum_files_and_exps_sub_agg)
         }
@@ -779,6 +781,7 @@ def bar_plot_chart(request):
                 search_result['aggregations']['total_exp_processed_files']['value']
             )
         },
+        "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
         "time_generated" : str(datetime.utcnow())
     }
 
@@ -795,10 +798,11 @@ def bar_plot_chart(request):
         if len(fields_to_aggregate_for) > curr_field_depth + 1: # More fields agg results to add
             next_field_name = fields_to_aggregate_for[curr_field_depth + 1]
             returned_buckets[bucket_result['key']] = {
-                "term"      : bucket_result['key'],
-                "field"     : next_field_name,
-                "total"     : curr_bucket_totals,
-                "terms"     : {}
+                "term"              : bucket_result['key'],
+                "field"             : next_field_name,
+                "total"             : curr_bucket_totals,
+                "terms"             : {},
+                "other_doc_count"   : bucket_result['field_' + str(curr_field_depth + 1)].get('sum_other_doc_count', 0),
             }
             for bucket in bucket_result['field_' + str(curr_field_depth + 1)]['buckets']:
                 format_bucket_result(bucket, returned_buckets[bucket_result['key']]['terms'], curr_field_depth + 1)

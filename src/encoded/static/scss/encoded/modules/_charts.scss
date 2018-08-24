@@ -568,6 +568,13 @@
         }
     }
 
+    .terms-excluded-notice {
+        position: absolute;
+        right: 0;
+        text-align: right;
+        color: #999;
+    }
+
 }
 
 @media screen and (max-width : $screen-xs-max){

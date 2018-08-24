@@ -69,17 +69,11 @@
             "type" : "object",
             "description" : "A high-level container object containing data from Google Analytics as well as metadata about the report.",
             "properties": {
-                "start_date" : {
+                "for_date" : {
                     "type" : "string",
                     "format" : "date",
-                    "description": "The start date for which analytics are gathered in reports. This should usually be the same as end_date unless a day of analytics was skipped.",
-                    "title" : "Start Date"
-                },
-                "end_date" : {
-                    "type" : "string",
-                    "format" : "date",
-                    "description": "The end date for which analytics are gathered in reports.",
-                    "title" : "End Date"
+                    "description": "The date for which analytics are gathered in reports.",
+                    "title" : "Analytics Date"
                 },
                 "reports" : {
                     "type" : "object",
@@ -119,6 +113,7 @@
                                 }
                             }
                         },
+
                         "detail_views_by_experiment_set" : {
                             "type" : "array",
                             "title" : "Experiment Set Detail Views",
@@ -222,12 +217,8 @@
         "tracking_type": {
             "title": "Tracking Type"
         },
-        "google_analytics.start_date": {
-            "title": "Start Date",
-            "default_hidden" : true
-        },
-        "google_analytics.end_date": {
-            "title": "End Date",
+        "google_analytics.for_date": {
+            "title": "Analytics Date",
             "default_hidden" : true
         }
     },
