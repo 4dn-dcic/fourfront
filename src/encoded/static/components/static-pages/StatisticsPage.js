@@ -47,6 +47,9 @@ export class StatisticsViewController extends React.PureComponent {
         },
         'ExperimentSetReplicate' : function(props) {
             return '/search/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
+        },
+        'TrackingItem' : function(props) {
+            return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
         }
     };
 
@@ -99,7 +102,7 @@ export class StatisticsViewController extends React.PureComponent {
                 this.setState(_.extend({ 'loadingStatus' : 'complete' }, state));
             }.bind(this),
             uponSingleRequestsCompleteCallback = function(key, uri, resp){
-                if ((resp && resp.code === 404) || _.keys(resp.aggregations).length === 0){
+                if (resp && resp.code === 404){
                     failureCallback();
                     return;
                 }
@@ -159,6 +162,10 @@ export class StatisticsChartsView extends React.Component {
                 <h5 className="text-400">{ label }</h5>
             </div>
         );
+    }
+
+    static xAxisGeneratorForDayInterval(x){
+        return d3.axisBottom(x).ticks(d3.timeDay.every(1));
     }
 
     constructor(props){
@@ -242,6 +249,11 @@ export class StatisticsChartsView extends React.Component {
                     <AreaChart data={this.state.file_volume_released} yAxisLabel="GB" />
                 </AreaChartContainer>
 
+                <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last 14 days</span>}>
+                    <AreaChart data={this.state.sessions_by_country} xAxisGenerator={StatisticsChartsView.xAxisGeneratorForDayInterval}
+                        xAxisGeneratorFull={StatisticsChartsView.xAxisGeneratorForDayInterval} />
+                </AreaChartContainer>
+
             </div>
         );
     }
@@ -311,7 +323,7 @@ export class AreaChartContainer extends React.Component {
             visualToShow = React.cloneElement(children, {
                 'width'             : chartInnerWidth,
                 'height'            : useHeight,
-                'xAxisGenerator'    : (expanded ? this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) ),
+                'xAxisGenerator'    : (expanded ? (children.props && children.props.xAxisGeneratorFull) || this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) ),
                 'colorScale'        : colorScale || null
             });
         } else { // If no width yet, just for stylistic purposes, don't render chart itself.
@@ -434,6 +446,34 @@ export const aggregationsToChartData = {
 
             return aggsList;
         }
+    },
+    'sessions_by_country' : {
+        'requires' : 'TrackingItem',
+        'function' : function(resp){
+            if (!resp || !resp['@graph']) return null;
+            // Notably, we do NOT sum up total here.
+            return _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
+
+                var totalSessions = _.reduce(trackingItem.google_analytics.reports.sessions_by_country, function(sum, trackingItemItem){
+                    return sum + trackingItemItem['ga:sessions'];
+                }, 0);
+
+                return {
+                    'date'      : trackingItem.google_analytics.for_date,
+                    'count'     : totalSessions,
+                    'total'     : totalSessions,
+                    'children'  : _.map(trackingItem.google_analytics.reports.sessions_by_country, function(trackingItemItem){
+                        return {
+                            'term'      : trackingItemItem['ga:country'],
+                            'count'     : trackingItemItem['ga:sessions'],
+                            'total'     : trackingItemItem['ga:sessions']
+                        };
+                    })
+                };
+
+            });
+
+        }
     }
 };
 
@@ -469,6 +509,7 @@ export class AreaChart extends React.PureComponent {
         'xAxisGenerator'        : function(x){ // One tick every 2 months
             return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
         },
+        'xAxis'                 : null,     // Use in place of xAxisGenerator if want to share x axis scales across multiple charts.
         'transitionDuration'    : 1500,
         'colorScale'            : null // d3.scaleOrdinal(d3.schemeCategory10)
     };
@@ -569,7 +610,7 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator } = this.props;
+        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis } = this.props;
         var data = this.state.stackedData;
         var svg         = d3.select(this.refs.svg),
             width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
@@ -594,7 +635,7 @@ export class AreaChart extends React.PureComponent {
         x.domain(d3.extent(mergedDataForExtents, function(d){ return d.date; }));
         y.domain([ 0, d3.max(mergedDataForExtents, function(d) { return d.total; }) ]);
 
-        var bottomAxisGenerator = xAxisGenerator(x);
+        var bottomAxisGenerator = xAxis || xAxisGenerator(x);
 
         var leftAxisGenerator   = d3.axisLeft(y),
             rightAxisGenerator  = d3.axisRight(y).tickSize(width),

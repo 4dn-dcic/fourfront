@@ -268,7 +268,7 @@ class ResultTableContainer extends React.PureComponent {
 
     render() {
         var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas, totalExpected, selectedFiles, sortBy, sortColumn, sortReverse } = this.props;
-        
+
         return (
             <div className="row">
                 { context.facets.length > 0 ?
