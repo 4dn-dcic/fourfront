@@ -35,7 +35,7 @@ Step 2: Install or update dependencies::
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install caskroom/versions/java8
     $ brew tap homebrew/versions
-    $ brew install elasticsearch@5.6 node4-lts
+    $ brew install elasticsearch@5.6 node@8
 
 If you need to update dependencies::
 

@@ -1160,10 +1160,10 @@ export default class App extends React.Component {
                     <SEO.FullSite baseDomain={baseDomain} />
                 </head>
                 <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
-                    <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
+                    <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
-                    <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
+                    <script data-prop-name="alerts" type="application/json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
                     <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>

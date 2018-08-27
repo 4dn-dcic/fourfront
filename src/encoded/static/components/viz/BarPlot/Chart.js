@@ -36,29 +36,23 @@ export function genChartBarDims(
     fullHeightCount         = null
 ){
 
-    
-    var numberOfTerms = _.keys(rootField.terms).length;
-    var largestExpCountForATerm = typeof fullHeightCount === 'number' ?
-        fullHeightCount
-        : _.reduce(rootField.terms, function(m,t){
+    var numberOfTerms = _.keys(rootField.terms).length,
+        largestExpCountForATerm = typeof fullHeightCount === 'number' ? fullHeightCount : _.reduce(rootField.terms, function(m,t){
             return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
-        }, 0);
-
-    var insetDims = {
-        width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
-        height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
-    };
-    
-    var availWidthPerBar = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap);
-    var barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
-    var barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
-
-    var sortByAggrCount = function(b){
-        if (typeof b[aggregateType] === 'number'){
-            return b[aggregateType];
-        }
-        return b.term;
-    };
+        }, 0),
+        insetDims           = {
+            width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
+            height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
+        },
+        availWidthPerBar    = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
+        barXCoords          = d3.range(0, insetDims.width, availWidthPerBar),
+        barWidth            = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth),
+        sortByAggrCount = function(b){
+            if (typeof b[aggregateType] === 'number'){
+                return b[aggregateType];
+            }
+            return b.term;
+        };
 
     function genBarData(fieldObj, outerDims = insetDims, parent = null){
         return _(fieldObj.terms).chain()
