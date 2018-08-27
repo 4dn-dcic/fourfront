@@ -37,6 +37,7 @@ export class AboveTableControls extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.handleWindowResize = _.debounce(this.handleWindowResize.bind(this), 300);
         this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
+        this.handleClose = this.handleOpenToggle.bind(this, false);
         this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
         this.renderPanel = this.renderPanel.bind(this);
         this.renderOverlay = this.renderOverlay.bind(this);
@@ -172,12 +173,7 @@ export class AboveTableControls extends React.Component {
     renderOverlay(){
         return (
             <Popover title="Configure Visible Columns" id="toggle-visible-columns" className="toggle-visible-columns-selector">
-                <CustomColumnSelector
-                    hiddenColumns={this.props.hiddenColumns}
-                    addHiddenColumn={this.props.addHiddenColumn}
-                    removeHiddenColumn={this.props.removeHiddenColumn}
-                    columnDefinitions={this.props.columnDefinitions}
-                />
+                <CustomColumnSelector {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'columnDefinitions')} />
             </Popover>
         );
     }
@@ -188,15 +184,10 @@ export class AboveTableControls extends React.Component {
             return (
                 <Collapse in={!!(open)} appear>
                     { wrapInAboveTablePanel(
-                        <CustomColumnSelector
-                            hiddenColumns={this.props.hiddenColumns}
-                            addHiddenColumn={this.props.addHiddenColumn}
-                            removeHiddenColumn={this.props.removeHiddenColumn}
-                            columnDefinitions={this.props.columnDefinitions}
-                        />,
+                        <CustomColumnSelector {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'columnDefinitions')} />,
                         <span><i className="icon icon-fw icon-gear"/> Configure Visible Columns</span>,
                         'visible-columns-selector-panel',
-                        this.handleOpenToggle.bind(this, false)
+                        this.handleClose
                     ) }
                 </Collapse>
             );
@@ -206,11 +197,8 @@ export class AboveTableControls extends React.Component {
                     <div>
                         <SelectedFilesFilterByContent
                             {..._.pick(this.props, 'selectedFiles', 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
-                            subSelectedFiles={selectedFiles}
-                            currentFileTypeFilters={this.state.fileTypeFilters}
-                            setFileTypeFilters={this.setFileTypeFilters}
-                            closeButtonClickHandler={this.handleOpenToggle.bind(this, false)}
-                        />
+                            subSelectedFiles={selectedFiles} closeButtonClickHandler={this.handleClose}
+                            currentFileTypeFilters={this.state.fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
                     </div>
                 </Collapse>
             );

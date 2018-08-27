@@ -126,7 +126,7 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction } = this.props;
+        var { context, href, hiddenColumns, currentAction, constantHiddenColumns } = this.props;
         var results = context['@graph'],
             inSelectionMode = currentAction === 'selection',
             facets = this.props.facets || context.facets,
@@ -136,7 +136,8 @@ class ControlsAndResults extends React.PureComponent {
             schemaForType,
             abstractType,
             urlParts = url.parse(href, true),
-            hiddenColumnsFull = (hiddenColumns || []).slice(0);
+            hiddenColumnsFull = (hiddenColumns || []).slice(0),
+            constantHiddenColumnsFull = ['@type'].concat((constantHiddenColumns || []).slice(0));
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
 
@@ -154,13 +155,14 @@ class ControlsAndResults extends React.PureComponent {
         // Excluded columns from schema.
         schemaForType = Schemas.getSchemaForItemType(thisType);
         if (schemaForType && Array.isArray(schemaForType.excludedColumns) && _.every(schemaForType.excludedColumns, function(c){ return typeof c === 'string'; }) ){
-            hiddenColumnsFull = hiddenColumnsFull.concat(schemaForType.excludedColumns);
+            hiddenColumnsFull           = hiddenColumnsFull.concat(schemaForType.excludedColumns);
+            constantHiddenColumnsFull   = constantHiddenColumnsFull.concat(schemaForType.excludedColumns);
         }
 
         var columnDefinitionOverrides = {};
         var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
-        // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
+        // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
         // Also add the popLink/target=_blank functionality to links
         if (isThereParentWindow && currentAction === 'selection') {
             columnDefinitionOverrides['display_title'] = {
@@ -207,17 +209,9 @@ class ControlsAndResults extends React.PureComponent {
         }
 
         return (
-            <div>
-            {/*
-                {this.props.submissionBase ?
-                    <h1 className="page-title">{thisTypeTitle + ' Selection'}</h1>
-                    : <h1 className="page-title">{thisTypeTitle + ' Search'}</h1>
-                }
-                <h4 className="page-subtitle">Filter & sort results</h4>
-            */}
-
-                <div className="row">
-                    {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
+            <div className="row">
+                { facets.length ?
+                    <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter')}
                             className="with-header-bg" facets={facets} filters={context.filters}
@@ -229,25 +223,21 @@ class ControlsAndResults extends React.PureComponent {
                                 if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
                                 return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
                             })()} />
-                </div> : null}
-                    <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                        <AboveTableControls {..._.pick(this.props,
-                                'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                                    'columns', 'selectedFiles', 'constantHiddenColumns', 'currentAction'
-                            )}
-                            parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                                SearchResultTable.defaultProps.constantColumnDefinitions,
-                                context.columns || {},
-                                columnDefinitionOverrides,
-                                ['@type']
-                            )}
-                            showTotalResults={context.total} />
-                        <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')} results={results} totalExpected={context.total}
-                            columns={context.columns || {}} hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
-                            renderDetailPane={(result, rowNumber, containerWidth)=>
-                                <SearchResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
-                            } />
-                    </div>
+                        </div>
+                : null }
+                <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
+                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'context', 'columns', 'selectedFiles', 'currentAction')}
+                        hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
+                        parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                            SearchResultTable.defaultProps.constantColumnDefinitions,
+                            context.columns || {},
+                            columnDefinitionOverrides,
+                            constantHiddenColumnsFull
+                        )} />
+                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')}
+                        results={results} totalExpected={context.total} columns={context.columns || {}}
+                        hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
+                        renderDetailPane={(result, rowNumber, containerWidth) => <SearchResultDetailPane result={result} /> } />
                 </div>
             </div>
         );

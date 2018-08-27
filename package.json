@@ -10,6 +10,8 @@
     "dev-quick": "gulp dev-quick",
     "dev-uglified": "gulp dev-uglified",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
+    "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
+    "cypress:open-hotseat": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com",
     "cypress:test": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
     "cypress:test-recorded": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key b07267b2-e853-4958-b1c4-df588b1efb04 --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret"
   },
@@ -59,7 +61,7 @@
     "codacy-coverage": "^2.1.1",
     "coveralls": "^2.13.3",
     "create-react-class": "^15.6.3",
-    "cypress": "^3.0.3",
+    "cypress": "^3.1.0",
     "eslint": "^3.19.0",
     "eslint-plugin-class-property": "^1.1.0",
     "eslint-plugin-cypress": "^2.0.1",

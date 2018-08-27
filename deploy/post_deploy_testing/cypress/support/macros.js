@@ -80,7 +80,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                         });
                     }).end();
             // Change to 'files' (2nd menu item in aggregate type drown); compare bar & legend counts
-            }).get('button#select-barplot-aggregate-type').should('contain', 'Experiments').click({ 'force' : true }).then(()=>{
+            })/*.get('button#select-barplot-aggregate-type').should('contain', 'Experiments').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(3)')
                     .should('have.text', 'Files').click().end().window().scrollTo('top').wait(750).then(()=>{
                         return getBarCounts().then((barCounts)=>{
@@ -100,7 +100,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                             expect(barPartCounts.files).to.equal(quickInfoBarCounts.files);
                         });
                     }).end();
-            }).get('button#select-barplot-aggregate-type').should('contain', 'Files').click({ 'force' : true }).then(()=>{
+            })*/.get('button#select-barplot-aggregate-type').should('contain', /* 'Files' */ 'Experiments').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(1)')
                     .should('have.text', 'Experiment Sets').click().end().window().scrollTo('top').wait(750).then(()=>{
                         return getBarCounts().then((barCounts)=>{

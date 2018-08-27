@@ -71,7 +71,7 @@ describe('Browse Views - Redirection & Visualization', function () {
                     return cy.window().scrollTo('top').wait(200).end()
                         .get('.bar-plot-chart .chart-bar[data-term="dilution Hi-C"] .bar-part[data-term="human"]').should('have.attr', 'data-count').wait(300).end()
                         .wrap($barPart).hoverIn().wait(100).end()
-                        .get('.cursor-component-root .details-title').should('contain', 'human').end()
+                        .get('.cursor-component-root .details-title').should('contain', 'Human').end()
                         .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'Repli-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
                             return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').wait(300).click({ force : true }).wait(200).end()
@@ -160,8 +160,8 @@ describe('Browse Views - Redirection & Visualization', function () {
             });
         });
 
-
-        it('Counts persist on setting groupBy --> "Biosource"', function(){
+        // Skipped because biosource might return more terms than allowed (30) and likely fail to have matching counts.
+        it.skip('Counts persist on setting groupBy --> "Biosource"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
                     .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
@@ -211,11 +211,11 @@ describe('Browse Views - Redirection & Visualization', function () {
         });
 
 
-        it('Counts persist on setting groupBy --> "Lab"', function(){
+        it('Counts persist on setting groupBy --> "Status"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
                     .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
-                        return cy.contains('Lab').click().wait(100);
+                        return cy.contains('Status').click().wait(100);
                     }).end()
                     .getQuickInfoBarCounts().then((nextCounts)=>{
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
@@ -233,7 +233,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
                 const loggedOutCounts = _.clone(counts);
 
-                cy.login4DN().wait(200)
+                cy.wait(100).login4DN().wait(100)
                     .get('#stats-stat-expsets').should('have.text', '').end()
                     .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
                         return compareQuickInfoCountsVsBarPlotCounts();
