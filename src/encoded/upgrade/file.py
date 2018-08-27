@@ -12,7 +12,6 @@ def file_1_2(value, system):
     file_format = value.get('file_format')
     formats = system['registry']['collections']['FileFormat']
     format_item = formats.get(file_format)
-    del value['file_format']
     fuuid = None
     try:
         fuuid = str(format_item.uuid)
@@ -25,3 +24,22 @@ def file_1_2(value, system):
         note = note + ' FILE FORMAT: ' + file_format
         value['notes'] = note
     value['file_format'] = fuuid
+
+    # need to also check for extra files to upgrade_step
+    extras = value.get('extra_files')
+    if extras:
+        for i, extra in enumerate(extras):
+            eformat = extra.get('file_format')
+            eformat_item = formats.get(eformat)
+            efuuid = None
+            try:
+                efuuid = str(eformat_item.uuid)
+            except AttributeError:
+                pass
+            if not efuuid:
+                other_format = formats.get('other')
+                efuuid = str(other_format.uuid)
+                note = value.get('notes', '')
+                note = note + ' EXTRA FILE FORMAT: ' + str(i) + '-' + eformat
+                value['notes'] = note
+            value['extra_files'][i]['file_format'] = efuuid
