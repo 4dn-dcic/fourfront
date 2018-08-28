@@ -29,7 +29,7 @@ from .types.workflow import (
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
-    config.add_route('date_histogram_aggregations', '/date_histogram_aggregations')
+    config.add_route('date_histogram_aggregations', '/date_histogram_aggregations/')
     config.scan(__name__)
 
 
@@ -287,18 +287,24 @@ def bar_plot_chart(request):
 def date_histogram_aggregations(request):
     '''PREDEFINED aggregations which run against type=ExperimentSet'''
 
+    group_by_field = 'award.center_title' # Default
+
     try:
         json_body = request.json_body
         search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
         fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
     except json.decoder.JSONDecodeError:
-        search_param_lists      = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
-        del search_param_lists['award.project']
-        fields_to_aggregate_for = request.params.getall('field')
+        search_param_lists      = dict(request.GET)
+        if 'group_by' in search_param_lists:
+            group_by_field = search_param_lists['group_by'][0] if isinstance(search_param_lists['group_by'], list) else search_param_lists['group_by']
+            del search_param_lists['group_by'] # We don't wanna use it as search filter.
+        if not search_param_lists:
+            search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
+            del search_param_lists['award.project']
 
 
     common_sub_agg = deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
-    
+
     # Add on file_size_volume
     for key_name in ['total_exp_raw_files', 'total_exp_processed_files', 'total_expset_processed_files']:
         common_sub_agg[key_name + "_volume"] = {
@@ -327,7 +333,7 @@ def date_histogram_aggregations(request):
             "aggs" : {
                 "group_by" : {
                     "terms" : {
-                        "field" : "embedded.award.center_title.raw", # TODO: Allow this to be passed in via URI param(s)
+                        "field" : "embedded." + group_by_field + ".raw",
                         "missing" : TERM_NAME_FOR_NO_VALUE,
                         "size" : 30
                     },
