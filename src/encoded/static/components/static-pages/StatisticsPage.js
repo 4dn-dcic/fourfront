@@ -47,7 +47,9 @@ export class StatisticsViewController extends React.PureComponent {
         //    );
         //},
         'ExperimentSetReplicate' : function(props) {
-            return '/date_histogram_aggregations/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
+            var params = navigate.getBrowseBaseParams(props.browseBaseState || null);
+            if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
+            return '/date_histogram_aggregations/?' + stringify(params) + '&limit=0';
         },
         // TEMP DISABLED
         //'TrackingItem' : function(props) {
@@ -443,29 +445,36 @@ export const aggregationsToChartData = {
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var total = 0,
-                subTotals = {};
+            var total       = 0,
+                subTotals   = {};
 
             var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                total += (bucket.total_files && bucket.total_files.value) || 0;
+
+                //total += (bucket.total_files && bucket.total_files.value) || 0;
+
                 var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
                     _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
                 ));
+
+                var children = _.map(subBucketKeysToDate, function(termKey){
+                    var subBucket   = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
+                        subCount    = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0);
+
+                    subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
+                    total += subCount;
+
+                    return {
+                        'term'  : termKey,
+                        'count' : subCount,
+                        'total' : subTotals[termKey]
+                    };
+                });
+
                 return {
                     'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
                     'count'    : bucket.doc_count,
                     'total'    : total,
-                    'children' : _.map(subBucketKeysToDate, function(termKey){
-                        var subBucket   = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
-                            subCount    = ((subBucket && subBucket.total_files && bucket.total_files.value) || 0);
-
-                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
-                        return {
-                            'term'  : termKey,
-                            'count' : subCount,
-                            'total' : subTotals[termKey]
-                        };
-                    })
+                    'children' : children
                 };
             });
 

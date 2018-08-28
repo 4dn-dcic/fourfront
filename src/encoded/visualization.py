@@ -326,7 +326,6 @@ def date_histogram_aggregations(request):
     histogram_sub_aggs = dict(common_sub_agg, group_by={
         "terms" : {
             "field" : "embedded." + group_by_field + ".raw",
-            "missing" : TERM_NAME_FOR_NO_VALUE,
             "size" : 30
         },
         "aggs" : common_sub_agg
