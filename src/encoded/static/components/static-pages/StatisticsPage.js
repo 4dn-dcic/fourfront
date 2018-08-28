@@ -37,20 +37,22 @@ export default class StatisticsPageView extends StaticPage {
 export class StatisticsViewController extends React.PureComponent {
 
     static CHART_SEARCH_URIS = {
-        //'File' : '/search/?type=File&experiments.display_title!=No%20value&limit=0',
-        'File' : function(props) {
-            return (
-                '/search/?type=File&' +
-                stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) +
-                '&limit=0'
-            );
-        },
+
+        // REPLACED
+        //'File' : function(props) {
+        //    return (
+        //        '/search/?type=File&' +
+        //        stringify(_.pick(navigate.getBrowseBaseParams(props.browseBaseState || null), 'award.project')) +
+        //        '&limit=0'
+        //    );
+        //},
         'ExperimentSetReplicate' : function(props) {
-            return '/search/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
+            return '/date_histogram_aggregations/?' + stringify(navigate.getBrowseBaseParams(props.browseBaseState || null)) + '&limit=0';
         },
-        'TrackingItem' : function(props) {
-            return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
-        }
+        // TEMP DISABLED
+        //'TrackingItem' : function(props) {
+        //    return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
+        //}
     };
 
     static shouldRefetchAggregations(pastProps, nextProps){
@@ -217,42 +219,49 @@ export class StatisticsChartsView extends React.Component {
     }
 
     render(){
-        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session } = this.props;
+        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session } = this.props,
+            { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country } = this.state;
+
         if (!mounted || loadingStatus === 'loading')    return StatisticsChartsView.loadingIcon();
         if (loadingStatus === 'failed')                 return StatisticsChartsView.errorIcon();
-        var anyExpandedCharts = _.any(_.values(this.state.chartToggles));
-        var commonContainerProps = {
-            'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
-            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250, 'colorScale' : this.state.colorScale
-        };
+
+        var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
+            commonContainerProps = {
+                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
+                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250, 'colorScale' : this.state.colorScale
+            };
 
         return (
             <div className="stats-charts-container">
 
                 <AreaChartContainer {...commonContainerProps} id="expsets_released" title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
-                    <AreaChart data={this.state.expsets_released} />
+                    <AreaChart data={expsets_released} />
                 </AreaChartContainer>
 
-                { session && this.state.expsets_released_internal ?
+                { session && expsets_released_internal ?
 
                     <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={<span><span className="text-500">Experiment Sets</span> released over time &mdash; Internal</span>}>
-                        <AreaChart data={this.state.expsets_released_internal} />
+                        <AreaChart data={expsets_released_internal} />
                     </AreaChartContainer>
 
                 : null }
 
                 <AreaChartContainer {...commonContainerProps} id="files_released" title={<span><span className="text-500">Files</span> released over time</span>}>
-                    <AreaChart data={this.state.files_released} />
+                    <AreaChart data={files_released} />
                 </AreaChartContainer>
 
                 <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={<span><span className="text-500">Total File Size</span> released over time</span>}>
-                    <AreaChart data={this.state.file_volume_released} yAxisLabel="GB" />
+                    <AreaChart data={file_volume_released} yAxisLabel="GB" />
                 </AreaChartContainer>
 
-                <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last 14 days</span>}>
-                    <AreaChart data={this.state.sessions_by_country} xAxisGenerator={StatisticsChartsView.xAxisGeneratorForDayInterval}
-                        xAxisGeneratorFull={StatisticsChartsView.xAxisGeneratorForDayInterval} />
-                </AreaChartContainer>
+                { sessions_by_country ?
+
+                    <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last 14 days</span>}>
+                        <AreaChart data={sessions_by_country} xAxisGenerator={StatisticsChartsView.xAxisGeneratorForDayInterval}
+                            xAxisGeneratorFull={StatisticsChartsView.xAxisGeneratorForDayInterval} />
+                    </AreaChartContainer>
+
+                : null }
 
             </div>
         );
@@ -348,37 +357,6 @@ export class AreaChartContainer extends React.Component {
     }
 }
 
-export function dateHistogramToD3Data(dateIntervalBuckets){
-    var total = 0;
-    var subTotals = {};
-    var aggsList = _.map(dateIntervalBuckets, function(bucket, index){
-        total += bucket.doc_count;
-        var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-            _.pluck((bucket.group_by_award && bucket.group_by_award.buckets) || [], 'key')
-        ));
-        return {
-            'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-            'count'    : bucket.doc_count,
-            'total'    : total,
-            'children' : _.map(subBucketKeysToDate, function(termKey){
-                var subBucket = bucket.group_by_award && bucket.group_by_award.buckets && _.findWhere(bucket.group_by_award.buckets, { 'key' : termKey });
-                var subCount = ((subBucket && subBucket.doc_count) || 0);
-                subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
-                return {
-                    'term'  : termKey,
-                    'count' : subCount,
-                    'total' : subTotals[termKey]
-                };
-            })
-        };
-    });
-
-    // Ensure each datum has all child terms, even if blank.
-    fillMissingChildBuckets(aggsList, _.keys(subTotals));
-
-    return aggsList;
-}
-
 
 export const aggregationsToChartData = {
     'expsets_released' : {
@@ -388,7 +366,35 @@ export const aggregationsToChartData = {
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            return dateHistogramToD3Data(weeklyIntervalBuckets);
+            var total = 0,
+                subTotals = {};
+
+            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+                total += bucket.doc_count;
+                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                    _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
+                ));
+                return {
+                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                    'count'    : bucket.doc_count,
+                    'total'    : total,
+                    'children' : _.map(subBucketKeysToDate, function(termKey){
+                        var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey });
+                        var subCount = ((subBucket && subBucket.doc_count) || 0);
+                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
+                        return {
+                            'term'  : termKey,
+                            'count' : subCount,
+                            'total' : subTotals[termKey]
+                        };
+                    })
+                };
+            });
+
+            // Ensure each datum has all child terms, even if blank.
+            fillMissingChildBuckets(aggsList, _.keys(subTotals));
+
+            return aggsList;
         }
     },
     'expsets_released_internal' : {
@@ -398,18 +404,79 @@ export const aggregationsToChartData = {
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_internal_release && resp.aggregations.weekly_interval_internal_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            return dateHistogramToD3Data(weeklyIntervalBuckets);
+            var total = 0,
+                subTotals = {};
+
+            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+                total += bucket.doc_count;
+                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                    _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
+                ));
+                return {
+                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                    'count'    : bucket.doc_count,
+                    'total'    : total,
+                    'children' : _.map(subBucketKeysToDate, function(termKey){
+                        var subBucket   = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
+                            subCount    = ((subBucket && subBucket.doc_count) || 0);
+
+                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
+                        return {
+                            'term'  : termKey,
+                            'count' : subCount,
+                            'total' : subTotals[termKey]
+                        };
+                    })
+                };
+            });
+
+            // Ensure each datum has all child terms, even if blank.
+            fillMissingChildBuckets(aggsList, _.keys(subTotals));
+
+            return aggsList;
         }
     },
     'files_released' : {
-        'requires'  : 'File',
+        'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp){
-            // Same as for ExpSets
-            return aggregationsToChartData.expsets_released.function(resp);
+            if (!resp || !resp.aggregations) return null;
+            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
+            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
+
+            var total = 0,
+                subTotals = {};
+
+            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+                total += (bucket.total_files && bucket.total_files.value) || 0;
+                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                    _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
+                ));
+                return {
+                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                    'count'    : bucket.doc_count,
+                    'total'    : total,
+                    'children' : _.map(subBucketKeysToDate, function(termKey){
+                        var subBucket   = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
+                            subCount    = ((subBucket && subBucket.total_files && bucket.total_files.value) || 0);
+
+                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
+                        return {
+                            'term'  : termKey,
+                            'count' : subCount,
+                            'total' : subTotals[termKey]
+                        };
+                    })
+                };
+            });
+
+            // Ensure each datum has all child terms, even if blank.
+            fillMissingChildBuckets(aggsList, _.keys(subTotals));
+
+            return aggsList;
         }
     },
     'file_volume_released' : {
-        'requires'  : 'File',
+        'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp){
             if (!resp || !resp.aggregations) return null;
             var weeklyIntervalBuckets = resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
@@ -419,18 +486,18 @@ export const aggregationsToChartData = {
                 total = 0,
                 subTotals = {},
                 aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                    var fileSizeVol = ((bucket.file_size_volume && bucket.file_size_volume.value) || 0) / gigabyte;
+                    var fileSizeVol = ((bucket.total_files_volume && bucket.total_files_volume.value) || 0) / gigabyte;
                     total += fileSizeVol;
                     var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-                        _.pluck((bucket.group_by_award && bucket.group_by_award.buckets) || [], 'key')
+                        _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
                     ));
                     return {
                         'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
                         'count'    : fileSizeVol,
                         'total'    : total,
                         'children' : _.map(subBucketKeysToDate, function(termKey){
-                            var subBucket = bucket.group_by_award && bucket.group_by_award.buckets && _.findWhere(bucket.group_by_award.buckets, { 'key' : termKey });
-                            var subFileSizeVol = ((subBucket && subBucket.file_size_volume && subBucket.file_size_volume.value) || 0) / gigabyte;
+                            var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
+                                subFileSizeVol = ((subBucket && subBucket.total_files_volume && subBucket.total_files_volume.value) || 0) / gigabyte;
                             subTotals[termKey] = (subTotals[termKey] || 0) + subFileSizeVol;
                             return {
                                 'term'  : termKey,

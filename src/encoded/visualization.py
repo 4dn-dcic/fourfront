@@ -293,7 +293,7 @@ def date_histogram_aggregations(request):
         json_body = request.json_body
         search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
         fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
-    except json.decoder.JSONDecodeError:
+    except:
         search_param_lists      = dict(request.GET)
         if 'group_by' in search_param_lists:
             group_by_field = search_param_lists['group_by'][0] if isinstance(search_param_lists['group_by'], list) else search_param_lists['group_by']
@@ -323,16 +323,14 @@ def date_histogram_aggregations(request):
         }
     }
 
-    histogram_sub_aggs = {
-        "group_by" : { # TODO: Maybe define more common bucketing here to avoid re-loads
-            "terms" : {
-                "field" : "embedded." + group_by_field + ".raw",
-                "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : 30
-            },
-            "aggs" : common_sub_agg
-        }
-    }
+    histogram_sub_aggs = dict(common_sub_agg, group_by={
+        "terms" : {
+            "field" : "embedded." + group_by_field + ".raw",
+            "missing" : TERM_NAME_FOR_NO_VALUE,
+            "size" : 30
+        },
+        "aggs" : common_sub_agg
+    })
 
     outer_date_histogram_agg = {
         "weekly_interval_public_release" : {
