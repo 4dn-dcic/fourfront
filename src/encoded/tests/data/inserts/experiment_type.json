@@ -1,0 +1,85 @@
+[
+    {
+        "title": "In situ Hi-C",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "3C Ligation-based Assays",
+        "grouping": "Minimum-bias Genome-wide Proximity Assays",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "Dilution Hi-C",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "3C Ligation-based Assays",
+        "grouping": "Minimum-bias Genome-wide Proximity Assays",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "ATAC-seq",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "1D DNA Enrichment",
+        "grouping": "Open Chromatin",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "Capture Hi-C",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "3C Ligation-based Assays",
+        "grouping": "Selected Region Proximity Assays",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "ChIA-PET",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "3C Ligation-based Assays",
+        "grouping": "Targeted Genome-wide Proximity Assays",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "PLAC-seq",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "3C Ligation-based Assays",
+        "grouping": "Targeted Genome-wide Proximity Assays",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "DamID-seq",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "1D DNA Enrichment",
+        "grouping": "Proximity to Organelle",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "FISH",
+        "experiment_category": "Microscopy",
+        "experiment_subcategory": "",
+        "grouping": ""
+    },
+    {
+        "title": "Repli-seq",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "1D DNA Enrichment",
+        "grouping": "Replication Timing",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "TSA-seq",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "1D DNA Enrichment",
+        "grouping": "Proximity to Organelle",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "ChIP-seq",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "1D DNA Enrichment",
+        "grouping": "DNA Binding",
+        "raw_files": "Reads (fastq) provided by lab"
+    },
+    {
+        "title": "CUT&RUN",
+        "experiment_category": "Sequencing",
+        "experiment_subcategory": "1D DNA Enrichment",
+        "grouping": "DNA Binding",
+        "raw_files": "Reads (fastq) provided by lab"
+    }
+]

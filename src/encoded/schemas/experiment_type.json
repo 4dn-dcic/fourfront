@@ -29,7 +29,7 @@
                 "deleted"
             ]
         },
-        "experiment_type": {
+        "title": {
             "title": "Experiment Type",
             "description": "The display name for the experiment type",
             "type": "string",
@@ -137,7 +137,7 @@
     },
     "facets": {
         "experiment_category": {
-          "title": "Experiment Category"
+            "title": "Experiment Category"
         },
         "experiment_subcategory": {
             "title": "Experiment Subcategory"
