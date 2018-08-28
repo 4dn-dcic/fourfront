@@ -7,7 +7,7 @@ import _ from 'underscore';
 import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas, fileUtil } from '../util';
 import Alerts from '../alerts';
 import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
 
@@ -1123,17 +1123,17 @@ class S3FileInput extends React.Component{
 
     getFileExtensionRequired(){
         // get the current context and overall schema for the file object
-        var currContext = this.props.getCurrContext();
-        var currSchema = this.props.getCurrSchema();
-        var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
-        var extension;
-        // find the extension the file should have
-        if (currContext.file_format in schema_extensions) {
-            extension = schema_extensions[currContext.file_format];
-        } else {
+        var currContext         = this.props.getCurrContext(),
+            currSchema          = this.props.getCurrSchema(),
+            schema_extensions   = object.getNestedProperty(currSchema, ['file_format_file_extension'], true),
+            currFileFormat      = fileUtil.getFileFormatStr(currContext),
+            extension           = (schema_extensions && schema_extensions[currFileFormat]) || null; // find the extension the file should have
+
+        if (!extension) {
             alert('Internal file extension conflict.');
             return null;
         }
+
         return extension;
     }
 
@@ -1142,22 +1142,23 @@ class S3FileInput extends React.Component{
     the filename context using modifyNewContext
     */
     handleChange = (e) => {
-        var extension = this.getFileExtensionRequired();
-        var file = e.target.files[0];
-        // file was not chosen
-        if(!file || typeof extension !== 'string'){
+        var { modifyNewContext, nestedField, linkType, arrayIdx } = this.props,
+            extension = this.getFileExtensionRequired(),
+            file = e.target.files[0];
+
+        if (!file || typeof extension !== 'string') return; // No file was chosen.
+
+        var filename = file.name ? file.name : "unknown";
+
+        // check extension
+        if (!filename.endsWith(extension)) {
+            alert('File extension error! Please enter a file of type: ' + extension);
             return;
-        }else{
-            var filename = file.name ? file.name : "unknown";
-            // check extension
-            if(!filename.endsWith(extension)){
-                alert('File extension error! Please enter a file of type: ' + extension);
-                return;
-            }
-            this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
-            // calling modifyFile changes the 'file' state of top level component
-            this.modifyFile(file);
         }
+
+        modifyNewContext(nestedField, filename, 'file upload', linkType, arrayIdx);
+        // calling modifyFile changes the 'file' state of top level component
+        this.modifyFile(file);
     }
 
     /*

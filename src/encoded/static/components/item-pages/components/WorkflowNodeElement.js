@@ -2,7 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { console, Schemas } from './../../util';
+import { console, Schemas, fileUtil, object } from './../../util';
 import _ from 'underscore';
 import { requestAnimationFrame } from './../../viz/utilities';
 
@@ -56,17 +56,17 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     icon(){
-        var node = this.props.node;
-        var ioType = node.ioType;
-        var nodeMetaType = (node.meta && node.meta.type) || null;
-        var fileFormat = (node.meta && node.meta.file_format) || null;
-        var iconClass;
-        
+        var node                = this.props.node,
+            ioType              = node.ioType,
+            nodeMetaType        = (node.meta && node.meta.type) || null,
+            fileFormatAsString  = (node.meta && node.meta.file_format && (node.meta.file_format.file_format || node.meta.file_format.display_title)) || null,
+            iconClass;
+
         if (node.nodeType === 'input-group' || node.nodeType === 'output-group'){
             iconClass = 'folder-open';
         } else if (node.nodeType === 'input' || node.nodeType === 'output'){
             // By file_format
-            if (fileFormat === 'zip' || fileFormat === 'tar' || fileFormat === 'gz') {
+            if (fileFormatAsString === 'zip' || fileFormatAsString === 'tar' || fileFormatAsString === 'gz') {
                 iconClass = 'file-zip-o';
             }
             // By meta.type & ioType
@@ -104,9 +104,9 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     tooltip(){
-        var node = this.props.node;
-        var output = '';
-        var hasRunDataFile = false;
+        var node            = this.props.node,
+            output          = '',
+            hasRunDataFile  = false;
 
         // Titles
         // Node Type -specific
@@ -132,11 +132,12 @@ export class WorkflowNodeElement extends React.Component {
             if (fileTitle) {
                 output += '<small>' + argumentName + ' File</small>';
                 output += '<h5 class="text-600 tooltip-title">' + fileTitle + '</h5>';
+                output += '<hr class="mt-08 mb-05"/>';
             }
             if (argumentName === 'Input' || argumentName === 'Output'){
                 argumentName += ' Argument &nbsp; <span class="text-500 mono-text">' + node.name + '</span>';
             }
-            output += '<hr class="mt-08 mb-05"/><small class="mb-03 inline-block">' + argumentName + '</small>';
+            output += '<small class="mb-03 inline-block">' + argumentName + '</small>';
         }
 
         // If file, and has file-size, add it (idk, why not)
@@ -177,12 +178,25 @@ export class WorkflowNodeElement extends React.Component {
 
     aboveNodeTitle(){
 
-        var node = this.props.node;
+        var node                = this.props.node,
+            fileFormat          = node.meta && node.meta.file_format, // Is a linkTo FileFormat Item (if not null)
+            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title),
+            fileFormatLinkHref  = fileFormat && object.itemUtil.atId(fileFormat);
 
         var elemProps = {
             'style' : { 'maxWidth' : this.props.columnWidth },
             'className' : "text-ellipsis-container above-node-title"
         };
+
+        function fileFormatJSX(){
+            if (fileFormat) {
+                if (fileFormatLinkHref) {
+                    return <div {...elemProps}><a href={fileFormatLinkHref}>{ fileFormatAsString }</a></div>;
+                }
+                return <div {...elemProps}>{ fileFormatAsString }</div>;
+            }
+            return null;
+        }
 
         if (node.nodeType === 'input-group'){
             return <div {...elemProps}>{ this.props.title }</div>;
@@ -212,7 +226,7 @@ export class WorkflowNodeElement extends React.Component {
             //if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
             //    return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
             //}
-            if (node.meta && typeof node.meta.file_format === 'string') return <div {...elemProps}>{ node.meta.file_format }</div>;
+            if (fileFormat) return fileFormatJSX();
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ this.props.title }</div>;
         }
@@ -226,8 +240,8 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // If IO Arg w/o file but w/ format
-        if ((node.nodeType === 'input' || node.nodeType === 'output') && node.meta && typeof node.meta.file_format === 'string'){
-            return <div {...elemProps}>{ node.meta.file_format }</div>;
+        if ((node.nodeType === 'input' || node.nodeType === 'output') && fileFormat){
+            return fileFormatJSX();
         }
 
         // Default-ish for IO node
@@ -321,22 +335,17 @@ export class WorkflowNodeElement extends React.Component {
     }
     
     render(){
+        var nodeTitle = <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html>{ this.nodeTitle() }</div>;
+
         return (
-            <div
-                className="node-visible-element"
-                data-tip={this.tooltip()}
-                data-place="top"
-                data-html
-                style={this.containerStyle()}
-                ref={(r)=>{
-                    if (r){
-                        requestAnimationFrame(()=>{
-                            r.style.opacity = "1";
-                        });
-                    }
-                }}
-            >
-                { this.nodeTitle() }
+            <div className="node-visible-element" style={this.containerStyle()} ref={(r)=>{
+                if (r){
+                    requestAnimationFrame(()=>{
+                        r.style.opacity = "1";
+                    });
+                }
+            }}>
+                { nodeTitle }
                 { this.belowNodeTitle() }
                 { this.aboveNodeTitle() }
             </div>

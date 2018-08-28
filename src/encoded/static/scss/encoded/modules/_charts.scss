@@ -1209,6 +1209,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             background-color: $workflow-node-color-default;
             white-space: nowrap;
 
+            > .innermost > .node-name,
             > .node-name {
                 padding-left: 2px;
                 padding-right: 5px;
@@ -1226,7 +1227,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
         .above-node-title ,
         .below-node-title {
-            pointer-events: none;
+            // pointer-events: none;
             position: absolute;
             left : 0px;
             transform: translate3d(0px,0px,0);
@@ -1300,6 +1301,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 background-color: $workflow-node-color-type-step;
                 border-radius: 2px;
                 border: 1px solid rgba(0,0,0,0.2);
+                > .innermost > .node-name,
                 > .node-name {
                     padding-left: 10px;
                     padding-right: 4px;
@@ -1371,7 +1373,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 background-color: transparent;
                 width: 100%;
                 transition: opacity .5s .25s ease-out;
-                > .node-name {
+                > .node-name,
+                > .innermost > .node-name {
                     padding-left: 7px;
                     &.mono-text {
                         transform: translateY(-1px);

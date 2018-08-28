@@ -118,7 +118,7 @@ export class FileItemRow extends React.Component {
         var fileDownloadHref = (file && file.href) || null;
         var attachmentDownloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
         
-        var fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format);
+        var fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format && (file.file_format.file_format || file.file_format.display_title));
         var attachmentIconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
 
         return (
