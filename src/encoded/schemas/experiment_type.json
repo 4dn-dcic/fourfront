@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type"],
-    "identifyingProperties": ["uuid", "aliases"],
+    "identifyingProperties": ["experiment_name", "uuid", "aliases"],
     "additionalProperties": false,
     "properties": {
         "schema_version": {
@@ -34,6 +34,13 @@
             "description": "The display name for the experiment type",
             "type": "string",
             "lookup": 20
+        },
+        "experiment_name": {
+            "description": "DON'T SUBMIT, auto-generated",
+            "type": "string",
+            "pattern": "^[a-z0-9\\-]+$",
+            "uniqueKey": true,
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "experiment_category": {
             "title": "Experiment Category",
