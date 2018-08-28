@@ -4,8 +4,150 @@
     "id": "/profiles/experiment_type.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title"],
+    "required": ["experiment_type"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
-    "properties": {}
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "lab": {
+            "default": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+            "permission": "import_items"
+        },
+        "award": {
+            "default": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+            "permission": "import_items"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "in review by lab",
+            "enum" : [
+                "released",
+                "in review by lab",
+                "deleted"
+            ]
+        },
+        "experiment_type": {
+            "title": "Experiment Type",
+            "description": "The display name for the experiment type",
+            "type": "string",
+            "lookup": 20
+        },
+        "experiment_category": {
+            "title": "Experiment Category",
+            "description": "General category of the experiment type",
+            "type": "string",
+            "enum": ["Sequencing", "Microscopy"],
+            "lookup": 100
+        },
+        "experiment_subcategory": {
+            "title": "Experiment Subcategory",
+            "description": "Sequencing or microscopy subcategory of the experiment type",
+            "type": "string",
+            "enum": [
+                "1D DNA Enrichment",
+                "3C Ligation-based Assays",
+                "3C Unligated Multi-contact Assays",
+                "Single Cell Assays",
+                "RNA Enrichment",
+                "DNA-RNA Interactions",
+                "Nucleic Acid Labeling",
+                "Live-cell Time-lapse Imaging"
+            ]
+        },
+        "grouping": {
+            "title": "Experiment Type Grouping",
+            "description": "Grouping of related experiment types within a subcategory",
+            "type": "string",
+            "enum": [
+                "Replication Timing",
+                "Proximity to Organelle",
+                "DNA Binding",
+                "Open Chromatin",
+                "Minimum-bias Genome-wide Proximity Assays",
+                "Targeted Genome-wide Proximity Assays",
+                "Selected Region Proximity Assays",
+                "SPRITE",
+                "GAM",
+                "Single Cell HiC",
+                "RNA-seq",
+                "DNA-RNA Interactions",
+                "DNA FISH",
+                "RNA FISH"
+            ]
+        },
+        "other_tags": {
+            "title": "Other Tags",
+            "description": "Other tags that categorize or describe the experiment type",
+            "type": "array of string"
+        },
+        "raw_files": {
+            "title": "Raw Files",
+            "description": "The type of raw files typically associated with the experiment type in the portal",
+            "type": "string",
+            "enum": ["Reads (fastq) provided by lab"]
+        },
+        "processed_files": {
+            "title": "Processed Files",
+            "description": "The type of processed files typically associated with the experiment type in the portal",
+            "type": "string"
+        },
+        "data_analysis": {
+            "title": "Data Analysis",
+            "description": "Static sections that contain information about relevant workflows",
+            "type": "array of object",
+            "items": {
+                "title": "Static Section",
+                "description": "Static section describing workflow",
+                "type": "string",
+                "linkTo": "StaticSection"
+            }
+        },
+        "static_header": {
+            "title": "Static Header",
+            "description": "Static section to be included on experiments of this type",
+            "type": "string",
+            "linkTo": "StaticSection"
+        },
+        "protocol": {
+            "title": "Protocol",
+            "description": "Protocol(s) that have been approved for the experiment type",
+            "type": "array of object",
+            "items": {
+                "title": "Protocol",
+                "description": "Protocol metadata.",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
+        },
+        "references": {
+            "title": "Reference Publications",
+            "description": "Reference publication(s) for the experiment type",
+            "type": "string"
+        }
+    },
+    "facets": {
+        "experiment_category": {
+          "title": "Experiment Category"
+        },
+        "experiment_subcategory": {
+            "title": "Experiment Subcategory"
+        },
+        "grouping": {
+            "title": "Experiment Type Grouping"
+        }
+    },
+    "columns": {
+        "experiment_category": {
+            "title": "Experiment Category"
+        },
+        "experiment_subcategory": {
+            "title": "Experiment Subcategory"
+        },
+        "grouping": {
+            "title": "Experiment Type Grouping"
+        }
+    }
 }
