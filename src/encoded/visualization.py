@@ -27,8 +27,9 @@ from .types.workflow import (
 
 
 def includeme(config):
-    config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
-    config.add_route('bar_plot_chart', '/bar_plot_aggregations')
+    config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
+    config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
+    config.add_route('date_histogram_aggregations', '/date_histogram_aggregations')
     config.scan(__name__)
 
 
@@ -87,19 +88,90 @@ def trace_workflow_runs(context, request):
 
 
 
+# This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
+TERM_NAME_FOR_NO_VALUE  = "No value"
 
+# Common definition for aggregating all files, exps, and set **counts**.
+# This works four our ElasticSearch mapping though has some non-ideal-ities.
+# For example, we use "cardinality" instead of "value_count" agg (which would (more correctly) count duplicate files, etc.)
+# because without a more complex "type" : "nested" it will uniq file accessions within a hit (ExpSetReplicate).
+SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
+    # Returns count of _unique_ raw file accessions encountered along the search.
+    "total_exp_raw_files" : {
+        "cardinality" : {
+            "field" : "embedded.experiments_in_set.files.accession.raw",
+            "precision_threshold" : 10000
+        }
+    },
 
+    # Alternate approaches -- saved for record / potential future usage:
+    #
+    # (a) Needs to have "type" : "nested" mapping, but then faceting & filtering needs to be changed (lots of effort)
+    #     Without "type" : "nested", "value_count" agg will not account for nested arrays and _unique_ on file accessions within a hit (exp set).
+    #
+    #"total_exp_raw_files_new2" : {
+    #    "nested" : {
+    #        "path" : "embedded.experiments_in_set"
+    #    },
+    #    "aggs" : {
+    #        "total" : {
+    #            "value_count" : {
+    #                "field" : "embedded.experiments_in_set.files.accession.raw",
+    #                #"script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value",
+    #                #"precision_threshold" : 10000
+    #            }
+    #        }
+    #    }
+    #},
+    #
+    # (b) Returns only 1 value per exp-set
+    #     When using a script without "type" : "nested". If "type" : "nested" exists, need to loop over the array (2nd example -ish).
+    #
+    #"total_exp_raw_files_new" : {
+    #    "terms" : {
+    #        "script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value"
+    #        #"script" : "int total = 0; for (int i = 0; i < doc['embedded.experiments_in_set.accession.raw'].length; ++i) { total += doc['links.experiments_in_set'][i]['embedded.files.accession.raw'].length; } return total;",
+    #        #"precision_threshold" : 10000
+    #   }
+    #},
+    #
+    # (c) Same as (b)
+    #
+    #"test" : {
+    #    "terms" : {
+    #        "script" : "return doc['embedded.experiments_in_set.accession.raw'].getValue().concat('~').concat(doc['embedded.experiments_in_set.accession.raw'].getValue()).concat('~').concat(doc['embedded.experiments_in_set.files.accession.raw'].getValue());",
+    #        #"precision_threshold" : 10000
+    #    }
+    #},
 
-
-
-
-
-
-
-
-
-
-
+    "total_exp_processed_files" : {
+        "cardinality" : {
+            "field" : "embedded.experiments_in_set.processed_files.accession.raw",
+            "precision_threshold" : 10000
+        }
+    },
+    "total_expset_processed_files" : {
+        "cardinality" : {
+            "field" : "embedded.processed_files.accession.raw",
+            "precision_threshold" : 10000
+        }
+    },
+    "total_files" : {
+        "bucket_script" : {
+            "buckets_path": {
+                "expSetProcessedFiles": "total_expset_processed_files",
+                "expProcessedFiles": "total_exp_processed_files",
+                "expRawFiles": "total_exp_raw_files"
+            },
+            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expRawFiles"
+        }
+    },
+    "total_experiments" : {
+        "value_count" : {
+            "field" : "embedded.experiments_in_set.accession.raw"
+        }
+    }
+}
 
 
 
@@ -107,9 +179,7 @@ def trace_workflow_runs(context, request):
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 def bar_plot_chart(request):
 
-    TERM_NAME_FOR_NO_VALUE = "No value" # This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
-    MAX_BUCKET_COUNT = 30               # Max amount of bars or bar sections to return, excluding 'other'.
-    OTHER_TERM_NAME = "Other"           # Set a name to be used for terms which are not included when too many unique values.
+    MAX_BUCKET_COUNT = 30 # Max amount of bars or bar sections to return, excluding 'other'.
 
     try:
         json_body = request.json_body
@@ -123,85 +193,6 @@ def bar_plot_chart(request):
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
-
-    sum_files_and_exps_sub_agg = {
-        # Returns count of _unique_ raw file accessions encountered along the search.
-        "total_exp_raw_files" : {
-            "cardinality" : {
-                "field" : "embedded.experiments_in_set.files.accession.raw",
-                "precision_threshold" : 10000
-            }
-        },
-
-        # Alternate approaches -- saved for record / potential future usage:
-        #
-        # (a) Needs to have "type" : "nested" mapping, but then faceting & filtering needs to be changed (lots of effort)
-        #     Without "type" : "nested", "value_count" agg will not account for nested arrays and _unique_ on file accessions within a hit (exp set).
-        #
-        #"total_exp_raw_files_new2" : {
-        #    "nested" : {
-        #        "path" : "embedded.experiments_in_set"
-        #    },
-        #    "aggs" : {
-        #        "total" : {
-        #            "value_count" : {
-        #                "field" : "embedded.experiments_in_set.files.accession.raw",
-        #                #"script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value",
-        #                #"precision_threshold" : 10000
-        #            }
-        #        }
-        #    }
-        #},
-        #
-        # (b) Returns only 1 value per exp-set
-        #     When using a script without "type" : "nested". If "type" : "nested" exists, need to loop over the array (2nd example -ish).
-        #
-        #"total_exp_raw_files_new" : {
-        #    "terms" : {
-        #        "script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value"
-        #        #"script" : "int total = 0; for (int i = 0; i < doc['embedded.experiments_in_set.accession.raw'].length; ++i) { total += doc['links.experiments_in_set'][i]['embedded.files.accession.raw'].length; } return total;",
-        #        #"precision_threshold" : 10000
-        #   }
-        #},
-        #
-        # (c) Same as (b)
-        #
-        #"test" : {
-        #    "terms" : {
-        #        "script" : "return doc['embedded.experiments_in_set.accession.raw'].getValue().concat('~').concat(doc['embedded.experiments_in_set.accession.raw'].getValue()).concat('~').concat(doc['embedded.experiments_in_set.files.accession.raw'].getValue());",
-        #        #"precision_threshold" : 10000
-        #    }
-        #},
-
-        "total_exp_processed_files" : {
-            "cardinality" : {
-                "field" : "embedded.experiments_in_set.processed_files.accession.raw",
-                "precision_threshold" : 10000
-            }
-        },
-        "total_expset_processed_files" : {
-            "cardinality" : {
-                "field" : "embedded.processed_files.accession.raw",
-                "precision_threshold" : 10000
-            }
-        },
-        "total_files" : {
-            "bucket_script" : {
-                "buckets_path": {
-                    "expSetProcessedFiles": "total_expset_processed_files",
-                    "expProcessedFiles": "total_exp_processed_files",
-                    "expRawFiles": "total_exp_raw_files"
-                },
-                "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expRawFiles"
-            }
-        },
-        "total_experiments" : {
-            "value_count" : {
-                "field" : "embedded.experiments_in_set.accession.raw"
-            }
-        }
-    }
-
     primary_agg = {
         "field_0" : {
             "terms" : {
@@ -209,11 +200,11 @@ def bar_plot_chart(request):
                 "missing" : TERM_NAME_FOR_NO_VALUE,
                 "size" : MAX_BUCKET_COUNT
             },
-            "aggs" : deepcopy(sum_files_and_exps_sub_agg)
+            "aggs" : deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
         }
     }
 
-    primary_agg.update(deepcopy(sum_files_and_exps_sub_agg))
+    primary_agg.update(deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION))
     del primary_agg['total_files'] # "bucket_script" not supported on root-level aggs
 
     # Nest in additional fields, if any
@@ -227,15 +218,15 @@ def bar_plot_chart(request):
                 "missing" : TERM_NAME_FOR_NO_VALUE,
                 "size" : MAX_BUCKET_COUNT
             },
-            "aggs" : deepcopy(sum_files_and_exps_sub_agg)
+            "aggs" : deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
         }
         curr_field_aggs = curr_field_aggs['field_' + str(field_index)]['aggs']
 
 
     search_param_lists['limit'] = search_param_lists['from'] = [0]
-    subreq = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    search_result   = perform_search_request(None, subreq, custom_aggregations=primary_agg)
 
-    search_result = perform_search_request(None, subreq, custom_aggregations=primary_agg)
     for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:
         if search_result.get(field_to_delete) is None:
             continue
@@ -289,4 +280,72 @@ def bar_plot_chart(request):
         format_bucket_result(bucket, ret_result['terms'], 0)
 
     return ret_result
+
+
+
+@view_config(route_name='date_histogram_aggregations', request_method=['GET', 'POST'])
+def date_histogram_aggregations(request):
+    '''PREDEFINED aggregations which run against type=ExperimentSet'''
+
+    try:
+        json_body = request.json_body
+        search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
+        fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
+    except json.decoder.JSONDecodeError:
+        search_param_lists      = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
+        del search_param_lists['award.project']
+        fields_to_aggregate_for = request.params.getall('field')
+
+
+    common_sub_agg = deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
+    
+    # Add on file_size_volume
+    for key_name in ['total_exp_raw_files', 'total_exp_processed_files', 'total_expset_processed_files']:
+        common_sub_agg[key_name + "_volume"] = {
+            "sum" : {
+                "field" : common_sub_agg[key_name]["cardinality"]["field"].replace('.accession.raw', '.file_size')
+            }
+        }
+    common_sub_agg["total_files_volume"] = {
+        "bucket_script" : {
+            "buckets_path": {
+                "expSetProcessedFilesVol": "total_expset_processed_files_volume",
+                "expProcessedFilesVol": "total_exp_processed_files_volume",
+                "expRawFilesVol": "total_exp_raw_files_volume"
+            },
+            "script" : "params.expSetProcessedFilesVol + params.expProcessedFilesVol + params.expRawFilesVol"
+        }
+    }
+
+    outer_date_histogram_agg = {
+        "weekly_interval_public_release" : {
+            "date_histogram" : {
+                "field": "embedded.public_release",
+                "interval": "week",
+                "format": "yyyy-MM-dd"
+            },
+            "aggs" : {
+                "group_by" : {
+                    "terms" : {
+                        "field" : "embedded.award.center_title.raw", # TODO: Allow this to be passed in via URI param(s)
+                        "missing" : TERM_NAME_FOR_NO_VALUE,
+                        "size" : 30
+                    },
+                    "aggs" : common_sub_agg
+                }
+            }
+        }
+    }
+
+
+    search_param_lists['limit'] = search_param_lists['from'] = [0]
+    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    search_result   = perform_search_request(None, subreq, custom_aggregations=outer_date_histogram_agg)
+
+    for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:
+        if search_result.get(field_to_delete) is None:
+            continue
+        del search_result[field_to_delete]
+
+    return search_result
 
