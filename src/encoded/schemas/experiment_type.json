@@ -1,0 +1,11 @@
+{
+    "title": "Experiment Type",
+    "description": "Schema for experiment type",
+    "id": "/profiles/experiment_type.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["title"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "properties": {}
+}
