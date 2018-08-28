@@ -323,6 +323,17 @@ def date_histogram_aggregations(request):
         }
     }
 
+    histogram_sub_aggs = {
+        "group_by" : { # TODO: Maybe define more common bucketing here to avoid re-loads
+            "terms" : {
+                "field" : "embedded." + group_by_field + ".raw",
+                "missing" : TERM_NAME_FOR_NO_VALUE,
+                "size" : 30
+            },
+            "aggs" : common_sub_agg
+        }
+    }
+
     outer_date_histogram_agg = {
         "weekly_interval_public_release" : {
             "date_histogram" : {
@@ -330,16 +341,15 @@ def date_histogram_aggregations(request):
                 "interval": "week",
                 "format": "yyyy-MM-dd"
             },
-            "aggs" : {
-                "group_by" : {
-                    "terms" : {
-                        "field" : "embedded." + group_by_field + ".raw",
-                        "missing" : TERM_NAME_FOR_NO_VALUE,
-                        "size" : 30
-                    },
-                    "aggs" : common_sub_agg
-                }
-            }
+            "aggs" : histogram_sub_aggs
+        },
+        "weekly_interval_internal_release" : {
+            "date_histogram" : {
+                "field": "embedded.internal_release",
+                "interval": "week",
+                "format": "yyyy-MM-dd"
+            },
+            "aggs" : histogram_sub_aggs
         }
     }
 

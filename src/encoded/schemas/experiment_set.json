@@ -149,38 +149,6 @@
             "disabled" : true
         }
     },
-    "aggregations" : {
-        "weekly_interval_public_release" : {
-            "date_histogram" : {
-                "field": "embedded.public_release",
-                "interval": "week",
-                "format": "yyyy-MM-dd"
-            },
-            "aggs" : {
-                "group_by_award" : {
-                    "terms" : {
-                        "field": "embedded.award.center_title.raw",
-                        "missing" : "No value"
-                    }
-                }
-            }
-        },
-        "weekly_interval_internal_release" : {
-            "date_histogram" : {
-                "field": "embedded.internal_release",
-                "interval": "week",
-                "format": "yyyy-MM-dd"
-            },
-            "aggs" : {
-                "group_by_award" : {
-                    "terms" : {
-                        "field": "embedded.award.center_title.raw",
-                        "missing" : "No value"
-                    }
-                }
-            }
-        }
-    },
     "columns": {
         "experimentset_type": {
             "title": "Set Type"
