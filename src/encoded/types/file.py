@@ -470,9 +470,7 @@ class File(Item):
                 eformat = extra.get('file_format')
                 if eformat.startswith('/file-formats/'):
                     eformat = eformat[len('/file-formats/'):-1]
-                format_item = self.registry['collections']['FileFormat'].get(eformat)
-                eff = format_item.properties['file_format']
-                extra_creds = self.propsheets.get('external' + eff)
+                extra_creds = self.propsheets.get('external' + eformat)
                 extra['upload_credentials'] = extra_creds['upload_credentials']
                 extras.append(extra)
             return extras
