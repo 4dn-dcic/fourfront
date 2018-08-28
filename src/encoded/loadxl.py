@@ -35,6 +35,7 @@ ORDER = [
     'file_format',
     'badge',
     'organism',
+    'experiment_type',
     'genomic_region',
     'target',
     'imaging_path',
