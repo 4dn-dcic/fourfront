@@ -54,7 +54,7 @@ TSV_MAPPING = OrderedDict([
     ('Size',                        (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
     ('File Type',                   (FILE,      ['file_type'])),
-    ('File Format',                 (FILE,      ['file_format'])),
+    ('File Format',                 (FILE,      ['file_format.display_title'])),
    #('Experiment Title',            (EXP,       ['display_title'])),
     ('Experiment Type',             (EXP,       ['experiment_type'])),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
