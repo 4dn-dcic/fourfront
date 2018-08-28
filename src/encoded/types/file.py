@@ -1009,6 +1009,7 @@ def validate_extra_file_format(context, request):
     '''validator to check to be sure that file_format of extrafile is not the
        same as the file and is a known format for the schema
     '''
+    # import pdb; pdb.set_trace()
     files_ok = True
     data = request.json
     if 'extra_files' not in data:
@@ -1046,6 +1047,8 @@ def validate_extra_file_format(context, request):
         eformat = ef.get('file_format')
         if eformat is None:
             return  # will fail the required extra_file.file_format
+        if eformat.startswith('/file-formats/'):
+            eformat = eformat[len('/file-formats/'):-1]
         if eformat in seen_ext_formats:
             request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
             files_ok = False
