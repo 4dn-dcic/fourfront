@@ -4,6 +4,7 @@ from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPMovedPermanently
 )
+from base64 import b64decode
 from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
@@ -448,7 +449,12 @@ def metadata_tsv(context, request):
         if not all_row_vals.get('Publication'):
             lab_correspondence = exp_set.get('lab', {}).get('correspondence', [])
             if len(lab_correspondence) > 0:
-                all_row_vals['Publication'] = "Correspondence: " + ", ".join([ c.get('contact_email', '') for c in lab_correspondence ])
+                contact_emails = []
+                for contact in lab_correspondence:
+                    decoded_email = b64decode(contact['contact_email'].encode('utf-8')).decode('utf-8') if contact.get('contact_email') else None
+                    if decoded_email:
+                        contact_emails.append(decoded_email)
+                all_row_vals['Publication'] = "Correspondence: " + ", ".join(contact_emails)
 
         # Add file to our return list which is to be bubbled upwards to iterable.
         files_returned.append(all_row_vals)
