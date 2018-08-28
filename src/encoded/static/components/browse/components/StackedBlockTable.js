@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
 
 
@@ -706,8 +706,15 @@ export class FileEntryBlock extends React.Component {
     }
 
     fileTypeSummary(file = this.props.file){
-        var summary = file.file_type_detailed || ((file.file_type && file.file_format && (file.file_type + ' (' + file.file_format + ')')) || file.file_type) || file.file_format || '-' ;
-        // Remove 'other' because it just takes up horizontal space.
+        var fileFormat = fileUtil.getFileFormatStr(file),
+            summary = (
+                file.file_type_detailed ||
+                ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
+                file.file_format ||
+                '-'
+            );
+
+        // Remove 'other', if present, because it just takes up horizontal space.
         if (summary.slice(0, 6).toLowerCase() === 'other '){
             return summary.slice(7).slice(0, -1);
         }
@@ -773,9 +780,10 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (title === 'File Info'){ // AKA Paired Info
+                var fileFormat = fileUtil.getFileFormatStr(file);
                 if (typeof file.paired_end !== 'undefined') {
                     row.push(<div key="file-info" className={colClassName} style={baseStyle}>Paired end {file.paired_end}</div>);
-                } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
+                } else if (fileFormat === 'fastq' || fileFormat === 'fasta') {
                     row.push(<div key="file-info" className={colClassName} style={baseStyle}>Unpaired</div>);
                 } else {
                     row.push(<div key="file-info" className={colClassName} style={baseStyle}></div>);
@@ -842,10 +850,10 @@ export class FileEntryBlock extends React.Component {
 
         if (Array.isArray(columnHeaders)) {
             var headerTitles = _.pluck(columnHeaders, 'title');
-            if ( (file.file_type || file.file_format) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0 ){
-                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || file.file_format} />;
+            if ((file.file_type || fileUtil.getFileFormatStr(file)) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0){
+                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || (file.file_format && file.file_format.display_title)} />;
             }
-            if ( file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0 ){
+            if (file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0){
                 return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
             }
         }

@@ -6,6 +6,21 @@ import { Button } from 'react-bootstrap';
 import { isServerSide } from './misc';
 
 
+
+/**
+ * Gets file_format string from a file.
+ * Requires file_format to be embedded.
+ * Currently file_format.display_title is same as file_format.file_format, so either property is fine.
+ * This may change in the future and would require file_format.file_format to be embedded.
+ *
+ * @param {{ '@id' : string, 'file_format' : { 'file_format' : string, 'display_title' : string, '@id' : string } }} file - A File Item JSON
+ * @returns {string|null} Format of the file.
+ */
+export function getFileFormatStr(file){
+    return (file && file.file_format && (file.file_format.file_format || file.file_format.display_title)) || null;
+}
+
+
 /**
  * Pass a File Item through this function to determine whether to fetch more of it via AJAX or not.
  * 
