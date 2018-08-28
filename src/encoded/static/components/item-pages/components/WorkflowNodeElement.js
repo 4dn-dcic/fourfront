@@ -180,23 +180,12 @@ export class WorkflowNodeElement extends React.Component {
 
         var node                = this.props.node,
             fileFormat          = node.meta && node.meta.file_format, // Is a linkTo FileFormat Item (if not null)
-            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title),
-            fileFormatLinkHref  = fileFormat && object.itemUtil.atId(fileFormat);
+            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title);
 
         var elemProps = {
             'style' : { 'maxWidth' : this.props.columnWidth },
             'className' : "text-ellipsis-container above-node-title"
         };
-
-        function fileFormatJSX(){
-            if (fileFormat) {
-                if (fileFormatLinkHref) {
-                    return <div {...elemProps}><a href={fileFormatLinkHref}>{ fileFormatAsString }</a></div>;
-                }
-                return <div {...elemProps}>{ fileFormatAsString }</div>;
-            }
-            return null;
-        }
 
         if (node.nodeType === 'input-group'){
             return <div {...elemProps}>{ this.props.title }</div>;
@@ -226,7 +215,7 @@ export class WorkflowNodeElement extends React.Component {
             //if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
             //    return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
             //}
-            if (fileFormat) return fileFormatJSX();
+            if (fileFormat) return <div {...elemProps}>{ fileFormatAsString }</div>;
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ this.props.title }</div>;
         }
@@ -241,7 +230,7 @@ export class WorkflowNodeElement extends React.Component {
 
         // If IO Arg w/o file but w/ format
         if ((node.nodeType === 'input' || node.nodeType === 'output') && fileFormat){
-            return fileFormatJSX();
+            return <div {...elemProps}>{ fileFormatAsString }</div>;
         }
 
         // Default-ish for IO node

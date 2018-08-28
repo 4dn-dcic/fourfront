@@ -188,7 +188,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheGroupSourcesByRun = {}
     steps = [] # Our output
 
-    def get_model(uuid, key = None):
+    def get_model(uuid, key=None):
         model = None
         cacheKey = uuid
         if key is not None:
@@ -209,8 +209,15 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
         return model
 
-    def get_model_obj(uuid, key = None):
+    def get_model_obj(uuid, key=None):
         return item_model_to_object(get_model(uuid, key), request)
+
+    def get_model_embed(uuid, key=None):
+        '''Returns @@embedded representation of UUID. Uses cached model. Returns None if not yet indexed.'''
+        model = get_model(uuid, key)
+        if not hasattr(model, 'source'):
+            return None
+        return model.source.get('embedded')
 
 
     def group_files_by_workflow_argument_name(set_of_files):
@@ -244,9 +251,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         """
         if not options.get('group_similar_workflow_runs') or len(workflow_run_tuples) < 3:
             return (workflow_run_tuples, [])
-        filtered_in_tuples = []
+        filtered_in_tuples  = []
         filtered_out_tuples = []
-        tuples_by_workflow = {}
+        tuples_by_workflow  = {}
 
         for wfr_tuple in workflow_run_tuples: # Group up into dict of { workflow-id : list-of-tuples }
             workflow_atid = wfr_tuple[0].get('workflow')
@@ -445,19 +452,20 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         output_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('output_files', []))
         for argument_name, output_files_for_arg in output_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
-            files = [ f.get('value') for f in output_files_for_arg ]
-            file_items = []
+            file_uuids       = [ f.get('value') for f in output_files_for_arg ]
+            file_items       = []
+            file_format      = None
+            io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             original_file_in_output = False
-            file_format = (workflow_step_io and workflow_step_io.get('meta', {}).get('file_format')) or None
-            io_type = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
-            for file_uuid in files:
-                got_item = get_model_obj(file_uuid)
-                if got_item is not None:
-                    if got_item['uuid'] == current_file_model_object['uuid']:
+            for file_uuid in file_uuids:
+                file_item = get_model_obj(file_uuid)
+                if file_item is not None:
+                    if file_item['uuid'] == current_file_model_object['uuid']:
                         original_file_in_output = True
-                    file_items.append(common_props_from_file(got_item))
+                    file_items.append(common_props_from_file(file_item))
                     if not file_format:
-                        file_format = got_item.get('file_format')
+                        file_with_embeds = get_model_embed(file_uuid)
+                        file_format = file_with_embeds and file_with_embeds.get('file_format')
 
             step['outputs'].append({
                 "name"      : argument_name,
@@ -481,20 +489,21 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         input_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('input_files', []))
         for argument_name, input_files_for_arg in input_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
-            files = [ f.get('value') for f in input_files_for_arg ]
-            file_item_models = []
-            file_format = (workflow_step_io and workflow_step_io.get('meta', {}).get('file_format')) or None
-            io_type = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
-            for file_uuid in files:
-                got_item = get_model_obj(file_uuid)
-                if got_item is not None:
-                    file_item_models.append(got_item)
+            file_uuids       = [ f.get('value') for f in input_files_for_arg ]
+            file_items       = []
+            file_format      = None
+            io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
+            for file_uuid in file_uuids:
+                file_item = get_model_obj(file_uuid)
+                if file_item is not None:
+                    file_items.append(file_item)
                     if not file_format:
-                        file_format = got_item.get('file_format')
+                        file_with_embeds = get_model_embed(file_uuid)
+                        file_format = file_with_embeds and file_with_embeds.get('file_format')
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "source" : generate_sources_for_input(file_item_models, argument_name, depth),
+                "source" : generate_sources_for_input(file_items, argument_name, depth),
                 "meta" : {
                     "in_path" : True,
                     "file_format" : file_format,
@@ -502,7 +511,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     "type" : io_type
                 },
                 "run_data" : {
-                    "file" : [ common_props_from_file(file_model) for file_model in file_item_models ],
+                    "file" : [ common_props_from_file(file_item) for file_item in file_items ],
                     "type" : "input",
                     "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in input_files_for_arg ]
                 }
