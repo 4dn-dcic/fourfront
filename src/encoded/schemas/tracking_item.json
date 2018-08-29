@@ -28,7 +28,7 @@
             "default": "other",
             "enum" : [
                 "other",
-                "file_download",
+                "download_tracking",
                 "google_analytics"
             ]
 		},
