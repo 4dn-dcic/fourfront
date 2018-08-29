@@ -86,5 +86,5 @@ def experiment_seq_2_3(value, system):
 @upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_tsaseq', '1', '2')
 def experiment_1_2(value, system):
-    types_dict = {'ATAC-seq'}
+    types_list = ['ATAC-seq']
     # if value.get('experiment_type')
