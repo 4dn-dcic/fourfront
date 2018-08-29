@@ -7,6 +7,15 @@
     "required": ["experiment_type"],
     "identifyingProperties": ["experiment_name", "uuid", "aliases"],
     "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/notes" }
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -88,7 +97,12 @@
         "other_tags": {
             "title": "Other Tags",
             "description": "Other tags that categorize or describe the experiment type",
-            "type": "array of string"
+            "type": "array",
+            "items": {
+                "title": "Tag",
+                "description": "A tag for the item.",
+                "type":  "string"
+            }
         },
         "raw_files": {
             "title": "Raw Files",
@@ -104,7 +118,7 @@
         "data_analysis": {
             "title": "Data Analysis",
             "description": "Static sections that contain information about relevant workflows",
-            "type": "array of object",
+            "type": "array",
             "items": {
                 "title": "Static Section",
                 "description": "Static section describing workflow",
@@ -121,7 +135,7 @@
         "protocol": {
             "title": "Protocol",
             "description": "Protocol(s) that have been approved for the experiment type",
-            "type": "array of object",
+            "type": "array",
             "items": {
                 "title": "Protocol",
                 "description": "Protocol metadata.",
