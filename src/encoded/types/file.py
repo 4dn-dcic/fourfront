@@ -1009,7 +1009,7 @@ def validate_extra_file_format(context, request):
     '''validator to check to be sure that file_format of extrafile is not the
        same as the file and is a known format for the schema
     '''
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     files_ok = True
     data = request.json
     if 'extra_files' not in data:
@@ -1040,6 +1040,14 @@ def validate_extra_file_format(context, request):
                 oef = of_item.get('file_format')
             except AttributeError:
                 raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % ff_item.get('uuid')
+            else:
+                if oef is None:
+                    atid = of_item.get('@id')
+                    if atid is None:
+                        raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % ff_item.get('uuid')
+                    else:
+                        if atid.startswith('/file-formats/'):
+                            oef = atid[len('/file-formats/'):-1]
             valid_ext_formats.append(oef)
     seen_ext_formats = []
     # formats = request.registry['collections']['FileFormat']
