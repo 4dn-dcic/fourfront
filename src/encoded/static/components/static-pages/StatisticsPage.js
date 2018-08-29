@@ -48,7 +48,7 @@ export class StatisticsViewController extends React.PureComponent {
         //},
         'ExperimentSetReplicate' : function(props) {
             var params = navigate.getBrowseBaseParams(props.browseBaseState || null);
-            if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
+            //if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
             return '/date_histogram_aggregations/?' + stringify(params) + '&limit=0';
         },
         // TEMP DISABLED
@@ -66,17 +66,23 @@ export class StatisticsViewController extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.performSearchRequests  = this.performSearchRequests.bind(this);
+        this.fetchAndGenerateExternalTermMap = this.fetchAndGenerateExternalTermMap.bind(this);
+        this.performAggRequests  = this.performAggRequests.bind(this);
         this.stateToChildProps      = this.stateToChildProps.bind(this);
         this.state = _.extend(
-            { 'mounted' : false, 'loadingStatus' : 'loading' },
+            {
+                'mounted'           : false,
+                'loadingStatus'     : 'loading',
+                'externalTermMap'   : {},
+            },
             _.object(_.map(_.keys(StatisticsViewController.CHART_SEARCH_URIS), function(k){ return ['resp' + k,null]; }))
         );
     }
 
     componentDidMount(){
         var nextState = { 'mounted' : true };
-        this.performSearchRequests();
+        this.performAggRequests();
+        this.fetchAndGenerateExternalTermMap();
         this.setState(nextState);
     }
 
@@ -90,11 +96,22 @@ export class StatisticsViewController extends React.PureComponent {
 
     componentDidUpdate(pastProps){
         if (StatisticsViewController.shouldRefetchAggregations(pastProps, this.props)){
-            this.performSearchRequests();
+            this.performAggRequests();
+            this.fetchAndGenerateExternalTermMap();
         }
     }
 
-    performSearchRequests(chartUris = StatisticsViewController.CHART_SEARCH_URIS){ // TODO: Perhaps make search uris a prop.
+    fetchAndGenerateExternalTermMap(){
+        ajax.load('/search/?type=Award&limit=all', (resp)=>{
+            this.setState({
+                'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
+                    return [ award.center_title, award.project !== '4DN' ];
+                }))
+            });
+        });
+    }
+
+    performAggRequests(chartUris = StatisticsViewController.CHART_SEARCH_URIS){ // TODO: Perhaps make search uris a prop.
 
         var resultStateToSet = {};
 
@@ -126,9 +143,9 @@ export class StatisticsViewController extends React.PureComponent {
     }
 
     stateToChildProps(state = this.state){
-        return _.object(_.filter(_.pairs(state), (pair)=>{
+        return _.object(_.filter(_.pairs(state), ([key, value])=>{
             // Which key:value pairs to pass to children.
-            if (pair[0] === 'mounted' || pair[0] === 'loadingStatus') return true;
+            if (key === 'mounted' || key === 'loadingStatus') return true;
             if (!state.mounted || state.loadingStatus !== 'complete') return false; // Don't pass responses in until finished.
             return true;
         }));
@@ -172,14 +189,17 @@ export class StatisticsChartsView extends React.Component {
         return d3.axisBottom(x).ticks(d3.timeDay.every(1));
     }
 
+    static xAxisGeneratorForWeekInterval(x){
+        return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
+    }
+
     constructor(props){
         super(props);
+        this.getRefWidth = this.getRefWidth.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
         this.state = _.extend(this.generateAggsToState(props), {
-            'chartToggles'      : {},
-            // Passed down to & shared by multiple charts in order to have same color per key
-            'colorScale'  : d3.scaleOrdinal(d3.schemeCategory10)
+            'chartToggles'      : {}
         });
     }
 
@@ -200,6 +220,10 @@ export class StatisticsChartsView extends React.Component {
         }
     }
 
+    getRefWidth(){
+        return this.refs && this.refs.elem && this.refs.elem.clientWidth;
+    }
+
     handleToggle(key, cb){
         this.setState(function(currState){
             var nextTogglesState = _.extend({}, currState.chartToggles);
@@ -215,53 +239,72 @@ export class StatisticsChartsView extends React.Component {
     }
 
     generateAggsToState(props){
-        return _.object(_.map(_.keys(aggregationsToChartData), function(k){
-            return [k, aggregationsToChartData[k].function(props['resp' + aggregationsToChartData[k].requires])];
-        }));
+        return _.object(_.map(_.keys(aggregationsToChartData), (key) =>
+            [
+                key,
+                aggregationsToChartData[key].function(
+                    props['resp' + aggregationsToChartData[key].requires],
+                    this.props.externalTermMap
+                )
+            ]
+        ));
     }
 
     render(){
-        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session } = this.props,
-            { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country } = this.state;
+        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session, externalTermMap } = this.props,
+            { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country,
+                expsets_created, chartToggles } = this.state,
+            width = this.getRefWidth() || null;
 
-        if (!mounted || loadingStatus === 'loading')    return StatisticsChartsView.loadingIcon();
-        if (loadingStatus === 'failed')                 return StatisticsChartsView.errorIcon();
+        if (!mounted || loadingStatus === 'loading')    return <div className="stats-charts-container" ref="elem" children={ StatisticsChartsView.loadingIcon() }/>;
+        if (loadingStatus === 'failed')                 return <div className="stats-charts-container" ref="elem" children={ StatisticsChartsView.errorIcon() }/>;
 
         var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
             commonContainerProps = {
-                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : this.state.chartToggles,
-                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250, 'colorScale' : this.state.colorScale
+                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
+                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
             };
 
         return (
-            <div className="stats-charts-container">
+            <div className="stats-charts-container" ref="elem">
 
-                <AreaChartContainer {...commonContainerProps} id="expsets_released" title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
-                    <AreaChart data={expsets_released} />
-                </AreaChartContainer>
+                <GroupOfCharts width={width}>
 
-                { session && expsets_released_internal ?
+                    <HorizontalD3ScaleLegend />
 
-                    <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={<span><span className="text-500">Experiment Sets</span> released over time &mdash; Internal</span>}>
-                        <AreaChart data={expsets_released_internal} />
+                    <AreaChartContainer {...commonContainerProps} id="expsets_released" title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
+                        <AreaChart data={expsets_released} />
                     </AreaChartContainer>
 
-                : null }
+                    { expsets_created ?
+                        <AreaChartContainer {...commonContainerProps} id="expsets_created" title={<span><span className="text-500">Experiment Sets</span> submitted over time</span>}>
+                            <AreaChart data={expsets_created} />
+                        </AreaChartContainer>
+                    : null }
 
-                <AreaChartContainer {...commonContainerProps} id="files_released" title={<span><span className="text-500">Files</span> released over time</span>}>
-                    <AreaChart data={files_released} />
-                </AreaChartContainer>
+                    { session && expsets_released_internal ?
+                        <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={<span><span className="text-500">Experiment Sets</span> released over time &mdash; Internal</span>}>
+                            <AreaChart data={expsets_released_internal} />
+                        </AreaChartContainer>
+                    : null }
 
-                <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={<span><span className="text-500">Total File Size</span> released over time</span>}>
-                    <AreaChart data={file_volume_released} yAxisLabel="GB" />
-                </AreaChartContainer>
+                    <AreaChartContainer {...commonContainerProps} id="files_released" title={<span><span className="text-500">Files</span> released over time</span>}>
+                        <AreaChart data={files_released} />
+                    </AreaChartContainer>
+
+                    <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={<span><span className="text-500">Total File Size</span> released over time</span>}>
+                        <AreaChart data={file_volume_released} yAxisLabel="GB" />
+                    </AreaChartContainer>
+
+                </GroupOfCharts>
 
                 { sessions_by_country ?
-
-                    <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last 14 days</span>}>
-                        <AreaChart data={sessions_by_country} xAxisGenerator={StatisticsChartsView.xAxisGeneratorForDayInterval}
-                            xAxisGeneratorFull={StatisticsChartsView.xAxisGeneratorForDayInterval} />
-                    </AreaChartContainer>
+                    <GroupOfCharts>
+                        <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last 14 days</span>}>
+                            <AreaChart data={sessions_by_country} xAxisGenerator={StatisticsChartsView.xAxisGeneratorForDayInterval}
+                                xAxisGeneratorFull={StatisticsChartsView.xAxisGeneratorForDayInterval} />
+                        </AreaChartContainer>
+                    </GroupOfCharts>
 
                 : null }
 
@@ -272,7 +315,100 @@ export class StatisticsChartsView extends React.Component {
 }
 
 
+/**
+ * Wraps AreaCharts or AreaChartContainers in order to provide shared scales.
+ */
+export class GroupOfCharts extends React.Component {
+
+    static defaultProps = {
+        'className' : 'chart-group clearfix',
+        //'xAxisData' : null,
+        //'xAxisGenerator' : function(x){
+        //    return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
+        //},
+        'width' : null,
+        'chartMargin' : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 }
+    }
+    
+    constructor(props){
+        super(props);
+        this.updateColorStore = this.updateColorStore.bind(this);
+
+        var colorScale = props.colorScale || d3.scaleOrdinal(d3.schemeCategory10) || null;
+            //xAxis, xScale, mergedXAxisData;
+        /*
+        if (props.xAxisData && props.xAxisGenerator && props.width){
+            xScale = d3.scaleTime().rangeRound([0, props.width - props.chartMargin.right - props.chartMargin.left]);
+            mergedXAxisData = AreaChart.mergeStackedDataForExtents(props.xAxisData);
+            xScale.domain(d3.extent(mergedXAxisData, function(d){
+                return d.date;
+            }));
+            xAxis = props.xAxisGenerator(xScale);
+        }
+        */
+        this.state = { colorScale, 'colorScaleStore' : {} };
+    }
+
+    updateColorStore(term, color){
+        var nextColorScaleStore = _.clone(this.state.colorScaleStore);
+        nextColorScaleStore[term] = color;
+        this.setState({ 'colorScaleStore' : nextColorScaleStore });
+    }
+
+    render(){
+        var { children, className, width, chartMargin } = this.props,
+            //width = this.getRefWidth() || null,
+            newChildren = React.Children.map(children, (child, childIndex) => {
+                if (!child) return null;
+                return React.cloneElement(child, _.extend({ width, chartMargin, 'updateColorStore' : this.updateColorStore }, this.state));
+            });
+
+        return <div ref="elem" className={className || null}>{ newChildren }</div>;
+    }
+
+}
+
+
+export class HorizontalD3ScaleLegend extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.renderColorItem = this.renderColorItem.bind(this);
+    }
+
+    renderColorItem([term, color], idx, all){
+        return (
+            <div className="col-sm-4 col-md-3 col-lg-2">
+                <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
+                { term }
+            </div>
+        );
+    }
+
+    render(){
+        var { colorScale, colorScaleStore } = this.props;
+        if (!colorScale || !colorScaleStore) return null;
+        return (
+            <div className="legend mb-27">
+                <div className="row" children={_.map(_.pairs(colorScaleStore), this.renderColorItem)}/>
+            </div>
+        );
+    }
+
+}
+
+
 export class AreaChartContainer extends React.Component {
+
+    static defaultProps = {
+        'xAxisGenerator'        : function(x){ // One tick every 2 months
+            return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
+        },
+        'xAxisGeneratorExpanded': function(x){
+            return d3.axisBottom(x).ticks(d3.timeMonth.every(1));
+        },
+        'colorScale' : null
+    }
 
     constructor(props){
         super(props);
@@ -308,10 +444,6 @@ export class AreaChartContainer extends React.Component {
         return this.refs && this.refs.elem && this.refs.elem.clientWidth;
     }
 
-    xAxisGeneratorFull(x){
-        return d3.axisBottom(x).ticks(d3.timeMonth.every(1)); // Every 1 month
-    }
-
     expandButton(expanded, className){
         if (this.props.gridState && this.props.gridState !== 'lg') return null;
         return (
@@ -322,20 +454,21 @@ export class AreaChartContainer extends React.Component {
     }
 
     render(){
-        var { title, children, width, defaultColSize, defaultHeight, colorScale } = this.props,
-            expanded = this.isExpanded(),
-            useWidth = width || this.getRefWidth(),
-            chartInnerWidth = expanded ? useWidth * 3 : useWidth,
-            className = 'mt-2 col-xs-12 col-lg-' + (expanded ? '12' : (defaultColSize || '6')),
-            useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
+        var { title, children, width, defaultHeight, colorScale, xAxisGenerator, xAxisGeneratorExpanded, chartMargin, updateColorStore } = this.props,
+            expanded            = this.isExpanded(),
+            useWidth            = width || this.getRefWidth(),
+            chartInnerWidth     = expanded ? useWidth * 3 : useWidth,
+            className           = 'mt-2',
+            useHeight           = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height),
+            visualToShow;
 
-        var visualToShow;
         if (typeof useWidth === 'number' && useWidth){
             visualToShow = React.cloneElement(children, {
+                colorScale, updateColorStore,
                 'width'             : chartInnerWidth,
                 'height'            : useHeight,
-                'xAxisGenerator'    : (expanded ? (children.props && children.props.xAxisGeneratorFull) || this.xAxisGeneratorFull : (children.props && children.props.xAxisGenerator) ),
-                'colorScale'        : colorScale || null
+                'xAxisGenerator'    : expanded ? xAxisGeneratorExpanded || xAxisGenerator : xAxisGenerator,
+                'margin'            : chartMargin || children.props.margin || null
             });
         } else { // If no width yet, just for stylistic purposes, don't render chart itself.
             visualToShow = StatisticsChartsView.loadingIcon("Initializing...");
@@ -343,184 +476,179 @@ export class AreaChartContainer extends React.Component {
 
         return (
             <div className={className}>
-                <div className="row">
-                    <div className="col-xs-12 col-lg-1">
-                        <h4 className="text-300">{ title }</h4>
-                        { this.expandButton(expanded) }
-                    </div>
-                    <div className={"col-xs-12 col-lg-11"}>
-                        <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
-                            { visualToShow }
-                        </div>
-                    </div>
-                </div>
+                <h4 className="text-300">{ title } { this.expandButton(expanded, 'pull-right') }</h4>
+                <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }} children={visualToShow} />
             </div>
         );
     }
 }
 
 
+
+export const commonParsingFxn = {
+    'bucketDocCounts' : function(weeklyIntervalBuckets, externalTermMap){
+        var total       = 0,
+            subTotals   = {},
+            aggsList;
+
+        aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+            total += bucket.doc_count;
+            var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
+            )),
+                children = _.map(subBucketKeysToDate, function(term){
+                    var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
+                        count     = ((subBucket && subBucket.doc_count) || 0),
+                        subTotal  = (subTotals[term] || 0) + count; // == Accumulated count to date.
+
+                    subTotals[term] = subTotal;
+                    return { term, count, 'total' : subTotal };
+                });
+
+            return {
+                'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                'count'    : bucket.doc_count,
+                'total'    : total,
+                'children' : groupExternalChildren(children, externalTermMap)
+            };
+        });
+
+        // Ensure each datum has all child terms, even if blank.
+        fillMissingChildBuckets(aggsList, _.difference(_.keys(subTotals), _.keys(externalTermMap)));
+
+        return aggsList;
+    },
+    'bucketTotalFilesCounts' : function(weeklyIntervalBuckets, externalTermMap){
+        var total       = 0,
+            subTotals   = {},
+            aggsList;
+
+        aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+
+            var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
+            )),
+                children = _.map(subBucketKeysToDate, function(term){
+                    var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
+                        count     = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0),
+                        subTotal  = (subTotals[term] || 0) + count;
+
+                    subTotals[term] = subTotal;
+                    total += count;
+
+                    return { term, count, 'total' : subTotal };
+                });
+
+            return {
+                'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                'count'    : bucket.doc_count,
+                'total'    : total,
+                'children' : groupExternalChildren(children, externalTermMap)
+            };
+        });
+
+        // Ensure each datum has all child terms, even if blank.
+        fillMissingChildBuckets(aggsList, _.difference(_.keys(subTotals), _.keys(externalTermMap))  );
+
+        return aggsList;
+    },
+    'bucketTotalFilesVolume' : function(weeklyIntervalBuckets, externalTermMap){
+        var gigabyte = 1024 * 1024 * 1024,
+            total = 0,
+            subTotals = {},
+            aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+
+                var fileSizeVol = ((bucket.total_files_volume && bucket.total_files_volume.value) || 0) / gigabyte,
+                    subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
+                        _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
+                    )),
+                    children = _.map(subBucketKeysToDate, function(term){
+                        var subBucket      = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
+                            subFileSizeVol = ((subBucket && subBucket.total_files_volume && subBucket.total_files_volume.value) || 0) / gigabyte,
+                            subTotal       = (subTotals[term] || 0) + subFileSizeVol;
+
+                        subTotals[term] = subTotal;
+                        return { term, 'count' : subFileSizeVol, 'total' : subTotal };
+                    });
+
+                total += fileSizeVol;
+
+                return {
+                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                    'count'    : fileSizeVol,
+                    'total'    : total,
+                    'children' : groupExternalChildren(children, externalTermMap)
+                };
+            });
+
+        // Ensure each datum has all child terms, even if blank.
+        fillMissingChildBuckets(aggsList, _.difference(_.keys(subTotals), _.keys(externalTermMap)));
+
+        return aggsList;
+    }
+};
+
+
+
 export const aggregationsToChartData = {
     'expsets_released' : {
         'requires'  : 'ExperimentSetReplicate',
-        'function'  : function(resp){
+        'function'  : function(resp, externalTermMap){
             if (!resp || !resp.aggregations) return null;
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var total = 0,
-                subTotals = {};
-
-            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                total += bucket.doc_count;
-                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-                    _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
-                ));
-                return {
-                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                    'count'    : bucket.doc_count,
-                    'total'    : total,
-                    'children' : _.map(subBucketKeysToDate, function(termKey){
-                        var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey });
-                        var subCount = ((subBucket && subBucket.doc_count) || 0);
-                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
-                        return {
-                            'term'  : termKey,
-                            'count' : subCount,
-                            'total' : subTotals[termKey]
-                        };
-                    })
-                };
-            });
-
-            // Ensure each datum has all child terms, even if blank.
-            fillMissingChildBuckets(aggsList, _.keys(subTotals));
-
-            return aggsList;
+            return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, externalTermMap);
         }
     },
     'expsets_released_internal' : {
         'requires'  : 'ExperimentSetReplicate',
-        'function'  : function(resp){
+        'function'  : function(resp, externalTermMap){
             if (!resp || !resp.aggregations) return null;
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_internal_release && resp.aggregations.weekly_interval_internal_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var total = 0,
-                subTotals = {};
-
-            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                total += bucket.doc_count;
-                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-                    _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
-                ));
-                return {
-                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                    'count'    : bucket.doc_count,
-                    'total'    : total,
-                    'children' : _.map(subBucketKeysToDate, function(termKey){
-                        var subBucket   = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
-                            subCount    = ((subBucket && subBucket.doc_count) || 0);
-
-                        subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
-                        return {
-                            'term'  : termKey,
-                            'count' : subCount,
-                            'total' : subTotals[termKey]
-                        };
-                    })
-                };
-            });
-
-            // Ensure each datum has all child terms, even if blank.
-            fillMissingChildBuckets(aggsList, _.keys(subTotals));
-
-            return aggsList;
+            return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, externalTermMap);
         }
     },
-    'files_released' : {
+    'expsets_created' : {
         'requires'  : 'ExperimentSetReplicate',
-        'function'  : function(resp){
+        'function'  : function(resp, externalTermMap){
+            if (!resp || !resp.aggregations) return null;
+            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_date_created && resp.aggregations.weekly_interval_date_created.buckets;
+            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
+
+            return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, externalTermMap);
+        }
+    },
+    'expsets_submitted' : {
+        'requires'  : 'ExperimentSetReplicate',
+        'function'  : function(resp, externalTermMap){
             if (!resp || !resp.aggregations) return null;
             var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var total       = 0,
-                subTotals   = {};
+            return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, externalTermMap);
+        }
+    },
+    'files_released' : {
+        'requires'  : 'ExperimentSetReplicate',
+        'function'  : function(resp, externalTermMap){
+            if (!resp || !resp.aggregations) return null;
+            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
+            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-
-                //total += (bucket.total_files && bucket.total_files.value) || 0;
-
-                var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-                    _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
-                ));
-
-                var children = _.map(subBucketKeysToDate, function(termKey){
-                    var subBucket   = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
-                        subCount    = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0);
-
-                    subTotals[termKey] = (subTotals[termKey] || 0) + subCount;
-                    total += subCount;
-
-                    return {
-                        'term'  : termKey,
-                        'count' : subCount,
-                        'total' : subTotals[termKey]
-                    };
-                });
-
-                return {
-                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                    'count'    : bucket.doc_count,
-                    'total'    : total,
-                    'children' : children
-                };
-            });
-
-            // Ensure each datum has all child terms, even if blank.
-            fillMissingChildBuckets(aggsList, _.keys(subTotals));
-
-            return aggsList;
+            return commonParsingFxn.bucketTotalFilesCounts(weeklyIntervalBuckets, externalTermMap);
         }
     },
     'file_volume_released' : {
         'requires'  : 'ExperimentSetReplicate',
-        'function'  : function(resp){
+        'function'  : function(resp, externalTermMap){
             if (!resp || !resp.aggregations) return null;
             var weeklyIntervalBuckets = resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            var gigabyte = 1024 * 1024 * 1024,
-                total = 0,
-                subTotals = {},
-                aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                    var fileSizeVol = ((bucket.total_files_volume && bucket.total_files_volume.value) || 0) / gigabyte;
-                    total += fileSizeVol;
-                    var subBucketKeysToDate = _.uniq(_.keys(subTotals).concat(
-                        _.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key')
-                    ));
-                    return {
-                        'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                        'count'    : fileSizeVol,
-                        'total'    : total,
-                        'children' : _.map(subBucketKeysToDate, function(termKey){
-                            var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : termKey }),
-                                subFileSizeVol = ((subBucket && subBucket.total_files_volume && subBucket.total_files_volume.value) || 0) / gigabyte;
-                            subTotals[termKey] = (subTotals[termKey] || 0) + subFileSizeVol;
-                            return {
-                                'term'  : termKey,
-                                'count' : subFileSizeVol,
-                                'total' : subTotals[termKey]
-                            };
-                        })
-                    };
-                });
-
-            // Ensure each datum has all child terms, even if blank.
-            fillMissingChildBuckets(aggsList, _.keys(subTotals));
-
-            return aggsList;
+            return commonParsingFxn.bucketTotalFilesVolume(weeklyIntervalBuckets, externalTermMap);
         }
     },
     'sessions_by_country' : {
@@ -553,10 +681,11 @@ export const aggregationsToChartData = {
     }
 };
 
-function fillMissingChildBuckets(aggsList, subAggKeys){
+function fillMissingChildBuckets(aggsList, subAggKeys, externalTermMap){
     _.forEach(aggsList, function(datum){
 
         _.forEach(subAggKeys, function(k){
+            if (externalTermMap && externalTermMap[k]) return;
             var foundChild = _.findWhere(datum.children, { 'term' : k });
             if (!foundChild){
                 datum.children.push({
@@ -570,11 +699,48 @@ function fillMissingChildBuckets(aggsList, subAggKeys){
     });
 }
 
+function groupExternalChildren(children, externalTermMap){
+
+    if (!externalTermMap){
+        return children;
+    }
+
+    var filteredOut = [];
+    children = _.filter(children, function(c){
+        if (externalTermMap[c.term]) {
+            filteredOut.push(c);
+            return false;
+        }
+        return true;
+    });
+    if (filteredOut.length > 0){
+        var externalChild = {
+            'term' : 'External',
+            'count': 0,
+            'total': 0
+        };
+        _.forEach(filteredOut, function(c){
+            externalChild.total += c.total;
+            externalChild.count += c.count;
+        });
+        children.push(externalChild);
+    }
+    return children;
+}
+
 
 export class AreaChart extends React.PureComponent {
 
+    static mergeStackedDataForExtents(d3Data){
+        return d3.merge(_.map(d3Data, function(d2){
+            return _.map(d2, function(d){
+                return d.data;
+            });
+        }));
+    }
+
     static defaultProps = {
-        'margin'                : { 'top': 30, 'right': 20, 'bottom': 30, 'left': 50 },
+        'chartMargin'           : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
         'data'                  : null,
         'd3TimeFormat'          : '%Y-%m-%d',
         'stackChildren'         : true,
@@ -582,10 +748,12 @@ export class AreaChart extends React.PureComponent {
         'yAxisLabel'            : 'Count',
         'yAxisScale'            : 'Linear', // Must be one of 'Linear', 'Log', 'Pow'
         'yAxisPower'            : null,
-        'xAxisGenerator'        : function(x){ // One tick every 2 months
-            return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
-        },
-        'xAxis'                 : null,     // Use in place of xAxisGenerator if want to share x axis scales across multiple charts.
+        //'xAxisGenerator'        : function(x){ // One tick every 2 months
+        //    return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
+        //},
+        //'xAxisGeneratorExpanded': function(x){
+        //    return d3.axisBottom(x).ticks(d3.timeMonth.every(1));
+        //},
         'transitionDuration'    : 1500,
         'colorScale'            : null // d3.scaleOrdinal(d3.schemeCategory10)
     };
@@ -686,12 +854,12 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis } = this.props;
+        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis, xScale } = this.props;
         var data = this.state.stackedData;
         var svg         = d3.select(this.refs.svg),
             width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
             height      = (  this.props.height || parseInt( this.refs.svg.clientHeight || svg.style('height') )  ) - margin.top - margin.bottom,
-            x           = d3.scaleTime().rangeRound([0, width]),
+            x           = xScale || d3.scaleTime().rangeRound([0, width]),
             y           = d3['scale' + yAxisScale]().rangeRound([height, 0]),
             area        = d3.area()
                 .x ( function(d){ return x(d.date || d.data.date);  } )
@@ -702,13 +870,11 @@ export class AreaChart extends React.PureComponent {
             y.exponent(yAxisPower);
         }
 
-        var mergedDataForExtents = d3.merge(_.map(data, function(d2){
-            return _.map(d2, function(d){
-                return d.data;
-            });
-        }));
+        var mergedDataForExtents = AreaChart.mergeStackedDataForExtents(data);
 
-        x.domain(d3.extent(mergedDataForExtents, function(d){ return d.date; }));
+        if (!xScale){
+            x.domain(d3.extent(mergedDataForExtents, function(d){ return d.date; }));
+        }
         y.domain([ 0, d3.max(mergedDataForExtents, function(d) { return d.total; }) ]);
 
         var bottomAxisGenerator = xAxis || xAxisGenerator(x);
@@ -745,10 +911,10 @@ export class AreaChart extends React.PureComponent {
             return;
         }
 
-        var { yAxisLabel, margin } = this.props;
-        var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
-        var drawn = { svg };
-        var colorScale = this.props.colorScale || this.colorScale;
+        var { yAxisLabel, margin, updateColorStore } = this.props,
+            { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup(),
+            drawn = { svg },
+            colorScale = this.props.colorScale || this.colorScale;
 
         requestAnimationFrame(()=>{
 
@@ -764,7 +930,14 @@ export class AreaChart extends React.PureComponent {
 
             drawn.path = drawn.layers.append('path')
                 .attr('class', 'area')
-                .style('fill', function(d){ return colorScale((d.data || d).key); })
+                .style('fill', function(d){
+                    var term = (d.data || d).key,
+                        color = colorScale(term);
+                    if (typeof updateColorStore === 'function'){
+                        updateColorStore(term, color);
+                    }
+                    return color;
+                })
                 .attr('d', area);
 
             this.drawAxes(drawn, { height, bottomAxisGenerator, y, yAxisLabel, rightAxisFxn });
@@ -773,6 +946,7 @@ export class AreaChart extends React.PureComponent {
             setTimeout(function(){
                 ReactTooltip.rebuild();
             }, 10);
+
         });
     }
 

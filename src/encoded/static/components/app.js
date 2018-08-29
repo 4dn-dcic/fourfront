@@ -845,10 +845,7 @@ export default class App extends React.Component {
                         console.error(e);
                     }
 
-                    if ( // Bad or expired JWT
-                        (response.detail === "Bad or expired token.") ||
-                        (jwtHeader === 'expired')
-                    ){
+                    if (response.detail === "Bad or expired token." || jwtHeader === 'expired'){ // Bad or expired JWT
                         JWT.remove();
 
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
@@ -891,10 +888,9 @@ export default class App extends React.Component {
                     if (options.replace) {
                         window.location.replace(href + fragment);
                     } else {
-                        var old_path = ('' + window.location).split('#')[0];
                         window.location.assign(href + fragment);
-                        return;
                     }
+                    return;
                 }
 
                 var hrefToSet = (request && request.xhr && request.xhr.responseURL) || href; // Get correct URL from XHR, in case we hit a redirect during the request.
@@ -931,24 +927,42 @@ export default class App extends React.Component {
                 if (err.status === 500){
                     analytics.exception('Server Error: ' + err.status + ' - ' + href);
                 }
+
                 if (err.status === 404){
                     analytics.exception('Page Not Found - ' + href);
                 }
 
                 // Err could be an XHR object if could not parse JSON.
-                if (
-                    typeof err.status === 'number' &&
-                    [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
-                ) {
+                if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
                     analytics.exception('Network Error: ' + err.status + ' - ' + href);
-                } else if (err.message !== 'HTTPForbidden'){
-                    console.error('Error in App.navigate():', err);
-                    throw err; // Bubble it up.
-                } else {
+                } else if (err.message === 'HTTPForbidden'){
+                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response.
                     console.info("Logged Out");
+                } else {
+                    console.error('Error in App.navigate():', err);
+                    throw err; // Unknown/unanticipated error: Bubble it up.
                 }
+
+                // Possibly not needed: If no major JS error thrown, add entry in Browser History so that back/forward buttons still works after hitting a 404 or similar.
+                // title currently ignored by browsers
+                if (options.replace){
+                    try {
+                        window.history.replaceState(err, '', href + fragment);
+                    } catch (exc) {
+                        // Might fail due to too large data
+                        window.history.replaceState(null, '', href + fragment);
+                    }
+                } else {
+                    try {
+                        window.history.pushState(err, '', href + fragment);
+                    } catch (exc) {
+                        // Might fail due to too large data
+                        window.history.pushState(null, '', href + fragment);
+                    }
+                }
+
             });
             console.info('Navigating > ', request);
             dispatch_dict.contextRequest = request;
@@ -1157,7 +1171,6 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
-                    <SEO.FullSite baseDomain={baseDomain} />
                 </head>
                 <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{

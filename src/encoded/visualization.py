@@ -287,7 +287,9 @@ def bar_plot_chart(request):
 def date_histogram_aggregations(request):
     '''PREDEFINED aggregations which run against type=ExperimentSet'''
 
-    group_by_field = 'award.center_title' # Default
+    # Defaults - may be overriden in URI params
+    date_histogram_fields   = ['public_release', 'date_created']
+    group_by_field          = 'award.center_title'
 
     try:
         json_body = request.json_body
@@ -298,6 +300,9 @@ def date_histogram_aggregations(request):
         if 'group_by' in search_param_lists:
             group_by_field = search_param_lists['group_by'][0] if isinstance(search_param_lists['group_by'], list) else search_param_lists['group_by']
             del search_param_lists['group_by'] # We don't wanna use it as search filter.
+        if 'date_histogram' in search_param_lists:
+            date_histogram_fields = search_param_lists['date_histogram'] if isinstance(search_param_lists['date_histogram'], list) else [search_param_lists['date_histogram']]
+            del search_param_lists['date_histogram'] # We don't wanna use it as search filter.
         if not search_param_lists:
             search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
             del search_param_lists['award.project']
@@ -331,23 +336,17 @@ def date_histogram_aggregations(request):
         "aggs" : common_sub_agg
     })
 
+    # Create an agg item for each date field in `date_histogram_fields`
     outer_date_histogram_agg = {
-        "weekly_interval_public_release" : {
+        "weekly_interval_" + dh_field : {
             "date_histogram" : {
-                "field": "embedded.public_release",
-                "interval": "week",
-                "format": "yyyy-MM-dd"
-            },
-            "aggs" : histogram_sub_aggs
-        },
-        "weekly_interval_internal_release" : {
-            "date_histogram" : {
-                "field": "embedded.internal_release",
+                "field": "embedded." + dh_field,
                 "interval": "week",
                 "format": "yyyy-MM-dd"
             },
             "aggs" : histogram_sub_aggs
         }
+        for dh_field in date_histogram_fields
     }
 
 
