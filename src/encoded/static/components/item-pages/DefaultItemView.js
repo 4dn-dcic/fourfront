@@ -260,13 +260,13 @@ export class OverviewHeadingContainer extends React.Component {
 export class StaticHeadersArea extends React.PureComponent {
 
     render(){
-        var context = this.props.context;
-        if (!context.static_headers || context.static_headers.length === 0 || !_.every(context.static_headers, function(s){ return s.content; })){
-            return null;
-        }
+        var context = this.props.context,
+            headersToShow = _.filter(context.static_headers || [], function(s){ return s.content; }); // Only sections with a content (incl check for permissions).
+
+        if (!headersToShow || headersToShow.length === 0) return null;
         return (
             <div className="static-headers-area">
-                { _.map(context.static_headers, (section, i) =>
+                { _.map(headersToShow, (section, i) =>
                     <ExpandableStaticHeader title={section.title || 'Informational Notice ' + (i + 1)} content={section.content}
                         defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i}
                         titleIcon={section.options && section.options.title_icon} />
