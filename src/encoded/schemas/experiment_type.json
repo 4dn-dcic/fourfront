@@ -4,7 +4,7 @@
     "id": "/profiles/experiment_type.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["experiment_type"],
+    "required": ["title"],
     "identifyingProperties": ["experiment_name", "uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
