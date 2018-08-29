@@ -86,5 +86,11 @@ def experiment_seq_2_3(value, system):
 @upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_tsaseq', '1', '2')
 def experiment_1_2(value, system):
-    types_list = ['ATAC-seq']
+    types_list = [
+        'ATAC-seq', 'CUT&RUN', 'capture Hi-C', 'ChIA-PET', 'ChIP-seq', 'DAM-ID seq',
+        'dilution Hi-C', 'DNA-paint', 'in situ Hi-C', 'PLAC-seq', 'Repli-seq', 'TSA-seq'
+        ]
+    if value.get('experiment_type') in types_list:
+        exptype = value['experiment_type'].replace('-', '').replace('&', '').replace(' ', '-')
+        value['experiment_type'] = '/experiment-types/' + exptype.lower() + '/'
     # if value.get('experiment_type')
