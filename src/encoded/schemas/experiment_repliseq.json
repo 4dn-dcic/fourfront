@@ -38,7 +38,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "experiment_type": {
             "enum": [

@@ -74,3 +74,17 @@ def experiment_seq_1_2(value, system):
 def experiment_seq_2_3(value, system):
     if value.get('experiment_type') == 'CHIP-seq':
         value['experiment_type'] = 'ChIP-seq'
+
+
+@upgrade_step('experiment_atacseq', '1', '2')
+@upgrade_step('experiment_capture_c', '1', '2')
+@upgrade_step('experiment_chiapet', '3', '4')
+@upgrade_step('experiment_damid', '2', '3')
+@upgrade_step('experiment_hi_c', '1', '2')
+@upgrade_step('experiment_mic', '2', '3')
+@upgrade_step('experiment_repliseq', '3', '4')
+@upgrade_step('experiment_seq', '3', '4')
+@upgrade_step('experiment_tsaseq', '1', '2')
+def experiment_1_2(value, system):
+    types_dict = {'ATAC-seq'}
+    # if value.get('experiment_type')
