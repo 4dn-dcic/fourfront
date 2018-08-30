@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { Button } from 'react-bootstrap';
+import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, layout, navigate, ajax, isServerSide } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
@@ -18,11 +18,13 @@ export default class StatisticsPageView extends StaticPage {
     render(){
         return (
             <StaticPage.Wrapper>
-                <StatisticsViewController {..._.pick(this.props, 'session', 'browseBaseState')}>
-                    <layout.WindowResizeUpdateTrigger>
-                        <StatisticsChartsView {..._.pick(this.props, 'session')} />
-                    </layout.WindowResizeUpdateTrigger>
-                </StatisticsViewController>
+                <GroupByController>
+                    <StatisticsViewController {..._.pick(this.props, 'session', 'browseBaseState')}>
+                        <layout.WindowResizeUpdateTrigger>
+                            <StatisticsChartsView {..._.pick(this.props, 'session')} />
+                        </layout.WindowResizeUpdateTrigger>
+                    </StatisticsViewController>
+                </GroupByController>
             </StaticPage.Wrapper>
         );
     }
@@ -48,6 +50,9 @@ export class StatisticsViewController extends React.PureComponent {
         //},
         'ExperimentSetReplicate' : function(props) {
             var params = navigate.getBrowseBaseParams(props.browseBaseState || null);
+            if (props.currentGroupBy){
+                params['group_by'] = props.currentGroupBy;
+            }
             //if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
             return '/date_histogram_aggregations/?' + stringify(params) + '&limit=0';
         },
@@ -60,7 +65,8 @@ export class StatisticsViewController extends React.PureComponent {
     static shouldRefetchAggregations(pastProps, nextProps){
         return (
             pastProps.session           !== nextProps.session ||
-            pastProps.browseBaseState   !== nextProps.browseBaseState
+            pastProps.browseBaseState   !== nextProps.browseBaseState ||
+            pastProps.currentGroupBy    !== nextProps.currentGroupBy
         );
     }
 
@@ -152,12 +158,13 @@ export class StatisticsViewController extends React.PureComponent {
     }
 
     render(){
-        if (Array.isArray(this.props.children)){
-            return React.Children.map(this.props.children, (c)=>{
-                return React.cloneElement(c, this.stateToChildProps(this.state));
-            });
+        var { children } = this.props,
+            childProps = _.extend(_.omit(this.props, 'children'), this.stateToChildProps(this.state));
+
+        if (Array.isArray(children)){
+            return React.Children.map(children, (c) => React.cloneElement(c, childProps));
         } else {
-            return React.cloneElement(this.props.children, this.stateToChildProps(this.state));
+            return React.cloneElement(children, childProps);
         }
     }
 
@@ -251,7 +258,7 @@ export class StatisticsChartsView extends React.Component {
     }
 
     render(){
-        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session, externalTermMap } = this.props,
+        var { loadingStatus, mounted, respFile, respExperimentSetReplicate, session, externalTermMap, currentGroupBy, groupByOptions, handleGroupByChange } = this.props,
             { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country,
                 expsets_created, chartToggles } = this.state,
             width = this.getRefWidth() || null;
@@ -269,6 +276,8 @@ export class StatisticsChartsView extends React.Component {
             <div className="stats-charts-container" ref="elem">
 
                 <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
+
+                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange }}/>
 
                     <HorizontalD3ScaleLegend />
 
@@ -312,6 +321,82 @@ export class StatisticsChartsView extends React.Component {
         );
     }
 
+}
+
+export class GroupByController extends React.PureComponent {
+
+    static defaultProps = {
+        'groupByOptions' : {
+            'award.center_title'                    : "Center",
+            'award.project'                         : "Project",
+            'lab.display_title'                     : "Lab",
+            'status'                                : "Status",
+            'experiments_in_set.experiment_type'    : "Experiment Type"
+        },
+        'initialGroupBy' : 'award.center_title'
+    }
+
+    constructor(props){
+        super(props);
+        this.handleGroupByChange = this.handleGroupByChange.bind(this);
+        this.state = {
+            'currentGroupBy' : props.initialGroupBy
+        };
+    }
+
+    handleGroupByChange(field){
+        this.setState(function(currState){
+            if (currState.currentGroupBy === field){
+                return;
+            }
+            return { 'currentGroupBy' : field };
+        });
+    }
+
+    render(){
+        var { children, groupByOptions } = this.props,
+            { currentGroupBy } = this.state,
+            childProps = { groupByOptions, currentGroupBy, 'handleGroupByChange' : this.handleGroupByChange };
+
+        if (Array.isArray(children)){
+            return React.Children.map(children, (c) =>  React.cloneElement(c, childProps) );
+        } else {
+            return React.cloneElement(children, childProps);
+        }
+    }
+}
+
+export class GroupByDropdown extends React.PureComponent {
+
+    static defaultProps = {
+        'title' : "Group By"
+    }
+
+    constructor(props){
+        super(props);
+        this.onSelect = _.throttle(this.onSelect.bind(this), 1000);
+    }
+
+    onSelect(eventKey, evt){
+        if (typeof this.props.handleGroupByChange !== 'function'){
+            throw new Error("No handleGroupByChange function passed to GroupByDropdown.");
+        }
+        this.props.handleGroupByChange(eventKey);
+    }
+
+    render(){
+        var { groupByOptions, currentGroupBy, title } = this.props,
+            optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
+                <MenuItem eventKey={field} key={field} children={title} active={field === currentGroupBy} />
+            );
+
+        return (
+            <div className="dropdown-container mb-12">
+                <span className="text-500">{ title }</span>&nbsp;&nbsp;&nbsp;
+                <DropdownButton title={groupByOptions[currentGroupBy]} onSelect={this.onSelect} children={ optionItems }/>
+            </div>
+        );
+    }
 }
 
 
@@ -374,11 +459,11 @@ export class GroupOfCharts extends React.Component {
     }
 
     render(){
-        var { children, className, width, chartMargin } = this.props,
+        var { children, className, width, chartMargin, xDomain } = this.props,
             //width = this.getRefWidth() || null,
             newChildren = React.Children.map(children, (child, childIndex) => {
                 if (!child) return null;
-                return React.cloneElement(child, _.extend({ width, chartMargin, 'updateColorStore' : this.updateColorStore }, this.state));
+                return React.cloneElement(child, _.extend({ width, chartMargin, xDomain, 'updateColorStore' : this.updateColorStore }, this.state));
             });
 
         return <div ref="elem" className={className || null}>{ newChildren }</div>;
@@ -798,6 +883,8 @@ export class AreaChart extends React.PureComponent {
         //'xAxisGeneratorExpanded': function(x){
         //    return d3.axisBottom(x).ticks(d3.timeMonth.every(1));
         //},
+        'xDomain'               : [ new Date('2017-03-01'), null ],
+        'yDomain'               : [ 0, null ],
         'transitionDuration'    : 1500,
         'colorScale'            : null // d3.scaleOrdinal(d3.schemeCategory10)
     };
@@ -898,12 +985,12 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis, xScale } = this.props;
+        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis, xDomain, yDomain } = this.props;
         var data = this.state.stackedData;
         var svg         = d3.select(this.refs.svg),
             width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
             height      = (  this.props.height || parseInt( this.refs.svg.clientHeight || svg.style('height') )  ) - margin.top - margin.bottom,
-            x           = xScale || d3.scaleTime().rangeRound([0, width]),
+            x           = d3.scaleTime().rangeRound([0, width]),
             y           = d3['scale' + yAxisScale]().rangeRound([height, 0]),
             area        = d3.area()
                 .x ( function(d){ return x(d.date || d.data.date);  } )
@@ -916,10 +1003,18 @@ export class AreaChart extends React.PureComponent {
 
         var mergedDataForExtents = AreaChart.mergeStackedDataForExtents(data);
 
-        if (!xScale){
-            x.domain(d3.extent(mergedDataForExtents, function(d){ return d.date; }));
-        }
-        y.domain([ 0, d3.max(mergedDataForExtents, function(d) { return d.total; }) ]);
+        //console.log('TEST!@#$', d3.extent(mergedDataForExtents, function(d){ return d.date; }) );
+        var xExtents = [
+                (xDomain && xDomain[0]) || d3.min(mergedDataForExtents, function(d){ return d.date; }),
+                (xDomain && xDomain[1]) || d3.max(mergedDataForExtents, function(d){ return d.date; })
+            ],
+            yExtents = [
+                (yDomain && typeof yDomain[0] === 'number') ? yDomain[0] : d3.min(mergedDataForExtents, function(d){ return d.total; }),
+                (yDomain && yDomain[1]) || d3.max(mergedDataForExtents, function(d){ return d.total; })
+            ];
+
+        x.domain(xExtents);
+        y.domain(yExtents);
 
         var bottomAxisGenerator = xAxis || xAxisGenerator(x);
 
