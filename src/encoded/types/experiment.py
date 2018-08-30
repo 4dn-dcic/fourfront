@@ -57,6 +57,7 @@ class Experiment(Item):
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
+        "experiment_type.title",
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
@@ -297,7 +298,7 @@ class ExperimentHiC(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']

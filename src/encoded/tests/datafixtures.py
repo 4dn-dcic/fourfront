@@ -306,16 +306,26 @@ def experiment(testapp, experiment_data):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample, mboI):
+def experiment_data(lab, award, human_biosample, mboI, experiment_type_hic):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': experiment_type_hic['@id'],
         'digestion_enzyme': mboI['@id'],
         'status': 'in review by lab'
     }
 
+
+@pytest.fixture
+def experiment_type_hic(testapp, lab, award):
+    data = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'title': 'In situ Hi-C',
+        'status': 'released'
+    }
+    return testapp.post_json('/experiment_type', data).json['@graph'][0]
 
 @pytest.fixture
 def experiment_project_release(testapp, lab, award, human_biosample):
