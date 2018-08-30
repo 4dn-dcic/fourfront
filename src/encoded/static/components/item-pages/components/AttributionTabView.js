@@ -42,19 +42,23 @@ export function generateContactPersonListItem(contactPerson, idx){
             return false;
         }) || null,
         dataTip = (decodedEmailParts && (
-            'Click to send e-mail message to <br/>' +
-            '<span class="text-500">' +
-            decodedEmailParts[0] +
-            '</span> <span class="text-300">(at)</span> <span class="text-500">' +
-            decodedEmailParts[1] +
-            '</span>'
+            '<span class="text-300">Click to send e-mail message to</span><br/>' +
+            '<div class="text-center">' +
+                '<span class="text-500">' +
+                    decodedEmailParts[0] +
+                '</span> <span class="text-400 small">(at)</span> <span class="text-500">' +
+                    decodedEmailParts[1] +
+                '</span>' +
+            '</div>'
         )) || null;
 
     return (
         <li className="contact-person" key={contactPerson.contact_email || idx}>
-            <i className="icon icon-fw icon-envelope-o clickable" data-html data-tip={dataTip} onClick={onClick} />
-            &nbsp;&nbsp;
-            { contactPerson.display_title }
+            <div className="inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
+                <i className="icon icon-fw icon-envelope-o" />
+                &nbsp;&nbsp;
+                { contactPerson.display_title }
+            </div>
         </li>
     );
 }
