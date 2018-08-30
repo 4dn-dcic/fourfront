@@ -324,6 +324,7 @@ class File(Item):
                 # ensure a file_format (identifier for extra_file) is given and non-null
                 if not('file_format' in xfile and bool(xfile['file_format'])):
                     continue
+                import pdb; pdb.set_trace()
                 # todo, make sure file_format is unique
                 fformat = xfile['file_format']
                 if fformat.startswith('/file-formats/'):
@@ -838,7 +839,7 @@ def download(context, request):
             if filename:
                 found = True
                 properties = extra
-                external = context.propsheets.get('external' + extra['file_format'])
+                external = context.propsheets.get('external' + eformat.get('file_format'))
                 break
         if not found:
             raise HTTPNotFound(_filename)
@@ -1009,7 +1010,7 @@ def validate_extra_file_format(context, request):
     '''validator to check to be sure that file_format of extrafile is not the
        same as the file and is a known format for the schema
     '''
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     files_ok = True
     data = request.json
     if 'extra_files' not in data:
