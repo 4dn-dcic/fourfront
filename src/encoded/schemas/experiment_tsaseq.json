@@ -42,11 +42,6 @@
         "schema_version": {
             "default": "2"
         },
-        "experiment_type": {
-            "enum": [
-                "/experiment-types/tsaseq/"
-            ]
-        },
         "protocol_version": {
             "title": "Protocol version",
             "description": "Version of the protocol used in the experiment",

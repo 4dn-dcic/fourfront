@@ -40,12 +40,6 @@
         "schema_version": {
             "default": "4"
         },
-        "experiment_type": {
-            "enum": [
-            "/experiment-types/repliseq/",
-            "/experiment-types/single-cell-repliseq/"
-          ]
-        },
         "dna_label": {
             "title": "DNA label",
             "description": "The tag or chemical used to label the newly replicated DNA - usually BrdU",

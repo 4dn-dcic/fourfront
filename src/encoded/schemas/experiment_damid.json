@@ -38,11 +38,6 @@
         "schema_version": {
             "default": "3"
         },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "default": "/experiment-types/damid-seq/",
-            "enum": ["/experiment-types/damid-seq/"]
-        },
         "targeted_factor": {
             "title": "Target Fusion Protein",
             "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",

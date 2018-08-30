@@ -2,7 +2,7 @@
     {
         "accession":"4DNEX067BBB1",
         "biosample":"111111bc-1111-4448-903e-854af460b123",
-        "experiment_type": "/experiment-types/damid-seq/",
+        "experiment_type": "a27b17cd-544a-3a3b-abc3-17a544544b3c",
         "targeted_factor": "d1115d5e-40aa-43bc-b81c-32c70c9afb21",
         "sap_treatment": "No",
         "me_pcr_cycles": 8,

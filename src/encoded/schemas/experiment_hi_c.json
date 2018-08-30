@@ -45,20 +45,6 @@
         "schema_version": {
             "default": "2"
         },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "enum": [
-                "/experiment-types/in-situ-hic/",
-                "/experiment-types/dilution-hic/",
-                "/experiment-types/microC/",
-                "/experiment-types/dnase-hic/",
-                "/experiment-types/tcc/",
-                "/experiment-types/cryomilling-tcc/",
-                "/experiment-types/single-cell-hic/",
-                "/experiment-types/scihic/",
-                "/experiment-types/mc3c/"
-            ]
-        },
         "crosslinking_method": {
             "title": "Crosslinking Method",
             "description": "Term used for the method for crosslinking chromatin",

@@ -38,11 +38,6 @@
         "schema_version": {
             "default": "2"
         },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "default": "/experiment-types/atacseq/",
-            "enum": ["/experiment-types/atacseq/"]
-        },
         "transposase": {
             "title": "Transposase",
             "description": "The transposase used to 'insert' sequencing adapters.",

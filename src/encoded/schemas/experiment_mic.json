@@ -38,21 +38,6 @@
         "schema_version": {
             "default": "3"
         },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "type" : "string",
-            "lookup": 10,
-            "enum": [
-                "/experiment-types/dnapaint/",
-                "/experiment-types/dna-fish/",
-                "/experiment-types/rna-fish/",
-                "/experiment-types/fish/",
-                "/experiment-types/immunofluorescence/",
-                "/experiment-types/fluorescence/",
-                "/experiment-types/cryoem/",
-                "/experiment-types/spt/"
-            ]
-        },
         "microscopy_technique": {
             "title" : "Microscopy Technique",
             "type" : "string",

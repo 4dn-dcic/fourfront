@@ -46,9 +46,6 @@
         "schema_version": {
             "default": "2"
         },
-        "experiment_type": {
-            "enum": ["/experiment-types/capture-hic/"]
-        },
         "rna_tag": {
             "title": "Biotinylated RNA base",
             "description": "The biotinylated base used to tag the in vitro transcribed capture RNA",

@@ -46,19 +46,6 @@
         "schema_version": {
             "default": "4"
         },
-        "experiment_type": {
-            "enum": [
-            "/experiment-types/chipseq/",
-            "/experiment-types/rnaseq/",
-            "/experiment-types/nadseq/",
-            "/experiment-types/dna-sprite/",
-            "/experiment-types/rnadna-sprite/",
-            "/experiment-types/margi/",
-            "/experiment-types/gam/",
-            "/experiment-types/cutrun/",
-            "/experiment-types/tracloop/"
-          ]
-        },
         "targeted_factor": {
             "title": "Target",
             "description": "Information about the target of the Antibody in an IP",

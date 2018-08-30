@@ -2,7 +2,7 @@
     {
         "accession":"4DNEX067AAA1",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
-        "experiment_type": "/experiment-types/atacseq/",
+        "experiment_type": "c17b17cd-544a-3a3b-abc3-17a544544b3c",
         "enzyme_lot_number": "123456",
         "enzyme_incubation_time": 30,
         "incubation_temperature": 55,

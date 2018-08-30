@@ -47,13 +47,6 @@
         "schema_version": {
             "default": "4"
         },
-        "experiment_type": {
-            "enum": [
-                "/experiment-types/chiapet/",
-                "/experiment-types/placseq/",
-                "/experiment-types/hichip/"
-            ]
-        },
         "targeted_factor": {
             "title": "Target",
             "description": "Information about the target of the Antibody in the IP",
