@@ -2,4 +2,7 @@ User-agent: *
 Disallow: /*?*limit=all
 Disallow: /files/*download
 Disallow: /files*@@download
+Disallow: /*@@download
+Disallow: /profiles/
+Disallow: /*@@download*
 Disallow: /cgi-bin/
