@@ -999,6 +999,8 @@ def test_update_of_item_to_released_status_adds_release_date(
         res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
         assert res2['status'] == status
         assert res2[datefield] == date.today().isoformat()
+        if status == 'released to project':
+            assert 'public_release' not in res2
 
 
 def test_update_of_item_to_non_released_status_does_not_add_release_date(
@@ -1026,6 +1028,8 @@ def test_update_of_item_that_has_release_date_does_not_change_release_date(
         res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
         assert res2['status'] == status
         assert res2[datefield] == test_date
+        if status == 'released':
+            assert 'project_release' not in res2
 
 
 def test_update_of_item_without_release_dates_mixin(wrangler_testapp, award):
@@ -1035,7 +1039,18 @@ def test_update_of_item_without_release_dates_mixin(wrangler_testapp, award):
         assert field not in award
 
 
-### tests for bogus nofic specific __ac_local_roles__
+def test_update_of_item_to_released_status_adds_release_date_and_proj_rel_too(
+        wrangler_testapp, planned_experiment_set_data):
+    res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    assert 'public_release' not in res1
+    assert 'project_release' not in res1
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'released'}, status=200).json['@graph'][0]
+    assert res2['status'] == 'released'
+    assert res2['public_release'] == res2['project_release'] == date.today().isoformat()
+
+
+# tests for bogus nofic specific __ac_local_roles__
 def test_4dn_can_view_nofic_released_to_project(
         planned_experiment_set_data, wrangler_testapp, viewing_group_member_testapp,
         nofic_award):
