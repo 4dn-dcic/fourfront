@@ -51,6 +51,12 @@
             "uniqueKey": true,
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "controlled_term": {
+            "title": "Ontology Term",
+            "description": "EFO ontology term that matches this experiment type",
+            "type": "string",
+            "linkTo": "OntologyTerm"
+        },
         "experiment_category": {
             "title": "Experiment Category",
             "description": "General category of the experiment type",
