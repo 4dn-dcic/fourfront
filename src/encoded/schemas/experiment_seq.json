@@ -48,15 +48,15 @@
         },
         "experiment_type": {
             "enum": [
-            "ChIP-seq",
-            "RNA-seq",
-            "NAD-seq",
-            "DNA SPRITE",
-            "RNA-DNA SPRITE",
-            "MARGI",
-            "GAM",
-            "CUT&RUN",
-            "TrAC-loop"
+            "/experiment-types/chipseq/",
+            "/experiment-types/rnaseq/",
+            "/experiment-types/nadseq/",
+            "/experiment-types/dna-sprite/",
+            "/experiment-types/rnadna-sprite/",
+            "/experiment-types/margi/",
+            "/experiment-types/gam/",
+            "/experiment-types/cutrun/",
+            "/experiment-types/tracloop/"
           ]
         },
         "targeted_factor": {

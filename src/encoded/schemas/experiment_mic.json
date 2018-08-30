@@ -43,14 +43,14 @@
             "type" : "string",
             "lookup": 10,
             "enum": [
-                "DNA-paint",
-                "DNA FISH",
-                "RNA FISH",
-                "FISH",
-                "Immunofluorescence",
-                "Fluorescence",
-                "Cryo-EM",
-                "SPT"
+                "/experiment-types/dnapaint/",
+                "/experiment-types/dna-fish/",
+                "/experiment-types/rna-fish/",
+                "/experiment-types/fish/",
+                "/experiment-types/immunofluorescence/",
+                "/experiment-types/fluorescence/",
+                "/experiment-types/cryoem/",
+                "/experiment-types/spt/"
             ]
         },
         "microscopy_technique": {

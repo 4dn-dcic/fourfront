@@ -40,10 +40,8 @@
         },
         "experiment_type": {
             "title" : "Experiment Type",
-            "default": "DAM-ID seq",
-            "enum": [
-                "DAM-ID seq"
-            ]
+            "default": "/experiment-types/damid-seq/",
+            "enum": ["/experiment-types/damid-seq/"]
         },
         "targeted_factor": {
             "title": "Target Fusion Protein",

@@ -49,10 +49,10 @@
         },
         "experiment_type": {
             "enum": [
-            "ChIA-PET",
-            "PLAC-seq",
-            "Hi-ChIP"
-          ]
+                "/experiment-types/chiapet/",
+                "/experiment-types/placseq/",
+                "/experiment-types/hichip/"
+            ]
         },
         "targeted_factor": {
             "title": "Target",

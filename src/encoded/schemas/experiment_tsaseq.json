@@ -44,7 +44,7 @@
         },
         "experiment_type": {
             "enum": [
-                "TSA-seq"
+                "/experiment-types/tsaseq/"
             ]
         },
         "protocol_version": {

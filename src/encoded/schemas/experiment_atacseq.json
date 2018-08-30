@@ -40,10 +40,8 @@
         },
         "experiment_type": {
             "title" : "Experiment Type",
-            "default": "ATAC-seq",
-            "enum": [
-                "ATAC-seq"
-            ]
+            "default": "/experiment-types/atacseq/",
+            "enum": ["/experiment-types/atacseq/"]
         },
         "transposase": {
             "title": "Transposase",

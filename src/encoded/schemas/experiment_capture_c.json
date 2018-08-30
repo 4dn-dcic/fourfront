@@ -47,9 +47,7 @@
             "default": "2"
         },
         "experiment_type": {
-            "enum": [
-            "capture Hi-C"
-          ]
+            "enum": ["/experiment-types/capture-hic/"]
         },
         "rna_tag": {
             "title": "Biotinylated RNA base",

@@ -48,7 +48,8 @@
             "type": "string",
             "lookup": 10,
             "description": "A controlled term specifying the type of experiment.",
-            "internal_comment":"should be ontology term?"
+            "internal_comment":"should be ontology term?",
+            "linkTo": "ExperimentType"
         },
         "protocol": {
             "title": "Reference Protocol",

@@ -48,15 +48,15 @@
         "experiment_type": {
             "title" : "Experiment Type",
             "enum": [
-                "in situ Hi-C",
-                "dilution Hi-C",
-                "micro-C",
-                "DNase Hi-C",
-                "TCC",
-                "cryomilling TCC",
-                "single cell Hi-C",
-                "sci-Hi-C",
-                "MC-3C"
+                "/experiment-types/in-situ-hic/",
+                "/experiment-types/dilution-hic/",
+                "/experiment-types/microC/",
+                "/experiment-types/dnase-hic/",
+                "/experiment-types/tcc/",
+                "/experiment-types/cryomilling-tcc/",
+                "/experiment-types/single-cell-hic/",
+                "/experiment-types/scihic/",
+                "/experiment-types/mc3c/"
             ]
         },
         "crosslinking_method": {
