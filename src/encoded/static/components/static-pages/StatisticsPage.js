@@ -268,7 +268,7 @@ export class StatisticsChartsView extends React.Component {
         return (
             <div className="stats-charts-container" ref="elem">
 
-                <GroupOfCharts width={width}>
+                <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
 
                     <HorizontalD3ScaleLegend />
 
@@ -327,14 +327,20 @@ export class GroupOfCharts extends React.Component {
         //    return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
         //},
         'width' : null,
-        'chartMargin' : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 }
+        'chartMargin' : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
+        'resetScalesWhenChange' : null
     }
     
     constructor(props){
         super(props);
+        this.resetColorScale = this.resetColorScale.bind(this);
         this.updateColorStore = this.updateColorStore.bind(this);
 
-        var colorScale = props.colorScale || d3.scaleOrdinal(d3.schemeCategory10) || null;
+        var colorScale = (
+            props.colorScale ||
+            d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1)) ||
+            null
+        );
             //xAxis, xScale, mergedXAxisData;
         /*
         if (props.xAxisData && props.xAxisGenerator && props.width){
@@ -347,6 +353,18 @@ export class GroupOfCharts extends React.Component {
         }
         */
         this.state = { colorScale, 'colorScaleStore' : {} };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.resetScalesWhenChange !== nextProps.resetScalesWhenChange){
+            this.resetColorScale();
+        }
+    }
+
+    resetColorScale(){
+        var colorScale      = d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1)),
+            colorScaleStore = {};
+        this.setState({ colorScale, colorScaleStore });
     }
 
     updateColorStore(term, color){
@@ -369,11 +387,35 @@ export class GroupOfCharts extends React.Component {
 }
 
 
-export class HorizontalD3ScaleLegend extends React.PureComponent {
+export class HorizontalD3ScaleLegend extends React.Component {
 
     constructor(props){
         super(props);
         this.renderColorItem = this.renderColorItem.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        if (nextProps.colorScale !== this.props.colorScale){
+            if (nextProps.colorScaleStore !== this.props.colorScaleStore){
+                var currTerms = _.keys(this.props.colorScaleStore),
+                    nextTerms = _.keys(nextProps.colorScaleStore);
+
+                // Don't update if no terms in next props; most likely means colorScale[Store] has been reset and being repopulated.
+                if (currTerms.length > 0 && nextTerms.length === 0){
+                    return false;
+                }
+            }
+        }
+
+        // Emulates PureComponent
+        var propKeys = _.keys(nextProps);
+        for (var i = 0; i < propKeys.length; i++){
+            if (nextProps[propKeys[i]] !== this.props[propKeys[i]]) {
+                return true;
+            }
+        }
+        return false;
+        //return React.PureComponent.shouldComponentUpdate.apply(this, ...arguments);
     }
 
     renderColorItem([term, color], idx, all){
