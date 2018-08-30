@@ -276,11 +276,11 @@ export class StatisticsChartsView extends React.Component {
                         <AreaChart data={expsets_released} />
                     </AreaChartContainer>
 
-                    { expsets_created ?
+                    {/* expsets_created ?
                         <AreaChartContainer {...commonContainerProps} id="expsets_created" title={<span><span className="text-500">Experiment Sets</span> submitted over time</span>}>
                             <AreaChart data={expsets_created} />
                         </AreaChartContainer>
-                    : null }
+                    : null */}
 
                     { session && expsets_released_internal ?
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={<span><span className="text-500">Experiment Sets</span> released over time &mdash; Internal</span>}>
@@ -647,12 +647,13 @@ export const aggregationsToChartData = {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, externalTermMap){
             if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_internal_release && resp.aggregations.weekly_interval_internal_release.buckets;
+            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_project_release && resp.aggregations.weekly_interval_project_release.buckets;
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, externalTermMap);
         }
     },
+    /*
     'expsets_created' : {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, externalTermMap){
@@ -663,6 +664,7 @@ export const aggregationsToChartData = {
             return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, externalTermMap);
         }
     },
+    */
     'expsets_submitted' : {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, externalTermMap){

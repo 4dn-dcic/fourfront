@@ -288,7 +288,7 @@ def date_histogram_aggregations(request):
     '''PREDEFINED aggregations which run against type=ExperimentSet'''
 
     # Defaults - may be overriden in URI params
-    date_histogram_fields   = ['public_release', 'date_created']
+    date_histogram_fields   = ['public_release', 'project_release']
     group_by_field          = 'award.center_title'
 
     try:
@@ -330,8 +330,9 @@ def date_histogram_aggregations(request):
 
     histogram_sub_aggs = dict(common_sub_agg, group_by={
         "terms" : {
-            "field" : "embedded." + group_by_field + ".raw",
-            "size" : 30
+            "field"     : "embedded." + group_by_field + ".raw",
+            "missing"   : TERM_NAME_FOR_NO_VALUE,
+            "size"      : 30
         },
         "aggs" : common_sub_agg
     })

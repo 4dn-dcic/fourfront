@@ -143,7 +143,7 @@
             "aggregation_type" : "date_histogram",
             "disabled" : true
         },
-        "internal_release" : {
+        "project_release" : {
             "title" : "Internal Release Date",
             "aggregation_type" : "date_histogram",
             "disabled" : true
