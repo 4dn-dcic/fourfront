@@ -175,6 +175,7 @@
             "title": "Reference publications",
             "description": "The publications that provide more information about the object.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "lookup": 1000,
             "uniqueItems": true,
             "items": {
