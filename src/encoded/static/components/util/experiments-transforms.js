@@ -462,8 +462,12 @@ export function findUnpairedFiles(files_in_experiment){
             } else if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.accession === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.accession === 'string'; })){
                 uniqueIDField = 'accession';
             } else {
-                throw new Error('All files & related files must have either a UUID or an Accession.');
+                console.error('(findUnpairedFiles) Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+                unpairedFiles.push(file);
+                return unpairedFiles;
+                //throw new Error('All files & related files must have either a UUID or an Accession.');
             }
+
             if (!_.any(file.related_files, function(rf){
                 return rf.file && rf.file[uniqueIDField] && rf.file[uniqueIDField] !== file[uniqueIDField] && _.pluck(files_in_experiment, uniqueIDField).indexOf(rf.file[uniqueIDField]) > -1;
             })) {
@@ -593,6 +597,14 @@ export function allPairsAndFilesFromExperimentSet(experiment_set){
     return pairs.concat(unpairedFiles);
 }
 
+/**
+ * Group files by their paired end and related_files array.
+ * E.g. [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
+ *
+ * Returns an empty array if _any_ of the files lack view permissions.
+ *
+ * @returns {{ '@id' : string, 'accession' : string }[][]} Multi-dimensional containing pairs of files.
+ */
 export function groupFilesByPairs(files_in_experiment){
 
     var allFiles = files_in_experiment.slice(0).concat(_.pluck(_.flatten(_.filter(_.pluck(files_in_experiment || [], 'related_files'))), 'file'));
@@ -603,36 +615,41 @@ export function groupFilesByPairs(files_in_experiment){
     } else if (_.all(allFiles, function(f){ return typeof f.accession === 'string'; })){
         uniqueIDField = 'accession';
     } else {
-        throw new Error('Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+        console.error('(groupFilesByPairs) Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+        return [];
+        //throw new Error('Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
     }
-    
-    return _(files_in_experiment || []).chain()
-        .map(function(file){
-            return _.clone(file);
-        })
-        .sortBy(function(file){ return parseInt(file.paired_end); }) // Bring files w/ paired_end == 1 to top of list.
-        .reduce(function(pairsObj, file, idx, sortedFiles){
-            // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
-            if (parseInt(file.paired_end) === 1){
-                pairsObj[file[uniqueIDField]] = { '1' : file };
-            } else if (Array.isArray(file.related_files)) {
-                _.each(file.related_files, function(related){
-                    if (pairsObj[related.file && related.file[uniqueIDField]]) {
-                        pairsObj[related.file && related.file[uniqueIDField]][file.paired_end + ''] = file;
+
+    return _.map(
+        _.values(
+            _.reduce(
+                _.sortBy(
+                    _.map(files_in_experiment || [], _.clone),
+                    function(file){ return parseInt(file.paired_end); }
+                ),
+                function(pairsObj, file, idx, sortedFiles){
+                    // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
+                    if (parseInt(file.paired_end) === 1){
+                        pairsObj[file[uniqueIDField]] = { '1' : file };
+                    } else if (Array.isArray(file.related_files)) {
+                        _.each(file.related_files, function(related){
+                            if (pairsObj[related.file && related.file[uniqueIDField]]) {
+                                pairsObj[related.file && related.file[uniqueIDField]][file.paired_end + ''] = file;
+                            }
+                        });
                     }
-                });
-            }
-            return pairsObj;
-        }, { })
-        .values()
-        .map(function(filePairObj){
-            return _(filePairObj).chain()
-                .pairs()
-                .sortBy (function(fp){ return parseInt(fp[0]); })
-                .map    (function(fp){ return fp[1]; })
-                .value();
-        })
-        .value(); // [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
+                    return pairsObj;
+                },
+                { }
+            )
+        ),
+        function(filePairObj){
+            return _.map(
+                _.sortBy(_.pairs(filePairObj), function([ filePairEnd, fileItem ]){ return parseInt(filePairEnd); }),
+                function([ filePairEnd, fileItem ]){ return fileItem; }
+            );
+        }
+    );
 }
 
 /**
