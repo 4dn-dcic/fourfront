@@ -66,6 +66,13 @@
                "Antibody Authentication",
                "Tissue Preparation Methods"
             ]
+        },
+        "url": {
+            "title": "URL",
+            "lookup": 1000,
+            "description": "An external resource with additional information about the protocol.",
+            "type": "string",
+            "format": "uri"
         }
     },
     "facets": {
