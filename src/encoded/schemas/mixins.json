@@ -563,6 +563,7 @@
             "description": "Array of linkTos for static sections to be displayed at the top of an item page",
             "type": "array",
             "uniqueItems": true,
+            "permission": "import_items",
             "exclude_from" : ["submit4dn"],
             "items": {
                 "title": "Static Header",

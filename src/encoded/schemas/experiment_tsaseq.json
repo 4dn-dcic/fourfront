@@ -128,14 +128,14 @@
             "lookup": 125
         },
         "biotinylated_spikein_sequences": {
-            "title": "Spike In Sequences",
+            "title": "Modified Spike In Sequences",
             "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
             "type": "string",
             "lookup": 196,
             "linkTo": "FileReference"
         },
         "biotinylated_spikein_source": {
-            "title": "Spike in source",
+            "title": "Modified Spike in source",
             "description": "The source or identifier for the spike-in",
             "type": "string",
             "lookup": 198
