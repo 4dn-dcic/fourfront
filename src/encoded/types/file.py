@@ -324,16 +324,18 @@ class File(Item):
                 # ensure a file_format (identifier for extra_file) is given and non-null
                 if not('file_format' in xfile and bool(xfile['file_format'])):
                     continue
-                import pdb; pdb.set_trace()
-                # todo, make sure file_format is unique
-                fformat = xfile['file_format']
-                if fformat.startswith('/file-formats/'):
-                    fformat = fformat[len('/file-formats/'):-1]
-                xfile_format = self.registry['collections']['FileFormat'].get(fformat)
+                eformat = xfile['file_format']
+                if eformat.startswith('/file-formats/'):
+                    eformat = eformat[len('/file-formats/'):-1]
+                xfile_format = self.registry['collections']['FileFormat'].get(eformat)
+                xff_uuid = str(xfile_format.uuid)
+                if not xff_uuid:
+                    raise Exception("Cannot find format item for the extra file")
 
-                if xfile_format in file_formats:
+                if xff_uuid in file_formats:
                     raise Exception("Each file in extra_files must have unique file_format")
-                file_formats.append(xfile_format)
+                file_formats.append(xff_uuid)
+                xfile['file_format'] = xff_uuid
 
                 xfile['accession'] = properties.get('accession')
                 # just need a filename to trigger creation of credentials
@@ -471,7 +473,9 @@ class File(Item):
                 eformat = extra.get('file_format')
                 if eformat.startswith('/file-formats/'):
                     eformat = eformat[len('/file-formats/'):-1]
-                extra_creds = self.propsheets.get('external' + eformat)
+                xfile_format = self.registry['collections']['FileFormat'].get(eformat)
+                xff_uuid = str(xfile_format.uuid)
+                extra_creds = self.propsheets.get('external' + xff_uuid)
                 extra['upload_credentials'] = extra_creds['upload_credentials']
                 extras.append(extra)
             return extras
