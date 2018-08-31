@@ -89,7 +89,9 @@
                             "controlled by",
                             "control for",
                             "derived from",
-                            "source for"
+                            "source for",
+                            "input of",
+                            "has input"
                         ]
                     },
                     "experiment": {

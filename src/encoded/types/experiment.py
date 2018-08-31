@@ -170,7 +170,9 @@ class Experiment(Item):
             "controlled by": "control for",
             "derived from": "source for",
             "control for": "controlled by",
-            "source for": "derived from"
+            "source for": "derived from",
+            "input of": "has input",
+            "has input": "input of"
         }
         acc = str(self.uuid)
         if 'experiment_relation' in properties.keys():
