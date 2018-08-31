@@ -418,6 +418,13 @@
         }
     },
     "spikein_info": {
+        "spikin_description": {
+            "title": "Spike in Description",
+            "description": "A description of the type/purpose of the spike-in",
+            "type": "string",
+            "lookup": 197,
+            "comment": "In some cases a spike in with heterologous non-specific DNA is used and this field can be used to indicate the source organism and concentration"
+        },
         "spikein_sequences": {
             "title": "Spike In Sequences",
             "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
@@ -557,6 +564,8 @@
             "description": "Array of linkTos for static sections to be displayed at the top of an item page",
             "type": "array",
             "uniqueItems": true,
+            "permission": "import_items",
+            "exclude_from" : ["submit4dn"],
             "items": {
                 "title": "Static Header",
                 "description": "Static section displayed at the top of an item page",
