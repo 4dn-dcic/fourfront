@@ -433,7 +433,11 @@ class File(Item):
     def href(self, request):
         file_format = self.properties.get('file_format')
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
-        file_extension = fformat.get('standard_file_extension')
+        if 'standard_file_extension' not in fformat:
+            # sometimes get_item_if_you_can could return only embedded fields rather
+            # than full item but it will have uuid at least so fetch item if needed
+            fformat = self.registry['collections']['FileFormat'].get(fformat['uuid'])
+        file_extension = fformat['standard_file_extension']
         accession = self.properties.get('accession', self.properties.get('external_accession'))
         filename = '{}.{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
@@ -754,7 +758,11 @@ def post_upload(context, request):
         # maybe this should be properties.uuid
         uuid = context.uuid
         file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
-        file_extension = file_format.get('file_format')
+        if 'standard_file_extension' not in file_format:
+            # sometimes get_item_if_you_can could return only embedded fields rather
+            # than full item but it will have uuid at least so fetch item if needed
+            file_format = request.registry['collections']['FileFormat'].get(file_format['uuid'])
+        file_extension = file_format.get('standard_file_extension')
 
         key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid, **properties)
@@ -830,7 +838,10 @@ def download(context, request):
     # search to find the "right" file and redirect to a download link for that one
     properties = context.upgrade_properties()
     file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
-
+    if 'standard_file_extension' not in file_format:
+        # sometimes get_item_if_you_can could return only embedded fields rather
+        # than full item but it will have uuid at least so fetch item if needed
+        file_format = request.registry['collections']['FileFormat'].get(file_format['uuid'])
     _filename = None
     if request.subpath:
         _filename, = request.subpath
@@ -839,11 +850,15 @@ def download(context, request):
         found = False
         for extra in properties.get('extra_files', []):
             eformat = get_item_if_you_can(request, extra.get('file_format'), 'file-formats')
+            if 'standard_file_extension' not in eformat:
+                # sometimes get_item_if_you_can could return only embedded fields rather
+                # than full item but it will have uuid at least so fetch item if needed
+                eformat = request.registry['collections']['FileFormat'].get(file_format['uuid'])
             filename = is_file_to_download(extra, eformat, _filename)
             if filename:
                 found = True
                 properties = extra
-                external = context.propsheets.get('external' + eformat.get('file_format'))
+                external = context.propsheets.get('external' + eformat.get('uuid'))
                 break
         if not found:
             raise HTTPNotFound(_filename)
@@ -919,17 +934,18 @@ def validate_file_filename(context, request):
         return
     filename = data['filename']
     file_format_item = None
-    if data.get('file_format'):
-        file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
-    try:
-        file_format_item.get('uuid')
-    except AttributeError:
-        file_format = context.properties.get('file_format')
-        if file_format:
-            file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+    ff = data.get('file_format')
+    if not ff:
+        ff = context.properties.get('file_format')
+    file_format_item = get_item_if_you_can(request, ff, 'file-formats')
+    if 'standard_file_extension' not in file_format_item:
+        try:
+            file_format_item = request.registry['collections']['FileFormat'].get(file_format_item['uuid'])
+        except AttributeError:
+            pass
     msg = None
     try:
-        file_extensions = [file_format_item.get('standard_file_extension')]
+        file_extensions = [file_format_item['standard_file_extension']]
         if file_format_item.get('other_allowed_extensions'):
             file_extensions.extend(file_format_item.get('other_allowed_extensions'))
             file_extensions = list(set(file_extensions))
@@ -1021,58 +1037,49 @@ def validate_extra_file_format(context, request):
         return
     extras = data['extra_files']
     # post should always have file_format as it is required patch may or may not
-    fformat = data.get('file_format')
-    if not fformat:
-        # must be a patch so get the regular file file_format from context
-        fformat = context.properties.get('file_format')
-
-    ff_item = get_item_if_you_can(request, fformat, 'file-formats')
-    try:
-        fformat = ff_item.get('file_format')
-    except AttributeError:
-        # this in theory should never happen
-        request.errors.add('body', None, "Can't find parent file format for extra_files")
-        return
-    schema_eformats = ff_item.get('extrafile_formats')
+    ff = data.get('file_format')
+    if not ff:
+        ff = context.properties.get('file_format')
+    file_format_item = get_item_if_you_can(request, ff, 'file-formats')
+    if 'standard_file_extension' not in file_format_item:
+        try:
+            file_format_item = request.registry['collections']['FileFormat'].get(file_format_item['uuid'])
+        except AttributeError:
+            request.errors.add('body', None, "Can't find parent file format for extra_files")
+            return
+    parent_format = file_format_item['uuid']
+    schema_eformats = file_format_item.get('extrafile_formats')
     if not schema_eformats:  # means this parent file shouldn't have any extra files
         request.errors.add('body', None, "File with format %s should not have extra_files" % fformat)
         return
     else:
         valid_ext_formats = []
-        for of in schema_eformats:
-            of_item = get_item_if_you_can(request, of, 'file-formats')
+        for ok_format in schema_eformats:
+            ok_format_item = get_item_if_you_can(request, ok_format, 'file-formats')
             try:
-                oef = of_item.get('file_format')
+                off_uuid = ok_format_item.get('uuid')
             except AttributeError:
-                raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % ff_item.get('uuid')
-            else:
-                if oef is None:
-                    atid = of_item.get('@id')
-                    if atid is None:
-                        raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % ff_item.get('uuid')
-                    else:
-                        if atid.startswith('/file-formats/'):
-                            oef = atid[len('/file-formats/'):-1]
-            valid_ext_formats.append(oef)
+                raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid')
+            valid_ext_formats.append(off_uuid)
     seen_ext_formats = []
     # formats = request.registry['collections']['FileFormat']
     for i, ef in enumerate(extras):
         eformat = ef.get('file_format')
         if eformat is None:
             return  # will fail the required extra_file.file_format
-        if eformat.startswith('/file-formats/'):
-            eformat = eformat[len('/file-formats/'):-1]
-        if eformat in seen_ext_formats:
+        eformat_item = get_item_if_you_can(request, eformat, 'file-formats')
+        ef_uuid = eformat_item.get('uuid')
+        if ef_uuid in seen_ext_formats:
             request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
             files_ok = False
         else:
-            seen_ext_formats.append(eformat)
-        if eformat == fformat:
-            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % fformat)
+            seen_ext_formats.append(ef_uuid)
+        if ef_uuid == parent_format:
+            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % parent_format)
             files_ok = False
 
-        if eformat not in valid_ext_formats:
-            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, fformat))
+        if ef_uuid not in valid_ext_formats:
+            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, file_format_item['file_format']))
             files_ok = False
     if files_ok:
         request.validated.update({})
