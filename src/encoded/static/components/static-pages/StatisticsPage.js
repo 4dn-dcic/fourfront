@@ -79,6 +79,7 @@ export class StatisticsViewController extends React.PureComponent {
             {
                 'mounted'           : false,
                 'loadingStatus'     : 'loading',
+                //'externalTermMapFor': 'award.center_title',
                 'externalTermMap'   : {},
             },
             _.object(_.map(_.keys(StatisticsViewController.CHART_SEARCH_URIS), function(k){ return ['resp' + k,null]; }))
@@ -102,12 +103,15 @@ export class StatisticsViewController extends React.PureComponent {
 
     componentDidUpdate(pastProps){
         if (StatisticsViewController.shouldRefetchAggregations(pastProps, this.props)){
+            this.setState({ 'loadingStatus' : 'loading' });
             this.performAggRequests();
             this.fetchAndGenerateExternalTermMap();
         }
     }
 
     fetchAndGenerateExternalTermMap(){
+        if (this.state.externalTermMap && _.keys(this.state.externalTermMap).length > 0) return;
+
         ajax.load('/search/?type=Award&limit=all', (resp)=>{
             this.setState({
                 'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
@@ -122,12 +126,12 @@ export class StatisticsViewController extends React.PureComponent {
         var resultStateToSet = {};
 
         var chartUrisAsPairs = _.pairs(chartUris),
-            failureCallback = function(){
+            failureCallback = () => {
                 this.setState({ 'loadingStatus' : 'failed' });
-            }.bind(this),
-            uponAllRequestsCompleteCallback = function(state = resultStateToSet){
+            },
+            uponAllRequestsCompleteCallback = (state = resultStateToSet) => {
                 this.setState(_.extend({ 'loadingStatus' : 'complete' }, state));
-            }.bind(this),
+            },
             uponSingleRequestsCompleteCallback = function(key, uri, resp){
                 if (resp && resp.code === 404){
                     failureCallback();
@@ -263,8 +267,12 @@ export class StatisticsChartsView extends React.Component {
                 expsets_created, chartToggles } = this.state,
             width = this.getRefWidth() || null;
 
-        if (!mounted || loadingStatus === 'loading')    return <div className="stats-charts-container" ref="elem" children={ StatisticsChartsView.loadingIcon() }/>;
-        if (loadingStatus === 'failed')                 return <div className="stats-charts-container" ref="elem" children={ StatisticsChartsView.errorIcon() }/>;
+        if (!mounted || (loadingStatus === 'loading' && !expsets_released)){
+            return <div className="stats-charts-container" ref="elem" children={ StatisticsChartsView.loadingIcon() }/>;
+        }
+        if (loadingStatus === 'failed'){
+            return <div className="stats-charts-container" ref="elem" children={ StatisticsChartsView.errorIcon() }/>;
+        }
 
         var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
             commonContainerProps = {
@@ -277,9 +285,9 @@ export class StatisticsChartsView extends React.Component {
 
                 <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
 
-                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange }}/>
+                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }}/>
 
-                    <HorizontalD3ScaleLegend />
+                    <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     <AreaChartContainer {...commonContainerProps} id="expsets_released" title={<span><span className="text-500">Experiment Sets</span> released over time</span>}>
                         <AreaChart data={expsets_released} />
@@ -329,8 +337,8 @@ export class GroupByController extends React.PureComponent {
         'groupByOptions' : {
             'award.center_title'                    : "Center",
             'award.project'                         : "Project",
-            'lab.display_title'                     : "Lab",
-            'status'                                : "Status",
+            'lab.display_title'                     : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
+            'status'                                : <span><span className="text-600">Current</span> Status</span>,
             'experiments_in_set.experiment_type'    : "Experiment Type"
         },
         'initialGroupBy' : 'award.center_title'
@@ -369,7 +377,12 @@ export class GroupByController extends React.PureComponent {
 export class GroupByDropdown extends React.PureComponent {
 
     static defaultProps = {
-        'title' : "Group By"
+        'title' : "Group By",
+        'buttonStyle' : {
+            'minWidth' : 120,
+            'marginLeft' : 12,
+            'textAlign' : 'left'
+        }
     }
 
     constructor(props){
@@ -385,15 +398,16 @@ export class GroupByDropdown extends React.PureComponent {
     }
 
     render(){
-        var { groupByOptions, currentGroupBy, title } = this.props,
+        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle } = this.props,
             optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
                 <MenuItem eventKey={field} key={field} children={title} active={field === currentGroupBy} />
-            );
+            ),
+            selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
 
         return (
             <div className="dropdown-container mb-12">
-                <span className="text-500">{ title }</span>&nbsp;&nbsp;&nbsp;
-                <DropdownButton title={groupByOptions[currentGroupBy]} onSelect={this.onSelect} children={ optionItems }/>
+                <span className="text-500">{ title }</span>
+                <DropdownButton title={selectedValueTitle} onSelect={this.onSelect} children={optionItems} style={buttonStyle} />
             </div>
         );
     }
@@ -505,7 +519,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
 
     renderColorItem([term, color], idx, all){
         return (
-            <div className="col-sm-4 col-md-3 col-lg-2">
+            <div className="col-sm-4 col-md-3 col-lg-2 mb-03">
                 <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
                 { term }
             </div>
