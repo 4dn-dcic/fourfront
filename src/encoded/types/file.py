@@ -941,7 +941,7 @@ def validate_file_filename(context, request):
     if 'standard_file_extension' not in file_format_item:
         try:
             file_format_item = request.registry['collections']['FileFormat'].get(file_format_item['uuid'])
-        except AttributeError:
+        except (AttributeError, TypeError):
             pass
     msg = None
     try:
@@ -949,7 +949,7 @@ def validate_file_filename(context, request):
         if file_format_item.get('other_allowed_extensions'):
             file_extensions.extend(file_format_item.get('other_allowed_extensions'))
             file_extensions = list(set(file_extensions))
-    except AttributeError:
+    except (AttributeError, TypeError):
         msg = 'Problem getting file_format for %s' % filename
     else:
         if file_format_item.get('file_format') == 'other':
@@ -1030,7 +1030,6 @@ def validate_extra_file_format(context, request):
     '''validator to check to be sure that file_format of extrafile is not the
        same as the file and is a known format for the schema
     '''
-    #import pdb; pdb.set_trace()
     files_ok = True
     data = request.json
     if 'extra_files' not in data:
@@ -1044,13 +1043,13 @@ def validate_extra_file_format(context, request):
     if 'standard_file_extension' not in file_format_item:
         try:
             file_format_item = request.registry['collections']['FileFormat'].get(file_format_item['uuid'])
-        except AttributeError:
+        except (AttributeError, TypeError):
             request.errors.add('body', None, "Can't find parent file format for extra_files")
             return
     parent_format = file_format_item['uuid']
     schema_eformats = file_format_item.get('extrafile_formats')
     if not schema_eformats:  # means this parent file shouldn't have any extra files
-        request.errors.add('body', None, "File with format %s should not have extra_files" % fformat)
+        request.errors.add('body', None, "File with format %s should not have extra_files" % file_format_item.get('file_format'))
         return
     else:
         valid_ext_formats = []
@@ -1068,18 +1067,25 @@ def validate_extra_file_format(context, request):
         if eformat is None:
             return  # will fail the required extra_file.file_format
         eformat_item = get_item_if_you_can(request, eformat, 'file-formats')
-        ef_uuid = eformat_item.get('uuid')
+        try:
+            ef_uuid = eformat_item.get('uuid')
+        except AttributeError:
+            request.errors.add('body', ['extra_files', i], "'%s' not a valid or known file format" % eformat)
+            files_ok = False
+            break
         if ef_uuid in seen_ext_formats:
             request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
             files_ok = False
+            break
         else:
             seen_ext_formats.append(ef_uuid)
         if ef_uuid == parent_format:
-            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % parent_format)
+            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % file_format_item.get('file_format'))
             files_ok = False
+            break
 
         if ef_uuid not in valid_ext_formats:
-            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, file_format_item['file_format']))
+            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, file_format_item.get('file_format')))
             files_ok = False
     if files_ok:
         request.validated.update({})

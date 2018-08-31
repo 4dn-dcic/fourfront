@@ -685,7 +685,7 @@ def test_validate_extra_files_unknown_parent_format(testapp, processed_file_data
 def test_validate_extra_files_parent_should_not_have_extras(
         testapp, processed_file_data, file_formats):
     extf = {'file_format': 'pairs_px2'}
-    processed_file_data['file_format'] = file_formats.get('mcool')
+    processed_file_data['file_format'] = file_formats.get('mcool').get('uuid')
     processed_file_data['extra_files'] = [extf]
     res1 = testapp.post_json('/files-processed', processed_file_data, status=422)
     errors = res1.json['errors']
@@ -700,4 +700,4 @@ def test_validate_extra_files_bad_extras_format(
     res1 = testapp.post_json('/files-processed', processed_file_data, status=422)
     errors = res1.json['errors']
     descriptions = ''.join([e['description'] for e in errors])
-    assert "'whosit' not a valid extrafile_format for 'pairs'" in descriptions
+    assert "'whosit' not a valid or known file format" in descriptions
