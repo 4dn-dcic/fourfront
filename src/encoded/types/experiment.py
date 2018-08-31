@@ -340,7 +340,7 @@ class ExperimentCaptureC(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -401,7 +401,7 @@ class ExperimentRepliseq(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -462,7 +462,7 @@ class ExperimentAtacseq(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -499,7 +499,7 @@ class ExperimentChiapet(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -542,7 +542,7 @@ class ExperimentDamid(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None, fusion=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
 
         if fusion:
             sum_str += (' with DAM-' + fusion)
@@ -583,7 +583,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -626,7 +626,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -677,7 +677,7 @@ class ExperimentMic(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
-        sum_str = experiment_type
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
