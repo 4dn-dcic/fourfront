@@ -61,7 +61,7 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     return bs
 
 
-def test_calculated_biosource_name(biosources):
+def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target):
     for biosource in biosources:
         biotype = biosource['biosource_type']
         name = biosource['biosource_name']
@@ -73,9 +73,10 @@ def test_calculated_biosource_name(biosources):
             # import pdb; pdb.set_trace()
             # used not real type here to test modification addition to name
             assert name == 'GM12878 Crispr'
-            res = testapp.patch_json(biosource['@id'],)
+            res = testapp.patch_json(biosource['@id'], {'modifications': [mod_w_change_and_target['@id']]})
+            assert res.json['@graph'][0]['biosource_name'].startswith('GM12878 Crispr deletion for Gene:')
         if biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
-            assert name == 'GM12878 with modifications'
+            assert name == 'GM12878 with genetic modifications'
         if biotype == 'tissue':
             assert name == 'lung'
         if biotype == 'multicellular organism':
