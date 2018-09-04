@@ -10,7 +10,7 @@ def other_mod(testapp, lab, award):
         "modification_type": "Stable Transfection",
         "description": "second modification"
     }
-    return testapp.post_json('/modification', item).json['@graph'][0]
+    return testapp.post_json('/modification', data).json['@graph'][0]
 
 @pytest.fixture
 def GM12878_mod_biosource(testapp, lab, award, gm12878_oterm, basic_modification):

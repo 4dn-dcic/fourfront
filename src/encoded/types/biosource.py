@@ -75,9 +75,9 @@ class Biosource(Item):
             'stem cell derived cell line',
         ]
         mod_str = ''
-        if len(modifications) == 1:
+        if modifications and len(modifications) == 1:
             mod_str = ' ' + request.embed(modifications[0], '@@object').get('modification_name_short', '')
-        elif len(modifications) > 1:
+        elif modifications and len(modifications) > 1:
             mod_str = ' with genetic modifications'
         if biosource_type == "tissue":
             if tissue:
