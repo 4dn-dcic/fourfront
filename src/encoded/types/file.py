@@ -475,10 +475,12 @@ class File(Item):
             extras = []
             for extra in self.properties.get('extra_files', []):
                 eformat = extra.get('file_format')
-                if eformat.startswith('/file-formats/'):
-                    eformat = eformat[len('/file-formats/'):-1]
                 xfile_format = self.registry['collections']['FileFormat'].get(eformat)
-                xff_uuid = str(xfile_format.uuid)
+                try:
+                    xff_uuid = str(xfile_format.uuid)
+                except AttributeError:
+                    print("Can't find required format uuid for %s" % eformat)
+                    continue
                 extra_creds = self.propsheets.get('external' + xff_uuid)
                 extra['upload_credentials'] = extra_creds['upload_credentials']
                 extras.append(extra)
