@@ -405,19 +405,33 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderFileBlocksForExperiment(experimentAccession, filesForExperiment){
-        return _.map(filesForExperiment, (file) => {
+        var fileBlocks = [],
+            filesWithPermissions = _.filter(filesForExperiment, object.itemUtil.atId);
+
+        _.forEach(filesWithPermissions, (file, idx) => {
             this.oddExpRow = !this.oddExpRow;
-            return (
-                <FileEntryBlock
-                    key={object.atIdFromObject(file)}
+            fileBlocks.push(
+                <FileEntryBlock key={object.atIdFromObject(file) || idx}
                     file={file}
                     hideNameOnHover={false}
                     experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
-                    isSingleItem={filesForExperiment.length === 1}
+                    isSingleItem={filesForExperiment.length === 1 && filesWithPermissions.length === 1}
                     stripe={this.oddExpRow}
                 />
             );
         });
+        if (filesWithPermissions.length < filesForExperiment.length){
+            this.oddExpRow = !this.oddExpRow;
+            fileBlocks.push(
+                <FileEntryBlock key="no-view-permission-file-or-files"
+                    file={{ 'error' : 'no view permissions' }}
+                    experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
+                    isSingleItem={filesWithPermissions.length === 0}
+                    stripe={this.oddExpRow}
+                />
+            );
+        }
+        return fileBlocks;
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal = this.state.filesGroupedByExperimentOrGlobal){

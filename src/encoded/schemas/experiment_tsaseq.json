@@ -25,7 +25,6 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/antibody_info" },
-        { "$ref": "mixins.json#/spikein_info" },
         { "$ref": "mixins.json#/supplementary_files" },
         { "$ref": "mixins.json#/static_headers" },
         { "$ref": "experiment.json#/properties" }
@@ -61,11 +60,30 @@
             "lookup": 81,
             "enum": ["Low", "Medium", "High"]
         },
+        "secondary_antibody": {
+            "title": "Secondary Antibody",
+            "description": "Reference to a 4DN antibody object",
+            "type": "string",
+            "lookup": 93,
+            "linkTo": "Antibody"
+        },
+        "secondary_antibody_lot_id": {
+            "title": "Secondary Antibody Lot Number",
+            "description": "A lot number or other unique identifier for a particular antibody lot",
+            "type": "string",
+            "lookup": 94
+        },
+        "secondary_antibody_dilution": {
+            "title": "Secondary Antibody Dilution/Concentration",
+            "description": "The working dilution or concentration of the antibody eg. 1:100 or 200 ug/ml",
+            "type": "string",
+            "lookup": 95
+        },
         "targeted_factor": {
             "title": "Target",
             "description": "Information about the target of the Antibody in an IP",
             "type": "string",
-            "lookup": 95,
+            "lookup": 96,
             "linkTo": "Target"
         },
         "tyramide_concentration": {
@@ -108,6 +126,32 @@
             "description": "Estimated average biotinlyation range from dot blot (kb/1 biotin）",
             "type": "string",
             "lookup": 125
+        },
+        "biotinylated_spikein_sequences": {
+            "title": "Modified Spike In Sequences",
+            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
+            "type": "string",
+            "lookup": 196,
+            "linkTo": "FileReference"
+        },
+        "biotinylated_spikein_source": {
+            "title": "Modified Spike in source",
+            "description": "The source or identifier for the spike-in",
+            "type": "string",
+            "lookup": 198
+        },
+        "non_biotinylated_spikein_sequences": {
+            "title": "Spike In Sequences",
+            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
+            "type": "string",
+            "lookup": 199,
+            "linkTo": "FileReference"
+        },
+        "non_biotinylated_spikein_source": {
+            "title": "Spike in source",
+            "description": "The source or identifier for the spike-in",
+            "type": "string",
+            "lookup": 200
         }
     },
     "columns": {

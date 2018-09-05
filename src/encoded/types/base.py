@@ -405,13 +405,21 @@ class Item(snovault.Item):
             if last_modified['modified_by'] != NO_DEFAULT:
                 properties['last_modified'] = last_modified
 
-        date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
-        for datefield, status in date2status.items():
+        date2status = [{'public_release': ['released', 'current']}, {'project_release': ['released to project']}]
+        # if an item is directly released without first being released to project
+        # then project_release date is added for same date as public_release
+        for dateinfo in date2status:
+            datefield, statuses = next(iter(dateinfo.items()))
             if datefield not in props:
-                if datefield in self.schema['properties'] and datefield not in properties \
-                   and 'status' in properties and properties['status'] in status:
-                    # check the status and add the date if it's not provided and item has right status
-                    properties[datefield] = date.today().isoformat()
+                if datefield in self.schema['properties'] and datefield not in properties:
+                    if 'status' in properties and properties['status'] in statuses:
+                        # check the status and add the date if it's not provided and item has right status
+                        properties[datefield] = date.today().isoformat()
+                    elif datefield == 'project_release':
+                        # case where public_release is added and want to set project_release = public_release
+                        public_rel = properties.get('public_release')
+                        if public_rel:
+                            properties[datefield] = public_rel
 
         super(Item, self)._update(properties, sheets)
 

@@ -297,7 +297,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     renderInnerBody(){
         return (
-            <div className="static-section-header pt-1">
+            <div className="static-section-header pt-1 clearfix">
                 <BasicStaticSectionBody {..._.pick(this.props, 'content', 'filetype')} />
             </div>
         );
