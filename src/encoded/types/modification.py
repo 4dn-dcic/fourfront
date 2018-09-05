@@ -55,7 +55,7 @@ class Modification(Item):
         mod_name = genomic_change if genomic_change else modification_type
         if target_of_mod:
             target = request.embed(target_of_mod, '@@object')
-            mod_name = target['target_summary'] + ' ' + mod_name
+            mod_name = target['target_summary'].replace('Gene:', '') + ' ' + mod_name
         # if not modification_type:
         #     return "None"
         #
