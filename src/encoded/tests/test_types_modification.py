@@ -20,11 +20,11 @@ def test_calculated_modification_name(testapp, modifications):
         # assert modifications[name]['modification_name_short'] == modname
         if name == 'basic_mod':
             assert modname == 'Crispr' and short == 'Crispr'
-        if name == 'mod_w_gen_chg':
+        elif name == 'mod_w_gen_chg':
             assert modname == 'Crispr deletion' and short == 'deletion'
-        if name == 'mod_w_target':
+        elif name == 'mod_w_target':
             assert modname == 'Crispr for Gene:eeny,meeny'
             assert short == 'Gene:eeny,meeny Crispr'
-        if name == 'mod_w_both':
+        elif name == 'mod_w_both':
             assert modname == 'Crispr deletion for Gene:eeny,meeny'
             assert short == 'Gene:eeny,meeny deletion'
