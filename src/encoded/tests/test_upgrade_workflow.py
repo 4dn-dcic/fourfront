@@ -548,7 +548,7 @@ def test_workflow_upgrade_4_5(
     arguments = value.get('arguments', [])
     for arg in arguments:
         secondary_formats = arg.get('secondary_formats', [])
-        for s, sformat in secondary_formats:
+        for _, sformat in secondary_formats:
             assert sformat in format_uuids
         argument_format = arg.get('argument_format')
         if argument_format:
@@ -556,8 +556,8 @@ def test_workflow_upgrade_4_5(
     steps = value.get('steps', [])
     for step in steps:
         inputs = step.get('inputs', [])
-        for input in inputs:
-            meta = input.get('meta', {})
+        for inp in inputs:
+            meta = inp.get('meta', {})
             fformat = meta.get('file_format')
             if fformat:
                 assert fformat in format_uuids

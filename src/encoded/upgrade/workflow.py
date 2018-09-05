@@ -393,8 +393,8 @@ def workflow_4_5(value, system):
     steps = value.get('steps')
     for s, step in enumerate(steps):
         inputs = step.get('inputs', [])
-        for i, input in enumerate(inputs):
-            meta = input.get('meta', {})
+        for i, inp in enumerate(inputs):
+            meta = inp.get('meta', {})
             fformat = meta.get('file_format')
             if fformat:
                 fformat_item = formats.get(fformat)

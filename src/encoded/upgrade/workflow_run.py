@@ -1,7 +1,6 @@
 from snovault import (
     upgrade_step,
 )
-from encoded.schema_formats import is_uuid
 
 
 @upgrade_step('workflow_run', '1', '2')
