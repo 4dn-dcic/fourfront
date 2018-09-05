@@ -67,19 +67,19 @@ def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target)
         name = biosource['biosource_name']
         if biotype == 'immortalized cell line':
             assert name == 'GM12878'
-        if biotype == 'stem cell':
+        elif biotype == 'stem cell':
             assert name == 'F123-CASTx129'
-        if biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC1":
+        elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC1":
             # import pdb; pdb.set_trace()
             # used not real type here to test modification addition to name
-            assert name == 'GM12878 Crispr'
+            assert name == 'GM12878 with Crispr'
             res = testapp.patch_json(biosource['@id'], {'modifications': [mod_w_change_and_target['@id']]})
-            assert res.json['@graph'][0]['biosource_name'].startswith('GM12878 Crispr deletion for Gene:')
-        if biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
-            assert name == 'GM12878 with genetic modifications'
-        if biotype == 'tissue':
+            assert res.json['@graph'][0]['biosource_name'] == 'GM12878 with Gene:eeny,meeny deletion'
+        elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
+            assert name == 'GM12878 with Crispr, Stable Transfection'
+        elif biotype == 'tissue':
             assert name == 'lung'
-        if biotype == 'multicellular organism':
+        elif biotype == 'multicellular organism':
             assert name == 'whole human'
 
 
