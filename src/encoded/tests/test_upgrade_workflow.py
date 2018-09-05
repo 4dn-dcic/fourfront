@@ -547,8 +547,8 @@ def test_workflow_upgrade_4_5(
     assert value['schema_version'] == '5'
     arguments = value.get('arguments', [])
     for arg in arguments:
-        secondary_formats = arg.get('secondary_formats', [])
-        for _, sformat in secondary_formats:
+        secondary_formats = arg.get('secondary_file_formats', [])
+        for sformat in secondary_formats:
             assert sformat in format_uuids
         argument_format = arg.get('argument_format')
         if argument_format:
