@@ -94,7 +94,7 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
-def test_extra_files_stuff(testapp, proc_file_json):
+def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
@@ -104,6 +104,7 @@ def test_extra_files_stuff(testapp, proc_file_json):
     expected_key = "%s/%s" % (resobj['uuid'], file_name)
     assert resobj['extra_files'][0]['upload_key'] == expected_key
     assert resobj['extra_files'][0]['href']
+    assert resobj['extra_files_creds'][0]['file_format'] == file_formats['pairs_px2']['uuid']
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
