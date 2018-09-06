@@ -57,6 +57,7 @@
                "inversion",
                "duplication",
                "replacement",
+               "disruption",
                "point mutation",
                "complex change"
             ]

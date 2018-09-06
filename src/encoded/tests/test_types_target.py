@@ -25,6 +25,18 @@ def vague_genomic_region(testapp, lab, award):
 
 
 @pytest.fixture
+def vague_genomic_region_w_desc(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCm38',
+            'chromosome': '5',
+            'start_location': 'beginning',
+            'end_location': 'centromere',
+            'location_description': 'gene X enhancer'}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
 def genomic_target(testapp, lab, award, some_genomic_region):
     item = {'award': award['@id'],
             'lab': lab['@id'],
@@ -49,14 +61,17 @@ def multi_target(testapp, lab, award):
     return testapp.post_json('/target', item).json['@graph'][0]
 
 
-def test_target_summary_genomic(testapp, genomic_target, some_genomic_region, vague_genomic_region):
+def test_target_summary_genomic(testapp, genomic_target, some_genomic_region,
+                                vague_genomic_region, vague_genomic_region_w_desc):
     assert genomic_target['target_summary'] == 'GRCh38:1:17-544'
     assert genomic_target['display_title'] == 'GRCh38:1:17-544'
     res = testapp.patch_json(genomic_target['@id'],
                              {'targeted_genome_regions': [some_genomic_region['@id'], vague_genomic_region['@id']]})
     assert res.json['@graph'][0]['target_summary'] == 'GRCh38:1:17-544,GRCm38:5'
     assert res.json['@graph'][0]['display_title'] == 'GRCh38:1:17-544,GRCm38:5'
-
+    region_patch = {'targeted_genome_regions': [vague_genomic_region_w_desc['@id']]}
+    res = testapp.patch_json(genomic_target['@id'], region_patch).json['@graph'][0]
+    assert res['target_summary'] == 'gene X enhancer' == res['display_title']
 
 def test_target_summary_proteins(testapp, protein_complex_target):
     assert protein_complex_target['target_summary'] == 'Protein:SubunitA,SubunitX'

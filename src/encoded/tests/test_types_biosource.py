@@ -3,6 +3,16 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
+def other_mod(testapp, lab, award):
+    data = {
+        "lab": lab['@id'],
+        "award": award['@id'],
+        "modification_type": "Stable Transfection",
+        "description": "second modification"
+    }
+    return testapp.post_json('/modification', data).json['@graph'][0]
+
+@pytest.fixture
 def GM12878_mod_biosource(testapp, lab, award, gm12878_oterm, basic_modification):
     item = {
         "accession": "4DNSROOOAAC1",
@@ -16,8 +26,21 @@ def GM12878_mod_biosource(testapp, lab, award, gm12878_oterm, basic_modification
 
 
 @pytest.fixture
-def cell_lines(GM12878_biosource, F123_biosource, GM12878_mod_biosource):
-    return [GM12878_biosource, F123_biosource, GM12878_mod_biosource]
+def GM12878_twomod_biosource(testapp, lab, award, gm12878_oterm, basic_modification, other_mod):
+    item = {
+        "accession": "4DNSROOOAAC2",
+        "biosource_type": "primary cell line",
+        "cell_line": gm12878_oterm['@id'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'modifications': [basic_modification['@id'], other_mod['@id']]
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def cell_lines(GM12878_biosource, F123_biosource, GM12878_mod_biosource, GM12878_twomod_biosource):
+    return [GM12878_biosource, F123_biosource, GM12878_mod_biosource, GM12878_twomod_biosource]
 
 
 @pytest.fixture
@@ -38,21 +61,25 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     return bs
 
 
-def test_calculated_biosource_name(biosources):
+def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target):
     for biosource in biosources:
         biotype = biosource['biosource_type']
         name = biosource['biosource_name']
         if biotype == 'immortalized cell line':
             assert name == 'GM12878'
-        if biotype == 'stem cell':
+        elif biotype == 'stem cell':
             assert name == 'F123-CASTx129'
-        if biotype == 'primary cell line':
+        elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC1":
             # import pdb; pdb.set_trace()
             # used not real type here to test modification addition to name
-            assert name == 'GM12878 Crispr'
-        if biotype == 'tissue':
+            assert name == 'GM12878 with Crispr'
+            res = testapp.patch_json(biosource['@id'], {'modifications': [mod_w_change_and_target['@id']]})
+            assert res.json['@graph'][0]['biosource_name'] == 'GM12878 with eeny,meeny deletion'
+        elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
+            assert name == 'GM12878 with Crispr, Stable Transfection'
+        elif biotype == 'tissue':
             assert name == 'lung'
-        if biotype == 'multicellular organism':
+        elif biotype == 'multicellular organism':
             assert name == 'whole human'
 
 
