@@ -58,10 +58,9 @@ def workflow(testapp, software, award, lab):
 
 @pytest.mark.xfail
 def test_pseudo_run(testapp, input_json):
-    # temporary because pyest.mar.skip was not working
-    # get this test running again when webdev FileFormat stuff is set
-    assert False
-    
+    # this test can be problematic; uncomment the following line to disable it
+    # assert False
+
     res = testapp.post_json('/WorkflowRun/pseudo-run', input_json)
     assert(res)
 
