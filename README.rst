@@ -42,7 +42,8 @@ Step 2: Install or update dependencies::
     $ brew install elasticsearch@5.6 node@8
 
 
-You may need to link the brew-installed elasticsearch:
+You may need to link the brew-installed elasticsearch::
+
     $ brew link --force elasticsearch@5.6
 
 
