@@ -123,6 +123,17 @@
         "groups": ["read-only-admin"]
     },
     {
+        "email": "chad_serrant@hms.harvard.edu",
+        "first_name": "Chad",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Serrant",
+        "uuid": "9866662f-4eb6-3a4b-7cdf-3ab267226988",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "timezone": "US/Eastern",
         "email": "ud4dntest@gmail.com",
         "status": "current",
