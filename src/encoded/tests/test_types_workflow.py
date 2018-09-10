@@ -58,6 +58,9 @@ def workflow(testapp, software, award, lab):
 
 @pytest.mark.xfail
 def test_pseudo_run(testapp, input_json):
+    # this test can be problematic; uncomment the following line to disable it
+    # assert False
+
     res = testapp.post_json('/WorkflowRun/pseudo-run', input_json)
     assert(res)
 

@@ -51,7 +51,7 @@
                     "type": "string"
                 },
                 "request_path" : {
-                    "title": "User Agent",
+                    "title": "Request Path",
                     "type": "string"
                 },
                 "filename" : {
@@ -195,7 +195,7 @@
                                 }
                             }
                         }
-                        
+
                     }
                 }
             }

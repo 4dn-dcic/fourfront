@@ -21,6 +21,10 @@
 
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
+
+Fourfront is known to work with Python 3.6.x and will not work with Python 3.7 or greater. If part of the 4DN team, it is recommended to use Python 3.4.3, since that's what is running on our servers. It is best practice to create a fresh Python virtualenv using one of these versions before proceeding to the following steps.
+
+
 Step 0: Obtain AWS keys. These will need to added to your environment variables or through the AWS CLI (installed later in this process).
 
 
@@ -37,6 +41,12 @@ Step 2: Install or update dependencies::
     $ brew tap homebrew/versions
     $ brew install elasticsearch@5.6 node@8
 
+
+You may need to link the brew-installed elasticsearch::
+
+    $ brew link --force elasticsearch@5.6
+
+
 If you need to update dependencies::
 
     $ brew update
@@ -47,7 +57,7 @@ If you need to update dependencies::
 Step 3: Run buildout::
 
     $ pip install -U zc.buildout setuptools
-    $ buildout bootstrap 
+    $ buildout bootstrap --buildout-version 2.9.5 --setuptools-version 36.6.0
     $ bin/buildout
 
     NOTE:
