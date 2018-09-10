@@ -213,7 +213,6 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b122",
         "submitted_by": "wrangler@wrangler.com",
-        "public_release" : "2018-03-24",
         "project_release" : "2018-01-24",
         "description": "Expset w. only processed files and no raw files.",
         "accession": "4DNESPROC001",
@@ -223,7 +222,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released to project"
     }
 
 ]
