@@ -79,7 +79,7 @@ install:
 - pip show pytest
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not performance and and setone" --durations=10
+- if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not performance and setone" --durations=10
   --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
   fi
 - if test -n "$UNIT"; then bin/test -v -v --aws-auth -m "not performance and working and not setone" --durations=10
