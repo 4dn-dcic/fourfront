@@ -80,23 +80,23 @@ def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
 
 def test_experiment_repliseq_update_type(app, experiment_repliseq_1):
     migrator = app.registry['upgrader']
-    value = migrator.upgrade('experiment_repliseq', experiment_repliseq_1, current_version='1', target_version='2')
-    assert value['schema_version'] == '2'
-    assert value['experiment_type'] == 'Repli-seq'
+    value = migrator.upgrade('experiment_repliseq', experiment_repliseq_1, current_version='1', target_version='4')
+    assert value['schema_version'] == '4'
+    assert value['experiment_type'] == '/experiment-types/repliseq/'
 
 
 def test_experiment_chiapet_update_type(app, experiment_chiapet_1):
     migrator = app.registry['upgrader']
-    value = migrator.upgrade('experiment_chiapet', experiment_chiapet_1, current_version='1', target_version='3')
-    assert value['schema_version'] == '3'
-    assert value['experiment_type'] == 'ChIA-PET'
+    value = migrator.upgrade('experiment_chiapet', experiment_chiapet_1, current_version='1', target_version='4')
+    assert value['schema_version'] == '4'
+    assert value['experiment_type'] == '/experiment-types/chiapet/'
 
 
 def test_experiment_seq_update_type(app, experiment_seq_1):
     migrator = app.registry['upgrader']
-    value = migrator.upgrade('experiment_seq', experiment_seq_1, current_version='1', target_version='3')
-    assert value['schema_version'] == '3'
-    assert value['experiment_type'] == 'ChIP-seq'
+    value = migrator.upgrade('experiment_seq', experiment_seq_1, current_version='1', target_version='4')
+    assert value['schema_version'] == '4'
+    assert value['experiment_type'] == '/experiment-types/chipseq/'
 
 
 def test_experiment_mic_update_type(app, experiment_mic_1):

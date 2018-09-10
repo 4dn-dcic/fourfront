@@ -93,4 +93,3 @@ def experiment_1_2(value, system):
     if value.get('experiment_type') in types_list:
         exptype = value['experiment_type'].replace('-', '').replace('&', '').replace(' ', '-')
         value['experiment_type'] = '/experiment-types/' + exptype.lower() + '/'
-    # if value.get('experiment_type')
