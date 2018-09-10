@@ -23,6 +23,7 @@ as an identifying property if the term validates.'''
 
 
 def test_store_ontology_term_by_uuid(testapp, oterm):
+    oterm.pop('term_name')  # this will create preferred_name in _update
     oterm.pop('preferred_name')
     res = testapp.post_json('/ontology_term', oterm)
     assert res.json['@graph'][0]['uuid'] == oterm['uuid']
@@ -31,6 +32,7 @@ def test_store_ontology_term_by_uuid(testapp, oterm):
 
 
 def test_store_ontology_term_by_term_id(testapp, oterm):
+    oterm.pop('term_name')  # this will create preferred_name in _update
     oterm.pop('preferred_name')
     oterm.pop('uuid')
     res = testapp.post_json('/ontology_term', oterm)
@@ -46,13 +48,13 @@ def test_store_ontology_no_required_keys(testapp, oterm):
     testapp.post_json('/ontology_term', oterm, status=422)
 
 
-def test_linkto_ontology_term_by_term_name(testapp, lab, award, oterm):
+def test_linkto_ontology_term_by_term_id(testapp, lab, award, oterm):
     item = {
         "accession": "4DNSROOOAAQ1",
         "biosource_type": "immortalized cell line",
         'award': award['@id'],
         'lab': lab['@id'],
-        'tissue': oterm['term_name']
+        'tissue': oterm['term_id']
     }
 
     res = testapp.post_json('/ontology_term', oterm).json['@graph'][0]
