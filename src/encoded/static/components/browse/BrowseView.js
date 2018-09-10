@@ -28,7 +28,8 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'number_of_files', },
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  },
-    { 'field' : 'status',  }
+    { 'field' : 'status',  },
+    { 'field' : 'date_modified', }
 ], defaultColumnDefinitionMap);
 
 
@@ -57,7 +58,7 @@ export class ExperimentSetCheckBox extends React.PureComponent {
 
 /**
  * Handles state for Browse results, including page & limit.
- * 
+ *
  * @export
  * @class ResultTableContainer
  * @extends {React.Component}
@@ -89,7 +90,7 @@ class ResultTableContainer extends React.PureComponent {
                 'title' : "Exps",
                 'render' : function(expSet, columnDefinition, props, width){
                     var number_of_experiments = parseInt(expSet.number_of_experiments);
-                    
+
                     if (isNaN(number_of_experiments) || !number_of_experiments){
                         number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
                     }
@@ -97,7 +98,7 @@ class ResultTableContainer extends React.PureComponent {
                         number_of_experiments = 0;
                     }
 
-                    
+
                     return <span key="val">{ number_of_experiments }</span>;
                 }
             },
@@ -106,14 +107,14 @@ class ResultTableContainer extends React.PureComponent {
                 'render' : function(expSet, columnDefinition, props, width){
 
                     var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
-                    
+
                     if (isNaN(number_of_files) || !number_of_files){
                         number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, false);
                     }
                     if (!number_of_files){
                         number_of_files = 0;
                     }
-                    
+
                     return <span key="val">{ number_of_files }</span>;
                 }
             },
@@ -268,7 +269,7 @@ class ResultTableContainer extends React.PureComponent {
 
     render() {
         var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas, totalExpected, selectedFiles, sortBy, sortColumn, sortReverse } = this.props;
-        
+
         return (
             <div className="row">
                 { context.facets.length > 0 ?
@@ -373,7 +374,7 @@ export default class BrowseView extends React.Component {
     }
 
     static defaultProps = {
-        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'status', 'number_of_files']
+        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'date_modified', 'status', 'number_of_files']
     }
 
     constructor(props){
@@ -463,7 +464,7 @@ export default class BrowseView extends React.Component {
      * Fallback view for no results found.
      * If no 4DN projects available in this query but there are External Items, let user know.
      * And, show list of suggested actions.
-     * 
+     *
      * @param {{ query: Object.<string|string[]>, pathname: string }} hrefParts - Parsed props.href, including parsed query.
      * @param {number} countExternalSets - Count of ExpSets available in External Data, as determined via `BrowseView.externalDataSetsCount(context)`.
      */

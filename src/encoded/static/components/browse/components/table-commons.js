@@ -199,6 +199,16 @@ export const defaultColumnDefinitionMap = {
         },
         'order' : 500
     },
+    'date_modified' : {
+        'title' : 'Date Modified',
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.last_modified) return null;
+            if (!result.last_modified.date_modified) return null;
+            return <DateUtility.LocalizedTime timestamp={result.last_modified.date_modified} formatType='date-sm' />;
+        },
+        'order' : 502
+    },
     'public_release' : {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
