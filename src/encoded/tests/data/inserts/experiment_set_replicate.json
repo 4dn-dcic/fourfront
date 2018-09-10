@@ -13,7 +13,7 @@
         "public_release" : "2018-04-04",
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab",
+        "status": "released",
         "accession": "4DNESAAAAAA1",
         "processed_files": ["4DNFIAAAAAA4", "4DNFIAAAAAA5"],
         "static_headers": ["item-page-headers.ExperimentSet.data-usage-guidelines", "release-updates.TEST1", "help.analysis.file-formats.hic"]
@@ -32,7 +32,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b222",
@@ -47,7 +47,7 @@
         ],
         "lab": "some-other-guys-lab",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461444b",
-        "status": "in review by lab",
+        "status": "released",
         "badges": [
             {
                 "badge": "ddd03a23-49e5-4c33-afab-9ec90d65faf3",
@@ -66,7 +66,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b112",
@@ -81,7 +81,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b113",
@@ -94,7 +94,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b223",
@@ -107,7 +107,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b114",
@@ -121,12 +121,13 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b115",
         "submitted_by": "wrangler@wrangler.com",
         "public_release" : "2018-03-14",
+        "project_release" : "2018-01-14",
         "description": "Test replicate experiment set for CHIA-pet",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -135,12 +136,13 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b116",
         "submitted_by": "wrangler@wrangler.com",
         "public_release" : "2018-02-23",
+        "project_release" : "2017-09-23",
         "description": "Test replicate experiment set for CHIP-seq",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -149,12 +151,12 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b121",
         "submitted_by": "wrangler@wrangler.com",
-        "project_release" : "2018-12-24",
+        "project_release" : "2017-12-24",
         "public_release" : "2018-02-24",
         "description": "Test replicate experiment set for Microscopy",
         "accession": "4DNESMICAAA1",
@@ -164,7 +166,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "331106bc-8535-3338-903e-854af460b544",
