@@ -134,7 +134,7 @@
         },
         "static_header": {
             "title": "Static Header",
-            "description": "Static section to be included on experiments of this type",
+            "description": "Static section to be included on experiments of this type, detailing purpose/summary",
             "type": "string",
             "linkTo": "StaticSection"
         },
