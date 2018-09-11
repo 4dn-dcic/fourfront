@@ -397,7 +397,7 @@ export class FormattedInfoBlock extends React.Component {
      * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
      * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
      */
-    static Lab(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+    static Lab(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, isMounted = false, key = null){
 
         if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
             return null;
