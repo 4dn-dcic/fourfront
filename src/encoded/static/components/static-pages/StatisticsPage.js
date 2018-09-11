@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { stringify } from 'query-string';
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import { console, layout, navigate, ajax, isServerSide, analytics } from'./../util';
+import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
@@ -213,7 +213,7 @@ export class StatisticsChartsView extends React.Component {
         } else if (term === 'Public Release' || term === 'Publically Released'){
             return '#1f77b4'; // Blue
         } else {
-            throw new Error("Term supplied is not one of 'Internal Release' or 'Public Release'");
+            throw new Error("Term supplied is not one of 'Internal Release' or 'Public Release': '" + term + "'.");
         }
     }
 
@@ -299,7 +299,7 @@ export class StatisticsChartsView extends React.Component {
 
                 { showInternalReleaseCharts ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={expsets_released_vs_internal} colorScale={StatisticsChartsView.colorScaleForPublicVsInternal}>
+                    <GroupOfCharts width={width} colorScale={StatisticsChartsView.colorScaleForPublicVsInternal}>
 
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal" title={<span><span className="text-500">Experiment Sets</span> - internal vs public release</span>}>
                             <AreaChart data={expsets_released_vs_internal} />
@@ -455,6 +455,7 @@ export class GroupOfCharts extends React.Component {
         //},
         'width'                 : null,
         'chartMargin'           : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
+        // Only relevant if --not-- providing own colorScale and letting this component create/re-create one.
         'resetScalesWhenChange' : null,
         'colorScale'            : null
     }
@@ -464,34 +465,29 @@ export class GroupOfCharts extends React.Component {
         this.resetColorScale = this.resetColorScale.bind(this);
         this.updateColorStore = this.updateColorStore.bind(this);
 
-        var colorScale = (
-            props.colorScale ||
-            d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1)) ||
-            null
-        );
-            //xAxis, xScale, mergedXAxisData;
-        /*
-        if (props.xAxisData && props.xAxisGenerator && props.width){
-            xScale = d3.scaleTime().rangeRound([0, props.width - props.chartMargin.right - props.chartMargin.left]);
-            mergedXAxisData = AreaChart.mergeStackedDataForExtents(props.xAxisData);
-            xScale.domain(d3.extent(mergedXAxisData, function(d){
-                return d.date;
-            }));
-            xAxis = props.xAxisGenerator(xScale);
-        }
-        */
+        var colorScale = props.colorScale || d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1));
         this.state = { colorScale, 'colorScaleStore' : {} };
     }
 
     componentWillReceiveProps(nextProps){
         if (this.props.resetScalesWhenChange !== nextProps.resetScalesWhenChange){
+            console.log("Color scale reset");
             this.resetColorScale();
         }
     }
 
     resetColorScale(){
-        var colorScale      = d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1)),
-            colorScaleStore = {};
+        var colorScale, colorScaleStore = {};
+
+        if (typeof this.props.colorScale === 'function'){
+            //colorScale = function(){
+            //    return this.props.colorScale(...arguments);
+            //}.bind(this);
+            colorScale = this.props.colorScale; // Does nothing.
+        } else {
+            colorScale = d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1));
+        }
+
         this.setState({ colorScale, colorScaleStore });
     }
 
@@ -548,7 +544,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
 
     renderColorItem([term, color], idx, all){
         return (
-            <div className="col-sm-4 col-md-3 col-lg-2 mb-03">
+            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-ellipsis-container">
                 <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
                 { term }
             </div>
@@ -997,8 +993,17 @@ export class AreaChart extends React.PureComponent {
         this.correctDatesInData = this.correctDatesInData.bind(this);
         this.childKeysFromData = this.childKeysFromData.bind(this);
         this.updateDataInState = this.updateDataInState.bind(this);
+        this.getInnerChartWidth = this.getInnerChartWidth.bind(this);
+        this.getInnerChartHeight = this.getInnerChartHeight.bind(this);
+        this.calculateXAxisExtents = this.calculateXAxisExtents.bind(this);
+        this.calculateYAxisExtents = this.calculateYAxisExtents.bind(this);
+        this.xScale = this.xScale.bind(this);
+        this.yScale = this.yScale.bind(this);
         this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
         this.drawNewChart = this.drawNewChart.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.drawTooltip = _.throttle(this.drawTooltip.bind(this), 300);
+        this.removeTooltip = this.removeTooltip.bind(this);
         this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
 
         // D3 things
@@ -1013,10 +1018,20 @@ export class AreaChart extends React.PureComponent {
             this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
         }
 
+        // Will be cached here later from d3.select(this.refs..)
+        this.svg     = null;
+        this.tooltip = null;
+
+        var stackedData             = this.stack(this.correctDatesInData(props.data)),
+            mergedDataForExtents    = AreaChart.mergeStackedDataForExtents(stackedData),
+            xExtents                = this.calculateXAxisExtents(mergedDataForExtents, props.xDomain),
+            yExtents                = this.calculateYAxisExtents(mergedDataForExtents, props.yDomain);
+
         this.state = {
             'drawingError'  : false,
             'drawn'         : false,
-            'stackedData'   : this.stack(this.correctDatesInData(props.data))
+            stackedData, mergedDataForExtents,
+            xExtents, yExtents
         };
 
     }
@@ -1026,11 +1041,9 @@ export class AreaChart extends React.PureComponent {
     }
 
     componentWillReceiveProps(nextProps){
+        //console.log('DIFF COLORSCALES?', this.props.colorScale !== nextProps.colorScale);
         if (nextProps.d3TimeFormat !== this.props.d3TimeFormat){
             this.parseTime = d3.timeParse(nextProps.d3TimeFormat);
-        }
-        if (nextProps.data !== this.props.data){
-            this.updateDataInState(nextProps.data);
         }
         if (this.props.colorScale && !nextProps.colorScale){
             this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -1050,15 +1063,16 @@ export class AreaChart extends React.PureComponent {
             }
         });
 
-        setTimeout(()=>{
-            // Wait for other UI stuff to finish updating, e.g. element widths.
-            if (!shouldDrawNewChart) {
-                this.updateExistingChart();
-            } else {
-                this.destroyExistingChart();
-                this.drawNewChart();
-            }
-        }, 300);
+        if (shouldDrawNewChart){
+            this.updateDataInState(this.props, ()=>{
+                setTimeout(()=>{ // Wait for other UI stuff to finish updating, e.g. element widths.
+                    this.destroyExistingChart();
+                    this.drawNewChart();
+                }, 300);
+            });
+        } else {
+            setTimeout(this.updateExistingChart, 300);
+        }
     }
 
     /**
@@ -1081,43 +1095,96 @@ export class AreaChart extends React.PureComponent {
         }, new Set()));
     }
 
-    updateDataInState(data = this.props.data){
-        data = this.correctDatesInData(data);
+    updateDataInState(props = this.props, callback = null){
+        var data = this.correctDatesInData(props.data);
         this.stack.keys(this.childKeysFromData(data));
-        this.setState({ 'stackedData' : this.stack(data) });
+
+        var stackedData          = this.stack(data),
+            mergedDataForExtents = AreaChart.mergeStackedDataForExtents(stackedData),
+            xExtents             = this.calculateXAxisExtents(mergedDataForExtents, props.xDomain),
+            yExtents             = this.calculateYAxisExtents(mergedDataForExtents, props.yDomain);
+
+        this.setState({ stackedData, mergedDataForExtents, xExtents, yExtents }, callback);
+    }
+
+    getInnerChartWidth(){
+        var { width, margin } = this.props;
+        this.svg = this.svg || d3.select(this.refs.svg);
+        this.innerWidth = (  width || parseInt( this.refs.svg.clientWidth || this.svg.style('width') )  ) - margin.left - margin.right;
+        return this.innerWidth;
+    }
+
+    getInnerChartHeight(){
+        var { height, margin } = this.props;
+        this.svg = this.svg || d3.select(this.refs.svg);
+        this.innerHeight = (  height || parseInt( this.refs.svg.clientHeight || this.svg.style('height') )  ) - margin.top - margin.bottom;
+        return this.innerHeight;
+    }
+
+    calculateXAxisExtents(mergedData = this.state.mergedDataForExtents, xDomain = this.props.xDomain){
+        var xExtents = [null, null];
+
+        if (xDomain && xDomain[0]){
+            xExtents[0] = xDomain[0];
+        } else {
+            xExtents[0] = d3.min(mergedData, function(d){ return d.date; });
+        }
+
+        if (xDomain && xDomain[1]){
+            xExtents[1] = xDomain[1];
+        } else {
+            xExtents[1] = d3.max(mergedData, function(d){ return d.date; });
+        }
+
+        return xExtents;
+    }
+
+    calculateYAxisExtents(mergedData = this.state.mergedDataForExtents, yDomain = this.props.yDomain){
+        var yExtents = [null, null];
+
+        if (yDomain && typeof yDomain[0] === 'number'){
+            yExtents[0] = yDomain[0];
+        } else {
+            yExtents[0] = d3.min(mergedData, function(d){ return d.total; });
+        }
+
+        if (yDomain && typeof yDomain[1] === 'number'){
+            yExtents[1] = yDomain[1];
+        } else {
+            yExtents[1] = d3.max(mergedData, function(d){ return d.total; });
+        }
+
+        return yExtents;
+    }
+
+    xScale(width, xExtents = this.state.xExtents){
+        return d3.scaleTime().rangeRound([0, width]).domain(xExtents);
+    }
+
+    yScale(height, yExtents = this.state.yExtents){
+        var { yAxisScale, yAxisPower } = this.props;
+        var scale = d3['scale' + yAxisScale]().rangeRound([height, 0]).domain(yExtents);
+        if (yAxisScale === 'Pow' && yAxisPower !== null){
+            scale.exponent(yAxisPower);
+        }
+        return scale;
     }
 
     commonDrawingSetup(){
-        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis, xDomain, yDomain } = this.props;
-        var data = this.state.stackedData;
-        var svg         = d3.select(this.refs.svg),
-            width       = (  this.props.width  || parseInt( this.refs.svg.clientWidth || svg.style('width' ) )  ) - margin.left - margin.right,
-            height      = (  this.props.height || parseInt( this.refs.svg.clientHeight || svg.style('height') )  ) - margin.top - margin.bottom,
-            x           = d3.scaleTime().rangeRound([0, width]),
-            y           = d3['scale' + yAxisScale]().rangeRound([height, 0]),
+        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis, xDomain, yDomain } = this.props,
+            { stackedData, mergedDataForExtents } = this.state,
+            svg         = this.svg || d3.select(this.refs.svg),
+            width       = this.getInnerChartWidth(),
+            height      = this.getInnerChartHeight(),
+            x           = this.xScale(width),
+            y           = this.yScale(height),
             area        = d3.area()
                 .x ( function(d){ return x(d.date || d.data.date);  } )
                 .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
                 .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
 
-        if (yAxisScale === 'Pow' && yAxisPower !== null){
-            y.exponent(yAxisPower);
-        }
-
-        var mergedDataForExtents = AreaChart.mergeStackedDataForExtents(data);
 
         //console.log('TEST!@#$', d3.extent(mergedDataForExtents, function(d){ return d.date; }) );
-        var xExtents = [
-                (xDomain && xDomain[0]) || d3.min(mergedDataForExtents, function(d){ return d.date; }),
-                (xDomain && xDomain[1]) || d3.max(mergedDataForExtents, function(d){ return d.date; })
-            ],
-            yExtents = [
-                (yDomain && typeof yDomain[0] === 'number') ? yDomain[0] : d3.min(mergedDataForExtents, function(d){ return d.total; }),
-                (yDomain && yDomain[1]) || d3.max(mergedDataForExtents, function(d){ return d.total; })
-            ];
-
-        x.domain(xExtents);
-        y.domain(yExtents);
 
         var bottomAxisGenerator = xAxis || xAxisGenerator(x);
 
@@ -1133,7 +1200,9 @@ export class AreaChart extends React.PureComponent {
                     .attr("stroke-dasharray", "2,2");
             };
 
-        return { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn };
+        this.svg = svg;
+
+        return { svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn, 'data' : stackedData };
     }
 
     /**
@@ -1190,6 +1259,59 @@ export class AreaChart extends React.PureComponent {
             }, 10);
 
         });
+    }
+
+    handleMouseMove(evt){
+        evt.persist();
+        this.drawTooltip(evt);
+    }
+
+    drawTooltip(evt){
+        var svg         = this.svg      || d3.select(this.refs.svg), // SHOULD be same as evt.target.
+            tooltip     = this.tooltip  || d3.select(this.refs.tooltipContainer),
+            chartMargin = this.props.chartMargin,
+            mouseCoords = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
+
+        if (!mouseCoords) {
+            throw new Error("Could not get mouse coordinates.");
+        }
+
+        mouseCoords[0] -= (chartMargin.left || 0);
+        mouseCoords[1] -= (chartMargin.top  || 0);
+
+        if (mouseCoords[0] < 0 || mouseCoords[1] < 0){
+            return this.removeTooltip();
+        }
+
+        var chartWidth  = this.innerWidth || this.getInnerChartWidth(),
+            chartHeight = this.innerHeight || this.getInnerChartHeight(),
+            xScale      = this.xScale(chartWidth),
+            hovDate     = xScale.invert(mouseCoords[0]),
+            tooltipHtml = (
+                '<div class="inner-box"><h3>' + DateUtility.format(hovDate) + '</h3></div>'
+            );
+
+        tooltip
+            .style('height', chartHeight)
+            .style('display', 'block')
+            .html(tooltipHtml); // TODO make this a react component or something.
+
+
+        
+        console.log('X:',
+            mouseCoords,
+            xScale.invert(mouseCoords[0])
+        );
+        this.tooltip = tooltip;
+    }
+
+    removeTooltip(){
+        this.tooltip = this.tooltip || d3.select(this.refs.tooltipContainer);
+        setTimeout(()=>{
+            this.tooltip
+                .style('display', 'none')
+                .html('');
+        }, 300);
     }
 
     drawAxes(drawn, reqdFields){
@@ -1273,12 +1395,22 @@ export class AreaChart extends React.PureComponent {
     }
 
     render(){
-        var { data, width, height, transitionDuration } = this.props;
+        var { data, width, height, transitionDuration, margin } = this.props;
         if (!data || this.state.drawingError) {
             return <div>Error</div>;
         }
-        return <svg ref="svg" className="area-chart" width={width || "100%"} height={height || null}
-            style={{ height, 'width' : width || '100%', 'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s') }} />;
+        return (
+            <div className="area-chart-inner-container">
+                <svg ref="svg" className="area-chart" width={width || "100%"} height={height || null} style={{
+                    height, 'width' : width || '100%',
+                    'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s')
+                }} onMouseMove={this.handleMouseMove} onMouseOut={this.removeTooltip} />
+                <div className="chart-tooltip" ref="tooltipContainer" style={{
+                    'borderRight' : '1px solid #000', 'position' : 'absolute',
+                    'width' : 1, 'top' : margin.top, 'left' : margin.left
+                }} />
+            </div>
+        );
     }
 
 }

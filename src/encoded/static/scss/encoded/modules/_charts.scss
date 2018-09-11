@@ -1746,6 +1746,23 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 
 
+/***** Area Charts *****/
+
+
+.stats-charts-container {
+
+
+    .area-chart-inner-container {
+        position: relative;
+
+        > .chart-tooltip {
+            
+        }
+    }
+
+}
+
+
 
 /**** Cursor Component(s) ****/
 
