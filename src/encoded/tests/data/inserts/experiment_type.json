@@ -53,7 +53,6 @@
         "experiment_subcategory": "1D DNA Enrichment",
         "grouping": "Proximity to Organelle",
         "raw_files": "Reads (fastq) provided by lab",
-        "processed_files": "Enrichment over control (bedGraph) and Lamin Associated Domain Calls provided by lab",
         "uuid": "a27b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {

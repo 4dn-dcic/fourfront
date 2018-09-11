@@ -119,7 +119,8 @@
         "processed_files": {
             "title": "Processed Files",
             "description": "The type of processed files typically associated with the experiment type in the portal",
-            "type": "string"
+            "type": "string",
+            "linkTo": "StaticSection"
         },
         "data_analysis": {
             "title": "Data Analysis",
