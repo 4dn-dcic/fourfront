@@ -1755,8 +1755,95 @@ $workflow-node-color-type-global-context: #ffb3b3;
     .area-chart-inner-container {
         position: relative;
 
+        svg {
+            .right-axis-tick-line {
+                pointer-events: none;
+            }
+        }
+
         > .chart-tooltip {
-            
+            position: absolute;
+            pointer-events: none;
+
+            > .line {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 0px;
+                border-right: 1px solid #000;
+                pointer-events: none;
+            }
+
+            > .label-bg {
+                padding-left: 12px;
+                padding-right: 12px;
+                padding-top: 8px;
+                position: absolute;
+                min-width: 120px;
+                background-color: rgba(255,255,255,0.6);
+                padding-bottom: 9px;
+                border-radius: 3px;
+
+                > h5 {
+                    white-space: nowrap;
+                }
+                
+                table.current-legend {
+                    font-size: 0.925rem;
+                    tr {
+                        > td {
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            white-space: nowrap;
+                            &.term-name-cell {
+                                padding-left: 1px;
+                                text-align: left;
+                                color: #555;
+                            }
+                            &.term-name-total {
+                                padding-left: 3px;
+                                font-weight: 600;
+                            }
+                            &.patch-cell > .color-patch {
+                                border-radius: 50%;
+                            }
+                        }
+                        &.active {
+                            &:not(:last-child) > td {
+                                padding-top: 0px;
+                                padding-bottom: 4px;
+                                border-bottom: 1px solid rgba(0,0,0,0.3);
+                            }
+                            + tr > td {
+                                padding-top: 4px;
+                            }
+                            > td.term-name-cell {
+                                color: #000;
+                                text-shadow: 0 0 0;
+                            }
+                            > td.patch-cell {
+                                .color-patch {
+                                    border: 1px solid rgba(0,0,0,0.3);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &:not(.to-left){
+                    left: 10px;
+                }
+                &.to-left {
+                    right: 9px;
+                    text-align: right;
+                    table {
+                        float: right;
+                    }
+                }
+    
+            }
+
         }
     }
 

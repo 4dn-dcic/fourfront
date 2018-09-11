@@ -1002,7 +1002,7 @@ export class AreaChart extends React.PureComponent {
         this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
         this.drawNewChart = this.drawNewChart.bind(this);
         this.handleMouseMove = this.handleMouseMove.bind(this);
-        this.drawTooltip = _.throttle(this.drawTooltip.bind(this), 300);
+        this.drawTooltip = this.drawTooltip.bind(this);
         this.removeTooltip = this.removeTooltip.bind(this);
         this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
 
@@ -1195,6 +1195,7 @@ export class AreaChart extends React.PureComponent {
                 g.select('.domain').remove();
                 g.selectAll('.tick > text').remove();
                 g.selectAll('.tick > line')
+                    .attr("class", "right-axis-tick-line")
                     .attr('opacity', 0.2)
                     .attr("stroke", "#777")
                     .attr("stroke-dasharray", "2,2");
@@ -1235,12 +1236,13 @@ export class AreaChart extends React.PureComponent {
                 .data(data)
                 .enter()
                 .append('g')
-                .attr('class', 'layer')
-                .attr('data-effect', 'float')
-                .attr('data-tip', function(d){ return (d.data || d).key; });
+                .attr('class', 'layer');
 
             drawn.path = drawn.layers.append('path')
                 .attr('class', 'area')
+                .attr('data-term', function(d){
+                    return (d.data || d).key;
+                })
                 .style('fill', function(d){
                     var term = (d.data || d).key,
                         color = colorScale(term);
@@ -1262,15 +1264,20 @@ export class AreaChart extends React.PureComponent {
     }
 
     handleMouseMove(evt){
-        evt.persist();
         this.drawTooltip(evt);
     }
 
     drawTooltip(evt){
         var svg         = this.svg      || d3.select(this.refs.svg), // SHOULD be same as evt.target.
-            tooltip     = this.tooltip  || d3.select(this.refs.tooltipContainer),
+            tooltip     = this.refs.tooltip,
+            //tooltip     = this.tooltip  || d3.select(this.refs.tooltipContainer),
             chartMargin = this.props.chartMargin,
-            mouseCoords = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
+            mouseCoords = d3.clientPoint(svg.node(), evt), // [x: number, y: number]
+            stackedData = this.state.stackedData,
+            colorScale = this.props.colorScale || this.colorScale,
+            chartWidth   = this.innerWidth || this.getInnerChartWidth(),
+            chartHeight  = this.innerHeight || this.getInnerChartHeight(),
+            currentTerm  = (evt && evt.target.getAttribute('data-term')) || null;
 
         if (!mouseCoords) {
             throw new Error("Could not get mouse coordinates.");
@@ -1279,39 +1286,91 @@ export class AreaChart extends React.PureComponent {
         mouseCoords[0] -= (chartMargin.left || 0);
         mouseCoords[1] -= (chartMargin.top  || 0);
 
-        if (mouseCoords[0] < 0 || mouseCoords[1] < 0){
+        // console.log(evt.target);
+
+        if (mouseCoords[0] < 0 || mouseCoords[1] < 0 || mouseCoords[0] > chartWidth + 1 || mouseCoords[1] > chartHeight + 1){
             return this.removeTooltip();
         }
 
-        var chartWidth  = this.innerWidth || this.getInnerChartWidth(),
-            chartHeight = this.innerHeight || this.getInnerChartHeight(),
-            xScale      = this.xScale(chartWidth),
-            hovDate     = xScale.invert(mouseCoords[0]),
-            tooltipHtml = (
-                '<div class="inner-box"><h3>' + DateUtility.format(hovDate) + '</h3></div>'
-            );
+        requestAnimationFrame(()=>{
 
-        tooltip
-            .style('height', chartHeight)
-            .style('display', 'block')
-            .html(tooltipHtml); // TODO make this a react component or something.
+            var xScale       = this.xScale(chartWidth),
+                hovDate      = xScale.invert(mouseCoords[0]),
+                dateString   = DateUtility.format(hovDate, 'date-sm'),
+                leftPosition = xScale(hovDate);
 
+            tooltip.setState({
+                'visible'       : true,
+                'leftPosition'  : leftPosition,
+                'contentFxn'    : function(tProps, tState){
+                    var isToLeft           = leftPosition > (chartWidth / 2),
+                        stackedLegendItems = _.filter(_.map(stackedData, function(sD){
+                            return _.find(sD, function(stackedDatum, i, all){
+                                var curr = stackedDatum.data,
+                                    next = (all[i + 1] && all[i + 1].data) || null;
 
-        
-        console.log('X:',
-            mouseCoords,
-            xScale.invert(mouseCoords[0])
-        );
-        this.tooltip = tooltip;
+                                if (hovDate >= curr.date && (!next || next.date > hovDate)){
+                                    return true;
+                                }
+                                return false;
+                            });
+                        })),
+                        termChildren = _.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
+                            return c && c.total > 0;
+                        }).reverse().sort(function(a,b){
+                            if (a.term === currentTerm) return -1;
+                            if (b.term === currentTerm) return 1;
+                            return b.total - a.total;
+                        });
+
+                    if (termChildren.length > 7){
+                        var termChildrenRemainder = termChildren.slice(7);
+                        termChildren = termChildren.slice(0, 7);
+                        var totalForRemainder = 0;
+                        _.forEach(termChildrenRemainder, function(r){
+                            totalForRemainder += r.total;
+                        });
+                        termChildren.push({ 'term' : termChildrenRemainder.length + " More...", "noColor" : true, 'total' : totalForRemainder });
+                    }
+
+                    return (
+                        <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
+                            <h5 className="text-500 mt-0 mb-08">{ dateString }</h5>
+                            <table className="current-legend">
+                                <tbody>
+                                { _.map(termChildren, function(c, i){
+                                    return (
+                                        <tr key={i} className={currentTerm === c.term ? 'active' : null}>
+                                            <td className="patch-cell">
+                                                <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
+                                            </td>
+                                            <td className="term-name-cell">{ c.term }</td>
+                                            <td className="term-name-total">{ c.total }</td>
+                                        </tr>
+                                    );
+                                }) }
+                                </tbody>
+                            </table>
+                        </div>
+                    );
+                }
+            });
+
+        });
+
     }
 
     removeTooltip(){
+        var tooltip     = this.refs.tooltip;
+        tooltip.setState({ 'visible' : false });
+        /*
         this.tooltip = this.tooltip || d3.select(this.refs.tooltipContainer);
         setTimeout(()=>{
             this.tooltip
                 .style('display', 'none')
                 .html('');
         }, 300);
+        */
     }
 
     drawAxes(drawn, reqdFields){
@@ -1400,15 +1459,51 @@ export class AreaChart extends React.PureComponent {
             return <div>Error</div>;
         }
         return (
-            <div className="area-chart-inner-container">
+            <div className="area-chart-inner-container" onMouseMove={this.handleMouseMove} onMouseOut={this.removeTooltip}>
                 <svg ref="svg" className="area-chart" width={width || "100%"} height={height || null} style={{
                     height, 'width' : width || '100%',
                     'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s')
-                }} onMouseMove={this.handleMouseMove} onMouseOut={this.removeTooltip} />
-                <div className="chart-tooltip" ref="tooltipContainer" style={{
-                    'borderRight' : '1px solid #000', 'position' : 'absolute',
-                    'width' : 1, 'top' : margin.top, 'left' : margin.left
                 }} />
+                <ChartTooltip margin={margin} ref="tooltip" />
+                {/* <div className="chart-tooltip" ref="tooltipContainer" margin={margin} /*style={_.pick(margin, 'left', 'top', 'bottom')} />*/}
+            </div>
+        );
+    }
+
+}
+
+export class ChartTooltip extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.state = _.extend({
+            'leftPosition'  : 0,
+            'visible'       : false,
+            'mounted'       : false,
+            'contentFxn'    : null
+        }, props.initialState || {});
+    }
+
+    componentDidMount(){
+        this.tooltip = d3.select(this.refs.tooltipContainer);
+        this.setState({ 'mounted': true });
+    }
+
+    componentWillUnmount(){
+        delete this.tooltip;
+    }
+
+    render(){
+        var { margin } = this.props,
+            { leftPosition, visible, contentFxn } = this.state;
+        return (
+            <div className="chart-tooltip" ref="tooltipContainer" style={_.extend(_.pick(margin, 'left', 'top'), {
+                'transform' : 'translate(' + leftPosition + 'px, 0px)',
+                'display' : visible ? 'block' : 'none',
+                'bottom' : margin.bottom + 5
+            })}>
+                <div className="line"/>
+                { contentFxn && contentFxn(this.props, this.state) }
             </div>
         );
     }
