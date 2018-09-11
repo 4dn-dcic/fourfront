@@ -139,6 +139,12 @@
             "type": "string",
             "linkTo": "StaticSection"
         },
+        "static_headers": {
+            "title": "Static Headers",
+            "description": "DON'T SUBMIT, auto-generated.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "protocol": {
             "title": "Protocol",
             "description": "Protocol(s) that have been approved for the experiment type",
