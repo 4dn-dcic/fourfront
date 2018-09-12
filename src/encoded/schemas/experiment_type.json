@@ -133,8 +133,8 @@
                 "linkTo": "StaticSection"
             }
         },
-        "static_header": {
-            "title": "Static Header",
+        "assay_description": {
+            "title": "Assay Description",
             "description": "Static section to be included on experiments of this type, detailing purpose/summary",
             "type": "string",
             "linkTo": "StaticSection"

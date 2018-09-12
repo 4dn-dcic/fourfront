@@ -147,10 +147,10 @@ class ExperimentType(Item):
         # set name based on what is entered into title
         properties['experiment_name'] = set_namekey_from_title(properties)
 
-        static_keys = ['processed_files', 'static_header', 'data_analysis']
+        static_keys = ['processed_files', 'assay_description', 'data_analysis']
         if len([properties[key] for key in static_keys if properties.get(key)]) > 0:
-            headers = [properties.get('static_header')] + properties.get('data_analysis', [])
-            headers += [properties.get('processed_files')]
+            headers = [properties.get('assay_description'), properties.get('processed_files')]
+            headers += properties.get('data_analysis', [])
             properties['static_headers'] = [header for header in headers if header]
 
         super(ExperimentType, self)._update(properties, sheets)
