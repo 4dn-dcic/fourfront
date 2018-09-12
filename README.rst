@@ -112,11 +112,7 @@ Specific tests to run locally for schema changes::
 
 Run the Pyramid tests with::
 
-    $ bin/test -m "not bdd"
-
-Run the Browser tests with::
-
-    $ bin/test -m bdd -v --splinter-webdriver chrome
+    $ bin/test
 
 Note: to run against chrome you should first::
 

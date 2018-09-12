@@ -59,9 +59,7 @@ if sys.version_info.major == 2:
     ])
 
 tests_require = [
-    'pytest-bdd',
     'pytest-mock',
-    'pytest-splinter',
     'pytest_exact_fixtures',
     'pytest-xdist',
     'pytest-cov',
