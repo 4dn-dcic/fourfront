@@ -34,14 +34,14 @@ export function generateAddressString(lab){
  * @returns {JSX.Element} A `li` JSX element.
  */
 export function generateContactPersonListItem(contactPerson, idx){
-    var decodedEmail = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
-        decodedEmailParts = decodedEmail && decodedEmail.split('@'),
-        onClick = (decodedEmail && function(e){
+    var decodedEmail        = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
+        decodedEmailParts   = decodedEmail && decodedEmail.split('@'),
+        onClick             = (decodedEmail && function(e){
             if (typeof window.location.assign !== 'function') return false;
             window.location.assign('mailto:' + decodedEmail);
             return false;
         }) || null,
-        dataTip = (decodedEmailParts && (
+        dataTip             = (decodedEmailParts && (
             '<span class="text-300">Click to send e-mail message to</span><br/>' +
             '<div class="text-center">' +
                 '<span class="text-500">' +
@@ -85,12 +85,11 @@ export class AttributionTabView extends React.PureComponent {
         };
     }
 
-
     render(){
-        var context = this.props.context,
+        var { context } = this.props,
             { produced_in_pub, publications_of_set, lab, award, submitted_by } = context,
-            awardExists = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
-            submittedByExists = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
+            awardExists         = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
+            submittedByExists   = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
 
         return (
             <div className="info-area">
@@ -142,8 +141,9 @@ class LabsSection extends React.PureComponent {
     }
 
     contributingLabRenderFxn(lab, idx, all){
-        var atId = object.itemUtil.atId(lab),
-            contactPersons = Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
+        var isMounted       = this.state.mounted,
+            atId            = object.itemUtil.atId(lab),
+            contactPersons  = isMounted && Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
                 return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
             });
 
@@ -161,13 +161,14 @@ class LabsSection extends React.PureComponent {
 
     render(){
         var { context, className } = this.props,
-            primaryLab = (typeof context.lab !== 'string' && context.lab) || null,
-            contributingLabs = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
+            isMounted           = this.state.mounted,
+            primaryLab          = (typeof context.lab !== 'string' && context.lab) || null,
+            contributingLabs    = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
 
         if (!primaryLab && !contributingLabs) return null;
         return (
             <div className={className}>
-                { primaryLab ? FormattedInfoBlock.Lab(primaryLab) : null }
+                { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, isMounted) : null }
                 { contributingLabs ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
                         iconClass='user-plus' itemRenderFxn={this.contributingLabRenderFxn} />
