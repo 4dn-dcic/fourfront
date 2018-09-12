@@ -58,7 +58,7 @@
     {
         "title": "DNA FISH",
         "experiment_category": "Microscopy",
-        "experiment_subcategory": "DNA Labeling",
+        "experiment_subcategory": "Nucleic Acid Labeling",
         "grouping": "DNA FISH",
         "uuid": "b27b17cd-544a-3a3b-abc3-17a544544b3c"
     },
