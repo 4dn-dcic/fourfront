@@ -726,6 +726,8 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
         ('audit.WARNING.category', {'title': 'Audit category: WARNING'}),
         ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION'})
     ]
+    # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
+    disabled_facets = []
 
     # Add facets from schema if one Item type is defined.
     # Also, conditionally add extra appendable facets if relevant for type from schema.
@@ -735,6 +737,7 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
             schema_facets = OrderedDict(current_type_schema['facets'])
             for schema_facet in schema_facets.items():
                 if schema_facet[1].get('disabled', False):
+                    disabled_facets.append(schema_facet[0])
                     continue # Skip disabled facets.
                 facets.append(schema_facet)
 
@@ -746,8 +749,8 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
             use_field = '.'.join(split_field[1:])
             # use the last part of the split field to get the title
             title_field = split_field[-1]
-            if title_field in used_facets:
-                continue # Cancel if already in facets.
+            if title_field in used_facets or title_field in disabled_facets:
+                continue  # Cancel if already in facets or is disabled
             for schema in schemas:
                 if title_field in schema['properties']:
                     title_field = schema['properties'][title_field].get('title', title_field)

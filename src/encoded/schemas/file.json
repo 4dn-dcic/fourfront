@@ -35,7 +35,8 @@
             "title": "File Format",
             "type": "string",
             "linkTo": "FileFormat",
-            "lookup": 20
+            "lookup": 20,
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",

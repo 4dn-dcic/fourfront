@@ -6,7 +6,8 @@
         "description": "This format is used for short read sequence data - more information can be found here https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/#fastq-files",
         "uuid": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
         "lab": "test-4dn-lab",
-        "award": "1U01CA200059-02"
+        "award": "1U01CA200059-02",
+        "valid_item_types": ["FileFastq"]
     },
     {
         "file_format": "cool",
@@ -14,7 +15,8 @@
         "description": "This format is used for contact matrices",
         "uuid": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "test-4dn-lab",
-        "award": "1U01CA200059-02"
+        "award": "1U01CA200059-02",
+        "valid_item_types": ["FileProcessed"]
     },
     {
         "file_format": "hic",
@@ -22,6 +24,7 @@
         "description": "This format is used for contact matrices",
         "uuid": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "test-4dn-lab",
-        "award": "1U01CA200059-02"
+        "award": "1U01CA200059-02",
+        "valid_item_types": ["FileProcessed"]
     }
 ]

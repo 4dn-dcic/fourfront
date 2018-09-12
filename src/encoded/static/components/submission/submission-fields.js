@@ -469,10 +469,17 @@ class LinkedObj extends React.PureComponent{
 
         if (!window) return;
 
-        var { schema, nestedField, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props;
 
         var itemType    = schema.linkTo,
             searchURL   = '/search/?type=' + itemType + '#!selection';
+        // check if we have any schema flags that will affect the searchUrl
+        if(schema.ff_flag && schema.ff_flag.startsWith('filter:')){
+            // the field to facet on could be set dynamically
+            if(schema.ff_flag == "filter:valid_item_types"){
+                searchURL   = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+            }
+        }
 
         if (linkedObjChildWindow && !linkedObjChildWindow.closed && linkedObjChildWindow.fourfront && typeof linkedObjChildWindow.fourfront.navigate === 'function'){
             // We have access to the JS of our child window. Call app.navigate(URL) directly instead of reloading entire HTML. May not work for some browsers.

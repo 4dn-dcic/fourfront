@@ -44,7 +44,8 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "linkTo": "FileFormat"
+            "linkTo": "FileFormat",
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
