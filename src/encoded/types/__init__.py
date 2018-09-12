@@ -257,14 +257,22 @@ class TrackingItem(Item):
         return res
 
     def display_title(self):
+        date_created = self.properties.get('date_created', '')[:10]
         if self.properties.get('tracking_type') == 'google_analytics':
             for_date = self.properties.get('google_analytics', {}).get('for_date', None)
             if for_date:
                 return 'Google Analytics for ' + for_date
             return 'Google Analytics Item'
         elif self.properties.get('tracking_type') == 'download_tracking':
-            return 'Download Tracking Item'
-        return 'Tracking Item from ' + self.properties.get('date_created')
+            title = 'Download Tracking Item'
+            if date_created:
+                title = title + ' from ' + date_created
+            return title
+        else:
+            title = 'Tracking Item'
+            if date_created:
+                title = title + ' from ' + date_created
+            return title
 
 
 @collection(
