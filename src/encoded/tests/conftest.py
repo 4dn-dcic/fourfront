@@ -66,7 +66,6 @@ def pytest_configure():
     import logging
     logging.basicConfig(format='%(message)s')
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
-    logging.getLogger('selenium').setLevel(logging.DEBUG)
 
     class Shorten(logging.Filter):
         max_len = 500
