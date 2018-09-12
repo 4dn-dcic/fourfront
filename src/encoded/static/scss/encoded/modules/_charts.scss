@@ -1771,7 +1771,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 bottom: 0;
                 left: 0;
                 width: 0px;
-                border-right: 1px solid #000;
+                border-left: 1px solid #000;
                 pointer-events: none;
             }
 
@@ -1781,12 +1781,15 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-top: 8px;
                 position: absolute;
                 min-width: 120px;
-                background-color: rgba(255,255,255,0.6);
+                background-color: rgba(255,255,255,0.8);
                 padding-bottom: 9px;
-                border-radius: 3px;
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
 
                 > h5 {
                     white-space: nowrap;
+                    border-bottom: 1px solid rgba(0,0,0,0.25);
+                    padding-bottom: 9px;
                 }
                 
                 table.current-legend {
@@ -1804,20 +1807,31 @@ $workflow-node-color-type-global-context: #ffb3b3;
                             &.term-name-total {
                                 padding-left: 3px;
                                 font-weight: 600;
+                                text-align: right;
                             }
                             &.patch-cell > .color-patch {
                                 border-radius: 50%;
                             }
                         }
                         &.active {
-                            &:not(:last-child) > td {
-                                padding-top: 0px;
-                                padding-bottom: 4px;
-                                border-bottom: 1px solid rgba(0,0,0,0.3);
+                            //> td {
+                            //    padding-top: 3px;
+                            //    padding-bottom: 3px;
+                            //}
+                            &:first-child > td {
+                                padding-top: 0;
                             }
-                            + tr > td {
-                                padding-top: 4px;
+                            &:last-child > td {
+                                padding-bottom: 0;
                             }
+                            //&:not(:last-child) > td {
+                            //    padding-top: 0px;
+                            //    padding-bottom: 4px;
+                            //    border-bottom: 1px solid rgba(0,0,0,0.3);
+                            //}
+                            //+ tr > td {
+                            //    padding-top: 4px;
+                            //}
                             > td.term-name-cell {
                                 color: #000;
                                 text-shadow: 0 0 0;

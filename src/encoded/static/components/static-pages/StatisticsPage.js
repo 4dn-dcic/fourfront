@@ -58,7 +58,7 @@ export class StatisticsViewController extends React.PureComponent {
         },
         // TEMP DISABLED
         //'TrackingItem' : function(props) {
-        //    return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
+        //    return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=30';
         //}
     };
 
@@ -345,12 +345,10 @@ export class StatisticsChartsView extends React.Component {
 
                 { sessions_by_country ?
                     <GroupOfCharts>
-                        <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last 14 days</span>}>
-                            <AreaChart data={sessions_by_country} xAxisGenerator={StatisticsChartsView.xAxisGeneratorForDayInterval}
-                                xAxisGeneratorFull={StatisticsChartsView.xAxisGeneratorForDayInterval} />
+                        <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last month</span>}>
+                            <AreaChart data={sessions_by_country} xDomain={[ null, null ]} />
                         </AreaChartContainer>
                     </GroupOfCharts>
-
                 : null }
 
             </div>
@@ -449,10 +447,6 @@ export class GroupOfCharts extends React.Component {
 
     static defaultProps = {
         'className'             : 'chart-group clearfix',
-        //'xAxisData' : null,
-        //'xAxisGenerator' : function(x){
-        //    return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
-        //},
         'width'                 : null,
         'chartMargin'           : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
         // Only relevant if --not-- providing own colorScale and letting this component create/re-create one.
@@ -567,12 +561,6 @@ export class HorizontalD3ScaleLegend extends React.Component {
 export class AreaChartContainer extends React.Component {
 
     static defaultProps = {
-        'xAxisGenerator'        : function(x){ // One tick every 2 months
-            return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
-        },
-        'xAxisGeneratorExpanded': function(x){
-            return d3.axisBottom(x).ticks(d3.timeMonth.every(1));
-        },
         'colorScale' : null
     }
 
@@ -620,7 +608,7 @@ export class AreaChartContainer extends React.Component {
     }
 
     render(){
-        var { title, children, width, defaultHeight, colorScale, xAxisGenerator, xAxisGeneratorExpanded, chartMargin, updateColorStore } = this.props,
+        var { title, children, width, defaultHeight, colorScale, chartMargin, updateColorStore } = this.props,
             expanded            = this.isExpanded(),
             useWidth            = width || this.getRefWidth(),
             chartInnerWidth     = expanded ? useWidth * 3 : useWidth,
@@ -633,7 +621,6 @@ export class AreaChartContainer extends React.Component {
                 colorScale, updateColorStore,
                 'width'             : chartInnerWidth,
                 'height'            : useHeight,
-                'xAxisGenerator'    : expanded ? xAxisGeneratorExpanded || xAxisGenerator : xAxisGenerator,
                 'margin'            : chartMargin || children.props.margin || null
             });
         } else { // If no width yet, just for stylistic purposes, don't render chart itself.
@@ -678,10 +665,24 @@ export const commonParsingFxn = {
             _.forEach(subAggTerms, function(term){
                 if (externalTermMap && externalTermMap[term]) return;
                 if (!_.findWhere(datum.children, { term })){
-                    datum.children.push({ term, 'count' : 0, 'total' : 0 });
+                    datum.children.push({ term, 'count' : 0, 'total' : 0, 'date' : datum.date });
                 }
             });
         });
+
+        var today = new Date(),
+            lastDate = aggsList.length > 0 && new Date(aggsList[aggsList.length - 1].date),
+            todayAsString = today.toISOString().slice(0,10);
+
+        if (lastDate && lastDate < today){
+            aggsList.push(_.extend({}, aggsList[aggsList.length - 1], {
+                'date' : todayAsString,
+                'count' : 0,
+                'children' : _.map(aggsList[aggsList.length - 1].children, function(c){
+                    return _.extend({}, c, { 'date' : todayAsString, 'count' : 0 });
+                })
+            }));
+        }
     },
     'bucketDocCounts' : function(weeklyIntervalBuckets, externalTermMap, excludeChildren = false){
         var subBucketKeysToDate = new Set(),
@@ -894,13 +895,16 @@ export const aggregationsToChartData = {
             );
         }
     },
-    /*
+    ///*
     'sessions_by_country' : {
         'requires' : 'TrackingItem',
         'function' : function(resp){
             if (!resp || !resp['@graph']) return null;
+
+            var subBucketKeysToDate = new Set();
+
             // Notably, we do NOT sum up total here.
-            return _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
+            var aggsList =  _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
 
                 var totalSessions = _.reduce(trackingItem.google_analytics.reports.sessions_by_country, function(sum, trackingItemItem){
                     return sum + trackingItemItem['ga:sessions'];
@@ -911,19 +915,25 @@ export const aggregationsToChartData = {
                     'count'     : totalSessions,
                     'total'     : totalSessions,
                     'children'  : _.map(trackingItem.google_analytics.reports.sessions_by_country, function(trackingItemItem){
+                        subBucketKeysToDate.add(trackingItemItem['ga:country']);
                         return {
                             'term'      : trackingItemItem['ga:country'],
                             'count'     : trackingItemItem['ga:sessions'],
-                            'total'     : trackingItemItem['ga:sessions']
+                            'total'     : trackingItemItem['ga:sessions'],
+                            'date'      : trackingItem.google_analytics.for_date
                         };
                     })
                 };
 
-            });
+            }).reverse();
+
+            commonParsingFxn.fillMissingChildBuckets(aggsList, Array.from(subBucketKeysToDate));
+
+            return aggsList;
 
         }
     }
-    */
+    //*/
 };
 
 
@@ -976,16 +986,11 @@ export class AreaChart extends React.PureComponent {
         'yAxisLabel'            : 'Count',
         'yAxisScale'            : 'Linear', // Must be one of 'Linear', 'Log', 'Pow'
         'yAxisPower'            : null,
-        //'xAxisGenerator'        : function(x){ // One tick every 2 months
-        //    return d3.axisBottom(x).ticks(d3.timeMonth.every(2));
-        //},
-        //'xAxisGeneratorExpanded': function(x){
-        //    return d3.axisBottom(x).ticks(d3.timeMonth.every(1));
-        //},
         'xDomain'               : [ new Date('2017-03-01'), null ],
         'yDomain'               : [ 0, null ],
         'transitionDuration'    : 1500,
-        'colorScale'            : null // d3.scaleOrdinal(d3.schemeCategory10)
+        'colorScale'            : null, // d3.scaleOrdinal(d3.schemeCategory10)
+        'tooltipDataProperty'   : 'total'
     };
 
     constructor(props){
@@ -1001,8 +1006,7 @@ export class AreaChart extends React.PureComponent {
         this.yScale = this.yScale.bind(this);
         this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
         this.drawNewChart = this.drawNewChart.bind(this);
-        this.handleMouseMove = this.handleMouseMove.bind(this);
-        this.drawTooltip = this.drawTooltip.bind(this);
+        this.updateTooltip = this.updateTooltip.bind(this);
         this.removeTooltip = this.removeTooltip.bind(this);
         this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
 
@@ -1072,6 +1076,47 @@ export class AreaChart extends React.PureComponent {
             });
         } else {
             setTimeout(this.updateExistingChart, 300);
+        }
+    }
+
+    getXAxisGenerator(useChartWidth = null){
+        var { width } = this.props,
+            chartWidth = useChartWidth || this.innerWidth || this.getInnerChartWidth(),
+            xExtents  = this.calculateXAxisExtents(),
+            yearDiff  = (xExtents[1] - xExtents[0]) / (60 * 1000 * 60 * 24 * 365),
+            widthPerYear = chartWidth / yearDiff;
+
+
+        if (widthPerYear < 1000){
+            var monthsTick;
+            if (widthPerYear < 50) monthsTick = 24;
+            else if (widthPerYear >= 50 && widthPerYear < 200) monthsTick = 12;
+            else if (widthPerYear >= 200 && widthPerYear < 300) monthsTick = 6;
+            else if (widthPerYear >= 300 && widthPerYear < 400) monthsTick = 4;
+            else if (widthPerYear >= 400 && widthPerYear < 500) monthsTick = 3;
+            else if (widthPerYear >= 500 && widthPerYear < 750) monthsTick = 2;
+            else if (widthPerYear >= 750) monthsTick = 1;
+
+            return function(x){
+                return d3.axisBottom(x).ticks(d3.timeMonth.every(monthsTick));
+            };
+        } else if (widthPerYear >= 1000){
+            var widthPerMonth = widthPerYear / 12, daysTick;
+            if (widthPerMonth > 1500){
+                daysTick = 1;
+            } else if (widthPerMonth > 1000){
+                daysTick = 3;
+            } else if (widthPerMonth > 600){
+                daysTick = 7;
+            } else if (widthPerMonth > 300){
+                daysTick = 14;
+            } else {
+                daysTick = 30;
+            }
+
+            return function(x){
+                return d3.axisBottom(x).ticks(d3.timeDay.every(daysTick));
+            };
         }
     }
 
@@ -1171,13 +1216,14 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, /*data,*/ yAxisScale, yAxisPower, xAxisGenerator, xAxis, xDomain, yDomain } = this.props,
+        var { margin, yAxisScale, yAxisPower, xDomain, yDomain } = this.props,
             { stackedData, mergedDataForExtents } = this.state,
             svg         = this.svg || d3.select(this.refs.svg),
             width       = this.getInnerChartWidth(),
             height      = this.getInnerChartHeight(),
             x           = this.xScale(width),
             y           = this.yScale(height),
+            bottomAxisGenerator = this.getXAxisGenerator(width)(x),
             area        = d3.area()
                 .x ( function(d){ return x(d.date || d.data.date);  } )
                 .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
@@ -1185,8 +1231,6 @@ export class AreaChart extends React.PureComponent {
 
 
         //console.log('TEST!@#$', d3.extent(mergedDataForExtents, function(d){ return d.date; }) );
-
-        var bottomAxisGenerator = xAxis || xAxisGenerator(x);
 
         var leftAxisGenerator   = d3.axisLeft(y),
             rightAxisGenerator  = d3.axisRight(y).tickSize(width),
@@ -1263,21 +1307,19 @@ export class AreaChart extends React.PureComponent {
         });
     }
 
-    handleMouseMove(evt){
-        this.drawTooltip(evt);
-    }
-
-    drawTooltip(evt){
+    updateTooltip(evt){
         var svg         = this.svg      || d3.select(this.refs.svg), // SHOULD be same as evt.target.
             tooltip     = this.refs.tooltip,
             //tooltip     = this.tooltip  || d3.select(this.refs.tooltipContainer),
             chartMargin = this.props.chartMargin,
             mouseCoords = d3.clientPoint(svg.node(), evt), // [x: number, y: number]
             stackedData = this.state.stackedData,
-            colorScale = this.props.colorScale || this.colorScale,
-            chartWidth   = this.innerWidth || this.getInnerChartWidth(),
-            chartHeight  = this.innerHeight || this.getInnerChartHeight(),
-            currentTerm  = (evt && evt.target.getAttribute('data-term')) || null;
+            colorScale  = this.props.colorScale || this.colorScale,
+            chartWidth  = this.innerWidth || this.getInnerChartWidth(),
+            chartHeight = this.innerHeight || this.getInnerChartHeight(),
+            currentTerm = (evt && evt.target.getAttribute('data-term')) || null,
+            yAxisLabel  = this.props.yAxisLabel,
+            tdp         = this.props.tooltipDataProperty || 'total';
 
         if (!mouseCoords) {
             throw new Error("Could not get mouse coordinates.");
@@ -1299,6 +1341,9 @@ export class AreaChart extends React.PureComponent {
                 dateString   = DateUtility.format(hovDate, 'date-sm'),
                 leftPosition = xScale(hovDate);
 
+             // It's anti-pattern for component to update its children using setState instead of passing props as done here.
+             // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
+             // so performance/clarity-wise this approach seems more desirable.
             tooltip.setState({
                 'visible'       : true,
                 'leftPosition'  : leftPosition,
@@ -1309,28 +1354,32 @@ export class AreaChart extends React.PureComponent {
                                 var curr = stackedDatum.data,
                                     next = (all[i + 1] && all[i + 1].data) || null;
 
-                                if (hovDate >= curr.date && (!next || next.date > hovDate)){
+                                if (hovDate > curr.date && (!next || next.date >= hovDate)){
                                     return true;
                                 }
                                 return false;
                             });
                         })),
                         termChildren = _.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
-                            return c && c.total > 0;
-                        }).reverse().sort(function(a,b){
-                            if (a.term === currentTerm) return -1;
-                            if (b.term === currentTerm) return 1;
-                            return b.total - a.total;
-                        });
+                            return c && c[tdp] > 0;
+                        }).reverse();
 
                     if (termChildren.length > 7){
+                        var currentActiveItemIndex = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
+                        if (currentActiveItemIndex && currentActiveItemIndex > 6){
+                            var temp = termChildren[6];
+                            termChildren[6] = termChildren[currentActiveItemIndex];
+                            termChildren[currentActiveItemIndex] = temp;
+                        }
                         var termChildrenRemainder = termChildren.slice(7);
                         termChildren = termChildren.slice(0, 7);
                         var totalForRemainder = 0;
                         _.forEach(termChildrenRemainder, function(r){
-                            totalForRemainder += r.total;
+                            totalForRemainder += r[tdp];
                         });
-                        termChildren.push({ 'term' : termChildrenRemainder.length + " More...", "noColor" : true, 'total' : totalForRemainder });
+                        var newChild = { 'term' : termChildrenRemainder.length + " More...", "noColor" : true };
+                        newChild[tdp] = totalForRemainder;
+                        termChildren.push(newChild);
                     }
 
                     return (
@@ -1345,7 +1394,10 @@ export class AreaChart extends React.PureComponent {
                                                 <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
                                             </td>
                                             <td className="term-name-cell">{ c.term }</td>
-                                            <td className="term-name-total">{ c.total }</td>
+                                            <td className="term-name-total">
+                                                { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
+                                                { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
+                                            </td>
                                         </tr>
                                     );
                                 }) }
@@ -1363,14 +1415,6 @@ export class AreaChart extends React.PureComponent {
     removeTooltip(){
         var tooltip     = this.refs.tooltip;
         tooltip.setState({ 'visible' : false });
-        /*
-        this.tooltip = this.tooltip || d3.select(this.refs.tooltipContainer);
-        setTimeout(()=>{
-            this.tooltip
-                .style('display', 'none')
-                .html('');
-        }, 300);
-        */
     }
 
     drawAxes(drawn, reqdFields){
@@ -1459,13 +1503,12 @@ export class AreaChart extends React.PureComponent {
             return <div>Error</div>;
         }
         return (
-            <div className="area-chart-inner-container" onMouseMove={this.handleMouseMove} onMouseOut={this.removeTooltip}>
+            <div className="area-chart-inner-container" onMouseMove={this.updateTooltip} onMouseOut={this.removeTooltip}>
                 <svg ref="svg" className="area-chart" width={width || "100%"} height={height || null} style={{
                     height, 'width' : width || '100%',
                     'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s')
                 }} />
                 <ChartTooltip margin={margin} ref="tooltip" />
-                {/* <div className="chart-tooltip" ref="tooltipContainer" margin={margin} /*style={_.pick(margin, 'left', 'top', 'bottom')} />*/}
             </div>
         );
     }
