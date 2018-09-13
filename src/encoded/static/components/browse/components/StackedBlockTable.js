@@ -856,62 +856,62 @@ export class FileEntryBlock extends React.Component {
     * @param file - Describes the file object that will be displayed.
     */
     renderExternalLink(){
-      var { file } = this.props;
-      console.log(file);
-      // Find out if the file format is hic.
-      // - It needs an external href link
-      //   - Either it needs a file format of 'hic'
-      //   - OR it has a detailed file type that contains 'hic'
-      var fileIsHic = (
-        file
-        && (
-          (file.file_format && file.file_format === 'hic')
-          || (
-            file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-          )
-        && file.href
-      );
+        var { file } = this.props;
 
-      var externalLinkButton;
-      if (fileIsHic) {
-        // Make an external juicebox link.
-        var onClick = function(evt){
-          // If we're on the server side, there is no need to make an external link.
-          if (isServerSide()) return null;
+        // Find out if the file format is hic.
+        // - It needs an external href link
+        //   - Either it needs a file format of 'hic'
+        //   - OR it has a detailed file type that contains 'hic'
+        var fileIsHic = (
+            file
+            && (
+                (file.file_format && file.file_format === 'hic')
+                || (
+                  file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+                )
+            && file.href
+        );
 
-          // Get the href from the page.
-          var pageHref = file.href,
-              hrefParts = url.parse(pageHref),
-              host = hrefParts.protocol + '//' + hrefParts.host,
-              targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+        var externalLinkButton;
+        if (fileIsHic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
 
-          var win = window.open(targetLocation, '_blank');
-          win.focus();
+                // Get the href from the page.
+                var pageHref = file.href,
+                    hrefParts = url.parse(pageHref),
+                    host = hrefParts.protocol + '//' + hrefParts.host,
+                    targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the juicebox button
+            externalLinkButton = (
+                <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                    <i className="icon icon-fw icon-external-link text-smaller"/>
+                </Button>
+            );
         }
 
-        // Build the juicebox button
-        externalLinkButton = (
-            <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                <i className="icon icon-fw icon-external-link text-smaller"/>
-            </Button>
-        );
-      }
-
-      // Return the External link.
-      return externalLinkButton;
+        // Return the External link.
+        return externalLinkButton;
     }
 
     renderName(){
         var { file, colWidthStyles } = this.props;
         return <div
-          className={
-            "name col-file" + (
-              file && file.accession ? ' mono-text' : ''
-            )}
-          style={colWidthStyles ? colWidthStyles.file : null}
-          children={[
-            this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
-          ]}
+            className={
+                "name col-file" + (
+                    file && file.accession ? ' mono-text' : ''
+                )}
+            style={colWidthStyles ? colWidthStyles.file : null}
+            children={[
+                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
+            ]}
         />;
     }
 
