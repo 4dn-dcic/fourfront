@@ -191,7 +191,7 @@ class OverviewHeading extends React.PureComponent {
 
 /**
  * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
- * 
+ *
  * @memberof module:item-pages/experiment-set-view
  * @private
  * @prop {Object} context - Same context prop as available on parent component.
@@ -233,7 +233,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 
         return (
             <div className="exp-table-section">
-                { expSetCount ? 
+                { expSetCount ?
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ fileCount }</span> Raw Files</span>
                 </h3>
@@ -378,25 +378,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             tb = (tableProps && tableProps.expTable && tableProps.expTable.props) || {},
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
-        // HiC File External Link/Button to JuiceBox
-        if (file && ((file.file_format && file.file_format === 'hic') || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1) ) && file.href){
-            var onClick = function(evt){
-                    var pageHref = tableProps.href || tb.href || (store && store.getState().href),
-                        hrefParts = url.parse(pageHref),
-                        host = hrefParts.protocol + '//' + hrefParts.host,
-                        targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
-                    if (isServerSide()) return null;
-                    var win = window.open(targetLocation, '_blank');
-                    win.focus();
-                },
-                juiceBoxExternalLinkBtn = (
-                    <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                        <i className="icon icon-fw icon-external-link text-smaller"/>
-                    </Button>
-                );
-            return <span>{ title } { juiceBoxExternalLinkBtn }</span>;
-
-        } else if (file && file.higlass_uid && (
+        if (file && file.higlass_uid && (
             (file.file_format && (file.file_format === 'mcool' || file.file_format === 'bw' || file.file_format === 'bg'))
             || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
         )){
@@ -647,7 +629,9 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
     }
 }
 
-
+/**
+* This object renders the "Supplementary Files" section.
+*/
 export class OtherProcessedFilesStackedTableSection extends React.PureComponent {
 
     static checkOPFCollectionPermission(opfCollection){
