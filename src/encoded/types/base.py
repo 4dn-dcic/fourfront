@@ -119,29 +119,35 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 def get_item_if_you_can(request, value, itype=None):
+    """
+    Return the @@object view of an item from a number of different sources
+
+        :param value: String item identifier or a dict containing @id/uuid
+        :param itype: Optional string collection name for the item (e.g. /file-formats/)
+        :returns: the dictionary @@object view of the item
+    """
+    if isinstance(value, dict):
+        if 'uuid' in value:
+            value = value['uuid']
+        elif '@id' in value:
+            value = value['@id']
+    svalue = str(value)
+    if not svalue.startswith('/'):
+        svalue = '/' + svalue
     try:
-        value.get('uuid')
-        return value
-    except AttributeError:
-        svalue = str(value)
-        if not svalue.startswith('/'):
-            svalue = '/' + svalue
+        item = request.embed(svalue, '@@object')
+    except:
+        pass
+    else:
+        if item.get('uuid'):
+            return item
+    if itype is not None:
+        svalue = '/' + itype + svalue + '/?datastore=database'
         try:
-            item = request.embed(svalue, '@@object')
+            return request.embed(svalue, '@@object')
         except:
-            pass
-        else:
-            try:
-                item.get('uuid')
-                return item
-            except AttributeError:
-                pass
-        if itype is not None:
-            svalue = '/' + itype + svalue + '/?datastore=database'
-            try:
-                return request.embed(svalue, '@@object')
-            except:
-                return value
+            # this could lead to unexpected errors
+            return value
 
 
 def set_namekey_from_title(properties):
