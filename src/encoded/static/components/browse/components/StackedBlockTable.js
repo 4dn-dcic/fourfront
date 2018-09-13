@@ -867,7 +867,7 @@ export class FileEntryBlock extends React.Component {
             && (
                 (file.file_format && file.file_format === 'hic')
                 || (
-                  file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+                    file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
                 )
             && file.href
         );
