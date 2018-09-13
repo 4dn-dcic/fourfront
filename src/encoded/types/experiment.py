@@ -100,7 +100,7 @@ class Experiment(Item):
         "processed_files.file_format",
         "processed_files.file_classification",
 
-        "other_processed_files.files.href",
+        "other_processed_files.files.href"
     ]
 
     def generate_mapid(self, experiment_type, num):
