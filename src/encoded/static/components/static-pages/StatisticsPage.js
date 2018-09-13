@@ -653,7 +653,7 @@ export const commonParsingFxn = {
         return parsedBuckets;
     },
     /**
-     * MODIFIES OBJECTS IN PLACE 
+     * MODIFIES OBJECTS IN PLACE
      */
     'fillMissingChildBuckets' : function(aggsList, subAggTerms = [], externalTermMap = {}){
         _.forEach(aggsList, function(datum){
