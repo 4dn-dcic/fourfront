@@ -453,7 +453,7 @@ export class GroupOfCharts extends React.Component {
         'resetScalesWhenChange' : null,
         'colorScale'            : null
     }
-    
+
     constructor(props){
         super(props);
         this.resetColorScale = this.resetColorScale.bind(this);
@@ -635,7 +635,7 @@ export class AreaChartContainer extends React.Component {
 
 export const commonParsingFxn = {
     /**
-     * MODIFIES OBJECTS IN PLACE 
+     * MODIFIES OBJECTS IN PLACE
      */
     'countsToTotals' : function(parsedBuckets, excludeChildren = false){
         var total = 0, subTotals = {};
@@ -854,7 +854,7 @@ export const aggregationsToChartData = {
         }
     },
     */
-   /*
+    /*
     'expsets_submitted' : {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, externalTermMap){
@@ -1329,9 +1329,9 @@ export class AreaChart extends React.PureComponent {
                 dateString   = DateUtility.format(hovDate, 'date-sm'),
                 leftPosition = xScale(hovDate);
 
-             // It's anti-pattern for component to update its children using setState instead of passing props as done here.
-             // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
-             // so performance/clarity-wise this approach seems more desirable.
+            // It's anti-pattern for component to update its children using setState instead of passing props as done here.
+            // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
+            // so performance/clarity-wise this approach seems more desirable.
             tooltip.setState({
                 'visible'       : true,
                 'leftPosition'  : leftPosition,
@@ -1349,7 +1349,7 @@ export class AreaChart extends React.PureComponent {
                                 return false;
                             });
                         })),
-                        //total = Math.abs(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
+                        total = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
                         termChildren = _.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
                             return c && c[tdp] > 0;
                         }).reverse();
@@ -1376,24 +1376,24 @@ export class AreaChart extends React.PureComponent {
                     return (
                         <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
                             <h5 className="text-500 mt-0 mb-11">
-                                { dateString }{/* TODO: (total && <span className="text-400">&nbsp;&nbsp;{ total }</span>) || null */}
+                                { dateString }{ total ? <span className="text-400">&nbsp;&nbsp; { total }</span> : null }
                             </h5>
                             <table className="current-legend">
                                 <tbody>
-                                { _.map(termChildren, function(c, i){
-                                    return (
-                                        <tr key={i} className={currentTerm === c.term ? 'active' : null}>
-                                            <td className="patch-cell">
-                                                <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
-                                            </td>
-                                            <td className="term-name-cell">{ c.term }</td>
-                                            <td className="term-name-total">
-                                                { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
-                                                { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
-                                            </td>
-                                        </tr>
-                                    );
-                                }) }
+                                    { _.map(termChildren, function(c, i){
+                                        return (
+                                            <tr key={i} className={currentTerm === c.term ? 'active' : null}>
+                                                <td className="patch-cell">
+                                                    <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
+                                                </td>
+                                                <td className="term-name-cell">{ c.term }</td>
+                                                <td className="term-name-total">
+                                                    { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
+                                                    { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) }
                                 </tbody>
                             </table>
                         </div>

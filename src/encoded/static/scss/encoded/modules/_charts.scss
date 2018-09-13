@@ -1808,10 +1808,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
                                 padding-right: 0;
                                 font-weight: 600;
                                 text-align: right;
+                                width: 7%;
                             }
                             &.patch-cell {
                                 padding-left: 0;
                                 text-align: left;
+                                width: 7%;
                                 > .color-patch {
                                     border-radius: 50%;
                                 }
