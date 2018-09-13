@@ -19,11 +19,21 @@
         "update_items": [
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b222",
-                "secondary_ids": ["431106bc-8535-4448-903e-854af460b222"]
+                "secondary_ids": [
+                    {
+                        "secondary_id": "431106bc-8535-4448-903e-854af460b222",
+                        "additional_info": "This should not appear"
+                    }
+                ]
             },
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b292",
-                "secondary_ids": ["431106bc-8535-4448-903e-854af460b292"]
+                "secondary_ids": [
+                    {
+                        "secondary_id": "431106bc-8535-4448-903e-854af460b292",
+                        "additional_info": ""
+                    }
+                ]
             }
         ]
     },
@@ -47,7 +57,12 @@
         "update_items": [
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b112",
-                "secondary_ids": ["75041e2f-3e43-4388-8bbb-e861f209c555"]
+                "secondary_ids": [
+                    {
+                        "secondary_id": "75041e2f-3e43-4388-8bbb-e861f209c555",
+                        "additional_info": "Test relationship to:"
+                    }
+                ]
             }
         ]
     },
@@ -71,7 +86,12 @@
         "update_items": [
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b113",
-                "secondary_ids": ["66661e2f-3e43-4388-8bbb-e861f209c444"]
+                "secondary_ids": [
+                    {
+                        "secondary_id": "66661e2f-3e43-4388-8bbb-e861f209c444",
+                        "additional_info": ""
+                    }
+                ]
             }
         ]
     },
@@ -96,8 +116,14 @@
             {
                 "primary_id": "431106bc-8535-4448-903e-854af460b121",
                 "secondary_ids": [
-                    "47e82a90-49e5-4c33-afab-9ec90d65fab9",
-                    "47e82a90-49e5-4c33-afab-9ec90d65fcd9"
+                    {
+                        "secondary_id": "47e82a90-49e5-4c33-afab-9ec90d65fab9",
+                        "additional_info": ""
+                    },
+                    {
+                        "secondary_id": "47e82a90-49e5-4c33-afab-9ec90d65fcd9",
+                        "additional_info": ""
+                    }
                 ]
             }
         ]

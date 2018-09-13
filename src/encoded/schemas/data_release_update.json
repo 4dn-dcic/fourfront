@@ -18,7 +18,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "severity": {
             "title": "Severity",
@@ -54,10 +54,22 @@
                         "default": [],
                         "uniqueItems": true,
                         "items": {
-                            "title": "Secondary ID",
-                            "type": "string",
-                            "description": "linkTo for the secondary item",
-                            "linkTo": "Item"
+                            "type": "object",
+                            "additionalProperties": false,
+                            "title": "Secondary Item",
+                            "properties": {
+                                "secondary_id": {
+                                    "title": "Secondary ID",
+                                    "type": "string",
+                                    "description": "linkTo for the secondary item",
+                                    "linkTo": "Item"
+                                },
+                                "additional_info": {
+                                    "title": "Additional info",
+                                    "type": "string",
+                                    "description": "Info that will be added to the secondary item"
+                                }
+                            }
                         }
                     }
                 }

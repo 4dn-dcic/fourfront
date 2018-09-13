@@ -186,12 +186,15 @@ class SingleUpdate extends React.Component {
     }
 
     buildSecondary(set_id, secondary_list){
-        // create a div that contains a list of secondary @ids or
+        // create a div that contains a list of additional_info + secondary @ids or
         // nothing if the only secondary id == set_id (primary)
-        if (secondary_list.length == 1 && set_id === secondary_list[0]['@id']){
+        if (secondary_list.length == 1 && set_id === secondary_list[0]['secondary_id']['@id']){
             return null;
         }else{
-            return secondary_list.map((item) => <div key={item['@id']}><a  href={item['@id']}>{item.display_title}</a></div>);
+            return secondary_list.map((item) => <div key={item['secondary_id']['@id']}>
+                <div>{item.additional_info + ' '}</div>
+                <a href={item['secondary_id']['@id']}>{item.secondary_id.display_title}</a>
+            </div>);
         }
     }
 
