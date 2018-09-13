@@ -474,9 +474,6 @@ export class GroupOfCharts extends React.Component {
         var colorScale, colorScaleStore = {};
 
         if (typeof this.props.colorScale === 'function'){
-            //colorScale = function(){
-            //    return this.props.colorScale(...arguments);
-            //}.bind(this);
             colorScale = this.props.colorScale; // Does nothing.
         } else {
             colorScale = d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1));
@@ -493,13 +490,12 @@ export class GroupOfCharts extends React.Component {
 
     render(){
         var { children, className, width, chartMargin, xDomain } = this.props,
-            //width = this.getRefWidth() || null,
             newChildren = React.Children.map(children, (child, childIndex) => {
                 if (!child) return null;
                 return React.cloneElement(child, _.extend({ width, chartMargin, xDomain, 'updateColorStore' : this.updateColorStore }, this.state));
             });
 
-        return <div ref="elem" className={className || null}>{ newChildren }</div>;
+        return <div className={className || null} children={newChildren}/>;
     }
 
 }
@@ -533,7 +529,6 @@ export class HorizontalD3ScaleLegend extends React.Component {
             }
         }
         return false;
-        //return React.PureComponent.shouldComponentUpdate.apply(this, ...arguments);
     }
 
     renderColorItem([term, color], idx, all){
@@ -1045,7 +1040,6 @@ export class AreaChart extends React.PureComponent {
     }
 
     componentWillReceiveProps(nextProps){
-        //console.log('DIFF COLORSCALES?', this.props.colorScale !== nextProps.colorScale);
         if (nextProps.d3TimeFormat !== this.props.d3TimeFormat){
             this.parseTime = d3.timeParse(nextProps.d3TimeFormat);
         }
@@ -1055,7 +1049,6 @@ export class AreaChart extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps, pastState){
-        // TODO: this.updateExistingChart();
         var shouldDrawNewChart = false;
 
         _.forEach(_.keys(this.props), (k) => {
@@ -1087,7 +1080,7 @@ export class AreaChart extends React.PureComponent {
             widthPerYear = chartWidth / yearDiff;
 
 
-        if (widthPerYear < 1000){
+        if (widthPerYear < 3600){
             var monthsTick;
             if (widthPerYear < 50) monthsTick = 24;
             else if (widthPerYear >= 50 && widthPerYear < 200) monthsTick = 12;
@@ -1100,7 +1093,7 @@ export class AreaChart extends React.PureComponent {
             return function(x){
                 return d3.axisBottom(x).ticks(d3.timeMonth.every(monthsTick));
             };
-        } else if (widthPerYear >= 1000){
+        } else if (widthPerYear >= 3600){
             var widthPerMonth = widthPerYear / 12, daysTick;
             if (widthPerMonth > 1500){
                 daysTick = 1;
@@ -1108,10 +1101,8 @@ export class AreaChart extends React.PureComponent {
                 daysTick = 3;
             } else if (widthPerMonth > 600){
                 daysTick = 7;
-            } else if (widthPerMonth > 300){
-                daysTick = 14;
             } else {
-                daysTick = 30;
+                daysTick = 14;
             }
 
             return function(x){
@@ -1228,9 +1219,6 @@ export class AreaChart extends React.PureComponent {
                 .x ( function(d){ return x(d.date || d.data.date);  } )
                 .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
                 .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
-
-
-        //console.log('TEST!@#$', d3.extent(mergedDataForExtents, function(d){ return d.date; }) );
 
         var leftAxisGenerator   = d3.axisLeft(y),
             rightAxisGenerator  = d3.axisRight(y).tickSize(width),
@@ -1349,6 +1337,7 @@ export class AreaChart extends React.PureComponent {
                 'leftPosition'  : leftPosition,
                 'contentFxn'    : function(tProps, tState){
                     var isToLeft           = leftPosition > (chartWidth / 2),
+                        maxTermsVisible    = Math.floor((chartHeight - 60) / 18),
                         stackedLegendItems = _.filter(_.map(stackedData, function(sD){
                             return _.find(sD, function(stackedDatum, i, all){
                                 var curr = stackedDatum.data,
@@ -1360,19 +1349,21 @@ export class AreaChart extends React.PureComponent {
                                 return false;
                             });
                         })),
+                        //total = Math.abs(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
                         termChildren = _.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
                             return c && c[tdp] > 0;
                         }).reverse();
 
-                    if (termChildren.length > 7){
-                        var currentActiveItemIndex = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
-                        if (currentActiveItemIndex && currentActiveItemIndex > 6){
-                            var temp = termChildren[6];
-                            termChildren[6] = termChildren[currentActiveItemIndex];
+                    if (termChildren.length > maxTermsVisible){
+                        var lastTermIdx = maxTermsVisible - 1,
+                            currentActiveItemIndex = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
+                        if (currentActiveItemIndex && currentActiveItemIndex > lastTermIdx){
+                            var temp = termChildren[lastTermIdx];
+                            termChildren[lastTermIdx] = termChildren[currentActiveItemIndex];
                             termChildren[currentActiveItemIndex] = temp;
                         }
-                        var termChildrenRemainder = termChildren.slice(7);
-                        termChildren = termChildren.slice(0, 7);
+                        var termChildrenRemainder = termChildren.slice(maxTermsVisible);
+                        termChildren = termChildren.slice(0, maxTermsVisible);
                         var totalForRemainder = 0;
                         _.forEach(termChildrenRemainder, function(r){
                             totalForRemainder += r[tdp];
@@ -1384,7 +1375,9 @@ export class AreaChart extends React.PureComponent {
 
                     return (
                         <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
-                            <h5 className="text-500 mt-0 mb-08">{ dateString }</h5>
+                            <h5 className="text-500 mt-0 mb-11">
+                                { dateString }{/* TODO: (total && <span className="text-400">&nbsp;&nbsp;{ total }</span>) || null */}
+                            </h5>
                             <table className="current-legend">
                                 <tbody>
                                 { _.map(termChildren, function(c, i){

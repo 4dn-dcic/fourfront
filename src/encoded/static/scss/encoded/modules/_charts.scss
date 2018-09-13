@@ -1780,7 +1780,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-right: 12px;
                 padding-top: 8px;
                 position: absolute;
-                min-width: 120px;
+                min-width: 135px;
                 background-color: rgba(255,255,255,0.8);
                 padding-bottom: 9px;
                 border-bottom-left-radius: 5px;
@@ -1788,16 +1788,15 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
                 > h5 {
                     white-space: nowrap;
-                    border-bottom: 1px solid rgba(0,0,0,0.25);
-                    padding-bottom: 9px;
                 }
                 
                 table.current-legend {
-                    font-size: 0.925rem;
+                    font-size: 0.9rem;
+                    width: 100%;
                     tr {
                         > td {
-                            padding-top: 0;
-                            padding-bottom: 0;
+                            padding-top: 0px;
+                            padding-bottom: 1px;
                             white-space: nowrap;
                             &.term-name-cell {
                                 padding-left: 1px;
@@ -1805,33 +1804,20 @@ $workflow-node-color-type-global-context: #ffb3b3;
                                 color: #555;
                             }
                             &.term-name-total {
-                                padding-left: 3px;
+                                padding-left: 5px;
+                                padding-right: 0;
                                 font-weight: 600;
                                 text-align: right;
                             }
-                            &.patch-cell > .color-patch {
-                                border-radius: 50%;
+                            &.patch-cell {
+                                padding-left: 0;
+                                text-align: left;
+                                > .color-patch {
+                                    border-radius: 50%;
+                                }
                             }
                         }
                         &.active {
-                            //> td {
-                            //    padding-top: 3px;
-                            //    padding-bottom: 3px;
-                            //}
-                            &:first-child > td {
-                                padding-top: 0;
-                            }
-                            &:last-child > td {
-                                padding-bottom: 0;
-                            }
-                            //&:not(:last-child) > td {
-                            //    padding-top: 0px;
-                            //    padding-bottom: 4px;
-                            //    border-bottom: 1px solid rgba(0,0,0,0.3);
-                            //}
-                            //+ tr > td {
-                            //    padding-top: 4px;
-                            //}
                             > td.term-name-cell {
                                 color: #000;
                                 text-shadow: 0 0 0;
