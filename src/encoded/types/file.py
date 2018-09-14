@@ -920,8 +920,7 @@ def validate_file_format_validity_for_file_type(context, request):
         file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
         # if get item if you can did not work it will return the data['file_format']
         if file_format_item == data['file_format']:
-            msg = 'File format {} does not exist'.format(data['file_format'])
-            request.errors.add('body', None, msg)
+            # item level validation will take care of generating the error
             return
         file_format_name = file_format_item['file_format']
         allowed_types = file_format_item.get('valid_item_types')

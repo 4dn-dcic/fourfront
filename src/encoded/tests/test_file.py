@@ -730,3 +730,15 @@ def test_validate_file_format_validity_for_file_type_fires(testapp, file_formats
     errors = res2.json['errors']
     descriptions = ''.join([e['description'] for e in errors])
     assert "File format fastq is not allowed for FileProcessed" in descriptions
+
+
+def test_file_format_does_not_exist(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': 'waldo',
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=422)
+    errors = res1.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "'waldo' not found" in descriptions
