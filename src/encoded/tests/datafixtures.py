@@ -402,7 +402,7 @@ def file_formats(testapp, lab, award):
                 "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileCalibration"]},
         'chromsizes': {'standard_file_extension': 'chrom.sizes',
                        "valid_item_types": ["FileReference"]},
-        'other': {'standard_file_extension': 'other',
+        'other': {'standard_file_extension': '',
                   "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]}
     }
 
