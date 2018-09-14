@@ -157,7 +157,7 @@
     },
     {
         "file_format": "other",
-        "standard_file_extension": "",
+        "standard_file_extension": "other",
         "description": "This format is used for other files",
         "uuid": "d13d06cf-218e-4f61-11f0-91f226248b2c",
         "lab": "4dn-dcic-lab",
@@ -247,5 +247,62 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "valid_item_types": ["FileProcessed"]
+    },
+    {
+        "file_format": "csv",
+        "standard_file_extension": "csv",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f336118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileProcessed"]
+    },
+
+    {
+        "file_format": "spt",
+        "standard_file_extension": "spt",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f446118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileProcessed"]
+    },
+    {
+        "file_format": "bedpe",
+        "standard_file_extension": "bedpe.gz",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f556118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileProcessed"]
+    },
+    {
+        "file_format": "flex",
+        "standard_file_extension": "flex",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f666118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileMicroscopy"]
+    },
+    {
+        "file_format": "dv",
+        "standard_file_extension": "dv",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f776118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileMicroscopy"]
+    },
+    {
+        "file_format": "r3d",
+        "standard_file_extension": "r3d",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f886118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileMicroscopy"]
+    },
+    {
+        "file_format": "nd2",
+        "standard_file_extension": "nd2",
+        "uuid": "d13d06cf-218e-4f61-55f0-94f556118b2c",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileMicroscopy"]
     }
 ]
