@@ -923,8 +923,8 @@ def validate_file_format_validity_for_file_type(context, request):
             # item level validation will take care of generating the error
             return
         file_format_name = file_format_item['file_format']
-        allowed_types = file_format_item.get('valid_item_types')
-        file_type = context.type_info.item_type.title().replace("_", '')
+        allowed_types = file_format_item.get('valid_item_types', [])
+        file_type = context.type_info.name
         if file_type not in allowed_types:
             msg = 'File format {} is not allowed for {}'.format(file_format_name, file_type)
             request.errors.add('body', None, msg)

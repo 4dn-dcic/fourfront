@@ -1095,7 +1095,6 @@ class S3FileInput extends React.Component{
 
     constructor(props){
         super(props);
-        this.getFileExtensionRequired = this.getFileExtensionRequired.bind(this);
         this.state = {
             'percentDone': null,
             'sizeUploaded': null,
@@ -1128,44 +1127,43 @@ class S3FileInput extends React.Component{
         }
     }
 
-    getFileExtensionRequired(){
-        // get the current context and overall schema for the file object
-        var currContext         = this.props.getCurrContext(),
-            currSchema          = this.props.getCurrSchema(),
-            schema_extensions   = object.getNestedProperty(currSchema, ['file_format_file_extension'], true),
-            currFileFormat      = fileUtil.getFileFormatStr(currContext),
-            extension           = (schema_extensions && schema_extensions[currFileFormat]) || null; // find the extension the file should have
-
-        if (!extension) {
-            alert('Internal file extension conflict.');
-            return null;
-        }
-
-        return extension;
-    }
-
     /*
     Handle file selection. Store the file in SubmissionView state and change
     the filename context using modifyNewContext
     */
     handleChange = (e) => {
         var { modifyNewContext, nestedField, linkType, arrayIdx } = this.props,
-            extension = this.getFileExtensionRequired(),
             file = e.target.files[0];
 
-        if (!file || typeof extension !== 'string') return; // No file was chosen.
+        if (!file) return; // No file was chosen.
 
         var filename = file.name ? file.name : "unknown";
 
-        // check extension
-        if (!filename.endsWith(extension)) {
-            alert('File extension error! Please enter a file of type: ' + extension);
-            return;
+        // check Extensions
+        var fileFormat = this.props.getCurrContext().file_format;
+        if(!fileFormat.startsWith('/')){
+            fileFormat = '/' + fileFormat;
         }
+        var extensions = [];
+        ajax.promise(fileFormat + '?frame=object').then(response => {
+            if (response['file_format'] && response['@id']){
+                extensions = response.standard_file_extension ? [response.standard_file_extension] : [];
+                if(response.other_allowed_extensions){
+                    extensions = extensions.concat(response.other_allowed_extensions);
+                }
+                if (!_.any(extensions, function(ext){return filename.endsWith(ext);})){
+                    alert('File extension error! Please enter a file with one of the following extensions: ' + extensions.join(', '));
+                    return;
+                }
 
-        modifyNewContext(nestedField, filename, 'file upload', linkType, arrayIdx);
-        // calling modifyFile changes the 'file' state of top level component
-        this.modifyFile(file);
+                modifyNewContext(nestedField, filename, 'file upload', linkType, arrayIdx);
+                // calling modifyFile changes the 'file' state of top level component
+                this.modifyFile(file);
+            }else{
+                alert('Internal file extension conflict.');
+                return;
+            }
+        });
     }
 
     /*

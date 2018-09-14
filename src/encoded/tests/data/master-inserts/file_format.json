@@ -300,7 +300,7 @@
     {
         "file_format": "nd2",
         "standard_file_extension": "nd2",
-        "uuid": "d13d06cf-218e-4f61-55f0-94f556118b2c",
+        "uuid": "d13d06cf-218e-4f61-55f0-94a156118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "valid_item_types": ["FileMicroscopy"]
