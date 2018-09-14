@@ -702,3 +702,41 @@ def test_validate_extra_files_bad_extras_format(
     errors = res1.json['errors']
     descriptions = ''.join([e['description'] for e in errors])
     assert "'whosit' not a valid or known file format" in descriptions
+
+
+def test_validate_file_format_validity_for_file_type_allows(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+    }
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=201)
+    res2 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    assert not res1.json.get('errors')
+    assert not res2.json.get('errors')
+
+
+def test_validate_file_format_validity_for_file_type_fires(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+    }
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=422)
+    errors = res1.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "File format pairs is not allowed for FileFastq" in descriptions
+    res2 = testapp.post_json('/files-processed', my_proc_file, status=422)
+    errors = res2.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "File format fastq is not allowed for FileProcessed" in descriptions

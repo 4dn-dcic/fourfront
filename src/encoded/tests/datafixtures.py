@@ -397,7 +397,7 @@ def file_formats(testapp, lab, award):
                   "valid_item_types": ["FileProcessed"]},
         'tiff': {'standard_file_extension': 'tiff',
                  'other_allowed_extensions': ['tif'],
-                 "valid_item_types": ["FileMicroscopy"]},
+                 "valid_item_types": ["FileMicroscopy", "FileCalibration"]},
         'zip': {'standard_file_extension': 'zip',
                 "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileCalibration"]},
         'chromsizes': {'standard_file_extension': 'chrom.sizes',

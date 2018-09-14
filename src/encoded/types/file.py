@@ -975,11 +975,11 @@ def validate_file_filename(context, request):
 def validate_processed_file_unique_md5_with_bypass(context, request):
     '''validator to check md5 on processed files, unless you tell it
        not to'''
-    data = request.json
-
-    if 'md5sum' not in data or not data['md5sum']:
+    # skip validator if not file processed
+    if context.type_info.item_type != 'file_processed':
         return
-    if context.type_info.item_type != 'file_processed':  # is this necessary?
+    data = request.json
+    if 'md5sum' not in data or not data['md5sum']:
         return
     if 'force_md5' in request.query_string:
         return
@@ -1006,7 +1006,11 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
 
 
 def validate_processed_file_produced_from_field(context, request):
-    '''validator to make sure that the values in the produced_from field are valid file identifiers'''
+    '''validator to make sure that the values in the
+    produced_from field are valid file identifiers'''
+    # skip validator if not file processed
+    if context.type_info.item_type != 'file_processed':
+        return
     data = request.json
     if 'produced_from' not in data:
         return
@@ -1091,29 +1095,29 @@ def validate_extra_file_format(context, request):
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_file_filename,
+             validators=[validate_item_content_post,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field,
-                         validate_extra_file_format])
+                         validate_processed_file_produced_from_field])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
 
-@view_config(context=File, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_file_filename, validate_extra_file_format])
-def file_edit(context, request, render=None):
-    return item_edit(context, request, render)
-
-
-@view_config(context=FileProcessed, permission='edit', request_method='PUT',
+@view_config(context=File, permission='edit', request_method='PUT',
              validators=[validate_item_content_put,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field,
-                         validate_extra_file_format])
-@view_config(context=FileProcessed, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_file_filename,
+                         validate_processed_file_produced_from_field])
+@view_config(context=File, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field,
-                         validate_extra_file_format])
-def procesed_edit(context, request, render=None):
+                         validate_processed_file_produced_from_field])
+def file_edit(context, request, render=None):
     return item_edit(context, request, render)
