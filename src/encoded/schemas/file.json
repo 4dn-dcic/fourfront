@@ -243,35 +243,6 @@
             "comment" : "disabled flag may be removed after we can handle ranges in URI filters."
         }
     },
-    "aggregations" : {
-        "weekly_interval_public_release" : {
-            "date_histogram" : {
-                "field": "embedded.public_release",
-                "interval": "week",
-                "format": "yyyy-MM-dd"
-            },
-            "aggs" : {
-                "file_size_volume" : {
-                    "sum" : {
-                        "field" : "embedded.file_size"
-                    }
-                },
-                "group_by_award" : {
-                    "terms" : {
-                        "field": "embedded.award.center_title.raw",
-                        "missing" : "No value"
-                    },
-                    "aggs" : {
-                        "file_size_volume" : {
-                            "sum" : {
-                                "field" : "embedded.file_size"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
     "columns": {
         "file_type" : {
             "title" : "File Type"

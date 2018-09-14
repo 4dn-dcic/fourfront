@@ -3,10 +3,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import url from 'url';
+import queryString from 'query-string';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
-import { detect } from 'detect-browser';
+import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
@@ -239,10 +240,11 @@ export default class App extends React.Component {
      * - Emits an event from browser window named 'fourfrontinitialized', letting any listeners (parent windows, etc.) know that JS of this window has initialized. Posts message with same 'eventType' as well.
      */
     componentDidMount() {
+        var { href, context } = this.props;
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics( analytics.getTrackingId(this.props.href), this.props.context );
+        analytics.initializeGoogleAnalytics( analytics.getTrackingId(href), context );
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
@@ -251,23 +253,22 @@ export default class App extends React.Component {
 
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and update props.href (via Redux), if it is different.
-        var query_href = this.props.href;
+        var queryHref = href;
         // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
         if (document.querySelector('link[rel="canonical"]')){
-            query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
+            queryHref = document.querySelector('link[rel="canonical"]').getAttribute('href');
         }
         // Grab window.location.href w/ query_href as fallback.
-        query_href = globals.windowHref(query_href);
-        if (this.props.href !== query_href){
+        queryHref = globals.windowHref(queryHref);
+        if (href !== queryHref){
             store.dispatch({
-                type: {'href':query_href}
+                type: {'href':queryHref}
             });
         }
 
         if (this.historyEnabled) {
-            var data = this.props.context;
             try {
-                window.history.replaceState(data, '', window.location.href);
+                window.history.replaceState(context, '', window.location.href);
             } catch (exc) {
                 // Might fail due to too large data
                 window.history.replaceState(null, '', window.location.href);
@@ -294,8 +295,8 @@ export default class App extends React.Component {
         });
 
         // Detect browser and save it to state. Show alert to inform people we're too ~lazy~ under-resourced to support MS Edge to the max.
-        var browserInfo = detect(),
-            mounted = true;
+        var browserInfo = detectBrowser(),
+            mounted     = true;
 
         console.log('BROWSER', browserInfo);
 
@@ -317,13 +318,39 @@ export default class App extends React.Component {
             });
         }
 
-        this.setState({ mounted, browserInfo }, ()=>{
+        // Post-mount stuff
+        this.setState({ mounted, browserInfo }, () => {
+
+            console.log('App is mounted, dispatching fourfrontinitialized event.');
+            // DEPRECATED:
             // Emit event from our window object to notify that fourfront JS has initialized.
             // This is to be used by, e.g. submissions view which might control a child window.
-            console.log('App is mounted, dispatching fourfrontinitialized event.');
             window.dispatchEvent(new Event('fourfrontinitialized'));
-            if (window.opener) { // If we have parent window, post a message to it as well.
-                window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
+            // CURRENT: If we have parent window, post a message to it as well.
+            if (window.opener) window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
+
+            // If we have UTM URL parameters in the URI, attempt to set history state (& browser) URL to exclude them after a few seconds
+            // after Google Analytics may have stored proper 'source', 'medium', etc. (async)
+            var urlParts = url.parse(queryHref, true),
+                paramsToClear = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+            if (urlParts.query && _.any(paramsToClear, function(prm){ return typeof urlParts.query[prm] !== 'undefined'; })){
+                setTimeout(()=>{
+                    var queryToSet = _.clone(urlParts.query);
+                    _.forEach(paramsToClear, function(prm){ typeof queryToSet[prm] !== 'undefined' && delete queryToSet[prm]; });
+                    var nextUrl = (
+                        urlParts.protocol + '//' + urlParts.host +
+                        urlParts.pathname + (_.keys(queryToSet).length > 0 ? '?' + queryString.stringify(queryToSet) : '')
+                    );
+                    if (nextUrl !== queryHref && this.historyEnabled){
+                        try {
+                            window.history.replaceState(context, '', nextUrl);
+                        } catch (exc) {
+                            // Might fail due to too large data
+                            window.history.replaceState(null, '', nextUrl);
+                        }
+                        console.info('Replaced UTM params in URI:', queryHref, nextUrl);
+                    }
+                }, 3000);
             }
         });
     }
@@ -845,10 +872,7 @@ export default class App extends React.Component {
                         console.error(e);
                     }
 
-                    if ( // Bad or expired JWT
-                        (response.detail === "Bad or expired token.") ||
-                        (jwtHeader === 'expired')
-                    ){
+                    if (response.detail === "Bad or expired token." || jwtHeader === 'expired'){ // Bad or expired JWT
                         JWT.remove();
 
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
@@ -891,10 +915,9 @@ export default class App extends React.Component {
                     if (options.replace) {
                         window.location.replace(href + fragment);
                     } else {
-                        var old_path = ('' + window.location).split('#')[0];
                         window.location.assign(href + fragment);
-                        return;
                     }
+                    return;
                 }
 
                 var hrefToSet = (request && request.xhr && request.xhr.responseURL) || href; // Get correct URL from XHR, in case we hit a redirect during the request.
@@ -931,24 +954,42 @@ export default class App extends React.Component {
                 if (err.status === 500){
                     analytics.exception('Server Error: ' + err.status + ' - ' + href);
                 }
+
                 if (err.status === 404){
                     analytics.exception('Page Not Found - ' + href);
                 }
 
                 // Err could be an XHR object if could not parse JSON.
-                if (
-                    typeof err.status === 'number' &&
-                    [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
-                ) {
+                if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
                     analytics.exception('Network Error: ' + err.status + ' - ' + href);
-                } else if (err.message !== 'HTTPForbidden'){
-                    console.error('Error in App.navigate():', err);
-                    throw err; // Bubble it up.
-                } else {
+                } else if (err.message === 'HTTPForbidden'){
+                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response.
                     console.info("Logged Out");
+                } else {
+                    console.error('Error in App.navigate():', err);
+                    throw err; // Unknown/unanticipated error: Bubble it up.
                 }
+
+                // Possibly not needed: If no major JS error thrown, add entry in Browser History so that back/forward buttons still works after hitting a 404 or similar.
+                // title currently ignored by browsers
+                if (options.replace){
+                    try {
+                        window.history.replaceState(err, '', href + fragment);
+                    } catch (exc) {
+                        // Might fail due to too large data
+                        window.history.replaceState(null, '', href + fragment);
+                    }
+                } else {
+                    try {
+                        window.history.pushState(err, '', href + fragment);
+                    } catch (exc) {
+                        // Might fail due to too large data
+                        window.history.pushState(null, '', href + fragment);
+                    }
+                }
+
             });
             console.info('Navigating > ', request);
             dispatch_dict.contextRequest = request;
@@ -1157,7 +1198,6 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
-                    <SEO.FullSite baseDomain={baseDomain} />
                 </head>
                 <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
                     <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
