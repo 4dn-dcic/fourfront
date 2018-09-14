@@ -12,6 +12,7 @@
     {
         "file_format": "txt",
         "standard_file_extension": "txt",
+        "other_allowed_extensions": ["txt.gz"],
         "description": "This format is used for plain text files",
         "uuid": "dba26778-f40a-4561-a552-65539702ded4",
         "lab": "4dn-dcic-lab",
