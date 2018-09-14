@@ -376,19 +376,34 @@ def file_formats(testapp, lab, award):
     from uuid import uuid4
     formats = {}
     ef_format_info = {
-        'pairs_px2': {'standard_file_extension': 'pairs.gz.px2'},
-        'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2'},
-        'bai': {'standard_file_extension': 'bam.bai'}
+        'pairs_px2': {'standard_file_extension': 'pairs.gz.px2',
+                      "valid_item_types": ["FileProcessed"]},
+        'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2',
+                        "valid_item_types": ["FileProcessed"]},
+        'bai': {'standard_file_extension': 'bam.bai',
+                "valid_item_types": ["FileProcessed"]}
     }
     format_info = {
-        'fastq': {'standard_file_extension': 'fastq.gz', 'other_allowed_extensions': ['fq.gz']},
-        'pairs': {'standard_file_extension': 'pairs.gz', "extrafile_formats": ['pairs_px2', 'pairsam_px2']},
-        'bam': {'standard_file_extension': 'bam', 'extrafile_formats': ['bai']},
-        'mcool': {'standard_file_extension': 'mcool'},
-        'tiff': {'standard_file_extension': 'tiff', 'other_allowed_extensions': ['tif']},
-        'zip': {'standard_file_extension': 'zip'},
-        'chromsizes': {'standard_file_extension': 'chrom.sizes'},
-        'other': {'standard_file_extension': 'other'}
+        'fastq': {'standard_file_extension': 'fastq.gz',
+                  'other_allowed_extensions': ['fq.gz'],
+                  "valid_item_types": ["FileFastq"]},
+        'pairs': {'standard_file_extension': 'pairs.gz',
+                  "extrafile_formats": ['pairs_px2', 'pairsam_px2'],
+                  "valid_item_types": ["FileProcessed"]},
+        'bam': {'standard_file_extension': 'bam',
+                'extrafile_formats': ['bai'],
+                "valid_item_types": ["FileProcessed"]},
+        'mcool': {'standard_file_extension': 'mcool',
+                  "valid_item_types": ["FileProcessed"]},
+        'tiff': {'standard_file_extension': 'tiff',
+                 'other_allowed_extensions': ['tif'],
+                 "valid_item_types": ["FileMicroscopy"]},
+        'zip': {'standard_file_extension': 'zip',
+                "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileCalibration"]},
+        'chromsizes': {'standard_file_extension': 'chrom.sizes',
+                       "valid_item_types": ["FileReference"]},
+        'other': {'standard_file_extension': 'other',
+                  "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]}
     }
 
     for eff, info in ef_format_info.items():
