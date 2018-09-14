@@ -7,6 +7,7 @@ import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
+import url from 'url';
 
 /**
  * Label to show at top left of Name block.

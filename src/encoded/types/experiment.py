@@ -98,9 +98,7 @@ class Experiment(Item):
         "processed_files.file_size",
         "processed_files.upload_key",
         "processed_files.file_format",
-        "processed_files.file_classification",
-
-        "other_processed_files.files.href"
+        "processed_files.file_classification"
     ]
 
     def generate_mapid(self, experiment_type, num):
