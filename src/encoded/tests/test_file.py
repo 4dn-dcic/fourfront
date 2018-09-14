@@ -673,16 +673,6 @@ def test_validate_extra_files_extra_files_ok_patch_existing_extra_format(testapp
     assert not res2.json.get('errors')
 
 
-def test_validate_extra_files_unknown_parent_format(testapp, processed_file_data):
-    extf = {'file_format': 'pairs_px2'}
-    processed_file_data['file_format'] = 'joey'
-    processed_file_data['extra_files'] = [extf]
-    res1 = testapp.post_json('/files-processed', processed_file_data, status=422)
-    errors = res1.json['errors']
-    descriptions = ''.join([e['description'] for e in errors])
-    assert "Can't find parent file format for extra_files" in descriptions
-
-
 def test_validate_extra_files_parent_should_not_have_extras(
         testapp, processed_file_data, file_formats):
     extf = {'file_format': 'pairs_px2'}
