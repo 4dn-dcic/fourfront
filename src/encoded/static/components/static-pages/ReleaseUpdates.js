@@ -72,7 +72,7 @@ export default class ReleaseUpdates extends React.Component {
         if (useParam){
             qString += ' AND parameters:' + useParam;
         }
-        var update_url = '/search/?type=DataReleaseUpdate&sort=-date_created&q=' + encodeURIComponent(qString);
+        var update_url = '/search/?type=DataReleaseUpdate&limit=all&sort=-date_created&q=' + encodeURIComponent(qString);
         this.setState({'updateData': null});
         ajax.promise(update_url).then(response => {
             if (response['@graph'] && response['@graph'].length > 0){
