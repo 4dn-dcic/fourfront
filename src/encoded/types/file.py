@@ -912,6 +912,22 @@ def download(context, request):
     raise HTTPTemporaryRedirect(location=location)
 
 
+def validate_file_format_validity_for_file_type(context, request):
+    """Check if the specified file format (e.g. fastq) is allowed for the file type (e.g. FileFastq).
+    """
+    data = request.json
+    if 'file_format' in data:
+        file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
+        file_format_name = file_format_item['file_format']
+        allowed_types = file_format_item.get('valid_item_types')
+        file_type = context.type_info.item_type.title().replace("_", '')
+        if file_type not in allowed_types:
+            msg = 'File format {} is not allowed for {}'.format(file_format_name, file_type)
+            request.errors.add('body', None, msg)
+        else:
+            request.validated.update({})
+
+
 def validate_file_filename(context, request):
     ''' validator for filename field '''
     found_match = False

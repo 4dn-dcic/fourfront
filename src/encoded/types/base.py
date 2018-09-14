@@ -161,6 +161,17 @@ def set_namekey_from_title(properties):
     return name
 
 
+def validate_item_type_of_linkto_field(context, request):
+    """We are doing this case by case on item specific types files,
+    but might want to carry it here if filter is used more often.
+    If any of the submitted fields contain an ff_flag property starting with "filter",
+    the field in the filter is used for validating the type of the linked item.
+    Example: file has field file_format which is a linkTo FileFormat.
+    FileFormat items contain a field called "valid_item_types".
+    We have the ff_flag on file_format field called "filter:valid_item_types"."""
+    pass
+
+
 # Common lists of embeds to be re-used in certain files (similar to schema mixins)
 
 lab_award_attribution_embed_list = [
