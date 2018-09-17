@@ -1722,7 +1722,7 @@ class IndividualObjectView extends React.Component{
         if(fieldType === 'new linked object'){
             value = this.props.keyIter + 1;
             if(this.props.roundTwo){
-                alert('Objects cannot be created in the stage of submission. Please select an existing one.');
+                alert('Objects cannot be created in this stage of submission. Please select an existing one.');
                 return;
             }
         }
@@ -2137,19 +2137,19 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
             }
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
-            if(edit){
-                if(context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
+            if (edit){
+                if (context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear edit")){
                     built[fields[i]] = null;
-                }else{
+                } else {
                     built[fields[i]] = context[fields[i]] || null;
                 }
-            }else if(!create){ //clone
-                if(context[fields[i]] === null || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
+            } else if (!create){ //clone
+                if (context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear clone")){
                     built[fields[i]] = null;
-                }else{
+                } else {
                     built[fields[i]] = context[fields[i]] || null;
                 }
-            }else{
+            } else {
                 built[fields[i]] = null;
             }
 
