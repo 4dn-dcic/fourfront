@@ -1050,7 +1050,7 @@ def validate_extra_file_format(context, request):
     if not ff:
         ff = context.properties.get('file_format')
     file_format_item = get_item_if_you_can(request, ff, 'file-formats')
-    if 'standard_file_extension' not in file_format_item:
+    if not file_format_item or 'standard_file_extension' not in file_format_item:
         request.errors.add('body', None, "Can't find parent file format for extra_files")
         return
     parent_format = file_format_item['uuid']

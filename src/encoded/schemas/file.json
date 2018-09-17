@@ -86,6 +86,7 @@
             "title": "Extra Files",
             "description": "Links to extra files on s3 that don't have associated metadata",
             "type": "array",
+            "exclude_from": ["FFedit-create"],
             "items": {
                 "title": "Extra File",
                 "type": "object",

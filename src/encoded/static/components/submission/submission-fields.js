@@ -1151,7 +1151,8 @@ class S3FileInput extends React.Component{
                 if(response.other_allowed_extensions){
                     extensions = extensions.concat(response.other_allowed_extensions);
                 }
-                if (!_.any(extensions, function(ext){return filename.endsWith(ext);})){
+                // Fail if "other" extension is not used and a valid extension is not provided
+                if (extensions.indexOf("other") === -1 && !_.any(extensions, function(ext){return filename.endsWith(ext);})){
                     alert('File extension error! Please enter a file with one of the following extensions: ' + extensions.join(', '));
                     return;
                 }
