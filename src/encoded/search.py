@@ -304,11 +304,14 @@ def clear_filters_setup(request, doc_types, forced_type):
     seach_query_url = urlencode([("q", seach_query) for seach_query in seach_query_specs])
     # types_url will always be present (always >=1 doc_type)
     types_url = urlencode([("type", typ) for typ in doc_types])
+
+    clear_qs = types_url or ''
     if seach_query_url:
-        clear_qs = seach_query_url + '&' + types_url
-    else:
-        # no search query provided
-        clear_qs = types_url
+        clear_qs += '&' + seach_query_url
+    current_search_sort = request.params.getall('sort')
+    current_search_sort_url = urlencode([("sort", s) for s in current_search_sort])
+    if current_search_sort_url:
+        clear_qs += '&' + current_search_sort_url
     return request.route_path(forced_type.lower(), slash='/') + (('?' + clear_qs) if clear_qs else '')
 
 
