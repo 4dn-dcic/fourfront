@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import * as store from './../../store';
-import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas } from './../util';
+import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer, AdjustableDividerRow } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
@@ -368,18 +368,19 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
      *
      * columnClass : 'file' render method takes different params than ordinary file-detail columns.
      *
-     * @param {{ '@id' : string, 'file_format' : string, 'higlass_uid' : string }} file - File for row/column
+     * @param {{ '@id' : string, 'file_format' : { 'display_title' : string, 'file_format' : string }, 'higlass_uid' : string }} file - File for row/column
      * @param {{ 'expTable' : { 'props' : { 'leftPanelCollapsed' : boolean, 'resetDivider' : function } } }} tableProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
      * @param {{ 'fileAtId' : string, 'fileTitleString' : string }} param2 - Some properties calculated by StackedTable FileEntryBlock and passed in to help cut down on JS calculation.
      */
     static renderFileColumn(file, tableProps, { fileAtId, fileTitleString }){
         var className = file.accession ? 'mono-text' : null,
+            fileFormat = fileUtil.getFileFormatStr(file),
             title = fileAtId ? <a href={fileAtId} className={className} children={fileTitleString}/> : <div className={className} children={fileTitleString}/>,
             tb = (tableProps && tableProps.expTable && tableProps.expTable.props) || {},
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
         // HiC File External Link/Button to JuiceBox
-        if (file && ((file.file_format && file.file_format === 'hic') || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1) ) && file.href){
+        if (file && (fileFormat === 'hic' || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1) ) && file.href){
             var onClick = function(evt){
                     var pageHref = tableProps.href || tb.href || (store && store.getState().href),
                         hrefParts = url.parse(pageHref),
@@ -397,14 +398,14 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             return <span>{ title } { juiceBoxExternalLinkBtn }</span>;
 
         } else if (file && file.higlass_uid && (
-            (file.file_format && (file.file_format === 'mcool' || file.file_format === 'bw' || file.file_format === 'bg'))
+            (fileFormat === 'mcool' || fileFormat === 'bw' || fileFormat === 'bg')
             || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
         )){
 
             var onDragStart = function(evt){
                 if (!evt || !evt.dataTransfer) return;
                 // evt.dataTransfer.setData('text/4dn-item-context', JSON.stringify(file));
-                evt.dataTransfer.setData('text/higlass-tileset-info', JSON.stringify({ 'tilesetUid' : file.higlass_uid, 'genome_assembly' : file.genome_assembly, 'file_format' : file.file_format }));
+                evt.dataTransfer.setData('text/higlass-tileset-info', JSON.stringify({ 'tilesetUid' : file.higlass_uid, 'genome_assembly' : file.genome_assembly, 'file_format' : fileFormat }));
             };
 
             // Currently-visualized MCOOL File HiGlass Indicator
@@ -567,14 +568,17 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
     static findAllFilesToVisualize(files){
 
         var firstMcoolFile = _.find(files || [], function(f){
-            return f.file_format === 'mcool' && f.higlass_uid;
+            return fileUtil.getFileFormatStr(f) === 'mcool' && f.higlass_uid;
         }) || null;
 
         if (firstMcoolFile) {
             return [firstMcoolFile]; // 1 MCOOL file, if present
         }
 
-        function isValidBWVizFile(f){ return (f.file_format === 'bg' || f.file_format === 'bw') && f.higlass_uid; }
+        function isValidBWVizFile(f){
+            var fileFormat = fileUtil.getFileFormatStr(f);
+            return (fileFormat === 'bg' || fileFormat === 'bw') && f.higlass_uid;
+        }
 
         var bigwigFiles = _.filter(files || [], isValidBWVizFile);
         if (bigwigFiles.length > 0) {
