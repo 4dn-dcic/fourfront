@@ -199,7 +199,7 @@ export const defaultColumnDefinitionMap = {
         },
         'order' : 500
     },
-    'date_modified' : {
+    'last_modified.date_modified' : {
         'title' : 'Date Modified',
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){

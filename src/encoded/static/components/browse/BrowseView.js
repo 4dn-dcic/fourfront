@@ -29,7 +29,7 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  },
     { 'field' : 'status',  },
-    { 'field' : 'date_modified', }
+    { 'field' : 'last_modified.date_modified', }
 ], defaultColumnDefinitionMap);
 
 
@@ -374,7 +374,7 @@ export default class BrowseView extends React.Component {
     }
 
     static defaultProps = {
-        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'date_modified', 'status', 'number_of_files']
+        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'last_modified.date_modified', 'status', 'number_of_files']
     }
 
     constructor(props){
