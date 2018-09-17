@@ -126,7 +126,7 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, constantHiddenColumns } = this.props;
+        var { context, href, hiddenColumns, currentAction, constantHiddenColumns, columnDefinitionOverrideMap } = this.props;
         var results = context['@graph'],
             inSelectionMode = currentAction === 'selection',
             facets = this.props.facets || context.facets,
@@ -159,7 +159,7 @@ class ControlsAndResults extends React.PureComponent {
             constantHiddenColumnsFull   = constantHiddenColumnsFull.concat(schemaForType.excludedColumns);
         }
 
-        var columnDefinitionOverrides = {};
+        var columnDefinitionOverrides = (columnDefinitionOverrideMap && _.clone(columnDefinitionOverrideMap)) || {};
         var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
         // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
@@ -255,6 +255,16 @@ export default class SearchView extends React.PureComponent {
     static defaultProps = {
         'href'          : null,
         'currentAction' : null,
+        'columnDefinitionOverrideMap' : {
+            'google_analytics.for_date' : {
+                'title' : 'Analytics Date',
+                'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+                'render' : function(result, columnDefinition, props, width){
+                    if (!result.google_analytics || !result.google_analytics.for_date) return null;
+                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' />;
+                }
+            }
+        },
         'restrictions'  : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
     }
 

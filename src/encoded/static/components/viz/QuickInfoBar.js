@@ -27,7 +27,7 @@ import ReactTooltip from 'react-tooltip';
  * @prop {string} href - Current location/href passed down from Redux store. Used for determining whether to display QuickInfoBar or not.
  */
 
-export default class QuickInfoBar extends React.Component {
+export default class QuickInfoBar extends React.PureComponent {
 
     static isInvisibleForHref(href){
         // If have href, only show for /browse/, /search/, and / & /home
@@ -93,20 +93,17 @@ export default class QuickInfoBar extends React.Component {
 
     /**
      * Updates state.show if no filters are selected.
-     *
-     * @private
-     * @instance
-     * @param {Object} nextProps - Next props.
-     * @returns {undefined}
      */
     componentWillReceiveProps(nextProps){
-        var nextState = {
-            'expSetFilters' : Filters.contextFiltersToExpSetFilters((nextProps.context && nextProps.context.filters) || null)
-        };
-        if (!this.anyFiltersSet(nextState.expSetFilters) && this.state.show){
-            nextState.show = false;
+        if (nextProps.context !== this.props.context){
+            var nextState = {
+                'expSetFilters' : Filters.contextFiltersToExpSetFilters((nextProps.context && nextProps.context.filters) || null)
+            };
+            if (!this.anyFiltersSet(nextState.expSetFilters) && this.state.show){
+                nextState.show = false;
+            }
+            this.setState(nextState);
         }
-        this.setState(nextState);
     }
 
     /** @private */

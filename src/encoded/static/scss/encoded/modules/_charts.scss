@@ -1746,6 +1746,112 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 
 
+/***** Area Charts *****/
+
+
+.stats-charts-container {
+
+
+    .area-chart-inner-container {
+        position: relative;
+
+        svg {
+            .right-axis-tick-line {
+                pointer-events: none;
+            }
+        }
+
+        > .chart-tooltip {
+            position: absolute;
+            pointer-events: none;
+
+            > .line {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 0px;
+                border-left: 1px solid #000;
+                pointer-events: none;
+            }
+
+            > .label-bg {
+                padding-left: 12px;
+                padding-right: 12px;
+                padding-top: 8px;
+                position: absolute;
+                min-width: 135px;
+                background-color: rgba(255,255,255,0.8);
+                padding-bottom: 9px;
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+
+                > h5 {
+                    white-space: nowrap;
+                }
+                
+                table.current-legend {
+                    font-size: 0.9rem;
+                    width: 100%;
+                    tr {
+                        > td {
+                            padding-top: 0px;
+                            padding-bottom: 1px;
+                            white-space: nowrap;
+                            &.term-name-cell {
+                                padding-left: 1px;
+                                text-align: left;
+                                color: #555;
+                            }
+                            &.term-name-total {
+                                padding-left: 5px;
+                                padding-right: 0;
+                                font-weight: 600;
+                                text-align: right;
+                                width: 7%;
+                            }
+                            &.patch-cell {
+                                padding-left: 0;
+                                text-align: left;
+                                width: 7%;
+                                > .color-patch {
+                                    border-radius: 50%;
+                                }
+                            }
+                        }
+                        &.active {
+                            > td.term-name-cell {
+                                color: #000;
+                                text-shadow: 0 0 0;
+                            }
+                            > td.patch-cell {
+                                .color-patch {
+                                    border: 1px solid rgba(0,0,0,0.3);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &:not(.to-left){
+                    left: 10px;
+                }
+                &.to-left {
+                    right: 9px;
+                    text-align: right;
+                    table {
+                        float: right;
+                    }
+                }
+    
+            }
+
+        }
+    }
+
+}
+
+
 
 /**** Cursor Component(s) ****/
 
