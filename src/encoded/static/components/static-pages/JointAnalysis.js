@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import { Popover, Button } from 'react-bootstrap';
-import { console, object, ajax } from'./../util';
+import { console, object, ajax, fileUtil } from'./../util';
 import * as plansData from './../testdata/stacked-block-matrix-list';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
@@ -339,10 +339,10 @@ class HiGlassSection extends React.Component {
 
         if (Array.isArray(results) && results.length > 0){
             var h1_expset = _.findWhere(results, { 'accession' : h1_access });
-            var h1_mcool = h1_expset && Array.isArray(h1_expset.processed_files) && _.findWhere(h1_expset.processed_files, { 'file_format' : 'mcool' });
+            var h1_mcool = h1_expset && Array.isArray(h1_expset.processed_files) && _.find(h1_expset.processed_files, function(pF){ return fileUtil.getFileFormatStr(pF) === 'mcool'; });
             tileset_h1 = (h1_mcool && h1_mcool.higlass_uid) || tileset_h1;
             var hff_expset = _.findWhere(results, { 'accession' : hff_access });
-            var hff_mcool = hff_expset && Array.isArray(hff_expset.processed_files) && _.findWhere(hff_expset.processed_files, { 'file_format' : 'mcool' });
+            var hff_mcool = hff_expset && Array.isArray(hff_expset.processed_files) && _.find(hff_expset.processed_files, function(pF){ return fileUtil.getFileFormatStr(pF) === 'mcool'; });
             tileset_hff = (hff_mcool && hff_mcool.higlass_uid) || tileset_hff;
         }
 

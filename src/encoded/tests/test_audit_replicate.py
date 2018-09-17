@@ -70,11 +70,11 @@ def biosamples4rep_set(biosample0, biosample1, biosample2):
 
 
 @pytest.fixture
-def fastq_files(testapp, lab, award):
+def fastq_files(testapp, lab, award, file_formats):
     files = []
     for i in range(4):
         item = {
-            'file_format': 'fastq',
+            'file_format': file_formats.get('fastq').get('@id'),
             'lab': lab['@id'],
             'award': award['@id']
         }
