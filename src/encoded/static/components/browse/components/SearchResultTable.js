@@ -1044,7 +1044,7 @@ export class SearchResultTable extends React.PureComponent {
             { 'field' : 'lab.display_title', },
             { 'field' : 'date_created', },
             { 'field' : 'status', },
-            { 'field' : 'date_modified', }
+            { 'field' : 'last_modified.date_modified', }
         ], defaultColumnDefinitionMap),
         'columnDefinitionOverrideMap' : null,
         'hiddenColumns' : null,
