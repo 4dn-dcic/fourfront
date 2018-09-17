@@ -23,23 +23,19 @@ import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
 
-/**
- * The top-level component for this application.
- *
- * @module {Component} app
- */
+
 
 /**
  * Used to temporarily store Redux store values for simultaneous dispatch.
  *
- * @memberof module:app
+ * @var
  */
 let dispatch_dict = {};
 
 /**
  * Top bar navigation & link schema definition.
  *
- * @memberof module:app
+ * @constant
  */
 const portal = {
     "portal_title": '4DN Data Portal',
@@ -111,10 +107,29 @@ class Timeout {
  */
 
 
+/**
+ * The root and top-most React component for our application.
+ * This is wrapped by a Redux store and then rendered by either the server-side
+ * NodeJS sub-process or by the browser.
+ * 
+ * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/server.js
+ * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/browser.js
+ */
 export default class App extends React.Component {
 
+    /**
+     * Defines time before a 'slow loading' indicator appears on page.
+     *
+     * @constant
+     * @type {number}
+     */
     static SLOW_REQUEST_TIME = 750
 
+    /**
+     * Immediately scrolls browser viewport to current window hash or to top of page.
+     *
+     * @returns {undefined} Nothing
+     */
     static scrollTo() {
         var hash = window.location.hash;
         if (hash && document.getElementById(hash.slice(1))) {
@@ -124,6 +139,14 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Used in browser.js to collect prop values from server-side-rendered HTML
+     * and then re-feed them into Redux store.
+     *
+     * @param {HTMLElement} document - HTML DOM element representing the document.
+     * @param {string} [filter=null] - If set, filters down prop fields/values collected to only one(s) defined.
+     * @returns {Object} Object keyed by field name with collected value as value.
+     */
     static getRenderedPropValues(document, filter = null){
         var returnObj = {};
         var script_props;
@@ -149,20 +172,48 @@ export default class App extends React.Component {
         return returnObj;
     }
 
+    /**
+     * Runs `App.getRenderedPropValues` and extends with `{ href }` from canonical link element.
+     *
+     * @param {HTMLElement} document - HTML DOM element representing the document.
+     * @param {string} [filters=null] - If set, filters down prop fields/values collected to only one(s) defined.
+     * @returns {Object} Object keyed by field name with collected value as value.
+     */
     static getRenderedProps(document, filters = null) {
         return _.extend(App.getRenderedPropValues(document, filters), {
             'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') // Ensure the initial render is exactly the same
         });
     }
 
+    /**
+     * @type {Object} propTypes
+     * @property {*} [propTypes.sessionMayBeSet] - PropTypes definition.
+     * @public
+     * @constant
+     * @member
+     */
     static propTypes = {
         "sessionMayBeSet" : PropTypes.any,    // Whether Auth0 session exists or not.
-    }
+    };
 
+    /**
+     * @type {Object} defaultProps
+     * @property {boolean} [defaultProps.sessionMayBeSet=null] Whether user is currently likely to be logged in as determined by browser.js
+     * @public
+     * @constant
+     * @member
+     */
     static defaultProps = {
         'sessionMayBeSet' : null
-    }
+    };
 
+    /**
+     * Does some initialization, checks if browser HistoryAPI is supported,
+     * sets state.session according to JWT in current cookie, etc.
+     * 
+     * @constructor
+     * @member
+     */
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -190,11 +241,16 @@ export default class App extends React.Component {
 
         console.log('App Filters on Initial Page Load', Filters.currentExpSetFilters((props.context && props.context.filters) || null));
 
+        /**
+         * Whether HistoryAPI is supported in current browser.
+         *
+         * @type {boolean}
+         */
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
         // Todo: Migrate session & user_actions to redux store?
-        var session = false;
-        var user_actions = [];
+        var session = false,
+            user_actions = [];
 
         if (props.sessionMayBeSet !== null){ // Only provided from server
             if (props.sessionMayBeSet === false) session = false;
@@ -219,12 +275,22 @@ export default class App extends React.Component {
 
         if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
 
+        /**
+         * Initial state of application.
+         *
+         * @type {Object}
+         * @property {boolean}  state.session       Whether user is currently logged in or not. User details are retrieved using JWT utility.
+         * @property {Object[]} state.user_actions  List of actions that are permitted for current user.
+         * @property {Object[]} state.schemas       Current schemas; null until AJAX-ed in (may change).
+         * @property {boolean}  state.isSubmitting  Whether there's a submission in progress. If true, alert is shown to prevent user from accidentally navigating away.
+         * @property {boolean}  state.mounted       Whether app has been mounted into DOM in browser yet.
+         */
         this.state = {
-            'session': session,
-            'user_actions': user_actions,
-            'schemas': this.props.context.schemas || null,
-            'isSubmitting': false,
-            'mounted' : false
+            'session'           : session,
+            'user_actions'      : user_actions,
+            'schemas'           : this.props.context.schemas || null,
+            'isSubmitting'      : false,
+            'mounted'           : false
         };
 
         console.log("App Initial State: ", this.state);
@@ -238,6 +304,11 @@ export default class App extends React.Component {
      * - Initializes Google Analytics
      * - Exposes 'API' from browser window object via property {Object} 'fourfront' which has reference to Alerts, JWT, navigate, and this app component.
      * - Emits an event from browser window named 'fourfrontinitialized', letting any listeners (parent windows, etc.) know that JS of this window has initialized. Posts message with same 'eventType' as well.
+     * - Shows browser suggestion alert if not using Chrome, Safari, Firefox.
+     * - Sets state.mounted to be true.
+     * - Clears out any UTM URI parameters three seconds after mounting (giving Google Analytics time to pick them up).
+     *
+     * @private
      */
     componentDidMount() {
         var { href, context } = this.props;
@@ -355,12 +426,14 @@ export default class App extends React.Component {
         });
     }
 
+    /** @ignore */
     componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
         }
     }
 
+    /** @ignore */
     componentDidUpdate(prevProps, prevState) {
         var key;
         if (this.props) {
@@ -400,6 +473,15 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Calculates some actions available, given a category.
+     * Potentially deprecated-ish.
+     *
+     * @todo Potentially remove. Or document more.
+     * @public
+     * @param {string} category - Usually one of "user", "context", "user_section", "global_sections".
+     * @returns {{ href: string }[]} - List of actions available for category.
+     */
     listActionsFor(category) {
         if (category === 'context') {
             var context = this.props.context;
@@ -432,6 +514,12 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Calculates current action, if any, from URL hash.
+     * 
+     * @public
+     * @returns {!string} Current action if any, or null.
+     */
     currentAction() {
         var href_url = url.parse(this.props.href);
         var hash = href_url.hash || '';
@@ -442,7 +530,15 @@ export default class App extends React.Component {
         return name || null;
     }
 
-    loadSchemas(callback, forceFetch = false){
+    /**
+     * If no schemas yet stored in our state, we AJAX them in from `/profiles/?format=json`.
+     *
+     * @public
+     * @param {function} [callback=null] - If defined, will be executed upon completion of load, with schemas passed in as first argument.
+     * @param {boolean} [forceFetch=false] - If true, will ignore any previously-fetched schemas and fetch new ones.
+     * @returns {void}
+     */
+    loadSchemas(callback = null, forceFetch = false){
         if (this.state.schemas !== null && !forceFetch){
             // We've already loaded these successfully (hopefully)
             if (typeof callback === 'function') callback(this.state.schemas);
@@ -463,20 +559,42 @@ export default class App extends React.Component {
         });
     }
 
-    // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
+    /**
+     * When current dropdown changes; componentID is _rootNodeID of newly dropped-down component.
+     *
+     * @private
+     * @deprecated
+     * @todo Remove and test
+     * @param {string} componentID - HTML element ID of a dropdown.
+     */
     handleDropdownChange(componentID) {
         // Use React _rootNodeID to uniquely identify a dropdown menu;
         // It's passed in as componentID
         this.setState({dropdownComponent: componentID});
     }
 
-    // Handle a click outside a dropdown menu by clearing currently dropped down menu
+    /**
+     * Handle a click outside a dropdown menu by clearing currently dropped down menu.
+     *
+     * @private
+     * @deprecated
+     * @todo Remove and test
+     * @param {React.SyntheticEvent} event React SyntheticEvent for click MouseEvent.
+     */
     handleLayoutClick(e) {
         if (this.state.dropdownComponent !== undefined) {
             this.setState({dropdownComponent: undefined});
         }
     }
 
+    /**
+     * Intercepts a click on a hyperlink HTML element
+     * and navigates to its target href if is an internal link.
+     * Skips for download links, external links, etc.
+     *
+     * @private
+     * @param {React.SyntheticEvent} event React SyntheticEvent for click MouseEvent.
+     */
     handleClick(event) {
         // https://github.com/facebook/react/issues/1691
         if (event.isDefaultPrevented()) return;
@@ -540,7 +658,13 @@ export default class App extends React.Component {
         }
     }
 
-    // Submitted forms are treated the same as links
+    /**
+     * Intercepts a form submission on a form HTML element
+     * and performs it via AJAX. Similar to handling of hyperlinks.
+     *
+     * @private
+     * @param {React.SyntheticEvent} event Form submission event.
+     */
     handleSubmit(event) {
         var target = event.target,
             hrefParts = url.parse(this.props.href);
@@ -587,6 +711,12 @@ export default class App extends React.Component {
         }
     }
 
+    /** 
+     * Handles a history change event.
+     *
+     * @private
+     * @param {React.SyntheticEvent} A popstate event.
+     */
     handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
         var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
@@ -644,6 +774,14 @@ export default class App extends React.Component {
         navigate(href, {'replace': true});
     }
 
+    /**
+     * Grabs JWT from local cookie and, if not already authenticated or are missing 'user_actions',
+     * perform authentication via AJAX to grab user actions, updated JWT token, and save to localStorage.
+     *
+     * @private
+     * @param {function} [callback=null] Optional callback to be ran upon completing authentication.
+     * @returns {void}
+     */
     authenticateUser(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
@@ -678,6 +816,14 @@ export default class App extends React.Component {
         return null;
     }
 
+    /**
+     * Tests that JWT is present along with user info and user actions, and if so, updates `state.session`.
+     * Called by `authenticateUser` as well as Login.
+     *
+     * @public
+     * @param {function} [callback=null] Optional callback to be ran upon completing authentication.
+     * @returns {void}
+     */
     updateUserInfo(callback = null){
         // get user actions (a function of log in) from local storage
         var userActions = [];
@@ -703,21 +849,40 @@ export default class App extends React.Component {
         }
     }
 
-    // functions previously in navigate, mixins.js
-    onHashChange (event) {
-        // IE8/9
+    /**
+     * Updates Redux store with non-hash version of URI. For IE8/9 only.
+     *
+     * @deprecated
+     * @private
+     * @param {React.SyntheticEvent} event An event.
+     * @returns {void}
+     */
+    onHashChange(event) {
         store.dispatch({
             type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
         });
     }
 
-    /** Rules to prevent browser from changing to 'href' via back/forward buttons. */
+    /**
+     * Rules to prevent browser from changing to 'href' via back/forward buttons.
+     *
+     * @private
+     * @param {string} href - Next href.
+     * @returns {boolean} Whether to proceed with browser navigation.
+     */
     confirmPopState(href){
         if (this.stayOnSubmissionsPage(href)) return false;
         return true;
     }
 
-    /** Only navigate if href changes */
+    /**
+     * Only navigate if href changes unless is inPlace navigation, if don't need to stay on submissions
+     * view, etc.
+     *
+     * @param {string} href - New URI we're navigating to.
+     * @param {Object} [options] - Options for navigation request.
+     * @returns {boolean}
+     */
     confirmNavigation(href, options) {
 
         // check if user is currently on submission page
@@ -748,7 +913,8 @@ export default class App extends React.Component {
      * Check this.state.isSubmitting to prompt user if navigating away
      * from the submissions page.
      *
-     * @param {string} [href] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
+     * @param {string} [href=null] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
+     * @returns {boolean}
      */
     stayOnSubmissionsPage(href = null) {
         // can override state in options
@@ -774,6 +940,21 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Function which is used/called to navigate us around the portal in single-page-application (AJAX)
+     * fashion.
+     *
+     * @public
+     * @param {string} href                 URI we're attempting to navigate to.
+     * @param {Object} [options={}]         Options for the navigation request.
+     * @param {boolean} options.replace     If true, browser history entry is replaced, not added.
+     * @param {boolean} options.skipRequest If true, request is skipped but browser URI and history is updated.
+     * @param {boolean} options.inPlace     If true, will re-load page even if is at same URL. Also won't scroll to top of page.
+     * @param {function} [callback=null]    Optional callback, accepting response JSON as first argument.
+     * @param {function} [fallbackCallback=null] - Optional callback to be called in case request fails.
+     * @param {Object} [includeReduxDispatch={}] - Optional extra data to save to Redux store along with the next response.
+     * @returns {void}
+     */
     navigate(href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
@@ -1008,6 +1189,16 @@ export default class App extends React.Component {
 
     }
 
+    /**
+     * This function is called by `App.navigate` upon completing request.
+     * Redux store is updated with new JSON response here.
+     *
+     * @private
+     * @param {JSONResponse} data - Next JSON response.
+     * @param {Object} extendDispatchDict - Additional keys/values to save to Redux along with next response.
+     * @param {Object} requestOptions - Navigation options that were passed to `App.navigate`.
+     * @returns {JSONResponse} Data which was received and saved.
+     */
     receiveContextResponse (data, extendDispatchDict = {}, requestOptions = {}) {
         // title currently ignored by browsers
         if (requestOptions.replace){
@@ -1045,12 +1236,24 @@ export default class App extends React.Component {
         return data;
     }
 
-    /** Set 'isSubmitting' in state. works with handleBeforeUnload **/
+    /**
+     * Set 'isSubmitting' in state. works with handleBeforeUnload
+     *
+     * @public
+     * @param {boolean} bool - Value to set.
+     * @param {function} [callback=null] - Optional callback to execute after updating state.
+     */
     setIsSubmitting(bool, callback=null){
         this.setState({'isSubmitting': bool}, callback);
     }
 
-    /** Catch user navigating away from page if in submission process. */
+    /**
+     * Catch and alert user navigating away from page if in submission process.
+     *
+     * @private
+     * @param {React.SyntheticEvent} e Window beforeunload event.
+     * @returns {string|void} Dialog text which is to be shown to user.
+     */
     handleBeforeUnload(e){
         if(this.state.isSubmitting){
             var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
@@ -1059,6 +1262,12 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Renders the entire HTML of the application.
+     *
+     * @private
+     * @returns {JSX.Element} An `<html>` element.
+     */
     render() {
         console.log('render app');
         var canonical       = this.props.href,

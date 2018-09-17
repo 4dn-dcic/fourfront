@@ -1,0 +1,32 @@
+{
+  "source": "./src/encoded/static/components",
+  "destination": "./es_docs",
+  "excludes" : ["testdata/*"],
+  "plugins": [
+    {
+      "name": "esdoc-standard-plugin",
+      "option" : {
+        "lint" : { "enable" : true },
+        "coverage" : { "enable" : true },
+        "accessor": {"access": ["public", "protected", "private"], "autoPrivate": true},
+        "typeInference": {"enable": true}
+      }
+    },
+    {"name": "esdoc-react-plugin"},
+    {"name": "esdoc-jsx-plugin"},
+    {
+      "name": "esdoc-ecmascript-proposal-plugin",
+      "option": {
+        "classProperties": true,
+        "doExpressions": true,
+        "functionBind": true,
+        "objectRestSpread": true,
+        "functionSent": true,
+        "asyncGenerators": true,
+        "decorators": true,
+        "exportExtensions": true,
+        "dynamicImport": true
+      }
+    }
+  ]
+}

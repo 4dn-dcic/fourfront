@@ -1,15 +1,16 @@
 'use strict';
-import React from 'react';
-import * as globals from './globals';
-import _ from 'underscore';
-import { ajax, console, object, isServerSide, DateUtility } from './util';
-import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
 
-/*
-Container component for the submissions page. Fetches the user info and
-coordinates individual subscriptions.
-*/
-export default class Submissions extends React.Component {
+import React from 'react';
+import _ from 'underscore';
+import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
+import * as globals from './../globals';
+import { ajax, console, object, isServerSide, DateUtility } from './../util';
+
+/**
+ * Container component for the submissions page. Fetches the user info and
+ * coordinates individual subscriptions.
+ */
+export class SubscriptionView extends React.Component {
 
     constructor(props){
         super(props);
@@ -68,11 +69,11 @@ export default class Submissions extends React.Component {
     }
 }
 
-/*
-Main submission/subscription component. One component per subscription.
-Hold data from the search result from the subscription and organizes
-it into a paginated table. Also allows filtering on item type
-*/
+/**
+ * Main submission/subscription component. One component per subscription.
+ * Hold data from the search result from the subscription and organizes
+ * it into a paginated table. Also allows filtering on item type.
+ */
 class SubscriptionEntry extends React.Component{
 
     constructor(props){
@@ -307,4 +308,4 @@ class SubscriptionEntry extends React.Component{
     }
 }
 
-globals.content_views.register(Submissions, 'Submissions');
+globals.content_views.register(SubscriptionView, 'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)

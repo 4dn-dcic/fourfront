@@ -11,7 +11,14 @@ import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
 
-var TITLE_PATHNAME_MAP = {
+/**
+ * @module PageTitle - Renders out title on all views.
+ */
+
+/** 
+ * A hardcoded mapping of URIs to title string or function. 
+ */
+const TITLE_PATHNAME_MAP = {
     '/' : {
         'title' : "Welcome"
     },
@@ -25,7 +32,7 @@ var TITLE_PATHNAME_MAP = {
             return 'Search';
         },
         'calloutTitle' : function(pathName, context, href, currentAction){
-            var thisTypeTitle = getSchemaTypeFromSearchContext(context);
+            var thisTypeTitle = Schemas.getSchemaTypeFromSearchContext(context);
             return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){
@@ -43,8 +50,8 @@ var TITLE_PATHNAME_MAP = {
     },
     '/users/\*' : {
         'title' : function(pathName, context){
-            var myDetails = JWT.getUserDetails();
-            var myEmail = myDetails && myDetails.email;
+            var myDetails = JWT.getUserDetails(),
+                myEmail = myDetails && myDetails.email;
             if (myEmail && context && context.email && myEmail === context.email){
                 return "My Profile";
             }
@@ -64,19 +71,43 @@ var TITLE_PATHNAME_MAP = {
 // Duplicates
 TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
 
-export function getSchemaTypeFromSearchContext(context){
-    var thisType = _.pluck(_.filter(context.filters || [], function(o){
-        if (o.field === 'type' && o.term !== 'Item') return true;
-        return false;
-    }), 'term')[0] || null;
-    if (thisType){
-        return Schemas.getTitleForType(thisType);
-    }
-    return null;
-}
+/** 
+ * @typedef {Object} JSONResponse
+ * @property {string} @id - Identifier and/or URL to Item or response endpoint.
+ * @property {string[]} @type - List of `@type` strings for Item, endpoint, etc.
+ * @property {string} display_title - Title for Item or page.
+ */
 
+ /** 
+ * @typedef {JSONResponse} JSONSearchResponse
+ * @property {{ field: string, term: string }[]} filters - Filters set on a search or browse request.
+ */
+
+/** 
+ * @typedef {JSONResponse} Item
+ * @property {string} @id - Identifier and/or URL to Item.
+ * @property {string} uuid - DB Identifier for Item. 
+ * @property {string[]} @type - List of `@type` strings for Item.
+ * @property {string} display_title - Title for Item.
+ * @property {Item} parent - Recursing reference to a parent Item.
+ */
+
+
+/**
+ * Calculates and renders out a title on every single front-end view.
+ *
+ * Also renders out static page breadcrumbs (if applicable) and any alerts if any
+ * are needed to be displayed.
+ */
 export default class PageTitle extends React.PureComponent {
 
+    /**
+     * Checks whether current context has an `@type` list containing "StaticPage".
+     *
+     * @public
+     * @param {JSONResponse} context - Current JSON Item or backend response representation.
+     * @returns {boolean} Whether is StaticPage view or not.
+     */
     static isStaticPage(context){
         if (Array.isArray(context['@type'])){
             if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
@@ -87,6 +118,13 @@ export default class PageTitle extends React.PureComponent {
         return false;
     }
 
+    /**
+     * Checks whether current URL/HREF is that of root or base page (e.g. pathname is '/').
+     *
+     * @public
+     * @param {string} href - Current URI/href.
+     * @returns {boolean} Whether is home page view or not.
+     */
     static isHomePage(href){
         var currentHrefParts = url.parse(href, false);
         var pathName = currentHrefParts.pathname;
@@ -96,6 +134,17 @@ export default class PageTitle extends React.PureComponent {
         return false;
     }
 
+    /**
+     * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
+     *
+     * @public
+     * @param {JSONResponse} context - Current Item or backend response JSON representation.
+     * @param {string} href - Current URI or href.
+     * @param {{}[]} [schemas=Schemas.get()] - List of schemas as returned from Redux.
+     * @param {boolean} [isMounted=false] - Whether page is currently mounted. Needed to determine whether can use LocalizedTime and similar.
+     * @param {string} currentAction - Current action if any, e.g. 'edit', 'add'.
+     * @returns {{ title: string, subtitle: ?string, calloutTitle: ?string }} Object with title and any subtitle/calloutTitle.
+     */
     static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false, currentAction){
         var currentPathName = null,
             currentPathRoot, title,
@@ -131,7 +180,10 @@ export default class PageTitle extends React.PureComponent {
             if (currentHrefParts.hash === '#!add') {
                 return {
                     'title' : "Creating",
-                    'calloutTitle' : (currentPathName.indexOf('/search/') > -1 ? getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas) )
+                    'calloutTitle' : (
+                        currentPathName.indexOf('/search/') > -1 ?
+                            Schemas.getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas)
+                    )
                 };
             }
 
@@ -224,6 +276,18 @@ export default class PageTitle extends React.PureComponent {
         return { title };
     }
 
+    /**
+     * Calculates CSS style object in response to some parameters and current layout.
+     * Adds things like +38 top margin if QuickInfoBar is visible, or limits width to 75%
+     * if table of contents is visible for page.
+     *
+     * @public
+     * @param {JSONResponse} context - Current Item or backend response JSON representation.
+     * @param {string} href - Current URI/href.
+     * @param {boolean} mounted - Whether we are currently mounted.
+     * @param {boolean} hasToc - Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
+     * @returns {{ 'marginTop' : number, 'width' : string }} - JS object representing some CSS styles.
+     */
     static getStyles(context, href, mounted, hasToc){
         var style = { 'marginTop' : 0 };
         var gridSize = mounted && layout.responsiveGridState();
@@ -241,16 +305,30 @@ export default class PageTitle extends React.PureComponent {
         return style;
     }
 
+    /** @ignore */
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
+
+        /**
+         * @private
+         * @type {Object}
+         * @property {boolean} state.mounted - Whether element is mounted or not.
+         */
         this.state = { 'mounted' : false };
     }
 
+    /** @ignore */
     componentDidMount(){
         this.setState({ 'mounted' : true });
     }
 
+    /**
+     * Renders out title elements, any alerts, and breadcrumbs, if necessary.
+     *
+     * @private
+     * @returns {JSX.Element} Div with ID set to "page-title-container" and any child elements for representing title, subtitle, etc.
+     */
     render(){
         var { context, href, session, currentAction } = this.props;
 
@@ -310,9 +388,9 @@ export default class PageTitle extends React.PureComponent {
 /**
  * Used for most page titles.
  *
- * @prop {JSX.Element|string} title - Shown @ top left, 300 font weight.
- * @prop {JSX.Element|string} calloutTitle - Shown @ right of title in similar size, 400 font weight.
- * @prop {JSX.Element|string} subtitle - Shown @ bottom title in small size, 400 font weight.
+ * @prop {JSX.Element|string} title - Shown at top left, 300 font weight.
+ * @prop {JSX.Element|string} calloutTitle - Shown at right of title in similar size, 400 font weight.
+ * @prop {JSX.Element|string} subtitle - Shown at bottom title in small size, 400 font weight.
  * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
  */
 class PageTitleElement extends React.PureComponent {
@@ -346,8 +424,21 @@ class HomePageTitleElement extends React.PureComponent {
 }
 
 
+/**
+ * Renders out breadcrumb links under page title for static help pages.
+ * Also adds JSON-LD structured data breadcrumbs for SEO.
+ * 
+ * Is used as part of PageTitle.
+ * @memberof PageTitle
+ */
 export class StaticPageBreadcrumbs extends React.Component {
 
+    /**
+     * Get ancestors of current Item JSON.
+     *
+     * @param {Item} context - Current Item JSON.
+     * @returns {{ '@id' : string }[]} List of ancestors as a JSON list.
+     */
     static getAncestors(context){
         if (!context.parent || !context.parent.display_title) return null;
         var list = [];
@@ -361,16 +452,29 @@ export class StaticPageBreadcrumbs extends React.Component {
         return list;
     }
 
+    /**
+     * @constant
+     * @public
+     * @ignore
+     */
     static defaultProps = {
         'pageTitleStyle' : {}
     }
 
+    /** @ignore */
     constructor(props){
         super(props);
         this.renderCrumb = this.renderCrumb.bind(this);
         this.seoMetadata = this.seoMetadata.bind(this);
     }
 
+    /**
+     * Renders each individual crumb.
+     *
+     * @private
+     * @param {Item} ancestor - JSON representing an ancestor. Should have at least an @id and a display_title.
+     * @returns {JSX.Element} A div element representing a breadcrumb.
+     */
     renderCrumb(ancestor, index, all){
         var inner;
         if (ancestor['@id'] === this.props.context['@id']){
@@ -386,6 +490,11 @@ export class StaticPageBreadcrumbs extends React.Component {
         );
     }
 
+    /**
+     * Renders an edit button to right side of page for people with edit permission.
+     * 
+     * @private
+     */
     editButton(){
         var { session, context, pageTitleStyle } = this.props;
         if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
@@ -410,6 +519,7 @@ export class StaticPageBreadcrumbs extends React.Component {
      *
      * @see https://developers.google.com/search/docs/data-types/breadcrumb
      *
+     * @private
      * @param {{ display_title: string }[]} ancestors - List of ancestors, including self.
      * @returns {JSX.Element} A script element containing JSON-LD data.
      */
@@ -434,6 +544,7 @@ export class StaticPageBreadcrumbs extends React.Component {
         return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonScriptEscape(JSON.stringify(structuredJSON)) }} />;
     }
 
+    /** @private */
     render(){
         var { context, hasToc } = this.props,
             ancestors = StaticPageBreadcrumbs.getAncestors(context),
@@ -448,5 +559,3 @@ export class StaticPageBreadcrumbs extends React.Component {
         );
     }
 }
-
-

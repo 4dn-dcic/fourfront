@@ -14,7 +14,12 @@ import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-common
 
 export class ExperimentSetDetailPane extends React.Component {
 
-    static allFileIDs(expSet: Object){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
+    /**
+     * Gets all file UUIDs from an ExperimentSet.
+     *
+     * @param {{ 'experiments' : { 'files' : { 'uuid': string }[], 'processed_files' : { 'uuid': string }[] }[], 'processed_files' : { 'uuid' : string }[] }} expSet - An ExperimentSet JSON object with files which have UUIDs embedded.
+     */
+    static allFileIDs(expSet){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
 
     static propTypes = {
         'selectAllFilesInitially' : PropTypes.bool,

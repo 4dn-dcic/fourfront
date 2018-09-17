@@ -34,11 +34,11 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
 
 export class ExperimentSetCheckBox extends React.PureComponent {
 
-    static isDisabled(files: Array){ return files.length === 0; }
+    static isDisabled(files){ return files.length === 0; }
 
-    static isAllFilesChecked(selectedFiles: Array, allFiles: Array){ return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles); }
+    static isAllFilesChecked(selectedFiles, allFiles){ return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles); }
 
-    static isIndeterminate(selectedFiles: Array, allFiles){ return selectedFiles.length > 0 && selectedFiles.length < allFiles.length; }
+    static isIndeterminate(selectedFiles, allFiles){ return selectedFiles.length > 0 && selectedFiles.length < allFiles.length; }
 
     render(){
         var { checked, disabled, onChange, indeterminate } = this.props;

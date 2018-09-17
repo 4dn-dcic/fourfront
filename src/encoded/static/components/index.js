@@ -20,7 +20,6 @@ require('./static-pages/PlannedDataSubmission');
 require('./static-pages/JointAnalysis');
 require('./static-pages/ReleaseUpdates');
 require('./static-pages/StatisticsPage');
-require('./submissions');
 require('./item-pages/DefaultItemView');
 require('./item-pages/ExperimentSetView');
 require('./item-pages/ExperimentView');
@@ -42,6 +41,7 @@ require('./submission/submission-fields');
 require('./inputs');
 require('./browse/BrowseView');
 require('./browse/SearchView');
+require('./browse/SubscriptionsView');
 require('./browse/components');
 require('./testwarning');
 

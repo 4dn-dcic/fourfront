@@ -2,7 +2,12 @@
 
 import React from 'react';
 
-export default class TestWarning extends React.Component {
+/**
+ * Component which displays a banner at top of page informing users about this portal containing test data.
+ *
+ * @todo Move to navigation file or elsewhere.
+ */
+export default class TestWarning extends React.PureComponent {
     render(){
         if (!this.props.visible) return null;
         return (

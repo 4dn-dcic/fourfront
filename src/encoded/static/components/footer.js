@@ -5,16 +5,23 @@ import PropTypes from 'prop-types';
 
 /**
  * Page footer which is visible on each page.
- * 
- * @module {Component} footer
- * @prop {string} version - App version number
  */
 export default class Footer extends React.Component {
 
+    /**
+     * @static
+     * @public
+     * @constant
+     */
     static propTypes = {
         version: PropTypes.string // App version number
     }
 
+    /**
+     * @private
+     * @ignore
+     * @returns {JSX.Element}
+     */
     render() {
         return (
             <footer id="page-footer">

@@ -1,6 +1,12 @@
-// Handle browser capabilities, a la Modernizr. Can *only* be called from
-// mounted components (componentDidMount method would be a good method to
-// use this from), because actual DOM is needed.
+
+/**
+ * Handle browser capabilities, a la Modernizr. Can *only* be called from
+ * mounted components (componentDidMount method would be a good method to
+ * use this from), because actual DOM is needed.
+ *
+ * @deprecated
+ * @constant
+ */
 
 export const BrowserFeat = {
     feat: {},

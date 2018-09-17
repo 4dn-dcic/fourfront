@@ -7,6 +7,11 @@ import _ from 'underscore';
 import * as store from './../store';
 import { ajax, console, object, isServerSide, navigate } from './util';
 
+/**
+ * Definitions for regex validators.
+ *
+ * @constant
+ */
 export const localRegexValidation = {
     /** 
      * http://www.regular-expressions.info/email.html -> changed capital A to lowercase
@@ -31,7 +36,7 @@ export const localRegexValidation = {
  *   generateSparseNestedProperty('human.body.leftArm.indexFinger', 'Orange') returns
  *   { human : { body : { leftArm : { indexFinger : 'Orange' } } } }
  */
-export function generateSparseNestedProperty(field, value){
+function generateSparseNestedProperty(field, value){
     if (typeof field === 'string') field = field.split('.');
     if (!Array.isArray(field)) throw new Error("Could not create nested field in object. Check field name.");
 
@@ -48,8 +53,9 @@ export function generateSparseNestedProperty(field, value){
  * @param {Object} hostObj - Object to merge/insert into.
  * @param {Object} nestedObj - Object whose value to insert into hostObj.
  * @param {number} [maxDepth=10] - Max number of recursions or object depth.
+ * @returns {boolean}
  */
-export function deepExtendObject(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
+function deepExtendObject(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
     var nKey = Object.keys(nestedObj)[0]; // Should only be 1.
     if (currentDepth > maxDepth){
         // Doubt we'd go this deep... so cancel out

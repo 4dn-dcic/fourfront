@@ -28,7 +28,7 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
  * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
  * @returns {string|null} String value or null. Your function may return a React element, as well.
  */
-export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Object, props: Object, width: number){
+export function defaultColumnBlockRenderFxn(result, columnDefinition, props, width){
 
     function filterAndUniq(vals){
         return _.uniq(_.filter(vals, function(v){
@@ -81,7 +81,7 @@ export function sanitizeOutputValue(value){
 
 
 
-export function extendColumnDefinitions(columnDefinitions: Array<Object>, columnDefinitionOverrideMap: Object){
+export function extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap){
     if (_.keys(columnDefinitionOverrideMap).length > 0){
         return columnDefinitions.map(function(colDef){
             if (columnDefinitionOverrideMap[colDef.field]){
@@ -114,7 +114,7 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
-        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number, popLink = false){
+        'render' : function(result, columnDefinition, props, width, popLink = false){
             var title = object.itemUtil.getTitleStringFromContext(result),
                 link = object.itemUtil.atId(result),
                 tooltip,
