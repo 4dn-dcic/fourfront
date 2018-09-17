@@ -9,9 +9,9 @@
         "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fab9",
         "status": "uploaded",
         "file_type": "z-stack",
-		    "imageid": "478243",
-		    "thumbnail": "https://omero.hms.harvard.edu/webgateway/render_thumbnail/478122/100/",
-		    "omerolink": "https://omero.hms.harvard.edu/pathviewer/vanilla-viewer/478122"
+            "imageid": "478243",
+            "thumbnail": "https://omero.hms.harvard.edu/webgateway/render_thumbnail/478122/100/",
+            "omerolink": "https://omero.hms.harvard.edu/pathviewer/vanilla-viewer/478122"
     },
     {
         "accession":"4DNFIOTESTM2",
