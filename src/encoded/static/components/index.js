@@ -35,14 +35,9 @@ require('./item-pages/FileMicroscopyView');
 require('./item-pages/BiosampleView');
 require('./item-pages/BiosourceView');
 require('./item-pages/ProtocolView');
-require('./navigation');
-require('./submission/submission-view');
-require('./submission/submission-fields');
-require('./inputs');
+require('./forms/SubmissionView');
 require('./browse/BrowseView');
 require('./browse/SearchView');
 require('./browse/SubscriptionsView');
-require('./browse/components');
-require('./testwarning');
 
 module.exports = require('./app').default;

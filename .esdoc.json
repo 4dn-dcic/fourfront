@@ -1,6 +1,6 @@
 {
   "source": "./src/encoded/static/components",
-  "destination": "./es_docs",
+  "destination": "./src/encoded/static/docs/js",
   "excludes" : ["testdata/*"],
   "plugins": [
     {

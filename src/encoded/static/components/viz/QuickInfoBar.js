@@ -8,7 +8,7 @@ import queryString from 'query-string';
 import * as d3 from 'd3';
 import * as vizUtil from './utilities';
 import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
-import { Toggle } from '../inputs';
+import { Toggle } from './../forms/components';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 import { ChartDataController } from './chart-data-controller';

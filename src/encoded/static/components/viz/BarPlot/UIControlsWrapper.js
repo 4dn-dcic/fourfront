@@ -7,7 +7,7 @@ import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 're
 import * as vizUtil from './../utilities';
 import { RotatedLabel, Legend } from './../components';
 import { console, object, isServerSide, expFxn, Filters, Schemas, layout, analytics } from './../../util';
-import { Toggle } from './../../inputs';
+import { Toggle } from './../../forms/components';
 import { boundActions } from './ViewContainer';
 
 /**

@@ -11,8 +11,7 @@ import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
-import Navigation from './navigation';
-import SubmissionView from './submission/submission-view';
+import { NavigationBar } from './navigation/NavigationBar';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
@@ -224,8 +223,6 @@ export default class App extends React.Component {
         this.loadSchemas = this.loadSchemas.bind(this);
 
         // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
-        this.handleDropdownChange = this.handleDropdownChange.bind(this);
-        this.handleLayoutClick = this.handleLayoutClick.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handlePopState = this.handlePopState.bind(this);
@@ -290,7 +287,8 @@ export default class App extends React.Component {
             'user_actions'      : user_actions,
             'schemas'           : this.props.context.schemas || null,
             'isSubmitting'      : false,
-            'mounted'           : false
+            'mounted'           : false,
+            'scrollState'       : null
         };
 
         console.log("App Initial State: ", this.state);
@@ -312,7 +310,6 @@ export default class App extends React.Component {
      */
     componentDidMount() {
         var { href, context } = this.props;
-        globals.bindEvent(window, 'keydown', this.handleKey);
 
         // Load up analytics
         analytics.initializeGoogleAnalytics( analytics.getTrackingId(href), context );
@@ -557,34 +554,6 @@ export default class App extends React.Component {
                 });
             }
         });
-    }
-
-    /**
-     * When current dropdown changes; componentID is _rootNodeID of newly dropped-down component.
-     *
-     * @private
-     * @deprecated
-     * @todo Remove and test
-     * @param {string} componentID - HTML element ID of a dropdown.
-     */
-    handleDropdownChange(componentID) {
-        // Use React _rootNodeID to uniquely identify a dropdown menu;
-        // It's passed in as componentID
-        this.setState({dropdownComponent: componentID});
-    }
-
-    /**
-     * Handle a click outside a dropdown menu by clearing currently dropped down menu.
-     *
-     * @private
-     * @deprecated
-     * @todo Remove and test
-     * @param {React.SyntheticEvent} event React SyntheticEvent for click MouseEvent.
-     */
-    handleLayoutClick(e) {
-        if (this.state.dropdownComponent !== undefined) {
-            this.setState({dropdownComponent: undefined});
-        }
     }
 
     /**
@@ -1276,8 +1245,7 @@ export default class App extends React.Component {
             routeList       = href_url.pathname.split("/"),
             routeLeaf       = routeList[routeList.length - 1],
             key             = context && context['@id'] && context['@id'].split('?')[0], // Switching between collections may leave component in place
-            currentAction   = this.currentAction(),
-            appClass        = this.props.slow ? 'communicating' : 'done';
+            currentAction   = this.currentAction();
 
         var content, title, status; // Rendered values
 
@@ -1408,61 +1376,189 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
                 </head>
-                <body onClick={this.handleClick} data-current-action={currentAction} onSubmit={this.handleSubmit} data-path={href_url.path} data-pathname={href_url.pathname} className={isLoading ? "loading-request" : null}>
-                    <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
-                        __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
-                    }}></script>
-                    <script data-prop-name="alerts" type="application/json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
-                    }}></script>
-                    <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
-                        <div className="inner">
-                            <i className="icon icon-circle-o-notch"/>
-                        </div>
-                    </div>
-                    <div id="slot-application">
-                        <div id="application" className={appClass}>
-                            <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation
-                                    href={this.props.href}
-                                    currentAction={currentAction}
-                                    session={this.state.session}
-                                    updateUserInfo={this.updateUserInfo}
-                                    portal={portal}
-                                    listActionsFor={this.listActionsFor}
-                                    ref="navigation"
-                                    schemas={this.state.schemas}
-                                    context={context}
-                                    browseBaseState={this.props.browseBaseState}
-                                />
-                                <div id="pre-content-placeholder"/>
-                                <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts')} {..._.pick(this.state, 'session', 'schemas')} currentAction={currentAction} />
-                                <div id="facet-charts-container" className="container">
-                                    <FacetCharts {..._.pick(this.props, 'context', 'href')} {..._.pick(this.state, 'session', 'schemas')} navigate={navigate} />
-                                </div>
-                                <div id="content" className="container" children={content} />
-                                <div id="layout-footer"/>
-                            </div>
-                            <Footer version={this.props.context.app_version} />
-                        </div>
-                    </div>
-                    <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={()=>{
-                        var _tooltip = this.refs && this.refs.tooltipComponent;
-                        // Grab tip & unset style.left and style.top using same method tooltip does internally.
-                        var node = ReactDOM.findDOMNode(_tooltip);
-                        node.style.left = null;
-                        node.style.top = null;
-                    }} globalEventOff="click" />
-                    <ChartDetailCursor
-                        href={this.props.href}
-                        schemas={this.state.schemas}
-                        verticalAlign="center" /* cursor position relative to popover */
-                        //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
-                    />
-                </body>
+                <BodyElement {...this.state}{...this.props}{...{ baseDomain, isLoading }} updateUserInfo={this.updateUserInfo} children={content}
+                    listActionsFor={this.listActionsFor} onClick={this.handleClick} onSubmit={this.handleSubmit} hrefParts={href_url}/>
             </html>
         );
     }
 
 }
+
+/**
+ * This component provides some extra layout properties to certain components.
+ * Namely, it handles, stores, and passes down state related to scrolling up/down the page.
+ * This prevents needing to have numerous window scroll event listeners living throughout the app.
+ *
+ * @todo Perhaps grab and pass down windowInnerWidth, windowInnerHeight, and/or similar props as well.
+ */
+class BodyElement extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.onTooltipAfterHide = this.onTooltipAfterHide.bind(this);
+        this.setupScrollHandler = this.setupScrollHandler.bind(this);
+        this.state = {
+            'scrolledPastTop'       : null,
+            'scrolledPastEighty'    : null,
+            'scrollTop'             : null // Not used, too many state updates if were to be.
+        };
+    }
+
+    /**
+     * Initializes scroll event handler & loading of help menu tree.
+     *
+     * @private
+     * @returns {void}
+     */
+    componentDidMount(){
+        this.setupScrollHandler();
+    }
+
+    /**
+     * Unbinds event listeners.
+     * Probably not needed but lets be safe & cleanup.
+     *
+     * @private
+     * @returns {void}
+     */
+    componentWillUnmount(){
+        window.removeEventListener("scroll", this.throttledScrollHandler);
+        delete this.throttledScrollHandler;
+    }
+
+    /**
+     * Attaches an event listener to the `window` object.
+     * Updates `state.scrolledPastTop` and `<body/>` element className depending on window current scroll top.
+     *
+     * @todo The state.scrolledPastTop isn't used as much as the "body" className (via CSS), perhaps this entire mechanism could be moved out of here and we get rid of state.scrolledPastTop? (replacing outerStyle.maxHeight dynamic setting w/ stylesheet)
+     * @todo Maybe try to delegate React synthetic event detected from root "html" element instead of directly listening to window events. Decision should depend on performance testing/profiling.
+     * @listens {Event} Window scroll events.
+     * @returns {void}
+     */
+    setupScrollHandler(){
+        if (!(typeof window !== 'undefined' && window && document && document.body && typeof document.body.scrollTop !== 'undefined')){
+            return null;
+        }
+
+        var lastScrollTop = 0,
+            handleScroll = (e) => {
+
+                // TODO: Maybe this.setState(function(currState){ ...stuf... }), but would update maybe couple of times extra...
+
+                var stateChange = {},
+                    currentScrollTop = layout.getPageVerticalScrollPosition(),
+                    scrollVector = currentScrollTop - lastScrollTop;
+
+                lastScrollTop = currentScrollTop;
+
+                if ( // Fixed nav takes effect at medium grid breakpoint or wider.
+                    ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && (
+                        (currentScrollTop > 20 && scrollVector >= 0) ||
+                        (currentScrollTop > 80)
+                    )
+                ){
+                    if (!this.state.scrolledPastTop){
+                        stateChange.scrolledPastTop = true;
+                    }
+                    if (currentScrollTop > 80){
+                        stateChange.scrolledPastEighty = true;
+                    }
+                } else {
+                    if (this.state.scrolledPastTop){
+                        stateChange.scrolledPastTop = false;
+                        stateChange.scrolledPastEighty = false;
+                    }
+                }
+                if (_.keys(stateChange).length > 0){
+                    this.setState(stateChange);
+                }
+            };
+
+        // We add as property of class instance so we can remove event listener on unmount, for example.
+        this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(window, handleScroll), 10);
+
+        window.addEventListener("scroll", this.throttledScrollHandler);
+        setTimeout(this.throttledScrollHandler, 100, null);
+    }
+
+    onTooltipAfterHide(){
+        var _tooltip = this.refs && this.refs.tooltipComponent,
+            domElem = ReactDOM.findDOMNode(_tooltip);
+        if (!domElem) {
+            console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
+            return;
+        }
+        requestAnimationFrame(function(){
+            // Grab tip & unset style.left and style.top using same method tooltip does internally.
+            domElem.style.left = null;
+            domElem.style.top = null;
+        });
+    }
+
+    render(){
+        var { 
+            onBodyClick, onBodySubmit, context, alerts,
+            currentAction, hrefParts, isLoading, slowLoad,
+            children
+        } = this.props,
+            { scrolledPastEighty, scrolledPastTop } = this.state,
+            appClass = slowLoad ? 'communicating' : 'done',
+            bodyClassList = [];
+
+        if (isLoading)          bodyClassList.push('loading-request');
+        if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
+        if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
+
+        return (
+            <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit}
+                data-path={hrefParts.path} data-pathname={hrefParts.pathname} className={bodyClassList.length > 0 && bodyClassList.join(' ')}>
+
+                <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
+                    __html: jsonScriptEscape(JSON.stringify(context))
+                }}/>
+                <script data-prop-name="alerts" type="application/json" dangerouslySetInnerHTML={{
+                    __html: jsonScriptEscape(JSON.stringify(alerts))
+                }}/>
+
+                <div id="slow-load-container" className={slowLoad ? 'visible' : null}>
+                    <div className="inner">
+                        <i className="icon icon-circle-o-notch"/>
+                    </div>
+                </div>
+
+                <div id="slot-application">
+                    <div id="application" className={appClass}>
+                        <div id="layout">
+                            <NavigationBar portal={portal} ref="navigation" {..._.pick(this.props, 'href', 'currentAction',
+                                'session', 'schemas', 'browseBaseState', 'context', 'updateUserInfo', 'listActionsFor')}/>
+
+                            <div id="pre-content-placeholder"/>
+
+                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')} />
+                            
+                            <div id="facet-charts-container" className="container">
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')} navigate={navigate} />
+                            </div>
+                            
+                            <div id="content" className="container" children={children} />
+
+                            <div id="layout-footer"/>
+                        </div>
+                        <Footer version={context.app_version} />
+                    </div>
+                </div>
+
+                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" />
+
+                <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
+                    verticalAlign="center" /* cursor position relative to popover */
+                    //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
+                />
+
+            </body>
+        );
+    }
+
+}
+
 

@@ -147,6 +147,63 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
 }
 
 
+/**
+ * Sets value to be deeply nested within an otherwise empty object, given a field with dot notation.
+ * Use for creating objects for PATCH requests. Does not currently support arrays.
+ * If want to update a full object rather than create an empty one, use @see deepExtendObject with output.
+ *
+ * @param {string|string[]} field   Property name of object of where to nest value, in dot-notation or pre-split into array.
+ * @param {*} value                 Any value to nest.
+ * @returns {Object} - Object with deepy-nested value.
+ * @example
+ *   generateSparseNestedProperty('human.body.leftArm.indexFinger', 'Orange') returns
+ *   { human : { body : { leftArm : { indexFinger : 'Orange' } } } }
+ */
+export function generateSparseNestedProperty(field, value){
+    if (typeof field === 'string') field = field.split('.');
+    if (!Array.isArray(field)) throw new Error("Could not create nested field in object. Check field name.");
+
+    var currObj = {};
+    currObj[field.pop()] = value;
+
+    if (field.length === 0) return currObj;
+    return generateSparseNestedProperty(field, currObj);
+}
+
+
+/**
+ * Performs an IN-PLACE 'deep merge' of a small object (one property per level, max) into a host object.
+ *
+ * @param {Object} hostObj          Object to merge/insert into.
+ * @param {Object} nestedObj        Object whose value to insert into hostObj.
+ * @param {number} [maxDepth=10]    Max number of recursions or object depth.
+ * @returns {boolean} False if failed.
+ */
+export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
+    var nKey = Object.keys(nestedObj)[0]; // Should only be 1.
+    if (currentDepth > maxDepth){
+        // Doubt we'd go this deep... so cancel out
+        return false;
+    }
+    if (typeof hostObj[nKey] !== 'undefined'){
+        if (typeof nestedObj[nKey] === 'object' && !Array.isArray(hostObj[nKey]) ){
+            return deepExtend(hostObj[nKey], nestedObj[nKey], currentDepth + 1);
+        } else {
+            // No more nested objects, insert here.
+            hostObj[nKey] = nestedObj[nKey];
+            return true;
+        }
+    } else if (typeof nestedObj[nKey] !== 'undefined') {
+        // Field doesn't exist on hostObj, but does on nestedObj, == new field.
+        hostObj[nKey] = nestedObj[nKey];
+        return true;
+    } else {
+        // Whoops, doesn't seem like fields match.
+        return false;
+    }
+}
+
+
 
 export function isValidJSON(content) {
     var isJson = true;
@@ -449,9 +506,9 @@ export const itemUtil = {
 
     // Aliases
 
-    isAnItem : isAnItem,
-    generateLink : linkFromItem,
-    atId : atIdFromObject,
+    isAnItem        : isAnItem,
+    generateLink    : linkFromItem,
+    atId            : atIdFromObject,
 
 
 
@@ -557,6 +614,31 @@ export const itemUtil = {
          */
         gravatar(email, size=null, props={}, defaultImg='retro'){
             return <img title="Obtained via Gravatar" {...props} src={itemUtil.User.buildGravatarURL(email, size, defaultImg)} className={'gravatar' + (props.className ? ' ' + props.className : '')} />;
+        },
+
+
+        /**
+         * Definitions for regex validators.
+         *
+         * @public
+         * @constant
+         */
+        localRegexValidation : {
+            /** 
+             * http://www.regular-expressions.info/email.html -> changed capital A to lowercase
+             *
+             * @public
+             * @constant
+             */
+            email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
+            /** 
+             * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and
+             * optional leading plus sign (for international).
+             *
+             * @public
+             * @constant
+             */
+            phone : '[+]?[\\d]{10,36}((\\sx|\\sext|\\sextension)(\\s)?[\\d]{1,7})?$'
         }
 
     }

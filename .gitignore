@@ -7,6 +7,7 @@ beanstalk.cfg
 /.cache/
 /.sass-cache/
 .vscode
+/src/encoded/static/docs/
 /es_docs/
 /annotations.json
 /aws-ip-ranges.json

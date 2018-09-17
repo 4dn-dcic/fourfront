@@ -10,10 +10,9 @@ import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
 import { panel_views, content_views } from './../globals';
-var store = require('./../../store');
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
-import { EditableField, FieldSet } from './../forms';
+import { EditableField, FieldSet } from './../forms/components';
 
 
 /**
@@ -27,7 +26,7 @@ import { EditableField, FieldSet } from './../forms';
 /**
  * Extends ItemStore to help manage collection of Access Keys from back-end.
  *
- * @memberof module:item-pages/user
+ * @todo Remove/refactor this and the ItemStore dependency in favor of using a React Component to wrap and provide state to some child view in UserView.
  * @extends module:lib/store.ItemStore
  * @private
  */
