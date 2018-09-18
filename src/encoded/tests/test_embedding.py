@@ -135,3 +135,22 @@ def test_fictitous_embed(registry):
     assert 'biosource.individual' in added_embeds
     assert 'biosource.individual.organism' in added_embeds
     assert error is None
+
+
+def test_get_item_if_you_can(content, dummy_request, threadlocals):
+    """
+    Not necessarily the best place for this test, but test that the
+    `get_item_if_you_can` function works with multiple inputs
+    """
+    from encoded.types.base import get_item_if_you_can
+    used_item = sources[0]
+    # all of these should get the full item
+    res1 = get_item_if_you_can(dummy_request, used_item)
+    res2 = get_item_if_you_can(dummy_request, {'uuid': used_item['uuid']})
+    res3 = get_item_if_you_can(dummy_request, used_item['uuid'])
+    res4 = get_item_if_you_can(dummy_request, used_item['uuid'], '/testing-link-sources/')
+    for res in [res1, res2, res3, res4]:
+        assert res['uuid'] == used_item['uuid']
+        assert res['name'] == used_item['name']
+        assert '@id' in res
+        assert '@type' in res
