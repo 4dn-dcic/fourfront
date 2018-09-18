@@ -248,7 +248,7 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
             <div id="file_disclaimer_div">
                 <h4 className="mt-2 mb-07 text-500">Notes</h4>
                 <ul className="mb-25">
-                    { isSignedIn ?
+                    { (foundUnreleasedFiles && isSignedIn) ?
                         <li className="mb-05">
                             To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
                             <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
@@ -257,11 +257,13 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                     <li className="mb-05">
                         {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
                     </li>
+                    { foundUnpublishedFiles ?
                     <li>
                         For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
                         In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
                         Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
                     </li>
+                    : null }
                 </ul>
                 {showDisclaimerButton ? <Button bsStyle="info" onClick={onClickHandler}><i className="icon icon-fw icon-check"></i>&nbsp;I have read and understand the notes.</Button> : null }
             </div>
