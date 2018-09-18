@@ -9,20 +9,12 @@ const defaultNavigateDisappearThreshold = 1;
 
 let alertNavigatationCountMap = {};
 
-/** 
- * @typedef {Object} AlertObj - Object used to represent alert message element contents at top of page.
- * @property {string} title                 Title to be shown at top of alert box.
- * @property {string|JSX.Element} message   Message to be shown in body of alert box. May be JSX if no plans for alert to be rendered server-side.
- * @property {?string} style                Style of alert box. May be any Bootstrap-compliant style, e.g. "danger", "warning", "info".
- * @property {number} [navigateDisappearThreshold=1] - After how many navigations should this alert be automatically removed.
- */
 
 /**
  * A Component and utility (via Component's 'statics' property & functions) to 
  * queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
  * the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
  * title for alert that was queued.
- *
  *
  * @prop {AlertObj[]} alerts - List of Alert objects currently being displayed. Should be passed down from Redux store from App.
  */
@@ -164,6 +156,7 @@ export default class Alerts extends React.Component {
          * State object for component.
          *
          * @type {Object}
+         * @private
          * @property {AlertObj[]} state.dismissing - List of alerts currently being faded out.
          */
         this.state = {

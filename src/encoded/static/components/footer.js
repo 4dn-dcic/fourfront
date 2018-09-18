@@ -5,22 +5,14 @@ import PropTypes from 'prop-types';
 
 /**
  * Page footer which is visible on each page.
+ * In future could maybe move into app.js since file is so small.
+ * But it may get bigger in future also and include things such as privacy policy, about page links, copyright, and so forth.
  */
-export default class Footer extends React.Component {
-
-    /**
-     * @static
-     * @public
-     * @constant
-     */
-    static propTypes = {
-        version: PropTypes.string // App version number
-    }
+export class Footer extends React.Component {
 
     /**
      * @private
-     * @ignore
-     * @returns {JSX.Element}
+     * @returns {JSX.Element} A footer element with a couple of columns.
      */
     render() {
         return (

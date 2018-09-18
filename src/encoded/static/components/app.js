@@ -1,4 +1,5 @@
 'use strict';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
@@ -12,7 +13,7 @@ import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
-import Footer from './footer';
+import { Footer } from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
 import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
@@ -21,6 +22,7 @@ import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
+import { NavigateOpts } from './util/navigate';
 
 
 
@@ -28,6 +30,7 @@ import PageTitle from './PageTitle';
  * Used to temporarily store Redux store values for simultaneous dispatch.
  *
  * @var
+ * @type {Object}
  */
 let dispatch_dict = {};
 
@@ -35,6 +38,7 @@ let dispatch_dict = {};
  * Top bar navigation & link schema definition.
  *
  * @constant
+ * @type {Object}
  */
 const portal = {
     "portal_title": '4DN Data Portal',
@@ -127,7 +131,7 @@ export default class App extends React.Component {
     /**
      * Immediately scrolls browser viewport to current window hash or to top of page.
      *
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     static scrollTo() {
         var hash = window.location.hash;
@@ -240,6 +244,7 @@ export default class App extends React.Component {
 
         /**
          * Whether HistoryAPI is supported in current browser.
+         * Assigned / determined in constructor.
          *
          * @type {boolean}
          */
@@ -295,7 +300,7 @@ export default class App extends React.Component {
     }
 
     /**
-     * Perform various actions once component is mounted which depend on browser environment.
+     * Perform various actions once component is mounted which depend on browser environment:
      *
      * - Add URI hash from window.location.hash/href to Redux store (doesn't get sent server-side).
      * - Bind 'handlePopState' function to window popstate event (e.g. back/forward button navigation).
@@ -684,7 +689,7 @@ export default class App extends React.Component {
      * Handles a history change event.
      *
      * @private
-     * @param {React.SyntheticEvent} A popstate event.
+     * @param {React.SyntheticEvent} event - A popstate event.
      */
     handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
@@ -848,6 +853,7 @@ export default class App extends React.Component {
      * Only navigate if href changes unless is inPlace navigation, if don't need to stay on submissions
      * view, etc.
      *
+     * @private
      * @param {string} href - New URI we're navigating to.
      * @param {Object} [options] - Options for navigation request.
      * @returns {boolean}
@@ -910,12 +916,14 @@ export default class App extends React.Component {
     }
 
     /**
+     * Should not be called directly - aliased to global function `util.navigate` during App constructor.
      * Function which is used/called to navigate us around the portal in single-page-application (AJAX)
      * fashion.
      *
-     * @public
+     * @alias navigate
+     * @private
      * @param {string} href                 URI we're attempting to navigate to.
-     * @param {Object} [options={}]         Options for the navigation request.
+     * @param {NavigateOpts} [options={}]   Options for the navigation request.
      * @param {boolean} options.replace     If true, browser history entry is replaced, not added.
      * @param {boolean} options.skipRequest If true, request is skipped but browser URI and history is updated.
      * @param {boolean} options.inPlace     If true, will re-load page even if is at same URL. Also won't scroll to top of page.
@@ -1163,10 +1171,10 @@ export default class App extends React.Component {
      * Redux store is updated with new JSON response here.
      *
      * @private
-     * @param {JSONResponse} data - Next JSON response.
+     * @param {JSONContentResponse} data - Next JSON response.
      * @param {Object} extendDispatchDict - Additional keys/values to save to Redux along with next response.
      * @param {Object} requestOptions - Navigation options that were passed to `App.navigate`.
-     * @returns {JSONResponse} Data which was received and saved.
+     * @returns {JSONContentResponse} Data which was received and saved.
      */
     receiveContextResponse (data, extendDispatchDict = {}, requestOptions = {}) {
         // title currently ignored by browsers

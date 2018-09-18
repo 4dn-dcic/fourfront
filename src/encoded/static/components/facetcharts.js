@@ -19,15 +19,19 @@ import * as BarPlot from './viz/BarPlot';
  * Area for displaying Charts rel to browsing.
  * Originally designed as space for 2 charts, a bigger barplot and a smaller/square/circle pie-like chart, to take up 3/4 and 1/4 width of header respectively (where 1/4 of width ~== height).
  * Now the 1/4 area for smaller chart is used for legend & ui controls.
- * 
- * Props:
- * 
- * @prop {(boolean|string|showFunc)} [show] - Type of view to show or whether to display or not; if function supplied, as well as props.href, path is passed as argument. 
- * @prop {string} [href='/'] - Current page/view URL, used to filter charts and pass 'path' arg to props.show, if provided.
  */
-
 export class FacetCharts extends React.Component {
 
+    /**
+     * @type {Object} defaultProps
+     * @static
+     * @public
+     * @member
+     * @constant
+     * @property {string} [href='/'] Current page/view URL, used to filter charts and pass 'path' arg to props.show, if provided.
+     * @property {boolean|string|showFunc} [show] - Type of view to show or whether to display or not; if function supplied, as well as props.href, path is passed as argument. 
+     * @property {string[]} initialFields - Array with 2 items representing the x-axis field and the group by field.
+     */
     static defaultProps = {
         'href' : '/',
         'show' : function(path, search, hash){
@@ -53,20 +57,32 @@ export class FacetCharts extends React.Component {
             'experiments_in_set.experiment_type',
             'experiments_in_set.biosample.biosource.individual.organism.name'
         ]
-    }
+    };
 
+    /**
+     * Binds functions and initiates a state object.
+     *
+     * @member
+     * @ignore
+     * @public
+     * @constructor
+     */
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.show = this.show.bind(this);
         this.width = this.width.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'mounted' : false };
     }
 
+    /**
+     * Adds event listener for window resize event.
+     * Updates `state.mounted`.
+     *
+     * @private
+     * @todo Remove and instead wrap this in a `layout.windowResizeTrigger`.
+     * @todo Perhaps calculate window inner width and height in root, e.g. App.js / BodyElement, and pass it down to trigger 'window resize'.
+     */
     componentDidMount(){
         var { debug, browseBaseState, initialFields } = this.props;
 
@@ -94,6 +110,9 @@ export class FacetCharts extends React.Component {
 
     }
 
+    /**
+     * Removes event listener for window resize event.
+     */
     componentWillUnmount(){
         if (!isServerSide() && typeof window !== 'undefined'){
             window.removeEventListener('resize', this.debouncedResizeHandler);
@@ -101,6 +120,9 @@ export class FacetCharts extends React.Component {
         }
     }
 
+    /**
+     * @ignore
+     */
     componentDidUpdate(pastProps, pastState){
         if (this.props.debug) console.log('Updated FacetCharts', this.state);
     }
@@ -109,6 +131,8 @@ export class FacetCharts extends React.Component {
      * Given this.props, determines if element is currently meant to be invisible (false) or a certain layout ({string}).
      * 
      * @instance
+     * @private
+     * @param {Object} [props=this.props] - Representation of current or next props for this component.
      * @returns {string|boolean} What layout should currently be rendered.
      */
     show(props = this.props){
@@ -128,7 +152,15 @@ export class FacetCharts extends React.Component {
         return props.views[0]; // Default
     }
 
-    /** We want a square for circular charts, so we determine WIDTH available for first chart (which is circular), and return that as height. */
+    /**
+     * We want a square for circular charts, so we determine WIDTH available for first chart (which is circular), and return that as height.
+     *
+     * @deprecated
+     * @todo Remove and refactor.
+     * @param {number} chartNumber - Index+1 of chart we want to get width for.
+     * @param {showFunc} show - Function to determine show state (large, small).
+     * @returns {number} Width
+     */
     width(chartNumber = 0, show = null){
         if (!show) show = this.show();
         if (!show) return null;
@@ -139,6 +171,10 @@ export class FacetCharts extends React.Component {
         }
     }
 
+    /**
+     * @private
+     * @returns {JSX.Element} Area with BarPlot chart, wrapped by `ChartDataController.Provider` instance.
+     */
     render(){
 
         var show = this.show();

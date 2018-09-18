@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import { Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import { panel_views, itemClass, content_views } from './../globals';
+import { content_views } from './../globals';
 import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
     FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
@@ -181,9 +181,31 @@ content_views.register(DefaultItemView, 'Item');
 
 
 
-/*******************************
- ****** Helper Components ******
- *******************************/
+/*******************************************
+ ****** Helper Components & Functions ******
+ *******************************************/
+
+/**
+ * @deprecated
+ */
+export function itemClass(context, htmlClass) {
+    htmlClass = htmlClass || '';
+    (context['@type'] || []).forEach(function (type) {
+        htmlClass += ' type-' + type;
+    });
+    return statusClass(context.status, htmlClass);
+}
+
+/**
+ * @deprecated
+ */
+export function statusClass(status, htmlClass) {
+    htmlClass = htmlClass || '';
+    if (typeof status == 'string') {
+        htmlClass += ' status-' + status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,'');
+    }
+    return htmlClass;
+}
 
 
 export class OverviewHeadingContainer extends React.Component {

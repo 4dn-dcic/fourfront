@@ -1,5 +1,6 @@
 {
   "source": "./src/encoded/static/components",
+  "index" : "./src/encoded/static/components/README.md",
   "destination": "./src/encoded/static/docs/js",
   "excludes" : ["testdata/*"],
   "plugins": [

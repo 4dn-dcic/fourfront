@@ -5,9 +5,10 @@ import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil, typedefs } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
 
+var { Item } = typedefs;
 
 
 /**
@@ -15,11 +16,9 @@ import { requestAnimationFrame } from './../../viz/utilities';
  */
 export class StackedBlockNameLabel extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
+    /**
+     * @ignore
+     */
     render(){
 
         var { title, subtitle, accession, inline, className } = this.props;
@@ -86,7 +85,6 @@ export class StackedBlockName extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
@@ -1024,8 +1022,8 @@ export class StackedBlockTable extends React.Component {
     /**
      * If we have a SelectedFilesController up the parent/ancestor chain that feeds us selectFile, selectedFiles, and unselectFile, this is the handler to use for checkbox stacked blocks.
      * 
-     * @param {string|string[]} uuid - String or list of strings (File Item UUID)
-     * @param {Object|Object[]} fileObj - File Item JSON
+     * @param {string|string[]} accessionTripleString - String or list of strings which represented 3 accessions (ExpSet, Exp, File) delimited by a tilde (~).
+     * @param {Item|Item[]} fileObj - File Item JSON
      * @returns {void} - Nothing.
      */
     handleFileCheckboxChange(accessionTripleString, fileObj){

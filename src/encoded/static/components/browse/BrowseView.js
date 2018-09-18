@@ -10,7 +10,7 @@ import ReactTooltip from 'react-tooltip';
 import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
-import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
+import { isServerSide, expFxn, Filters, navigate, object, layout, typedefs } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
@@ -19,8 +19,16 @@ import {
 } from './components';
 
 
+var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
 
+
+/**
+ * Default column definitions for the browse view.
+ *
+ * @constant
+ * @type {ColumnDefinition[]}
+ */
 export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
@@ -33,13 +41,23 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
 ], defaultColumnDefinitionMap);
 
 
-export class ExperimentSetCheckBox extends React.PureComponent {
+/**
+ * Component for checkbox that is shown in display_title column (first), along with the expand/collapse toggle.
+ * Handles/sets an 'intermediate' checked state if partial selection of files comprising the ExperimentSet.
+ */
+class ExperimentSetCheckBox extends React.PureComponent {
 
-    static isDisabled(files){ return files.length === 0; }
+    static isDisabled(files){
+        return files.length === 0;
+    }
 
-    static isAllFilesChecked(selectedFiles, allFiles){ return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles); }
+    static isAllFilesChecked(selectedFiles, allFiles){
+        return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles);
+    }
 
-    static isIndeterminate(selectedFiles, allFiles){ return selectedFiles.length > 0 && selectedFiles.length < allFiles.length; }
+    static isIndeterminate(selectedFiles, allFiles){
+        return selectedFiles.length > 0 && selectedFiles.length < allFiles.length;
+    }
 
     render(){
         var { checked, disabled, onChange, indeterminate } = this.props;
@@ -58,10 +76,6 @@ export class ExperimentSetCheckBox extends React.PureComponent {
 
 /**
  * Handles state for Browse results, including page & limit.
- *
- * @export
- * @class ResultTableContainer
- * @extends {React.Component}
  */
 class ResultTableContainer extends React.PureComponent {
 
@@ -173,6 +187,13 @@ class ResultTableContainer extends React.PureComponent {
         return selected;
     }
 
+    /**
+     * Builds final form of column definitions to be rendered by table.
+     *
+     * @private
+     * @param {Object} [props=this.props] Current or next props.
+     * @returns {ColumnDefinition[]} Final column definitions.
+     */
     getColumnDefinitions(props = this.props){
         return CustomColumnSelector.buildColumnDefinitions(
             browseTableConstantColumnDefinitions,
@@ -343,9 +364,18 @@ class ExternaDataExpSetsCount extends React.PureComponent {
 
 
 
-
+/**
+ * View which renders the page located at `/browse/`.
+ *
+ */
 export default class BrowseView extends React.Component {
 
+    /**
+     * Calculates how many experiment sets are 'External' and do not have award.project===4DN from browse JSON result.
+     *
+     * @param {SearchResponse} context - Browse search result.
+     * @returns {number} Count of external experiment sets.
+     */
     static externalDataSetsCount(context){
         var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
         var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
@@ -354,7 +384,12 @@ export default class BrowseView extends React.Component {
         return countExternalSets;
     }
 
-    /** Combines props.defaultHiddenColumns with list of facets/columns which have `"default_hidden" : true` in schema. */
+    /**
+     * Combines props.defaultHiddenColumns with list of facets/columns which have `"default_hidden" : true` in schema.
+     *
+     * @param {{ context: SearchResponse }} props - Current or next props of component with a 'context' field.
+     * @returns {string[]}
+     */
     static fullDefaultHiddenColumns(props){
         if (props.context && props.context.columns){
             return (props.defaultHiddenColumns || []).concat(_.map(
@@ -366,24 +401,67 @@ export default class BrowseView extends React.Component {
         }
     }
 
+    /**
+     * Default prop values for BrowseView. Namely contains `defaultHiddenColumns`.
+     *
+     * @static
+     * @public
+     * @type {Object}
+     * @property {string[]} defaultHiddenColumns - List of column fields which are hidden by default.
+     */
+    static defaultProps = {
+        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'last_modified.date_modified', 'status', 'number_of_files']
+    };
+
+    /**
+     * PropTypes for component.
+     *
+     * @static
+     * @public
+     * @type {Object}
+     * @ignore
+     */
     static propTypes = {
         'context' : PropTypes.object.isRequired,
         'session' : PropTypes.bool,
         'schemas' : PropTypes.object,
         'href' : PropTypes.string.isRequired
-    }
+    };
 
-    static defaultProps = {
-        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'last_modified.date_modified', 'status', 'number_of_files']
-    }
-
+    /**
+     * Creates an instance of BrowseView.
+     *
+     * @public
+     * @constructor
+     * @param {Object} props - Initial props.
+     */
     constructor(props){
         super(props);
+
+        /**
+         * Internal state for root-level BrowseView component.
+         * Contains list of default hidden columns, as calculated by merging `props.defaultHiddenColumns` with contents
+         * of SearchResponse.columns which have `"default_hidden" : true`.
+         *
+         * @private
+         * @type {Object}
+         * @property {string[]} state.defaultHiddenColumns - List of column fields which are hidden by default, until user interaction.
+         */
         this.state = {
             'defaultHiddenColumns' : BrowseView.fullDefaultHiddenColumns(props)
         };
     }
 
+    /**
+     * Rules for when to update/re-render this view, according to change in state or props.
+     * Attempts to minimize re-renders because the BrowseView can become quite big especially after
+     * load-as-you-scroll into a hundred or more results.
+     *
+     * @private
+     * @member
+     * @param {Object} nextProps - Next props, to be compared against this.props.
+     * @param {Object} nextState - Next state, to be compared against this.state.
+     */
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.context !== nextProps.context) return true;
         if (this.props.session !== nextProps.session) return true;
@@ -392,6 +470,13 @@ export default class BrowseView extends React.Component {
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
+    /**
+     * Redirects to correct URI params if the current URI params are invalid.
+     * Only matters if navigated to /browse/ page manually.
+     *
+     * @private
+     * @returns {void}
+     */
     componentDidMount(){
         var { href, context } = this.props;
         var hrefParts = url.parse(href, true);
@@ -403,12 +488,24 @@ export default class BrowseView extends React.Component {
         this.checkResyncChartData(hrefParts, context);
     }
 
+    /**
+     * Updates internal state if initial search response (`props.context`) or `props.defaultHiddenColumns` have changed.
+     *
+     * @private
+     * @returns {void}
+     */
     componentWillReceiveProps(nextProps){
         if (this.props.context !== nextProps.context || this.props.defaultHiddenColumns !== nextProps.defaultHiddenColumns){
             this.setState({ 'defaultHiddenColumns' : BrowseView.fullDefaultHiddenColumns(nextProps) });
         }
     }
 
+    /**
+     * Same functionality as componentDidMount if `props.href` has changed.
+     *
+     * @private
+     * @returns {void}
+     */
     componentDidUpdate(pastProps){
         var { context, href } = this.props;
         var hrefParts = url.parse(href, true);
@@ -424,6 +521,11 @@ export default class BrowseView extends React.Component {
 
     /**
      * If we get different count in Browse result total, then refetch chart data.
+     * 
+     * @private
+     * @param {URLParts} hrefParts - Components of current URI.
+     * @param {SearchResponse} context - Current search response.
+     * @returns {void}
      */
     checkResyncChartData(hrefParts, context = this.props.context){
         setTimeout(()=>{
@@ -437,10 +539,20 @@ export default class BrowseView extends React.Component {
         });
     }
 
+
+    /**
+     * Called by `componentDidMount` and/or `componentDidUpdate` to redirect to correct Browse page URI params, if needed.
+     *
+     * @private
+     * @param {URLParts} [hrefParts=null] If not passed, is obtained by parsing `this.props.href`.
+     * @returns {void}
+     */
     redirectToCorrectBrowseView(hrefParts = null){
         if (!hrefParts) hrefParts = url.parse(this.props.href, true);
 
-        var context = this.props.context;
+        var context = this.props.context,
+            nextBrowseHref = navigate.getBrowseBaseHref(),
+            expSetFilters = Filters.contextFiltersToExpSetFilters((context && context.filters) || null);
 
         // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
         //var availableProjectsInResults = Array.isArray(context.facets) ? _.uniq(_.pluck(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key')) : [];
@@ -449,8 +561,6 @@ export default class BrowseView extends React.Component {
         //    return;
         //}
 
-        var nextBrowseHref = navigate.getBrowseBaseHref();
-        var expSetFilters = Filters.contextFiltersToExpSetFilters();
         if (_.keys(expSetFilters).length > 0){
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
         }
@@ -465,15 +575,15 @@ export default class BrowseView extends React.Component {
      * If no 4DN projects available in this query but there are External Items, let user know.
      * And, show list of suggested actions.
      *
-     * @param {{ query: Object.<string|string[]>, pathname: string }} hrefParts - Parsed props.href, including parsed query.
+     * @private
+     * @param {URLParts} hrefParts - Parsed props.href, including parsed query.
      * @param {number} countExternalSets - Count of ExpSets available in External Data, as determined via `BrowseView.externalDataSetsCount(context)`.
+     * @returns {JSX.Element} Elements and content for fallback view, including some suggested actions.
      */
     renderNoResultsView(hrefParts, countExternalSets){
-        var context = this.props.context;
-
-        var browseBaseHref = navigate.getBrowseBaseHref();
-
-        var queryForSearchAllItems = _.extend( _.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ), { 'type' : 'Item' } );
+        var context = this.props.context,
+            browseBaseHref = navigate.getBrowseBaseHref(),
+            queryForSearchAllItems = _.extend( _.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ), { 'type' : 'Item' } );
 
         return (
             <div className="error-page mt-4">
@@ -505,13 +615,18 @@ export default class BrowseView extends React.Component {
         );
     }
 
+    /**
+     * Renders out components for managing state and view of Browse table in the following order:
+     * `SelectedFilesController` -> `CustomColumnController` -> `SortController` -> `ResultTableContainer`.
+     *
+     * @private
+     * @returns {JSX.Element} View for Browse page.
+     */
     render() {
-        var { context, href, session, defaultHiddenColumns, browseBaseState, schemas } = this.props;
-        //var fileFormats = findFormats(context['@graph']);
-        var results = context['@graph'];
-        var hrefParts = url.parse(href, true);
-        var searchBase = hrefParts.search || '';
-        var countExternalSets = BrowseView.externalDataSetsCount(context);
+        var { context, href, session, defaultHiddenColumns, browseBaseState, schemas } = this.props,
+            results             = context['@graph'],
+            hrefParts           = url.parse(href, true),
+            countExternalSets   = BrowseView.externalDataSetsCount(context);
 
         // no results found!
         if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts, countExternalSets);

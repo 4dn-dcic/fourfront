@@ -146,6 +146,23 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
 
 }
 
+/**
+ * Check if parameter is a valid JSON object or array.
+ *
+ * @param {Object|Array} content - Parameter to test for JSON validity.
+ * @returns {boolean} Whether passed in param is JSON.
+ * @todo Research if a more performant option might exist for this.
+ */
+export function isValidJSON(content) {
+    var isJson = true;
+    try{
+        var json = JSON.parse(JSON.stringify(content));
+    } catch(err) {
+        isJson = false;
+    }
+    return isJson;
+}
+
 
 /**
  * Sets value to be deeply nested within an otherwise empty object, given a field with dot notation.
@@ -204,24 +221,19 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
 }
 
 
-
-export function isValidJSON(content) {
-    var isJson = true;
-    try{
-        var json = JSON.parse(JSON.stringify(content));
-    } catch(err) {
-        isJson = false;
-    }
-    return isJson;
-}
-
-
 /**
  * Deep-clone a given object using JSON stringify/parse.
+ * Does not handle or clone references or non-serializable types.
+ *
+ * @param {Object|Array} JSON to deep-clone.
+ * @returns {Object|Array} Cloned JSON.
  */
 export function deepClone(obj){
     return JSON.parse(JSON.stringify(obj));
 }
+
+
+
 
 
 /**
@@ -580,6 +592,16 @@ export const itemUtil = {
         return true;
     },
 
+
+    /**
+     * Performs a `_.uniq` on list of Items by their @id.
+     *
+     * @param {Item[]} items - List of Items to unique.
+     * @returns {Item[]} Uniqued list.
+     */
+    uniq : function(items){
+        return _.uniq(items, false, function(o){ return atIdFromObject(o);  } );
+    },
 
 
     // Secondary Dictionaries -- functions by Item type.

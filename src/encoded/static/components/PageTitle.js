@@ -6,10 +6,12 @@ import _ from 'underscore';
 import url from 'url';
 import Alerts from './alerts';
 import { content_views } from './globals';
-import { console, object, Schemas, JWT, layout, DateUtility } from './util';
+import { console, object, Schemas, JWT, layout, DateUtility, typedefs } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
+
+const { Item, JSONContentResponse, SearchResponse } = typedefs;
 
 /**
  * @module PageTitle - Renders out title on all views.
@@ -71,27 +73,6 @@ const TITLE_PATHNAME_MAP = {
 // Duplicates
 TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
 
-/** 
- * @typedef {Object} JSONResponse
- * @property {string} @id - Identifier and/or URL to Item or response endpoint.
- * @property {string[]} @type - List of `@type` strings for Item, endpoint, etc.
- * @property {string} display_title - Title for Item or page.
- */
-
- /** 
- * @typedef {JSONResponse} JSONSearchResponse
- * @property {{ field: string, term: string }[]} filters - Filters set on a search or browse request.
- */
-
-/** 
- * @typedef {JSONResponse} Item
- * @property {string} @id - Identifier and/or URL to Item.
- * @property {string} uuid - DB Identifier for Item. 
- * @property {string[]} @type - List of `@type` strings for Item.
- * @property {string} display_title - Title for Item.
- * @property {Item} parent - Recursing reference to a parent Item.
- */
-
 
 /**
  * Calculates and renders out a title on every single front-end view.
@@ -105,7 +86,7 @@ export default class PageTitle extends React.PureComponent {
      * Checks whether current context has an `@type` list containing "StaticPage".
      *
      * @public
-     * @param {JSONResponse} context - Current JSON Item or backend response representation.
+     * @param {JSONContentResponse} context - Current JSON Item or backend response representation.
      * @returns {boolean} Whether is StaticPage view or not.
      */
     static isStaticPage(context){
@@ -138,7 +119,7 @@ export default class PageTitle extends React.PureComponent {
      * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
      *
      * @public
-     * @param {JSONResponse} context - Current Item or backend response JSON representation.
+     * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
      * @param {string} href - Current URI or href.
      * @param {{}[]} [schemas=Schemas.get()] - List of schemas as returned from Redux.
      * @param {boolean} [isMounted=false] - Whether page is currently mounted. Needed to determine whether can use LocalizedTime and similar.
@@ -282,7 +263,7 @@ export default class PageTitle extends React.PureComponent {
      * if table of contents is visible for page.
      *
      * @public
-     * @param {JSONResponse} context - Current Item or backend response JSON representation.
+     * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
      * @param {string} href - Current URI/href.
      * @param {boolean} mounted - Whether we are currently mounted.
      * @param {boolean} hasToc - Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
@@ -459,7 +440,7 @@ export class StaticPageBreadcrumbs extends React.Component {
      */
     static defaultProps = {
         'pageTitleStyle' : {}
-    }
+    };
 
     /** @ignore */
     constructor(props){
@@ -472,7 +453,9 @@ export class StaticPageBreadcrumbs extends React.Component {
      * Renders each individual crumb.
      *
      * @private
-     * @param {Item} ancestor - JSON representing an ancestor. Should have at least an @id and a display_title.
+     * @param {Item} ancestor   JSON representing an ancestor. Should have at least an @id and a display_title.
+     * @param {number} index    Current ancestor index.
+     * @param {Item[]} all      List of all ancestors being iterated.
      * @returns {JSX.Element} A div element representing a breadcrumb.
      */
     renderCrumb(ancestor, index, all){
