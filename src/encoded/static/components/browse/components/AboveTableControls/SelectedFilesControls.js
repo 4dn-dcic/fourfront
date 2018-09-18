@@ -32,155 +32,104 @@ export class SelectedFilesOverview extends React.Component {
 * Upon clicking the button, reveal a modal popup giving users more download instructions.
 */
 export class SelectedFilesDownloadButton extends React.PureComponent {
-
-    constructor2(props){
+    constructor(props){
         super(props);
-        this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
+        this.handleClickRevealModal = _.throttle(this.handleClickRevealModal.bind(this), 1000);
         this.handleHideModal = this.handleHideModal.bind(this);
-        this.renderFileDisclaimers = this.renderFileDisclaimers.bind(this);
-        this.hideAcknowledgement = this.hideAcknowledgement.bind(this);
+        this.handleClickDisclaimer = this.handleClickDisclaimer.bind(this);
         this.renderModal = this.renderModal.bind(this);
+        this.hasUnreleasedOrUnpublishedFiles = this.hasUnreleasedOrUnpublishedFiles.bind(this);
         this.state = {
             'modalOpen' : false,
-            'showDisclaimer' : true,
-            'showDownloadButton' : true,
-            'showAcknowledgeButton' : false,
+            'showDisclaimer' : false,
+            'showDownloadMetadata' : false,
+            'showDisclaimerButton' : false,
         };
     }
 
-    getAccessionTripleArrays(){
-        return _.map(
-            _.keys(this.props.subSelectedFiles || this.props.selectedFiles),
-            function(accessionTripleString){
-                var accessions = accessionTripleString.split('~');
-                return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
-            }
-        );
-    }
-
-    handleClickOpenModal(e){
-        this.setState({ 'modalOpen' : true });
-    }
-
     /**
-    * This returns a secondary disclaimer message if some of the files have not been released or published.
-    * @param {array} selectedFiles All of the files to consider in the modal. Used for the title and disclaimers.
-    * @param {object} userInfo An object containing the user's information, commonly taken from the JWT.
-    * @param {string} suggestedFilename TODO!
+    * Hide the modal window and its subwindows as needed.
     */
-    renderFileDisclaimers(selectedFiles, userInfo, suggestedFilename){
+    handleHideModal(){
+        this.setState({
+            'modalOpen' : false,
+            'showDisclaimer' : false,
+            'showDownloadMetadata' : false,
+            'showDisclaimerButton' : false,
+        });
+    }
 
-        // Default download button to get file metadata.
-        var downloadButtonJSX = (
-            <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
-                <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
-                <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-                <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                    <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
-                </Button>
-                {' '}
-
-            </form>
+    renderModalCodeSnippet(meta_download_filename, isSignedIn){
+        return (
+            <pre className="mb-15">
+                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
+                { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
+            </pre>
         );
-
-        renderedObjects = {
-            'disclaimer' : '',
-            'button' : downloadButtonJSX
-        };
-
-        // Find out if at least 1 is released
-        var foundUnreleasedFiles = _.any(selectedFiles,
-            file => file.status !== "released"
-        );
-
-        // Find out if at least 1 is unpublished
-        var foundUnpublishedFiles = _.any(selectedFiles,
-            file => !(
-                file.from_experiment
-                && file.from_experiment.from_experiment_set
-                && file.from_experiment.public_release
-            )
-        );
-
-        // If all data sets have been released and published, return nothing.
-        if (!(foundUnreleasedFiles || foundUnpublishedFiles)) { return renderedObjects; }
-
-        // Find out if the user is signed in, and what their profile href is.
-        var isSignedIn = !!(
-                userInfo
-                && userInfo.details
-                && userInfo.details.email
-                && userInfo.id_token
-            ),
-            profileHref = (
-                isSignedIn
-                && userInfo.user_actions
-                && _.findWhere(
-                    userInfo.user_actions, { 'id' : 'profile' }).href
-                )
-                || '/me';
-
-        // TODO hide disclaimers if the files have been released
-        // Generate the div containing warnings about unpublished and unreleased files.
-        var disclaimerDivs = (
-            <div id="file_disclaimer_div" class="hidden">
-                <h4 className="mt-2 mb-07 text-500">Notes</h4>
-                <ul className="mb-25">
-                    { isSignedIn ?
-                        <li className="mb-05">
-                            To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
-                            <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
-                        </li>
-                    : null }
-                    <li className="mb-05">
-                        {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
-                    </li>
-                    <li>
-                        For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
-                        Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
-                    </li>
-                </ul>
-            </div>
-        )
-
-        renderedObjects['disclaimer'] = disclaimerDivs;
-
-        // When you click on the button, reveal more information.
-        var revealDownloadMetadataButton = (event) => {
-            /// TODO Reveal the disclaimer.
-            /// TODO Reveal the download button.
-            /// TODO Hide this button
-        };
-
-        var hideDisclaimerJSX = (
-            <button onClick={this.hideAcknowledgement()}></button>
-        )
-
-        return renderedObjects;
     }
 
     /**
-     * This function renders out a React-Bootstrap Modal component.
-     * Part of the rendered output is a literal form which may be submitted, with 'accession triples'
-     * ([ExpSetAccession, ExpAccession, FileAccession]) included in the POSTed form fields which
-     * identify the individual files to download.
-     *
-     * @param {array} selectedFiles All of the files to consider in the modal. Used for the title and disclaimers.
-     * @returns {JSX.Element} A modal instance.
-     */
-    renderModal2(selectedFiles){
+    * The user wants to reveal the modal.
+    */
+    handleClickRevealModal(){
+        // Determine if any of the targetted files need the disclaimer
+        var fileStatus = this.hasUnreleasedOrUnpublishedFiles();
+
+        var disclaimerRequired = (fileStatus.foundUnreleasedFiles || fileStatus.foundUnpublishedFiles);
+
+        // If they need the disclaimer
+        if (disclaimerRequired) {
+            // Reveal the disclaimer widget
+            // Hide the download metadata widget
+            this.setState({
+                'modalOpen': true,
+                'showDisclaimer' : true,
+                'showDisclaimerButton' : true,
+                'showDownloadMetadata' : false,
+            });
+        }
+        else {
+            // Hide the disclaimer widget
+            // Show the download metadata widget
+            this.setState({
+                'modalOpen': true,
+                'showDisclaimer' : false,
+                'showDisclaimerButton' : false,
+                'showDownloadMetadata' : true,
+            });
+        }
+    }
+
+    /**
+    * User clicks on the acknowledgement button.
+    */
+    handleClickDisclaimer(){
+        // Update the state:
+        // - Hide the Disclaimer button
+        // - Show the Download Metadata widget
+        this.setState({
+            'modalOpen': true,
+            'showDisclaimer' : true,
+            'showDisclaimerButton' : false,
+            'showDownloadMetadata' : true,
+        });
+    }
+
+    /**
+    * Renders the modal content.
+    * @param {array} selectedFiles - Files to display and download.
+    */
+    renderModal(selectedFiles){
         if (!this.state.modalOpen) return null;
 
         var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
             userInfo = JWT.getUserInfo(),
             isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
             profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-
         var countSelectedFiles = _.keys(selectedFiles).length;
 
-        var extraDisclaimer = this.renderFileDisclaimers(selectedFiles, isSignedIn, suggestedFilename);
-        // TODO If there is a disclaimer, use the button to swap itself out with the accession form.
+        var fileStatus = this.hasUnreleasedOrUnpublishedFiles();
+
         return (
             <Modal show className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
                 <Modal.Header closeButton>
@@ -194,126 +143,19 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
                     { this.renderModalCodeSnippet(suggestedFilename, isSignedIn) }
 
-                    { extraDisclaimer.disclaimer }
-                    { extraDisclaimer.button }
+                    { this.state.showDisclaimer ? <SelectedFilesDownloadDisclaimer  foundUnreleasedFiles={fileStatus.foundUnreleasedFiles}  foundUnpublishedFiles={fileStatus.foundUnpublishedFiles}  suggestedFilename={suggestedFilename}  userInfo={userInfo} showDisclaimerButton={this.state.showDisclaimerButton} onClickHandler={this.handleClickDisclaimer}/> : null }
+
+                    { this.state.showDownloadMetadata ? <SelectedFilesDownloadMetadataButton subSelectedFiles={this.props.subSelectedFiles} onClickHandler={this.handleHideModal} /> : null }
                 </Modal.Body>
             </Modal>
         );
     }
 
-    render2(){
-        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props,
-            selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length,
-            disabled = selectedFilesUniqueCount === 0,
-            countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount,
-            countToShow = selectedFilesUniqueCount,
-            tip = (
-                "Download metadata TSV sheet containing download URIs for " +
-                selectedFilesUniqueCount + " files" +
-                (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
-            );
-
-        var subSelectedFilesCount = _.keys(subSelectedFiles).length;
-        if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
-            countToShow = subSelectedFilesCount;
-            tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
-        }
-
-        return (
-            <Button key="download" onClick={this.handleClick} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
-                <i className="icon icon-download icon-fw"/> Download { countToShow }<span className="text-400"> Selected Files</span>
-                { this.renderModal(subSelectedFiles) }
-            </Button>
-        );
-    }
-
-    // END OLD CODE
-    constructor(props){
-        super(props);
-        this.handleClickRevealModal = _.throttle(this.handleClickRevealModal.bind(this), 1000);
-        this.handleHideModal = this.handleHideModal.bind(this);
-        // TODO move to disclaimer widget this.renderFileDisclaimers = this.renderFileDisclaimers.bind(this);
-        // TODO move to disclaimer widget this.hideAcknowledgement = this.hideAcknowledgement.bind(this);
-        this.renderModal = this.renderModal.bind(this);
-        this.state = {
-            'modalOpen' : false,
-            'showDisclaimer' : false,
-            'showDownloadMetadata' : false,
-        };
-    }
-
     /**
-    * Hide the modal window and its subwindows as needed.
+    * Returns an object containing booleans which indicate if the user is trying to download unreleased or unpublished files.
     */
-    handleHideModal(){
-        this.setState({
-            'modalOpen' : false,
-            'showDisclaimer' : false,
-            'showDownloadMetadata' : false,
-        });
-    }
-
-    renderModalCodeSnippet(meta_download_filename, isSignedIn){
-        return (
-            <pre className="mb-15">
-                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
-                { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
-            </pre>
-        );
-    }
-
-    handleClickRevealModal(){
-        // TODO Determine if any of the targetted files need the disclaimer
-        var disclaimerRequired = false;
-
-        // TODO If they need the disclaimer
-        if (disclaimerRequired) {
-            // Reveal the disclaimer widget
-            // Hide the download metadata widget
-            this.setState({
-                'showDisclaimer' : true,
-                'showDownloadMetadata' : false,
-            });
-        }
-        else {
-            // Hide the disclaimer widget
-            // Show the download metadata widget
-            this.setState({
-                'showDisclaimer' : false,
-                'showDownloadMetadata' : true,
-            });
-        }
-    }
-
-    /**
-    * User clicks on the acknowledgement button.
-    */
-    handleClickDisclaimer(){
-        // TODO Update the state:
-        // - Hide the Disclaimer widget
-        // - Show the Download Metadata widget
-        this.setState({
-            'showDisclaimer' : false,
-            'showDownloadMetadata' : true,
-        });
-    }
-
-    /**
-    * User clicks on the download button.
-    */
-    handleClickDownloadMetadata(){
-        // TODO Submit
-        // TODO close this form
-    }
-
-    renderModal(selectedFiles){
-        if (!this.state.modalOpen) return null;
-
-        var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
-            userInfo = JWT.getUserInfo(),
-            isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
-            profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-        var countSelectedFiles = _.keys(selectedFiles).length;
+    hasUnreleasedOrUnpublishedFiles(){
+        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props;
 
         // Find out if at least 1 file is unreleased
         var foundUnreleasedFiles = _.any(selectedFiles,
@@ -329,27 +171,10 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
             )
         );
 
-        return (
-            <Modal show className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
-                <Modal.Header closeButton>
-                    <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-
-                    <p>Please press the "Download" button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
-
-                    <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
-
-                    { this.renderModalCodeSnippet(suggestedFilename, isSignedIn) }
-
-                    // TODO Delegate to the disclaimer widget if it should be visible
-                    { this.state.showDisclaimer ? <SelectedFilesDownloadDisclaimer                     foundUnreleasedFiles={foundUnreleasedFiles}                     foundUnpublishedFiles={foundUnpublishedFiles}                     suggestedFilename={suggestedFilename} userInfo={userInfo} clickHandler={this.handleClickDisclaimer}/> : null }
-
-                    // TODO Delegate to the download metadata widget if it should be visible
-                    //{ this.state.showDownloadMetadata ? <SelectedFilesDownloadMetadataButton /> : null }
-                </Modal.Body>
-            </Modal>
-        );
+        return {
+            "foundUnreleasedFiles": foundUnreleasedFiles,
+            "foundUnpublishedFiles": foundUnpublishedFiles,
+        }
     }
 
     render(){
@@ -371,225 +196,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         }
 
         return (
-            <Button key="download" onClick={this.handleClickOpenModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
-                <i className="icon icon-download icon-fw"/> Download { countToShow }<span className="text-400"> Selected Files</span>
-                { this.renderModal(subSelectedFiles) }
-            </Button>
-        );
-    }
-}
-
-export class SelectedFilesDownloadButton2 extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
-        this.handleHideModal = this.handleHideModal.bind(this);
-        this.renderFileDisclaimers = this.renderFileDisclaimers.bind(this);
-        this.hideAcknowledgement = this.hideAcknowledgement.bind(this);
-        this.renderModal = this.renderModal.bind(this);
-        this.state = {
-            'modalOpen' : false,
-            'showDisclaimer' : true,
-            'showDownloadButton' : true,
-            'showAcknowledgeButton' : false,
-        };
-    }
-
-    getAccessionTripleArrays(){
-        return _.map(
-            _.keys(this.props.subSelectedFiles || this.props.selectedFiles),
-            function(accessionTripleString){
-                var accessions = accessionTripleString.split('~');
-                return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
-            }
-        );
-    }
-
-    handleClick(e){
-        this.setState({ 'modalOpen' : true });
-    }
-
-    handleHideModal(){
-        this.setState({ 'modalOpen' : false });
-    }
-
-    renderModalCodeSnippet(meta_download_filename, isSignedIn){
-        return (
-            <pre className="mb-15">
-                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
-                { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
-            </pre>
-        );
-    }
-
-    /**
-    * This returns a secondary disclaimer message if some of the files have not been released or published.
-    * @param {array} selectedFiles All of the files to consider in the modal. Used for the title and disclaimers.
-    * @param {object} userInfo An object containing the user's information, commonly taken from the JWT.
-    * @param {string} suggestedFilename TODO!
-    */
-    renderFileDisclaimers(selectedFiles, userInfo, suggestedFilename){
-
-        // Default download button to get file metadata.
-        var downloadButtonJSX = (
-            <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
-                <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
-                <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-                <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                    <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
-                </Button>
-                {' '}
-
-            </form>
-        );
-
-        renderedObjects = {
-            'disclaimer' : '',
-            'button' : downloadButtonJSX
-        };
-
-        // Find out if at least 1 is released
-        var foundUnreleasedFiles = _.any(selectedFiles,
-            file => file.status !== "released"
-        );
-
-        // Find out if at least 1 is unpublished
-        var foundUnpublishedFiles = _.any(selectedFiles,
-            file => !(
-                file.from_experiment
-                && file.from_experiment.from_experiment_set
-                && file.from_experiment.public_release
-            )
-        );
-
-        // If all data sets have been released and published, return nothing.
-        if (!(foundUnreleasedFiles || foundUnpublishedFiles)) { return renderedObjects; }
-
-        // Find out if the user is signed in, and what their profile href is.
-        var isSignedIn = !!(
-                userInfo
-                && userInfo.details
-                && userInfo.details.email
-                && userInfo.id_token
-            ),
-            profileHref = (
-                isSignedIn
-                && userInfo.user_actions
-                && _.findWhere(
-                    userInfo.user_actions, { 'id' : 'profile' }).href
-                )
-                || '/me';
-
-        // TODO hide disclaimers if the files have been released
-        // Generate the div containing warnings about unpublished and unreleased files.
-        var disclaimerDivs = (
-            <div id="file_disclaimer_div" class="hidden">
-                <h4 className="mt-2 mb-07 text-500">Notes</h4>
-                <ul className="mb-25">
-                    { isSignedIn ?
-                        <li className="mb-05">
-                            To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
-                            <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
-                        </li>
-                    : null }
-                    <li className="mb-05">
-                        {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
-                    </li>
-                    <li>
-                        For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
-                        Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
-                    </li>
-                </ul>
-            </div>
-        )
-
-        renderedObjects['disclaimer'] = disclaimerDivs;
-
-        // When you click on the button, reveal more information.
-        var revealDownloadMetadataButton = (event) => {
-            /// TODO Reveal the disclaimer.
-            /// TODO Reveal the download button.
-            /// TODO Hide this button
-        };
-
-        var hideDisclaimerJSX = (
-            <button onClick={this.hideAcknowledgement()}></button>
-        )
-
-        return renderedObjects;
-    }
-
-    hideAcknowledgement(){
-        this.setState(
-            'showDisclaimer' : true,
-            'showDownloadButton' : true,
-            'showAcknowledgeButton' : false,
-        );
-    }
-
-    /**
-     * This function renders out a React-Bootstrap Modal component.
-     * Part of the rendered output is a literal form which may be submitted, with 'accession triples'
-     * ([ExpSetAccession, ExpAccession, FileAccession]) included in the POSTed form fields which
-     * identify the individual files to download.
-     *
-     * @param {array} selectedFiles All of the files to consider in the modal. Used for the title and disclaimers.
-     * @returns {JSX.Element} A modal instance.
-     */
-    renderModal(selectedFiles){
-        if (!this.state.modalOpen) return null;
-        // TODO pull userInfo in and derive isSignedIn and profileHref
-        var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
-            userInfo = JWT.getUserInfo(),
-            isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
-            profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-
-        var countSelectedFiles = _.keys(selectedFiles).length;
-
-        var extraDisclaimer = this.renderFileDisclaimers(selectedFiles, isSignedIn, suggestedFilename);
-        // TODO If there is a disclaimer, use the button to swap itself out with the accession form.
-        return (
-            <Modal show className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
-                <Modal.Header closeButton>
-                    <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-
-                    <p>Please press the "Download" button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
-
-                    <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
-
-                    { this.renderModalCodeSnippet(suggestedFilename, isSignedIn) }
-
-                    { extraDisclaimer.disclaimer }
-                    { extraDisclaimer.button }
-                </Modal.Body>
-            </Modal>
-        );
-    }
-
-    render(){
-        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props,
-            selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length,
-            disabled = selectedFilesUniqueCount === 0,
-            countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount,
-            countToShow = selectedFilesUniqueCount,
-            tip = (
-                "Download metadata TSV sheet containing download URIs for " +
-                selectedFilesUniqueCount + " files" +
-                (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
-            );
-
-        var subSelectedFilesCount = _.keys(subSelectedFiles).length;
-        if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
-            countToShow = subSelectedFilesCount;
-            tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
-        }
-
-        return (
-            <Button key="download" onClick={this.handleClick} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
+            <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
                 <i className="icon icon-download icon-fw"/> Download { countToShow }<span className="text-400"> Selected Files</span>
                 { this.renderModal(subSelectedFiles) }
             </Button>
@@ -606,10 +213,12 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
     }
 
     render(){
-        var { foundUnreleasedFiles, foundUnpublishedFiles, userInfo, suggestedFilename } = this.props;
+        var { foundUnreleasedFiles, foundUnpublishedFiles, suggestedFilename, userInfo, showDisclaimerButton, onClickHandler } = this.props;
 
         // If all data sets have been released and published, return nothing.
-        if (!(foundUnreleasedFiles || foundUnpublishedFiles)) { return renderedObjects; }
+        if (!(foundUnreleasedFiles || foundUnpublishedFiles)) {
+            return null;
+        }
 
         // Find out if the user is signed in, and what their profile href is.
         var isSignedIn = !!(
@@ -627,8 +236,8 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                 || '/me';
 
         // Generate the div containing warnings about unpublished and unreleased files.
-        var disclaimerDivs = (
-            <div id="file_disclaimer_div" class="hidden">
+        return(
+            <div id="file_disclaimer_div">
                 <h4 className="mt-2 mb-07 text-500">Notes</h4>
                 <ul className="mb-25">
                     { isSignedIn ?
@@ -646,16 +255,48 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                         Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
                     </li>
                 </ul>
+                {showDisclaimerButton ? <Button bsStyle="info" onClick={onClickHandler}><i className="icon icon-fw icon-check"></i>&nbsp;I acknowledge these warnings.</Button> : null }
             </div>
-        )
+        );
+    }
+}
 
-        renderedObjects['disclaimer'] = disclaimerDivs;
+/**
+* Use this button to download the tsv file metadata.
+* Also has a close modal button.
+*/
+export class SelectedFilesDownloadMetadataButton extends React.PureComponent {
+    constructor(props){
+        super(props);
+        this.getAccessionTripleArrays = this.getAccessionTripleArrays.bind(this);
+    }
 
-        var hideDisclaimerJSX = (
-            <button onClick={this.props.clickHandler}></button>
-        )
+    getAccessionTripleArrays(){
+        return _.map(
+            _.keys(this.props.subSelectedFiles || this.props.selectedFiles),
+            function(accessionTripleString){
+                var accessions = accessionTripleString.split('~');
+                return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
+            }
+        );
+    }
 
-        return ();
+    render(){
+        var { subSelectedFiles, onClickHandler } = this.props;
+        var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
+
+        // Default download button to get file metadata.
+        return (
+            <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
+                <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
+                <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
+                <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
+                    <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
+                </Button>
+                {' '}
+                <Button type="reset" onClick={onClickHandler}>Close</Button>
+            </form>
+        );
     }
 }
 
