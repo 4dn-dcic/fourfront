@@ -48,7 +48,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     /**
-    * Hide the modal window and its subwindows as needed.
+    * Hide the modal window and its subwindows.
     */
     handleHideModal(){
         this.setState({
@@ -70,6 +70,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
     /**
     * The user wants to reveal the modal.
+    * This function renders out a React-Bootstrap Modal component.
+    * @returns {JSX.Element} A modal instance.
     */
     handleClickRevealModal(){
         // Determine if any of the targetted files need the disclaimer
@@ -212,6 +214,12 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
         super(props);
     }
 
+    /**
+    * This function renders out a div containing information about
+    * unreleased and unpublished files.
+    *
+    * @returns {JSX.Element} A modal instance.
+    */
     render(){
         var { foundUnreleasedFiles, foundUnpublishedFiles, suggestedFilename, userInfo, showDisclaimerButton, onClickHandler } = this.props;
 
@@ -255,7 +263,7 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                         Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
                     </li>
                 </ul>
-                {showDisclaimerButton ? <Button bsStyle="info" onClick={onClickHandler}><i className="icon icon-fw icon-check"></i>&nbsp;I acknowledge these warnings.</Button> : null }
+                {showDisclaimerButton ? <Button bsStyle="info" onClick={onClickHandler}><i className="icon icon-fw icon-check"></i>&nbsp;I have read and understand the notes.</Button> : null }
             </div>
         );
     }
@@ -281,6 +289,13 @@ export class SelectedFilesDownloadMetadataButton extends React.PureComponent {
         );
     }
 
+    /**
+    * This function renders out a literal form which may be submitted, with 'accession triples'
+    * ([ExpSetAccession, ExpAccession, FileAccession]) included in the POSTed form fields which
+    * identify the individual files to download.
+    *
+    * @returns {JSX.Element} A modal instance.
+    */
     render(){
         var { subSelectedFiles, onClickHandler } = this.props;
         var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
