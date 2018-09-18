@@ -32,14 +32,13 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
-                "fastq"
-            ]
+            "linkTo": "FileFormat",
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",

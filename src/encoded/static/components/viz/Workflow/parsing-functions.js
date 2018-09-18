@@ -638,9 +638,9 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
 
                     // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
                     var combinedMeta = _.extend({}, n.meta, inNode.meta, {
-                        'global' : n.meta.global || inNode.meta.global || false, // Make true if either is true.
-                        'type' : (n.meta && n.meta.type) || (inNode.meta && inNode.meta.type),
-                        'file_format' : (n.meta && n.meta.file_format) || (inNode.meta && inNode.meta.file_format),
+                        'global'        : n.meta.global || inNode.meta.global || false, // Make true if either is true.
+                        'type'          : (n.meta && n.meta.type) || (inNode.meta && inNode.meta.type),
+                        'file_format'   : (n.meta && n.meta.file_format) || (inNode.meta && inNode.meta.file_format),
                     });
 
                     // TEMP: Re Grouping
