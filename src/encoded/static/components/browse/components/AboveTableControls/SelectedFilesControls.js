@@ -175,8 +175,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
         return {
             "foundUnreleasedFiles": foundUnreleasedFiles,
-            "foundUnpublishedFiles": foundUnpublishedFiles,
-        }
+            "foundUnpublishedFiles": foundUnpublishedFiles
+        };
     }
 
     render(){
@@ -240,8 +240,8 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                 && userInfo.user_actions
                 && _.findWhere(
                     userInfo.user_actions, { 'id' : 'profile' }).href
-                )
-                || '/me';
+            )
+            || '/me';
 
         // Generate the div containing warnings about unpublished and unreleased files.
         return(
@@ -258,11 +258,11 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                         {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
                     </li>
                     { foundUnpublishedFiles ?
-                    <li>
-                        For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
-                        Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
-                    </li>
+                        <li>
+                            For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
+                            In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                            Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
+                        </li>
                     : null }
                 </ul>
                 {showDisclaimerButton ? <Button bsStyle="info" onClick={onClickHandler}><i className="icon icon-fw icon-check"></i>&nbsp;I have read and understand the notes.</Button> : null }
