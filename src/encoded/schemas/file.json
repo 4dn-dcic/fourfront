@@ -196,7 +196,7 @@
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
         },
-        "file_format": {
+        "file_format.file_format": {
             "title" : "File Format",
             "description" : "Format of the file, i.e. the file extension."
         },
