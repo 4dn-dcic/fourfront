@@ -7,6 +7,7 @@
         "uuid": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileFastq"]
     },
     {
@@ -16,6 +17,7 @@
         "uuid": "dba26778-f40a-4561-a552-65539702ded4",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -26,6 +28,7 @@
         "extrafile_formats": ["d13d06cf-218e-4f61-aaf0-91f226348b2c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -36,6 +39,7 @@
         "extrafile_formats": ["d13d06cf-218e-6f61-aaf0-91f226248b2c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -45,6 +49,7 @@
         "uuid": "d13d06cf-218e-6f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -54,6 +59,7 @@
         "uuid": "d1311111-218e-4f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -64,6 +70,7 @@
         "extrafile_formats": ["d1311111-218e-4f61-aaf0-91f226248b2c", "d1311112-218e-4f61-aaf0-91f226248b2c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -73,6 +80,7 @@
         "uuid": "d1311112-218e-4f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -82,6 +90,7 @@
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -92,6 +101,7 @@
         "extrafile_formats": ["d13d06c1-218e-4f61-aaf0-91f226248b3c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -101,6 +111,7 @@
         "uuid": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -110,6 +121,7 @@
         "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -119,6 +131,7 @@
         "uuid": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -127,6 +140,7 @@
         "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -135,6 +149,7 @@
         "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -144,6 +159,7 @@
         "uuid": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -153,6 +169,7 @@
         "uuid": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -162,6 +179,7 @@
         "uuid": "d13d06cf-218e-4f61-11f0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]
     },
     {
@@ -172,6 +190,7 @@
         "uuid": "d13d06cf-218e-4f61-22f0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -182,6 +201,7 @@
         "uuid": "d13d06cf-218e-4f61-33f0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileMicroscopy", "FileCalibration"]
     },
     {
@@ -191,6 +211,7 @@
         "uuid": "d13d06cf-218e-4f61-44f0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileCalibration"]
     },
     {
@@ -200,6 +221,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -210,6 +232,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-92f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -220,6 +243,7 @@
         "uuid": "d13d16cf-218e-4f61-55f0-92f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -229,6 +253,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-93f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -238,6 +263,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -246,6 +272,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f226118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -254,6 +281,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f336118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
 
@@ -263,6 +291,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f446118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -271,6 +300,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f556118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -279,6 +309,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f666118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -287,6 +318,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f776118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -295,6 +327,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94f886118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -303,6 +336,7 @@
         "uuid": "d13d06cf-218e-4f61-55f0-94a156118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["FileMicroscopy"]
     }
 ]
