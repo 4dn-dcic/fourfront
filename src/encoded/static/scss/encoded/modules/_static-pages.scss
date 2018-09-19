@@ -119,6 +119,19 @@ h5.fourDN-header {
 		max-width: 100%;
 	}
 
+	ol, ul {
+		> li {
+			> ul, > ol {
+				margin-bottom: 5px;
+			}
+			> p + ul,
+			> p + ol {
+				// Reverses p { margin-bottom: 10px } style
+				margin-top: -5px;
+			}
+		}
+	}
+
 }
 
 .static-section-entry {
@@ -176,6 +189,8 @@ h5.fourDN-header {
 	}
 
 }
+
+
 
 
 /**********************************************************
