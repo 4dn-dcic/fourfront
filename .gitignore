@@ -9,6 +9,7 @@ beanstalk.cfg
 .vscode
 /src/encoded/static/docs/
 /es_docs/
+/docs/javascript-reference/
 /annotations.json
 /aws-ip-ranges.json
 /bin/

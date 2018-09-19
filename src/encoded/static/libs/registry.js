@@ -6,8 +6,6 @@ import _ from 'underscore';
 /**
  * A registry of views to text and possibly sub-text strings.
  * Used to register an Item view to be the renderer for a given Item type[/action], for example.
- *
- * @typedef {Object} Registry
  */
 export default class Registry {
     constructor(options) {

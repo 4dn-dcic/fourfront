@@ -75,6 +75,31 @@ export var StaticSection;
  */
 export var StaticPage;
 
+/**
+ * An object containing data to fully represent a tab of a tab view.
+ *
+ * @typedef {Object} TabObject
+ * @property {string}               key         Unique key for the tab. Sent to `DefaultItemView.setTabViewKey` for example to change tab.
+ * @property {string|JSX.Element}   tab         Contents or title of the visible clickable tab. Often is a span wrapping icon + text.
+ * @property {boolean}              [disabled]  If true, the tab is grayed out and not clickable. Use for when contents of a tab are loading in via AJAX, or when data in a tab __should__ be available but is not.
+ * @property {JSX.Element}          content     Contents of the tab view. Should be a div with overflow: hidden style as wrapper.
+ * @example
+ *      {
+ *          tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
+ *          key : "attribution",
+ *          disabled : (!context.lab && !context.award && !context.submitted_by),
+ *          content : (
+ *              <div className="overflow-hidden">
+ *                  <h3 className="tab-section-title">
+ *                      <span>Attribution</span>
+ *                  </h3>
+ *                  <hr className="tab-section-title-horiz-divider mb-1"/>
+ *                  <AttributionTabView context={context} />
+ *              </div>
+ *          )
+ *      }
+ */
+export var TabObject;
 
 
 // ----------------------------------------------------------------------------
