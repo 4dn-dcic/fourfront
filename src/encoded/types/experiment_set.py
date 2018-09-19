@@ -273,6 +273,8 @@ class ExperimentSetReplicate(ExperimentSet):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
+    # will aggregate badge items found during embedding by badge_classification
+    aggregated_list = ["badges.badge_classification"]
     embedded_list = ExperimentSet.embedded_list + [
         "replicate_exps.replicate_exp.accession"
     ]
