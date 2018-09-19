@@ -871,10 +871,11 @@ export class FileEntryBlock extends React.Component {
         // - It needs an external href link
         //   - Either it needs a file format of 'hic'
         //   - OR it has a detailed file type that contains 'hic'
+        var fileFormat = fileUtil.getFileFormatStr(file);
         var fileIsHic = (
             file
             && (
-                (file.file_format && file.file_format === 'hic')
+                (fileFormat && fileFormat === 'hic')
                 || (
                     file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
             )

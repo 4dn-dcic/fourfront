@@ -380,7 +380,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
         if (file && file.higlass_uid && (
-            (file.file_format && (file.file_format === 'mcool' || file.file_format === 'bw' || file.file_format === 'bg'))
+            (fileFormat && (fileFormat === 'mcool' || fileFormat === 'bw' || fileFormat === 'bg'))
             || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
         )){
 
