@@ -65,7 +65,7 @@ export class FieldSet extends React.Component {
     }
 
     adjustedChildren(){
-        var { children, endpoint, href, objectType, schemas, disabled, inputSize, style, absoluteBox, context, parent } = this.props;
+        var { children, endpoint, href, objectType, schemas, disabled, inputSize, style, absoluteBox, context, parent, windowWidth } = this.props;
         // Add shared props to children EditableField elements.
         return React.Children.map(children, (child)=>{
             if (child.type && child.type.displayName === 'EditableField'){
@@ -80,6 +80,7 @@ export class FieldSet extends React.Component {
                 if (inputSize)                                    newProps.inputSize    = inputSize; // Overwrite, since EditableField has default props.
                 if (style)                                        newProps.style        = style;
                 if (absoluteBox)                                  newProps.absoluteBox  = absoluteBox;
+                if (windowWidth)                                  newProps.windowWidth  = windowWidth;
 
                 return React.cloneElement(child, newProps);
             }
@@ -169,10 +170,7 @@ export class EditableField extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.onResizeStateChange = this.onResizeStateChange.bind(this);
         this.objectType = this.objectType.bind(this);
         this.isSet = this.isSet.bind(this);
         this.isRequired = this.isRequired.bind(this);
@@ -191,7 +189,6 @@ export class EditableField extends React.Component {
         this.renderSaved = this.renderSaved.bind(this);
         this.inputField = this.inputField.bind(this);
         this.renderEditing = this.renderEditing.bind(this);
-        this.render = this.render.bind(this);
 
         var initialValue = null;
         try {
@@ -215,24 +212,15 @@ export class EditableField extends React.Component {
         };
     }
 
-    componentDidMount(){
-        if (this.props.style === 'inline' && this.props.absoluteBox && !isServerSide()){
-
-            this.debouncedLayoutResizeStateChange = _.debounce(() => {
-                if (this.refs.field && this.refs.field.offsetParent){
-                    var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
-                    //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
-                    this.setState({
-                        'leanTo' :
-                            this.refs.field.offsetLeft > offsetRight ?
-                            'left' : 'right',
-                        'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
-                    });
-                }
-            }, 300, false);
-
-            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
-
+    onResizeStateChange(){
+        if (this.refs.field && this.refs.field.offsetParent){
+            var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
+            //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
+            this.setState({
+                'leanTo' :
+                    this.refs.field.offsetLeft > offsetRight ? 'left' : 'right',
+                'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
+            });
         }
     }
 
@@ -272,7 +260,6 @@ export class EditableField extends React.Component {
     componentDidUpdate(oldProps, oldState){
         // If state change but not onChange event -- e.g. change to/from editing state
         if (
-            typeof this.debouncedLayoutResizeStateChange !== 'undefined' &&
             oldState.value === this.state.value &&
             oldState.loading === this.state.loading &&
             oldState.dispatching === this.state.dispatching &&
@@ -283,17 +270,11 @@ export class EditableField extends React.Component {
                 return false;
             }
             if (this.props.parent.state && this.props.parent.state.currentlyEditing === this.props.labelID){
-                this.debouncedLayoutResizeStateChange();
+                this.onResizeStateChange();
             } else {
                 this.setState({ 'leanTo' : null });
             }
             this.justUpdatedLayout = true;
-        }
-    }
-
-    componentWillUnmount(){
-        if (typeof this.debouncedLayoutResizeStateChange !== 'undefined'){
-            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
         }
     }
 

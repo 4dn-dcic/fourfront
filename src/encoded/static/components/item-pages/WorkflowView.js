@@ -50,18 +50,21 @@ export function checkIfIndirectOrReferenceNodesExist(steps){
 
 export function commonGraphPropsFromProps(props){
     return {
-        'href'        : props.href,
-        'renderDetailPane' : function(selectedNode, paneProps){
-            return <WorkflowDetailPane {...paneProps} schemas={props.schemas} context={props.context} selectedNode={selectedNode} legendItems={props.legendItems} />;
+        'href'              : props.href,
+        'renderDetailPane'  : function(selectedNode, paneProps){
+            return (
+                <WorkflowDetailPane {...paneProps} {..._.pick(props, 'schemas', 'context', 'legendItems', 'windowWidth')} selectedNode={selectedNode} />
+            );
         },
         'renderNodeElement' : function(node, graphProps){
-            return <WorkflowNodeElement {...graphProps} schemas={props.schemas} node={node}/>;
+            return <WorkflowNodeElement {...graphProps} {..._.pick(props, 'schemas', 'windowWidth')} node={node}/>;
         },
-        'rowSpacingType' : 'wide',
-        'nodeClassName' : null,
-        'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
+        'rowSpacingType'    : 'wide',
+        'nodeClassName'     : null,
+        'onNodeClick'       : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
         'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : false,
-        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false
+        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false,
+        'windowWidth'       : props.windowWidth
     };
 }
 
@@ -127,7 +130,7 @@ export class WorkflowView extends DefaultItemView {
 }
 
 
-export class WorkflowGraphSectionControls extends React.PureComponent {
+export class WorkflowGraphSectionControls extends React.Component {
 
     static analysisStepsSet(context){
         if (!Array.isArray(context.steps)) return false;
@@ -236,7 +239,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      * @returns {JSX.Element} Workflow Controls Element.
      */
     wrapper(element){
-        var isOpen = (this.state.mounted && layout.responsiveGridState() === 'lg') || this.state.open;
+        var isOpen = (this.state.mounted && layout.responsiveGridState(this.props.windowWidth) === 'lg') || this.state.open;
         return (
             <div className="pull-right workflow-view-controls-container">
                 <Collapse in={isOpen}>
@@ -299,12 +302,8 @@ export class RowSpacingTypeDropdown extends React.Component {
     
     
         return (
-            <DropdownButton
-                id={this.props.id || "rowspacingtype-select"}
-                pullRight
-                onSelect={this.props.onSelect}
-                title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}
-            >
+            <DropdownButton id={this.props.id || "rowspacingtype-select"}
+                pullRight onSelect={this.props.onSelect} title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}>
                 { stacked }{ compact }{ spread }
             </DropdownButton>
         );
@@ -341,7 +340,7 @@ export class WorkflowGraphSection extends React.Component {
 
     componentWillUnmount(){
         if (this.state.fullscreenViewEnabled){
-            layout.toggleBodyClass('is-full-screen', false);
+            this.props.removeFromBodyClassList('is-full-screen');
         }
     }
 
@@ -409,10 +408,19 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     onToggleFullScreenView(){
+        var { addToBodyClassList, removeFromBodyClassList } = this.props;
+
         requestAnimationFrame(()=>{
-            var willBeFullscreen = !this.state.fullscreenViewEnabled;
-            layout.toggleBodyClass('is-full-screen', willBeFullscreen);
-            this.setState({ 'fullscreenViewEnabled' : willBeFullscreen }, ()=>{
+            var fullscreenViewEnabled;
+            this.setState((currState, currProps)=>{
+                fullscreenViewEnabled = !currState.fullscreenViewEnabled;
+                return { fullscreenViewEnabled };
+            }, function(){
+                if (fullscreenViewEnabled){
+                    addToBodyClassList('is-full-screen');
+                } else {
+                    removeFromBodyClassList('is-full-screen');
+                }
                 ReactTooltip.rebuild();
             });
         });
@@ -432,7 +440,7 @@ export class WorkflowGraphSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls
-                        {..._.pick(this.props, 'context', 'href')}
+                        {..._.pick(this.props, 'context', 'href', 'windowWidth')}
                         showChartType={this.state.showChart}
                         rowSpacingType={this.state.rowSpacingType}
                         showParameters={this.state.showParameters}

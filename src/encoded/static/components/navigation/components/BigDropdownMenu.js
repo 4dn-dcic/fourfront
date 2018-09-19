@@ -9,6 +9,10 @@ export class BigDropdownMenu extends React.PureComponent {
 
     // TODO: Check openDropdownID vs ___MenuTree presence.
 
+    static defaultProps = {
+        'windowHeight' : 500
+    };
+
     constructor(props){
         super(props);
         this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
@@ -24,7 +28,7 @@ export class BigDropdownMenu extends React.PureComponent {
     }
 
     renderMenuItems(){
-        var { openDropdownID, menuTree, windowInnerWidth, href, setOpenDropdownID } = this.props;
+        var { openDropdownID, menuTree, windowWidth, href, setOpenDropdownID } = this.props;
         var handleMenuItemClick = this.handleMenuItemClick;
         /*
         var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
@@ -75,8 +79,8 @@ export class BigDropdownMenu extends React.PureComponent {
         }
 
         var columnsPerRow = 3;
-        if (windowInnerWidth >= 768 && windowInnerWidth < 992) columnsPerRow = 2;
-        else if (windowInnerWidth < 768) columnsPerRow = 1;
+        if (windowWidth >= 768 && windowWidth < 992) columnsPerRow = 2;
+        else if (windowWidth < 768) columnsPerRow = 1;
 
 
         var rowsOfLevel1Children = [];
@@ -92,8 +96,8 @@ export class BigDropdownMenu extends React.PureComponent {
     }
 
     introSection(){
-        var { menuTree, windowInnerHeight } = this.props;
-        if (!menuTree || !menuTree.display_title || !menuTree.description || windowInnerHeight < 800) return null;
+        var { menuTree, windowHeight } = this.props;
+        if (!menuTree || !menuTree.display_title || !menuTree.description || windowHeight < 800) return null;
         return (
             <div className="intro-section">
                 <h4><a href={'/' + menuTree.name} onClick={this.handleMenuItemClick}>{ menuTree.display_title }</a></h4>
@@ -103,10 +107,10 @@ export class BigDropdownMenu extends React.PureComponent {
     }
 
     render(){
-        var { openDropdownID, windowInnerWidth, windowInnerHeight, scrolledPastTop, testWarning } = this.props;
+        var { openDropdownID, windowWidth, windowHeight, scrolledPastTop, testWarning } = this.props;
         var outerStyle = null;
-        if (windowInnerWidth >= 992){
-            outerStyle = { 'maxHeight' : windowInnerHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
+        if (windowWidth >= 992){
+            outerStyle = { 'maxHeight' : windowHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
         }
         return (
             <div className={"big-dropdown-menu" + (openDropdownID ? ' is-open' : '')} data-open-id={openDropdownID} style={outerStyle}>

@@ -20,7 +20,10 @@ export default class FileMicroscopyView extends FileView {
         var tabs =  super.getTabViewContents();
 
         // Replace default FileOverview (1st tab) with FileMicroscopyViewOverview
-        tabs[0] = FileMicroscopyViewOverview.getTabObject(this.props.context, this.props.schemas, tabs[0].content && tabs[0].content.props.children[2] && tabs[0].content.props.children[2].props.width);
+        tabs[0] = FileMicroscopyViewOverview.getTabObject(
+            this.props,
+            tabs[0].content && tabs[0].content.props.children[2] && tabs[0].content.props.children[2].props.width
+        );
 
         return tabs;
     }
@@ -32,7 +35,7 @@ globals.content_views.register(FileMicroscopyView, 'FileMicroscopy');
 
 class FileMicroscopyViewOverview extends React.Component {
 
-    static getTabObject(context, schemas, width){
+    static getTabObject({context, schemas, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
@@ -43,7 +46,7 @@ class FileMicroscopyViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileMicroscopyViewOverview context={context} schemas={schemas} width={width} />
+                    <FileMicroscopyViewOverview {...{ context, schemas, windowWidth, width }} />
                 </div>
             )
         };
@@ -60,7 +63,7 @@ class FileMicroscopyViewOverview extends React.Component {
     }
 
     render(){
-        var { context, schemas, width } = this.props;
+        var { context, schemas, width, windowWidth } = this.props;
 
         var setsByKey;
         var table = null;
@@ -72,12 +75,12 @@ class FileMicroscopyViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
             <div>
-                <FileMicOverViewBody result={context} schemas={schemas} />
+                <FileMicOverViewBody result={context} schemas={schemas} windowWidth={windowWidth} />
                 { table }
             </div>
         );

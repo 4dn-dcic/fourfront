@@ -281,7 +281,7 @@ class ResultTableContainer extends React.PureComponent {
     browseExpSetDetailPane(result, rowNumber, containerWidth, toggleExpandCallback){
         return (
             <ExperimentSetDetailPane
-                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile')}
+                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth')}
                 {...{ result, containerWidth, toggleExpandCallback }}
                 href={this.props.href || this.props.searchBase} paddingWidth={47}
             />
@@ -289,22 +289,21 @@ class ResultTableContainer extends React.PureComponent {
     }
 
     render() {
-        var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas, totalExpected, selectedFiles, sortBy, sortColumn, sortReverse } = this.props;
+        var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas,
+            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth } = this.props;
 
         return (
             <div className="row">
                 { context.facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <ExternaDataExpSetsCount countExternalSets={countExternalSets} browseBaseState={browseBaseState} href={href} />
-                        <FacetList
+                        <FacetList {...{ session, browseBaseState, schemas, windowWidth }}
                             orientation="vertical" className="with-header-bg"
                             facets={context.facets} filters={context.filters}
                             isTermSelected={this.isTermSelected} onFilter={this.onFilter}
-                            itemTypeForSchemas="ExperimentSetReplicate" session={session}
-                            href={href || searchBase} browseBaseState={browseBaseState} schemas={schemas}
+                            itemTypeForSchemas="ExperimentSetReplicate" href={href || searchBase}
                             showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
-                            onClearFilters={this.handleClearFilters}
-                        />
+                            onClearFilters={this.handleClearFilters} />
                     </div>
                     :
                     null
@@ -313,19 +312,18 @@ class ResultTableContainer extends React.PureComponent {
                     <AboveTableControls {..._.pick(this.props,
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles',
-                            'selectedFilesUniqueCount'
+                            'selectedFilesUniqueCount', 'windowHeight', 'windowWidth'
                         )}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount
                     />
                     <SearchResultTable
+                        {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth }}
+                        registerWindowOnScrollHandler={this.props.registerWindowOnScrollHandler}
                         results={context['@graph']} columns={context.columns || {}}
-                        renderDetailPane={this.browseExpSetDetailPane} href={href} totalExpected={totalExpected}
+                        renderDetailPane={this.browseExpSetDetailPane}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions} hiddenColumns={this.state.hiddenColumns}
-                        columnDefinitionOverrideMap={this.state.colDefOverrides} stickyHeaderTopOffset={-78}
-                        sortBy={sortBy} sortColumn={sortColumn} sortReverse={sortReverse}
-                        selectedFiles={selectedFiles} // Passed only to trigger re-render on PureComponent further down tree.
-                    />
+                        columnDefinitionOverrideMap={this.state.colDefOverrides} stickyHeaderTopOffset={-78} />
                 </div>
             </div>
         );
@@ -467,6 +465,7 @@ export default class BrowseView extends React.Component {
         if (this.props.session !== nextProps.session) return true;
         if (this.props.href !== nextProps.href) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
+        if (this.props.windowWidth !== nextProps.windowWidth) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
@@ -658,7 +657,9 @@ export default class BrowseView extends React.Component {
                 <SelectedFilesController href={href}>
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer browseBaseState={browseBaseState} session={session} schemas={schemas} totalExpected={context && context.total} countExternalSets={countExternalSets} />
+                            <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets }}
+                                {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler')}
+                                totalExpected={context && context.total} />
                         </SortController>
                     </CustomColumnController>
                 </SelectedFilesController>

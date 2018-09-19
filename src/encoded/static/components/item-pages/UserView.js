@@ -404,7 +404,7 @@ export default class UserView extends React.Component {
                                                     schemas={this.props.schemas}
                                                     disabled={!mayEdit}
                                                     href={this.props.href}
-                                                >
+                                                    windowWidth={this.props.windowWidth}>
                                                     <EditableField
                                                         labelID="first_name"
                                                         fallbackText="No first name set"
@@ -460,15 +460,10 @@ class ProfileContactFields extends React.Component {
         var user = this.props.user;
 
         return (
-            <FieldSet
-                context={user}
-                parent={this.props.parent}
-                className="profile-contact-fields"
-                disabled={!this.props.mayEdit}
-                objectType="User"
-                schemas={this.props.schemas}
-                href={this.props.href}
-            >
+            <FieldSet context={user}
+                parent={this.props.parent} className="profile-contact-fields"
+                disabled={!this.props.mayEdit} objectType="User" windowWidth={this.props.windowWidth}
+                schemas={this.props.schemas} href={this.props.href}>
 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { ProfileContactFields.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>

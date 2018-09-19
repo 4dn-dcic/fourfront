@@ -34,11 +34,11 @@ export class HelpNavItem extends React.PureComponent {
     }
 
     render(){
-        var { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowInnerWidth } = this.props,
+        var { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowWidth } = this.props,
             isOpen          = openDropdownID === this.dropdownID,
             active          = href.indexOf(helpItemHref) > -1,
             commonProps     = { id, active, 'key' : id },
-            isDesktopView   = windowInnerWidth >= 768;
+            isDesktopView   = windowWidth >= 768;
 
         if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView){
             return <NavItem {...commonProps} href={helpItemHref} children="Help" />;

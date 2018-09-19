@@ -17,8 +17,8 @@ const { Item, JSONContentResponse, SearchResponse } = typedefs;
  * @module PageTitle - Renders out title on all views.
  */
 
-/** 
- * A hardcoded mapping of URIs to title string or function. 
+/**
+ * A hardcoded mapping of URIs to title string or function.
  */
 const TITLE_PATHNAME_MAP = {
     '/' : {
@@ -269,9 +269,9 @@ export default class PageTitle extends React.PureComponent {
      * @param {boolean} hasToc - Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
      * @returns {{ 'marginTop' : number, 'width' : string }} - JS object representing some CSS styles.
      */
-    static getStyles(context, href, mounted, hasToc){
+    static getStyles(context, href, mounted, hasToc, windowWidth){
         var style = { 'marginTop' : 0 };
-        var gridSize = mounted && layout.responsiveGridState();
+        var gridSize = mounted && layout.responsiveGridState(windowWidth || null);
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
             if (mounted && (gridSize === 'xs' || gridSize === 'sm')) {
@@ -311,18 +311,16 @@ export default class PageTitle extends React.PureComponent {
      * @returns {JSX.Element} Div with ID set to "page-title-container" and any child elements for representing title, subtitle, etc.
      */
     render(){
-        var { context, href, session, currentAction } = this.props;
+        var { context, href, session, currentAction, windowWidth } = this.props;
 
         var elementStyle;
 
         if (PageTitle.isHomePage(href)){
-            elementStyle = PageTitle.getStyles(context, href, this.state.mounted, false);
+            elementStyle = PageTitle.getStyles(context, href, this.state.mounted, false, windowWidth);
             return (
                 <div id="page-title-container" className="container">
                     <div className="breadcrumb-placeholder" key="breadcrumbs" />
-                    <layout.WindowResizeUpdateTrigger>
-                        <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} style={elementStyle} />
-                    </layout.WindowResizeUpdateTrigger>
+                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href', 'windowWidth')} mounted={this.state.mounted} style={elementStyle} />
                     <Alerts alerts={this.props.alerts} />
                 </div>
             );
@@ -351,14 +349,12 @@ export default class PageTitle extends React.PureComponent {
             && context['table-of-contents'].enabled
         );
 
-        elementStyle = PageTitle.getStyles(context, href, this.state.mounted, hasToc);
+        elementStyle = PageTitle.getStyles(context, href, this.state.mounted, hasToc, windowWidth);
 
         return (
             <div id="page-title-container" className="container">
-                <StaticPageBreadcrumbs {...{ context, session, hasToc, href }} key="breadcrumbs" pageTitleStyle={elementStyle} />
-                <layout.WindowResizeUpdateTrigger>
-                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} style={elementStyle} />
-                </layout.WindowResizeUpdateTrigger>
+                <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
+                <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={this.state.mounted} style={elementStyle} />
                 <Alerts alerts={this.props.alerts} style={{ 'width' : elementStyle.width || null }} />
             </div>
         );
@@ -408,7 +404,7 @@ class HomePageTitleElement extends React.PureComponent {
 /**
  * Renders out breadcrumb links under page title for static help pages.
  * Also adds JSON-LD structured data breadcrumbs for SEO.
- * 
+ *
  * Is used as part of PageTitle.
  * @memberof PageTitle
  */

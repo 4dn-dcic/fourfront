@@ -304,7 +304,7 @@ export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
  * @param {boolean} [mounted=true]  - Whether component calling this function is mounted. If false, uses 'lg' to align with server-side render.
  * @returns {string|number}         - Width for div column block to be used at current screen/browser size.
  */
-export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
+export function getColumnWidthFromDefinition(columnDefinition, mounted=true, windowWidth=null){
 
     var w = columnDefinition.width || columnDefinition.baseWidth || null;
     if (typeof w === 'number'){
@@ -314,7 +314,7 @@ export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
     if (widthMap){
         var responsiveGridSize;
         if (!mounted || isServerSide()) responsiveGridSize = 'lg';
-        else responsiveGridSize = layout.responsiveGridState();
+        else responsiveGridSize = layout.responsiveGridState(windowWidth);
         if (responsiveGridSize === 'xs') responsiveGridSize = 'sm';
         return widthMap[responsiveGridSize || 'lg'];
     }

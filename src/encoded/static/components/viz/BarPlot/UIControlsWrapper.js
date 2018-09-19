@@ -346,12 +346,13 @@ export class UIControlsWrapper extends React.PureComponent {
     }
 
     render(){
-        var { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight } = this.props;
+        var { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData,
+            availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth } = this.props;
         var { aggregateType, showState } = this.state;
 
         if (!UIControlsWrapper.canShowChart(barplot_data_unfiltered)) return null;
 
-        var windowGridSize = layout.responsiveGridState();
+        var windowGridSize = layout.responsiveGridState(windowWidth);
         var contextualView = this.contextualView();
 
         var legendContainerHeight = windowGridSize === 'xs' ? null :

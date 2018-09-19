@@ -105,16 +105,13 @@ class Timeout {
     }
 }
 
-/**
- * @alias module:app
- */
 
 
 /**
  * The root and top-most React component for our application.
  * This is wrapped by a Redux store and then rendered by either the server-side
  * NodeJS sub-process or by the browser.
- * 
+ *
  * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/server.js
  * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/browser.js
  */
@@ -685,7 +682,7 @@ export default class App extends React.Component {
         }
     }
 
-    /** 
+    /**
      * Handles a history change event.
      *
      * @private
@@ -1359,7 +1356,16 @@ export default class App extends React.Component {
         }
 
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
-            baseDomain = (href_url.protocol || '') + '//' + href_url.host;
+            baseDomain = (href_url.protocol || '') + '//' + href_url.host,
+            bodyElementProps = _.extend({}, this.state, this.props, {
+                baseDomain, isLoading,
+                'updateUserInfo' : this.updateUserInfo,
+                'listActionsFor' : this.listActionsFor,
+                'onBodyClick'    : this.handleClick,
+                'onBodySubmit'   : this.handleSubmit,
+                'hrefParts'      : href_url,
+                'children'       : content
+            });
 
         return (
             <html lang="en">
@@ -1384,8 +1390,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
                 </head>
-                <BodyElement {...this.state}{...this.props}{...{ baseDomain, isLoading }} updateUserInfo={this.updateUserInfo} children={content}
-                    listActionsFor={this.listActionsFor} onClick={this.handleClick} onSubmit={this.handleSubmit} hrefParts={href_url}/>
+                <BodyElement {...bodyElementProps} />
             </html>
         );
     }
@@ -1397,19 +1402,35 @@ export default class App extends React.Component {
  * Namely, it handles, stores, and passes down state related to scrolling up/down the page.
  * This prevents needing to have numerous window scroll event listeners living throughout the app.
  *
+ * @public
+ * @listens {Event} Window scroll events.
+ * @listens {Event} Window resize events.
  * @todo Perhaps grab and pass down windowInnerWidth, windowInnerHeight, and/or similar props as well.
  */
 class BodyElement extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.onResize = _.debounce(this.onResize.bind(this), 300);
         this.onTooltipAfterHide = this.onTooltipAfterHide.bind(this);
         this.setupScrollHandler = this.setupScrollHandler.bind(this);
+
+        this.registerWindowOnResizeHandler = this.registerWindowOnResizeHandler.bind(this);
+        this.registerWindowOnScrollHandler = this.registerWindowOnScrollHandler.bind(this);
+        this.addToBodyClassList         = this.addToBodyClassList.bind(this);
+        this.removeFromBodyClassList    = this.removeFromBodyClassList.bind(this);
+
         this.state = {
             'scrolledPastTop'       : null,
             'scrolledPastEighty'    : null,
-            'scrollTop'             : null // Not used, too many state updates if were to be.
+            //'scrollTop'             : null // Not used, too many state updates if were to be.
+            'windowWidth'           : null,
+            'windowHeight'          : null,
+            'classList'             : []
         };
+
+        this.scrollHandlers = [];
+        this.resizeHandlers = [];
     }
 
     /**
@@ -1419,7 +1440,10 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     componentDidMount(){
+        if (window && window.fourfront) window.fourfront.bodyElem = this;
         this.setupScrollHandler();
+        window.addEventListener('resize', this.onResize);
+        this.onResize();
     }
 
     /**
@@ -1432,14 +1456,164 @@ class BodyElement extends React.PureComponent {
     componentWillUnmount(){
         window.removeEventListener("scroll", this.throttledScrollHandler);
         delete this.throttledScrollHandler;
+        window.removeEventListener('resize', this.onResize);
     }
 
     /**
-     * Attaches an event listener to the `window` object.
+     * Function passed down as a prop to content views to register window on scroll handlers.
+     *
+     * @public
+     * @param {function} scrollHandlerFxn - Callback function which accepts a 'scrollTop' (number) and 'scrollVector' (number) param.
+     * @returns {function} A function to call to unregister newly registered handler.
+     */
+    registerWindowOnScrollHandler(scrollHandlerFxn){
+        var exists = this.scrollHandlers.indexOf(scrollHandlerFxn);// _.findIndex(this.scrollHandlers, scrollHandlerFxn);
+        if (exists > -1) {
+            console.warn('Function already registered.', scrollHandlerFxn);
+            return null;
+        } else {
+            this.scrollHandlers.push(scrollHandlerFxn);
+            console.info("Registered scroll handler", scrollHandlerFxn);
+            return () => {
+                var idxToRemove = this.scrollHandlers.indexOf(scrollHandlerFxn);
+                if (idxToRemove === -1){
+                    console.warn('Function no longer registered.', scrollHandlerFxn);
+                    return false;
+                }
+                this.scrollHandlers.splice(idxToRemove, 1);
+                console.info('Unregistered function from scroll events', scrollHandlerFxn);
+                return true;
+            };
+        }
+    }
+
+
+    /**
+     * Function passed down as a prop to content views to register window on resize handlers.
+     *
+     * @public
+     * @param {function} resizeHandlerFxn - Callback function which accepts a 'dims' ({ windowWidth: number, windowHeight: number }) and 'pastDims' param.
+     * @returns {function} A function to call to unregister newly registered handler.
+     */
+    registerWindowOnResizeHandler(resizeHandlerFxn){
+        var exists = this.resizeHandlers.indexOf(resizeHandlerFxn);
+        if (exists > -1) {
+            console.warn('Function already registered.', resizeHandlerFxn);
+            return null;
+        } else {
+            this.resizeHandlers.push(resizeHandlerFxn);
+            console.info("Registered resize handler", resizeHandlerFxn);
+            return () => {
+                var idxToRemove = this.resizeHandlers.indexOf(resizeHandlerFxn);
+                if (idxToRemove === -1){
+                    console.warn('Function no longer registered.', resizeHandlerFxn);
+                    return false;
+                }
+                this.resizeHandlers.splice(idxToRemove, 1);
+                console.info('Unregistered function from resize events', resizeHandlerFxn);
+                return true;
+            };
+        }
+    }
+
+    /**
+     * Adds param `className` to `state.classList`. Passed down through props for child components to be able to adjust
+     * body className in response to user interactions, such as setting a full screen state.
+     *
+     * @public
+     * @param {string}   className      ClassName to add to class list.
+     * @param {function} [callback]     Optional callback to be executed after state change.
+     * @returns {void}
+     */
+    addToBodyClassList(className, callback){
+        this.setState(function(currState){
+            var classList   = currState.classList,
+                foundIdx    = classList.indexOf(className);
+            if (foundIdx > -1){
+                console.warn('ClassName already set', className);
+                return null;
+            } else {
+                classList = classList.slice(0);
+                classList.push(className);
+                console.info('Adding "' + className + '" to body classList');
+                return { classList };
+            }
+        }, callback);
+    }
+
+    /**
+     * Removes param `className` from `state.classList`. Passed down through props for child components to be able to adjust
+     * body className in response to user interactions, such as removing a full screen state.
+     *
+     * @public
+     * @param {string}   className      ClassName to remove from class list.
+     * @param {function} [callback]     Optional callback to be executed after state change.
+     * @returns {void}
+     */
+    removeFromBodyClassList(className, callback){
+        this.setState(function(currState){
+            var classList   = currState.classList,
+                foundIdx    = classList.indexOf(className);
+            if (foundIdx === -1){
+                console.warn('ClassName not in list', className);
+                return null;
+            } else {
+                classList = classList.slice(0);
+                classList.splice(foundIdx, 1);
+                console.info('Removing "' + className + '" from body classList');
+                return { classList };
+            }
+        }, callback);
+    }
+
+
+    /**
+     * Updates windowWidth and windowHeight dimensions in this.state, if different.
+     * @private
+     * @returns {void}
+     */
+    onResize(e){
+        var dims, pastDims;
+        this.setState(function(currState, currProps){
+            var nextState = {};
+            dims = this.getViewportDimensions();
+            pastDims = _.pick(currState, 'windowWidth', 'windowHeight');
+            if (dims.windowWidth !== currState.windowWidth)     nextState.windowWidth = dims.windowWidth;
+            if (dims.windowHeight !== currState.windowHeight)   nextState.windowHeight = dims.windowHeight;
+            if (_.keys(nextState).length > 0){
+                return nextState;
+            }
+            return null;
+        }, ()=>{
+            console.info('Window resize detected.', dims);
+            if (this.resizeHandlers.length > 0){
+                _.forEach(this.resizeHandlers, (resizeHandlerFxn) => resizeHandlerFxn(dims, pastDims, e) );
+            }
+        });
+    }
+
+    /**
+     * Calculates and returns width and height of viewport.
+     *
+     * @private
+     * @returns {{ windowWidth: number, windowHeight: number }} Object with windowWidth and windowHeight properties.
+     */
+    getViewportDimensions(){
+        if (isServerSide()) return;
+
+        var scrollElem      = (window.document && window.document.scrollingElement) || null,
+            windowWidth     = (scrollElem && (scrollElem.clientWidth || scrollElem.offsetWidth)) || window.innerWidth,
+            windowHeight    = (scrollElem && (scrollElem.clientHeight || scrollElem.offsetHeight)) || window.innerHeight;
+            //documentHeight  = (widthElem && widthElem.scrollHeight); Not relevant re: resizing.
+
+        return { windowWidth, windowHeight };
+    }
+
+    /**
+     * Attaches event listeners to the `window` object and passes down 'registerOnWindowEvent' functions as props which children down the rendering tree can subscribe to.
      * Updates `state.scrolledPastTop` and `<body/>` element className depending on window current scroll top.
      *
-     * @todo The state.scrolledPastTop isn't used as much as the "body" className (via CSS), perhaps this entire mechanism could be moved out of here and we get rid of state.scrolledPastTop? (replacing outerStyle.maxHeight dynamic setting w/ stylesheet)
-     * @todo Maybe try to delegate React synthetic event detected from root "html" element instead of directly listening to window events. Decision should depend on performance testing/profiling.
+     * @private
      * @listens {Event} Window scroll events.
      * @returns {void}
      */
@@ -1449,6 +1623,7 @@ class BodyElement extends React.PureComponent {
         }
 
         var lastScrollTop = 0,
+            windowWidth = this.state.windowWidth || null,
             handleScroll = (e) => {
 
                 // TODO: Maybe this.setState(function(currState){ ...stuf... }), but would update maybe couple of times extra...
@@ -1460,7 +1635,7 @@ class BodyElement extends React.PureComponent {
                 lastScrollTop = currentScrollTop;
 
                 if ( // Fixed nav takes effect at medium grid breakpoint or wider.
-                    ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && (
+                    ['xs','sm'].indexOf(layout.responsiveGridState(windowWidth)) === -1 && (
                         (currentScrollTop > 20 && scrollVector >= 0) ||
                         (currentScrollTop > 80)
                     )
@@ -1477,6 +1652,11 @@ class BodyElement extends React.PureComponent {
                         stateChange.scrolledPastEighty = false;
                     }
                 }
+
+                if (this.scrollHandlers.length > 0){
+                    _.forEach(this.scrollHandlers, (scrollHandlerFxn) => scrollHandlerFxn(currentScrollTop, scrollVector, e) );
+                }
+
                 if (_.keys(stateChange).length > 0){
                     this.setState(stateChange);
                 }
@@ -1489,6 +1669,14 @@ class BodyElement extends React.PureComponent {
         setTimeout(this.throttledScrollHandler, 100, null);
     }
 
+    /**
+     * Is executed after ReactTooltip is hidden e.g. via moving cursor away from an element.
+     * Used to unset lingering style.left and style.top property values which may interfere with placement
+     * of the next visible tooltip.
+     *
+     * @private
+     * @returns {void}
+     */
     onTooltipAfterHide(){
         var _tooltip = this.refs && this.refs.tooltipComponent,
             domElem = ReactDOM.findDOMNode(_tooltip);
@@ -1503,23 +1691,32 @@ class BodyElement extends React.PureComponent {
         });
     }
 
+    /**
+     * Renders out the body layout of the application.
+     *
+     * @private
+     */
     render(){
-        var { 
+        var {
             onBodyClick, onBodySubmit, context, alerts,
             currentAction, hrefParts, isLoading, slowLoad,
             children
         } = this.props,
-            { scrolledPastEighty, scrolledPastTop } = this.state,
+            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
-            bodyClassList = [];
+            bodyClassList = (classList && classList.slice(0)) || [],
+            registerWindowOnResizeHandler = this.registerWindowOnResizeHandler,
+            registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
+            addToBodyClassList            = this.addToBodyClassList,
+            removeFromBodyClassList       = this.removeFromBodyClassList;
 
         if (isLoading)          bodyClassList.push('loading-request');
         if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
         if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
 
         return (
-            <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit}
-                data-path={hrefParts.path} data-pathname={hrefParts.pathname} className={bodyClassList.length > 0 && bodyClassList.join(' ')}>
+            <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
+                data-pathname={hrefParts.pathname} className={(bodyClassList.length > 0 && bodyClassList.join(' ')) || null}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
@@ -1537,18 +1734,25 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar portal={portal} ref="navigation" {..._.pick(this.props, 'href', 'currentAction',
-                                'session', 'schemas', 'browseBaseState', 'context', 'updateUserInfo', 'listActionsFor')}/>
+                            <NavigationBar {...{ portal, windowWidth, windowHeight }} ref="navigation"
+                                {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
+                                'context', 'updateUserInfo', 'listActionsFor')}/>
 
                             <div id="pre-content-placeholder"/>
 
-                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')} />
+                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')}
+                                windowWidth={windowWidth} />
                             
                             <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')} navigate={navigate} />
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'windowWidth')} navigate={navigate} />
                             </div>
                             
-                            <div id="content" className="container" children={children} />
+                            <div id="content" className="container" children={
+                                React.cloneElement(children, {
+                                    windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
+                                    addToBodyClassList, removeFromBodyClassList
+                                })
+                            } />
 
                             <div id="layout-footer"/>
                         </div>

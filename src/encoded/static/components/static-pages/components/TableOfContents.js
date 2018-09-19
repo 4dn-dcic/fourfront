@@ -470,11 +470,7 @@ export class TableOfContents extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.onPageScroll = _.throttle(this.onPageScroll.bind(this), 100, { 'leading' : false });
-        this.onResize = _.debounce(this.onResize.bind(this), 300);
+        this.onPageScroll = this.onPageScroll.bind(this);
         this.onToggleWidthBound = this.onToggleWidthBound.bind(this);
         this.state = {
             'scrollTop' : 0,
@@ -487,11 +483,8 @@ export class TableOfContents extends React.Component {
         if (window && !isServerSide()){
             this.setState(
                 { 'mounted' : true, 'scrollTop' : parseInt(getPageVerticalScrollPosition()) },
-                () => {
-                    window.addEventListener('scroll', this.onPageScroll);
-                    window.addEventListener('resize', this.onResize);
-                }
             );
+            this.unsubFromScrollEventsFxn = this.props.registerWindowOnScrollHandler(this.onPageScroll);
         }
     }
 
@@ -500,29 +493,31 @@ export class TableOfContents extends React.Component {
             this.updateQueued = false;
             return true;
         }
+        if (nextProps.windowWidth !== this.props.windowWidth) return true;
         if (nextState.mounted !== this.state.mounted) return true;
         if (nextState.scrollTop !== this.state.scrollTop) return true;
         if (nextState.widthBound !== this.state.widthBound) return true;
         return false;
     }
 
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.windowWidth !== this.props.windowWidth){
+            // Recalculate new position on page etc.
+            this.updateQueued = true;
+            setTimeout(()=>{
+                this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
+            }, 0);
+        }
+    }
+
     componentWillUnmount(){
-        // Cleanup
-        window.removeEventListener('scroll', this.onPageScroll);
-        window.removeEventListener('resize', this.onResize);
+        if (typeof this.unsubFromScrollEventsFxn === 'function'){
+            this.unsubFromScrollEventsFxn();
+        }
     }
 
-    onPageScroll(e){
-        setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
-        }, 0);
-    }
-
-    onResize(e){
-        this.updateQueued = true;
-        setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
-        }, 0);
+    onPageScroll(scrollTop, scrollVector, evt){
+        this.setState({ scrollTop });
     }
 
     onToggleWidthBound(){

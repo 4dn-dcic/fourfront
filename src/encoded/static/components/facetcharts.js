@@ -76,23 +76,10 @@ export class FacetCharts extends React.Component {
     }
 
     /**
-     * Adds event listener for window resize event.
      * Updates `state.mounted`.
-     *
-     * @private
-     * @todo Remove and instead wrap this in a `layout.windowResizeTrigger`.
-     * @todo Perhaps calculate window inner width and height in root, e.g. App.js / BodyElement, and pass it down to trigger 'window resize'.
      */
     componentDidMount(){
         var { debug, browseBaseState, initialFields } = this.props;
-
-        if (!isServerSide() && typeof window !== 'undefined'){
-            var _this = this;
-            this.debouncedResizeHandler = _.debounce(function(){
-                _this.forceUpdate();
-            }, 300);
-            window.addEventListener('resize', this.debouncedResizeHandler);
-        }
 
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
@@ -108,16 +95,6 @@ export class FacetCharts extends React.Component {
             setTimeout(() => this.setState({ 'mounted' : true }), 100);
         }
 
-    }
-
-    /**
-     * Removes event listener for window resize event.
-     */
-    componentWillUnmount(){
-        if (!isServerSide() && typeof window !== 'undefined'){
-            window.removeEventListener('resize', this.debouncedResizeHandler);
-            delete this.debouncedResizeHandler;
-        }
     }
 
     /**
@@ -162,12 +139,16 @@ export class FacetCharts extends React.Component {
      * @returns {number} Width
      */
     width(chartNumber = 0, show = null){
+        var { colWidthPerScreenSize, windowWidth } = this.props;
         if (!show) show = this.show();
         if (!show) return null;
         if (!this.state.mounted || isServerSide()){
-            return 1160 * (this.props.colWidthPerScreenSize[show][chartNumber - 1].lg / 12); // Full width container size (1160) 
+            return 1160 * (colWidthPerScreenSize[show][chartNumber - 1].lg / 12); // Full width container size (1160) 
         } else {
-            return (layout.gridContainerWidth() + 20) * (this.props.colWidthPerScreenSize[show][chartNumber - 1][layout.responsiveGridState()] / 12);
+            return (
+                (layout.gridContainerWidth() + 20) *
+                (colWidthPerScreenSize[show][chartNumber - 1][layout.responsiveGridState(windowWidth || null)] / 12)
+            );
         }
     }
 
@@ -176,13 +157,14 @@ export class FacetCharts extends React.Component {
      * @returns {JSX.Element} Area with BarPlot chart, wrapped by `ChartDataController.Provider` instance.
      */
     render(){
-
         var show = this.show();
         if (!show) return null; // We don't show section at all.
-        if (this.props.context && this.props.context.total === 0) return null;
-        if (this.props.debug) console.log('WILL SHOW FACETCHARTS', show, this.props.href);
 
-        var colWidthPerScreenSize = this.props.colWidthPerScreenSize;
+        var { context, debug, windowWidth, colWidthPerScreenSize, schemas, href } = this.props;
+
+        if (context && context.total === 0) return null;
+        if (debug) console.log('WILL SHOW FACETCHARTS', show, this.props.href);
+
         function genChartColClassName(chartNumber = 1){
             return _.keys(colWidthPerScreenSize[show][chartNumber - 1]).map(function(size){
                 return 'col-' + size + '-' + colWidthPerScreenSize[show][chartNumber - 1][size];
@@ -191,7 +173,7 @@ export class FacetCharts extends React.Component {
 
         var height = show === 'small' ? 300 : 450;
 
-        if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
+        if (this.state.mounted && layout.responsiveGridState(windowWidth || null) === 'xs') height = Math.min(height, 240);
 
         //vizUtil.unhighlightTerms();
 
@@ -203,18 +185,13 @@ export class FacetCharts extends React.Component {
             );
         }
 
-        if (this.props.debug) console.log('FacetCharts SCHEMAS AT RENDER', this.props.schemas);
+        if (debug) console.log('FacetCharts SCHEMAS AT RENDER', schemas);
 
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
-                    <BarPlot.UIControlsWrapper legend chartHeight={height} href={this.props.href} expSetFilters={Filters.currentExpSetFilters()} >
-                        <BarPlot.Chart
-                            width={this.width(1) - 20}
-                            height={height}
-                            schemas={this.props.schemas}
-                            ref="barplotChart"
-                        />
+                    <BarPlot.UIControlsWrapper legend chartHeight={height} href={href} expSetFilters={Filters.currentExpSetFilters()} windowWidth={windowWidth}>
+                        <BarPlot.Chart width={this.width(1) - 20} height={height} schemas={schemas} ref="barplotChart" />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
             </div>

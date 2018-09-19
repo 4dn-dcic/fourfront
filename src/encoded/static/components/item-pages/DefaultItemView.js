@@ -109,10 +109,14 @@ export default class DefaultItemView extends React.PureComponent {
      * @param {Item} context Current Item JSON.
      * @returns {TabObject[]}
      */
-    getCommonTabs(context = this.props.context){
-        var returnArr = [];
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
-        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
+    getCommonTabs(props = this.props){
+        var returnArr = [],
+            { context, schemas, windowWidth } = this.props;
+    
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+            returnArr.push(AttributionTabView.getTabObject(context));
+        }
+        returnArr.push(ItemDetailList.getTabObject(context, schemas));
         returnArr.push(AuditTabView.getTabObject(context));
         return returnArr;
     }
@@ -209,7 +213,7 @@ export default class DefaultItemView extends React.PureComponent {
      */
     itemHeader(){
         return (
-            <ItemHeader.Wrapper context={this.props.context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
+            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')} className="exp-set-header-area">
                 <ItemHeader.TopRow typeInfo={this.typeInfo()} />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
@@ -237,7 +241,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element}
      */
     tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} key="tabbedView" />;
+        return <TabbedView contents={this.getTabViewContents} key="tabbedView" {..._.pick(this.props, 'windowWidth', 'windowHeight')} />;
     }
 
     /**
@@ -264,9 +268,7 @@ export default class DefaultItemView extends React.PureComponent {
                 { this.itemMidSection() }
 
                 <div className="row">
-                    <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer">
-                        <layout.WindowResizeUpdateTrigger children={this.tabbedView()} />
-                    </div>
+                    <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer" children={this.tabbedView()} />
                 </div>
                 <br/>
                 { this.itemFooter() }

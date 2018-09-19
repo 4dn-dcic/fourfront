@@ -644,7 +644,7 @@ export class FacetList extends React.PureComponent {
 
     renderFacets(facets = this.props.facets, maxTermsToShow = 12){
 
-        var { href, onFilter, schemas, isTermSelected, itemTypeForSchemas } = this.props;
+        var { href, onFilter, schemas, isTermSelected, itemTypeForSchemas, windowWidth } = this.props;
 
         facets = _.uniq(
             _.filter(facets, (facet) => this.props.filterFacetsFxn(facet, this.props, this.state)),
@@ -669,7 +669,7 @@ export class FacetList extends React.PureComponent {
                 defaultFacetOpen={ !this.state.mounted ? false : !!(
                     facet.terms.filter((t)=> this.props.isTermSelected(t.key, facet.field)).length ||
                     (
-                        layout.responsiveGridState() !== 'xs' &&
+                        layout.responsiveGridState(windowWidth || null) !== 'xs' &&
                         i < (facetIndexWherePastXTerms || 1)
                     )
                 )} />

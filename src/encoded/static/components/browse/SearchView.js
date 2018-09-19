@@ -190,7 +190,7 @@ class ControlsAndResults extends React.PureComponent {
                 { facets.length ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter')}
+                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth')}
                             className="with-header-bg" facets={facets} filters={context.filters}
                             onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
                             itemTypeForSchemas={itemTypeForSchemas} hideDataTypeFacet={inSelectionMode}
@@ -203,7 +203,8 @@ class ControlsAndResults extends React.PureComponent {
                         </div>
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'context', 'columns', 'selectedFiles', 'currentAction')}
+                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
+                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight')}
                         hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                             SearchResultTable.defaultProps.constantColumnDefinitions,
@@ -211,10 +212,13 @@ class ControlsAndResults extends React.PureComponent {
                             columnDefinitionOverrides,
                             constantHiddenColumnsFull
                         )} />
-                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')}
+                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
+                        'currentAction', 'windowWidth', 'registerWindowOnScrollHandler')}
                         results={results} totalExpected={context.total} columns={context.columns || {}}
                         hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
-                        renderDetailPane={(result, rowNumber, containerWidth) => <SearchResultDetailPane result={result} /> } />
+                        renderDetailPane={(result, rowNumber, containerWidth) =>
+                            <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />
+                        } />
                 </div>
             </div>
         );

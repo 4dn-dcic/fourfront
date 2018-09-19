@@ -65,7 +65,6 @@ export class NavigationBar extends React.PureComponent {
          * @property {boolean} state.testWarning        Whether Test Data warning banner is visible. Initially determined according to if are on production hostname.
          * @property {boolean} state.mounted            Whether are mounted.
          * @property {boolean} state.mobileDropdownOpen Helper state to keep track of if menu open on mobile because mobile menu doesn't auto-close after navigation.
-         * @property {boolean} state.scrolledPastTop    Keeps track if we've scrolled past top of browser breakpoint, used for e.g. minimizing height of navbar.
          * @property {!string} state.openDropdown       ID of currently-open dropdown menu. Use for BigDropdown(s) e.g. Help menu directory.
          * @property {Object}  state.helpMenuTree       JSON representation of menu tree.
          * @property {boolean} state.isLoadingHelpMenuTree - Whether menu tree is currently being loaded.
@@ -74,7 +73,6 @@ export class NavigationBar extends React.PureComponent {
             'testWarning'           : !productionHost[url.parse(this.props.href).hostname] || false,
             'mounted'               : false,
             'mobileDropdownOpen'    : false,
-            'scrolledPastTop'       : false,
             'openDropdown'          : null,
             'helpMenuTree'          : null,
             'isLoadingHelpMenuTree' : false
@@ -89,7 +87,6 @@ export class NavigationBar extends React.PureComponent {
      */
     componentDidMount(){
         this.setState({ 'mounted' : true });
-        //this.setupScrollHandler();
         if (!this.state.helpMenuTree && !this.state.isLoadingHelpMenuTree){
             this.loadHelpMenuTree();
         }
@@ -167,18 +164,15 @@ export class NavigationBar extends React.PureComponent {
 
     render() {
         var { testWarning, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state,
-            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, scrolledPastTop } = this.props,
+            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight } = this.props,
             navClassName        = (
                 "navbar-container" + 
                 (testWarning ?      ' test-warning-visible' : '') +
-                (scrolledPastTop ?  " scrolled-past-top" : " scrolled-at-top") +
                 (openDropdown ?     ' big-menu-open' : '')
             ),
             primaryActions      = listActionsFor('global_sections'),
             browseMenuItemOpts  = _.findWhere(primaryActions, { 'id' : 'browse-menu-item' }),
-            windowInnerWidth    = (mounted && !isServerSide() && typeof window !== 'undefined' && window.innerWidth) || 0,
-            windowInnerHeight   =  (windowInnerWidth && window.innerHeight) || 500,
-            inclBigMenu         = helpMenuTree && (helpMenuTree.children || []).length > 0 && windowInnerWidth >= 768;
+            inclBigMenu         = helpMenuTree && (helpMenuTree.children || []).length > 0 && windowWidth >= 768;
 
         return (
             <div className={navClassName}>
@@ -202,7 +196,7 @@ export class NavigationBar extends React.PureComponent {
                                         active={isActionActive(browseMenuItemOpts, mounted, href)}
                                         children={browseMenuItemOpts.title || "Browse"} />
                                 : null }
-                                <HelpNavItem {...this.props} {...{ windowInnerWidth, windowInnerHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
+                                <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
                                     setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
                             </Nav>
                             <UserActionDropdownMenu closeMobileMenu={this.closeMobileMenu} {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
@@ -210,7 +204,7 @@ export class NavigationBar extends React.PureComponent {
                         </Navbar.Collapse>
                     </Navbar>
                     { inclBigMenu ?
-                        <BigDropdownMenu {...{ windowInnerWidth, windowInnerHeight, mobileDropdownOpen, href }}
+                        <BigDropdownMenu {...{ windowWidth, windowHeight, mobileDropdownOpen, href }}
                             setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} menuTree={helpMenuTree} />
                     : null }
                     <ChartDataController.Provider id="quick_info_bar1">
