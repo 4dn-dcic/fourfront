@@ -19,6 +19,7 @@ import * as origin from '../libs/origin';
 import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
+import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
