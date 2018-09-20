@@ -8,6 +8,7 @@ import { FacetList } from './FacetList';
 import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
 import url from 'url';
+import * as store from './../../../store';
 
 /**
  * Label to show at top left of Name block.
@@ -889,9 +890,9 @@ export class FileEntryBlock extends React.Component {
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                // Get the href from the page.
-                var pageHref = file.href,
-                    hrefParts = url.parse(pageHref),
+                // Get the protocol and host from storage before adding the juicebox link.
+                var currentPageUrlBase = store && store.getState().href,
+                    hrefParts = url.parse(currentPageUrlBase),
                     host = hrefParts.protocol + '//' + hrefParts.host,
                     targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
 
