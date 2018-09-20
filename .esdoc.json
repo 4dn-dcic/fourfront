@@ -9,8 +9,16 @@
       "option" : {
         "lint" : { "enable" : true },
         "coverage" : { "enable" : true },
-        "accessor": {"access": ["public", "protected", "private"], "autoPrivate": true},
-        "typeInference": {"enable": true}
+        "accessor": {"access": ["public", "protected", "private"], "autoPrivate": false },
+        "typeInference": {"enable": true},
+        "undocumentIdentifier" : { "enable" : false },
+        "unexportIdentifier" : { "enable" : true },
+        "brand" : {
+          "logo" : "./src/encoded/static/img/4dn-logo-raster.png",
+          "title" : "4DN Portal Front-End Reference",
+          "repository": "https://github.com/4dn-dcic/fourfront",
+          "site" : "https://data.4dnucleome.org"
+        }
       }
     },
     {"name": "esdoc-react-plugin"},

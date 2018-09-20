@@ -1404,12 +1404,16 @@ export default class App extends React.Component {
  * This prevents needing to have numerous window scroll event listeners living throughout the app.
  *
  * @public
+ * @class
  * @listens {Event} Window scroll events.
  * @listens {Event} Window resize events.
  * @todo Perhaps grab and pass down windowInnerWidth, windowInnerHeight, and/or similar props as well.
  */
 class BodyElement extends React.PureComponent {
 
+    /**
+     * Instantiates the BodyElement component, binds functions.
+     */
     constructor(props){
         super(props);
         this.onResize = _.debounce(this.onResize.bind(this), 300);
@@ -1421,6 +1425,16 @@ class BodyElement extends React.PureComponent {
         this.addToBodyClassList         = this.addToBodyClassList.bind(this);
         this.removeFromBodyClassList    = this.removeFromBodyClassList.bind(this);
 
+        /**
+         * State object for BodyElement.
+         *
+         * @type {Object}
+         * @property {boolean} state.scrolledPastTop        Whether window has been scrolled past 0.
+         * @property {boolean} state.scrolledPastEighty     Whether window has been scrolled past 80px.
+         * @property {number} state.windowWidth             Window inner width.
+         * @property {number} state.windowHeight            Window inner height.
+         * @property {string[]} state.classList             List of additional classNames that are added to the body element.
+         */
         this.state = {
             'scrolledPastTop'       : null,
             'scrolledPastEighty'    : null,
@@ -1430,7 +1444,15 @@ class BodyElement extends React.PureComponent {
             'classList'             : []
         };
 
+        /**
+         * Holds event handlers for window scroll event.
+         * @private
+         */
         this.scrollHandlers = [];
+        /**
+         * Holds event handlers for window resize event.
+         * @private
+         */
         this.resizeHandlers = [];
     }
 
