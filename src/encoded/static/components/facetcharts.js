@@ -20,7 +20,7 @@ import * as BarPlot from './viz/BarPlot';
  * Originally designed as space for 2 charts, a bigger barplot and a smaller/square/circle pie-like chart, to take up 3/4 and 1/4 width of header respectively (where 1/4 of width ~== height).
  * Now the 1/4 area for smaller chart is used for legend & ui controls.
  */
-export class FacetCharts extends React.Component {
+export class FacetCharts extends React.PureComponent {
 
     /**
      * @type {Object} defaultProps
@@ -101,7 +101,21 @@ export class FacetCharts extends React.Component {
      * @ignore
      */
     componentDidUpdate(pastProps, pastState){
-        if (this.props.debug) console.log('Updated FacetCharts', this.state);
+        if (this.props.debug){ 
+            var propKeys    = _.keys(this.props),
+                stateKeys   = _.keys(this.state),
+                i;
+            for (i = 0; i < propKeys.length; i++){
+                if (this.props[propKeys[i]] !== pastProps[propKeys[i]]){
+                    console.log('DIFFERENT PROP:', propKeys[i], pastProps[propKeys[i]], this.props[propKeys[i]]);
+                }
+            }
+            for (i = 0; i < stateKeys.length; i++){
+                if (this.state[stateKeys[i]] !== pastState[stateKeys[i]]){
+                    console.log('DIFFERENT STATE:', stateKeys[i], pastState[stateKeys[i]], this.state[stateKeys[i]]);
+                }
+            }
+        }
     }
 
     /**
@@ -171,7 +185,8 @@ export class FacetCharts extends React.Component {
             }).join(' ');
         }
 
-        var height = show === 'small' ? 300 : 450;
+        var height  = show === 'small' ? 300 : 450,
+            width   = this.width(1);
 
         if (this.state.mounted && layout.responsiveGridState(windowWidth || null) === 'xs') height = Math.min(height, 240);
 
@@ -187,11 +202,13 @@ export class FacetCharts extends React.Component {
 
         if (debug) console.log('FacetCharts SCHEMAS AT RENDER', schemas);
 
+        console.log('DDDD', width, windowWidth);
+
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
-                    <BarPlot.UIControlsWrapper legend chartHeight={height} href={href} expSetFilters={Filters.currentExpSetFilters()} windowWidth={windowWidth}>
-                        <BarPlot.Chart width={this.width(1) - 20} height={height} schemas={schemas} ref="barplotChart" />
+                    <BarPlot.UIControlsWrapper legend chartHeight={height} {...{ href, windowWidth }} expSetFilters={Filters.currentExpSetFilters()}>
+                        <BarPlot.Chart width={width - 20} {...{ height, schemas, windowWidth }} ref="barplotChart" />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
             </div>

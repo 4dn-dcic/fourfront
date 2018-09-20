@@ -638,11 +638,11 @@ export default class App extends React.Component {
      * @param {React.SyntheticEvent} event Form submission event.
      */
     handleSubmit(event) {
-        var target = event.target,
-            hrefParts = url.parse(this.props.href);
+        var target      = event.target, // A form DOM element reference
+            hrefParts   = url.parse(this.props.href);
 
         // Skip POST forms
-        if (target.method != 'get') return;
+        if (target.method !== 'get') return;
 
         // Skip forms with a data-bypass attribute.
         if (target.getAttribute('data-bypass')) return;
@@ -650,10 +650,15 @@ export default class App extends React.Component {
         // Skip external forms
         if (!origin.same(target.action)) return;
 
-        var options = {};
-        var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == hrefParts.pathname;
-        var search = serialize(target);
+        var actionUrlParts  = url.parse(url.resolve(this.props.href, target.action)),
+            search          = serialize(target),
+            href            = actionUrlParts.pathname,
+            currentAction   = this.currentAction(),
+            navOptions      = {
+                'replace'       : actionUrlParts.pathname == hrefParts.pathname,
+                'skipRequest'   : target.getAttribute('data-skiprequest')
+            };
+
         if (target.getAttribute('data-removeempty')) {
             search = _.map(
                 _.filter(search.split('&'), function (item) {
@@ -665,22 +670,17 @@ export default class App extends React.Component {
                 }
             ).join('&');
         }
-        var href = action_url.pathname;
-        if (search) {
-            href += '?' + search;
-        }
 
-        var currentAction = this.currentAction();
-        if (currentAction === 'selection'){
-            href += '#!' + currentAction;
-        }
+        // Append form name:vals as stringified URI params (`search`).
+        if (search) href += '?' + search;
 
-        options.skipRequest = target.getAttribute('data-skiprequest');
+        // If we're submitting search form in selection mode, preserve selection mode at next URL.
+        if (currentAction === 'selection') href += '#!' + currentAction;
 
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, options);
-        }
+            navigate(href, navOptions);
+        } // Else is submitted as normal browser HTTP GET request if event.preventDefault() not called.
     }
 
     /**
@@ -1745,7 +1745,7 @@ class BodyElement extends React.PureComponent {
                                 windowWidth={windowWidth} />
                             
                             <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'windowWidth')} navigate={navigate} />
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
                             </div>
                             
                             <div id="content" className="container" children={
