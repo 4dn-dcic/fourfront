@@ -348,7 +348,7 @@ export class EditableField extends React.Component {
      * @return {RegExp|null} Pattern to input validate against.
      */
     validationPattern(schemas = this.props.schemas){
-        var { labelID, fieldType, debug } = this.props; 
+        var { labelID, fieldType, debug } = this.props;
 
         function getPatternFromSchema(){ // TODO: Maybe move to util/Schemas.js
             // We do not handle nested, linked or embedded properties for now.

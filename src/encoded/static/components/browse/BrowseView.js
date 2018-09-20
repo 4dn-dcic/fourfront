@@ -309,8 +309,8 @@ class ResultTableContainer extends React.PureComponent {
                     null
                 }
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                    <AboveTableControls {..._.pick(this.props,
-                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'href', 'currentAction',
+                    <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
+                            'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles',
                             'selectedFilesUniqueCount', 'windowHeight', 'windowWidth'
                         )}
@@ -520,7 +520,7 @@ export default class BrowseView extends React.Component {
 
     /**
      * If we get different count in Browse result total, then refetch chart data.
-     * 
+     *
      * @private
      * @param {URLParts} hrefParts - Components of current URI.
      * @param {SearchResponse} context - Current search response.

@@ -29,7 +29,7 @@ export class FacetCharts extends React.PureComponent {
      * @member
      * @constant
      * @property {string} [href='/'] Current page/view URL, used to filter charts and pass 'path' arg to props.show, if provided.
-     * @property {boolean|string|showFunc} [show] - Type of view to show or whether to display or not; if function supplied, as well as props.href, path is passed as argument. 
+     * @property {boolean|string|showFunc} [show] - Type of view to show or whether to display or not; if function supplied, as well as props.href, path is passed as argument.
      * @property {string[]} initialFields - Array with 2 items representing the x-axis field and the group by field.
      */
     static defaultProps = {
@@ -157,7 +157,7 @@ export class FacetCharts extends React.PureComponent {
         if (!show) show = this.show();
         if (!show) return null;
         if (!this.state.mounted || isServerSide()){
-            return 1160 * (colWidthPerScreenSize[show][chartNumber - 1].lg / 12); // Full width container size (1160) 
+            return 1160 * (colWidthPerScreenSize[show][chartNumber - 1].lg / 12); // Full width container size (1160)
         } else {
             return (
                 (layout.gridContainerWidth() + 20) *

@@ -211,7 +211,7 @@ export default class App extends React.Component {
     /**
      * Does some initialization, checks if browser HistoryAPI is supported,
      * sets state.session according to JWT in current cookie, etc.
-     * 
+     *
      * @constructor
      * @member
      */
@@ -1699,10 +1699,10 @@ class BodyElement extends React.PureComponent {
      */
     render(){
         var {
-            onBodyClick, onBodySubmit, context, alerts,
-            currentAction, hrefParts, isLoading, slowLoad,
-            children
-        } = this.props,
+                onBodyClick, onBodySubmit, context, alerts,
+                currentAction, hrefParts, isLoading, slowLoad,
+                children
+            } = this.props,
             { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
             bodyClassList = (classList && classList.slice(0)) || [],
@@ -1737,7 +1737,7 @@ class BodyElement extends React.PureComponent {
                         <div id="layout">
                             <NavigationBar {...{ portal, windowWidth, windowHeight }} ref="navigation"
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                'context', 'updateUserInfo', 'listActionsFor')}/>
+                                    'context', 'updateUserInfo', 'listActionsFor')}/>
 
                             <div id="pre-content-placeholder"/>
 
@@ -1747,7 +1747,7 @@ class BodyElement extends React.PureComponent {
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
                             </div>
-                            
+
                             <div id="content" className="container" children={
                                 React.cloneElement(children, {
                                     windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,

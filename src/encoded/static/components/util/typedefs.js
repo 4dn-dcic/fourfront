@@ -13,7 +13,7 @@
 
 /**
  * A JSON response from the server. Any response should contain an ID, a type, and likely a display title.
- * 
+ *
  * @typedef {Object} JSONContentResponse
  * @property {string} @id - Identifier and/or URL to Item or response endpoint.
  * @property {string[]} @type - List of `@type` strings for Item, endpoint, etc.
@@ -75,6 +75,7 @@ export var StaticSection;
  */
 export var StaticPage;
 
+
 /**
  * An object containing data to fully represent a tab of a tab view.
  *
@@ -129,6 +130,8 @@ export var SearchResponse;
  *          return <DateUtility.LocalizedTime timestamp={result.last_modified.date_modified} formatType='date-sm' />;
  *      }
  */
+export var ColumnDefinitionRenderFxn;
+
 
 /**
  * A JSON object which contains some properties that define a renderable column.
@@ -160,6 +163,7 @@ export var ColumnDefinition;
  * @property {boolean} cache                Set to false to explicitly not cache response. Shouldn't be necessary (browser does this by default).
  * @property {boolean} dontScrollToTop      Don't scroll to top of page after completion.
  */
+export var NavigateOpts;
 
 /**
  * @typedef {Object} AlertObj - Object used to represent alert message element contents at top of page.

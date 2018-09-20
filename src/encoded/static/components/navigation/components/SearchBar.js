@@ -76,7 +76,6 @@ export class SearchBar extends React.Component{
         if (this.hasInput(lastQuery) && !this.hasInput(this.state.typedSearchQuery)) {
             this.setState({ 'typedSearchQuery' : lastQuery });
         }
-        
     }
 
     onResetSearch (e){

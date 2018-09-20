@@ -646,14 +646,14 @@ export const itemUtil = {
          * @constant
          */
         localRegexValidation : {
-            /** 
+            /**
              * http://www.regular-expressions.info/email.html -> changed capital A to lowercase
              *
              * @public
              * @constant
              */
             email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
-            /** 
+            /**
              * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and
              * optional leading plus sign (for international).
              *

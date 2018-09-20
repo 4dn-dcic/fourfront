@@ -105,7 +105,7 @@ export class UserActionDropdownMenu extends React.Component {
  * @param {Action} action - Action to test.
  * @param {boolean} mounted - Whether parent component is mounted or in a browser execution context.
  * @param {string} currentHref - Current URI, if available.
- * @returns {boolean} Whether this action is to be displayed as active or not. 
+ * @returns {boolean} Whether this action is to be displayed as active or not.
  */
 export function isActionActive(action, mounted, currentHref){
     return (

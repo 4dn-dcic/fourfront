@@ -166,7 +166,7 @@ export class NavigationBar extends React.PureComponent {
         var { testWarning, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state,
             { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight } = this.props,
             navClassName        = (
-                "navbar-container" + 
+                "navbar-container" +
                 (testWarning ?      ' test-warning-visible' : '') +
                 (openDropdown ?     ' big-menu-open' : '')
             ),

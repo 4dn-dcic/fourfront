@@ -27,7 +27,6 @@ export class SubscriptionView extends React.Component {
         /**
          * @private
          * @type {Object}
-         * 
          */
         this.state = {
             'subscriptions': null,

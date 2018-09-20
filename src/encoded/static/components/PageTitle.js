@@ -471,7 +471,7 @@ export class StaticPageBreadcrumbs extends React.Component {
 
     /**
      * Renders an edit button to right side of page for people with edit permission.
-     * 
+     *
      * @private
      */
     editButton(){

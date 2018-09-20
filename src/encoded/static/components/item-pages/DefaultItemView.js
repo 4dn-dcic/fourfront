@@ -187,7 +187,7 @@ export default class DefaultItemView extends React.PureComponent {
      * Extendable method to returns tabs for the view or sub-class view.
      * Returns `getDefaultTabs()` by default, until extended in a sub-class.
      * Executed on width change, as well as ItemView's prop changes.
-     * 
+     *
      * @returns {TabObject[]} Tab objects for this Item view/type.
      */
     getTabViewContents(){
@@ -314,7 +314,7 @@ export function statusClass(status, htmlClass) {
 }
 
 
-/** 
+/**
  * A collapsible panel that is meant to be shown near top of Item views.
  * Is meant to display a grid of Item properties, rendered out via `OverViewBodyItem`s.
  * However the component may be extended to display other things, e.g. as `ExpandableStaticHeader` does.

@@ -37,7 +37,7 @@ export const ajax = ajaxMethods;
 
 // Patches over browser window's console and disables logging (e.g. console.log) on production. Just import from this module to patch.
 import patchedConsoleInstance from './patched-console';
-export let console = patchedConsoleInstance;
+export const console = patchedConsoleInstance;
 
 
 // Type definitions
