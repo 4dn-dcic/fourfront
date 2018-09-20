@@ -502,15 +502,15 @@ export default class BrowseView extends React.Component {
                     <hr/>
                     {
                         countExternalSets > 0 ?
-                        React.createElement(
-                            'h4',
-                            { 'className' : "text-400 mb-05 mt-42" },
-                            'There are only results from External Data for current filter selection.'
-                        )
-                        : React.createElement(
-                            'h3',
-                            { 'className' : "text-400 mb-05 mt-42" },
-                            'No results found for current filter selection.'
+                            React.createElement(
+                                'h4',
+                                { 'className' : "text-400 mb-05 mt-42" },
+                                'There are only results from External Data for current filter selection.'
+                            )
+                            : React.createElement(
+                                'h3',
+                                { 'className' : "text-400 mb-05 mt-42" },
+                                'No results found for current filter selection.'
                         )
                     }
                     { countExternalSets > 0 ?
