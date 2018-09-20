@@ -694,7 +694,10 @@ export class HiGlassContainer extends React.PureComponent {
             'uuid' : PropTypes.string.isRequired,
             'accession' : PropTypes.string.isRequired,
             'higlass_uid' : PropTypes.string,
-            'file_format' : PropTypes.string.isRequired,
+            'file_format' : PropTypes.shape({
+                'file_format' : PropTypes.string,
+                'display_title' : PropTypes.string.isRequired
+            }),
             'genome_assembly' : PropTypes.string.isRequired
         })).isRequired,
         'extraViewProps' : PropTypes.arrayOf(PropTypes.object)
@@ -712,6 +715,7 @@ export class HiGlassContainer extends React.PureComponent {
 
         this.state = {
             'mounted' : false,
+            'hasRuntimeError' : false,
             'viewConfig' : props.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, HiGlassContainer.propsToViewConfigGeneratorOptions(props))
         };
     }
@@ -729,6 +733,10 @@ export class HiGlassContainer extends React.PureComponent {
             }
             this.setState({ 'mounted' : true });
         }, 500);
+    }
+
+    componentDidCatch(){
+        this.setState({ 'hasRuntimeError' : true });
     }
 
     componentWillReceiveProps(nextProps){
@@ -846,6 +854,12 @@ export class HiGlassContainer extends React.PureComponent {
                     <h4 className="text-400">Not Available</h4>
                 </div>
             );
+        } else if (this.state.hasRuntimeError) {
+            hiGlassInstance = (
+                <div className="col-sm-12 text-center mt-4">
+                    <h4 className="text-400">Runtime Error</h4>
+                </div>
+            );
         } else {
             hiGlassInstance = (
                 <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
@@ -860,7 +874,7 @@ export class HiGlassContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.0.0/dist/styles/hglib.css" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.3/dist/styles/hglib.css" crossOrigin />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
             </div>

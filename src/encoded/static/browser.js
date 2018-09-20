@@ -4,14 +4,12 @@
 import React from 'react';
 import _ from 'underscore';
 import ReactDOM from 'react-dom';
-var ReactMount = require('react-dom/lib/ReactMount');
-ReactMount.allowFullPageRender = true;
 
 var App = require('./components');
 var domready = require('domready');
 import * as store from './store';
 var { Provider, connect } = require('react-redux');
-import * as JWT from './components/util/json-web-token';
+import { console, JWT } from './components/util';
 import { BrowserFeat } from './components/util/layout';
 
 /** 
@@ -72,7 +70,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         var app;
         
         try {
-            app = ReactDOM.render(<Provider store={store}><UseApp /></Provider>, document);
+            app = ReactDOM.hydrate(<Provider store={store}><UseApp /></Provider>, document);
         } catch (e) {
             console.error("INVARIANT ERROR", e); // To debug
             // So we can get printout and compare diff of renders.
