@@ -937,8 +937,12 @@ def validate_file_filename(context, request):
     found_match = False
     data = request.json
     if 'filename' not in data:
-        return
-    filename = data['filename']
+        # see if there is an existing file_name
+        filename = context.properties.get('filename')
+        if not filename:
+            return
+    else:
+        filename = data['filename']
     file_format_item = None
     ff = data.get('file_format')
     if not ff:
