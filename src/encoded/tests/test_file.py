@@ -59,12 +59,12 @@ def test_replaced_file_not_uniqued(testapp, file):
 
 
 @pytest.fixture
-def fastq_json(award, experiment, lab):
+def fastq_json(award, experiment, lab, file_formats):
     return {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('uuid'),
         'filename': 'test.fastq.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploaded',
@@ -72,40 +72,20 @@ def fastq_json(award, experiment, lab):
 
 
 @pytest.fixture
-def proc_file_json(award, experiment, lab):
+def proc_file_json(award, experiment, lab, file_formats):
     return {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'pairs',
+        'file_format': file_formats.get('pairs').get('uuid'),
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
     }
 
 
-@pytest.fixture
-def all_file_jsons(fastq_json):
-    return [fastq_json]
-
-
-@pytest.fixture
-def related_files(all_file_jsons):
-    r_files = []
-    for f in all_file_jsons:
-        item = f.copy()
-        item['related_files'] = [{'relationship_type': 'derived from',
-                                  'file': f['accession']}]
-        item['md5sum'] = '2123456789abcdef0123456789abcdef'
-        item['accession'] = ''
-        r_files.append(item)
-    return(zip(all_file_jsons, r_files))
-
-
-def test_file_post_all(testapp, all_file_jsons):
-    for f in all_file_jsons:
-        file_url = '/file_' + f['file_format']
-        testapp.post_json(file_url, f, status=201)
+def test_file_post_fastq(testapp, fastq_json):
+    testapp.post_json('/file_fastq', fastq_json, status=201)
 
 
 @pytest.fixture
@@ -114,7 +94,7 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
-def test_extra_files(testapp, proc_file_json):
+def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
@@ -124,6 +104,7 @@ def test_extra_files(testapp, proc_file_json):
     expected_key = "%s/%s" % (resobj['uuid'], file_name)
     assert resobj['extra_files'][0]['upload_key'] == expected_key
     assert resobj['extra_files'][0]['href']
+    assert resobj['extra_files_creds'][0]['file_format'] == file_formats['pairs_px2']['uuid']
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
@@ -212,7 +193,7 @@ def test_extra_files_get_upload(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
 
-    get_res = testapp.get(resobj['@id']+'/upload')
+    get_res = testapp.get(resobj['@id'] + '/upload')
     get_resobj = get_res.json['@graph'][0]
     assert get_resobj['upload_credentials']
     assert get_resobj['extra_files_creds'][0]
@@ -248,14 +229,14 @@ def test_files_aws_credentials(testapp, fastq_uploading):
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
 
 
-def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
+def test_files_aws_credentials_change_filename(testapp, fastq_uploading, file_formats):
     fastq_uploading['filename'] = 'test.zip'
-    fastq_uploading['file_format'] = 'zip'
+    fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')
     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
     resobj = res.json['@graph'][0]
 
     fastq_uploading['filename'] = 'test.tiff'
-    fastq_uploading['file_format'] = 'tiff'
+    fastq_uploading['file_format'] = file_formats.get('tiff').get('uuid')
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
     assert resobj['upload_credentials']['key'].endswith('zip')
@@ -264,9 +245,9 @@ def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
     assert res_put.json['@graph'][0]['href'].endswith('tiff')
 
 
-def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
+def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading, file_formats):
     fastq_uploading['filename'] = 'test.zip'
-    fastq_uploading['file_format'] = 'zip'
+    fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')
     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
     resobj = res.json['@graph'][0]
 
@@ -280,27 +261,23 @@ def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
     assert resobj['href'] == res_put.json['@graph'][0]['href']
 
 
-def test_s3_filename_validation(testapp, fastq_uploading):
+def test_s3_filename_validation(testapp, fastq_uploading, file_formats):
     """
     s3 won't allow certain characters in filenames, hence the regex validator
     created in file.json schema. Required regex is: "^[\\w+=,.@-]*$"
     """
     # first a working one
     fastq_uploading['filename'] = 'test_file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
+    fastq_uploading['file_format'] = file_formats.get('fastq').get('uuid')
     testapp.post_json('/file_fastq', fastq_uploading, status=201)
     # now some bad boys that don't pass
     fastq_uploading['filename'] = 'test file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test|file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test~file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test#file.fastq.gz'
-    fastq_uploading['file_format'] = 'fastq'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
 
 
@@ -342,11 +319,11 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
 
 
 @pytest.fixture
-def mcool_file_json(award, experiment, lab):
+def mcool_file_json(award, experiment, lab, file_formats):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'mcool',
+        'file_format': file_formats.get('mcool').get('uuid'),
         'md5sum': '00000000000000000000000000000000',
         'filename': 'my.cool.mcool',
         'status': 'uploaded',
@@ -361,12 +338,12 @@ def mcool_file(testapp, mcool_file_json):
 
 
 @pytest.fixture
-def file(testapp, award, experiment, lab):
+def file(testapp, award, experiment, lab, file_formats):
 
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('uuid'),
         'md5sum': '00000000000000000000000000000000',
         'filename': 'my.fastq.gz',
         'status': 'uploaded',
@@ -568,17 +545,66 @@ def test_force_beanstalk_env(mocker):
 
 
 @pytest.fixture
-def processed_file_data(award, lab):
+def processed_file_data(award, lab, file_formats):
     return {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'pairs'
+        'file_format': file_formats.get('pairs').get('uuid'),
     }
 
 
-def test_validate_produced_from_files_no_produced_by(testapp, processed_file_data):
+def test_validate_produced_from_files_no_produced_by_and_filename_no_filename(
+        testapp, processed_file_data):
     res = testapp.post_json('/files-processed', processed_file_data, status=201)
     assert not res.json.get('errors')
+
+
+def test_validate_filename_invalid_file_format_post(testapp, processed_file_data):
+    processed_file_data['file_format'] = 'stringy file format'
+    processed_file_data['filename'] = 'test_file.pairs.gz'
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert 'Problem getting file_format for test_file.pairs.gz' in descriptions
+
+
+def test_validate_filename_valid_file_format_and_name_post(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file.pairs.gz'
+    res = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_filename_invalid_filename_post(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file_pairs.gz'
+    res = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "Filename test_file_pairs.gz extension does not agree with specified file format. Valid extension(s): '.pairs.gz'" in descriptions
+
+
+def test_validate_filename_valid_filename_patch(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file1.pairs.gz'
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res1.json.get('errors')
+    res1_props = res1.json['@graph'][0]
+    assert res1_props['filename'] == 'test_file1.pairs.gz'
+    filename2patch = 'test_file2.pairs.gz'
+    res2 = testapp.patch_json(res1_props['@id'], {'filename': filename2patch}, status=200)
+    assert not res2.json.get('errors')
+    assert res2.json['@graph'][0]['filename'] == 'test_file2.pairs.gz'
+
+
+def test_validate_filename_invalid_filename_patch(testapp, processed_file_data):
+    processed_file_data['filename'] = 'test_file1.pairs.gz'
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
+    assert not res1.json.get('errors')
+    res1_props = res1.json['@graph'][0]
+    assert res1_props['filename'] == 'test_file1.pairs.gz'
+    filename2patch = 'test_file2.bam'
+    res2 = testapp.patch_json(res1_props['@id'], {'filename': filename2patch}, status=422)
+    errors = res2.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "Filename test_file2.bam extension does not agree with specified file format. Valid extension(s): '.pairs.gz'" in descriptions
 
 
 def test_validate_produced_from_files_invalid_post(testapp, processed_file_data):
@@ -644,4 +670,121 @@ def test_validate_extra_files_extra_files_ok_patch_existing_extra_format(testapp
     res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
     pfid = res1.json['@graph'][0]['@id']
     res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=200)
+    assert not res2.json.get('errors')
+
+
+def test_validate_extra_files_parent_should_not_have_extras(
+        testapp, processed_file_data, file_formats):
+    extf = {'file_format': 'pairs_px2'}
+    processed_file_data['file_format'] = file_formats.get('mcool').get('uuid')
+    processed_file_data['extra_files'] = [extf]
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res1.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "File with format mcool should not have extra_files" in descriptions
+
+
+def test_validate_extra_files_bad_extras_format(
+        testapp, processed_file_data, file_formats):
+    extf = {'file_format': 'whosit'}
+    processed_file_data['extra_files'] = [extf]
+    res1 = testapp.post_json('/files-processed', processed_file_data, status=422)
+    errors = res1.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "'whosit' not a valid or known file format" in descriptions
+
+
+def test_validate_file_format_validity_for_file_type_allows(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+    }
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=201)
+    res2 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    assert not res1.json.get('errors')
+    assert not res2.json.get('errors')
+
+
+def test_validate_file_format_validity_for_file_type_fires(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+    }
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=422)
+    errors = res1.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "File format pairs is not allowed for FileFastq" in descriptions
+    res2 = testapp.post_json('/files-processed', my_proc_file, status=422)
+    errors = res2.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "File format fastq is not allowed for FileProcessed" in descriptions
+
+
+def test_file_format_does_not_exist(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': 'waldo',
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=422)
+    errors = res1.json['errors']
+    descriptions = ''.join([e['description'] for e in errors])
+    assert "'waldo' not found" in descriptions
+
+
+def test_filename_patch_fails_wrong_format(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'filename': 'test.fastq.gz'
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('pairs').get('uuid')}
+    res2 = testapp.patch_json('/files-fastq/' + resobj['uuid'], patch_data, status=422)
+    errors = res2.json['errors']
+    error1 = "Filename test.fastq.gz extension does not agree with specified file format. Valid extension(s): '.pairs.gz'"
+    error2 = "File format pairs is not allowed for FileFastq"
+    descriptions = ''.join([e['description'] for e in errors])
+    assert error1 in descriptions
+    assert error2 in descriptions
+
+
+def test_filename_patch_works_with_different_format(testapp, file_formats, award, lab):
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+        'filename': 'test.pairs.gz'
+    }
+    res1 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('bam').get('uuid'), 'filename': 'test.bam'}
+    res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
+    assert not res2.json.get('errors')
+
+
+def test_file_format_patch_works_if_no_filename(testapp, file_formats, award, lab):
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid')
+    }
+    res1 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('bam').get('uuid')}
+    res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
     assert not res2.json.get('errors')

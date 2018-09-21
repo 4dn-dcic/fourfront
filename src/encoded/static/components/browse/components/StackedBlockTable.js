@@ -2,13 +2,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox, Collapse } from 'react-bootstrap';
+import { Button, Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
-
-
+import url from 'url';
+import * as store from './../../../store';
 
 /**
  * Label to show at top left of Name block.
@@ -64,7 +64,7 @@ export class StackedBlockNameLabel extends React.Component {
 export class StackedBlockName extends React.Component {
 
     static Label = StackedBlockNameLabel
-    
+
     static propTypes = {
         'columnClass' : PropTypes.string,
         'colWidthStyles' : PropTypes.object,
@@ -76,7 +76,7 @@ export class StackedBlockName extends React.Component {
         'style' : PropTypes.object,
         'visible' : PropTypes.bool, // ? forgot
         'verticalAlign' : PropTypes.string // CSS vertical-align property. Change alignment/positioning if wanted.
-        
+
     }
 
     static defaultProps = {
@@ -141,7 +141,7 @@ export class StackedBlockName extends React.Component {
                     addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
                 }
             }
-            
+
             if (_.keys(addedProps).length > 0){
                 return React.cloneElement(c, addedProps, c.props.children);
             }
@@ -189,7 +189,7 @@ export class StackedBlockName extends React.Component {
  * Button to toggle collapse/visible of longer StacedkBlockLists. Used in StackedBlockLists.
  */
 export class StackedBlockListViewMoreButton extends React.Component {
-    
+
     static propTypes = {
         collapsibleChildren : PropTypes.array,
         collapsed : PropTypes.bool,
@@ -486,7 +486,7 @@ export class StackedBlock extends React.Component {
 
 
 export class FilePairBlock extends React.Component {
-    
+
     static accessionTriplesFromProps(props){
         var accessionTriples;
         try {
@@ -652,7 +652,7 @@ export class FileEntryBlockPairColumn extends React.Component {
         this.hasCheckbox = fileEntryBlockMixins.hasCheckbox.bind(this);
         this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
     }
-    
+
     render(){
         var tableHasFilePairColumn = _.pluck(this.props.columnHeaders || [], 'title').indexOf('File Pair') > -1;
         return (
@@ -706,8 +706,15 @@ export class FileEntryBlock extends React.Component {
     }
 
     fileTypeSummary(file = this.props.file){
-        var summary = file.file_type_detailed || ((file.file_type && file.file_format && (file.file_type + ' (' + file.file_format + ')')) || file.file_type) || file.file_format || '-' ;
-        // Remove 'other' because it just takes up horizontal space.
+        var fileFormat = fileUtil.getFileFormatStr(file),
+            summary = (
+                file.file_type_detailed ||
+                ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
+                file.file_format ||
+                '-'
+            );
+
+        // Remove 'other', if present, because it just takes up horizontal space.
         if (summary.slice(0, 6).toLowerCase() === 'other '){
             return summary.slice(7).slice(0, -1);
         }
@@ -724,7 +731,7 @@ export class FileEntryBlock extends React.Component {
                 //return true;
             }),
             baseClassName = (className || '') + " col-file-detail item";
-        
+
         for (var i = 0; i < cols.length; i++){
 
             var col = cols[i],
@@ -773,9 +780,10 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (title === 'File Info'){ // AKA Paired Info
+                var fileFormat = fileUtil.getFileFormatStr(file);
                 if (typeof file.paired_end !== 'undefined') {
                     row.push(<div key="file-info" className={colClassName} style={baseStyle}>Paired end {file.paired_end}</div>);
-                } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
+                } else if (fileFormat === 'fastq' || fileFormat === 'fasta') {
                     row.push(<div key="file-info" className={colClassName} style={baseStyle}>Unpaired</div>);
                 } else {
                     row.push(<div key="file-info" className={colClassName} style={baseStyle}></div>);
@@ -842,10 +850,10 @@ export class FileEntryBlock extends React.Component {
 
         if (Array.isArray(columnHeaders)) {
             var headerTitles = _.pluck(columnHeaders, 'title');
-            if ( (file.file_type || file.file_format) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0 ){
-                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || file.file_format} />;
+            if ((file.file_type || fileUtil.getFileFormatStr(file)) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0){
+                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || (file.file_format && file.file_format.display_title)} />;
             }
-            if ( file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0 ){
+            if (file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0){
                 return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
             }
         }
@@ -853,9 +861,69 @@ export class FileEntryBlock extends React.Component {
         return <StackedBlock.Name.Label {...commonProperties} />;
     }
 
+    /**
+    * Add a link to an external site for some file types.
+    * @param file - Describes the file object that will be displayed.
+    */
+    renderExternalLink(){
+        var { file } = this.props;
+
+        // Find out if the file format is hic.
+        // - It needs an external href link
+        //   - Either it needs a file format of 'hic'
+        //   - OR it has a detailed file type that contains 'hic'
+        var fileFormat = fileUtil.getFileFormatStr(file);
+        var fileIsHic = (
+            file
+            && (
+                (fileFormat && fileFormat === 'hic')
+                || (
+                    file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+            )
+            && file.href
+        );
+
+        var externalLinkButton;
+        if (fileIsHic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                // Get the protocol and host from storage before adding the juicebox link.
+                var currentPageUrlBase = store && store.getState().href,
+                    hrefParts = url.parse(currentPageUrlBase),
+                    host = hrefParts.protocol + '//' + hrefParts.host,
+                    targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the juicebox button
+            externalLinkButton = (
+                <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                    <i className="icon icon-fw icon-external-link text-smaller"/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
     renderName(){
         var { file, colWidthStyles } = this.props;
-        return <div className={"name col-file" + (file && file.accession ? ' mono-text' : '')} style={colWidthStyles ? colWidthStyles.file : null} children={[this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle()]}/>;
+        return <div
+            className={
+                "name col-file" + (
+                    file && file.accession ? ' mono-text' : ''
+                )}
+            style={colWidthStyles ? colWidthStyles.file : null}
+            children={[
+                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
+            ]}
+        />;
     }
 
     render(){
@@ -946,7 +1014,7 @@ export class StackedBlockTable extends React.Component {
         delete this.lastColumnWidths;
         delete this.cache.origColumnWidths;
     }
-    
+
     totalColumnsWidth(origColumnWidths = this.cache.origColumnWidths){
         return _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
     }
@@ -1015,7 +1083,7 @@ export class StackedBlockTable extends React.Component {
 
     /**
      * If we have a SelectedFilesController up the parent/ancestor chain that feeds us selectFile, selectedFiles, and unselectFile, this is the handler to use for checkbox stacked blocks.
-     * 
+     *
      * @param {string|string[]} uuid - String or list of strings (File Item UUID)
      * @param {Object|Object[]} fileObj - File Item JSON
      * @returns {void} - Nothing.
@@ -1072,7 +1140,7 @@ export class StackedBlockTable extends React.Component {
             if (typeof this.props.collapseLongLists === 'boolean' && typeof c.props.collapseLongLists !== 'boolean'){
                 addedProps.collapseLongLists = this.props.collapseLongLists;
             }
-            
+
             if (Object.keys(addedProps).length > 0){
                 return React.cloneElement(c, addedProps, c.props.children);
             }
@@ -1081,7 +1149,7 @@ export class StackedBlockTable extends React.Component {
     }
 
     render(){
-        
+
         // Cache for each render.
         var minTotalWidth = Math.max(this.props.width || 0, this.totalColumnsWidth(this.getOriginalColumnWidths()));
         this.lastColumnWidths = this.getColumnWidths();

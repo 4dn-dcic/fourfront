@@ -38,8 +38,9 @@ export default class FileView extends WorkflowRunTracingView {
     static shouldHiGlassViewExist(context){
         // TODO: Remove context.file_format check?
         if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
-        var isMcoolFile = context.file_format === 'mcool';
-        var isBWFile = (context.file_format === 'bw' || context.file_format === 'bg');
+        var fileFormat  = fileUtil.getFileFormatStr(context),
+            isMcoolFile = fileFormat === 'mcool',
+            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg');
         return isMcoolFile || isBWFile;
     }
 
@@ -274,11 +275,11 @@ export class FileOverViewBody extends React.Component {
     }
 
     handleJuiceBoxVizClick(evt){
-        var file = this.props.result,
-            pageHref = this.props.href || (store && store.getState().href),
-            hrefParts = url.parse(pageHref),
-            host = hrefParts.protocol + '//' + hrefParts.host,
-            targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+        var file            = this.props.result,
+            pageHref        = this.props.href || (store && store.getState().href),
+            hrefParts       = url.parse(pageHref),
+            host            = hrefParts.protocol + '//' + hrefParts.host,
+            targetLocation  = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
 
         if (isServerSide()) return null;
         var win = window.open(targetLocation, '_blank');
@@ -286,8 +287,11 @@ export class FileOverViewBody extends React.Component {
     }
 
     visualizeExternallyButton(){
-        var file = this.props.result, tips = this.props.tips;
-        if (!file || file.file_format !== 'hic') return null;
+        var file        = this.props.result,
+            tips        = this.props.tips,
+            fileFormat  = fileUtil.getFileFormatStr(file);
+
+        if (fileFormat !== 'hic') return null;
         return (
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
@@ -298,8 +302,9 @@ export class FileOverViewBody extends React.Component {
     }
 
     render(){
-        var file = this.props.result, tips = this.props.tips;
-        var extVizButton = this.visualizeExternallyButton();
+        var file = this.props.result,
+            tips = this.props.tips,
+            extVizButton = this.visualizeExternallyButton();
         return (
             <div className="row overview-blocks">
                 { extVizButton }

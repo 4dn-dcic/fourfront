@@ -7,7 +7,7 @@ import _ from 'underscore';
 import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas, fileUtil } from '../util';
 import Alerts from '../alerts';
 import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
 
@@ -469,10 +469,17 @@ class LinkedObj extends React.PureComponent{
 
         if (!window) return;
 
-        var { schema, nestedField, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props;
 
         var itemType    = schema.linkTo,
             searchURL   = '/search/?type=' + itemType + '#!selection';
+        // check if we have any schema flags that will affect the searchUrl
+        if(schema.ff_flag && schema.ff_flag.startsWith('filter:')){
+            // the field to facet on could be set dynamically
+            if(schema.ff_flag == "filter:valid_item_types"){
+                searchURL   = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+            }
+        }
 
         if (linkedObjChildWindow && !linkedObjChildWindow.closed && linkedObjChildWindow.fourfront && typeof linkedObjChildWindow.fourfront.navigate === 'function'){
             // We have access to the JS of our child window. Call app.navigate(URL) directly instead of reloading entire HTML. May not work for some browsers.
@@ -1088,7 +1095,6 @@ class S3FileInput extends React.Component{
 
     constructor(props){
         super(props);
-        this.getFileExtensionRequired = this.getFileExtensionRequired.bind(this);
         this.state = {
             'percentDone': null,
             'sizeUploaded': null,
@@ -1121,43 +1127,44 @@ class S3FileInput extends React.Component{
         }
     }
 
-    getFileExtensionRequired(){
-        // get the current context and overall schema for the file object
-        var currContext = this.props.getCurrContext();
-        var currSchema = this.props.getCurrSchema();
-        var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
-        var extension;
-        // find the extension the file should have
-        if (currContext.file_format in schema_extensions) {
-            extension = schema_extensions[currContext.file_format];
-        } else {
-            alert('Internal file extension conflict.');
-            return null;
-        }
-        return extension;
-    }
-
     /*
     Handle file selection. Store the file in SubmissionView state and change
     the filename context using modifyNewContext
     */
     handleChange = (e) => {
-        var extension = this.getFileExtensionRequired();
-        var file = e.target.files[0];
-        // file was not chosen
-        if(!file || typeof extension !== 'string'){
-            return;
-        }else{
-            var filename = file.name ? file.name : "unknown";
-            // check extension
-            if(!filename.endsWith(extension)){
-                alert('File extension error! Please enter a file of type: ' + extension);
+        var { modifyNewContext, nestedField, linkType, arrayIdx } = this.props,
+            file = e.target.files[0];
+
+        if (!file) return; // No file was chosen.
+
+        var filename = file.name ? file.name : "unknown";
+
+        // check Extensions
+        var fileFormat = this.props.getCurrContext().file_format;
+        if(!fileFormat.startsWith('/')){
+            fileFormat = '/' + fileFormat;
+        }
+        var extensions = [];
+        ajax.promise(fileFormat + '?frame=object').then(response => {
+            if (response['file_format'] && response['@id']){
+                extensions = response.standard_file_extension ? [response.standard_file_extension] : [];
+                if(response.other_allowed_extensions){
+                    extensions = extensions.concat(response.other_allowed_extensions);
+                }
+                // Fail if "other" extension is not used and a valid extension is not provided
+                if (extensions.indexOf("other") === -1 && !_.any(extensions, function(ext){return filename.endsWith(ext);})){
+                    alert('File extension error! Please enter a file with one of the following extensions: ' + extensions.join(', '));
+                    return;
+                }
+
+                modifyNewContext(nestedField, filename, 'file upload', linkType, arrayIdx);
+                // calling modifyFile changes the 'file' state of top level component
+                this.modifyFile(file);
+            }else{
+                alert('Internal file extension conflict.');
                 return;
             }
-            this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
-            // calling modifyFile changes the 'file' state of top level component
-            this.modifyFile(file);
-        }
+        });
     }
 
     /*

@@ -140,19 +140,20 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
 
 
 @pytest.fixture
-def item_uuid(testapp, award, experiment, lab):
+def item_uuid(testapp, award, experiment, lab, file_formats):
     # this is a processed file
     item = {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'pairs',
+        'file_format': file_formats.get('pairs').get('@id'),
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
     }
     res = testapp.post_json('/file_processed', item)
     return res.json['@graph'][0]['uuid']
+
 
 def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
     # Todo, input a list of accessions / uuids:
@@ -190,7 +191,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
         json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
         # pluck a few uuids for testing
         if type_name in test_types:
-            test_inserts.append({'type_name': type_name, 'data':json_inserts[type_name][0]})
+            test_inserts.append({'type_name': type_name, 'data': json_inserts[type_name][0]})
 
     # load -em up
     start = timer()
@@ -218,6 +219,6 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
         embed_time = stop - start
 
         print("PERFORMANCE: Time to query item %s - %s raw: %s embed %s" % (item['type_name'], item['data']['uuid'],
-                                                               frame_time, embed_time))
+                                                                            frame_time, embed_time))
     # userful for seeing debug messages
     # assert False

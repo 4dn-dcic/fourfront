@@ -1,4 +1,3 @@
-
 {
     "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
@@ -34,9 +33,10 @@
         },
         "file_format": {
             "title": "File Format",
-            "description": "Format or extension of this file.",
             "type": "string",
-            "lookup": 20
+            "linkTo": "FileFormat",
+            "lookup": 20,
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
@@ -86,6 +86,7 @@
             "title": "Extra Files",
             "description": "Links to extra files on s3 that don't have associated metadata",
             "type": "array",
+            "exclude_from": ["FFedit-create"],
             "items": {
                 "title": "Extra File",
                 "type": "object",
@@ -95,6 +96,7 @@
                     "file_format": {
                         "title": "File Format",
                         "type": "string",
+                        "linkTo": "FileFormat",
                         "lookup": 400
                     },
                     "href": {
@@ -194,7 +196,7 @@
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
         },
-        "file_format": {
+        "file_format.file_format": {
             "title" : "File Format",
             "description" : "Format of the file, i.e. the file extension."
         },
