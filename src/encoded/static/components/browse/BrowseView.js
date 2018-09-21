@@ -375,11 +375,13 @@ export default class BrowseView extends React.Component {
      * @returns {number} Count of external experiment sets.
      */
     static externalDataSetsCount(context){
-        var projectFacetTerms = Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : [];
-        var availableProjectsInResults = _.pluck(projectFacetTerms, 'key');
-        var setsExistInExternalData = availableProjectsInResults.indexOf('External') > -1;
-        var countExternalSets = setsExistInExternalData ? _.findWhere(projectFacetTerms, { 'key' : 'External' }).doc_count : 0;
-        return countExternalSets;
+        var projectFacetTerms = (
+            Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : []
+        );
+        return _.reduce(projectFacetTerms, function(sum, projectTermObj){
+            if (projectTermObj.key === '4DN') return sum; // continue.
+            return sum + projectTermObj.doc_count;
+        }, 0);
     }
 
     /**
@@ -627,11 +629,11 @@ export default class BrowseView extends React.Component {
             hrefParts           = url.parse(href, true),
             countExternalSets   = BrowseView.externalDataSetsCount(context);
 
-        // no results found!
+        // No results found!
         if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts, countExternalSets);
 
-        // browse is only for experiment sets
-        if(!navigate.isValidBrowseQuery(hrefParts.query)){
+        // Browse is only for experiment sets w. award.project=4DN and experimentset_type=replicates
+        if (!navigate.isValidBrowseQuery(hrefParts.query)){
             return(
                 <div className="error-page text-center">
                     <h3 className="text-300">
