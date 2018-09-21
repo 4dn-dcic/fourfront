@@ -97,7 +97,7 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
-        "experiments_in_set.badges.*",
+        "experiments_in_set.badges.badge.*",
 
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
@@ -114,7 +114,7 @@ class ExperimentSet(Item):
         'experiments_in_set.biosample.treatments.treatment_type',
         'experiments_in_set.biosample.treatments.display_title',
         'experiments_in_set.biosample.treatments_summary',
-        "experiments_in_set.biosample.badges.*",
+        "experiments_in_set.biosample.badges.badge.*",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
@@ -276,7 +276,7 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     # will aggregate badge items found during embedding by badge_classification
-    aggregated_list = ["badges.badge_classification"]
+    aggregated_list = ["badges.badge.badge_classification", "biosample", "experiments_in_set"]
     embedded_list = ExperimentSet.embedded_list + [
         "replicate_exps.replicate_exp.accession"
     ]
