@@ -24,7 +24,7 @@ function mapStateToProps(store) {
 }
 
 describe('Testing browse.js for experiment set browser', function() {
-    var React, Browse, testItem, TestUtils, page, store, context, filters, _, Wrapper;
+    var React, Browse, testItem, TestUtils, page, store, context, filters, _, Wrapper, searchViewCommonProps;
 
     beforeEach(function() {
         React = require('react');
@@ -44,10 +44,21 @@ describe('Testing browse.js for experiment set browser', function() {
             type: dispatch_vals
         });
 
+        searchViewCommonProps = {
+            // Mocked props that would be sent from app.BodyElement
+            "windowWidth" : 1000,
+            "registerWindowOnScrollHandler" : function(fxn){
+                setTimeout(()=> console.log(fxn(345, 345)), 2000);
+                setTimeout(()=> console.log(fxn(40, -305)), 5000);
+                console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
+                jest.runAllTimers();
+            }
+        };
+
         var UseBrowse = connect(mapStateToProps)(Browse);
         page = TestUtils.renderIntoDocument(
             <Provider store={store}>
-                <UseBrowse />
+                <UseBrowse {...searchViewCommonProps} />
             </Provider>
         );
     });

@@ -364,14 +364,13 @@ class ExternaDataExpSetsCount extends React.PureComponent {
 
 /**
  * View which renders the page located at `/browse/`.
- *
  */
 export default class BrowseView extends React.Component {
 
     /**
      * Calculates how many experiment sets are 'External' and do not have award.project===4DN from browse JSON result.
      *
-     * @param {SearchResponse} context - Browse search result.
+     * @param {SearchResponse} context - Browse search result with at least 'facets'.
      * @returns {number} Count of external experiment sets.
      */
     static externalDataSetsCount(context){
