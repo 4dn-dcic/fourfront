@@ -22,8 +22,7 @@ export default class HomePage extends React.PureComponent {
     static propTypes = {
         "context" : PropTypes.shape({
             "content" : PropTypes.array
-        }).isRequired,
-        "windowWidth" : PropTypes.number.isRequired
+        }).isRequired
     }
 
     midHeader(){

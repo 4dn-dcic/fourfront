@@ -187,23 +187,9 @@ class TableEntry extends React.Component {
                 { title }
                 <Collapse in={!this.state || this.state.open && mounted}>
                     <div>
-                        <TableEntryChildren
-                            active={active}
-                            content={content}
-                            childHeaders={childHeaders}
-                            depth={depth}
-                            mounted={mounted}
-                            listStyleTypes={listStyleTypes}
-                            pageScrollTop={pageScrollTop}
-                            nextHeader={nextHeader}
-                            children={children}
-                            navigate={this.props.navigate}
-                            link={link}
-                            maxHeaderDepth={maxHeaderDepth}
-                            parentClosed={this.state && !this.state.open}
-                            skipDepth={skipDepth}
-                            recurDepth={recurDepth}
-                        />
+                        <TableEntryChildren {...{ active, content, childHeaders, depth, mounted, listStyleTypes,
+                            pageScrollTop, nextHeader, children, link, maxHeaderDepth, skipDepth, recurDepth }}
+                            navigate={this.props.navigate} parentClosed={this.state && !this.state.open}/>
                     </div>
                 </Collapse>
             </li>
@@ -530,13 +516,13 @@ export class TableOfContents extends React.Component {
         var context = this.props.context;
         var cols = [];
         cols.push(
-            <div className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1600 ? '9' : '12')}>
+            <div key="parent-link" className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1600 ? '9' : '12')}>
                 <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
             </div>
         );
         if (windowInnerWidth && windowInnerWidth >= 1600){
             cols.push(
-                <div className="col-xs-3 text-right expand-button-container">
+                <div key="expand-btn" className="col-xs-3 text-right expand-button-container">
                     <Button bsSize="xs" onClick={this.onToggleWidthBound}>{ this.state.widthBound ?
                         <span><i className="icon icon-fw icon-angle-left"/></span> :
                         <span><i className="icon icon-fw icon-angle-right"/></span>

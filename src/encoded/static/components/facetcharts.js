@@ -202,8 +202,6 @@ export class FacetCharts extends React.PureComponent {
 
         if (debug) console.log('FacetCharts SCHEMAS AT RENDER', schemas);
 
-        console.log('DDDD', width, windowWidth);
-
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
