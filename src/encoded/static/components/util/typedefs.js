@@ -142,7 +142,7 @@ export var ColumnDefinitionRenderFxn;
  * @property {string} title - Title to appear at top of column, in facet, etc.
  * @property {number} [minColumnWidth] - Minimum width of column, in pixels.
  * @property {{ sm: number, md: number, lg: number }} [widthMap] - Default width (before sizing) per response-width level.
- * @property {ColumnDefinitionRenderFxn} [render] - Optional function to render column in some custom way, for example in order to format a date-time value. 
+ * @property {ColumnDefinitionRenderFxn} [render] - Optional function to render column in some custom way, for example in order to format a date-time value.
  */
 export var ColumnDefinition;
 
@@ -174,3 +174,4 @@ export var NavigateOpts;
  * @property {number} [navigateDisappearThreshold=1] - After how many navigations should this alert be automatically removed.
  */
 export var AlertObj;
+

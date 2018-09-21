@@ -516,7 +516,7 @@ export default class App extends React.Component {
 
     /**
      * Calculates current action, if any, from URL hash.
-     * 
+     *
      * @public
      * @returns {!string} Current action if any, or null.
      */
@@ -1765,7 +1765,7 @@ class BodyElement extends React.PureComponent {
 
                             <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')}
                                 windowWidth={windowWidth} />
-                            
+
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
                             </div>
