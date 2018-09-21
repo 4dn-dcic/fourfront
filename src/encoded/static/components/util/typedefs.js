@@ -112,6 +112,7 @@ export var TabObject;
  *
  * @typedef {JSONContentResponse} SearchResponse
  * @property {{ field: string, term: string }[]} filters - Filters set on a search or browse request.
+ * @property {{ terms: { key: string, doc_count: number }[]}[]} facets - Faceting options which are available for search request/response, including options and counts.
  * @property {number} total - Total number of results expected for query.
  */
 export var SearchResponse;
