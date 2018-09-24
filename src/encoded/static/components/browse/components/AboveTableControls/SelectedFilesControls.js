@@ -164,12 +164,21 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
             file => file.status !== "released"
         );
 
-        // Find out if at least 1 is unpublished
+        // Find out if at least 1 is unpublished.
+        // The file could be part of an experiment set with a publication
+        // Or the file could be part of an experiment which is in an experiment set with a publication
         var foundUnpublishedFiles = _.any(selectedFiles,
             file => !(
-                file.from_experiment
-                && file.from_experiment.from_experiment_set
-                && file.from_experiment.public_release
+                (
+                    file.from_experiment
+                    && file.from_experiment.from_experiment_set
+                    && file.from_experiment.from_experiment_set.produced_in_pub
+                )
+                ||
+                (
+                    file.from_experiment_set
+                    && file.from_experiment_set.produced_in_pub
+                )
             )
         );
 
@@ -333,11 +342,13 @@ export class SelectAllFilesButton extends React.PureComponent {
         'experiments_in_set.processed_files.accession',
         'experiments_in_set.processed_files.file_type_detailed',
         'experiments_in_set.processed_files.uuid',
+        'produced_in_pub.display_title',
         'processed_files.accession',
         'processed_files.file_type_detailed',
         'processed_files.uuid',
         'accession',
-        'experiments_in_set.accession'
+        'experiments_in_set.accession',
+        'status',
     ];
 
     constructor(props){
