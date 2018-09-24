@@ -594,18 +594,10 @@ export default class BrowseView extends React.Component {
 
         // If there are no External Sets found:
         // - Tell the user there is no data.
-        // - If filters were set, add a button to reset the filters and try again.
 
         // If there are External Sets that match the filter:
         // - Tell the user they exist, and how many.
         // - Instruct the user to click on the button to search for Experiment Sets in External Data.
-        // - Add a button to keep the current filters and look for External Data.
-        // - Deemphasize the reset filters button.
-
-        // Whether or not there are External Data results, offer a link to the advanced search.
-        var unsetFilterButtonClass = countExternalSets > 0 ? "btn-secondary btn-md" : "btn-primary btn-lg";
-        unsetFilterButtonClass += " btn text-600 inline-block clickable in-stacked-table-button";
-
         return (
             <div className="error-page mt-4">
                 <div className="clearfix">
@@ -613,36 +605,23 @@ export default class BrowseView extends React.Component {
                     {
                         countExternalSets > 0 ?
                             React.createElement(
-                                'h4',
-                                { 'className' : "text-400 mb-05 mt-42" },
-                                'There are only results from External Data for current filter selection.'
-                            )
+                            'h4',
+                            { 'className' : "text-400 mb-05 mt-05" },
+                            "Only External Data results were found."
+                        )
                             : React.createElement(
                                 'h3',
-                                { 'className' : "text-400 mb-05 mt-42" },
-                                'No results found for current filter selection.'
+                                { 'className' : "text-400 mb-05 mt-05" },
+                                'No results found.'
                         )
                     }
-                    { countExternalSets > 0 ?
-                        <h3 className="text-500 mt-05 mb-05">
-                            Click below to browse the { countExternalSets } Experiment { countExternalSets > 1 ? 'sets ' : 'set ' } available in External Data.
-                        </h3>
-                    : null}
                     { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
                         <div className="mb-10 mt-1">
                             <Button bsSize="large" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
-                                Browse External Data
-                            </Button> Keep current filters and browse all Experiment Sets, including External data.
+                                Browse { countExternalSets } External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
+                            </Button>
                         </div>
                     : null }
-                    { hrefParts.path !== browseBaseHref ?
-                        <div className="mb-30 mt-1">
-                            <a href={browseBaseHref} className={unsetFilterButtonClass} data-tip="Unset Filters">
-                                Unset Filters
-                            </a> Unset filters and browse all 4DN Experiment Sets.
-                        </div>
-                    : null }
-                    <div className="mb-45 mt-1"><a href={'/search/?' + queryString.stringify(queryForSearchAllItems)}>Search <strong>all Items</strong></a> (advanced).</div>
                     <hr/>
                 </div>
             </div>
