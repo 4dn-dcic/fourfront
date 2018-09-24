@@ -613,7 +613,7 @@ export default class BrowseView extends React.Component {
                                 'h3',
                                 { 'className' : "text-400 mb-05 mt-05" },
                                 'No results found.'
-                        )
+                            )
                     }
                     { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
                         <div className="mb-10 mt-1">
