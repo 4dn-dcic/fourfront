@@ -1,29 +1,53 @@
 'use strict';
-import React from 'react';
-import * as globals from './globals';
-import _ from 'underscore';
-import { ajax, console, object, isServerSide, DateUtility } from './util';
-import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
 
-/*
-Container component for the submissions page. Fetches the user info and
-coordinates individual subscriptions.
-*/
-export default class Submissions extends React.Component {
+import React from 'react';
+import _ from 'underscore';
+import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
+import * as globals from './../globals';
+import { ajax, console, object, isServerSide, DateUtility } from './../util';
+
+/**
+ * @typedef {Object} Subscription
+ * @property {string} url       Search request URI.
+ * @property {string} title     Human-readable subscription title.
+ *
+ * @todo Move to util/typedef.js if will be re-used in other files.
+ */
+var Subscription;
+
+/**
+ * Container component for the submissions page. Fetches the user info and
+ * coordinates individual subscriptions.
+ */
+export class SubscriptionView extends React.Component {
 
     constructor(props){
         super(props);
+
+        /**
+         * @private
+         * @type {Object}
+         */
         this.state = {
             'subscriptions': null,
             'initialized': false
         };
     }
 
+    /**
+     * Triggers async call to get user subscriptions.
+     * @private
+     */
     componentDidMount(){
-        // make async call to get user subscriptions
         this.getUserInfo();
     }
 
+    /**
+     * Makes async call to `/me` endpoint to get user subscriptions.
+     *
+     * @private
+     * @returns {void}
+     */
     getUserInfo = () => {
         ajax.promise('/me?frame=embedded').then(response => {
             if (!response.link_id || !response.subscriptions){
@@ -40,17 +64,29 @@ export default class Submissions extends React.Component {
         });
     }
 
-    generateSubscription = (scrip) => {
+    /**
+     * Generates a subscription list item.
+     *
+     * @private
+     * @param {Subscription} scrip      Current subscription.
+     * @param {number} index            Index of current subscription/
+     * @param {Subscription[]} all      All subscriptions.
+     * @returns {JSX.Element} A `SubscriptionEntry` component instance.
+     */
+    generateSubscription = (scrip, index, all) => {
         return(
             <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />
         );
     }
 
+    /**
+     * @private
+     * @returns {JSX.Element} Div containing list of subscription views.
+     */
     render(){
-        var subscrip_list;
-        var main_message;
+        var subscrip_list, main_message;
         if(this.state.subscriptions){
-            subscrip_list = this.state.subscriptions.map((scrip) => this.generateSubscription(scrip));
+            subscrip_list = _.map(this.state.subscriptions, this.generateSubscription);
             main_message = "View your 4DN submissions and track those you're associated with.";
         }else if(this.state.initialized){
             main_message = "No submissions to track; you are not a submitter nor associated with any labs.";
@@ -68,11 +104,11 @@ export default class Submissions extends React.Component {
     }
 }
 
-/*
-Main submission/subscription component. One component per subscription.
-Hold data from the search result from the subscription and organizes
-it into a paginated table. Also allows filtering on item type
-*/
+/**
+ * Main submission/subscription component. One component per subscription.
+ * Hold data from the search result from the subscription and organizes
+ * it into a paginated table. Also allows filtering on item type.
+ */
 class SubscriptionEntry extends React.Component{
 
     constructor(props){
@@ -307,4 +343,4 @@ class SubscriptionEntry extends React.Component{
     }
 }
 
-globals.content_views.register(Submissions, 'Submissions');
+globals.content_views.register(SubscriptionView, 'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)

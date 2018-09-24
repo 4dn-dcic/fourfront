@@ -416,22 +416,28 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
 
 export function combineWithReplicateNumbers(experimentsWithReplicateNums, experimentsInSet){
     if (!Array.isArray(experimentsWithReplicateNums)) return false;
-    return _(experimentsWithReplicateNums).chain()
-        .map(function(r){
-            return {
-                'tec_rep_no' : r.tec_rep_no || null,
-                'bio_rep_no' : r.bio_rep_no || null,
-                '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
-            };
-        })
-        .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
-        .map(function(r){
-            r[1].biosample = _.clone(r[1].biosample);
-            if (!r[1].biosample) r[1].biosample = { 'bio_rep_no' : '?' };
-            r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
-            return _.extend(r[0], r[1]);
-        })
-        .value();
+
+    return _.map(
+        _.zip(
+            _.map(experimentsWithReplicateNums, function(r){
+                return {
+                    'tec_rep_no' : r.tec_rep_no || null,
+                    'bio_rep_no' : r.bio_rep_no || null,
+                    '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
+                };
+            }),
+            experimentsInSet
+        ),
+        function([replicateInfo, expSet]){
+            return _.extend({}, replicateInfo, expSet, {
+                'biosample' : (
+                    expSet.biosample && _.extend(
+                        {}, expSet.biosample, { 'bio_rep_no' : replicateInfo.bio_rep_no || '?' }
+                    )
+                ) || { 'bio_rep_no' : replicateInfo.bio_rep_no || '?' }
+            });
+        }
+    );
 }
 
 export function combineExpsWithReplicateNumbersForExpSet(experiment_set){

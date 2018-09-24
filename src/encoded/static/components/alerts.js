@@ -9,14 +9,14 @@ const defaultNavigateDisappearThreshold = 1;
 
 let alertNavigatationCountMap = {};
 
+
 /**
  * A Component and utility (via Component's 'statics' property & functions) to 
  * queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
  * the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
  * title for alert that was queued.
- * 
- * @class Alerts
- * @prop {Object[]} alerts - List of Alert objects currently being displayed. Should be passed down from Redux store from App.
+ *
+ * @prop {AlertObj[]} alerts - List of Alert objects currently being displayed. Should be passed down from Redux store from App.
  */
 export default class Alerts extends React.Component {
 
@@ -25,11 +25,10 @@ export default class Alerts extends React.Component {
      * More specifically, saves a new alert to Redux store 'alerts' field.
      *
      * @public
-     * @param {Object} alert                    Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
-     * @param {string} alert.title              Title to be shown at top of alert box.
-     * @param {string|JSXElement} alert.message Message to be shown in body of alert box. May be JSX if no plans for alert to be rendered server-side.
-     * @param {string} alert.style              Style of alert box. May be any Bootstrap-compliant style, e.g. "danger", "warning", "info".
-     * @returns {undefined}                     Nothing
+     * @param {AlertObj} alert              Object used to represent alert message element contents at top of page.
+     * @param {function} [callback]         Optional function to be ran after queuing.
+     * @param {AlertObj[]} [currentAlerts]  Current alerts, if any. Pass in for performance, else will retrieve them from Redux.
+     * @returns {undefined}                 Nothing
      */
     static queue(alert, callback, currentAlerts = null){
         if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
@@ -51,7 +50,8 @@ export default class Alerts extends React.Component {
      * Close an alert box.
      *
      * @public
-     * @param {Object} alert - Object with at least 'title'.
+     * @param {AlertObj} alert - Object with at least 'title'.
+     * @param {AlertObj[]} [currentAlerts] - Current alerts, if any. Pass in for performance, else will retrieve them from Redux.
      * @returns {undefined} Nothing
      */
     static deQueue(alert, currentAlerts = null){
@@ -62,6 +62,15 @@ export default class Alerts extends React.Component {
         });
     }
 
+    /**
+     * This is called after each navigation within the portal.
+     * It increments counter per each alert title, and if counter exceeds
+     * limit of any `alert.navigateDisappearThreshold`, the alerts is dequeued.
+     *
+     * @static
+     * @param {AlertObj[]} [currentAlerts=null] Current alerts, if any. Pass in for performance, else will retrieve them from Redux.
+     * @returns {undefined} Nothing
+     */
     static updateCurrentAlertsTitleMap(currentAlerts = null){
         if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
         var titles = _.pluck(currentAlerts, 'title').sort();
@@ -81,51 +90,91 @@ export default class Alerts extends React.Component {
         });
     }
 
-    // Common alert definitions
+    /**
+     * Alert definition for person having been logged out.
+     *
+     * @type {AlertObj}
+     * @public
+     * @constant
+     */
     static LoggedOut = {
         "title"     : "Logged Out",
         "message"   : "You have been logged out due to an expired session.",
         "style"     : 'danger',
         'navigateDisappearThreshold' : 1
-    }
+    };
 
+    /**
+     * Alert definition for 0 results being returned from /browse/ or /search/ endpoint.
+     *
+     * @type {AlertObj}
+     * @public
+     * @constant
+     */
     static NoFilterResults = {
         'title'     : "No Results",
         'message'   : "Selecting this filter returned no results so it was deselected.",
         'style'     : "warning",
         'navigateDisappearThreshold' : 3
-    }
+    };
 
+    /**
+     * Alert definition for a connection error, e.g. as detected by an AJAX call.
+     *
+     * @type {AlertObj}
+     * @public
+     * @constant
+     */
     static ConnectionError = {
         "title" : "Connection Error",
         "message" : "Check your internet connection",
         "style" : "danger",
         'navigateDisappearThreshold' : 1
-    }
+    };
 
+    /**
+     * Alert definition for person failing to log in.
+     *
+     * @type {AlertObj}
+     * @public
+     * @constant
+     */
     static LoginFailed = {
         "title" : "Login Failed",
         "message" : "Your attempt to login failed - please check your credentials or try again later.",
         "style" : "danger",
         'navigateDisappearThreshold' : 1
-    }
+    };
 
-
+    /** @ignore */
     constructor(props){
         super(props);
         this.setDismissing = this.setDismissing.bind(this);
         this.render = this.render.bind(this);
+
+        /**
+         * State object for component.
+         *
+         * @type {Object}
+         * @private
+         * @property {AlertObj[]} state.dismissing - List of alerts currently being faded out.
+         */
         this.state = {
             'dismissing' : []
         };
     }
 
+    /**
+     * Called when 'fade out' of an alert is initialized.
+     * @private
+     */
     setDismissing(dismissing){ this.setState({ dismissing }); }
 
     /**
      * Renders out Bootstrap Alerts for any queued alerts.
      *
-     * @returns {JSX.Element} A <div> element.
+     * @private
+     * @returns {JSX.Element} A `<div>` element containing AlertItems as children.
      */
     render(){
         if (this.props.alerts.length === 0) return null;
@@ -138,6 +187,9 @@ export default class Alerts extends React.Component {
     }
 }
 
+/**
+ * Component which renders out an individual Alert.
+ */
 class AlertItem extends React.PureComponent {
 
     constructor(props){

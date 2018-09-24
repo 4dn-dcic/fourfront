@@ -11,32 +11,20 @@ let callbackFunctions = [];
 
 
 /**
- * Options to pass to App.navigate function.
- * @typedef {Object} NavigateOpts
- * @property {boolean} inPlace              Don't cancel out if loading same HREF/URL (e.g. allow refresh).
- * @property {boolean} replace              Replace Browser History entry with new HREF/URL instead of adding.
- * @property {boolean} skipConfirmCheck
- * @property {boolean} skipRequest          Don't perform request, just change URL.
- * @property {boolean} skipUpdateHref       Fetch/request new context, but don't update URL.
- * @property {boolean} cache                Set to false to explicitly not cache response. Shouldn't be necessary (browser does this by default).
- * @property {boolean} dontScrollToTop      Don't scroll to top of page after completion.
- */
-
-/**
  * Navigation function, defined globally to act as alias of App.navigate.
  * Is set in App constructor via navigate.setNavigateFunction.
- * 
+ *
  * Singleton function, defined the old fashioned way (pre ES6).
  * Uses the same parameters as app.prototype.navigate(..).
- * 
+ *
  * Use by importing and calling in the same way app.navigate might be used.
- * 
+ *
  * @param {string}       href                        Where to navigate to.
  * @param {NavigateOpts} [options={}]                Additional options, examine App.navigate for details.
  * @param {function}     [callback]                  Optional callback, accepts the response object.
  * @param {function}     [fallbackCallback]          Optional callback called if any error with response, including 404 error. Accepts response object -or- error object, if AJAX request failed.
  * @param {Object}       [includeReduxDispatch={}]   Optional state to save to Redux store, in addition to the 'href' and 'context' set by navigate function.
- * 
+ *
  * @example
  * var { navigate } = require('./util');
  * navigate('/a/different/page', options);
@@ -52,7 +40,12 @@ var navigate = function(href, options = {}, callback = null, fallbackCallback = 
 
 /******* PUBLIC STATIC FUNCTIONS *******/
 
-/** This must be called in app initialization to alias app.navigate into this global module/function. */
+/**
+ * This is called in app initialization to alias app.navigate into this global module/function.
+ *
+ * @param {function} navFxn - The `navigate` function bound to `App` component to be aliased.
+ * @returns {void}
+ */
 navigate.setNavigateFunction = function(navFxn){
     if (typeof navFxn !== 'function') throw new Error("Not a function.");
     store = require('../../store');
@@ -60,7 +53,13 @@ navigate.setNavigateFunction = function(navFxn){
     cachedNavFunction = navFxn;
 };
 
-
+/**
+ * Get the browse parameters for our given `browseBaseState`.
+ * If `browseBaseState` param is not provided, it is retrieved from the Redux store.
+ *
+ * @param {string} [browseBaseState=null] The browse base state. By default is set to "only_4dn" on app init.
+ * @returns {Object} JSON form of URI query params for given or current browseBaseState.
+ */
 navigate.getBrowseBaseParams = function(browseBaseState = null){
     if (browseBaseState === 'item_search') {
         return {};

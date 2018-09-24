@@ -14,14 +14,20 @@ import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-common
 
 export class ExperimentSetDetailPane extends React.Component {
 
-    static allFileIDs(expSet: Object){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
+    /**
+     * Gets all file UUIDs from an ExperimentSet.
+     *
+     * @param {{ 'experiments' : { 'files' : { 'uuid': string }[], 'processed_files' : { 'uuid': string }[] }[], 'processed_files' : { 'uuid' : string }[] }} expSet - An ExperimentSet JSON object with files which have UUIDs embedded.
+     */
+    static allFileIDs(expSet){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
 
     static propTypes = {
         'selectAllFilesInitially' : PropTypes.bool,
         'result' : PropTypes.object.isRequired,
         'containerWidth' : PropTypes.number,
         'additionalDetailFields' : PropTypes.object,
-        'paddingWidth' : PropTypes.number
+        'paddingWidth' : PropTypes.number,
+        'windowWidth' : PropTypes.number.isRequired
     }
 
     static defaultProps = {
@@ -116,13 +122,13 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     render(){
-        var { additionalDetailFields, paddingWidthMap, containerWidth } = this.props,
+        var { additionalDetailFields, paddingWidthMap, containerWidth, windowWidth } = this.props,
             expSet = this.props.result,
             addInfoKeys = _.keys(additionalDetailFields),
             paddingWidth = this.props.paddingWidth || 0;
     
         if (paddingWidthMap){
-            var rgs = layout.responsiveGridState();
+            var rgs = layout.responsiveGridState(windowWidth);
             paddingWidth = paddingWidthMap[rgs] || paddingWidth;
         }
 
@@ -133,6 +139,7 @@ export class ExperimentSetDetailPane extends React.Component {
                         <div className="col-md-6 addinfo-description-section">
                             {/* <label className="text-500 description-label">Description</label> */}
                             <FlexibleDescriptionBox
+                                windowWidth={windowWidth}
                                 description={ expSet.description }
                                 fitTo="self"
                                 textClassName="text-normal"

@@ -12,7 +12,7 @@ import { RawFilesStackedTable } from './file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
-    getColumnWidthFromDefinition, HeadersRow, TableRowToggleOpenButton } from './table-commons';
+    HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { SearchResultDetailPane } from './SearchResultDetailPane';
 
 
@@ -27,7 +27,8 @@ export class ItemPageTable extends React.Component {
         'loading' : PropTypes.bool,
         'renderDetailPane' : PropTypes.func,
         'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
-        'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string)        
+        'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string),
+        'windowWidth' : PropTypes.number.isRequired
     }
 
     static defaultProps = {
@@ -88,10 +89,9 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var results = this.props.results;
-        var loading = this.props.loading;
+        var { results, loading, constantColumnDefinitions, columnDefinitionOverrideMap, columns, width, windowWidth } = this.props,
+            columnDefinitions;
 
-        var constantColumnDefinitions = this.props.constantColumnDefinitions;
         if (!constantColumnDefinitions){
             constantColumnDefinitions = extendColumnDefinitions([
                 { 'field' : 'display_title' }
@@ -106,12 +106,10 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var width = this.props.width;
-        var columns = null;
 
-        var columnDefinitions = columnsToColumnDefinitions(this.props.columns, constantColumnDefinitions);
-        if (this.props.columnDefinitionOverrideMap){
-            columnDefinitions = extendColumnDefinitions(columnDefinitions, this.props.columnDefinitionOverrideMap);
+        columnDefinitions = columnsToColumnDefinitions(columns, constantColumnDefinitions);
+        if (columnDefinitionOverrideMap){
+            columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
         }
 
         if (!width && this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
@@ -122,7 +120,7 @@ export class ItemPageTable extends React.Component {
             columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
         }
 
-        var responsiveGridState = (this.state.mounted && layout.responsiveGridState()) || 'lg';
+        var responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
         
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
@@ -279,7 +277,8 @@ export class ItemPageTableLoader extends React.Component {
         'children' : PropTypes.element.isRequired,
         'itemsObject' : PropTypes.object.isRequired,
         'sortFxn' : PropTypes.func,
-        'isItemCompleteEnough' : PropTypes.func.isRequired
+        'isItemCompleteEnough' : PropTypes.func.isRequired,
+        'windowWidth': PropTypes.number.isRequired
     }
 
     static defaultProps = {
@@ -290,13 +289,11 @@ export class ItemPageTableLoader extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
 
         // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        var items_obj = props.itemsObject;
-        var items = _.values(items_obj);
-        var items_for_state = null;
+        var items_obj = props.itemsObject,
+            items = _.values(items_obj),
+            items_for_state = null;
 
         if (Array.isArray(items) && items.length > 0 && props.isItemCompleteEnough(items[0])){
             items_for_state = items;
@@ -342,7 +339,7 @@ export class ItemPageTableLoader extends React.Component {
     }
 
     render(){
-        return <layout.WindowResizeUpdateTrigger children={React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) )} />;
+        return React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
     }
 
 }
@@ -380,7 +377,7 @@ export class ItemPageTableSearchLoader extends React.Component {
     render(){
         var { requestHref } = this.props;
         if (!requestHref) return null;
-        return <layout.WindowResizeUpdateTrigger children={React.cloneElement(this.props.children, _.extend({}, this.props, this.state) )} />;
+        return React.cloneElement(this.props.children, _.extend({}, this.props, this.state) );
     }
 
 }
