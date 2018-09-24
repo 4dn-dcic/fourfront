@@ -447,7 +447,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
     /**
      * Converts `selectedFiles` structure into groups of `file_type_detailed` property.
      *
-     * @param {Object.<Item>}   Object of files, keyed by accession triple string.
+     * @param {Object.<Item>} files - Object of files, keyed by accession triple string.
      * @returns {Object.<Item>} Object of files, keyed by `file_type_detailed` property,
      */
     static filesToFileTypeBuckets(files){

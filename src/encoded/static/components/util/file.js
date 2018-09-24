@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button } from 'react-bootstrap';
 import { isServerSide } from './misc';
+import { File } from './typedefs';
 
 
 
@@ -13,7 +14,7 @@ import { isServerSide } from './misc';
  * Currently file_format.display_title is same as file_format.file_format, so either property is fine.
  * This may change in the future and would require file_format.file_format to be embedded.
  *
- * @param {{ '@id' : string, 'file_format' : { 'file_format' : string, 'display_title' : string, '@id' : string } }} file - A File Item JSON
+ * @param {File} file - A File Item JSON
  * @returns {string|null} Format of the file.
  */
 export function getFileFormatStr(file){
@@ -23,11 +24,11 @@ export function getFileFormatStr(file){
 
 /**
  * Pass a File Item through this function to determine whether to fetch more of it via AJAX or not.
- * 
+ *
  * Use presence of 'status', '@type', and 'display_title' property to determine if File object/Item we have
  * is complete in its properties or not.
- * 
- * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
+ *
+ * @param {File} file - Object representing an embedded file. Should have display_title, at minimum.
  * @returns {boolean} True if complete, false if not.
  * @throws Error if file is not an object.
  */

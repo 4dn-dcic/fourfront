@@ -193,11 +193,13 @@ export function textHeight(
 
 /**
  * Check width of text or text-like content if it were to fit on one line.
- * @param {string} textContent - Either text or text-like content, e.g. with span elements.
- * @param {string} [containerElementType] - Type of element to fit into, e.g. 'div' or 'p'.
- * @param {string} [containerClassName] - ClassName of containing element, e.g. with 'text-large' to use larger text size.
- * @param {integer} [widthForHeightCheck] - If provided, will return an object which will return height of text content when constrained to width.
- * @return {integer|Object} - Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
+ *
+ * @param {string} textContent                      Either text or text-like content, e.g. with span elements.
+ * @param {string} [containerElementType="div"]     Type of element to fit into, e.g. 'div' or 'p'.
+ * @param {?string} [containerClassName=null]       ClassName of containing element, e.g. with 'text-large' to use larger text size.
+ * @param {?integer} [widthForHeightCheck=null]     If provided, will return an object which will return height of text content when constrained to width.
+ * @param {?Object} [style=null]                    Any additional style properties.
+ * @return {integer|{ containerHeight: number, textWidth: number }} Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
  */
 export function textContentWidth(
     textContent,
@@ -270,9 +272,13 @@ export function getPageVerticalScrollPosition(){
 
 
 /**
- * 
+ * Scroll to a target element, element ID, or scrollTop position over a period of time via transition.
+ *
  * @param {string|number|HTMLElement} to - Where to scroll to.
- * @param {number} duration - How long should take.
+ * @param {number} [duration=750] - How long should take.
+ * @param {number} [offsetBeforeTarget=72] - How much padding under target element to give, e.g. to account for fixed top bar.
+ * @param {?function} [callback=null] - Optional callback.
+ * @returns {void}
  */
 export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, callback = null){
 

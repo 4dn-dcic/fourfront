@@ -3,12 +3,13 @@
 import _ from 'underscore';
 import { atIdFromObject } from './object';
 import patchedConsoleInstance from './patched-console';
+import { Item, File, Experiment, ExperimentSet } from './typedefs';
 
 var console = patchedConsoleInstance;
 
 
 /**
- * @param   {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Experiment[]} - List of experiments without files.
  */
 export function listEmptyExperiments(experiments){
@@ -28,7 +29,9 @@ export function listEmptyExperiments(experiments){
 
 
 /**
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
  * @returns {number} - Count of files from all experiments.
  */
 export function fileCountFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false){
@@ -40,7 +43,9 @@ export function fileCountFromExperiments(experiments, includeProcessedFiles = fa
 }
 
 /**
- * @param   {Object} experiment_set - ExpSet Item context
+ * @param {ExperimentSet} experiment_set - ExpSet Item context.
+ * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
  * @returns {number} - Count of files from all experiments.
  */
 export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles = false, includeFileSets = false){
@@ -55,8 +60,9 @@ export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles
 /**
  * NOT SORTED
  *
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
- * @returns {Object[]} - All files from experiments without a pair.
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @returns {File[]} - All files from experiments without a pair.
  */
 export function listAllUnpairedFiles(experiments, includeFileSets = false){
     return _.filter(
@@ -72,8 +78,11 @@ export function listAllUnpairedFiles(experiments, includeFileSets = false){
  * Sorted by accession. Does not need to be all from one Experiment Set.
  * For usage especially by ChartDataController-using components.
  *
- * @param {Object[]} List of experiments with at least a 'files' property.
- * @returns {Object[]} List of all files gathered from experiments list.
+ * @param {Experiment[]} experiments - List of experiments with at least a 'files' property.
+ * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @param {boolean} [uniqify=false] - Whether to run resulting files through `_.uniq` by their accession.
+ * @returns {File[]} List of all files gathered from experiments list.
  */
 export function allFilesFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false, uniqify = false){
     var files = _.sortBy(
@@ -117,7 +126,7 @@ export function fileToAccessionTriple(file, toString = false){
  * which have "from_experiment" & "from_experiment.from_experiment_set"
  * properties, into a list of strings which represent them.
  *
- * @param {{ accession: string,  }[]} files     Files which to convert to accession triples. Must have 'from_experiment' properties (provided by other funcs).
+ * @param {File[]} files                        Files which to convert to accession triples. Must have 'from_experiment' properties (provided by other funcs).
  * @param {boolean|string} [toString=false]     Whether to concatanate resulting accession items into strings delimited by a tilde (`~`). If string is supplied, it is used as delimiter instead.
  * @returns {string[]} List of arrays or strings in form of EXPSETACCESSION~EXPACESSION~FILEACCESSION. EXPACESSION may be "NONE".
  */
@@ -131,8 +140,9 @@ export function filesToAccessionTriples(files, toString = false){
 /**
  * NOT SORTED
  *
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
- * @returns {Object[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @returns {File[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
  */
 export function listAllFilePairs(experiments, includeFileSets = false){
     return (
@@ -153,8 +163,8 @@ export function listAllFilePairs(experiments, includeFileSets = false){
 /**
  * Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment.
  *
- * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
- * @returns {Object[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
+ * @param {ExperimentSet[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
+ * @returns {Experiment[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
  */
 export function listAllExperimentsFromExperimentSets(experiment_sets){
     var uniqExpAccessions = {};
@@ -190,7 +200,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
  * Groups experiments by experiment_set accession.
  * Almost inverse of listAllExperimentsFromExperimentSets, though returns an object.
  *
- * @param {Array} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
+ * @param {Experiment[]} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
  * @returns {Object} Contains experiment_set accessions as keys and array of experiments in that set as value.
  */
 export function groupExperimentsIntoExperimentSets(experiments){
@@ -229,7 +239,7 @@ export function groupExperimentsIntoExperimentSets(experiments){
  * by other experiment-focused functions or views which require information
  * about the parent ExperimentSet.
  *
- * @param {{ experiments_in_set : { accession: string }[] }} experiment_set - An ExperimentSet Item
+ * @param {ExperimentSet} experiment_set - An ExperimentSet Item
  * @returns {{ from_experiment_set: Object, accession: string }[]} List of experiments from ExperimentSet, extended with 'from_experiment_set'
  */
 export function experimentsFromExperimentSet(experiment_set){
@@ -248,8 +258,8 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 
 
 /**
- * @param {Object} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
- * @returns {Object} Object with ExperimentSet @ids as keys and their JSON as values.
+ * @param {File} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
+ * @returns {Object.<ExperimentSet>} Object with ExperimentSet @ids as keys and their JSON as values.
  */
 export function experimentSetsFromFile(file){
 
@@ -316,8 +326,8 @@ export function allProcessedFilesFromExperiments(experiments){
 }
 
 /**
- * @param {Object} experiment_set - Representation of ExperimentSet Item
- * @returns {Object[]} List of ProcessedFile Items, cloned & extended from param expset with '[from_experiment.]from_experiment_set' property.
+ * @param {ExperimentSet} experiment_set - Representation of ExperimentSet Item
+ * @returns {File[]} List of ProcessedFile Items, cloned & extended from param expset with '[from_experiment.]from_experiment_set' property.
  */
 export function allProcessedFilesFromExperimentSet(experiment_set){
 
@@ -491,8 +501,9 @@ export function findUnpairedFiles(files_in_experiment){
 /**
  * TODO: Add from filesets as well instead of only as fallback if no experiment.files?
  *
- * @param {Object[]} experiments - List of experiment objects with files properties.
- * @returns {Object[]} List of unpaired files from all experiments.
+ * @param {Experiment[]} experiments - List of experiment objects with files properties.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @returns {File[]} List of unpaired files from all experiments.
  */
 export function findUnpairedFilesPerExperiment(experiments, includeFileSets = false){
     return _.map(experiments || [], function(exp){
@@ -588,8 +599,8 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
  * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
  * Can always _.flatten() this or map out first file per pair.
  * 
- * @param {Object} expSet - Experiment Set
- * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+ * @param {ExperimentSet} experiment_set - Experiment Set
+ * @returns {File[]|File[][]} For example, [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */
 export function allPairsAndFilesFromExperimentSet(experiment_set){
     if (Array.isArray(experiment_set.replicate_exps) && Array.isArray(experiment_set.experiments_in_set)){
@@ -609,7 +620,8 @@ export function allPairsAndFilesFromExperimentSet(experiment_set){
  *
  * Returns an empty array if _any_ of the files lack view permissions.
  *
- * @returns {{ '@id' : string, 'accession' : string }[][]} Multi-dimensional containing pairs of files.
+ * @param {File[]} files_in_experiment - Files, presumably all from the same experiment.
+ * @returns {File[][]} Multi-dimensional array containing pairs of files.
  */
 export function groupFilesByPairs(files_in_experiment){
 
@@ -659,7 +671,7 @@ export function groupFilesByPairs(files_in_experiment){
 }
 
 /**
- * @param {any} experiments - List of Experiment Items in JSON format.
+ * @param {Experiment} experiments - List of Experiment Items in JSON format.
  * @param {boolean} [includeFileSets=false] - Whether to include files from experiment.filesets.
  * @returns Modified list 'experiments' objects.
  */

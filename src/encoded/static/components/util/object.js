@@ -13,8 +13,8 @@ import url from 'url';
 /**
  * Convert a link_id, if one exists on param 'object', to an '@id' link.
  * If an '@id' exists already, gets that.
- * 
- * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
+ *
+ * @param {Object} o - Must have a 'link_id' or '@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */
 export function atIdFromObject(o){
@@ -98,10 +98,11 @@ export function listFromTips(tips){
  * Find property within an object using a propertyName in object dot notation.
  * Recursively travels down object tree following dot-delimited property names.
  * If any node is an array, will return array of results.
- * 
+ *
  * @param {Object} object - Item to traverse or find propertyName in.
  * @param {string|string[]} propertyName - (Nested) property in object to retrieve, in dot notation or ordered array.
- * @return {*} - Value corresponding to propertyName.
+ * @param {boolean} [suppressNotFoundError=false] - If true, will not print a console warning message if no value found.
+ * @return {?any} Value corresponding to propertyName.
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
     var errorMsg;
@@ -191,9 +192,10 @@ export function generateSparseNestedProperty(field, value){
 /**
  * Performs an IN-PLACE 'deep merge' of a small object (one property per level, max) into a host object.
  *
- * @param {Object} hostObj          Object to merge/insert into.
- * @param {Object} nestedObj        Object whose value to insert into hostObj.
- * @param {number} [maxDepth=10]    Max number of recursions or object depth.
+ * @param {Object} hostObj           Object to merge/insert into.
+ * @param {Object} nestedObj         Object whose value to insert into hostObj.
+ * @param {number} [maxDepth=10]     Max number of recursions or object depth.
+ * @param {number} [currentDepth=0]  Current recursion depth.
  * @returns {boolean} False if failed.
  */
 export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
@@ -225,7 +227,7 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
  * Deep-clone a given object using JSON stringify/parse.
  * Does not handle or clone references or non-serializable types.
  *
- * @param {Object|Array} JSON to deep-clone.
+ * @param {Object|Array} obj - JSON to deep-clone.
  * @returns {Object|Array} Cloned JSON.
  */
 export function deepClone(obj){

@@ -949,8 +949,8 @@ export function traceNodePathAndRun(nextNode, fxn, direction = 'output', lastNod
 }
 
 /**
- * @param {{ nodes : Node[], edges: Edge[] } | Node[] } graphData - Object containing nodes and edges. Or just nodes themselves.
- * @returns {{ nodes : Node[], edges: Edge[] } | Node[] } graphData or nodes with corrected column assignments.
+ * @param {{ nodes: Node[], edges: Edge[] }|Node[] } graphData - Object containing nodes and edges. Or just nodes themselves.
+ * @returns {{ nodes: Node[], edges: Edge[] }|Node[] } graphData or nodes with corrected column assignments.
  */
 export function correctColumnAssignments(graphData){
     var nodes;

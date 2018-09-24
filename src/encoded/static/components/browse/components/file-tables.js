@@ -5,7 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock, FileEntryBlockPairColumn } from './StackedBlockTable';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
+
+var { Item } = typedefs;
 
 
 /**
@@ -516,10 +518,11 @@ export class RawFilesStackedTableExtendedColumns extends RawFilesStackedTable {
 export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
 
     /**
-     * Filter a list of files down to those with a quality_metric && quality_metric.overall_quality_status;
+     * Filter a list of files down to those with a value for `quality_metric` and `quality_metric.overall_quality_status`.
      *
-     * @param {{ '@id' : string, 'quality_metric' : { "overall_quality_status" : string, '@id' : string } }} files - List of files, potentially with quality_metric.
-     * @param {boolean} [checkAny=false] - Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
+     * @param {Item[]} files                    List of files, potentially with quality_metric.
+     * @param {boolean} [checkAny=false]        Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
+     * @returns {Item[]|true} Filtered list of files or boolean for "any", depending on `checkAny` param.
      */
     static filterFiles(files, checkAny=false){
         var func = checkAny ? _.any : _.filter;
@@ -528,6 +531,15 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
         });
     }
 
+    /**
+     * Converts file + field (param) into a human-readable percentage.
+     *
+     * @param {Item} file - File to get 'percentOfTotalReads' from.
+     * @param {string} field - Property where 'percentOfTotalReads' value can be found.
+     * @param {number} colIndex - Unused.
+     * @param {Object} props - Unused.
+     * @returns {JSX.Element|string} Human-readable value for percent of total reads.
+     */
     static percentOfTotalReads(file, field, colIndex, props){
         var numVal = object.getNestedProperty(file, field);
         if (numVal && typeof numVal === 'number' && file.quality_metric && file.quality_metric['Total reads']){
@@ -555,6 +567,6 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
             { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 80, field : "quality_metric.url" }
         ],
         'titleForFiles' : "Processed File Metrics"
-    }
+    };
 
 }

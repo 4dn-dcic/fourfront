@@ -132,7 +132,7 @@ export class NavigationBar extends React.PureComponent {
      * Performs AJAX request to `props.helpItemTreeURI` and saves response to
      * `state.helpMenuTree`. Manages `state.isLoadingHelpMenuTree` appropriately.
      *
-     * @param {React.SyntheticEvent} [e] An event, if any. Unused.
+     * @param {Object} [extraState={}] Any extra state values to save prior to starting AJAX load.
      * @returns {void}
      */
     loadHelpMenuTree(extraState = {}){
