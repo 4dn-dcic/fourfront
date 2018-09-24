@@ -263,10 +263,11 @@ export default class PageTitle extends React.PureComponent {
      * if table of contents is visible for page.
      *
      * @public
-     * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
-     * @param {string} href - Current URI/href.
-     * @param {boolean} mounted - Whether we are currently mounted.
-     * @param {boolean} hasToc - Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
+     * @param {JSONContentResponse} context     Current Item or backend response JSON representation.
+     * @param {string} href                     Current URI/href.
+     * @param {boolean} mounted                 Whether we are currently mounted.
+     * @param {boolean} hasToc                  Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
+     * @param {number} windowWidth              Current window width, to trigger changes on window resize.
      * @returns {{ 'marginTop' : number, 'width' : string }} - JS object representing some CSS styles.
      */
     static getStyles(context, href, mounted, hasToc, windowWidth){

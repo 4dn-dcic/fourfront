@@ -8,11 +8,12 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import { Modal, ButtonGroup, Checkbox, Button } from 'react-bootstrap';
-import { expFxn, Schemas, DateUtility, ajax, JWT } from './../../../util';
+import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
 import { windowHref } from './../../../globals';
 import * as vizUtil from './../../../viz/utilities';
 import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
 
+var { Item } = typedefs;
 
 
 export class SelectedFilesOverview extends React.Component {
@@ -270,9 +271,13 @@ export class SelectAllFilesButton extends React.PureComponent {
 export class SelectedFilesFilterByContent extends React.PureComponent {
 
     /**
-     * @param {Object} format_buckets - File Type Details (keys) + lists of files (values)
-     * @param {string} [button_text_prefix=''] - Title to pre-pend to buttons.
-     * @param {function} clickHandler - Function to handle button click. Accepts fileTypeDetail as first param before MouseEvt.
+     * @todo Refactor/remove need to supply renderer function, maybe.
+     *
+     * @param {Object} format_buckets               File Type Details (keys) + lists of files (values)
+     * @param {string} [button_text_prefix='']      Title to pre-pend to buttons.
+     * @param {function} clickHandler               Function to handle button click. Accepts fileTypeDetail as first param before MouseEvt.
+     * @param {function} renderer                   Function to render checkbox or button to return a JSX element. Should be one of `renderBucketButton` or `renderBucketCheckbox`.
+     * @param {string[]|null} fileTypeFilters       List of currently filtered-in filetype, if any.
      * @returns {JSX.Element[]} List of JSX Button elements.
      */
     static renderFileFormatButtonsFromBuckets(format_buckets, button_text_prefix = '', clickHandler, renderer, fileTypeFilters){
@@ -290,11 +295,16 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         });
     }
 
+    /**
+     * Converts `selectedFiles` structure into groups of `file_type_detailed` property.
+     *
+     * @param {Object.<Item>}   Object of files, keyed by accession triple string.
+     * @returns {Object.<Item>} Object of files, keyed by `file_type_detailed` property,
+     */
     static filesToFileTypeBuckets(files){
         return _.groupBy(
-            _.pairs(files).map(function(f){
-                f[1].selection_id = f[0];
-                return f[1];
+            _.map(_.pairs(files), function([accessionTripleString, file]){
+                return _.extend({ 'selection_id' : accessionTripleString }, file);
             }),
             'file_type_detailed'
         );
@@ -320,15 +330,27 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         );
     }
 
+    /**
+     * @constant
+     * @ignore
+     */
     static propTypes = {
         selectedFiles : PropTypes.object.isRequired
-    }
+    };
 
+    /**
+     * @constant
+     * @ignore
+     */
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
         'bsSize' : 'small'
-    }
+    };
 
+    /**
+     * @constant
+     * @ignore
+     */
     constructor(props){
         super(props);
         this.onClick = this.onClick.bind(this);
@@ -370,6 +392,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
     }
 
 }
+
 
 export class SelectedFilesFilterByButton extends React.Component {
 
