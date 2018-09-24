@@ -605,10 +605,10 @@ export default class BrowseView extends React.Component {
                     {
                         countExternalSets > 0 ?
                             React.createElement(
-                            'h4',
-                            { 'className' : "text-400 mb-05 mt-05" },
-                            "Only External Data results were found."
-                        )
+                                'h4',
+                                { 'className' : "text-400 mb-05 mt-05" },
+                                "Only External Data results were found."
+                            )
                             : React.createElement(
                                 'h3',
                                 { 'className' : "text-400 mb-05 mt-05" },
