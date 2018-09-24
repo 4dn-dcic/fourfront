@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, ajax, console } from './../../util';
+import { isServerSide, ajax, console, fileUtil } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
@@ -478,10 +478,13 @@ export const HiGlassConfigurator = {
 
             // Continuing code assumes a single MCOOL file.
 
-            const file = files[0];
+            var file = files[0],
+                fileFormat = fileUtil.getFileFormatStr(file);
 
             if (!file) throw new Error('No file supplied.');
-            if (file.file_format !== 'mcool') console.error('File does not have "file_format" : "mcool"!');
+            if (!fileFormat || fileFormat !== 'mcool'){
+                console.error('File does not have "file_format" : "mcool"!');
+            }
 
             return _.extend(HiGlassConfigurator.generateViewConfigBase(options), {
                 "views": [ HiGlassConfigurator.mcool.generateView(file, options) ]
@@ -626,7 +629,7 @@ export class HiGlassContainer extends React.PureComponent {
         let fxnToUse = generateViewConfigUsingFxn;
         if (!fxnToUse){
 
-            var allFileFormats = _.uniq(_.filter(_.pluck(files, 'file_format'))),
+            var allFileFormats = _.uniq(_.filter(_.map(files, fileUtil.getFileFormatStr))),
                 fileFormat = allFileFormats[0];
 
             var fxnByFormatDict = {
@@ -895,9 +898,10 @@ export class HiGlassTabView extends React.Component {
 
     render(){
         var file = this.props.context,
-            contentTrackOptions = {};
+            contentTrackOptions = {},
+            fileFormat = fileUtil.getFileFormatStr(file);
 
-        if (file.file_format === 'bg' || file.file_format === 'bw'){
+        if (fileFormat === 'bg' || fileFormat === 'bw'){
             contentTrackOptions.showTooltip = true;
         }
         /**

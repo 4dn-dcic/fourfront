@@ -11,7 +11,8 @@ export class ExperimentSetTables extends React.Component {
 
     static propTypes = {
         'loading' : PropTypes.bool,
-        'sortFxn' : PropTypes.func
+        'sortFxn' : PropTypes.func,
+        'windowWidth' : PropTypes.number.isRequired
     }
     
     static defaultProps = {
@@ -25,10 +26,10 @@ export class ExperimentSetTables extends React.Component {
     }
 
     render(){
-        var experiment_sets = this.props.experiment_sets || this.props.results;
-        var loading = this.props.loading;
+        var { loading, sortFxn, title, windowWidth } = this.props,
+            experiment_sets = this.props.experiment_sets || this.props.results;
 
-        if (this.props.loading || !Array.isArray(experiment_sets)){
+        if (loading || !Array.isArray(experiment_sets)){
             return (
                 <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
                     <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
@@ -42,18 +43,20 @@ export class ExperimentSetTables extends React.Component {
             );
         }
 
-        if (typeof this.props.sortFxn === 'function'){
-            experiment_sets = experiment_sets.sort(this.props.sortFxn);
+        if (typeof sortFxn === 'function'){
+            experiment_sets = experiment_sets.sort(sortFxn);
         }
         
         return (
             <div className="file-part-of-experiment-sets-container" ref="experimentSetsContainer">
-                <h3 className="tab-section-title">{ this.props.title }</h3>
+                <h3 className="tab-section-title">{ title }</h3>
                 <ItemPageTable
                     results={experiment_sets}
-                    renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
-                        'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
-                    }} />}
+                    renderDetailPane={(es, rowNum, width)=>
+                        <ExperimentSetDetailPane result={es} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
+                            'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
+                        }} />
+                    }
                     columns={{
                         "number_of_experiments" : { "title" : "Exps" },
                         "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
@@ -61,9 +64,7 @@ export class ExperimentSetTables extends React.Component {
                         "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
                         "experiments_in_set.experiment_categorizer.combined" : defaultColumnDefinitionMap["experiments_in_set.experiment_categorizer.combined"]
                     }}
-                    width={this.props.width}
-                    defaultOpenIndices={this.props.defaultOpenIndices}
-                    defaultOpenIds={this.props.defaultOpenIds}
+                    {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')}
                 />
             </div>
         );
@@ -84,18 +85,14 @@ export class ExperimentSetTablesLoaded extends React.Component {
 
     innerTable(){
         return (
-            <ExperimentSetTables
-                sortFxn={this.props.sortFxn}
-                width={this.props.width}
-                defaultOpenIndices={this.props.defaultOpenIndices}
-                defaultOpenIds={this.props.defaultOpenIds}
-            />
+            <ExperimentSetTables {..._.pick(this.props, 'sortFxn', 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')} />
         );
     }
 
     render(){
         return (
-            <ItemPageTableLoader itemsObject={this.props.experimentSetObject} isItemCompleteEnough={ExperimentSetTablesLoaded.isExperimentSetCompleteEnough} children={this.innerTable()} />
+            <ItemPageTableLoader itemsObject={this.props.experimentSetObject}
+                isItemCompleteEnough={ExperimentSetTablesLoaded.isExperimentSetCompleteEnough} children={this.innerTable()} />
         );
     }
 }
@@ -104,7 +101,7 @@ export class ExperimentSetTablesLoaded extends React.Component {
 export class ExperimentSetTablesLoadedFromSearch extends ExperimentSetTablesLoaded {
     render(){
         return (
-            <ItemPageTableSearchLoaderPageController requestHref={this.props.requestHref} children={this.innerTable()} />
+            <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth')} children={this.innerTable()} />
         );
     }
 }

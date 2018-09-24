@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { isServerSide } from './misc';
 import * as d3 from 'd3';
@@ -97,17 +98,18 @@ export function responsiveGridState(width = null){
  * $container-large-desktop - $grid-gutter-width
  * in src/encoded/static/scss/bootstrap/_variables.scss.
  *
+ * @param {number} [windowWidth] Optional current window width to supply.
  * @return {integer}
  */
-export function gridContainerWidth(){
+export function gridContainerWidth(windowWidth = null){
     // Subtract 20 for padding/margins.
-    switch(responsiveGridState()){
+    switch(responsiveGridState(windowWidth)){
         case 'lg': return 1140;
         case 'md': return 940;
         case 'sm': return 720;
         case 'xs':
             if (isServerSide()) return 400;
-            return window.innerWidth - 20;
+            return (windowWidth || window.innerWidth) - 20;
     }
 }
 
@@ -354,51 +356,15 @@ export function toggleBodyClass(className, toggleTo = null, bodyElement = null){
 
 
 
-/**
- * Wrap this around other React components to send them a forceUpdate()-based re-render trigger
- * when the page has been resized. Debounced at 300ms (default).
- * 
- * @prop {number} delay - Milliseconds to debounce.
- * @prop {React.Component} children - Another React component which needs to be updated in response to window resize.
- */
-export class WindowResizeUpdateTrigger extends React.Component {
-
-    static defaultProps = {
-        'delay' : 300
-    }
-
-    constructor(props){
-        super(props);
-        this.onResize = _.debounce(this.onResize.bind(this), props.delay);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-    onResize(){
-        this.forceUpdate();
-    }
-
-    componentDidMount(){
-        if (isServerSide() || !window || !document) return null;
-        window.addEventListener('resize', this.onResize);
-    }
-
-    componentWillUnmount(){
-        if (isServerSide() || !window || !document) return null;
-        window.removeEventListener('resize', this.onResize);
-    }
-
-    render(){
-        return React.cloneElement(this.props.children, _.omit(this.props, 'children', 'delay'));
-    }
-
-}
 
 /**
- * Wrap inside a WindowResizeUpdateTrigger for responsiveness.
+ * Pass 'windowWidth' through props down from BodyElement for this element to update.
  */
 export class WidthProvider extends React.Component {
+
+    static propTypes = {
+        'windowWidth' : PropTypes.number.isRequired
+    }
 
     constructor(props){
         super(props);
@@ -412,16 +378,13 @@ export class WidthProvider extends React.Component {
     }
 
     render(){
-       
-        var domWrapperBlock = (this.state.mounted && this.refs && this.refs.wrapper) || null;
-        var width = null;
+        var domWrapperBlock = (this.state.mounted && this.refs && this.refs.wrapper) || null,
+            width = null,
+            passProps = {};
+
         if (domWrapperBlock){
             width = domWrapperBlock.offsetWidth;
         }
-
-        var passProps = {
-            'ref' : 'childElement'
-        };
 
         if (width) {
             passProps.width = width;
@@ -429,11 +392,7 @@ export class WidthProvider extends React.Component {
             passProps.width = this.props.fallbackWidth;
         }
 
-        return (
-            <div ref="wrapper">
-                { React.cloneElement(this.props.children, passProps) }
-            </div>
-        );
+        return <div ref="wrapper" children={React.cloneElement(this.props.children, passProps)} />;
     }
 }
 
@@ -487,3 +446,86 @@ export class VerticallyCenteredChild extends React.Component {
         return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
     }
 }
+
+
+/**
+ * Handle browser capabilities, a la Modernizr.
+ *
+ * Entry point is `setHtmlFeatClass`. Called in browser.js.
+ * May *only* be called from mounted components (componentDidMount method
+ * would be a good method to use this from), because actual DOM is needed.
+ *
+ * @deprecated
+ * @constant
+ */
+
+export const BrowserFeat = {
+
+    'feat': {},
+
+    /**
+     * Return object with browser capabilities; return from cache if available.
+     */
+    'getBrowserCaps': function (feat) {
+        if (Object.keys(this.feat).length === 0) {
+            // Detect SVG
+            this.feat.svg = document.implementation.hasFeature('http://www.w3.org/TR/SVG11/feature#Image', '1.1');
+
+            // Detect <canvas>
+            this.feat.canvas = (function() {
+                var elem = document.createElement('canvas');
+                return !!(elem.getContext && elem.getContext('2d'));
+            })();
+
+            // Detect toDataURL
+            this.feat.todataurlpng = (function() {
+                var canvas = document.createElement('canvas');
+                return !!(canvas && canvas.toDataURL && canvas.toDataURL('image/png').indexOf('data:image/png') === 0);
+            })();
+
+            // Detect CSS transforms
+            this.feat.csstransforms = (function() {
+                var elem = document.createElement('tspan');
+                return 'transform' in elem.style;
+            })();
+
+            // Detect FlexBox
+            this.feat.flexbox = (function() {
+                var elem = document.createElement('tspan');
+                return 'flexBasis' in elem.style;
+            })();
+
+            // UA checks; should be retired as soon as possible
+            this.feat.uaTrident = (function() {
+                return navigator.userAgent.indexOf('Trident') > 0;
+            })();
+
+            // UA checks; should be retired as soon as possible
+            this.feat.uaEdge = (function() {
+                return navigator.userAgent.indexOf('Edge') > 0;
+            })();
+
+        }
+        return feat ? this.feat[feat] : this.feat;
+    },
+
+    'setHtmlFeatClass': function() {
+        var htmlclass = [];
+
+        this.getBrowserCaps();
+
+        // For each set feature, add to the <html> element's class
+        var keys = Object.keys(this.feat);
+        var i = keys.length;
+        while (i--) {
+            if (this.feat[keys[i]]) {
+                htmlclass.push(keys[i]);
+            } else {
+                htmlclass.push('no-' + keys[i]);
+            }
+        }
+
+        // Now write the classes to the <html> DOM element
+        document.documentElement.className = htmlclass.join(' ');
+    }
+};

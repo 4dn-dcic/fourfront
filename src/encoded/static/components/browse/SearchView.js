@@ -7,42 +7,19 @@ import url from 'url';
 import _ from 'underscore';
 import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, typedefs } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
 
-
-
-export function getSearchType(facets){
-    var specificSearchType;
-    // Check to see if we are searching among multiple data types
-    // If only one type, use that as the search title
-    for (var i = 0; i < facets.length; i++){
-        if (facets[i]['field'] && facets[i]['field'] == 'type'){
-            if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
-                && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
-                // it's a single data type, so grab it
-                specificSearchType = facets[i]['terms'][0]['key'];
-            }else{
-                specificSearchType = 'Multiple type';
-            }
-        }
-        return specificSearchType;
-    }
-}
-
+var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
 /**
  * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
  * 'searchBase' or 'href' prop (treated the same) and the 'navigate' callback prop (usually utils/navigate.js).
  *
  * Passes other props down to ControlsAndResults.
- *
- * @export
- * @class ResultTableHandlersContainer
- * @extends {React.Component}
  */
-export class ResultTableHandlersContainer extends React.PureComponent {
+class ResultTableHandlersContainer extends React.PureComponent {
 
     static defaultProps = {
         'restrictions'  : {},
@@ -127,17 +104,17 @@ class ControlsAndResults extends React.PureComponent {
 
     render() {
         var { context, href, hiddenColumns, currentAction, constantHiddenColumns, columnDefinitionOverrideMap } = this.props;
-        var results = context['@graph'],
-            inSelectionMode = currentAction === 'selection',
-            facets = this.props.facets || context.facets,
-            thisType = 'Item',
-            thisTypeTitle = Schemas.getTitleForType(thisType),
+        var results                     = context['@graph'],
+            inSelectionMode             = currentAction === 'selection',
+            facets                      = this.props.facets || context.facets,
+            thisType                    = 'Item',
+            thisTypeTitle               = Schemas.getTitleForType(thisType),
             itemTypeForSchemas,
             schemaForType,
             abstractType,
-            urlParts = url.parse(href, true),
-            hiddenColumnsFull = (hiddenColumns || []).slice(0),
-            constantHiddenColumnsFull = ['@type'].concat((constantHiddenColumns || []).slice(0));
+            urlParts                    = url.parse(href, true),
+            hiddenColumnsFull           = (hiddenColumns || []).slice(0),
+            constantHiddenColumnsFull   = ['@type'].concat((constantHiddenColumns || []).slice(0));
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
 
@@ -213,7 +190,7 @@ class ControlsAndResults extends React.PureComponent {
                 { facets.length ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter')}
+                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth')}
                             className="with-header-bg" facets={facets} filters={context.filters}
                             onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
                             itemTypeForSchemas={itemTypeForSchemas} hideDataTypeFacet={inSelectionMode}
@@ -226,7 +203,8 @@ class ControlsAndResults extends React.PureComponent {
                         </div>
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'context', 'columns', 'selectedFiles', 'currentAction')}
+                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
+                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight')}
                         hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                             SearchResultTable.defaultProps.constantColumnDefinitions,
@@ -234,10 +212,13 @@ class ControlsAndResults extends React.PureComponent {
                             columnDefinitionOverrides,
                             constantHiddenColumnsFull
                         )} />
-                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')}
+                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
+                        'currentAction', 'windowWidth', 'registerWindowOnScrollHandler')}
                         results={results} totalExpected={context.total} columns={context.columns || {}}
                         hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
-                        renderDetailPane={(result, rowNumber, containerWidth) => <SearchResultDetailPane result={result} /> } />
+                        renderDetailPane={(result, rowNumber, containerWidth) =>
+                            <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />
+                        } />
                 </div>
             </div>
         );
@@ -247,11 +228,21 @@ class ControlsAndResults extends React.PureComponent {
 
 export default class SearchView extends React.PureComponent {
 
+    /**
+     * @ignore
+     */
     static propTypes = {
         'context' : PropTypes.object.isRequired,
         'currentAction' : PropTypes.string
-    }
+    };
 
+    /**
+     * @public
+     * @type {Object}
+     * @property {string} href - Current URI.
+     * @property {string} [currentAction=null] - Current action, if any.
+     * @property {Object.<ColumnDefinition>} columnDefinitionOverrideMap - Object keyed by field name with overrides for column definition.
+     */
     static defaultProps = {
         'href'          : null,
         'currentAction' : null,
@@ -266,7 +257,7 @@ export default class SearchView extends React.PureComponent {
             }
         },
         'restrictions'  : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
-    }
+    };
 
     constructor(props){
         super(props);

@@ -32,10 +32,6 @@ export class AboveTableControls extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillMount = this.componentWillMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.handleWindowResize = _.debounce(this.handleWindowResize.bind(this), 300);
         this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
         this.handleClose = this.handleOpenToggle.bind(this, false);
         this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
@@ -51,32 +47,22 @@ export class AboveTableControls extends React.Component {
         };
     }
 
-    componentWillMount(){
-        if (!isServerSide()){
-            window.addEventListener('resize', this.handleWindowResize);
-        }
-    }
-
-    componentWillUnmount(){
-        window.removeEventListener('resize', this.handleWindowResize);
-    }
-
     componentWillReceiveProps(nextProps){
         var newState = {};
 
         // Remove from fileTypeFilters if no newly selected files don't have filtered-in fileType.
+        var fileTypeFilters     = this.state.fileTypeFilters,
+            fileTypeBucketsNew  = SelectedFilesFilterByContent.filesToFileTypeBuckets(nextProps.selectedFiles),
+            newTypes            = _.keys(fileTypeBucketsNew),
+            typesToRemove       = [];
 
-        var fileTypeBucketsNew = SelectedFilesFilterByContent.filesToFileTypeBuckets(nextProps.selectedFiles);
-        var newTypes = _.keys(fileTypeBucketsNew);
-
-        var typesToRemove = [];
-        for (var i = 0; i < this.state.fileTypeFilters.length ; i++){
-            if (newTypes.indexOf(this.state.fileTypeFilters[i]) === -1){
-                typesToRemove.push(this.state.fileTypeFilters[i]);
+        for (var i = 0; i < fileTypeFilters.length ; i++){
+            if (newTypes.indexOf(fileTypeFilters[i]) === -1){
+                typesToRemove.push(fileTypeFilters[i]);
             }
         }
         if (typesToRemove.length > 0){
-            newState.fileTypeFilters = _.difference(this.state.fileTypeFilters, typesToRemove);
+            newState.fileTypeFilters = _.difference(fileTypeFilters, typesToRemove);
         }
 
         // Set open=false if currently is 'filterFilesBy' && no selected files.
@@ -85,29 +71,33 @@ export class AboveTableControls extends React.Component {
             newState.open = false;
         }
 
-        this.setState(newState);
+        // If windowWidth or windowHeight has changed, update own layout style state if we're on 'full screen'-ish view -
+        if (this.state.layout === 'wide' && typeof nextProps.windowWidth === 'number' && nextProps.windowWidth !== this.props.windowWidth){
+            if (nextProps.windowWidth < 1200){
+                newState.layout = 'normal';
+            }
+        }
+
+        if (_.keys(newState).length > 0){
+            this.setState(newState);
+        }
     }
 
     componentDidUpdate(prevProps, prevState){
         if (this.state.open || prevState.open !== this.state.open) ReactTooltip.rebuild();
-        if (this.state.layout === 'wide' && prevState.layout !== 'wide') {
+        if (
+            (this.state.layout === 'wide' && prevState.layout !== 'wide') ||
+            (this.state.layout === 'wide' && (prevProps.windowWidth !== this.props.windowWidth))
+        ){
             this.setWideLayout();
         } else if (this.state.layout !== 'wide' && prevState.layout === 'wide'){
             this.unsetWideLayout();
         }
     }
 
-    handleWindowResize(e){
-        if (isServerSide() || !document || !document.body) return null;
-        if (this.state.layout === 'wide'){
-            if ((document.body.offsetWidth || window.innerWidth) < 1200) {
-                this.setState({ 'layout' : 'normal' });
-            } else {
-                this.setWideLayout();
-            }
-        }
-    }
-
+    /**
+     * @todo Refactor, move to BodyElement
+     */
     setWideLayout(){
         if (isServerSide() || !document || !document.getElementsByClassName || !document.body) return null;
         vizUtil.requestAnimationFrame(()=>{
@@ -156,7 +146,7 @@ export class AboveTableControls extends React.Component {
     }
 
     handleLayoutToggle(){
-        if (!SearchResultTable.isDesktopClientside()) return null;
+        if (!SearchResultTable.isDesktopClientside(this.props.windowWidth)) return null;
         var state = { };
         if (this.state.layout === 'normal'){
             state.layout = 'wide';

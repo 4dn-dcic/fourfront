@@ -1,0 +1,41 @@
+{
+  "source": "./src/encoded/static/components",
+  "index" : "./src/encoded/static/components/README.md",
+  "destination": "./docs/javascript-reference",
+  "excludes" : ["testdata/*"],
+  "plugins": [
+    {
+      "name": "esdoc-standard-plugin",
+      "option" : {
+        "lint" : { "enable" : true },
+        "coverage" : { "enable" : true },
+        "accessor": {"access": ["public", "protected", "private"], "autoPrivate": false },
+        "typeInference": {"enable": true},
+        "undocumentIdentifier" : { "enable" : false },
+        "unexportIdentifier" : { "enable" : true },
+        "brand" : {
+          "logo" : "./src/encoded/static/img/4dn-logo-raster.png",
+          "title" : "4DN Portal Front-End Reference",
+          "repository": "https://github.com/4dn-dcic/fourfront",
+          "site" : "https://data.4dnucleome.org"
+        }
+      }
+    },
+    {"name": "esdoc-react-plugin"},
+    {"name": "esdoc-jsx-plugin"},
+    {
+      "name": "esdoc-ecmascript-proposal-plugin",
+      "option": {
+        "classProperties": true,
+        "doExpressions": true,
+        "functionBind": true,
+        "objectRestSpread": true,
+        "functionSent": true,
+        "asyncGenerators": true,
+        "decorators": true,
+        "exportExtensions": true,
+        "dynamicImport": true
+      }
+    }
+  ]
+}

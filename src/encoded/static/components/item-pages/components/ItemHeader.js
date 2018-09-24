@@ -223,6 +223,7 @@ export class MiddleRow extends React.Component {
 
     shouldComponentUpdate(nextProps){
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
+        if (nextProps.windowWidth !== this.props.windowWidth) return true;
         return false;
     }
 
@@ -235,6 +236,7 @@ export class MiddleRow extends React.Component {
 
         return (
             <FlexibleDescriptionBox
+                windowWidth={this.props.windowWidth}
                 description={ description || <em>No description provided.</em> }
                 className="item-page-heading"
                 textClassName="text-medium"
@@ -304,23 +306,18 @@ export class Wrapper extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.adjustChildren = this.adjustChildren.bind(this);
     }
 
     adjustChildren(){
-        var { context, href, schemas, children } = this.props;
+        var { context, href, schemas, children, windowWidth } = this.props;
         if (!context) return children;
-        return React.Children.map(children, (child)=>{
-            if (typeof child.props.context !== 'undefined' && typeof child.props.href === 'string') return child;
-            else {
-                return React.cloneElement(child, {
-                    'context'   : context,
-                    'href'      : href,
-                    'schemas'   : schemas || (Schemas.get && Schemas.get()) || null
-                }, child.props.children);
-            }
-        });
+        return React.Children.map(children, (child)=>
+            React.cloneElement(child, {
+                context, href, windowWidth,
+                'schemas': schemas || (Schemas.get && Schemas.get()) || null
+            })
+        );
     }
 
     render(){

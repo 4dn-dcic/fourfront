@@ -115,13 +115,10 @@ var store = createStore(combineReducers(reducers));
 
 store.reducers = reducers;
 
-store.mapStateToProps = function(store){
-    var reduxStoreFields = _.keys(reducers);
-    var props = {};
-    for (var i = 0; i < reduxStoreFields.length; i++){
-        props[reduxStoreFields[i]] = store[reduxStoreFields[i]];
-    }
-    return props;
+store.mapStateToProps = function(currStore){
+    return _.object(_.map(_.keys(reducers), function(rfield){
+        return [rfield, currStore[rfield]];
+    }));
 };
 
 module.exports = store;

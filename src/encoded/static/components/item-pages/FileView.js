@@ -38,8 +38,9 @@ export default class FileView extends WorkflowRunTracingView {
     static shouldHiGlassViewExist(context){
         // TODO: Remove context.file_format check?
         if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
-        var isMcoolFile = context.file_format === 'mcool';
-        var isBWFile = (context.file_format === 'bw' || context.file_format === 'bg');
+        var fileFormat  = fileUtil.getFileFormatStr(context),
+            isMcoolFile = fileFormat === 'mcool',
+            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg');
         return isMcoolFile || isBWFile;
     }
 
@@ -86,7 +87,7 @@ export default class FileView extends WorkflowRunTracingView {
             width = this.getTabViewWidth(),
             steps = this.state.steps;
 
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
+        initTabs.push(FileViewOverview.getTabObject(this.props, width));
 
         if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
@@ -96,11 +97,13 @@ export default class FileView extends WorkflowRunTracingView {
             initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
-        return initTabs.concat(this.getCommonTabs(context));
+        return initTabs.concat(this.getCommonTabs(this.props));
     }
 
     itemMidSection(){
-        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} tips={this.state.tips} /></layout.WindowResizeUpdateTrigger>;
+        return (
+            <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+        );
     }
 
 }
@@ -112,7 +115,7 @@ globals.content_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, tips, width){
+    static getTabObject({context, schemas, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'file-overview',
@@ -123,7 +126,7 @@ class FileViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} tips={tips} width={width} />
+                    <FileViewOverview {...{ context, width, windowWidth }} tips={schemas} />
                 </div>
             )
         };
@@ -145,7 +148,7 @@ class FileViewOverview extends React.Component {
     }
 
     render(){
-        var { context } = this.props;
+        var { context, windowWidth, width, tips } = this.props;
 
         var setsByKey;
         var table = null;
@@ -157,12 +160,12 @@ class FileViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} defaultOpenIndices={[0]} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
             <div>
-                <FileOverViewBody result={context} tips={this.props.tips} />
+                <FileOverViewBody result={context} tips={tips} windowWidth={windowWidth} />
                 { table }
             </div>
         );
@@ -232,7 +235,7 @@ export class FileOverviewHeading extends React.Component {
     }
 
     render(){
-        var responsiveSize = layout.responsiveGridState();
+        var responsiveSize = layout.responsiveGridState(this.props.windowWidth);
         var isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
         return (
             <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
@@ -274,11 +277,11 @@ export class FileOverViewBody extends React.Component {
     }
 
     handleJuiceBoxVizClick(evt){
-        var file = this.props.result,
-            pageHref = this.props.href || (store && store.getState().href),
-            hrefParts = url.parse(pageHref),
-            host = hrefParts.protocol + '//' + hrefParts.host,
-            targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+        var file            = this.props.result,
+            pageHref        = this.props.href || (store && store.getState().href),
+            hrefParts       = url.parse(pageHref),
+            host            = hrefParts.protocol + '//' + hrefParts.host,
+            targetLocation  = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
 
         if (isServerSide()) return null;
         var win = window.open(targetLocation, '_blank');
@@ -286,8 +289,11 @@ export class FileOverViewBody extends React.Component {
     }
 
     visualizeExternallyButton(){
-        var file = this.props.result, tips = this.props.tips;
-        if (!file || file.file_format !== 'hic') return null;
+        var file        = this.props.result,
+            tips        = this.props.tips,
+            fileFormat  = fileUtil.getFileFormatStr(file);
+
+        if (fileFormat !== 'hic') return null;
         return (
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
@@ -298,8 +304,9 @@ export class FileOverViewBody extends React.Component {
     }
 
     render(){
-        var file = this.props.result, tips = this.props.tips;
-        var extVizButton = this.visualizeExternallyButton();
+        var file = this.props.result,
+            tips = this.props.tips,
+            extVizButton = this.visualizeExternallyButton();
         return (
             <div className="row overview-blocks">
                 { extVizButton }
