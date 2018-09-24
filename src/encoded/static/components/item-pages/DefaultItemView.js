@@ -106,7 +106,7 @@ export default class DefaultItemView extends React.PureComponent {
      * DO NOT EXTEND.
      *
      * @protected
-     * @param {Item} context Current Item JSON.
+     * @param {Object} props Current props sent down to view. Should be about same as in App render function.
      * @returns {TabObject[]}
      */
     getCommonTabs(props = this.props){
@@ -169,14 +169,13 @@ export default class DefaultItemView extends React.PureComponent {
             console.error('Cannot access refs.tabbedView.setActiveKey()');
         }
     }
-    
+
     /**
      * Returns a classname for view container. Not used for much at moment.
      * DO NOT EXTEND
      *
      * @deprecated
      * @protected
-     * @param {string} nextKey - Key name for tab to switch to.
      * @returns {string} A className
      */
     itemClassName(){

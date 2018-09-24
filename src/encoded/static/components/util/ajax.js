@@ -18,6 +18,7 @@ const defaultHeaders = {
  * @function
  * @param {XMLHttpRequest} xhr - XHR object.
  * @param {Object} [headers={}] - Headers object.
+ * @param {string[]} [deleteHeaders=[]] - List of header key names to exclude, e.g. from extra or default headers object.
  * @returns {XMLHttpRequest} XHR object with set headers.
  */
 function setHeaders(xhr, headers = {}, deleteHeaders = []) {

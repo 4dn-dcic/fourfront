@@ -77,6 +77,31 @@ export var StaticPage;
 
 
 /**
+ * @typedef {Item} File
+ * @property {?string} href                 URI/pathname to where File may be downloaded.
+ * @property {{ display_title: string, file_format: string }} file_format - LinkTo/Object containing file format information.
+ * @property {string} [higlass_uid]         UID of file on HiGlass server, if any.
+ */
+export var File;
+
+
+/**
+ * @typedef {Item} Experiment
+ * @property {?File[]} files                Objects/linkTos representing File items.
+ * @property {?File[]} processed_files      Objects/linkTos representing Processed File items.
+ */
+export var Experiment;
+
+
+/**
+ * @typedef {Item} ExperimentSet
+ * @property {?Experiment[]} experiments_in_set     Objects/linkTos representing File items.
+ * @property {?File[]} processed_files              Objects/linkTos representing Processed File items.
+ */
+export var ExperimentSet;
+
+
+/**
  * An object containing data to fully represent a tab of a tab view.
  *
  * @typedef {Object} TabObject

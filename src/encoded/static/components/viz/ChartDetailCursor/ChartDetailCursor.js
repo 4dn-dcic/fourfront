@@ -265,11 +265,12 @@ export default class ChartDetailCursor extends React.Component {
 
     /**
      * A static alias of the ChartDetailCursor instance's this.update() method.
-     * 
+     *
      * @public
      * @param {Object} state - State to update ChartDetailCursor with.
-     * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
+     * @param {string} [id="default"] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
      * @param {function} [cb] - Optional callback function.
+     * @param {boolean} [overrideSticky=false] - If true, will ignore that is stickied if is the case.
      */
     static update(state, id = "default", cb = null, overrideSticky = false){
         if (typeof updateFxns[id] === 'function'){
@@ -281,10 +282,10 @@ export default class ChartDetailCursor extends React.Component {
 
     /**
      * A static alias of the ChartDetailCursor instance's this.reset() method.
-     * 
+     *
      * @public
      * @param {boolean} [overrideSticky=true] - If false, will cancel out if stickied.
-     * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
+     * @param {string} [id="default"] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
      * @param {function} [cb] - Optional callback function.
      */
     static reset(overrideSticky = true, id = "default", cb = null){
@@ -398,11 +399,12 @@ export default class ChartDetailCursor extends React.Component {
 
     /**
      * Call this function to update component state with the new "path" and other properties, if applicable.
-     * 
+     *
      * @public
      * @param {Object} state - New state to set. Should contain a 'path' property.
      * @param {function} [cb] - Optional callback function. Takes updated state as argument.
-     * @returns {undefined} Nothing
+     * @param {boolean} [overrideSticky=true] - If false, will cancel out if stickied.
+     * @returns {void} Nothing
      */
     update(state = {}, cb = null, overrideSticky = false){
         if (overrideSticky) this.overrideSticky = true; // Unset this on subsequent update.
@@ -416,8 +418,9 @@ export default class ChartDetailCursor extends React.Component {
 
     /**
      * Call this function to reset component state. Cancels out if stickied.
-     * 
+     *
      * @public
+     * @param {boolean} [overrideSticky=true] - If false, will cancel out if stickied.
      * @param {function} [cb] - Optional callback function. Takes updated state as argument.
      * @returns {boolean} True if reset, false if not.
      */

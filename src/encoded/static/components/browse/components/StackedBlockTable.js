@@ -863,30 +863,22 @@ export class FileEntryBlock extends React.Component {
 
     /**
     * Add a link to an external site for some file types.
-    * @param file - Describes the file object that will be displayed.
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
     renderExternalLink(){
-        var { file } = this.props;
-
-        // Find out if the file format is hic.
-        // - It needs an external href link
-        //   - Either it needs a file format of 'hic'
-        //   - OR it has a detailed file type that contains 'hic'
-        var fileFormat = fileUtil.getFileFormatStr(file);
-        var fileIsHic = (
-            file
-            && (
+        var { file } = this.props,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
                 (fileFormat && fileFormat === 'hic')
-                || (
-                    file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )
-            && file.href
-        );
+                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+            )),
+            externalLinkButton      = null;
 
-        var externalLinkButton;
         if (fileIsHic) {
             // Make an external juicebox link.
             var onClick = function(evt){
+
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
@@ -915,10 +907,7 @@ export class FileEntryBlock extends React.Component {
     renderName(){
         var { file, colWidthStyles } = this.props;
         return <div
-            className={
-                "name col-file" + (
-                    file && file.accession ? ' mono-text' : ''
-                )}
+            className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
             style={colWidthStyles ? colWidthStyles.file : null}
             children={[
                 this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
