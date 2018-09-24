@@ -38,7 +38,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         this.handleHideModal = this.handleHideModal.bind(this);
         this.handleClickDisclaimer = this.handleClickDisclaimer.bind(this);
         this.renderModal = this.renderModal.bind(this);
-        this.hasUnreleasedOrUnpublishedFiles = this.hasUnreleasedOrUnpublishedFiles.bind(this);
+        this.findUnpublishedFiles = this.findUnpublishedFiles.bind(this);
         this.state = {
             'modalOpen' : false,
             'showDisclaimer' : false,
@@ -71,16 +71,12 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     /**
     * The user wants to reveal the modal.
     * This function renders out a React-Bootstrap Modal component.
+    *
     * @returns {JSX.Element} A modal instance.
     */
     handleClickRevealModal(){
-        // Determine if any of the targetted files need the disclaimer
-        var fileStatus = this.hasUnreleasedOrUnpublishedFiles();
-
-        var disclaimerRequired = (fileStatus.foundUnreleasedFiles || fileStatus.foundUnpublishedFiles);
-
-        // If they need the disclaimer
-        if (disclaimerRequired) {
+        if (this.findUnpublishedFiles()) { // Determine if any of the targeted files need the disclaimer
+            // If they need the disclaimer
             // Reveal the disclaimer widget
             // Hide the download metadata widget
             this.setState({
@@ -119,18 +115,18 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
     /**
     * Renders the modal content.
+    *
     * @param {array} selectedFiles - Files to display and download.
     */
     renderModal(selectedFiles){
         if (!this.state.modalOpen) return null;
 
-        var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
-            userInfo = JWT.getUserInfo(),
-            isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
-            profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-        var countSelectedFiles = _.keys(selectedFiles).length;
-
-        var fileStatus = this.hasUnreleasedOrUnpublishedFiles();
+        var suggestedFilename           = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
+            userInfo                    = JWT.getUserInfo(),
+            isSignedIn                  = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
+            profileHref                 = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me',
+            countSelectedFiles          = _.keys(selectedFiles).length,
+            foundUnpublishedFiles       = this.findUnpublishedFiles();
 
         return (
             <Modal show className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
@@ -145,7 +141,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
                     { this.renderModalCodeSnippet(suggestedFilename, isSignedIn) }
 
-                    { this.state.showDisclaimer ? <SelectedFilesDownloadDisclaimer  foundUnreleasedFiles={fileStatus.foundUnreleasedFiles}  foundUnpublishedFiles={fileStatus.foundUnpublishedFiles}  suggestedFilename={suggestedFilename}  userInfo={userInfo} showDisclaimerButton={this.state.showDisclaimerButton} onClickHandler={this.handleClickDisclaimer}/> : null }
+                    { this.state.showDisclaimer ? <SelectedFilesDownloadDisclaimer {...{ foundUnpublishedFiles, suggestedFilename, userInfo }} showDisclaimerButton={this.state.showDisclaimerButton} onClickHandler={this.handleClickDisclaimer}/> : null }
 
                     { this.state.showDownloadMetadata ? <SelectedFilesDownloadMetadataButton subSelectedFiles={this.props.subSelectedFiles} onClickHandler={this.handleHideModal} /> : null }
                 </Modal.Body>
@@ -155,52 +151,37 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
     /**
     * Returns an object containing booleans which indicate if the user is trying to download unreleased or unpublished files.
+    *
+    * @returns {boolean}} Whether found any files which lack a `produced_in_pub` in their parent ExperimentSet.
     */
-    hasUnreleasedOrUnpublishedFiles(){
-        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props;
-
-        // Find out if at least 1 file is unreleased
-        var foundUnreleasedFiles = _.any(selectedFiles,
-            file => file.status !== "released"
-        );
+    findUnpublishedFiles(){
+        var { selectedFiles } = this.props;
 
         // Find out if at least 1 is unpublished.
         // The file could be part of an experiment set with a publication
         // Or the file could be part of an experiment which is in an experiment set with a publication
-        var foundUnpublishedFiles = _.any(selectedFiles,
-            file => !(
-                (
-                    file.from_experiment
-                    && file.from_experiment.from_experiment_set
-                    && file.from_experiment.from_experiment_set.produced_in_pub
-                )
-                ||
-                (
-                    file.from_experiment_set
-                    && file.from_experiment_set.produced_in_pub
-                )
-            )
-        );
-
-        return {
-            "foundUnreleasedFiles": foundUnreleasedFiles,
-            "foundUnpublishedFiles": foundUnpublishedFiles
-        };
+        return _.any(_.values(selectedFiles), function(file){
+            var expSetHasPub = (
+                (file.from_experiment && file.from_experiment.from_experiment_set && file.from_experiment.from_experiment_set.produced_in_pub)
+                || (file.from_experiment_set && file.from_experiment_set.produced_in_pub)
+            );
+            return !expSetHasPub;
+        });
     }
 
     render(){
         var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props,
-            selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length,
-            disabled = selectedFilesUniqueCount === 0,
-            countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount,
-            countToShow = selectedFilesUniqueCount,
-            tip = (
+            selectedFilesCountIncludingDuplicates   = _.keys(selectedFiles).length,
+            subSelectedFilesCount                   = _.keys(subSelectedFiles).length,
+            disabled                                = selectedFilesUniqueCount === 0,
+            countDuplicates                         = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount,
+            countToShow                             = selectedFilesUniqueCount,
+            tip                                     = (
                 "Download metadata TSV sheet containing download URIs for " +
                 selectedFilesUniqueCount + " files" +
                 (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
             );
 
-        var subSelectedFilesCount = _.keys(subSelectedFiles).length;
         if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
             countToShow = subSelectedFilesCount;
             tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
@@ -219,9 +200,6 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 * A disclaimer will appear if the user wants to download unpublished or unreleased files.
 */
 export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
-    constructor(props){
-        super(props);
-    }
 
     /**
     * This function renders out a div containing information about
@@ -230,12 +208,10 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
     * @returns {JSX.Element} A modal instance.
     */
     render(){
-        var { foundUnreleasedFiles, foundUnpublishedFiles, suggestedFilename, userInfo, showDisclaimerButton, onClickHandler } = this.props;
+        var { foundUnpublishedFiles, suggestedFilename, userInfo, showDisclaimerButton, onClickHandler } = this.props;
 
         // If all data sets have been released and published, return nothing.
-        if (!(foundUnreleasedFiles || foundUnpublishedFiles)) {
-            return null;
-        }
+        if (!foundUnpublishedFiles) return null;
 
         // Find out if the user is signed in, and what their profile href is.
         var isSignedIn = !!(
@@ -257,7 +233,7 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
             <div id="file_disclaimer_div">
                 <h4 className="mt-2 mb-07 text-500">Notes</h4>
                 <ul className="mb-25">
-                    { (foundUnreleasedFiles && isSignedIn) ?
+                    { isSignedIn ?
                         <li className="mb-05">
                             To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
                             <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
@@ -281,9 +257,9 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
 }
 
 /**
-* Use this button to download the tsv file metadata.
-* Also has a close modal button.
-*/
+ * Use this button to download the tsv file metadata.
+ * Also has a close modal button.
+ */
 export class SelectedFilesDownloadMetadataButton extends React.PureComponent {
     constructor(props){
         super(props);
@@ -334,21 +310,24 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     static fieldsToRequest = [
+        'accession',
+        'produced_in_pub.display_title',
+
+        'processed_files.accession',
+        'processed_files.file_type_detailed',
+        'processed_files.uuid',
+
+        'experiments_in_set.accession',
+
         'experiments_in_set.files.accession',
         'experiments_in_set.files.file_type_detailed',
         'experiments_in_set.files.paired_end',
         'experiments_in_set.files.uuid',
         'experiments_in_set.files.related_files.file.accession',
+
         'experiments_in_set.processed_files.accession',
         'experiments_in_set.processed_files.file_type_detailed',
-        'experiments_in_set.processed_files.uuid',
-        'produced_in_pub.display_title',
-        'processed_files.accession',
-        'processed_files.file_type_detailed',
-        'processed_files.uuid',
-        'accession',
-        'experiments_in_set.accession',
-        'status',
+        'experiments_in_set.processed_files.uuid'
     ];
 
     constructor(props){
