@@ -152,7 +152,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     /**
     * Returns an object containing booleans which indicate if the user is trying to download unreleased or unpublished files.
     *
-    * @returns {boolean}} Whether found any files which lack a `produced_in_pub` in their parent ExperimentSet.
+    * @returns {boolean} Whether found any files which lack a `produced_in_pub` in their parent ExperimentSet.
     */
     findUnpublishedFiles(){
         var { selectedFiles } = this.props;
