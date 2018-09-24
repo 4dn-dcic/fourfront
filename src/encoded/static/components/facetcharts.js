@@ -101,7 +101,7 @@ export class FacetCharts extends React.PureComponent {
      * @ignore
      */
     componentDidUpdate(pastProps, pastState){
-        if (this.props.debug){ 
+        if (this.props.debug){
             var propKeys    = _.keys(this.props),
                 stateKeys   = _.keys(this.state),
                 i;

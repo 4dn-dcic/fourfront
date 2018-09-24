@@ -197,7 +197,7 @@ export default class DefaultItemView extends React.PureComponent {
     /**
      * Returns object with `title` and `description` (used for tooltip) to show detailed or base type info at top left of page, under title.
      * Extendable.
-     * 
+     *
      * @returns {null} Nothing. Must be extended per item type.
      */
     typeInfo(){

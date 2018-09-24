@@ -79,13 +79,15 @@ export class SearchBar extends React.Component{
     }
 
     onResetSearch (e){
-        var id = url.parse(this.props.href, true);
-        if (typeof id.search === 'string'){
-            delete id.query['q'];
-            delete id.search;
+        var hrefParts = url.parse(this.props.href, true);
+        if (typeof hrefParts.search === 'string'){
+            delete hrefParts.query['q'];
+            delete hrefParts.search;
         }
-        var resetHref = url.format(id);
-        this.setState({ 'searchAllItems' : false, 'typedSearchQuery' : '' }, navigate.bind(navigate, resetHref));
+        this.setState(
+            { 'searchAllItems' : false, 'typedSearchQuery' : '' },
+            navigate.bind(navigate, url.format(hrefParts))
+        );
     }
 
     selectItemTypeDropdown(inProp = false){
@@ -113,26 +115,22 @@ export class SearchBar extends React.Component{
     }
 
     render() {
-        var { searchAllItems, typedSearchQuery } = this.state;
-        var id = url.parse(this.props.href, true);
-        var searchQueryFromHref = (id && id.query && id.query.q) || '';
-        var resetIconButton = null;
-        var searchBoxHasInput = this.hasInput();
+        var { searchAllItems, typedSearchQuery } = this.state,
+            hrefParts           = url.parse(this.props.href, true),
+            searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '',
+            resetIconButton     = searchQueryFromHref ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null,
+            searchBoxHasInput   = this.hasInput(),
+            query               = {}, // Don't preserve facets.
+            browseBaseParams    = navigate.getBrowseBaseParams();
 
-        if (searchQueryFromHref){
-            resetIconButton = <i className="reset-button icon icon-close" onClick={this.onResetSearch}/>;
-        }
-
-        var query = {}; // Don't preserve facets.
-        var browseBaseParams = navigate.getBrowseBaseParams();
         if (this.props.currentAction === 'selection'){
-            _.extend(query, _.omit(id.query || {}, 'q')); // Preserve facets, incl type facet.
+            _.extend(query, _.omit(hrefParts.query || {}, 'q')); // Preserve facets (except 'q'), incl type facet.
         } else if (searchAllItems && this.props.currentAction !== 'selection') {
-            _.extend(query, { 'type' : 'Item' });
+            _.extend(query, { 'type' : 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else {
-            _.extend(query, _.omit(id.query || {}, 'q'), browseBaseParams); // Preserve facets.
+            _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
         }
-        
+
         return (
             <form className={"navbar-search-form-container navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
                 action={searchAllItems ? "/search/" : "/browse/" } method="GET" ref="form">
