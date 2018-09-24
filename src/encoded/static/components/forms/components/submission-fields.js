@@ -2,32 +2,35 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, animateScrollTo, Schemas, fileUtil } from '../util';
-import Alerts from '../alerts';
-import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
+import * as globals from './../../globals';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from './../../util';
+import Alerts from './../../alerts';
+import { BasicStaticSectionBody } from './../../static-pages/components/BasicStaticSectionBody';
+import { Line as ProgressBar } from 'rc-progress';
 
 
-var ProgressBar = require('rc-progress').Line;
-
-var makeTitle = object.itemUtil.title;
-
-
-
-/*
-Individual component for each type of field. Contains the appropriate input
-if it is a simple number/text/enum, or generates a child component for
-attachment, linked object, array, object, and file fields. Contains delete
-logic for the field as well (deleting is done by setting value to null).
-*/
-export default class BuildField extends React.PureComponent {
+/**
+ * Individual component for each type of field. Contains the appropriate input
+ * if it is a simple number/text/enum, or generates a child component for
+ * attachment, linked object, array, object, and file fields. Contains delete
+ * logic for the field as well (deleting is done by setting value to null).
+ *
+ * @todo Possibly rename both this class and the containing file to be `SubmissionViewField` or `SubmissionField`.
+ */
+export class BuildField extends React.PureComponent {
 
     /**
+     * Gets the (interal) field type from a schema for a field.
+     * Possible return values include 'attachment', 'linked object', 'enum', 'text', 'html', 'code', 'boolean', 'number', 'integer', etc.
+     *
+     * @todo Handle date formats, other things, etc.
+     *
      * @param {{ 'type' : string }} fieldSchema - Schema definition for this property. Should be same as `app.state.schemas[CurrentItemType].properties[currentField]`.
+     * @returns {string} Type of field that will be created, according to schema.
      */
     static fieldTypeFromFieldSchema(fieldSchema){
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
@@ -73,8 +76,14 @@ export default class BuildField extends React.PureComponent {
         }
     }
 
-    displayField(field_case){
-        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, fieldType, currType, getCurrContext } = this.props;
+    /**
+     * Renders out an input field (or more fields of itself via more advanced input field component, e.g. for arrays).
+     *
+     * @param {string} [fieldType=this.props.fieldType] Type of input field to render, if different from `props.fieldType`.
+     * @returns {JSX.Element} A JSX `<input>` element, a Bootstrap input element component, or custom React component which will render input fields.
+     */
+    displayField(fieldType = this.props.fieldType){
+        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, currType, getCurrContext } = this.props;
         var inputProps = {
             'key'       :        field,
             'id'                : 'field_for_' + field,
@@ -84,7 +93,7 @@ export default class BuildField extends React.PureComponent {
             'onChange'          : this.handleChange,
             'name'              : field,
             'placeholder'       : "No value",
-            'data-field-type'   : field_case
+            'data-field-type'   : fieldType
         };
 
         // Unique per-type overrides
@@ -99,7 +108,7 @@ export default class BuildField extends React.PureComponent {
         }
 
         // Common field types
-        switch(field_case){
+        switch(fieldType){
             case 'text' :
                 if (field === 'aliases'){
                     return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={currentSubmittingUser} /></div>;
@@ -195,6 +204,12 @@ export default class BuildField extends React.PureComponent {
         this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
+    /**
+     * Returns an object representing `props` which would be common to any type of input field
+     * element which this component renders.
+     *
+     * @returns {{ 'className': string, 'data-field-type': string, 'data-field-name': string, 'style': Object.<string|number> }} Object of props and values.
+     */
     commonRowProps(){
         return {
             'className' : (
@@ -208,11 +223,14 @@ export default class BuildField extends React.PureComponent {
         };
     }
 
+    /**
+     * Returns a `<div>` JSX element with 'Required' label/text, if `props.required` is true or truthy.
+     */
     labelTypeDescriptor(){
         return <div className="field-descriptor">{ this.props.required ? <span style={{'color':'#a94442'}}> Required</span> : null }</div>;
-
     }
 
+    /** @ignore */
     wrapWithLabel(){
         var { fieldTip, title, fieldType, schema } = this.props;
         return(
@@ -235,19 +253,27 @@ export default class BuildField extends React.PureComponent {
         );
     }
 
+    /** @ignore */
     wrapWithNoLabel(){
         return <div {...this.commonRowProps()}>{ Array.prototype.slice.call(arguments) }</div>;
     }
 
+    /**
+     * Renders out input for this field. Performs this recursively (through adding own component down in render tree)
+     * if necessary re: data structure.
+     *
+     * @todo Come up with a schema based solution for code below?
+     * @private
+     * @returns {JSX.Element} Appropriate element/markup for this field.
+     */
     render = () => {
-        // TODO: come up with a schema based solution for code below?
         var { value, isArray, field, fieldType, arrayIdx, isLastItemInArray, schema } = this.props;
-        var cannot_delete = ['filename'], // hardcoded fields you can't delete
-            showDelete = false,
-            disableDelete = false,
-            extClass = '';
+        var cannot_delete       = ['filename'], // hardcoded fields you can't delete
+            showDelete          = false,
+            disableDelete       = false,
+            extClass            = '';
 
-        // don't show delet button unless:
+        // Don't show delete button unless:
         // not in hardcoded cannot delete list AND is not an object or
         // non-empty array element (individual values get deleted)
         if(!_.contains(cannot_delete, field) && fieldType !== 'array'){
@@ -259,11 +285,9 @@ export default class BuildField extends React.PureComponent {
             showDelete = false;
         }
 
-        var wrapFunc = this.wrapWithLabel;
-
-        var excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
-
-        var fieldToDisplay = this.displayField(fieldType);
+        var wrapFunc = this.wrapWithLabel,
+            excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'), // In case we render our own w/ dif functionality lower down.
+            fieldToDisplay = this.displayField(fieldType);  // The rendered field.
 
         if (isArray) {
             // array items don't need fieldnames/tooltips
@@ -473,11 +497,12 @@ class LinkedObj extends React.PureComponent{
 
         var itemType    = schema.linkTo,
             searchURL   = '/search/?type=' + itemType + '#!selection';
+
         // check if we have any schema flags that will affect the searchUrl
-        if(schema.ff_flag && schema.ff_flag.startsWith('filter:')){
+        if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
             // the field to facet on could be set dynamically
-            if(schema.ff_flag == "filter:valid_item_types"){
-                searchURL   = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+            if (schema.ff_flag == "filter:valid_item_types"){
+                searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
             }
         }
 
@@ -1095,6 +1120,7 @@ class S3FileInput extends React.Component{
 
     constructor(props){
         super(props);
+        this.getFileExtensionRequired = this.getFileExtensionRequired.bind(this);
         this.state = {
             'percentDone': null,
             'sizeUploaded': null,
@@ -1127,44 +1153,43 @@ class S3FileInput extends React.Component{
         }
     }
 
+    getFileExtensionRequired(){
+        // get the current context and overall schema for the file object
+        var currContext = this.props.getCurrContext();
+        var currSchema = this.props.getCurrSchema();
+        var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
+        var extension;
+        // find the extension the file should have
+        if (currContext.file_format in schema_extensions) {
+            extension = schema_extensions[currContext.file_format];
+        } else {
+            alert('Internal file extension conflict.');
+            return null;
+        }
+        return extension;
+    }
+
     /*
     Handle file selection. Store the file in SubmissionView state and change
     the filename context using modifyNewContext
     */
     handleChange = (e) => {
-        var { modifyNewContext, nestedField, linkType, arrayIdx } = this.props,
-            file = e.target.files[0];
-
-        if (!file) return; // No file was chosen.
-
-        var filename = file.name ? file.name : "unknown";
-
-        // check Extensions
-        var fileFormat = this.props.getCurrContext().file_format;
-        if(!fileFormat.startsWith('/')){
-            fileFormat = '/' + fileFormat;
-        }
-        var extensions = [];
-        ajax.promise(fileFormat + '?frame=object').then(response => {
-            if (response['file_format'] && response['@id']){
-                extensions = response.standard_file_extension ? [response.standard_file_extension] : [];
-                if(response.other_allowed_extensions){
-                    extensions = extensions.concat(response.other_allowed_extensions);
-                }
-                // Fail if "other" extension is not used and a valid extension is not provided
-                if (extensions.indexOf("other") === -1 && !_.any(extensions, function(ext){return filename.endsWith(ext);})){
-                    alert('File extension error! Please enter a file with one of the following extensions: ' + extensions.join(', '));
-                    return;
-                }
-
-                modifyNewContext(nestedField, filename, 'file upload', linkType, arrayIdx);
-                // calling modifyFile changes the 'file' state of top level component
-                this.modifyFile(file);
-            }else{
-                alert('Internal file extension conflict.');
+        var extension = this.getFileExtensionRequired();
+        var file = e.target.files[0];
+        // file was not chosen
+        if(!file || typeof extension !== 'string'){
+            return;
+        }else{
+            var filename = file.name ? file.name : "unknown";
+            // check extension
+            if(!filename.endsWith(extension)){
+                alert('File extension error! Please enter a file of type: ' + extension);
                 return;
             }
-        });
+            this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
+            // calling modifyFile changes the 'file' state of top level component
+            this.modifyFile(file);
+        }
     }
 
     /*

@@ -9,11 +9,10 @@ import _ from 'underscore';
 import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
-import { panel_views, content_views } from './../globals';
-var store = require('./../../store');
+import { content_views } from './../globals';
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
-import { EditableField, FieldSet } from './../forms';
+import { EditableField, FieldSet } from './../forms/components';
 
 
 /**
@@ -27,7 +26,7 @@ import { EditableField, FieldSet } from './../forms';
 /**
  * Extends ItemStore to help manage collection of Access Keys from back-end.
  *
- * @memberof module:item-pages/user
+ * @todo Remove/refactor this and the ItemStore dependency in favor of using a React Component to wrap and provide state to some child view in UserView.
  * @extends module:lib/store.ItemStore
  * @private
  */
@@ -405,7 +404,7 @@ export default class UserView extends React.Component {
                                                     schemas={this.props.schemas}
                                                     disabled={!mayEdit}
                                                     href={this.props.href}
-                                                >
+                                                    windowWidth={this.props.windowWidth}>
                                                     <EditableField
                                                         labelID="first_name"
                                                         fallbackText="No first name set"
@@ -461,15 +460,10 @@ class ProfileContactFields extends React.Component {
         var user = this.props.user;
 
         return (
-            <FieldSet
-                context={user}
-                parent={this.props.parent}
-                className="profile-contact-fields"
-                disabled={!this.props.mayEdit}
-                objectType="User"
-                schemas={this.props.schemas}
-                href={this.props.href}
-            >
+            <FieldSet context={user}
+                parent={this.props.parent} className="profile-contact-fields"
+                disabled={!this.props.mayEdit} objectType="User" windowWidth={this.props.windowWidth}
+                schemas={this.props.schemas} href={this.props.href}>
 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { ProfileContactFields.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>

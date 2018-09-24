@@ -11,10 +11,11 @@ import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, 
 import SearchView from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
-import SubmissionTree, { delveObject, delveObjectProperty } from './expandable-tree';
-import BuildField, { AliasInputField, isValueNull } from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
+
+import { SubmissionTree, fieldSchemaLinkToType, fieldSchemaLinkToPath } from './components/SubmissionTree';
+import { BuildField, AliasInputField, isValueNull } from './components/submission-fields';
 
 /**
  * Key container component for Submission components.
@@ -1969,7 +1970,7 @@ class IndividualObjectView extends React.Component{
             fieldValue  = currContext[field] !== null ? currContext[field] : null,
             enumValues  = [],
             isLinked    = false,
-            linked      = delveObject(fieldSchema);
+            linked      = fieldSchemaLinkToType(fieldSchema);
 
         // check if this is an enum
         if(fieldType === 'enum'){
@@ -2136,26 +2137,25 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
             }
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
-            if(edit){
-                if(context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
+            if (edit){
+                if (context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear edit")){
                     built[fields[i]] = null;
-                }else{
+                } else {
                     built[fields[i]] = context[fields[i]] || null;
                 }
-            }else if(!create){ //clone
-                if(context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
+            } else if (!create){ //clone
+                if (context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear clone")){
                     built[fields[i]] = null;
-                }else{
+                } else {
                     built[fields[i]] = context[fields[i]] || null;
                 }
-            }else{
+            } else {
                 built[fields[i]] = null;
             }
 
             if (objList !== null) {
-                var linkedProperty = delveObjectProperty(fieldSchema); // Is it a linkTo (recursively or not)?
-                //console.log('LINKEDPROPSIS', linkedProperty);
-                var roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
+                var linkedProperty = fieldSchemaLinkToPath(fieldSchema), // Is it a linkTo (recursively or not)?
+                    roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
                 if((linkedProperty !== null && typeof linkedProperty !== 'undefined') && !roundTwoExclude){ // If linkTo, add to our list, selecting a nice name for it first.
                     //var listTerm = fieldSchema.title ? fieldSchema.title : linked;
                     var fieldToStore = fields[i];
@@ -2201,10 +2201,10 @@ var delvePreExistingObjects = function myself(initObjs, json, fieldSchema, listT
         }
     } else if (_.contains(_.keys(fieldSchema),'linkTo')) { // non-array, non-object field. check schema to ensure there's a linkTo
         initObjs.push({
-            'path' : json,
-            'display' : json,
-            'newLink' : listTerm,
-            'type' : delveObject(fieldSchema)
+            'path'      : json,
+            'display'   : json,
+            'newLink'   : listTerm,
+            'type'      : fieldSchemaLinkToType(fieldSchema)
         });
     }
 };

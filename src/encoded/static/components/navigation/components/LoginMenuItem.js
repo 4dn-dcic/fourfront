@@ -3,16 +3,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import * as store from '../store';
-import { JWT, ajax, navigate, isServerSide, analytics, object } from './util';
 import { MenuItem } from 'react-bootstrap';
-import Alerts from './alerts';
 import Auth0Lock from 'auth0-lock';
+import * as store from './../../../store';
+import { JWT, ajax, navigate, isServerSide, analytics, object } from './../../util';
+import Alerts from './../../alerts';
 
 
 
 /** Component that contains auth0 functions */
-export default class Login extends React.Component {
+export class LoginMenuItem extends React.Component {
 
     static propTypes = {
         updateUserInfo      : PropTypes.func.isRequired,

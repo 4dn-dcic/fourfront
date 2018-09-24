@@ -1,7 +1,10 @@
-// Render a simple static error page with a link to return to the homepage
+'use strict';
 
 import React from 'react';
 
+/**
+ * Render a simple static error page with a link to return to the homepage.
+ */
 export default class ErrorPage extends React.Component {
     render() {
         var homelink;

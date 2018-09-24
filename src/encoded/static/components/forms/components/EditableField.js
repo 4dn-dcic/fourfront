@@ -1,77 +1,13 @@
 'use strict';
 
 import React from 'react';
-import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import * as store from './../store';
-import { ajax, console, object, isServerSide, navigate } from './util';
+import * as store from './../../../store';
+import { ajax, console, object, isServerSide, navigate } from './../../util';
 
-export const localRegexValidation = {
-    /** 
-     * http://www.regular-expressions.info/email.html -> changed capital A to lowercase
-     */
-    email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
-    /** 
-     * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and
-     * optional leading plus sign (for international)
-     */
-    phone : '[+]?[\\d]{10,36}((\\sx|\\sext|\\sextension)(\\s)?[\\d]{1,7})?$'
-};
 
-/**
- * Sets value to be deeply nested within an otherwise empty object, given a field with dot notation.
- * Use for creating objects for PATCH requests. Does not currently support arrays.
- * If want to update a full object rather than create an empty one, use @see deepExtendObject with output.
- *
- * @param {string|string[]} field - Property name of object of where to nest value, in dot-notation or pre-split into array.
- * @param {*} value - Any value to nest.
- * @returns {Object} - Object with deepy-nested value.
- * @example
- *   generateSparseNestedProperty('human.body.leftArm.indexFinger', 'Orange') returns
- *   { human : { body : { leftArm : { indexFinger : 'Orange' } } } }
- */
-export function generateSparseNestedProperty(field, value){
-    if (typeof field === 'string') field = field.split('.');
-    if (!Array.isArray(field)) throw new Error("Could not create nested field in object. Check field name.");
 
-    var currObj = {};
-    currObj[field.pop()] = value;
-
-    if (field.length === 0) return currObj;
-    return generateSparseNestedProperty(field, currObj);
-}
-
-/**
- * Performs a 'deep merge' of a small object (one property per level, max) into a host object.
- * 
- * @param {Object} hostObj - Object to merge/insert into.
- * @param {Object} nestedObj - Object whose value to insert into hostObj.
- * @param {number} [maxDepth=10] - Max number of recursions or object depth.
- */
-export function deepExtendObject(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
-    var nKey = Object.keys(nestedObj)[0]; // Should only be 1.
-    if (currentDepth > maxDepth){
-        // Doubt we'd go this deep... so cancel out
-        return false;
-    }
-    if (typeof hostObj[nKey] !== 'undefined'){
-        if (typeof nestedObj[nKey] === 'object' && !Array.isArray(hostObj[nKey]) ){
-            return deepExtendObject(hostObj[nKey], nestedObj[nKey], currentDepth + 1);
-        } else {
-            // No more nested objects, insert here.
-            hostObj[nKey] = nestedObj[nKey];
-            return true;
-        }
-    } else if (typeof nestedObj[nKey] !== 'undefined') {
-        // Field doesn't exist on hostObj, but does on nestedObj, == new field.
-        hostObj[nKey] = nestedObj[nKey];
-        return true;
-    } else {
-        // Whoops, doesn't seem like fields match.
-        return false;
-    }
-}
 
 /**
  * FieldSet allows to group EditableFields together.
@@ -129,23 +65,22 @@ export class FieldSet extends React.Component {
     }
 
     adjustedChildren(){
+        var { children, endpoint, href, objectType, schemas, disabled, inputSize, style, absoluteBox, context, parent, windowWidth } = this.props;
         // Add shared props to children EditableField elements.
-        return React.Children.map(this.props.children, (child)=>{
+        return React.Children.map(children, (child)=>{
             if (child.type && child.type.displayName === 'EditableField'){
                 var newProps = {};
-                if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
-                if (!child.props.parent) newProps.parent = this.props.parent || this;
-                if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
-                if (!child.props.href && this.props.href) newProps.href = this.props.href;
-                if (!child.props.objectType && this.props.objectType) newProps.objectType = this.props.objectType;
-                if (!child.props.schemas && this.props.schemas) newProps.schemas = this.props.schemas;
-                if (
-                    typeof child.props.disabled === 'undefined' &&
-                    typeof this.props.disabled === 'boolean'
-                ) newProps.disabled = this.props.disabled;
-                if (this.props.inputSize) newProps.inputSize = this.props.inputSize; // Overwrite, since EditableField has default props.
-                if (this.props.style) newProps.style = this.props.style;
-                if (this.props.absoluteBox) newProps.absoluteBox = this.props.absoluteBox;
+                if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = context;
+                if (!child.props.parent)                          newProps.parent       = parent || this;
+                if (!child.props.endpoint && endpoint)            newProps.endpoint     = endpoint;
+                if (!child.props.href && href)                    newProps.href         = href;
+                if (!child.props.objectType && objectType)        newProps.objectType   = objectType;
+                if (!child.props.schemas && schemas)              newProps.schemas      = schemas;
+                if (typeof child.props.disabled === 'undefined' && typeof disabled === 'boolean') newProps.disabled = disabled;
+                if (inputSize)                                    newProps.inputSize    = inputSize; // Overwrite, since EditableField has default props.
+                if (style)                                        newProps.style        = style;
+                if (absoluteBox)                                  newProps.absoluteBox  = absoluteBox;
+                if (windowWidth)                                  newProps.windowWidth  = windowWidth;
 
                 return React.cloneElement(child, newProps);
             }
@@ -162,12 +97,13 @@ export class FieldSet extends React.Component {
     }
 
     fullClassName(){
-        var stateHolder = this.props.parent || this; // Fallback to using self as state holder.
+        var { className, style, inputSize, parent } = this.props,
+            stateHolder = parent || this; // Fallback to using self as state holder.
         return (
-            (this.props.className ? this.props.className + ' ' : '') +
+            (className ? className + ' ' : '') +
             "editable-fields fieldset" +
-            (this.props.style ? ' ' + this.props.style : '') +
-            (this.props.inputSize ? ' size-' + this.props.inputSize : '') +
+            (style ? ' ' + style : '') +
+            (inputSize ? ' size-' + inputSize : '') +
             (
                 stateHolder.state &&
                 stateHolder.state.currentlyEditing &&
@@ -185,6 +121,8 @@ export class FieldSet extends React.Component {
     }
 
 }
+
+
 
 /**
  * Display a field which may be edited & saved to server.
@@ -232,10 +170,7 @@ export class EditableField extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.onResizeStateChange = this.onResizeStateChange.bind(this);
         this.objectType = this.objectType.bind(this);
         this.isSet = this.isSet.bind(this);
         this.isRequired = this.isRequired.bind(this);
@@ -254,7 +189,6 @@ export class EditableField extends React.Component {
         this.renderSaved = this.renderSaved.bind(this);
         this.inputField = this.inputField.bind(this);
         this.renderEditing = this.renderEditing.bind(this);
-        this.render = this.render.bind(this);
 
         var initialValue = null;
         try {
@@ -278,24 +212,15 @@ export class EditableField extends React.Component {
         };
     }
 
-    componentDidMount(){
-        if (this.props.style === 'inline' && this.props.absoluteBox && !isServerSide()){
-
-            this.debouncedLayoutResizeStateChange = _.debounce(() => {
-                if (this.refs.field && this.refs.field.offsetParent){
-                    var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
-                    //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
-                    this.setState({
-                        'leanTo' :
-                            this.refs.field.offsetLeft > offsetRight ?
-                            'left' : 'right',
-                        'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
-                    });
-                }
-            }, 300, false);
-
-            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
-
+    onResizeStateChange(){
+        if (this.refs.field && this.refs.field.offsetParent){
+            var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
+            //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
+            this.setState({
+                'leanTo' :
+                    this.refs.field.offsetLeft > offsetRight ? 'left' : 'right',
+                'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
+            });
         }
     }
 
@@ -335,7 +260,6 @@ export class EditableField extends React.Component {
     componentDidUpdate(oldProps, oldState){
         // If state change but not onChange event -- e.g. change to/from editing state
         if (
-            typeof this.debouncedLayoutResizeStateChange !== 'undefined' &&
             oldState.value === this.state.value &&
             oldState.loading === this.state.loading &&
             oldState.dispatching === this.state.dispatching &&
@@ -346,17 +270,11 @@ export class EditableField extends React.Component {
                 return false;
             }
             if (this.props.parent.state && this.props.parent.state.currentlyEditing === this.props.labelID){
-                this.debouncedLayoutResizeStateChange();
+                this.onResizeStateChange();
             } else {
                 this.setState({ 'leanTo' : null });
             }
             this.justUpdatedLayout = true;
-        }
-    }
-
-    componentWillUnmount(){
-        if (typeof this.debouncedLayoutResizeStateChange !== 'undefined'){
-            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
         }
     }
 
@@ -369,12 +287,13 @@ export class EditableField extends React.Component {
     }
 
     isSet(){
+        var { context } = this.props, { savedValue } = this.state;
         return (
-            typeof this.props.context === 'object' &&
-            !_.isEmpty(this.props.context) &&
-            typeof this.state.savedValue !== 'undefined' &&
-            this.state.savedValue !== null &&
-            this.state.savedValue !== ''
+            typeof context === 'object' &&
+            !_.isEmpty(context) &&
+            typeof savedValue !== 'undefined' &&
+            savedValue !== null &&
+            savedValue !== ''
         );
     }
 
@@ -425,18 +344,20 @@ export class EditableField extends React.Component {
      * Try to get from this.props.schemas based on object type (User, ExperimentHIC, etc.) and props.labelID.
      * Defaults to generic per-fieldType validation pattern if available and pattern not set schemas, or null if not applicable.
      *
-     * @return {*} Pattern to input validate against.
+     * @todo Maybe move part of this to util/Schemas.js
+     * @return {RegExp|null} Pattern to input validate against.
      */
     validationPattern(schemas = this.props.schemas){
+        var { labelID, fieldType, debug } = this.props;
 
-        function getPatternFromSchema(){
+        function getPatternFromSchema(){ // TODO: Maybe move to util/Schemas.js
             // We do not handle nested, linked or embedded properties for now.
-            if (!schemas || !this.props.labelID || this.props.labelID.indexOf('.') > -1) return null;
+            if (!schemas || !labelID || labelID.indexOf('.') > -1) return null;
 
             var fieldSchema = this.fieldSchema(schemas);
 
             if (!fieldSchema || typeof fieldSchema.pattern === 'undefined') return null; // No pattern set.
-            if (this.props.debug) console.info('Obtained EditableField validationPattern from schema (' + [this.objectType(), 'properties', this.props.labelID].join('.') + ')');
+            if (debug) console.info('Obtained EditableField validationPattern from schema (' + [this.objectType(), 'properties', labelID].join('.') + ')');
             return fieldSchema.pattern;
         }
 
@@ -444,38 +365,34 @@ export class EditableField extends React.Component {
         if (schemaDerivedPattern) return schemaDerivedPattern;
 
         // Fallback to generic pattern, if applicable for props.fieldType.
-        if (this.props.fieldType === 'phone') return localRegexValidation.phone;
-        if (this.props.fieldType === 'email') return localRegexValidation.email;
-        return null;
+        if (fieldType === 'phone') return object.itemUtil.User.localRegexValidation.phone;
+        else if (fieldType === 'email') return object.itemUtil.User.localRegexValidation.email;
+        else return null;
     }
 
     validationFeedbackMessage(){
+        var { fieldType } = this.props,
+            { required, valid, validationMessage, serverErrors, serverErrorsMessage } = this.state;
         //if (this.isValid(true)) return null;
         // ^ Hide via CSS instead.
 
-        if (this.state.required && this.state.valid === false && this.state.validationMessage){
+        if (required && valid === false && validationMessage){
             // Some validationMessages provided by browser don't give much info, so use it selectively (if at all).
+            return <span className="help-block">{ validationMessage }</span>;
+        }
+
+        if (Array.isArray(serverErrors) && serverErrors.length > 0) {
             return (
                 <span className="help-block">
-                    { this.state.validationMessage }
+                    { serverErrorsMessage ? <b>{ serverErrorsMessage }</b> : null }
+                    { _.map(serverErrors, (err, i) =>
+                        <div key={'error-' + i}>{ (serverErrors.length === 1 ? '' : (i + 1) + '. ') + err.description }</div>
+                    ) }
                 </span>
             );
         }
 
-        if (this.state.serverErrors && this.state.serverErrors.length > 0) {
-            return (
-                <span className="help-block">
-                    { this.state.serverErrorsMessage ? <b>{ this.state.serverErrorsMessage }</b> : null }
-                    { this.state.serverErrors.map((e, i)=> (
-                        <div key={'error-' + i}>
-                            { (this.state.serverErrors.length === 1 ? '' : (i + 1) + '. ') + e.description }
-                        </div>
-                    ) ) }
-                </span>
-            );
-        }
-
-        switch(this.props.fieldType){
+        switch(fieldType){
 
             case 'phone':
                 return (
@@ -485,62 +402,57 @@ export class EditableField extends React.Component {
                         <b>e.g.:</b> <code>+######### x###</code>
                     </span>
                 );
-            case 'email': return (
-                <span className="help-block">
-                    Please enter a valid email address.
-                </span>
-            );
-            case 'username' : return (
-                null
-            );
-            case 'text' : return (
-                null
-            );
+            case 'email':
+                return <span className="help-block">Please enter a valid email address.</span>;
+            case 'username':
+            case 'text':
+            default:
+                return null;
         }
     }
 
     fetch(){
-        ajax.load(this.props.endpoint || this.props.context['@id'], (r)=>{
-            var val = object.getNestedProperty(r, this.props.labelID);
-            this.setState({ value : val, savedValue : val });
+        var { endpoint, labelID, context } = this.props;
+        ajax.load(endpoint || context['@id'], (res)=>{
+            var value = object.getNestedProperty(res, labelID);
+            this.setState({ value, 'savedValue' : value });
         }, 'GET');
     }
 
     save(successCallback = null, errorCallback = null){
+        var { labelID, endpoint, context, parent } = this.props;
 
-        var errorFallback = function(r){
+        var errorFallback = (res) => {
             // ToDo display (bigger?) errors
-            console.error("Error: ", r);
-            this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
+            console.error("Error: ", res);
+            this.setState({ 'serverErrors' : res.errors, 'serverErrorsMessage' : res.description, 'loading' : false }, errorCallback);
             return;
-        }.bind(this);
+        };
 
-        this.setState({ loading : true }, ()=>{
-            var value = this.state.value;
-            var patchData = generateSparseNestedProperty(this.props.labelID, value);
-            var timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
-            ajax.load((this.props.endpoint || this.props.context['@id']) + '?ts=' + timestamp, (r)=>{
-                console.log('EditableField Save Result:', r);
+        this.setState({ 'loading' : true }, ()=>{
+            var value       = this.state.value,
+                patchData   = object.generateSparseNestedProperty(labelID, value),
+                timestamp   = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
 
-                if (r.status !== 'success'){
-                    return errorFallback(r);
-                }
+            ajax.load( (endpoint || object.itemUtil.atId(context) ) + '?ts=' + timestamp, (r) => {
+                console.info('EditableField Save Result:', r);
+                if (r.status !== 'success') return errorFallback(r);
 
-                var updatedContext = _.clone(this.props.context);
-                var inserted = deepExtendObject(updatedContext, patchData);
-                if (inserted){
+                var nextContext     = _.clone(context),
+                    insertSuccess   = object.deepExtend(nextContext, patchData);
+                if (insertSuccess){
                     this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
                         var unsubscribe = store.subscribe(()=>{
                             unsubscribe();
                             setTimeout(()=>{
-                                this.props.parent.setState({ currentlyEditing : null }, ()=> {
+                                parent.setState({ 'currentlyEditing' : null }, ()=> {
                                     this.setState({ 'loading' : false, 'dispatching' : false });
                                     if (typeof successCallback === 'function') successCallback(r);
                                 });
                             },0);
                         });
                         store.dispatch({
-                            type: { 'context': updatedContext }
+                            type: { 'context': nextContext }
                         });
                     });
 

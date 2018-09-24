@@ -56,8 +56,9 @@ export class AdjustableDividerRow extends React.PureComponent {
         'renderLeftPanel'               : PropTypes.func.isRequired,
         'renderRightPanel'              : PropTypes.func.isRequired,
         'renderLeftPanelPlaceHolder'    : PropTypes.func,
-        'height'                        : PropTypes.number, // Pre-define this.
-        'width'                         : PropTypes.number  // Wrap in a WidthProvider if don't have
+        'height'                        : PropTypes.number.isRequired, // Pre-define this.
+        'width'                         : PropTypes.number, // Wrap in a WidthProvider if don't have
+        'windowWidth'                   : PropTypes.number.isRequired
     };
 
     constructor(props){
@@ -72,7 +73,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         };
         if (props.mounted && props.leftPanelDefaultCollapsed && props.width){
             var leftPanelCollapseWidth = Math.max(props.leftPanelCollapseWidth || 0, props.minLeftPanelWidth);
-            var layoutSize = layout.responsiveGridState() || null;
+            var layoutSize = layout.responsiveGridState(props.windowWidth) || null;
             if (layoutSize === 'md' || layoutSize === 'lg'){
                 var leftPanelWidth;
                 if (layoutSize === 'md'){
@@ -136,16 +137,16 @@ export class AdjustableDividerRow extends React.PureComponent {
 
     render(){
         var { mounted, width, height, leftPanelCollapseWidth, minRightPanelWidth, minLeftPanelWidth, leftPanelDefaultSizeMD, leftPanelDefaultSizeLG,
-            className, rightPanelClassName, leftPanelClassName, renderLeftPanel, renderRightPanel, leftPanelCollapseHeight } = this.props;
+            className, rightPanelClassName, leftPanelClassName, renderLeftPanel, renderRightPanel, leftPanelCollapseHeight, windowWidth } = this.props;
 
         if (!mounted) return null;
 
         leftPanelCollapseWidth = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
 
-        var xOffset = this.state.xOffset;
-        var layoutSize = layout.responsiveGridState() || null;
-        var rightPanelDefaultSizeMD = 12 - leftPanelDefaultSizeMD;
-        var rightPanelDefaultSizeLG = 12 - leftPanelDefaultSizeLG;
+        var xOffset = this.state.xOffset,
+            layoutSize = layout.responsiveGridState(windowWidth) || null,
+            rightPanelDefaultSizeMD = 12 - leftPanelDefaultSizeMD,
+            rightPanelDefaultSizeLG = 12 - leftPanelDefaultSizeLG;
 
         this.rightPanelWidth = width; // Original full width. Used for <= small layout size.
         this.leftPanelWidth = width;

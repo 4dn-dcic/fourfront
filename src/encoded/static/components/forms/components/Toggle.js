@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { object, console } from './../util';
+import { object, console } from './../../util';
 
 /**
  * Wraps a checkbox input to turn it into a toggle switch using CSS.
