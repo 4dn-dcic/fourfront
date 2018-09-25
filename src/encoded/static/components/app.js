@@ -75,15 +75,9 @@ const portal = {
 // See https://github.com/facebook/react/issues/2323
 class Title extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.render = this.render.bind(this);
-    }
-
     componentDidMount() {
         var node = document.querySelector('title');
-        if (node && !node.getAttribute('data-reactid')) {
+        if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
             node.setAttribute('data-reactid', this._rootNodeID);
         }
     }
@@ -1244,9 +1238,8 @@ export default class App extends React.Component {
      * @returns {JSX.Element} An `<html>` element.
      */
     render() {
-        console.log('render app');
-        var canonical       = this.props.href,
-            context         = this.props.context,
+        var { context, lastCSSBuildTime } = this.props,
+            canonical       = this.props.href,
             href_url        = url.parse(canonical),
             routeList       = href_url.pathname.split("/"),
             routeLeaf       = routeList[routeList.length - 1],
@@ -1368,6 +1361,8 @@ export default class App extends React.Component {
                 'children'       : content
             });
 
+        // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
+
         return (
             <html lang="en">
                 <head>
@@ -1379,17 +1374,18 @@ export default class App extends React.Component {
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
-                    <script async src="//www.google-analytics.com/analytics.js"/>
-                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}/>
-                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/>
-                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}/>
-                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
+                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
+                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
+                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
+                    <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
+                    <script async type="application/javascript" src="//www.google-analytics.com/analytics.js" />
+                    {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
                 <BodyElement {...bodyElementProps} />
             </html>

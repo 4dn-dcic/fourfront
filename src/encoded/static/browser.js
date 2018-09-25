@@ -68,7 +68,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         var server_stats = require('querystring').parse(window.stats_cookie);
         var UseApp = connect(store.mapStateToProps)(App);
         var app;
-        
+
         try {
             app = ReactDOM.hydrate(<Provider store={store}><UseApp /></Provider>, document);
         } catch (e) {

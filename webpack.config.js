@@ -71,11 +71,13 @@ module.exports = [
     // for browser
     {
         context: PATHS.static,
-        entry: {inline: './inline'},
+        entry: {bundle: './browser'},
         output: {
             path: PATHS.build,
             publicPath: '/static/build/',
-            filename: '[name].js',
+            filename: '[name].js',          // TODO: Eventually we can change this to be chunkFilename as well, however this can only occur after we refactor React to only render <body> element and then we can use
+                                            // this library, https://www.npmjs.com/package/chunkhash-replace-webpack-plugin, to replace the <script> tag's src attribute.
+                                            // For now, to prevent caching JS, we append a timestamp to JS request.
             chunkFilename: chunkFilename,
         },
         // https://github.com/hapijs/joi/issues/665
@@ -96,7 +98,7 @@ module.exports = [
         resolveLoader : resolve,
         devtool: devTool,
         plugins: plugins,
-        debug: true
+        debug: env !== 'production'
     },
     // for server-side rendering
     ///*
@@ -109,14 +111,15 @@ module.exports = [
         node: {
             __dirname: true,
         },
-        externals: [
+        externals: [ // Anything which is not to be used server-side may be excluded
             'brace',
             'brace/mode/json',
             'brace/theme/solarized_light',
             'd3',
             'dagre-d3',
             'babel-core/register', // avoid bundling babel transpiler, which is not used at runtime
-            'higlass'
+            'higlass',
+            'auth0-lock'
         ],
         output: {
             path: PATHS.build,
