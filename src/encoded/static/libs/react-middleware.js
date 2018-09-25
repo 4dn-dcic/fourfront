@@ -12,38 +12,40 @@ var { JWT, Filters } = require('../components/util');
 import Alerts from './../components/alerts';
 
 
-var cssFileStats = fs.statSync(__dirname + '/../css/style.css'),
-    lastCSSBuildTime = Date.parse(cssFileStats.mtime.toUTCString());
+var cssFileStats        = fs.statSync(__dirname + '/../css/style.css'),
+    lastCSSBuildTime    = Date.parse(cssFileStats.mtime.toUTCString());
 
 var render = function (Component, body, res) {
+
     //var start = process.hrtime();
-    var context = JSON.parse(body);
-    var disp_dict = {
-        'context'           : context,
-        'href'              : res.getHeader('X-Request-URL') || context['@id'],
-        //'inline'            : inline, // -- uncomment this line and the line in imports if we want to compile an inline JS script.
-        'lastCSSBuildTime'  : lastCSSBuildTime
-    };
+
+    var context = JSON.parse(body),
+        disp_dict = {
+            'context'           : context,
+            'href'              : res.getHeader('X-Request-URL') || context['@id'],
+            //'inline'            : inline, // -- uncomment this line and the line in imports if we want to compile an inline JS script.
+            'lastCSSBuildTime'  : lastCSSBuildTime
+        };
 
     // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
     // JWT 'localStorage' uses 'dummyStorage' plain object on server-side
     JWT.remove(); 
+
     // Grab JWT token if available to inform session
-    var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
-    var sessionMayBeSet = false;
-    var userInfo = null;
+    var jwtToken = res.getHeader('X-Request-JWT'), // Only returned if successfully authenticated
+        sessionMayBeSet = false,
+        userInfo = null;
+
     if (JWT.maybeValid(jwtToken)){
         sessionMayBeSet = true;
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
         if (userInfo){
             JWT.saveUserInfoLocalStorage(userInfo);
         }
-        //res.removeHeader('X-User-Info');
-        //res.removeHeader('X-Request-JWT');
     } else if (
         /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 
         // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)
-        (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
+        jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token."
     ){
         sessionMayBeSet = false;
         // TEMPORARY DISABLED (maybe not temporary eventually)
