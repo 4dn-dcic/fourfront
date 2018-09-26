@@ -443,7 +443,7 @@ class File(Item):
         except AttributeError:
             file_extension = ''
         accession = self.properties.get('accession', self.properties.get('external_accession'))
-        filename = '{}.{}'.format(accession, file_extension)
+        filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(schema={
