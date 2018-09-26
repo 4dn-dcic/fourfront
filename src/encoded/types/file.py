@@ -275,8 +275,11 @@ class File(Item):
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
         file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
-        file_extension = file_format_item.get('standard_file_extension')
-        return '{}.{}'.format(accession, file_extension)
+        try:
+            file_extension = '.' + file_format_item.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
+        return '{}{}'.format(accession, file_extension)
 
     @calculated_property(schema={
         "title": "File Type",
@@ -286,9 +289,11 @@ class File(Item):
     def file_type_detailed(self, request, file_format, file_type=None):
         outString = (file_type or 'other')
         file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
-        fformat = file_format_item.get('file_format')
-        if fformat is not None:
+        try:
+            fformat = file_format_item.get('file_format')
             outString = outString + ' (' + fformat + ')'
+        except AttributeError:
+            pass
         return outString
 
     def _update(self, properties, sheets=None):
@@ -433,7 +438,10 @@ class File(Item):
     def href(self, request):
         file_format = self.properties.get('file_format')
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
-        file_extension = fformat['standard_file_extension']
+        try:
+            file_extension = '.' + fformat.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
         accession = self.properties.get('accession', self.properties.get('external_accession'))
         filename = '{}.{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
@@ -756,7 +764,10 @@ def post_upload(context, request):
         # maybe this should be properties.uuid
         uuid = context.uuid
         file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
-        file_extension = file_format.get('standard_file_extension')
+        try:
+            file_extension = '.' + fformat.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
 
         key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid, **properties)
@@ -795,11 +806,14 @@ def post_upload(context, request):
 
 
 def is_file_to_download(properties, file_format, expected_filename=None):
-    file_extension = file_format.get('standard_file_extension')
+    try:
+        file_extension = '.' + file_format.get('standard_file_extension')
+    except AttributeError:
+        file_extension = ''
     accession_or_external = properties.get('accession') or properties.get('external_accession')
     if not accession_or_external:
         return False
-    filename = '{accession}.{file_extension}'.format(
+    filename = '{accession}{file_extension}'.format(
         accession=accession_or_external, file_extension=file_extension)
     if expected_filename is None:
         return filename
