@@ -430,41 +430,36 @@ export default class App extends React.Component {
     /** @ignore */
     componentDidUpdate(prevProps, prevState) {
         var key;
-        if (this.props) {
 
-            if (this.props.href !== prevProps.href){ // We navigated somewhere else.
+        if (this.props.href !== prevProps.href){ // We navigated somewhere else.
 
-                // Register google analytics pageview event.
-                analytics.registerPageView(this.props.href, this.props.context);
+            // Register google analytics pageview event.
+            analytics.registerPageView(this.props.href, this.props.context);
 
-                // We need to rebuild tooltips after navigation to a different page.
-                ReactTooltip.rebuild();
+            // We need to rebuild tooltips after navigation to a different page.
+            ReactTooltip.rebuild();
 
+        }
+
+
+        for (key in this.props) {
+            if (this.props[key] !== prevProps[key]) {
+                console.log('changed props: %s', key);
             }
-
-
-            for (key in this.props) {
-                if (this.props[key] !== prevProps[key]) {
-                    console.log('changed props: %s', key);
-                }
+        }
+        for (key in this.state) {
+            if (this.state[key] !== prevState[key]) {
+                console.log('changed state: %s', key);
             }
         }
 
-        if (this.state) {
-            if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
-                setTimeout(function(){
-                    // Delay 100ms.
-                    console.log("SYNCING CHART DATA");
-                    ChartDataController.sync();
-                }, 100);
-            }
-
-            for (key in this.state) {
-                if (this.state[key] !== prevState[key]) {
-                    console.log('changed state: %s', key);
-                }
-            }
+        if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
+            setTimeout(function(){
+                console.log("SYNCING CHART DATA");
+                ChartDataController.sync();
+            }, 0);
         }
+
     }
 
     /**

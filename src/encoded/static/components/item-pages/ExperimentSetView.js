@@ -216,12 +216,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 
         var { context, files } = this.props;
 
-        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
-        var expTableColumnHeaders = [
-                { columnClass: 'file-detail', title: 'File Info'},
-                { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
-            ],
-            fileCount = files.length,
+        var fileCount = files.length,
             expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0,
             anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
 

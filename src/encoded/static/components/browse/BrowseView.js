@@ -530,9 +530,10 @@ export default class BrowseView extends React.Component {
     checkResyncChartData(hrefParts, context = this.props.context){
         setTimeout(()=>{
             if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
-                var cdcState = ChartDataController.getState();
-                var cdcExpSetCount = cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets;
-                if (cdcExpSetCount && cdcExpSetCount !== context.total && !cdcState.fetching){
+                var cdcState = ChartDataController.getState(),
+                    cdcExpSetCount = (cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets);
+
+                if (cdcExpSetCount && cdcExpSetCount !== context.total && !cdcState.isLoadingChartData){
                     ChartDataController.sync();
                 }
             }
