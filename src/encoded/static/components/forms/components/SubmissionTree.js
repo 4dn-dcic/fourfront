@@ -2,15 +2,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import globals from '../globals';
 import _ from 'underscore';
-import { ajax, console, object, isServerSide } from '../util';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse} from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
+import globals from './../../globals';
+import { ajax, console, object, isServerSide } from './../../util';
 
 // Create a custom tree to represent object hierarchy in front end submission.
 // Each leaf is clickable and will bring you to a view of the new object
-export default class SubmissionTree extends React.Component {
+export class SubmissionTree extends React.Component {
 
     static propTypes = {
         'keyHierarchy'      : PropTypes.object.isRequired,
@@ -88,7 +88,7 @@ class SubmissionProperty extends React.Component {
         var fieldBase = field.split('.')[0];
         var fieldSchema = itemSchema.properties[fieldBase];
 
-        var bookmark = (fieldSchema && fieldSchema.title) || delveObject(fieldSchema);
+        var bookmark = (fieldSchema && fieldSchema.title) || fieldSchemaLinkToType(fieldSchema);
         var children = _.map(
             _.filter(
                 _.keys(hierarchy[keyIdx]),
@@ -173,7 +173,6 @@ class SubmissionLeaf extends React.Component{
      * create a SubmissionLeaf for each child object under its corresponding
      * placholder.
      *
-     * @param {string} bookmark - Name of the leaf/view we're on.
      * @returns {JSX.Element} Visible leaf/branch-representing element.
      */
     generateAllPlaceholders(){
@@ -292,33 +291,44 @@ class InfoIcon extends React.Component{
 
 
 /**
- * Function to recursively find whether a json object contains a linkTo fields
- * anywhere in its nested structure. Returns object type if found, null otherwise.
+ * Function to recursively find whether a schema for a field contains a linkTo to
+ * another Item within its nested structure.
+ *
+ * @param {{ title: string, type: string, linkTo: string }} json - A schema for a field.
+ * @param {boolean} [getProperty=false] - Unused? What is this supposed to do?
+ * @returns {string|null} The `@type` of the linkTo Item referenced in the field schema, if any, else null.
  */
-export const delveObject = function myself(json, getProperty=false){
-    var found_obj = null;
-    _.keys(json).forEach(function(key, index){
-        if(key === 'linkTo'){
-            found_obj = json[key];
-        }else if(json[key] !== null && typeof json[key] === 'object'){
-            var test = myself(json[key]);
-            if(test !== null){
-                found_obj = test;
+export function fieldSchemaLinkToType(json, getProperty=false){
+    var currKeys = _.keys(json), key, value;
+
+    for (var i = 0; i < currKeys.length; i++){
+        key = currKeys[i];
+        value = json[key];
+        if (key === 'linkTo') {
+            return value;
+        } else if (value !== null && typeof value === 'object'){
+            var test = fieldSchemaLinkToType(value);
+            if (test !== null) {
+                return test;
             }
         }
-    });
-    return found_obj;
-};
+    }
+}
 
-export const delveObjectProperty = function myself(json){
-    var jsonKeys = _.keys(json);
-    var key;
+/**
+ * Returns list of recursed/nested keys from fieldSchema which contains linkTo, or true if direct linkTo on fieldSchema itself.
+ *
+ * @param {{ 'title':string, 'type':string, 'linkTo':string }} json - Schema for a field.
+ * @returns {string[]|boolean} True if current field is linkTo, else field keys which contain nested linkTos.
+ */
+export function fieldSchemaLinkToPath(json){
+    var jsonKeys = _.keys(json), key;
     for (var i = 0; i < jsonKeys.length; i++){
         key = jsonKeys[i];
         if (key === 'linkTo') {
             return true;
         } else if (json[key] !== null && typeof json[key] === 'object') {
-            var test = myself(json[key]);
+            var test = fieldSchemaLinkToPath(json[key]);
             if (test === true){
                 return [key];
             } else if (Array.isArray(test)){
@@ -328,4 +338,4 @@ export const delveObjectProperty = function myself(json){
             }
         }
     }
-};
+}

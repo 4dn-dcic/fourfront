@@ -2,6 +2,9 @@
 
 import React from 'react';
 
+/**
+ * @deprecated
+ */
 export class FileInput extends React.Component {
 
     constructor(props){

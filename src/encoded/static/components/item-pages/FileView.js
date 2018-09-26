@@ -87,7 +87,7 @@ export default class FileView extends WorkflowRunTracingView {
             width = this.getTabViewWidth(),
             steps = this.state.steps;
 
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
+        initTabs.push(FileViewOverview.getTabObject(this.props, width));
 
         if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
@@ -97,11 +97,13 @@ export default class FileView extends WorkflowRunTracingView {
             initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
-        return initTabs.concat(this.getCommonTabs(context));
+        return initTabs.concat(this.getCommonTabs(this.props));
     }
 
     itemMidSection(){
-        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} tips={this.state.tips} /></layout.WindowResizeUpdateTrigger>;
+        return (
+            <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+        );
     }
 
 }
@@ -113,7 +115,7 @@ globals.content_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, tips, width){
+    static getTabObject({context, schemas, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'file-overview',
@@ -124,7 +126,7 @@ class FileViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} tips={tips} width={width} />
+                    <FileViewOverview {...{ context, width, windowWidth }} tips={schemas} />
                 </div>
             )
         };
@@ -146,7 +148,7 @@ class FileViewOverview extends React.Component {
     }
 
     render(){
-        var { context } = this.props;
+        var { context, windowWidth, width, tips } = this.props;
 
         var setsByKey;
         var table = null;
@@ -158,12 +160,12 @@ class FileViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} defaultOpenIndices={[0]} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
             <div>
-                <FileOverViewBody result={context} tips={this.props.tips} />
+                <FileOverViewBody result={context} tips={tips} windowWidth={windowWidth} />
                 { table }
             </div>
         );
@@ -233,7 +235,7 @@ export class FileOverviewHeading extends React.Component {
     }
 
     render(){
-        var responsiveSize = layout.responsiveGridState();
+        var responsiveSize = layout.responsiveGridState(this.props.windowWidth);
         var isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
         return (
             <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>

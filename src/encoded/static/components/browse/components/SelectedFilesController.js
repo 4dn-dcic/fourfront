@@ -79,7 +79,7 @@ export class SelectedFilesController extends React.Component {
         }
     }
 
-    selectFile(uuid: string, memo = null){
+    selectFile(uuid, memo = null){
 
         var newSelectedFiles = _.clone(this.state.selectedFiles);
 
@@ -107,7 +107,7 @@ export class SelectedFilesController extends React.Component {
         this.setState({ 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount });
     }
 
-    unselectFile(uuid: string){
+    unselectFile(uuid){
         var newSelectedFiles = _.clone(this.state.selectedFiles);
 
         function remove(id) {

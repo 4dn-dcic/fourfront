@@ -742,3 +742,49 @@ def test_file_format_does_not_exist(testapp, file_formats, award, lab):
     errors = res1.json['errors']
     descriptions = ''.join([e['description'] for e in errors])
     assert "'waldo' not found" in descriptions
+
+
+def test_filename_patch_fails_wrong_format(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'filename': 'test.fastq.gz'
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('pairs').get('uuid')}
+    res2 = testapp.patch_json('/files-fastq/' + resobj['uuid'], patch_data, status=422)
+    errors = res2.json['errors']
+    error1 = "Filename test.fastq.gz extension does not agree with specified file format. Valid extension(s): '.pairs.gz'"
+    error2 = "File format pairs is not allowed for FileFastq"
+    descriptions = ''.join([e['description'] for e in errors])
+    assert error1 in descriptions
+    assert error2 in descriptions
+
+
+def test_filename_patch_works_with_different_format(testapp, file_formats, award, lab):
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+        'filename': 'test.pairs.gz'
+    }
+    res1 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('bam').get('uuid'), 'filename': 'test.bam'}
+    res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
+    assert not res2.json.get('errors')
+
+
+def test_file_format_patch_works_if_no_filename(testapp, file_formats, award, lab):
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid')
+    }
+    res1 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('bam').get('uuid')}
+    res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
+    assert not res2.json.get('errors')

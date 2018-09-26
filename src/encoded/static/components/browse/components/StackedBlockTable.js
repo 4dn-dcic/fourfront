@@ -4,22 +4,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil } from './../../util';
-import { requestAnimationFrame } from './../../viz/utilities';
 import url from 'url';
+import { FacetList } from './FacetList';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil, typedefs } from './../../util';
+import { requestAnimationFrame } from './../../viz/utilities';
 import * as store from './../../../store';
+
+var { Item } = typedefs;
+
 
 /**
  * Label to show at top left of Name block.
  */
 export class StackedBlockNameLabel extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
+    /**
+     * @ignore
+     */
     render(){
 
         var { title, subtitle, accession, inline, className } = this.props;
@@ -86,7 +87,6 @@ export class StackedBlockName extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
@@ -863,30 +863,22 @@ export class FileEntryBlock extends React.Component {
 
     /**
     * Add a link to an external site for some file types.
-    * @param file - Describes the file object that will be displayed.
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
     renderExternalLink(){
-        var { file } = this.props;
-
-        // Find out if the file format is hic.
-        // - It needs an external href link
-        //   - Either it needs a file format of 'hic'
-        //   - OR it has a detailed file type that contains 'hic'
-        var fileFormat = fileUtil.getFileFormatStr(file);
-        var fileIsHic = (
-            file
-            && (
+        var { file } = this.props,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
                 (fileFormat && fileFormat === 'hic')
-                || (
-                    file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )
-            && file.href
-        );
+                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+            )),
+            externalLinkButton      = null;
 
-        var externalLinkButton;
         if (fileIsHic) {
             // Make an external juicebox link.
             var onClick = function(evt){
+
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
@@ -915,10 +907,7 @@ export class FileEntryBlock extends React.Component {
     renderName(){
         var { file, colWidthStyles } = this.props;
         return <div
-            className={
-                "name col-file" + (
-                    file && file.accession ? ' mono-text' : ''
-                )}
+            className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
             style={colWidthStyles ? colWidthStyles.file : null}
             children={[
                 this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
@@ -1084,8 +1073,8 @@ export class StackedBlockTable extends React.Component {
     /**
      * If we have a SelectedFilesController up the parent/ancestor chain that feeds us selectFile, selectedFiles, and unselectFile, this is the handler to use for checkbox stacked blocks.
      *
-     * @param {string|string[]} uuid - String or list of strings (File Item UUID)
-     * @param {Object|Object[]} fileObj - File Item JSON
+     * @param {string|string[]} accessionTripleString - String or list of strings which represented 3 accessions (ExpSet, Exp, File) delimited by a tilde (~).
+     * @param {Item|Item[]} fileObj - File Item JSON
      * @returns {void} - Nothing.
      */
     handleFileCheckboxChange(accessionTripleString, fileObj){
@@ -1149,9 +1138,10 @@ export class StackedBlockTable extends React.Component {
     }
 
     render(){
+        var { width , fadeIn, columnHeaders, className, children } = this.props;
 
         // Cache for each render.
-        var minTotalWidth = Math.max(this.props.width || 0, this.totalColumnsWidth(this.getOriginalColumnWidths()));
+        var minTotalWidth = Math.max(width || 0, this.totalColumnsWidth(this.getOriginalColumnWidths()));
         this.lastColumnWidths = this.getColumnWidths();
 
         var renderHeaderItem = function(h, i, arr){
@@ -1163,7 +1153,8 @@ export class StackedBlockTable extends React.Component {
                 style = { 'width' : this.lastColumnWidths[i] || h.initialWidth };
             }
             return (
-                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
+                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')}
+                    key={'header-' + i} style={style} data-column-class={h.columnClass}>
                     { visibleTitle }
                 </div>
             );
@@ -1171,25 +1162,15 @@ export class StackedBlockTable extends React.Component {
 
         return (
             <div
-                className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}
-                style={{ minWidth : minTotalWidth }}
-            >
+                className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (fadeIn ? ' fade-in' : '') + (typeof className === 'string' ? ' ' + className : '')}
+                style={{ minWidth : minTotalWidth }}>
                 {
-                    !this.props.children ?
+                    !children ?
                     <h6 className="text-center text-400"><em>No Results</em></h6>
                     :
-                    <div className="headers expset-headers" ref="header">
-                        { this.props.columnHeaders.map(renderHeaderItem) }
-                    </div>
+                    <div className="headers expset-headers" ref="header" children={columnHeaders.map(renderHeaderItem)}/>
                 }
-
-                {
-                    this.props.children ?
-                    <div className="body clearfix">
-                        { this.adjustedChildren() }
-                    </div> : null
-                }
-
+                { children ? <div className="body clearfix" children={this.adjustedChildren()} /> : null }
             </div>
         );
     }

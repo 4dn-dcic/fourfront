@@ -49,9 +49,7 @@ export default class HomePage extends React.PureComponent {
             <div className="col-md-6 col-xs-12">
                 <h2 className="homepage-section-title">{ (introContent && introContent.display_title) || "Introduction" }</h2>
                 { introContent ? <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} className="text-justify" /> : <p className="text-center">Introduction content not yet indexed.</p> }
-                <layout.WindowResizeUpdateTrigger>
-                    <LinksRow session={this.props.session} />
-                </layout.WindowResizeUpdateTrigger>
+                <LinksRow {..._.pick(this.props, 'session', 'windowWidth')} />
             </div>
         );
     }

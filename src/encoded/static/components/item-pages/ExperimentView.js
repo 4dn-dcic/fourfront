@@ -84,7 +84,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
             width = this.getTabViewWidth();
 
         if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
-            initTabs.push(ExperimentSetsViewOverview.getTabObject(context, this.props.schemas, width));
+            initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
         }
 
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
@@ -159,14 +159,14 @@ class ExperimentSetsViewOverview extends React.Component {
         return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
     }
 
-    static getTabObject(context, schemas, width){
+    static getTabObject({ schemas, context, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
             'key' : 'experiments-info',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">
-                    <ExperimentSetsViewOverview context={context} schemas={schemas} width={width} />
+                    <ExperimentSetsViewOverview {...{ context, schemas, windowWidth, width }} />
                 </div>
             )
         };
@@ -181,12 +181,12 @@ class ExperimentSetsViewOverview extends React.Component {
     }
 
     render(){
-        var { context, width } = this.props, setsByKey = null;
+        var { context, width, windowWidth } = this.props, experimentSetObject = null;
 
-        setsByKey = _.object(_.zip(_.map(context.experiment_sets, object.atIdFromObject), context.experiment_sets));
+        experimentSetObject = _.object(_.zip(_.map(context.experiment_sets, object.atIdFromObject), context.experiment_sets));
 
-        if (setsByKey && _.keys(setsByKey).length > 0){
-            return <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
+        if (experimentSetObject && _.keys(experimentSetObject).length > 0){
+            return <ExperimentSetTablesLoaded {...{ experimentSetObject, width, windowWidth }} defaultOpenIndices={[0]} />;
         }
 
         return null;
@@ -200,15 +200,15 @@ class ExperimentSetsViewOverview extends React.Component {
  */
 class OverviewHeading extends React.Component {
     render(){
-        var exp = this.props.context;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-        var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
-        var commonProps = {
-            'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
-            'result'        : exp,                  // The Item from which are getting value for 'property'.
-            'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
-        };
-        var commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
+        var { context, schemas } = this.props,
+            tips = object.tipsFromSchema(schemas || Schemas.get(), context), // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+            tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, context.biosample)),
+            commonProps = {
+                'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
+                'result'        : context,              // The Item from which are getting value for 'property'.
+                'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+            },
+            commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : context.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
         return (
             <OverviewHeadingContainer>

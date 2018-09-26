@@ -12,10 +12,11 @@ import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax, analytics } from './../../util';
+import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax, analytics, typedefs } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { ColumnSorterIcon } from './LimitAndPageControls';
 
+var { Item, ColumnDefinition } = typedefs;
 
 export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
 
@@ -23,12 +24,13 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
  * Default value rendering function.
  * Uses columnDefinition field (column key) to get nested property value from result and display it.
  *
- * @param {Object} result - JSON object representing row data.
- * @param {any} columnDefinition - Object with column definition data - field, title, widthMap, render function (self)
- * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
+ * @param {Item} result - JSON object representing row data.
+ * @param {ColumnDefinition} columnDefinition - Object with column definition data - field, title, widthMap, render function (self)
+ * @param {Object} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance.
+ * @param {number} width - Unused. Todo - remove?
  * @returns {string|null} String value or null. Your function may return a React element, as well.
  */
-export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Object, props: Object, width: number){
+export function defaultColumnBlockRenderFxn(result, columnDefinition, props, width){
 
     function filterAndUniq(vals){
         return _.uniq(_.filter(vals, function(v){
@@ -61,7 +63,7 @@ export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Ob
  * Else, let exception bubble up.
  *
  * @static
- * @param {any} value
+ * @param {any} value - Value to sanitize.
  */
 export function sanitizeOutputValue(value){
     if (typeof value !== 'string' && !React.isValidElement(value)){
@@ -81,7 +83,7 @@ export function sanitizeOutputValue(value){
 
 
 
-export function extendColumnDefinitions(columnDefinitions: Array<Object>, columnDefinitionOverrideMap: Object){
+export function extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap){
     if (_.keys(columnDefinitionOverrideMap).length > 0){
         return columnDefinitions.map(function(colDef){
             if (columnDefinitionOverrideMap[colDef.field]){
@@ -114,7 +116,7 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
-        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number, popLink = false){
+        'render' : function(result, columnDefinition, props, width, popLink = false){
             var title = object.itemUtil.getTitleStringFromContext(result),
                 link = object.itemUtil.atId(result),
                 tooltip,
@@ -299,12 +301,13 @@ export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
 /**
  * Determine the typical column width, given current browser width. Defaults to large width if server-side.
  *
- * @param {Object} columnDefinition - JSON of column definition, should have widthMap or width or baseWidth.
+ * @param {ColumnDefinition} columnDefinition - JSON of column definition, should have widthMap or width or baseWidth.
  * @param {Object} columnDefinition.widthMap - Map of integer sizes to use at 'lg', 'md', or 'sm' sizes.
  * @param {boolean} [mounted=true]  - Whether component calling this function is mounted. If false, uses 'lg' to align with server-side render.
- * @returns {string|number}         - Width for div column block to be used at current screen/browser size.
+ * @param {number} [windowWidth=null] - Current window width.
+ * @returns {string|number} Width for div column block to be used at current screen/browser size.
  */
-export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
+export function getColumnWidthFromDefinition(columnDefinition, mounted=true, windowWidth=null){
 
     var w = columnDefinition.width || columnDefinition.baseWidth || null;
     if (typeof w === 'number'){
@@ -314,7 +317,7 @@ export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
     if (widthMap){
         var responsiveGridSize;
         if (!mounted || isServerSide()) responsiveGridSize = 'lg';
-        else responsiveGridSize = layout.responsiveGridState();
+        else responsiveGridSize = layout.responsiveGridState(windowWidth);
         if (responsiveGridSize === 'xs') responsiveGridSize = 'sm';
         return widthMap[responsiveGridSize || 'lg'];
     }

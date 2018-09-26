@@ -6,13 +6,15 @@ import _ from 'underscore';
 import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import * as store from './../../store';
-import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil } from './../util';
+import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer, AdjustableDividerRow } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { requestAnimationFrame } from './../viz/utilities';
+
+var { Item, File, ExperimentSet } = typedefs;
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
 // import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
@@ -22,7 +24,7 @@ import { requestAnimationFrame } from './../viz/utilities';
  * ExperimentSet Item view/page.
  *
  * @prop {Object} schemas - state.schemas passed down from app Component.
- * @prop {Object} context - JSON representation of current ExperimentSet item.
+ * @prop {ExperimentSet} context - JSON representation of current ExperimentSet item.
  */
 export default class ExperimentSetView extends WorkflowRunTracingView {
 
@@ -76,14 +78,14 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
      * Executed on width change, as well as this ItemView's prop change.
      */
     getTabViewContents(){
-        var { context, schemas } = this.props;
+        var { context, schemas, windowWidth } = this.props;
 
         //context = SET;
 
         var processedFiles  = expFxn.allProcessedFilesFromExperimentSet(context),
             rawFiles        = expFxn.allFilesFromExperimentSet(context, false),
             width           = this.getTabViewWidth(),
-            commonProps     = { width, context, schemas },
+            commonProps     = { width, context, schemas, windowWidth },
             tabs            = [];
 
         if (processedFiles && processedFiles.length > 0){
@@ -127,7 +129,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             });
         }
 
-        return tabs.concat(this.getCommonTabs(context)).map((tabObj)=>{
+        return tabs.concat(this.getCommonTabs(this.props)).map((tabObj)=>{
             return _.extend(tabObj, {
                 'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });
@@ -192,22 +194,14 @@ class OverviewHeading extends React.PureComponent {
 /**
  * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
  *
- * @memberof module:item-pages/experiment-set-view
- * @private
  * @prop {Object} context - Same context prop as available on parent component.
  * @prop {string} href - Current page href, passed down from app or Redux store.
  */
 class ExperimentSetHeader extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
     render() {
         if (this.props.debug) console.log('render ExperimentSetHeader');
         return (
-            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
+            <ItemHeader.Wrapper {..._.pick(this.props, 'href', 'context', 'schemas', 'windowWidth')} className="exp-set-header-area">
                 <ItemHeader.TopRow />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
@@ -240,10 +234,9 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 : null }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns
-                        width={this.props.width}
+                        {..._.pick(this.props, 'width', 'windowWidth', 'facets')}
                         experimentSetType={this.props.context.experimentset_type}
                         showMetricColumns={anyFilesWithMetrics}
-                        facets={ this.props.facets }
                         experimentSetAccession={this.props.context.accession || null}
                         experimentArray={this.props.context.experiments_in_set}
                         replicateExpsArray={this.props.context.replicate_exps}
@@ -281,7 +274,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
         'files'  : PropTypes.array,
-        'renderRightPanel' : PropTypes.func
+        'renderRightPanel' : PropTypes.func,
+        'windowWidth' : PropTypes.number.isRequired
     };
 
     constructor(props){
@@ -326,16 +320,16 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
+        var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
+            leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
         if (!files || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
 
         var minOpenHeight = 300,
             maxOpenHeight = 800;
 
         return (
-            <AdjustableDividerRow
-                width={width} mounted={mounted} height={minOpenHeight} leftPanelCollapseHeight={leftPanelCollapseHeight}
-                leftPanelClassName="expset-higlass-panel" leftPanelDefaultCollapsed={leftPanelDefaultCollapsed}
+            <AdjustableDividerRow {...{ width, mounted, leftPanelCollapseHeight, leftPanelDefaultCollapsed, renderRightPanel, windowWidth }}
+                height={minOpenHeight} leftPanelClassName="expset-higlass-panel"
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
                     if (collapsed){
@@ -354,8 +348,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                         return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 25, minOpenHeight), maxOpenHeight)} ref="hiGlassContainer" />;
                     }
                 }}
-                rightPanelClassName="exp-table-container" renderRightPanel={renderRightPanel}
-                onDrag={this.correctHiGlassTrackDimensions} ref="adjustableRow" />
+                rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} ref="adjustableRow" />
         );
     }
 }
@@ -365,12 +358,14 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
      * Renderer for "columnClass" : "file" column definition.
+     * It takes a different param signature than ordinary file-detail columns, which accept `file`, `fieldName`, `headerIndex`, and `fileEntryBlockProps`.
      *
-     * columnClass : 'file' render method takes different params than ordinary file-detail columns.
-     *
-     * @param {{ '@id' : string, 'file_format' : { 'display_title' : string, 'file_format' : string }, 'higlass_uid' : string }} file - File for row/column
-     * @param {{ 'expTable' : { 'props' : { 'leftPanelCollapsed' : boolean, 'resetDivider' : function } } }} tableProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
-     * @param {{ 'fileAtId' : string, 'fileTitleString' : string }} param2 - Some properties calculated by StackedTable FileEntryBlock and passed in to help cut down on JS calculation.
+     * @param {File} file - File for row/column.
+     * @param {{ expTable: { props: { leftPanelCollapsed: boolean, resetDivider: function }}}} tableProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
+     * @param {Object} param - Props passed in from a FileEntryBlock.
+     * @param {string} param.fileAtId - The atId of current file.
+     * @param {string} param.fileTitleString - The title of current of file.
+     * @returns {?JSX.Element}
      */
     static renderFileColumn(file, tableProps, { fileAtId, fileTitleString }){
         var className = file.accession ? 'mono-text' : null,
@@ -458,13 +453,13 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 
     renderTopRow(){
-        const { mounted, width, files, context } = this.props;
+        const { mounted, width, files, context, windowWidth } = this.props;
         if (!mounted) return null;
 
         // Used in ProcessedFilesStackedTable for icons/buttons
         const currentlyVisualizedFiles = this.state.currentlyVisualizedFiles;
         const processedFilesTableProps = {
-            files, currentlyVisualizedFiles,
+            files, currentlyVisualizedFiles, windowWidth,
             'experimentSetAccession' : context.accession || null,
             'experimentArray' : context.experiments_in_set,
             'replicateExpsArray' : context.replicate_exps,
@@ -485,7 +480,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, files, context, leftPanelCollapseWidth } = this.props;
+        var { mounted, width, files, context, leftPanelCollapseWidth, windowWidth } = this.props;
         if (!mounted) return null;
 
         return (
@@ -500,16 +495,10 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                             <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
                                 <span>Quality Metrics</span>
                             </h3>,
-                            <ProcessedFilesQCStackedTable
-                                key="metrics-table"
-                                files={this.state.filesWithMetrics}
-                                width={width}
-                                experimentSetAccession={context.accession || null}
-                                experimentArray={context.experiments_in_set}
-                                replicateExpsArray={context.replicate_exps}
-                                collapseLimit={10} collapseShow={7}
-                                collapseLongLists={true}
-                            />
+                            <ProcessedFilesQCStackedTable {...{ width, windowWidth }} key="metrics-table"
+                                files={this.state.filesWithMetrics} experimentSetAccession={context.accession || null}
+                                experimentArray={context.experiments_in_set} replicateExpsArray={context.replicate_exps}
+                                collapseLimit={10} collapseShow={7} collapseLongLists={true} />
                         ] : null }
                     </div>
                 </div>
@@ -524,8 +513,10 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
     /**
      * Most likely deprecated as `OtherProcessedFilesStackedTableSection.extendCollectionsWithExperimentFiles` performs the same task(s) as part of its execution.
      * Eventually can remove function and state.files, instead using props.collection.files directly.
+     *
      * @deprecated - TODO: Check/test removal of this function and finalize.
-     * @param {{ 'collection' : { 'files': { 'accession' : string, '@id' : string }[] }, 'context' : { 'accession' : string, '@id' : string } }} props - Object with 'collection', 'context' (expSet) properties.
+     * @param {{ collection: { files: Item[] }, context: Item }} props - Object with 'collection', 'context' (expSet) properties.
+     * @returns {Item[]}
      */
     static filesWithFromExpAndExpSetProperty(props){
         return _.map(props.collection.files, (origFile)=>{
@@ -544,8 +535,8 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
      * This function might be moved closer to HiGlassContainer in near future.
      * @see ProcessedFilesStackedTable.findAllFilesToVisualize()
      *
-     * @param {{ '@id' : string, 'display_title' : string, 'higlass_uid' : string, 'genome_assembly' : string }[]} files - Files to filter to visualize.
-     * @returns {!{ '@id' : string, 'display_title' : string, 'higlass_uid' : string, 'genome_assembly' : string }[]} List of files to be visualized.
+     * @param {Item[]} files - Files to filter to visualize, according to their `higlass_uid` and `genome_assembly` properties (if any).
+     * @returns {Item[]|null} List of files to be visualized.
      */
     static findAllFilesToVisualize(files){
 
@@ -612,7 +603,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
     }
 
     render(){
-        const { collection, index, context, width, mounted, defaultOpen } = this.props;
+        const { collection, index, context, width, mounted, defaultOpen, windowWidth } = this.props;
         const { open, files, currentlyVisualizedFiles } = this.state;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
@@ -622,7 +613,12 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
                         { collection.title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
                 </h4>
-                { collection.description ? <FlexibleDescriptionBox description={collection.description} className="description" fitTo="grid" expanded={open} /> : <div className="mb-15"/> }
+                { collection.description ?
+                    <FlexibleDescriptionBox description={collection.description} className="description"
+                        fitTo="grid" expanded={open} windowWidth={windowWidth} />
+                    :
+                    <div className="mb-15"/>
+                }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
                         { currentlyVisualizedFiles ? <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} /> : this.renderFilesTable(width - 21) }
@@ -710,8 +706,8 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
     }
 
     render(){
-        var { context, width, mounted } = this.props;
-        var gridState = mounted && layout.responsiveGridState();
+        var { context, width, mounted, windowWidth } = this.props;
+        var gridState = mounted && layout.responsiveGridState(windowWidth);
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
@@ -720,7 +716,7 @@ export class OtherProcessedFilesStackedTableSection extends React.PureComponent 
                 <hr className="tab-section-title-horiz-divider"/>
                 { _.map(this.state.otherProcessedFileSetsCombined, (collection, index, all) => {
                     var defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 2));
-                    return <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width, mounted }} key={index} defaultOpen={defaultOpen} />;
+                    return <OtherProcessedFilesStackedTableSectionPart {...{ collection, index, context, width, mounted, windowWidth }} key={index} defaultOpen={defaultOpen} />;
                 }) }
             </div>
         );

@@ -51,12 +51,12 @@ export function parseSectionsContent(context = this.props.context){
 /**
  * Converts links to other files into links to sections from a React element and its children (recursively).
  *
- * @param {JSX.Element} elem - A high-level React element representation of some content which might have relative links.
- * @param {{ 'content' : { 'name' : string } }} context - Backend-provided data.
- * @param {number} depth - Current depth.
- * @returns {JSX.Element} - Copy of original 'elem' param with corrected links.
+ * @param {*} elem                                      A high-level React element representation of some content which might have relative links.
+ * @param {{ content: { name: string }}} context        Backend-provided data.
+ * @param {number} [depth=0]                            Current depth.
+ * @returns {JSX.Element} Copy of original 'elem' param with corrected links.
  */
-export function correctRelativeLinks(elem, context, depth = 0){
+export function correctRelativeLinks(elem, context, depth=0){
     if (typeof elem !== 'object' || !elem) return elem; // Could be a string, or null.
     if (elem.type === 'a'){
         var href = elem.props.href;
@@ -127,20 +127,18 @@ class Wrapper extends React.PureComponent {
 
     renderToC(){
         if (!this.props.tableOfContents || this.props.tableOfContents.enabled === false) return null;
-        var contentColSize = this.contentColSize();
-        var context = this.props.context;
-        var toc = context['table-of-contents'] || (this.props.tableOfContents && typeof this.props.tableOfContents === 'object' ? this.props.tableOfContents : {});
-        var title = this.props.title || (context && context.title) || null;
+
+        var { context, tableOfContents, href, windowWidth } = this.props,
+            contentColSize = this.contentColSize(),
+            toc = context['table-of-contents'] || (tableOfContents && typeof tableOfContents === 'object' ? tableOfContents : {}),
+            title = this.props.title || (context && context.title) || null;
+
         return (
             <div key="toc-wrapper" className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
-                <TableOfContents
-                    context={context}
-                    pageTitle={title}
-                    fixedGridWidth={12 - contentColSize}
-                    navigate={this.props.navigate}
-                    href={this.props.href}
-                    //skipDepth={1}
+                <TableOfContents pageTitle={title} fixedGridWidth={12 - contentColSize}
                     maxHeaderDepth={toc['header-depth'] || 6}
+                    {..._.pick(this.props, 'navigate', 'windowWidth', 'context', 'href', 'registerWindowOnScrollHandler')}
+                    //skipDepth={1}
                     //includeTop={toc['include-top-link']}
                     //listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
                 />
@@ -150,9 +148,9 @@ class Wrapper extends React.PureComponent {
 
     render(){
 
-        var title = this.props.title || (this.props.context && this.props.context.title) || null;
-        var contentColSize = this.contentColSize();
-        var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
+        var title = this.props.title || (this.props.context && this.props.context.title) || null,
+            contentColSize = this.contentColSize(),
+            mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
 
         return (
             <div className="static-page row" key="wrapper">
@@ -319,14 +317,10 @@ export default class StaticPage extends React.PureComponent {
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
-                key="page-wrapper"
-                title={parsedContent.title}
-                tableOfContents={tableOfContents}
-                context={parsedContent}
-                navigate={this.props.navigate}
-                href={this.props.href}
-                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent)}
-            />
+                {..._.pick(this.props, 'navigate', 'windowWidth', 'registerWindowOnScrollHandler', 'href')}
+                key="page-wrapper" title={parsedContent.title}
+                tableOfContents={tableOfContents} context={parsedContent}
+                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent)} />
         );
     }
 }

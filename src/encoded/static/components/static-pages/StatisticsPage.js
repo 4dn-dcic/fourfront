@@ -18,10 +18,8 @@ export default class StatisticsPageView extends StaticPage {
         return (
             <StaticPage.Wrapper>
                 <GroupByController>
-                    <StatisticsViewController {..._.pick(this.props, 'session', 'browseBaseState')}>
-                        <layout.WindowResizeUpdateTrigger>
-                            <StatisticsChartsView {..._.pick(this.props, 'session')} />
-                        </layout.WindowResizeUpdateTrigger>
+                    <StatisticsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
+                        <StatisticsChartsView />
                     </StatisticsViewController>
                 </GroupByController>
             </StaticPage.Wrapper>
@@ -258,7 +256,7 @@ export class StatisticsChartsView extends React.Component {
 
     componentWillUpdate(nextProps, nextState){
         if (!isServerSide()){
-            this.currGridState = layout.responsiveGridState();
+            this.currGridState = layout.responsiveGridState(nextProps.windowWidth);
         }
     }
 

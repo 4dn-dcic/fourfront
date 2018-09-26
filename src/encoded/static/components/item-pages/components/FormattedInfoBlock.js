@@ -392,10 +392,12 @@ export class FormattedInfoBlock extends React.Component {
      * @see FormattedInfoBlock.generate
      *
      * @param {Object} details_lab - Object containing Lab Details.
-     * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
-     * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
-     * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
+     * @param {boolean|string} [includeIcon=true] - Include icon or not. Supply string to override default lab icon. Defaults to true.
+     * @param {boolean} [includeLabel=true] - Include 'Lab >' label in top left corner, or not. Defaults to true.
+     * @param {boolean} [includeDetail=true] - Include description/details or not. Defaults to true.
+     * @param {boolean} [isMounted=false] - Whether parent component is mounted and we can access e.g. browser window API.
      * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
+     * @returns {JSX.Element} FormattedBlock instance.
      */
     static Lab(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, isMounted = false, key = null){
 
