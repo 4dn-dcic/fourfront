@@ -42,10 +42,10 @@ var refs = {
  * @todo Better property definitions here
  * @private
  * @type {Object}
- * @property {Object} barplot_data_filtered     Object for root/first-level field with bucketed term counts, recursed with children as set in 'barplot_data_fields'.
- * @property {Object} barplot_data_unfiltered   Same as `barplot_data_filtered` but without concern for any expSetFilters aside from those in `browseBaseParams`.
- * @property {string[]} barplot_data_fields     List of fields on which aggregations/bucketing is done for generating `barplot_data_filtered` & `barplot_data_unfiltered`.
- * @property {booolean} isLoadingChartData      Whether we are currently loading.
+ * @property {{ field: string, terms: Object }} barplot_data_filtered       Object for root/first-level field with bucketed term counts, recursed with children as set in 'barplot_data_fields'.
+ * @property {{ field: string, terms: Object }} barplot_data_unfiltered     Same as `barplot_data_filtered` but without concern for any expSetFilters aside from those in `browseBaseParams`.
+ * @property {string[]} barplot_data_fields                                 List of fields on which aggregations/bucketing is done for generating `barplot_data_filtered` & `barplot_data_unfiltered`.
+ * @property {booolean} isLoadingChartData                                  Whether we are currently loading.
  */
 var state = {
 
