@@ -40,7 +40,17 @@
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
         "status": "in review by lab",
-        "accession": "4DNBS1234567"
+        "accession": "4DNBS1234567",
+        "badges": [
+            {
+                "badge": "ddd03a23-49e5-4c33-afab-9ec90d65faf3",
+                "message": "TEST BADGE 1!"
+            },
+            {
+                "badge": "dee03a23-49e5-4c33-afab-9ec90d65faf3",
+                "message": "TEST BADGE 2!"
+            }
+        ]
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460b242",
