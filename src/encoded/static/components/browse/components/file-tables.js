@@ -207,9 +207,9 @@ export class RawFilesStackedTable extends React.PureComponent {
         }
 
         var experimentVisibleName = (
-            exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                exp.experiment_type ? exp.experiment_type : exp.accession
-        ),
+                exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
+                    exp.experiment_type ? exp.experiment_type : exp.accession
+            ),
             experimentAtId  = object.itemUtil.atId(exp),
             linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
 
