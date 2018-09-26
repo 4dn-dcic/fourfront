@@ -588,8 +588,8 @@ export class SelectedFilesFilterByButton extends React.Component {
             <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'}>
                 <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/> {
                     currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : (
-                            smallerSize ? 'All ' : null
-                        )
+                        smallerSize ? 'All ' : null
+                    )
                 }
                 { smallerSize ? <span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }&nbsp;&nbsp;</span> : null }
                 <i className="icon icon-angle-down icon-fw"/>
