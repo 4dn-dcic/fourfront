@@ -729,6 +729,8 @@ export class HiGlassContainer extends React.PureComponent {
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
             if (!HiGlassComponent) {
                 window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
+                // Would ideally load non-compiled app, but requires CSS webpack loaders (see HiGlass webpack.config.js).
+                //HiGlassComponent = require('higlass/app/scripts/hglib').HiGlassComponent;
                 HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
             }
             this.setState({ 'mounted' : true });
@@ -874,7 +876,7 @@ export class HiGlassContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.3/dist/styles/hglib.css" crossOrigin />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.3/dist/styles/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
             </div>
