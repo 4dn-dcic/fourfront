@@ -21,7 +21,7 @@ export class Footer extends React.Component {
                     <div className="container">
                         <div className="row">
 
-                            <div className="col-md-6 hidden-sm">
+                            <div className="col-md-6">
                                 <div className="footer-section copy-notice">
                                     <a href="http://dcic.4dnucleome.org" target="_blank" className="text-400">
                                         4D Nucleome Data Coordination and Integration Center
