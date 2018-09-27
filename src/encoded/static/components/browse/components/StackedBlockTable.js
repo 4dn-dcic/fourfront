@@ -253,29 +253,36 @@ export class StackedBlockListViewMoreButton extends React.Component {
  */
 export class StackedBlockList extends React.Component {
 
-    static ViewMoreButton = StackedBlockListViewMoreButton
+    static ViewMoreButton = StackedBlockListViewMoreButton;
 
     static propTypes = {
-        title : PropTypes.string,
-        showMoreExtTitle : PropTypes.string,
-        collapseLimit : PropTypes.number,
-        collapseShow : PropTypes.number,
-        expTable : PropTypes.any,
-        collapseLongLists : PropTypes.bool.isRequired
-    }
+        title               : PropTypes.string,
+        showMoreExtTitle    : PropTypes.string,
+        collapseLimit       : PropTypes.number,
+        collapseShow        : PropTypes.number,
+        expTable            : PropTypes.any,
+        collapseLongLists   : PropTypes.bool.isRequired
+    };
 
     static defaultProps = {
-        collapseLimit : 4,
-        collapseShow : 3
-    }
+        'collapseLimit'     : 4,
+        'collapseShow'      : 3,
+        'collapseLongLists' : true
+    };
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
+        this.finishTransition = this.finishTransition.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         if (props.collapseLongLists && Array.isArray(props.children) && props.children.length > props.collapseLimit){
             this.state = { 'collapsed' : true };
+        }
+    }
+
+    finishTransition(){
+        if (this.props.expTable && this.props.expTable.state){
+            this.props.expTable.setState({ 'collapsing' : false });
         }
     }
 
@@ -341,16 +348,17 @@ export class StackedBlockList extends React.Component {
     }
 
     render(){
-        var children = this.adjustedChildren();
+        var { collapseLongLists, stackDepth, collapseLimit, collapseShow } = this.props,
+            children = this.adjustedChildren(),
+            className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + stackDepth),
+            timeout = 350; // Default
 
-        var className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + this.props.stackDepth);
-        var timeout = 350; // Default
-        if (!this.props.collapseLongLists || !Array.isArray(children) || children.length <= this.props.collapseLimit) {
+        if (collapseLongLists === false || !Array.isArray(children) || children.length <= collapseLimit) {
             // Don't have enough items for collapsible element, return plain list.
             return <div className={className}>{ children }</div>;
         }
 
-        var collapsibleChildren = children.slice(this.props.collapseShow);
+        var collapsibleChildren = children.slice(collapseShow);
         if (collapsibleChildren.length > 18) {
             className += ' transition-slow';
             timeout = 1000;
@@ -359,24 +367,14 @@ export class StackedBlockList extends React.Component {
             timeout = 500;
         }
 
-        var transitionFinish = function(){
-            if (this.props.expTable && this.props.expTable.state){
-                this.props.expTable.setState({ 'collapsing' : false });
-            }
-        }.bind(this);
-
         return (
             <div className={className} data-count-collapsed={collapsibleChildren.length}>
                 { children.slice(0, this.props.collapseShow) }
-                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
+                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={this.finishTransition} onEntered={this.finishTransition}>
                     <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
                 </Collapse>
-                <StackedBlockListViewMoreButton
-                    collapsibleChildren={collapsibleChildren}
-                    collapsed={this.state.collapsed}
-                    handleCollapseToggle={this.handleCollapseToggle}
-                    {...this.props}
-                />
+                <StackedBlockListViewMoreButton {...this.props} collapsibleChildren={collapsibleChildren}
+                    collapsed={this.state.collapsed} handleCollapseToggle={this.handleCollapseToggle} />
             </div>
         );
     }
@@ -613,9 +611,10 @@ const fileEntryBlockMixins = {
     },
 
     hasCheckbox : function(){
-        if (!this.props.file) return false; // No file to select.
-        if (this.props.pairParent) return false; // Part of pair -- FilePairBlock has own checkbox.
-        if (this.props.excludeCheckbox) return false;
+        var { file, pairParent, excludeCheckbox } = this.props;
+        if (!file) return false; // No file to select.
+        if (pairParent) return false; // Part of pair -- FilePairBlock has own checkbox.
+        if (excludeCheckbox) return false;
         var checked = this.isChecked();
         if (checked === null) return false; // No checked state.
         return true;
@@ -623,22 +622,15 @@ const fileEntryBlockMixins = {
 
     renderCheckBox : function(){
         if (!this.hasCheckbox()) return null;
-        var isChecked = !!this.isChecked();
-        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+        var { handleFileCheckboxChange, file } = this.props,
+            isChecked       = !!this.isChecked(),
+            accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
         return (
-            <Checkbox
-                validationState='warning'
-                checked={isChecked}
-                name="file-checkbox"
-                id={'checkbox-for-' + accessionTriple}
-                className='file-entry-table-checkbox'
-                data-select-files={[accessionTriple]}
-                onChange={this.props.handleFileCheckboxChange.bind(
-                    this.props.handleFileCheckboxChange,
-                    accessionTriple,
-                    this.props.file
-                )}
-            />
+            <Checkbox key={this.props['data-key'] || 'file-entry-checkbox'}
+                validationState='warning' checked={isChecked}
+                name="file-checkbox" id={'checkbox-for-' + accessionTriple}
+                className='file-entry-table-checkbox' data-select-files={[accessionTriple]}
+                onChange={handleFileCheckboxChange.bind(handleFileCheckboxChange, accessionTriple, file)} />
         );
     }
 
@@ -667,7 +659,7 @@ export class FileEntryBlockPairColumn extends React.Component {
 
 }
 
-export class FileEntryBlock extends React.Component {
+export class FileEntryBlock extends React.PureComponent {
 
     static accessionTripleFromProps(props){
         var accessionTriple;
@@ -740,7 +732,7 @@ export class FileEntryBlock extends React.Component {
                 baseStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (typeof col.render === 'function'){
-                row.push(<div key={col.field} className={colClassName} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
+                row.push(<div key={col.field || i} className={colClassName} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
                 continue;
             }
 
@@ -755,7 +747,7 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (typeof col.field === 'string'){
-                let val = object.getNestedProperty(file, col.field);
+                let val = object.getNestedProperty(file, col.field, true);
                 val = (val && Schemas.Term.toName(col.field, val, true)) || '-';
                 if (col.field === 'quality_metric.overall_quality_status'){
                     var linkToReport = (file.quality_metric && file.quality_metric.url) || null;
@@ -803,7 +795,7 @@ export class FileEntryBlock extends React.Component {
             fileTitleString;
 
         if (fileError) {
-            return <div className="name-title"><em>{ fileError }</em></div>;
+            return <div key="name-title" className="name-title"><em>{ fileError }</em></div>;
         }
 
         if (!file)                              fileTitleString = 'No Files';
@@ -817,12 +809,12 @@ export class FileEntryBlock extends React.Component {
         if (!fileTitleString)                   fileTitleString = file.uuid || fileAtId || 'N/A';
         if (typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, this.props, { fileAtId, fileTitleString });
-            if (renderedName) return <div className="name-title" children={renderedName} />;
+            if (renderedName) return <div key="name-title" className="name-title" children={renderedName} />;
         }
         if (!fileAtId) {
-            return <div className="name-title" children={fileTitleString}/>;
+            return <div key="name-title" className="name-title" children={fileTitleString}/>;
         }
-        return <a className="name-title mono-text" href={fileAtId} children={fileTitleString}/>;
+        return <a key="name-title" className="name-title mono-text" href={fileAtId} children={fileTitleString}/>;
     }
 
     renderLabel(){
@@ -831,6 +823,7 @@ export class FileEntryBlock extends React.Component {
         if (!file) return null;
 
         var commonProperties = {
+            'key'       : "name-block-label",
             'title'     : label && label.title,
             'inline'    : false,
             'className' : 'col-file',
@@ -894,7 +887,7 @@ export class FileEntryBlock extends React.Component {
 
             // Build the juicebox button
             externalLinkButton = (
-                <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                <Button key="external-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
                     <i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
@@ -925,7 +918,7 @@ export class FileEntryBlock extends React.Component {
         if (typeof stripe !== 'undefined' && stripe !== null){
             sBlockClassName += (stripe === true || stripe === 'even') ? ' even' : ' odd';
         }
-        return <div className={sBlockClassName} children={[this.renderName(), this.filledFileRow()]}/>;
+        return <div key="file-s-block" className={sBlockClassName} children={[this.renderName(), this.filledFileRow()]}/>;
     }
 }
 

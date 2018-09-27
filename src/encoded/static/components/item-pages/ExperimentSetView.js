@@ -468,7 +468,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         };
 
         if (currentlyVisualizedFiles && currentlyVisualizedFiles.length > 0){
-            const hiGlassProps = { width, mounted, files : currentlyVisualizedFiles };
+            const hiGlassProps = { width, mounted, windowWidth, files : currentlyVisualizedFiles };
             return (
                 <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
                     <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
@@ -621,7 +621,10 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
                 }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                        { currentlyVisualizedFiles ? <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} mounted={mounted} width={width - 21} renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} /> : this.renderFilesTable(width - 21) }
+                    { currentlyVisualizedFiles ? (
+                        <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} windowWidth={windowWidth} mounted={mounted} width={width - 21}
+                            renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
+                        ) : this.renderFilesTable(width - 21) }
                     </div>
                 </Collapse>
             </div>

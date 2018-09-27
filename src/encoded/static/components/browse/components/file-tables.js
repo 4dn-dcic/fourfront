@@ -150,10 +150,9 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        var columnHeaders = this.state.columnHeaders;
-
-        var contentsClassName = 'files';
-        var contents = [];
+        var columnHeaders       = this.state.columnHeaders,
+            contentsClassName   = 'files',
+            contents            = [];
 
         if (Array.isArray(exp.file_pairs)){
             contentsClassName = 'file-pairs';
@@ -234,11 +233,10 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
-        var biosample = expsWithBiosample[0].biosample;
-
-        var bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
-        var biosampleAtId = object.itemUtil.atId(biosample);
-        var linkTitle = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
+        var biosample       = expsWithBiosample[0].biosample,
+            bioRepTitle     = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary,
+            biosampleAtId   = object.itemUtil.atId(biosample),
+            linkTitle       = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
         return (
             <StackedBlock
                 columnClass="biosample"
