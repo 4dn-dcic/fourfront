@@ -1,17 +1,17 @@
 # Documentation for 4DN/Fourfront Front-End
 
 
-### This is a living document. Edit it as needed.
+#### This is a living document. Edit it as needed.
 
 ---
 
 ## Overview
 
-The client/front-end for the [4DN Data Portal](https://data.4dnucleome.org) functions as a single-page application (SPA) and is written entirely in [ReactJS](https://reactjs.org/). This includes the output/rendering of the `<head>` document HTML element<sup>1</sup>.
+The client/front-end for the [4DN Data Portal](https://data.4dnucleome.org) functions as a single-page application (SPA) and is written entirely in [ReactJS](https://reactjs.org/). This includes the output/rendering of the `<head>` document HTML element¹.
 
-<small>
-<sup>1.</sup> <a href="https://github.com/facebook/react/pull/2311#issuecomment-58743271">Rendering 'head' element is against React best practices as of 2014</a> -- a long-term to-do includes refactoring this aspect of our front-end.
-</small>
+
+**¹** [Rendering 'head' element is against React best practices as of 2014](https://github.com/facebook/react/pull/2311#issuecomment-58743271) -- a long-term to-do includes refactoring this aspect of our front-end.
+
 
 ## Server-Side Rendering
 
@@ -25,20 +25,20 @@ The front-end browser environment, after receiving the HTML response, then loads
 
 ### Considerations
 
-The server-side render cannot differ from the front-end render, so some features -- namely any which require access to the browser API (`window`, `document`, etc.) or a viewport -- cannot be used until the app or relevant component has been [mounted](https://reactjs.org/docs/react-component.html#componentdidmount). This mostly affects things with calculated dimensions, e.g. an element's width, or chart dimension, that is a function/product of browser viewport width; localized date times; etc. An "invariant error" will occur if any properties or attributes differ between server-side and client-side render (pre-`compoonentDidMount`)<sup>2</sup>.
+The server-side render cannot differ from the front-end render, so some features -- namely any which require access to the browser API (`window`, `document`, etc.) or a viewport -- cannot be used until the app or relevant component has been [mounted](https://reactjs.org/docs/react-component.html#componentdidmount). This mostly affects things with calculated dimensions, e.g. an element's width, or chart dimension, that is a function/product of browser viewport width; localized date times; etc. An "invariant error" will occur if any properties or attributes differ between server-side and client-side render (pre-`compoonentDidMount`)².
 
-<small>
-<sup>2.</sup> As of React 16, "invariant" errors are less likely to be thrown because React version 16 introduced a <a href="https://hackernoon.com/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67#4e11">less strict diffing algorithm</a> for when mounting/hydrating over server-side-rendered HTML.
-</small>
+
+**²** As of React 16, "invariant" errors are less likely to be thrown because React version 16 introduced a [less strict diffing algorithm](https://hackernoon.com/whats-new-with-server-side-rendering-in-react-16-9b0d78585d67#4e11) for when mounting/hydrating over server-side-rendered HTML.
+
 
 ## React Component Structure
 
-`App.js` and its primary `App` component is the structural root of the front-end application. From there, the app branches out into several layout components. The `App` component is wrapped by a Redux store as well <sup>3</sup>.
+`App.js` and its primary `App` component is the structural root of the front-end application. From there, the app branches out into several layout components. The `App` component is wrapped by a Redux store as well³.
 A registry is used to determine which 'page view' to use for a given URI/endpoint/response according to the `@type` for the response. The App component itself renders one primary component -- the `BodyElement`, which renders the `<body>` tag, and then branches out into multiple other component and elements.
 
 ### Direct Descendant Components/Elements
 
-Some of the components that App/BodyElement renders (or branches out to) are 'ever-present' on each page and don't change or change minimally in response to navigation, this includes Components such as `NavigationBar`, `PageTitle`, `Footer`, `QuickInfoBar`, and `FacetCharts`, as well as some elements (e.g. most things inside the `<head>` tag). Some of these render/return `null` when on a page which does not require them - namely `QuickInfoBar` and `FacetCharts`. `FacetCharts` & `QuickInfoBar` are defined in the root level BodyElement instead of deeper in tree, e.g. `HomePage` + `BrowseView` components, because it must stay present when transitioning/navigating from one page to the other (Home <-> Browse); being present twice on two separate views would cause it to be dismounted and re-mounted.
+Some of the components that App/BodyElement renders (or branches out to) are 'ever-present' on each page and don't change or change minimally in response to navigation, this includes Components such as `NavigationBar`, `PageTitle`, `Footer`, `QuickInfoBar`, and `FacetCharts`, as well as some elements (e.g. most things inside the `<head>` tag). Some of these render/return `null` when on a page which does not require them - namely `QuickInfoBar` and `FacetCharts`. `FacetCharts` & `QuickInfoBar` are defined in the root level BodyElement instead of deeper in tree, e.g. `HomePage` + `BrowseView` components, because it must stay present when transitioning/navigating from one page to the other (Home ↔ Browse); being present twice on two separate views would cause it to be dismounted and re-mounted.
 
 `NavigationBar` & `QuickInfoBar` receive selected props/state from App + BodyElement and render their (lack of) visibility - as well as other visual states, data, etc. - in response to them.
 
@@ -54,9 +54,9 @@ This approach makes slightly less sense to do now given that we try to utilize R
 
 The ultimate example of this is the `ChartDataController` and its synchronized `ChartDataController.Provider` components, where ChartDataController fetches, stores, and provides callback functions for syncing ElasticSearch-aggregated data from the `/bar_plot_aggregations` endpoint. The ES-agged data is in turn used in/for a _few_ important but random and not 'close-together-in-rendering-tree' places - the QuickInfoBar (to get total current-filtered-in count), the BarPlot chart (for bucketed counts to use for bars, bar sections), the "Select All Files" button (if counts match, all files are selected.).
 
-<small>
-<sup>3.</sup> The Redux store wraps the App component as a parent and could technically be considered the "root" "component" as well by some, though it does not have a render method.
-</small>
+
+**³** The Redux store wraps the App component as a parent and could technically be considered the "root" "component" as well by some, though it does not have a render method.
+
 
 ## Generating this documentation
 
