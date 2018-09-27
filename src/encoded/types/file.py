@@ -932,8 +932,7 @@ def validate_file_format_validity_for_file_type(context, request):
     data = request.json
     if 'file_format' in data:
         file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
-        # if get item if you can did not work it will return the data['file_format']
-        if file_format_item == data['file_format']:
+        if not file_format_item:
             # item level validation will take care of generating the error
             return
         file_format_name = file_format_item['file_format']
@@ -957,19 +956,17 @@ def validate_file_filename(context, request):
             return
     else:
         filename = data['filename']
-    file_format_item = None
     ff = data.get('file_format')
     if not ff:
         ff = context.properties.get('file_format')
     file_format_item = get_item_if_you_can(request, ff, 'file-formats')
-    if 'standard_file_extension' not in file_format_item:
-        try:
-            file_format_item = request.registry['collections']['FileFormat'].get(file_format_item['uuid'])
-        except (AttributeError, TypeError):
-            pass
+    if not file_format_item:
+        msg = 'Problem getting file_format for %s' % filename
+        request.errors.add('body', None, msg)
+        return
     msg = None
     try:
-        file_extensions = [file_format_item['standard_file_extension']]
+        file_extensions = [file_format_item.get('standard_file_extension')]
         if file_format_item.get('other_allowed_extensions'):
             file_extensions.extend(file_format_item.get('other_allowed_extensions'))
             file_extensions = list(set(file_extensions))
