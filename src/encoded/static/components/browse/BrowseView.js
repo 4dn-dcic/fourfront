@@ -604,21 +604,14 @@ export default class BrowseView extends React.Component {
                     <hr/>
                     {
                         countExternalSets > 0 ?
-                            React.createElement(
-                                'h4',
-                                { 'className' : "text-400 mb-05 mt-05" },
-                                "Only External Data results were found."
-                            )
-                            : React.createElement(
-                                'h3',
-                                { 'className' : "text-400 mb-05 mt-05" },
-                                'No results found.'
-                            )
+                            <h4 className="text-400 mb-18 mt-05">Only External Data results were found.</h4>
+                            :
+                            <h3 className="text-400 mb-05 mt-05">No results found.</h3>
                     }
                     { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
                         <div className="mb-10 mt-1">
-                            <Button bsSize="large" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
-                                Browse { countExternalSets } External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
+                            <Button bsSize="large" bsStyle="primary" className="text-400 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
+                                Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
                             </Button>
                         </div>
                     : null }
