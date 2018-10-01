@@ -280,7 +280,9 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     aggregated_items = {
-        "badges": ["badge.badge_classification", "message", "badge.principals_allowed.view", "badge.uuid"]
+        "badges": ["badge.badge_classification", "message", "badge.principals_allowed.view", "badge.uuid"],
+        "biosample": ["uuid", "biosource", "principals_allowed.view", "principals_allowed"],
+        "biosource": ['biosource_type']
     }
     embedded_list = ExperimentSet.embedded_list + [
         "replicate_exps.replicate_exp.accession"

@@ -581,6 +581,11 @@
         "lab.display_title": {
             "title": "Lab"
         }
+    },
+    "facets_aggregated_badges" : {
+        "aggregated_items.badges.item.badge.badge_classification": {
+            "title": "Badge Classification"
+        }
     }
 
 }

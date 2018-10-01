@@ -50,7 +50,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'sort': {}
     }
     principals = effective_principals(request)
-
     es = request.registry[ELASTIC_SEARCH]
     search_audit = request.has_permission('search_audit')
 
@@ -344,7 +343,7 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field.startswith('audit'):
+        if field.startswith('audit') or field.startswith('aggregated_items'):
             continue
         elif field == 'q': # searched string has field 'q'
             # people shouldn't provide multiple queries, but if they do,
@@ -631,7 +630,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
             not_field = True
 
         # Add filter to query
-        if field.startswith('audit'):
+        if field.startswith('audit') or field.startswith('aggregated_items'):
             query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
@@ -875,7 +874,7 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
 
         if field == 'type':
             query_field = 'embedded.@type.raw'
-        elif field.startswith('audit'):
+        elif field.startswith('audit') or field.startswith('aggregated_items'):
             query_field = field + '.raw'
         elif facet.get('aggregation_type') in ('date_histogram', 'histogram', 'range'):
             query_field = 'embedded.' + field
@@ -1087,6 +1086,7 @@ def format_results(request, hits, search_frame):
     """
     Loads results to pass onto UI
     For now, add audits to the results so we can facet/not facet on audits
+    Also add aggregated_items
     """
     fields_requested = request.params.getall('field')
     if fields_requested:
@@ -1104,6 +1104,8 @@ def format_results(request, hits, search_frame):
             frame_result = hit['_source'][frame]
             if 'audit' in hit['_source'] and 'audit' not in frame_result:
                 frame_result['audit'] = hit['_source']['audit']
+            if 'aggregated_items' in hit['_source'] and 'aggregated_items' not in frame_result:
+                frame_result['aggregated_items'] = hit['_source']['aggregated_items']
             yield frame_result
         return
 

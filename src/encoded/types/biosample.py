@@ -27,6 +27,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
     # name_key = 'accession'
+    aggregated_items = {
+        'biosource': ['biosource_type'],
+        'cell_culture_details': ['uuid', 'principals_allowed']
+    }
     embedded_list = [
         'biosource.biosource_type',
         'biosource.individual.sex',

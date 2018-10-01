@@ -28,7 +28,8 @@
     ],
     "mixinFacets": [
         { "$ref": "experiment_set.json#/facets"},
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "mixinColumns": [
         { "$ref": "experiment_set.json#/columns"}
