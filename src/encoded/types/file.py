@@ -275,8 +275,11 @@ class File(Item):
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
         file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
-        file_extension = file_format_item.get('standard_file_extension')
-        return '{}.{}'.format(accession, file_extension)
+        try:
+            file_extension = '.' + file_format_item.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
+        return '{}{}'.format(accession, file_extension)
 
     @calculated_property(schema={
         "title": "File Type",
@@ -286,9 +289,11 @@ class File(Item):
     def file_type_detailed(self, request, file_format, file_type=None):
         outString = (file_type or 'other')
         file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
-        fformat = file_format_item.get('file_format')
-        if fformat is not None:
+        try:
+            fformat = file_format_item.get('file_format')
             outString = outString + ' (' + fformat + ')'
+        except AttributeError:
+            pass
         return outString
 
     def _update(self, properties, sheets=None):
@@ -433,9 +438,12 @@ class File(Item):
     def href(self, request):
         file_format = self.properties.get('file_format')
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
-        file_extension = fformat['standard_file_extension']
+        try:
+            file_extension = '.' + fformat.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
         accession = self.properties.get('accession', self.properties.get('external_accession'))
-        filename = '{}.{}'.format(accession, file_extension)
+        filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(schema={
@@ -756,7 +764,10 @@ def post_upload(context, request):
         # maybe this should be properties.uuid
         uuid = context.uuid
         file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
-        file_extension = file_format.get('standard_file_extension')
+        try:
+            file_extension = '.' + file_format.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
 
         key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid, **properties)
@@ -795,11 +806,14 @@ def post_upload(context, request):
 
 
 def is_file_to_download(properties, file_format, expected_filename=None):
-    file_extension = file_format.get('standard_file_extension')
+    try:
+        file_extension = '.' + file_format.get('standard_file_extension')
+    except AttributeError:
+        file_extension = ''
     accession_or_external = properties.get('accession') or properties.get('external_accession')
     if not accession_or_external:
         return False
-    filename = '{accession}.{file_extension}'.format(
+    filename = '{accession}{file_extension}'.format(
         accession=accession_or_external, file_extension=file_extension)
     if expected_filename is None:
         return filename
@@ -918,8 +932,7 @@ def validate_file_format_validity_for_file_type(context, request):
     data = request.json
     if 'file_format' in data:
         file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
-        # if get item if you can did not work it will return the data['file_format']
-        if file_format_item == data['file_format']:
+        if not file_format_item:
             # item level validation will take care of generating the error
             return
         file_format_name = file_format_item['file_format']
@@ -943,19 +956,17 @@ def validate_file_filename(context, request):
             return
     else:
         filename = data['filename']
-    file_format_item = None
     ff = data.get('file_format')
     if not ff:
         ff = context.properties.get('file_format')
     file_format_item = get_item_if_you_can(request, ff, 'file-formats')
-    if 'standard_file_extension' not in file_format_item:
-        try:
-            file_format_item = request.registry['collections']['FileFormat'].get(file_format_item['uuid'])
-        except (AttributeError, TypeError):
-            pass
+    if not file_format_item:
+        msg = 'Problem getting file_format for %s' % filename
+        request.errors.add('body', None, msg)
+        return
     msg = None
     try:
-        file_extensions = [file_format_item['standard_file_extension']]
+        file_extensions = [file_format_item.get('standard_file_extension')]
         if file_format_item.get('other_allowed_extensions'):
             file_extensions.extend(file_format_item.get('other_allowed_extensions'))
             file_extensions = list(set(file_extensions))

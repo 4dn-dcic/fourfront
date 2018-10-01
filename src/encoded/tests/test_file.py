@@ -139,7 +139,6 @@ def test_patch_extra_files(testapp, proc_file_json):
 def test_extra_files_download(testapp, registry, proc_file_json):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
-
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')

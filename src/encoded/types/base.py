@@ -147,7 +147,7 @@ def get_item_if_you_can(request, value, itype=None):
             return request.embed(svalue, '@@object')
         except:
             # this could lead to unexpected errors
-            return value
+            return None
 
 
 def set_namekey_from_title(properties):
