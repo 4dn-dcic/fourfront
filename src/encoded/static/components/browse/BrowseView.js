@@ -590,30 +590,36 @@ export default class BrowseView extends React.Component {
             browseBaseHref = navigate.getBrowseBaseHref(),
             queryForSearchAllItems = _.extend( _.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ), { 'type' : 'Item' } );
 
+        // Function to reuse the search function but with External Data flag activated.
+        var browseExternalData = (e)=>{
+            e.preventDefault();
+            e.stopPropagation();
+            navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+        };
+
+        // If there are no External Sets found:
+        // - Tell the user there is no data.
+
+        // If there are External Sets that match the filter:
+        // - Tell the user they exist, and how many.
+        // - Instruct the user to click on the button to search for Experiment Sets in External Data.
         return (
             <div className="error-page mt-4">
                 <div className="clearfix">
                     <hr/>
-                    { React.createElement(countExternalSets > 0 ? 'h4' : 'h3', { 'className' : "text-400 mb-05 mt-42" }, 'No results found for current filter selection.') }
-                    { countExternalSets > 0 ?
-                        <h3 className="text-500 mt-05 mb-05">
-                            However, there { countExternalSets > 1 ? 'are ' + countExternalSets + ' Experiment Sets' : 'is one Experiment Set' } available in External Data.
-                        </h3>
-                    : null}
-                    <h4 className="mt-2 mb-05 text-400">Suggestions:</h4>
-                    <ul className="mb-45 mt-1">
-                        { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
-                            <li>
-                                Keep current filters and <a href="#" onClick={(e)=>{
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
-                                }}>browse <strong>all Experiment Sets</strong></a>, including External data.
-                            </li>
-                        : null }
-                        { hrefParts.path !== browseBaseHref ? <li>Unset filters and <a href={browseBaseHref}>browse <strong>all 4DN Experiment Sets</strong></a>.</li> : null }
-                        <li><a href={'/search/?' + queryString.stringify(queryForSearchAllItems)}>Search <strong>all Items</strong></a> (advanced).</li>
-                    </ul>
+                    {
+                        countExternalSets > 0 ?
+                            <h4 className="text-400 mb-18 mt-05">Only External Data results were found.</h4>
+                            :
+                            <h3 className="text-400 mb-05 mt-05">No results found.</h3>
+                    }
+                    { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
+                        <div className="mb-10 mt-1">
+                            <Button bsSize="large" bsStyle="primary" className="text-400 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
+                                Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
+                            </Button>
+                        </div>
+                    : null }
                     <hr/>
                 </div>
             </div>
