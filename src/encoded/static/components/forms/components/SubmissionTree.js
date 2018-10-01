@@ -173,7 +173,6 @@ class SubmissionLeaf extends React.Component{
      * create a SubmissionLeaf for each child object under its corresponding
      * placholder.
      *
-     * @param {string} bookmark - Name of the leaf/view we're on.
      * @returns {JSX.Element} Visible leaf/branch-representing element.
      */
     generateAllPlaceholders(){
@@ -295,7 +294,8 @@ class InfoIcon extends React.Component{
  * Function to recursively find whether a schema for a field contains a linkTo to
  * another Item within its nested structure.
  *
- * @param {{ 'title':string, 'type':string, 'linkTo':string }} fieldSchema - A schema for a field.
+ * @param {{ title: string, type: string, linkTo: string }} json - A schema for a field.
+ * @param {boolean} [getProperty=false] - Unused? What is this supposed to do?
  * @returns {string|null} The `@type` of the linkTo Item referenced in the field schema, if any, else null.
  */
 export function fieldSchemaLinkToType(json, getProperty=false){

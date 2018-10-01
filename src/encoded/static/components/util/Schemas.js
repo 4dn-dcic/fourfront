@@ -293,6 +293,7 @@ export function getSchemaTypeFromSearchContext(context){
  * To this form: "key" : { ... }, "key.property" : { ...details... }, ...
  *
  * @param {Object} tips - Schema property object with a potentially nested 'items'->'properties' value(s).
+ * @param {number} [depth=0] - Current recursive depth.
  * @returns {Object} Object with period-delimited keys instead of nested value to represent nested schema structure.
  */
 export function flattenSchemaPropertyToColumnDefinition(tips, depth = 0){
