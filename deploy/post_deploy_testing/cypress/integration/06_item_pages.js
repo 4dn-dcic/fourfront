@@ -28,7 +28,7 @@ describe("Individual Item Views", function(){
 
             it('FileView loads correctly on click from SearchView', function(){
                 cy.get('.search-results-container .search-result-row[data-row-number="' + idx + '"] .search-result-column-block[data-field="display_title"] a')
-                    .should('contain', '.mcool').click({ force: true }).end();
+                    .should('contain', '.mcool').click({ force: true }).wait(200).end();
             });
 
             testGraphTabClick();
