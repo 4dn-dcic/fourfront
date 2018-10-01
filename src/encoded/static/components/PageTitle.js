@@ -19,6 +19,9 @@ const { Item, JSONContentResponse, SearchResponse } = typedefs;
 
 /**
  * A hardcoded mapping of URIs to title string or function.
+ *
+ * @private
+ * @ignore
  */
 const TITLE_PATHNAME_MAP = {
     '/' : {
@@ -366,6 +369,7 @@ export default class PageTitle extends React.PureComponent {
 /**
  * Used for most page titles.
  *
+ * @ignore
  * @prop {JSX.Element|string} title - Shown at top left, 300 font weight.
  * @prop {JSX.Element|string} calloutTitle - Shown at right of title in similar size, 400 font weight.
  * @prop {JSX.Element|string} subtitle - Shown at bottom title in small size, 400 font weight.

@@ -246,12 +246,10 @@ export class Chart extends React.PureComponent {
      * @ignore
      */
     componentWillReceiveProps(nextProps){
-        ///*
         if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
-        //*/
     }
 
 
@@ -262,14 +260,13 @@ export class Chart extends React.PureComponent {
 
     componentDidUpdate(pastProps){
 
-        ///*
         if (Chart.shouldPerformManualTransitions(this.props, pastProps)){
             // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
             setTimeout(()=>{
+                if (!this || !this.state || !this.state.mounted) return;
                 this.setState({ transitioning : false });
             }, 750);
         }
-        //*/
 
     }
 

@@ -694,7 +694,10 @@ export class HiGlassContainer extends React.PureComponent {
             'uuid' : PropTypes.string.isRequired,
             'accession' : PropTypes.string.isRequired,
             'higlass_uid' : PropTypes.string,
-            'file_format' : PropTypes.string.isRequired,
+            'file_format' : PropTypes.shape({
+                'file_format' : PropTypes.string,
+                'display_title' : PropTypes.string.isRequired
+            }),
             'genome_assembly' : PropTypes.string.isRequired
         })).isRequired,
         'extraViewProps' : PropTypes.arrayOf(PropTypes.object)

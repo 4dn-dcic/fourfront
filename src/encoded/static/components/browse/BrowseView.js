@@ -528,12 +528,17 @@ export default class BrowseView extends React.Component {
      * @returns {void}
      */
     checkResyncChartData(hrefParts, context = this.props.context){
-        setTimeout(()=>{
+        setTimeout(function(){
             if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
-                var cdcState = ChartDataController.getState();
-                var cdcExpSetCount = cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets;
-                if (cdcExpSetCount && cdcExpSetCount !== context.total && !cdcState.fetching){
-                    ChartDataController.sync();
+                var cdcState = ChartDataController.getState(),
+                    cdcExpSetCount = (cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets);
+
+                if (cdcExpSetCount && cdcExpSetCount !== context.total){
+                    if (cdcState.isLoadingChartData){
+                        console.info('Already loading chart data, canceling.');
+                    } else {
+                        ChartDataController.sync();
+                    }
                 }
             }
         });
