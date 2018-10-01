@@ -765,7 +765,7 @@ def post_upload(context, request):
         uuid = context.uuid
         file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
         try:
-            file_extension = '.' + fformat.get('standard_file_extension')
+            file_extension = '.' + file_format.get('standard_file_extension')
         except AttributeError:
             file_extension = ''
 
