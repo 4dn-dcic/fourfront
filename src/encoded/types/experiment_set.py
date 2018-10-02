@@ -1,7 +1,7 @@
 """Collection for ExperimentSet and ExperimentSetReplicate."""
 
 from pyramid.threadlocal import get_current_request
-
+from pyramid.view import view_config
 from snovault import (
     calculated_property,
     collection,
@@ -10,12 +10,18 @@ from snovault import (
     BeforeModified
 )
 from snovault.calculated import calculate_properties
-
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
 from .base import (
     Item,
-    paths_filtered_by_status
+    paths_filtered_by_status,
+    collection_add,
+    item_edit,
+    lab_award_attribution_embed_list
 )
-
 import datetime
 
 
@@ -49,6 +55,7 @@ def invalidate_linked_items(item, field, updates=None):
             registry.notify(AfterModified(linked_item, request))
 
 
+
 @collection(
     name='experiment-sets',
     unique_key='accession',
@@ -66,20 +73,19 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
-    embedded_list = [
-        "award.project",
-        "award.center_title",
-        "lab.city",
-        "lab.state",
-        "lab.country",
-        "lab.postal_code",
-        "lab.city",
-        "lab.title",
+    embedded_list = lab_award_attribution_embed_list + [
+        "static_headers.content",
+        "static_headers.title",
+        "static_headers.filetype",
+        "static_headers.section_type",
+        "static_headers.options.default_open",
+        "static_headers.options.title_icon",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
+        "produced_in_pub.short_attribution",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",
@@ -91,10 +97,12 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
+        "experiments_in_set.badges.*",
 
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
         "experiments_in_set.biosample.biosource_summary",
+        "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
@@ -106,6 +114,7 @@ class ExperimentSet(Item):
         'experiments_in_set.biosample.treatments.treatment_type',
         'experiments_in_set.biosample.treatments.display_title',
         'experiments_in_set.biosample.treatments_summary',
+        "experiments_in_set.biosample.badges.*",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
@@ -134,6 +143,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
+        "experiments_in_set.files.badges.*",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -180,6 +190,8 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.file_type_detailed",
         "experiments_in_set.processed_files.status",
         "experiments_in_set.processed_files.md5sum",
+        "experiments_in_set.processed_files.higlass_uid",
+        "experiments_in_set.processed_files.genome_assembly",
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
         "experiments_in_set.processed_files.extra_files.file_format",
@@ -193,15 +205,19 @@ class ExperimentSet(Item):
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
+        "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
+        "other_processed_files.files.href",
 
+        "experiments_in_set.other_processed_files.files.href",
         "experiments_in_set.other_processed_files.title",
         "experiments_in_set.other_processed_files.description",
         "experiments_in_set.other_processed_files.type",
         "experiments_in_set.other_processed_files.files.accession",
         "experiments_in_set.other_processed_files.files.file_type_detailed",
+        "experiments_in_set.other_processed_files.files.file_format",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
         "experiments_in_set.other_processed_files.files.genome_assembly"
@@ -214,9 +230,8 @@ class ExperimentSet(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
-        uuids = [str(pub) for pub in self.get_rev_links('publications_produced')]
-        pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, uuids)]
+        pub_paths = self.rev_link_atids(request, 'publications_produced')
+        pubs = [request.embed('/', path, '@@object') for path in pub_paths]
         if pubs:
             return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']),
                           reverse=True)[0].get('@id')
@@ -232,11 +247,9 @@ class ExperimentSet(Item):
         }
     })
     def publications_of_set(self, request):
-        pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
-                   self.get_rev_links('publications_using')])
-        pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, pubs)]
-        return [pub['@id'] for pub in pubs]
+        pubs_produced = self.rev_link_atids(request, 'publications_produced')
+        pubs_using = self.rev_link_atids(request, 'publications_using')
+        return list(set(pubs_produced + pubs_using))
 
     @calculated_property(schema={
         "title": "Number of Experiments",
@@ -267,6 +280,48 @@ class ExperimentSetReplicate(ExperimentSet):
     ]
 
     def _update(self, properties, sheets=None):
-        all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
+        all_experiments = [exp['replicate_exp'] for exp in properties.get('replicate_exps', [])]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+    class Collection(Item.Collection):
+        pass
+
+
+def validate_experiment_set_replicate_experiments(context, request):
+    '''
+    Validates that each replicate_exps.replicate_exp in context (ExperimentSetReplicate Item) is unique within the ExperimentSetReplicate.
+    '''
+    data = request.json
+    replicate_exp_objects = data.get('replicate_exps', [])
+
+    have_seen_exps = set()
+    any_failures = False
+    for replicate_idx, replicate_exp_object in enumerate(replicate_exp_objects):
+        experiment = replicate_exp_object.get('replicate_exp')
+        if experiment is None:
+            request.errors.add('body', None, 'No experiment supplied for replicate_exps[' + str(replicate_idx) + ']')
+            any_failures = True
+            continue
+        if experiment in have_seen_exps:
+            request.errors.add('body', None, 'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']')
+            any_failures = True
+            continue
+        have_seen_exps.add(experiment)
+
+    if not any_failures:
+        request.validated.update({})
+
+
+@view_config(context=ExperimentSetReplicate.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_experiment_set_replicate_experiments])
+def experiment_set_replicate_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=ExperimentSetReplicate, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_experiment_set_replicate_experiments])
+@view_config(context=ExperimentSetReplicate, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments])
+def experiment_set_replicate_edit(context, request, render=None):
+    return item_edit(context, request, render)

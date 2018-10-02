@@ -85,7 +85,6 @@
             "title": "Content Sections",
             "description": "Sections used to compose the static page",
             "type": "array",
-            "default": [],
             "items": {
                 "type": "string",
                 "linkTo" : "StaticSection"

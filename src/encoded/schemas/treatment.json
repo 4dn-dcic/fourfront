@@ -4,9 +4,12 @@
     "id": "/profiles/treatment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["description", "lab", "award"],
+    "required": ["description", "treatment_type", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
     "properties": {
         "description": {
             "title": "Description",
@@ -26,6 +29,23 @@
               "RNAi",
               "Other"
             ]
+        },
+        "url": {
+            "title": "URL",
+            "description": "An external resource with additional information about the construct.",
+            "type": "string",
+            "lookup": 1000,
+            "format": "uri"
+        }
+    },
+    "facets": {
+        "treatment_type": {
+            "title": "Treatment type"
+        }
+    },
+    "columns": {
+        "treatment_type": {
+          "title": "Treatment type"
         }
     }
 }

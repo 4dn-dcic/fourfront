@@ -23,6 +23,7 @@ var _testing_data;
 //import { ALL_RUNS } from './../testdata/traced_workflow_runs/files-processed-4DNFI18UHVRO';
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNESXZ4FW4T';
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNES9L4AK6Q';
+//import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNESXKBPZKQ';
 //_testing_data = STEPS;
 
 
@@ -62,6 +63,8 @@ export class WorkflowRunTracingView extends DefaultItemView {
     }
 
     componentDidMount(){
+        super.componentDidMount(...arguments);
+
         var nextState = { 'mounted' : true };
 
         if (!this.state.steps){

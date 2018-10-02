@@ -637,8 +637,13 @@ h4.tab-section-title {
           opacity: 0.25;
       }
 
-      &.icon-th {
+      &.icon-th,
+      &.icon-list,
+      &.icon-warning,
+      &.icon-microchip,
+      &.icon-leaf {
         position: relative;
+        top: 1px;
         top: 0.5px;
       }
     }

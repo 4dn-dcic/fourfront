@@ -3,16 +3,17 @@
 import _ from 'underscore';
 import { atIdFromObject } from './object';
 import patchedConsoleInstance from './patched-console';
+import { Item, File, Experiment, ExperimentSet } from './typedefs';
 
 var console = patchedConsoleInstance;
 
 
 /**
- * @param   {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Experiment[]} - List of experiments without files.
  */
 export function listEmptyExperiments(experiments){
-    return _.filter(ensureArray(experiments), function(exp){
+    return _.filter(experiments || [], function(exp){
         if (Array.isArray(exp.files) && exp.files.length > 0) return false;
         else if (Array.isArray(exp.filesets) && exp.filesets.length > 0){
             for (var i = 0; i < exp.filesets.length; i++){
@@ -28,7 +29,9 @@ export function listEmptyExperiments(experiments){
 
 
 /**
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
  * @returns {number} - Count of files from all experiments.
  */
 export function fileCountFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false){
@@ -40,7 +43,9 @@ export function fileCountFromExperiments(experiments, includeProcessedFiles = fa
 }
 
 /**
- * @param   {Object} experiment_set - ExpSet Item context
+ * @param {ExperimentSet} experiment_set - ExpSet Item context.
+ * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
  * @returns {number} - Count of files from all experiments.
  */
 export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles = false, includeFileSets = false){
@@ -48,15 +53,16 @@ export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles
     if (includeProcessedFiles){
         initialCountFromSet += (experiment_set && Array.isArray(experiment_set.processed_files) && experiment_set.processed_files.length) || 0;
     }
-    return initialCountFromSet + fileCountFromExperiments(ensureArray(experiment_set.experiments_in_set), includeProcessedFiles, includeFileSets);
+    return initialCountFromSet + fileCountFromExperiments(experiment_set.experiments_in_set || [], includeProcessedFiles, includeFileSets);
 }
 
 
 /**
  * NOT SORTED
  *
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
- * @returns {Object[]} - All files from experiments without a pair.
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @returns {File[]} - All files from experiments without a pair.
  */
 export function listAllUnpairedFiles(experiments, includeFileSets = false){
     return _.filter(
@@ -71,15 +77,17 @@ export function listAllUnpairedFiles(experiments, includeFileSets = false){
 /**
  * Sorted by accession. Does not need to be all from one Experiment Set.
  * For usage especially by ChartDataController-using components.
- * 
- * @export
- * @param {Object[]} List of experiments with at least a 'files' property.
- * @returns {Object[]} List of all files gathered from experiments list.
+ *
+ * @param {Experiment[]} experiments - List of experiments with at least a 'files' property.
+ * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @param {boolean} [uniqify=false] - Whether to run resulting files through `_.uniq` by their accession.
+ * @returns {File[]} List of all files gathered from experiments list.
  */
 export function allFilesFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false, uniqify = false){
     var files = _.sortBy(
         _.flatten(
-            _.map(ensureArray(experiments), function(exp){ return allFilesFromExperiment(exp, includeProcessedFiles, includeFileSets); }),
+            _.map(experiments || [], function(exp){ return allFilesFromExperiment(exp, includeProcessedFiles, includeFileSets); }),
             true
         ),
         'accession'
@@ -113,8 +121,17 @@ export function fileToAccessionTriple(file, toString = false){
     }
 }
 
+/**
+ * Converts a list of files (list of objects),
+ * which have "from_experiment" & "from_experiment.from_experiment_set"
+ * properties, into a list of strings which represent them.
+ *
+ * @param {File[]} files                        Files which to convert to accession triples. Must have 'from_experiment' properties (provided by other funcs).
+ * @param {boolean|string} [toString=false]     Whether to concatanate resulting accession items into strings delimited by a tilde (`~`). If string is supplied, it is used as delimiter instead.
+ * @returns {string[]} List of arrays or strings in form of EXPSETACCESSION~EXPACESSION~FILEACCESSION. EXPACESSION may be "NONE".
+ */
 export function filesToAccessionTriples(files, toString = false){
-    return _.map(ensureArray(files), function(file){
+    return _.map(files || [], function(file){
         return fileToAccessionTriple(file, toString);
     });
 }
@@ -123,8 +140,9 @@ export function filesToAccessionTriples(files, toString = false){
 /**
  * NOT SORTED
  *
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
- * @returns {Object[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
+ * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @returns {File[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
  */
 export function listAllFilePairs(experiments, includeFileSets = false){
     return (
@@ -145,14 +163,14 @@ export function listAllFilePairs(experiments, includeFileSets = false){
 /**
  * Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment.
  *
- * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
- * @returns {Object[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
+ * @param {ExperimentSet[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
+ * @returns {Experiment[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
  */
 export function listAllExperimentsFromExperimentSets(experiment_sets){
     var uniqExpAccessions = {};
-    return _(ensureArray(experiment_sets)).chain()
+    return _(experiment_sets || []).chain()
         .map(function(set){
-            return _.map(ensureArray(set.experiments_in_set), function(exp){
+            return _.map(set.experiments_in_set || [], function(exp){
                 // Make sure we return new exp & set objects instead of mutating existing ones.
                 var cExp = _.clone(exp);
                 var cSet = _.clone(set);
@@ -182,7 +200,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
  * Groups experiments by experiment_set accession.
  * Almost inverse of listAllExperimentsFromExperimentSets, though returns an object.
  *
- * @param {Array} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
+ * @param {Experiment[]} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
  * @returns {Object} Contains experiment_set accessions as keys and array of experiments in that set as value.
  */
 export function groupExperimentsIntoExperimentSets(experiments){
@@ -214,33 +232,40 @@ export function groupExperimentsIntoExperimentSets(experiments){
     return expSets;
 }
 
+
+/**
+ * Returns (copies of) 'experiments_in_set' from an ExperimentSet,
+ * each extended with a "from_experiment_set" property, which may be used
+ * by other experiment-focused functions or views which require information
+ * about the parent ExperimentSet.
+ *
+ * @param {ExperimentSet} experiment_set - An ExperimentSet Item
+ * @returns {{ from_experiment_set: Object, accession: string }[]} List of experiments from ExperimentSet, extended with 'from_experiment_set'
+ */
 export function experimentsFromExperimentSet(experiment_set){
-    return _.map(
-        ensureArray(experiment_set.experiments_in_set),
-        function(exp){ return _.extend({ 'from_experiment_set' : experiment_set }, exp); }
-    );
+    return _.map(experiment_set.experiments_in_set || [], function(exp){
+        return _.extend({ 'from_experiment_set' : experiment_set }, exp);
+    });
 }
 
 
 /** @return Object with experiment accessions as keys, from input array of experiments. */
 export function convertToObjectKeyedByAccession(experiments, keepExpObject = true){
-    return _.object(
-        ensureArray(experiments).map(function(exp){
-            return [exp.accession, keepExpObject ? exp : true];
-        })
-    );
+    return _.object(_.map(experiments || [], function(exp){
+        return [ exp.accession, keepExpObject ? exp : true ];
+    }));
 }
 
 
 /**
- * @param {Object} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
- * @returns {Object} Object with ExperimentSet @ids as keys and their JSON as values.
+ * @param {File} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
+ * @returns {Object.<ExperimentSet>} Object with ExperimentSet @ids as keys and their JSON as values.
  */
 export function experimentSetsFromFile(file){
 
     return _.extend(
 
-        _.reduce(ensureArray(file.experiment_sets), function(m, expSet){ // ExpSets by @id, no 'experiments_in_set' added.
+        _.reduce(file.experiment_sets || [], function(m, expSet){ // ExpSets by @id, no 'experiments_in_set' added.
             var id = atIdFromObject(expSet);
             if (id && typeof m[id] === 'undefined'){
                 m[id] = _.clone(expSet);
@@ -248,7 +273,7 @@ export function experimentSetsFromFile(file){
             return m;
         }, {}),
 
-        _.reduce(ensureArray(file.experiments), function(sets, exp){ // ExpSets by @id from file.experiments, with 'experiments_in_set' added.
+        _.reduce(file.experiments || [], function(sets, exp){ // ExpSets by @id from file.experiments, with 'experiments_in_set' added.
             
             var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
                 var id = atIdFromObject(expSet);
@@ -301,8 +326,8 @@ export function allProcessedFilesFromExperiments(experiments){
 }
 
 /**
- * @param {Object} experiment_set - Representation of ExperimentSet Item
- * @returns {Object[]} List of ProcessedFile Items, cloned & extended from param expset with '[from_experiment.]from_experiment_set' property.
+ * @param {ExperimentSet} experiment_set - Representation of ExperimentSet Item
+ * @returns {File[]} List of ProcessedFile Items, cloned & extended from param expset with '[from_experiment.]from_experiment_set' property.
  */
 export function allProcessedFilesFromExperimentSet(experiment_set){
 
@@ -324,7 +349,7 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
         return pF;
     }).concat(
         allProcessedFilesFromExperiments(
-            _.map(ensureArray(experiment_set.experiments_in_set), function(exp){
+            _.map(experiment_set.experiments_in_set || [], function(exp){
                 if (typeof exp.from_experiment_set === 'undefined'){
                     return _.extend({}, exp, { 'from_experiment_set' : experiment_set });
                 }
@@ -364,7 +389,8 @@ export function processedFilesFromExperimentSetToGroup(processed_files, combined
 }
 
 export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
-    var expsAndSetsByFileAccession =_.reduce(ensureArray(processed_files), function(m, pF){
+
+    var expsAndSetsByFileAccession =_.reduce(processed_files || [], function(m, pF){
         if (typeof pF.from_experiment !== 'undefined' && !Array.isArray(pF.from_experiment)){
             if (!Array.isArray(m.from_experiments[pF.accession])) m.from_experiments[pF.accession] = [];
             m.from_experiments[pF.accession].push(pF.from_experiment);
@@ -374,8 +400,9 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
         }
         return m;
     }, { 'from_experiments' : {}, 'from_experiment_sets' : {} } );
+
     return _.map(
-        _.uniq(ensureArray(processed_files), false, function(pF){ return pF.accession; }),
+        _.uniq(processed_files || [], false, function(pF){ return pF.accession; }),
         function(pF){
             pF = _.clone(pF);
             if (expsAndSetsByFileAccession.from_experiments[pF.accession]){
@@ -399,22 +426,28 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
 
 export function combineWithReplicateNumbers(experimentsWithReplicateNums, experimentsInSet){
     if (!Array.isArray(experimentsWithReplicateNums)) return false;
-    return _(experimentsWithReplicateNums).chain()
-        .map(function(r){
-            return {
-                'tec_rep_no' : r.tec_rep_no || null,
-                'bio_rep_no' : r.bio_rep_no || null,
-                '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
-            };
-        })
-        .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
-        .map(function(r){
-            r[1].biosample = _.clone(r[1].biosample);
-            if (!r[1].biosample) r[1].biosample = { 'bio_rep_no' : '?' };
-            r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
-            return _.extend(r[0], r[1]);
-        })
-        .value();
+
+    return _.map(
+        _.zip(
+            _.map(experimentsWithReplicateNums, function(r){
+                return {
+                    'tec_rep_no' : r.tec_rep_no || null,
+                    'bio_rep_no' : r.bio_rep_no || null,
+                    '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
+                };
+            }),
+            experimentsInSet
+        ),
+        function([replicateInfo, expSet]){
+            return _.extend({}, replicateInfo, expSet, {
+                'biosample' : (
+                    expSet.biosample && _.extend(
+                        {}, expSet.biosample, { 'bio_rep_no' : replicateInfo.bio_rep_no || '?' }
+                    )
+                ) || { 'bio_rep_no' : replicateInfo.bio_rep_no || '?' }
+            });
+        }
+    );
 }
 
 export function combineExpsWithReplicateNumbersForExpSet(experiment_set){
@@ -427,7 +460,7 @@ export function combineExpsWithReplicateNumbersForExpSet(experiment_set){
 }
 
 export function findUnpairedFiles(files_in_experiment){
-    return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, index){
+    return _.reduce(files_in_experiment || [], function(unpairedFiles, file, index){
         if (typeof file.paired_end === 'undefined'){
             unpairedFiles.push(file);
             return unpairedFiles;
@@ -445,8 +478,12 @@ export function findUnpairedFiles(files_in_experiment){
             } else if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.accession === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.accession === 'string'; })){
                 uniqueIDField = 'accession';
             } else {
-                throw new Error('All files & related files must have either a UUID or an Accession.');
+                console.error('(findUnpairedFiles) Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+                unpairedFiles.push(file);
+                return unpairedFiles;
+                //throw new Error('All files & related files must have either a UUID or an Accession.');
             }
+
             if (!_.any(file.related_files, function(rf){
                 return rf.file && rf.file[uniqueIDField] && rf.file[uniqueIDField] !== file[uniqueIDField] && _.pluck(files_in_experiment, uniqueIDField).indexOf(rf.file[uniqueIDField]) > -1;
             })) {
@@ -464,11 +501,12 @@ export function findUnpairedFiles(files_in_experiment){
 /**
  * TODO: Add from filesets as well instead of only as fallback if no experiment.files?
  *
- * @param {Object[]} experiments - List of experiment objects with files properties.
- * @returns {Object[]} List of unpaired files from all experiments.
+ * @param {Experiment[]} experiments - List of experiment objects with files properties.
+ * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
+ * @returns {File[]} List of unpaired files from all experiments.
  */
 export function findUnpairedFilesPerExperiment(experiments, includeFileSets = false){
-    return ensureArray(experiments).map(function(exp){
+    return _.map(experiments || [], function(exp){
         var files;
         if (Array.isArray(exp.files)){
             files = findUnpairedFiles(exp.files);
@@ -479,10 +517,7 @@ export function findUnpairedFilesPerExperiment(experiments, includeFileSets = fa
             Array.isArray(exp.filesets[0].files_in_set)
         ){
             files = findUnpairedFiles(
-                _.flatten(
-                    _.pluck(exp.filesets, 'files_in_set'),
-                    true
-                )
+                _.flatten(_.pluck(exp.filesets, 'files_in_set'), true)
             );
         } else {
             files = [];
@@ -494,8 +529,8 @@ export function findUnpairedFilesPerExperiment(experiments, includeFileSets = fa
 }
 
 export function findExperimentInSetWithFileAccession(experiments_in_set, file_accession){
-    return _.find(ensureArray(experiments_in_set), function(exp){
-        var expFiles = ensureArray(exp.files);
+    return _.find(experiments_in_set || [], function(exp){
+        var expFiles = exp.files || [];
         for (var i = 0; i < expFiles.length; i++){
             if (expFiles[i] && expFiles[i].accession && expFiles[i].accession === file_accession){
                 return true;
@@ -533,17 +568,15 @@ export function allFilesFromFileSetsInExperiment(experiment){
 }
 
 export function allFilesFromExperiment(experiment, includeProcessedFiles = false, includeFileSets = false){
-    var allFiles = ensureArray(experiment.files);
+    var filesToReturn = experiment.files || [];
     if (includeFileSets){
-        allFiles = allFiles.concat(allFilesFromFileSetsInExperiment(experiment));
+        filesToReturn = filesToReturn.concat(allFilesFromFileSetsInExperiment(experiment));
     }
     if (includeProcessedFiles){
-        allFiles = allFiles.concat(allProcessedFilesFromExperiments([experiment]));
+        filesToReturn = filesToReturn.concat(allProcessedFilesFromExperiments([experiment]));
     }
-    return _.map(allFiles, function(origFile){
-        var file = _.clone(origFile);
-        if (typeof file.from_experiment === 'undefined') file.from_experiment = experiment;
-        return file;
+    return _.map(filesToReturn, function(f){
+        return _.extend({}, f, { 'from_experiment' : f.from_experiment || experiment });
     });
 }
 
@@ -566,14 +599,14 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
  * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
  * Can always _.flatten() this or map out first file per pair.
  * 
- * @param {Object} expSet - Experiment Set
- * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+ * @param {ExperimentSet} experiment_set - Experiment Set
+ * @returns {File[]|File[][]} For example, [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */
 export function allPairsAndFilesFromExperimentSet(experiment_set){
     if (Array.isArray(experiment_set.replicate_exps) && Array.isArray(experiment_set.experiments_in_set)){
         experiment_set = combineExpsWithReplicateNumbersForExpSet(experiment_set);
     }
-    var exps_in_set_with_from_set_property = _.map(ensureArray(experiment_set.experiments_in_set), function(exp){
+    var exps_in_set_with_from_set_property = _.map(experiment_set.experiments_in_set || [], function(exp){
         return _.extend({}, exp, { 'from_experiment_set' : experiment_set });
     });
     var pairs = listAllFilePairs(exps_in_set_with_from_set_property);
@@ -581,9 +614,18 @@ export function allPairsAndFilesFromExperimentSet(experiment_set){
     return pairs.concat(unpairedFiles);
 }
 
+/**
+ * Group files by their paired end and related_files array.
+ * E.g. [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
+ *
+ * Returns an empty array if _any_ of the files lack view permissions.
+ *
+ * @param {File[]} files_in_experiment - Files, presumably all from the same experiment.
+ * @returns {File[][]} Multi-dimensional array containing pairs of files.
+ */
 export function groupFilesByPairs(files_in_experiment){
 
-    var allFiles = files_in_experiment.slice(0).concat(_.pluck(_.flatten(_.filter(_.pluck(files_in_experiment, 'related_files'))), 'file'));
+    var allFiles = files_in_experiment.slice(0).concat(_.pluck(_.flatten(_.filter(_.pluck(files_in_experiment || [], 'related_files'))), 'file'));
     var uniqueIDField = null;
 
     if (_.all(allFiles, function(f){ return typeof f.uuid === 'string'; })){
@@ -591,45 +633,50 @@ export function groupFilesByPairs(files_in_experiment){
     } else if (_.all(allFiles, function(f){ return typeof f.accession === 'string'; })){
         uniqueIDField = 'accession';
     } else {
-        throw new Error('Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+        console.error('(groupFilesByPairs) Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
+        return [];
+        //throw new Error('Not all files & related files have either a UUID or accession field; cannot accurately group by file pairs.');
     }
-    
-    return _(ensureArray(files_in_experiment)).chain()
-        .map(function(file){
-            return _.clone(file);
-        })
-        .sortBy(function(file){ return parseInt(file.paired_end); }) // Bring files w/ paired_end == 1 to top of list.
-        .reduce(function(pairsObj, file, idx, sortedFiles){
-            // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
-            if (parseInt(file.paired_end) === 1){
-                pairsObj[file[uniqueIDField]] = { '1' : file };
-            } else if (Array.isArray(file.related_files)) {
-                _.each(file.related_files, function(related){
-                    if (pairsObj[related.file && related.file[uniqueIDField]]) {
-                        pairsObj[related.file && related.file[uniqueIDField]][file.paired_end + ''] = file;
+
+    return _.map(
+        _.values(
+            _.reduce(
+                _.sortBy(
+                    _.map(files_in_experiment || [], _.clone),
+                    function(file){ return parseInt(file.paired_end); }
+                ),
+                function(pairsObj, file, idx, sortedFiles){
+                    // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
+                    if (parseInt(file.paired_end) === 1){
+                        pairsObj[file[uniqueIDField]] = { '1' : file };
+                    } else if (Array.isArray(file.related_files)) {
+                        _.each(file.related_files, function(related){
+                            if (pairsObj[related.file && related.file[uniqueIDField]]) {
+                                pairsObj[related.file && related.file[uniqueIDField]][file.paired_end + ''] = file;
+                            }
+                        });
                     }
-                });
-            }
-            return pairsObj;
-        }, { })
-        .values()
-        .map(function(filePairObj){
-            return _(filePairObj).chain()
-                .pairs()
-                .sortBy (function(fp){ return parseInt(fp[0]); })
-                .map    (function(fp){ return fp[1]; })
-                .value();
-        })
-        .value(); // [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
+                    return pairsObj;
+                },
+                { }
+            )
+        ),
+        function(filePairObj){
+            return _.map(
+                _.sortBy(_.pairs(filePairObj), function([ filePairEnd, fileItem ]){ return parseInt(filePairEnd); }),
+                function([ filePairEnd, fileItem ]){ return fileItem; }
+            );
+        }
+    );
 }
 
 /**
- * @param {any} experiments - List of Experiment Items in JSON format.
+ * @param {Experiment} experiments - List of Experiment Items in JSON format.
  * @param {boolean} [includeFileSets=false] - Whether to include files from experiment.filesets.
  * @returns Modified list 'experiments' objects.
  */
 export function groupFilesByPairsForEachExperiment(experiments, includeFileSets = false){
-    return ensureArray(experiments).map(function(exp) {
+    return _.map(experiments || [], function(exp) {
         var file_pairs;
         if (Array.isArray(exp.files)){
             file_pairs = groupFilesByPairs(exp.files);
@@ -650,7 +697,7 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
                     file_in_pair.from_experiment = exp;
                 });
             });
-            exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(ensureArray(exp.files)) });
+            exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(exp.files || []) });
         }
         return exp;
     });
@@ -671,7 +718,7 @@ export function flattenFileSetsToFilesIfNoFilesForEachExperiment(experiments){
 }
 
 export function groupExperimentsByBiosampleRepNo(experiments){
-    return _(ensureArray(experiments)).chain()
+    return _(experiments || []).chain()
         .groupBy(function(exp){
             return exp.biosample.bio_rep_no;
         })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
@@ -684,7 +731,7 @@ export function groupExperimentsByBiosampleRepNo(experiments){
 }
 
 export function groupExperimentsByBiosample(experiments){
-    return _(ensureArray(experiments)).chain()
+    return _(experiments || []).chain()
         .groupBy(function(exp){
             return exp.biosample['@id'] || exp.biosample.bio_rep_no;
         })
@@ -692,20 +739,4 @@ export function groupExperimentsByBiosample(experiments){
         .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
         .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
         .value();
-}
-
-/**
- * Use this to fail gracefully but also inform that some data is missing.
- *
- * @param {Object[]} someArray - Any list that should be a list.
- * @returns {Object[]} Array if valid array, or empty array if not.
- */
-export function ensureArray(someArray){
-    if (!Array.isArray(someArray)) {
-        // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
-        // entire list of experiment_sets to fail.
-        console.error("Parameter is not an array! Most likely an experiment_set has undefined property experiments_in_set instead of an empty array. Or files for an experiment. etc.");
-        return [];
-    }
-    return someArray;
 }

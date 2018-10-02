@@ -8,7 +8,8 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/modified" }
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "type": "object",
     "properties": {
@@ -46,6 +47,11 @@
             "title": "Secret access key Hash",
             "comment": "Only admins are allowed to set this value.",
             "type": "string"
+        }
+    },
+    "facets" : {
+        "user.display_title" : {
+            "title" : "User Name"
         }
     }
 }

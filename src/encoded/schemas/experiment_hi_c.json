@@ -24,6 +24,8 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/supplementary_files" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
@@ -51,6 +53,7 @@
                 "micro-C",
                 "DNase Hi-C",
                 "TCC",
+                "cryomilling TCC",
                 "single cell Hi-C",
                 "sci-Hi-C",
                 "MC-3C"

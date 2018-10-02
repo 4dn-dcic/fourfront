@@ -1,0 +1,346 @@
+[
+    {
+        "files": [
+            "83f36c27-c222-4745-8630-e1514aace964", 
+            "c885c6d4-f25d-492c-92e3-6291d9dfbc60"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXNT6XXHX", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "bf543841-62f5-4bdc-baec-48660be53b06", 
+            "88793582-d8d5-4cef-89c6-88a973441791"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:untreated_F123AIDCTCF_r1"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "c6159041-a5d2-4a7c-af80-a0ff973ce149", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "f127b496-8f8b-4aab-a4c9-6e24d516a15e", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "Untreated F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF prepared for in situ Hi-C - Bioreplicate 1", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "digestion_temperature": 37.0, 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "date_created": "2018-05-27T04:58:02.563512+00:00", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "tagging_method": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "ad14b956-84d9-4ff8-8012-7996e1bbf38c", 
+            "0ba23514-445b-4f66-a8db-99693524f498"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXB65W9GS", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "2f549fc0-a5bb-4eee-ab43-a1df8061d54b", 
+            "5154fc82-58f9-4f55-b592-64f008ba9033"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:untreated_F123AIDCTCF_r2"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "77ec51e4-1d4b-4718-b9b3-a6ccefde43af", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "9ff939d4-83ae-40e0-a73f-e3f7d572f6c2", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "Untreated F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF prepared for in situ Hi-C - Bioreplicate 2", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "digestion_temperature": 37.0, 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "date_created": "2018-05-27T04:58:06.678936+00:00", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "tagging_method": "bio-dATP"
+    }, 
+    {
+        "files": [
+            "c774c350-8333-4e5c-99fc-caafee8d5d58", 
+            "d2b37f10-7acd-4d79-8be0-be53616073c6"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXLWC9JX7", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "cce60ed8-83cf-484d-b24d-d989d3348a5f", 
+            "58d4addc-5b87-48ab-9817-a9832db11549"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:24h_F123AIDCTCF_r1"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "d34b2505-bd84-45dd-9df7-f6340ec28b56", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "8b2107ba-ce86-4115-8a6d-b60d0dce7eae", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 24 hours and then prepared for in situ Hi-C -  - Bioreplicate 1", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "digestion_temperature": 37.0, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "tagging_method": "bio-dATP", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "date_created": "2018-05-27T04:58:03.564710+00:00"
+    }, 
+    {
+        "files": [
+            "be9d5167-dcad-45e8-a3d5-a5fd07d349d1", 
+            "83d2928e-2d7f-468b-b618-94c81722d2f1"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXU87YSSY", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "5bcc3414-09dd-421a-881b-c5ca8e764a38", 
+            "b4b2c140-6cfc-425b-b973-997b8c5e9709"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:24h_F123AIDCTCF_r2"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "4a3044c1-8b05-47a4-ae73-49cf9aa59053", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "f3a54565-7287-4084-aae5-c6342bb9be45", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 24 hours and then prepared for in situ Hi-C - Bioreplicate 2", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "digestion_temperature": 37.0, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "tagging_method": "bio-dATP", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "date_created": "2018-05-27T04:58:07.673563+00:00"
+    }, 
+    {
+        "files": [
+            "2233a2d3-8e71-4656-ba32-6d2eb5db8895", 
+            "ee5089e9-53b2-4b80-8b73-0f3049e57780"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXVGS8FQQ", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "73505f08-0cfa-4e3d-8c97-5072eaf618ed", 
+            "e8e5f2ab-032d-4ffb-aed1-2c9f4e1b74a0"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:48h_F123AIDCTCF_r1"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "f048f178-131e-49f3-a393-5e265c90fa2d", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "c8961d71-0935-4c63-a67f-e6048c7e1db3", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 48 hours and then prepared for in situ Hi-C -  - Bioreplicate 1", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "digestion_temperature": 37.0, 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "tagging_method": "bio-dATP", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "date_created": "2018-05-27T04:58:04.606757+00:00"
+    }, 
+    {
+        "files": [
+            "b25aca10-09c6-4c7f-8ee3-262b0c5116f9", 
+            "c42e3984-ece0-4b57-8d2e-f5c007fdb3f5"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXA7ZMMK3", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "47f46014-1463-4449-b37c-3ff69af00364", 
+            "d3460a87-fb51-4dd8-921d-ec9668c18318"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:48h_F123AIDCTCF_r2"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "7a32bd32-c447-44f3-8ea8-4ef76c04c9bc", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "bdd26c42-52b2-4f69-aca1-977eab857c05", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 48 hours and then prepared for in situ Hi-C - Bioreplicate 2", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "digestion_temperature": 37.0, 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "tagging_method": "bio-dATP", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "date_created": "2018-05-27T04:58:08.674387+00:00"
+    }, 
+    {
+        "files": [
+            "344db0af-078b-42ea-ae5c-c417194e36eb", 
+            "675e58df-1263-4595-a35b-5b19790730e4"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEXRI9JYW6", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "8bbcc176-90c8-472e-b76b-ed99afd1a795", 
+            "63ed0e0c-2878-4b97-ac0f-9a6834ddf17a"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:96h_F123AIDCTCF_r1"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "9127e693-bf95-4811-90d3-93e3e0afb785", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "f1d42039-fa49-402d-8b6c-f036919aabff", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 96 hours and then prepared for in situ Hi-C - Bioreplicate 1", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "digestion_temperature": 37.0, 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "tagging_method": "bio-dATP", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "date_created": "2018-05-27T04:58:05.618160+00:00"
+    }, 
+    {
+        "files": [
+            "43f75f61-075b-4bc3-88ea-5d37e56f8a8e", 
+            "9ad51f65-13f2-452a-bd36-4ff1aa9027c4"
+        ], 
+        "protocol": "d0ed0449-5b16-4782-9097-0232b1b1eba0", 
+        "library_preparation_date": "2016-10-10", 
+        "accession": "4DNEX4J4Z9WE", 
+        "biosample_quantity": 2000000.0, 
+        "biosample_quantity_units": "cells", 
+        "crosslinking_temperature": 22.0, 
+        "processed_files": [
+            "8b95c7b4-c0d9-4213-8a6f-cb2d15d3f4c7", 
+            "7a2b1417-b056-4eaf-a8d1-21b401b6b6d9"
+        ], 
+        "sop_mapping": {
+            "has_sop": "No"
+        }, 
+        "aliases": [
+            "ren:96h_F123AIDCTCF_r2"
+        ], 
+        "submitted_by": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa", 
+        "uuid": "37b9c26c-52f8-4cfa-98e9-cd830ecaa03c", 
+        "schema_version": "1", 
+        "digestion_time": 960.0, 
+        "biosample": "f4e5c8cd-6d39-4a4b-b79f-211795997739", 
+        "public_release": "2018-05-31", 
+        "status": "released", 
+        "description": "F123 CAST X 129 mouse cells containing a genomically modified AID-tagged CTCF treated with Auxin for 96 hours and then prepared for in situ Hi-C - Bioreplicate 2", 
+        "ligation_volume": 1.2, 
+        "crosslinking_method": "1% Formaldehyde", 
+        "award": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "digestion_temperature": 37.0, 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "tagging_method": "bio-dATP", 
+        "ligation_temperature": 16.0, 
+        "crosslinking_time": 10.0, 
+        "ligation_time": 240.0, 
+        "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03", 
+        "fragment_size_selection_method": "SPRI beads", 
+        "experiment_type": "in situ Hi-C", 
+        "date_created": "2018-05-27T04:58:09.669947+00:00"
+    }
+]

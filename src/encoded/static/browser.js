@@ -11,9 +11,8 @@ var App = require('./components');
 var domready = require('domready');
 import * as store from './store';
 var { Provider, connect } = require('react-redux');
-import { convertExpSetFiltersTerms } from './components/util/experiments-filters';
 import * as JWT from './components/util/json-web-token';
-
+import { BrowserFeat } from './components/util/layout';
 
 /** 
  * Unset JWT/auth and reload page if missing user info which should be paired with otherwise valid JWT token.
@@ -81,7 +80,6 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         }
 
         // Set <html> class depending on browser features
-        var BrowserFeat = require('./components/browserfeat').BrowserFeat;
         BrowserFeat.setHtmlFeatClass();
 
         // Simplify debugging

@@ -32,6 +32,12 @@ def experiment_chiapet_1_2(value, system):
         del value['antibody']
 
 
+@upgrade_step('experiment_chiapet', '2', '3')
+def experiment_chiapet_2_3(value, system):
+    if value.get('experiment_type') == 'CHIA-pet':
+        value['experiment_type'] = 'ChIA-PET'
+
+
 @upgrade_step('experiment_damid', '1', '2')
 def experiment_damid_1_2(value, system):
     if value.get('index_pcr_cycles'):
@@ -45,6 +51,13 @@ def experiment_damid_1_2(value, system):
         del value['fusion']
 
 
+@upgrade_step('experiment_mic', '1', '2')
+def experiment_mic_1_2(value, system):
+    fish_dict = {'DNA-FiSH': 'DNA FISH', 'RNA-FiSH': 'RNA FISH', 'FiSH': 'FISH'}
+    if value.get('experiment_type') and value['experiment_type'] in fish_dict.keys():
+        value['experiment_type'] = fish_dict[value['experiment_type']]
+
+
 @upgrade_step('experiment_seq', '1', '2')
 def experiment_seq_1_2(value, system):
     # sticking the string in antibody field into Notes
@@ -55,3 +68,9 @@ def experiment_seq_1_2(value, system):
         else:
             value['notes'] = value['antibody']
         del value['antibody']
+
+
+@upgrade_step('experiment_seq', '2', '3')
+def experiment_seq_2_3(value, system):
+    if value.get('experiment_type') == 'CHIP-seq':
+        value['experiment_type'] = 'ChIP-seq'

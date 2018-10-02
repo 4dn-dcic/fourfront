@@ -55,24 +55,17 @@ export class WorkflowDetailPane extends React.Component {
 
         if (node){
 
-            var commonDetailProps = {
-                'key' : 'body',
-                'node' : node,
-                'schemas' : this.props.schemas,
-                'minHeight' : this.props.minHeight,
-                'keyTitleDescriptionMap' : this.props.keyTitleDescriptionMap
-            };
+            var commonDetailProps = _.extend(
+                _.pick(this.props, 'schemas', 'minHeight', 'keyTitleDescriptionMap', 'windowHeight', 'windowWidth'),
+                {
+                    'key' : 'body',
+                    'node' : node
+                }
+            );
             
             if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
                 // File
-                return (
-                    <layout.WindowResizeUpdateTrigger>
-                        <FileDetailBody
-                            {...commonDetailProps}
-                            file={node.meta.run_data.file}
-                        />
-                    </layout.WindowResizeUpdateTrigger>
-                );
+                return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }
             if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
                 // Parameter

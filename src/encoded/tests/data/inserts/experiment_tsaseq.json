@@ -1,0 +1,30 @@
+[
+    {
+        "accession":"4DNEXO6777D7",
+        "biosample":"234411bc-8535-4448-903e-854af460b255",
+        "experiment_type": "TSA-seq",
+        "files": ["4DNFIN232JB3"],
+        "description": "TSA-seq test insert",
+        "award": "1U01CA200059-01",
+        "lab": "test-4dn-lab",
+        "uuid": "65541e2f-3e43-4388-8bbb-e861f209c450",
+        "submitted_by": "4dndcic@gmail.com",
+        "biosample_quantity": 490000000,
+        "biosample_quantity_units": "cells",
+        "status": "in review by lab",
+        "targeted_factor": "dcic:test_targ4",
+        "antibody": "4d44d12c-b37c-478b-9bc7-d843cba4ba99",
+        "antibody_lot_id": "11111111",
+        "average_fragment_size": 100,
+        "fragmentation_method": "sonication",
+        "library_preparation_date": "2017-01-01",
+        "protocol_version": "1.0",
+        "resolution": "High",
+        "tyramide_concentration": "1:10000",
+        "reaction_time": 9,
+        "reaction_buffer": "Standard",
+        "reaction_temperature": 37,
+        "affinity_rounds": 2,
+        "average_biotin_range": "50000 - 190000"
+    }
+]

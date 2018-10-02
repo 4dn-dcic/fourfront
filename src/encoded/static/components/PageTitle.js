@@ -4,12 +4,26 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import Alerts from './alerts';
 import { content_views } from './globals';
-import { console, object, Schemas, JWT, layout, DateUtility } from './util';
+import { console, object, Schemas, JWT, layout, DateUtility, typedefs } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
+import jsonScriptEscape from './../libs/jsonScriptEscape';
 
-var TITLE_PATHNAME_MAP = {
+const { Item, JSONContentResponse, SearchResponse } = typedefs;
+
+/**
+ * @module PageTitle - Renders out title on all views.
+ */
+
+/**
+ * A hardcoded mapping of URIs to title string or function.
+ *
+ * @private
+ * @ignore
+ */
+const TITLE_PATHNAME_MAP = {
     '/' : {
         'title' : "Welcome"
     },
@@ -18,10 +32,19 @@ var TITLE_PATHNAME_MAP = {
         'subtitle' : "Filter & browse experiments"
     },
     '/search/' : {
-        'title' : 'Search',
-        'calloutTitle' : function(pathName, context){
-            var thisTypeTitle = getSchemaTypeFromSearchContext(context);
-            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>for</small> { thisTypeTitle }</span>: null;
+        'title' : function(pathName, context, href, currentAction){
+            if (currentAction === 'selection') return 'Selecting';
+            return 'Search';
+        },
+        'calloutTitle' : function(pathName, context, href, currentAction){
+            var thisTypeTitle = Schemas.getSchemaTypeFromSearchContext(context);
+            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
+        },
+        'subtitle' : function(pathName, context, href, currentAction){
+            if (currentAction === 'selection') {
+                return 'Drag and drop Items from this view into other window(s).';
+            }
+            return null;
         }
     },
     '/health' : {
@@ -32,8 +55,8 @@ var TITLE_PATHNAME_MAP = {
     },
     '/users/\*' : {
         'title' : function(pathName, context){
-            var myDetails = JWT.getUserDetails();
-            var myEmail = myDetails && myDetails.email;
+            var myDetails = JWT.getUserDetails(),
+                myEmail = myDetails && myDetails.email;
             if (myEmail && context && context.email && myEmail === context.email){
                 return "My Profile";
             }
@@ -53,19 +76,22 @@ var TITLE_PATHNAME_MAP = {
 // Duplicates
 TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
 
-export function getSchemaTypeFromSearchContext(context){
-    var thisType = _.pluck(_.filter(context.filters || [], function(o){
-        if (o.field === 'type' && o.term !== 'Item') return true;
-        return false;
-    }), 'term')[0] || null;
-    if (thisType){
-        return Schemas.getTitleForType(thisType);
-    }
-    return null;
-}
 
+/**
+ * Calculates and renders out a title on every single front-end view.
+ *
+ * Also renders out static page breadcrumbs (if applicable) and any alerts if any
+ * are needed to be displayed.
+ */
 export default class PageTitle extends React.PureComponent {
 
+    /**
+     * Checks whether current context has an `@type` list containing "StaticPage".
+     *
+     * @public
+     * @param {JSONContentResponse} context - Current JSON Item or backend response representation.
+     * @returns {boolean} Whether is StaticPage view or not.
+     */
     static isStaticPage(context){
         if (Array.isArray(context['@type'])){
             if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
@@ -76,6 +102,13 @@ export default class PageTitle extends React.PureComponent {
         return false;
     }
 
+    /**
+     * Checks whether current URL/HREF is that of root or base page (e.g. pathname is '/').
+     *
+     * @public
+     * @param {string} href - Current URI/href.
+     * @returns {boolean} Whether is home page view or not.
+     */
     static isHomePage(href){
         var currentHrefParts = url.parse(href, false);
         var pathName = currentHrefParts.pathname;
@@ -85,12 +118,23 @@ export default class PageTitle extends React.PureComponent {
         return false;
     }
 
-    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false){
-        var currentPathName = null, currentPathRoot;
-        var title;
-        var atId = object.atIdFromObject(context);
-        var currentHref = isMounted ? windowHref(href) : href;
-        var currentHrefParts = url.parse(currentHref);
+    /**
+     * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
+     *
+     * @public
+     * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
+     * @param {string} href - Current URI or href.
+     * @param {{}[]} [schemas=Schemas.get()] - List of schemas as returned from Redux.
+     * @param {boolean} [isMounted=false] - Whether page is currently mounted. Needed to determine whether can use LocalizedTime and similar.
+     * @param {string} currentAction - Current action if any, e.g. 'edit', 'add'.
+     * @returns {{ title: string, subtitle: ?string, calloutTitle: ?string }} Object with title and any subtitle/calloutTitle.
+     */
+    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false, currentAction){
+        var currentPathName = null,
+            currentPathRoot, title,
+            atId = object.atIdFromObject(context),
+            currentHref = isMounted ? windowHref(href) : href,
+            currentHrefParts = url.parse(currentHref);
 
         if (typeof atId === 'string'){
             currentPathName = url.parse(atId).pathname;
@@ -120,7 +164,10 @@ export default class PageTitle extends React.PureComponent {
             if (currentHrefParts.hash === '#!add') {
                 return {
                     'title' : "Creating",
-                    'calloutTitle' : (currentPathName.indexOf('/search/') > -1 ? getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas) )
+                    'calloutTitle' : (
+                        currentPathName.indexOf('/search/') > -1 ?
+                            Schemas.getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas)
+                    )
                 };
             }
 
@@ -141,7 +188,7 @@ export default class PageTitle extends React.PureComponent {
 
         function getProp(prop){
             if (typeof prop === 'string') return prop;
-            if (typeof prop === 'function') return prop(currentPathName, context, href);
+            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction);
             return prop;
         }
 
@@ -213,9 +260,22 @@ export default class PageTitle extends React.PureComponent {
         return { title };
     }
 
-    static getStyles(context, href, mounted, hasToc){
+    /**
+     * Calculates CSS style object in response to some parameters and current layout.
+     * Adds things like +38 top margin if QuickInfoBar is visible, or limits width to 75%
+     * if table of contents is visible for page.
+     *
+     * @public
+     * @param {JSONContentResponse} context     Current Item or backend response JSON representation.
+     * @param {string} href                     Current URI/href.
+     * @param {boolean} mounted                 Whether we are currently mounted.
+     * @param {boolean} hasToc                  Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
+     * @param {number} windowWidth              Current window width, to trigger changes on window resize.
+     * @returns {{ 'marginTop' : number, 'width' : string }} - JS object representing some CSS styles.
+     */
+    static getStyles(context, href, mounted, hasToc, windowWidth){
         var style = { 'marginTop' : 0 };
-        var gridSize = mounted && layout.responsiveGridState();
+        var gridSize = mounted && layout.responsiveGridState(windowWidth || null);
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
             if (mounted && (gridSize === 'xs' || gridSize === 'sm')) {
@@ -225,36 +285,54 @@ export default class PageTitle extends React.PureComponent {
             }
         }
 
-        if (hasToc && (gridSize === 'md' || gridSize === 'lg' || !mounted)) style.width = '75%';
+        if (hasToc && (gridSize === 'lg' || !mounted)) style.width = '75%';
 
         return style;
     }
 
+    /** @ignore */
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
+
+        /**
+         * @private
+         * @type {Object}
+         * @property {boolean} state.mounted - Whether element is mounted or not.
+         */
         this.state = { 'mounted' : false };
     }
 
+    /** @ignore */
     componentDidMount(){
         this.setState({ 'mounted' : true });
     }
 
+    /**
+     * Renders out title elements, any alerts, and breadcrumbs, if necessary.
+     *
+     * @private
+     * @returns {JSX.Element} Div with ID set to "page-title-container" and any child elements for representing title, subtitle, etc.
+     */
     render(){
-        var { context, href, session } = this.props;
+        var { context, href, session, currentAction, windowWidth } = this.props;
+
+        var elementStyle;
 
         if (PageTitle.isHomePage(href)){
+            elementStyle = PageTitle.getStyles(context, href, this.state.mounted, false, windowWidth);
             return (
                 <div id="page-title-container" className="container">
                     <div className="breadcrumb-placeholder" key="breadcrumbs" />
-                    <layout.WindowResizeUpdateTrigger>
-                        <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
-                    </layout.WindowResizeUpdateTrigger>
+                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href', 'windowWidth')} mounted={this.state.mounted} style={elementStyle} />
+                    <Alerts alerts={this.props.alerts} />
                 </div>
             );
         }
 
-        var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
+        var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(
+            context, href, (this.props.shemas || Schemas.get()), this.state.mounted, currentAction
+        );
 
         if (title) {
             title = <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>{ title }</span>;
@@ -275,33 +353,35 @@ export default class PageTitle extends React.PureComponent {
             && context['table-of-contents'].enabled
         );
 
+        elementStyle = PageTitle.getStyles(context, href, this.state.mounted, hasToc, windowWidth);
+
         return (
             <div id="page-title-container" className="container">
-                <StaticPageBreadcrumbs {...{ context, session, hasToc }} key="breadcrumbs" />
-                <layout.WindowResizeUpdateTrigger>
-                    <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc } } mounted={this.state.mounted} />
-                </layout.WindowResizeUpdateTrigger>
+                <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
+                <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={this.state.mounted} style={elementStyle} />
+                <Alerts alerts={this.props.alerts} style={{ 'width' : elementStyle.width || null }} />
             </div>
         );
     }
-
 }
+
 
 /**
  * Used for most page titles.
  *
- * @prop {JSX.Element|string} title - Shown @ top left, 300 font weight.
- * @prop {JSX.Element|string} calloutTitle - Shown @ right of title in similar size, 400 font weight.
- * @prop {JSX.Element|string} subtitle - Shown @ bottom title in small size, 400 font weight.
+ * @ignore
+ * @prop {JSX.Element|string} title - Shown at top left, 300 font weight.
+ * @prop {JSX.Element|string} calloutTitle - Shown at right of title in similar size, 400 font weight.
+ * @prop {JSX.Element|string} subtitle - Shown at bottom title in small size, 400 font weight.
  * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
  */
-class PageTitleElement extends React.Component {
+class PageTitleElement extends React.PureComponent {
 
     render(){
-        var { title, calloutTitle, subtitle, context, href, mounted, hasToc } = this.props;
+        var { title, calloutTitle, subtitle, context, href, mounted, hasToc, style } = this.props;
 
         return ((title || subtitle) && (
-            <h1 className="page-title top-of-page" style={PageTitle.getStyles(context, href, mounted, hasToc)} >
+            <h1 className="page-title top-of-page" style={style} >
                 { title }{ calloutTitle }{ subtitle }
             </h1>
         )) || <br/>;
@@ -309,11 +389,11 @@ class PageTitleElement extends React.Component {
 }
 
 
-class HomePageTitleElement extends React.Component {
+class HomePageTitleElement extends React.PureComponent {
     render(){
-        var { title, calloutTitle, subtitle, context, href, mounted, hasToc } = this.props;
+        var { title, calloutTitle, subtitle, context, href, mounted, hasToc, style } = this.props;
 
-        var style = PageTitle.getStyles(context, href, mounted, hasToc);
+        style = _.clone(style);
         style.marginTop ? style.marginTop -= 3 : null;
 
         return (
@@ -326,8 +406,21 @@ class HomePageTitleElement extends React.Component {
 }
 
 
+/**
+ * Renders out breadcrumb links under page title for static help pages.
+ * Also adds JSON-LD structured data breadcrumbs for SEO.
+ *
+ * Is used as part of PageTitle.
+ * @memberof PageTitle
+ */
 export class StaticPageBreadcrumbs extends React.Component {
 
+    /**
+     * Get ancestors of current Item JSON.
+     *
+     * @param {Item} context - Current Item JSON.
+     * @returns {{ '@id' : string }[]} List of ancestors as a JSON list.
+     */
     static getAncestors(context){
         if (!context.parent || !context.parent.display_title) return null;
         var list = [];
@@ -341,11 +434,31 @@ export class StaticPageBreadcrumbs extends React.Component {
         return list;
     }
 
+    /**
+     * @constant
+     * @public
+     * @ignore
+     */
+    static defaultProps = {
+        'pageTitleStyle' : {}
+    };
+
+    /** @ignore */
     constructor(props){
         super(props);
         this.renderCrumb = this.renderCrumb.bind(this);
+        this.seoMetadata = this.seoMetadata.bind(this);
     }
 
+    /**
+     * Renders each individual crumb.
+     *
+     * @private
+     * @param {Item} ancestor   JSON representing an ancestor. Should have at least an @id and a display_title.
+     * @param {number} index    Current ancestor index.
+     * @param {Item[]} all      List of all ancestors being iterated.
+     * @returns {JSX.Element} A div element representing a breadcrumb.
+     */
     renderCrumb(ancestor, index, all){
         var inner;
         if (ancestor['@id'] === this.props.context['@id']){
@@ -361,15 +474,20 @@ export class StaticPageBreadcrumbs extends React.Component {
         );
     }
 
+    /**
+     * Renders an edit button to right side of page for people with edit permission.
+     *
+     * @private
+     */
     editButton(){
-        var { session, context } = this.props;
+        var { session, context, pageTitleStyle } = this.props;
         if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
 
             if (Array.isArray(context.actions)){
                 var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
                 if (editAction && editAction.href){
                     return (
-                        <div className="static-edit-button pull-right">
+                        <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
                             <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
@@ -379,17 +497,49 @@ export class StaticPageBreadcrumbs extends React.Component {
         return null;
     }
 
+    /**
+     * Renders out JSON-LD structured data version of our breadcrumbs for
+     * search engine consumption.
+     *
+     * @see https://developers.google.com/search/docs/data-types/breadcrumb
+     *
+     * @private
+     * @param {{ display_title: string }[]} ancestors - List of ancestors, including self.
+     * @returns {JSX.Element} A script element containing JSON-LD data.
+     */
+    seoMetadata(ancestors){
+        if (!ancestors || !Array.isArray(ancestors) || ancestors.length < 2) return null;
+        var hrefParts = url.parse(this.props.href),
+            baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
+            structuredJSON = {
+                "@context": "http://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement" : _.map(ancestors, function(item, idx){
+                    return {
+                        "@type" : "ListItem",
+                        "position" : idx + 1,
+                        "item" : {
+                            "name" : item.title || item.display_title,
+                            "@id" : baseDomain + object.itemUtil.atId(item)
+                        }
+                    };
+                })
+            };
+        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonScriptEscape(JSON.stringify(structuredJSON)) }} />;
+    }
+
+    /** @private */
     render(){
-        var { context, hasToc } = this.props;
-        var ancestors = StaticPageBreadcrumbs.getAncestors(context);
-        var crumbs = ancestors && _.map(ancestors, this.renderCrumb);
+        var { context, hasToc } = this.props,
+            ancestors = StaticPageBreadcrumbs.getAncestors(context),
+            crumbs = ancestors && _.map(ancestors, this.renderCrumb);
+
         return  (
             <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? 'empty' : '') + (hasToc ? ' page-has-toc' : '')}>
                 { crumbs }
                 { this.editButton() }
+                { this.seoMetadata(ancestors) }
             </div>
         );
     }
 }
-
-

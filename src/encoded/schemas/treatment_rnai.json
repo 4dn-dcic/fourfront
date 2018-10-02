@@ -20,10 +20,15 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/documents" }
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "treatment.json#/facets"}
+    ],
+    "mixinColumns" : [
+        { "$ref": "treatment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
@@ -74,13 +79,6 @@
                 "type": "string",
                 "linkTo": "Construct"
             }
-        },
-        "url": {
-            "title": "URL",
-            "description": "An external resource with additional information about the construct.",
-            "type": "string",
-            "lookup": 1000,
-            "format": "uri"
         }
     }
 }

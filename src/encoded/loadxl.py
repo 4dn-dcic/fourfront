@@ -4,18 +4,25 @@ from .typedsheets import cast_row_values
 from functools import reduce
 import io
 import json
-import logging
+import structlog
 import os.path
 import boto3
 import os
 from datetime import datetime
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
+from pyramid.paster import get_app
+
+from pyramid.view import view_config
 
 
 text = type(u'')
 
-logger = logging.getLogger('encoded')
-logger.setLevel(logging.INFO)  # doesn't work to shut off sqla INFO
+logger = structlog.getLogger('encoded')
+
+def includeme(config):
+    # provide an endpoint to do bulk uploading that just uses loadxl
+    config.add_route('load_data', '/load_data')
+    config.scan(__name__)
 
 ORDER = [
     'user',
@@ -25,6 +32,7 @@ ORDER = [
     'page',
     'ontology',
     'ontology_term',
+    'file_format',
     'badge',
     'organism',
     'genomic_region',
@@ -58,7 +66,6 @@ ORDER = [
     'microscope_setting_a1',
     'microscope_setting_a2',
     'file_fastq',
-    'file_fasta',
     'file_processed',
     'file_reference',
     'file_calibration',
@@ -73,6 +80,7 @@ ORDER = [
     'experiment_chiapet',
     'experiment_damid',
     'experiment_seq',
+    'experiment_tsaseq',
     'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
@@ -87,16 +95,51 @@ ORDER = [
 
 IS_ATTACHMENT = [
     'attachment',
-    'IDR_plot_true',
-    'IDR_plot_rep1_pr',
-    'IDR_plot_rep2_pr',
-    'IDR_plot_pool_pr',
-    'IDR_parameters_true',
-    'IDR_parameters_rep1_pr',
-    'IDR_parameters_rep2_pr',
-    'IDR_parameters_pool_pr',
-    'cross_correlation_plot'
+    'file_format_specification',
 ]
+
+
+@view_config(route_name='load_data', request_method='POST', permission='add')
+def load_data_view(context, request):
+    '''
+    we expect to get posted data in the form of
+    {'item_type': [items], 'item_type2': [items]}
+    then we just use load_all to load all that stuff in
+    '''
+
+    # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
+    config_uri = request.json.get('config_uri', 'production.ini')
+    app = get_app(config_uri, 'app')
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    # expected response
+    request.response.status = 200
+    result = {
+        'status': 'success',
+        '@type': ['result'],
+    }
+    # if we post local_dir key then we use local data
+    # actually load the stuff
+    from pkg_resources import resource_filename
+    local_dir = request.json.get('local_dir')
+    if  local_dir:
+        local_inserts = resource_filename('encoded', 'tests/data/' + local_dir + '/')
+        res = load_all(testapp, local_inserts, [])
+    else:
+        res = load_all(testapp, request.json, [], from_json=True)
+
+    if res:
+        request.response.status = 422
+        result['status'] = 'error'
+        result['@graph'] = res
+
+    return result
+
 
 ##############################################################################
 # Pipeline components
@@ -227,7 +270,7 @@ def add_attachments(docsdir):
 
 
 def read_single_sheet(path, name=None):
-    """ Read an xlsx, csv or tsv from a zipfile or directory
+    """ Read an xlsx, csv, json, or tsv from a zipfile or directory
     """
     from zipfile import ZipFile
     from . import xlreader
@@ -483,7 +526,9 @@ def attachment(path):
             'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
         }
 
-        if mime_type in ('application/pdf', "application/zip", 'text/plain', 'text/tab-separated-values', 'text/html'):
+        if mime_type in ('application/pdf', "application/zip", 'text/plain',
+                         'text/tab-separated-values', 'text/html', 'application/msword',
+                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
 
@@ -550,7 +595,9 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=Non
     elif phase == 2:
         method = 'PUT'
         pipeline.extend(PHASE2_PIPELINES.get(item_type, []))
-
+    elif phase == 3:
+        method = 'PUT'
+        pipeline.extend(PHASE2_PIPELINES.get(item_type, []))
     pipeline.extend([
         request_url(item_type, method),
         remove_keys('uuid') if method in ('PUT', 'PATCH') else noop,
@@ -572,10 +619,10 @@ PHASE1_PIPELINES = {
     'user': [
         remove_keys('lab', 'submits_for'),
     ],
-    'file_fastq': [
-        remove_keys('related_files'),
+    'file_format': [
+        remove_keys('extrafile_formats'),
     ],
-    'file_fasta': [
+    'file_fastq': [
         remove_keys('related_files'),
     ],
     'file_processed': [
@@ -620,6 +667,9 @@ PHASE1_PIPELINES = {
     'experiment_seq': [
         remove_keys('experiment_relation'),
     ],
+    'experiment_tsaseq': [
+        remove_keys('experiment_relation'),
+    ],
     'publication': [
         remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -635,28 +685,22 @@ PHASE1_PIPELINES = {
 ##############################################################################
 # Phase 2 pipelines
 #
-# A second pass is required to cope with reference cycles. Only rows with
+# A second pass is required to cope with self reference cycles. Only rows with
 # filtered out keys are updated.
 
 
 PHASE2_PIPELINES = {
-    'ontology': [
-        skip_rows_missing_all_keys('synonym_terms', 'definition_terms', 'relation_terms'),
-    ],
     'ontology_term': [
         skip_rows_missing_all_keys('parents', 'slim_terms'),
     ],
-    'user': [
-        skip_rows_missing_all_keys('lab', 'submits_for'),
+    'file_format': [
+        skip_rows_missing_all_keys('extrafile_formats'),
     ],
     'file_fastq': [
         skip_rows_missing_all_keys('related_files'),
     ],
-    'file_fasta': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
     'file_processed': [
-        skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments", 'produced_from'),
+        skip_rows_missing_all_keys('related_files', 'produced_from'),
     ],
     'file_reference': [
         skip_rows_missing_all_keys('related_files'),
@@ -666,15 +710,6 @@ PHASE2_PIPELINES = {
     ],
     'file_microscopy': [
         skip_rows_missing_all_keys('related_files'),
-    ],
-    'file_set': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'file_set_calibration': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'file_set_microscope_qc': [
-        skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hi_c': [
         skip_rows_missing_all_keys('experiment_relation'),
@@ -697,6 +732,33 @@ PHASE2_PIPELINES = {
     'experiment_seq': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
+    'experiment_tsaseq': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ]
+}
+
+
+####
+# and a third phase is needed for non-self references
+PHASE3_PIPELINES = {
+    'ontology': [
+        skip_rows_missing_all_keys('synonym_terms', 'definition_terms', 'relation_terms'),
+    ],
+    'user': [
+        skip_rows_missing_all_keys('lab', 'submits_for'),
+    ],
+    'file_processed': [
+        skip_rows_missing_all_keys('workflow_run', 'source_experiments'),
+    ],
+    'file_set': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
     'publication': [
         skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -709,11 +771,24 @@ PHASE2_PIPELINES = {
 }
 
 
-def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
+def check_result(data, errors=[], exclude=[]):
+    for result in data:
+        if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+            errors.append({'uuid': result['uuid'],
+                           'error': result['_response'].json})
+
+            exclude.append(result['uuid'])
+            print("excluding uuid %s due to error" % result['uuid'])
+
+
+def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, from_json=False):
     """smth."""
     # exclude_list is for items that fail phase1 to be excluded from phase2
     exclude_list = []
+    errors = []
     order = list(ORDER)
+    # default incase no data comes in
+    force_return = False
     if itype is not None:
         if isinstance(itype, list):
             order = itype
@@ -721,7 +796,12 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
             order = [itype]
     for item_type in order:
         try:
-            source = read_single_sheet(filename, item_type)
+            if from_json:
+                source = filename.get(item_type)
+                if source is None:
+                    continue
+            else:
+                source = read_single_sheet(filename, item_type)
         except ValueError:
             logger.error('Opening %s %s failed.', filename, item_type)
             continue
@@ -735,37 +815,53 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
 
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase)
         processed_data = combine(source, pipeline)
-        for result in processed_data:
-            if result.get('_response') and result.get('_response').status_code not in [200, 201]:
-                exclude_list.append(result['uuid'])
-                print("excluding uuid %s do to error" % result['uuid'])
+        check_result(processed_data, exclude=exclude_list, errors=errors)
+        # for result in processed_data:
+        #     if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+        #         errors.append({'uuid': result['uuid'],
+        #                        'error': result['_response'].json})
+        #         # import pdb; pdb.set_trace()
+        #         exclude_list.append(result['uuid'])
+        #         print("excluding uuid %s due to error" % result['uuid'])
+
+        # load self referential phase2
+        if force_return:
+            continue
+        elif item_type not in PHASE2_PIPELINES:
+            continue
+        else:
+            phase = 2
+            pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase, exclude=exclude_list)
+            processed_data = combine(source, pipeline)
+            check_result(processed_data, exclude=exclude_list, errors=errors)
+
     if force_return:
         return
 
     for item_type in order:
-        if item_type not in PHASE2_PIPELINES:
+        if item_type not in PHASE3_PIPELINES:
             continue
         try:
-            source = read_single_sheet(filename, item_type)
+            if from_json:
+                source = filename.get(item_type)
+                if source is None:
+                    continue
+            else:
+                source = read_single_sheet(filename, item_type)
         except ValueError:
             continue
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2, exclude=exclude_list)
+        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=3, exclude=exclude_list)
         process(combine(source, pipeline))
+    return errors
 
 
-def generate_access_key(testapp, store_access_key=None,
+def generate_access_key(testapp, store_access_key,
                         email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
         admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
-
-        # don't create one if we already have
-        for key in admin['access_keys']:
-            if key.get('description') == 'key for submit4dn':
-                print("key found not generating new one")
-                return
 
         access_key_req = {
             'user': admin['@id'],
@@ -804,11 +900,12 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                     keypairs.write(keys)
 
         elif store_access_key == 's3':
+            # if access_key_loc == 's3', always generate new keys
             s3bucket = app.registry.settings['system_bucket']
             secret = os.environ.get('AWS_SECRET_KEY')
             if not secret:
                 print("no secrets for s3 upload, you probably shouldn't be doing"
-                      "this from yourlocal machine")
+                      "this from your local machine")
                 print("halt and catch fire")
                 return
 
@@ -853,7 +950,7 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts': # Load up master_inserts
+    if indir != 'master-inserts':  # Always load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
 
@@ -883,6 +980,10 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False):
 
 def load_jin_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='jin_inserts',
+              clear_tables=clear_tables)
+
+def load_wfr_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
               clear_tables=clear_tables)
 
 

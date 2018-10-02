@@ -9,7 +9,6 @@ from snovault.validators import (
     validate_item_content_patch,
     validate_item_content_put,
 )
-from snovault.etag import if_match_tid
 from pyramid.view import view_config
 from .base import (
     Item,
@@ -43,6 +42,7 @@ class Biosource(Item):
         "individual.mouse_strain",
         "individual.ethnicity",
         "individual.health_status",
+        "modifications.modification_type",
         "tissue.term_name",
         "tissue.slim_terms",
         "tissue.synonyms",
@@ -76,10 +76,10 @@ class Biosource(Item):
         ]
         mod_str = ''
         if modifications:
-            mod_str = ' ' + '; '.join(
-                request.embed(mod, '@@object').get('modification_name_short', '')
-                for mod in modifications[:-1]) \
-                + request.embed(modifications[-1], '@@object').get('modification_name_short', '')
+            mod_str = ' with ' + ', '.join([request.embed(mod, '@@object').get('modification_name_short', '')
+                                            for mod in modifications])
+        # elif modifications and len(modifications) > 1:
+        #     mod_str = ' with genetic modifications'
         if biosource_type == "tissue":
             if tissue:
                 tissue_props = request.embed(tissue, '@@object')
@@ -199,10 +199,8 @@ def biosource_add(context, request, render=None):
 
 
 @view_config(context=Biosource, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line],
-             decorator=if_match_tid)
+             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line],
-             decorator=if_match_tid)
+             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)

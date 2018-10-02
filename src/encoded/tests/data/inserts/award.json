@@ -7,7 +7,7 @@
         "title": "4DN TEST",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
         "viewing_group": "4DN",
-        "project": "4DN"
+        "center" : "4DN Center"
     },
     {
         "description": "A test non 4DN award - for testing permissions and access to various items",
@@ -16,7 +16,7 @@
         "project": "External",
         "title": "Other TEST",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461444b",
-        "project": "External",
+        "center" : "Non-4DN Center",
         "viewing_group": "Not 4DN"
     },
     {
@@ -28,6 +28,7 @@
         "start_date": "2015-09-07",
         "status": "current",
         "title": "SOME EXTERNAL AWARD",
+        "center" : "External Center",
         "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b4613349"
     },

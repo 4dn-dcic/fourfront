@@ -10,7 +10,8 @@
       "age": [ "age_units"]
     },
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "properties": {
         "accession": {

@@ -65,7 +65,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
             cy.location('pathname').should('equal', '/joint-analysis');
         });
 
-        const yAxisTerms = ['ATAC-seq', 'CHIA-pet', 'DAM-ID seq', 'Repli-seq', 'in situ Hi-C'];
+        const yAxisTerms = ['ATAC-seq', 'ChIA-PET', 'DAM-ID seq', 'Repli-seq', 'in situ Hi-C'];
         const xAxisTerms = ['H1-hESC', 'HFFc6'];
 
         it('Have at least one of each term - ' + yAxisTerms.join(', ') + ' + ' + xAxisTerms.join(', '), function(){

@@ -119,6 +119,19 @@ h5.fourDN-header {
 		max-width: 100%;
 	}
 
+	ol, ul {
+		> li {
+			> ul, > ol {
+				margin-bottom: 5px;
+			}
+			> p + ul,
+			> p + ol {
+				// Reverses p { margin-bottom: 10px } style
+				margin-top: -5px;
+			}
+		}
+	}
+
 }
 
 .static-section-entry {
@@ -176,6 +189,8 @@ h5.fourDN-header {
 	}
 
 }
+
+
 
 
 /**********************************************************
@@ -827,6 +842,16 @@ h5.fourDN-header {
 
 }
 
+
+
+#legend.static-section-entry .section-title,
+#release-updates-section.static-section-entry .section-title {
+	font-weight: 500;
+	padding-bottom: 12px;
+	border-bottom: 1px solid #eee;
+}
+
+
 #content.container,
 #legend.static-section-entry {
 
@@ -839,15 +864,8 @@ h5.fourDN-header {
 #legend.static-section-entry {
 	margin-bottom: 10px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+	border-bottom: 1px solid #eee;
 	.section-joint-anlysis-data-legend {
-		> .title-col {
-			> h5 {
-				font-weight: 500;
-				padding-bottom: 12px;
-				border-bottom: 1px solid #eee;
-			}
-		}
 		font-size: 1rem;
 		> .col-sm-3 {
 			text-align: center;

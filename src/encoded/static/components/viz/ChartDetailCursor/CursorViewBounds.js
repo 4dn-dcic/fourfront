@@ -11,7 +11,7 @@ import { console, isServerSide, Filters, layout, analytics } from './../../util'
  * Use this Component to wrap a chart or other view which displays any sort of Experiment Set 'Node'(s).
  * A "Node" here implies an object with properties: 'field', 'term', 'experiment_sets', 'experiments', and 'files'.
  * Optionally may have a 'parent' node also, and any other metada.
- * 
+ *
  * This components adjusts child Component to pass down props:
  * {function} onNodeMouseEnter(node, evt)
  * {function} onNodeMouseLeave(node, evt)
@@ -20,12 +20,12 @@ import { console, isServerSide, Filters, layout, analytics } from './../../util'
  * {string} selectedParentTerm
  * {string} hoverTerm
  * {string} hoverParentTerm
- * 
+ *
  * The added prop callback functions should be used in the view whenever a "Node" element is hovered over or clicked on,
  * to pass node to them for the popover display.
- * 
+ *
  * Added prop strings should be used alongside CursorViewBounds.isSelected or similar to determine to highlight a node element that is selected, or something.
- * 
+ *
  * @export
  * @class CursorViewBounds
  * @extends {React.Component}
@@ -37,9 +37,9 @@ export default class CursorViewBounds extends React.Component {
      * 
      * @public
      * @param {Object} node - A 'node' containing at least 'field', 'term', and 'parent' if applicable.
-     * @param {string} selectedBarSectionTerm - Currently selected subdivision field term.
-     * @param {string} selectedBarSectionParentTerm - Currently selected X-Axis field term.
-     * @returns {boolean} True if node (and node.parent, if applicable) matches selectedBarSectionTerm & selectedBarSectionParentTerm.
+     * @param {string} selectedTerm - Currently selected subdivision field term.
+     * @param {string} selectedParentTerm - Currently selected X-Axis field term.
+     * @returns {boolean} True if node (and node.parent, if applicable) matches selectedTerm & selectedParentTerm.
      */
     static isSelected(node, selectedTerm, selectedParentTerm){
         if (
@@ -62,7 +62,7 @@ export default class CursorViewBounds extends React.Component {
             };
 
         }
-    }
+    };
 
     constructor(props){
         super(props);
@@ -177,7 +177,11 @@ export default class CursorViewBounds extends React.Component {
         });
     }
 
-    sendHoverEvent(node){
+    /**
+     * Is debounced by 3 seconds. Nodes hovered over get added to this.hovers and then every 3 seconds (+) any
+     * queued this.hovers nodes get an Analytics events sent, with multiple node hover instances delimited by '; '.
+     */
+    sendHoverEvent(){
         setTimeout(()=>{
             analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Hover Node', {
                 eventLabel : analytics.eventLabelFromChartNodes(this.hovers),

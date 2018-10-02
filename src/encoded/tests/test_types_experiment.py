@@ -568,7 +568,7 @@ def expt_w_target(testapp, lab, award, human_biosample,
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'CHIA-pet',
+        'experiment_type': 'ChIA-PET',
         'targeted_factor': target_w_prot['@id']
     }
     return testapp.post_json('/experiment_chiapet', item).json['@graph'][0]
@@ -690,7 +690,7 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
 
 
 def test_experiment_categorizer_4_chiapet_no_fusion(testapp, repliseq_info):
-    repliseq_info['experiment_type'] = 'CHIA-pet'
+    repliseq_info['experiment_type'] = 'ChIA-PET'
     res = testapp.post_json('/experiment_chiapet', repliseq_info).json['@graph'][0]
     assert res['experiment_categorizer']['field'] == 'Default'
     assert res['experiment_categorizer']['value'] is None

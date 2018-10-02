@@ -22,13 +22,13 @@ function filterRowsToResults(rows){
 
 describe('Testing search.js', function() {
     var sinon, server;
-    var React, Search, testSearch, TestUtils, context, schemas, _;
+    var React, SearchView, searchViewCommonProps, testSearch, TestUtils, context, schemas, _;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        Search = require('./../browse/SearchView').default;
+        SearchView = require('./../browse/SearchView').default;
         context = require('../testdata/expt_search');
 
         sinon = require('sinon');
@@ -44,8 +44,21 @@ describe('Testing search.js', function() {
             ]
         );
 
+        searchViewCommonProps = {
+            "href" : "/search/?type=ExperimentHiC",
+
+            // Mocked props that would be sent from app.BodyElement
+            "windowWidth" : 1000,
+            "registerWindowOnScrollHandler" : function(fxn){
+                setTimeout(()=> console.log(fxn(345, 345)), 2000);
+                setTimeout(()=> console.log(fxn(40, -305)), 5000);
+                console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
+                jest.runAllTimers();
+            }
+        };
+
         testSearch = TestUtils.renderIntoDocument(
-            <Search context={context} href="/search/?type=ExperimentHiC" />
+            <SearchView {...searchViewCommonProps} context={context} />
         );
 
     });
@@ -64,7 +77,7 @@ describe('Testing search.js', function() {
     it('facets properly (digestion_enzyme=hindIII)', function() {
         context = require('../testdata/expt_search_hindIII');
         testSearch = TestUtils.renderIntoDocument(
-            <Search context={context} href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII' />
+            <SearchView {...searchViewCommonProps} context={context} href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII' />
         );
         var rows = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
         var results = filterRowsToResults(rows);

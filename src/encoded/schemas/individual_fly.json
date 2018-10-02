@@ -20,7 +20,8 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -80,7 +81,6 @@
             "title": "External identifiers",
             "description": "Unique identifiers from external resources.",
             "type": "array",
-            "default": [],
             "lookup": 1000,
             "uniqueItems": true,
             "items": {

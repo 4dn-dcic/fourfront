@@ -14,8 +14,9 @@ snovault.app_version = ${encoded_version}
 snovault.elasticsearch.index = ${elasticsearch_index}
 env.name = ${env_name}
 encoded_version = ${encoded_version}
-mpindexer = ${mpindexer} 
-indexer = ${indexer} 
+mpindexer = ${mpindexer}
+indexer = ${indexer}
+elasticsearch.aws_auth = true
 production = true
 
 snovault.load_test_data = ${load_test_data}

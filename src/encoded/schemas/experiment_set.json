@@ -21,7 +21,9 @@
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/badges" }
+        { "$ref": "mixins.json#/supplementary_files" },
+        { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -58,7 +60,6 @@
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
             "exclude_from": ["submit4dn"],
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Experiment",
@@ -106,51 +107,6 @@
                 "linkTo": "FileProcessed"
             }
         },
-        "other_processed_files": {
-            "title": "Archived or Preliminary Processed Files",
-            "description": "Archived or preliminary processed filesets that are derived from files in this experiment set.",
-            "type": "array",
-            "lookup": 110,
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "items": {
-                "title": "Archived/Preliminary Processed Filesets",
-                "description": "Fileset metadata",
-                "type": "object",
-                "required": ["title", "files"],
-                "properties": {
-                    "title": {
-                        "title": "Fileset Title",
-                        "type": "string",
-                        "lookup": 111
-                    },
-                    "type": {
-                        "title": "Fileset Type",
-                        "type": "string",
-                        "lookup": 112,
-                        "enum": [
-                            "archived",
-                            "preliminary",
-                            "visualization"
-                        ]
-                    },
-                    "description": {
-                        "title": "Description",
-                        "type": "string",
-                        "lookup": 113
-                    },
-                    "files": {
-                        "title": "Files",
-                        "type": "array",
-                        "lookup": 114,
-                        "items": {
-                            "title": "File",
-                            "type": "string",
-                            "linkTo": "FileProcessed"
-                        }
-                    }
-                }
-            }
-        },
         "completed_processes": {
             "title": "Completed data processing",
             "exclude_from": ["submit4dn", "FFedit-create"],
@@ -162,20 +118,8 @@
         }
     },
     "facets": {
-        "award.center_title": {
-            "title": "Center"
-        },
-        "publications_of_set.display_title": {
-            "title": "Publication"
-        },
-        "experimentset_type": {
-            "title": "Set Type"
-        },
         "experiments_in_set.experiment_type": {
-            "title": "Experiment Type"
-        },
-        "experiments_in_set.experiment_categorizer.combined" : {
-            "title" : "Assay Details"
+          "title": "Experiment Type"
         },
         "dataset_label" : {
             "title" : "Dataset"
@@ -183,17 +127,39 @@
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "experiments_in_set.biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+        "experiments_in_set.biosample.biosample_type": {
+            "title": "Sample Type"
         },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Sample"
+        },
+        "publications_of_set.display_title": {
+            "title": "Publication"
         },
         "experiments_in_set.biosample.modifications.modification_type": {
             "title": "Modifications"
         },
         "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
+        },
+        "experiments_in_set.experiment_categorizer.combined" : {
+            "title" : "Assay Details"
+        },
+        "award.center_title": {
+            "title": "Center"
+        },
+        "experimentset_type": {
+            "title": "Set Type"
+        },
+        "public_release" : {
+            "title" : "Public Release Date",
+            "aggregation_type" : "date_histogram",
+            "disabled" : true
+        },
+        "project_release" : {
+            "title" : "Internal Release Date",
+            "aggregation_type" : "date_histogram",
+            "disabled" : true
         }
     },
     "columns": {

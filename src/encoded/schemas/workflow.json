@@ -18,14 +18,15 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "accession": {
             "accessionType": "WF"
@@ -167,7 +168,8 @@
                         "items": {
                              "title": "secondary_file_format",
                              "description": "formats for secondary file",
-                             "type": "string"
+                             "type": "string",
+                             "linkTo": "FileFormat"
                         }
                     },
                     "is_primaryfile": {
@@ -198,6 +200,7 @@
                         "title": "Format",
                         "description": "Argument Format",
                         "type": "string",
+                        "linkTo": "FileFormat",
                         "suggested_enum" : [
                             "fastq",
                             "bam",
@@ -221,6 +224,10 @@
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "internal notes",
                         "type": "string"
                     }
                 }
@@ -268,7 +275,8 @@
                                         },
                                         "file_format" : {
                                             "title" : "File Format",
-                                            "type" : "string"
+                                            "type" : "string",
+                                            "linkTo": "FileFormat"
                                         },
                                         "cardinality" : {
                                             "title" : "Cardinality",
@@ -278,6 +286,10 @@
                                         "global" : {
                                             "title" : "Global Argument",
                                             "type" : "boolean"
+                                        },
+                                        "notes": {
+                                            "description": "internal notes",
+                                            "type": "string"
                                         }
                                     }
                                 },

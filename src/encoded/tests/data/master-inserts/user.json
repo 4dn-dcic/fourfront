@@ -21,7 +21,8 @@
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
+        "submits_for": ["4dn-dcic-lab"],
+        "preferred_email" : "fake_email_address@email.com"
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",
@@ -64,7 +65,6 @@
         "last_name": "Kirli",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
         "viewing_groups": ["4DN"],
-        "groups": ["read-only-admin"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
     },
@@ -97,6 +97,38 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Reiff",
         "uuid": "e2324f87-0625-4bbc-803b-d47677aebe08",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "luisa_mercado@hms.harvard.edu",
+        "first_name": "Luisa",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Mercado",
+        "uuid": "56c9c683-bb11-471b-b590-c656f7dc03c1",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "shannon.ehmsen@gmail.com",
+        "first_name": "Shannon",
+        "job_title": "Graphic designer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Ehmsen",
+        "uuid": "52b6954c-c1cc-4f56-9e40-b8a777c8b42f",
+        "viewing_groups": ["4DN"],
+        "groups": ["read-only-admin"]
+    },
+    {
+        "email": "chad_serrant@hms.harvard.edu",
+        "first_name": "Chad",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Serrant",
+        "uuid": "9866662f-4eb6-3a4b-7cdf-3ab267226988",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]

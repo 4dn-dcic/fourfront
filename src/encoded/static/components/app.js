@@ -1,44 +1,47 @@
 'use strict';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import url from 'url';
+import queryString from 'query-string';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
-var jwt = require('jsonwebtoken');
+import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
-import Navigation from './navigation';
-import SubmissionView from './submission/submission-view';
-import Footer from './footer';
+import { NavigationBar } from './navigation/NavigationBar';
+import { Footer } from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
+import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
+import { NavigateOpts } from './util/navigate';
 
-/**
- * The top-level component for this application.
- *
- * @module {Component} app
- */
+
 
 /**
  * Used to temporarily store Redux store values for simultaneous dispatch.
  *
- * @memberof module:app
+ * @private
+ * @var
+ * @type {Object}
  */
 let dispatch_dict = {};
 
 /**
  * Top bar navigation & link schema definition.
  *
- * @memberof module:app
+ * @private
+ * @constant
+ * @type {Object}
  */
 const portal = {
     "portal_title": '4DN Data Portal',
@@ -65,7 +68,7 @@ const portal = {
     ],
     "user_section": [
         {id: 'login-menu-item', title: 'Log in', url: '/'},
-        {id: 'accountactions-menu-item', title: 'Register', url: '/help/account-creation'}
+        {id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}
         // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
@@ -98,22 +101,48 @@ class Title extends React.Component {
  * Creates a promise which completes after a delay, performing no network request.
  * Used to perform a promise.race to see if this timeout or a network requests completes first, which
  * then allows us to set app.state.slow and render a loading icon until long-running network request completes.
+ *
+ * @private
  */
 class Timeout {
+    /**
+     * @param {number} timeout - The length of time before this promise resolves.
+     */
     constructor(timeout) {
+        /**
+         * Internal promise object which resolves after length of time as specified by `timeout`.
+         *
+         * @private
+         */
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
     }
 }
 
+
+
 /**
- * @alias module:app
+ * The root and top-most React component for our application.
+ * This is wrapped by a Redux store and then rendered by either the server-side
+ * NodeJS sub-process or by the browser.
+ *
+ * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/server.js
+ * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/browser.js
  */
-
-
 export default class App extends React.Component {
 
+    /**
+     * Defines time before a 'slow loading' indicator appears on page.
+     *
+     * @constant
+     * @type {number}
+     */
     static SLOW_REQUEST_TIME = 750
 
+    /**
+     * Immediately scrolls browser viewport to current window hash or to top of page.
+     *
+     * @returns {void} Nothing
+     */
     static scrollTo() {
         var hash = window.location.hash;
         if (hash && document.getElementById(hash.slice(1))) {
@@ -123,6 +152,14 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Used in browser.js to collect prop values from server-side-rendered HTML
+     * and then re-feed them into Redux store.
+     *
+     * @param {HTMLElement} document - HTML DOM element representing the document.
+     * @param {string} [filter=null] - If set, filters down prop fields/values collected to only one(s) defined.
+     * @returns {Object} Object keyed by field name with collected value as value.
+     */
     static getRenderedPropValues(document, filter = null){
         var returnObj = {};
         var script_props;
@@ -148,50 +185,62 @@ export default class App extends React.Component {
         return returnObj;
     }
 
+    /**
+     * Runs `App.getRenderedPropValues` and extends with `{ href }` from canonical link element.
+     *
+     * @param {HTMLElement} document - HTML DOM element representing the document.
+     * @param {string} [filters=null] - If set, filters down prop fields/values collected to only one(s) defined.
+     * @returns {Object} Object keyed by field name with collected value as value.
+     */
     static getRenderedProps(document, filters = null) {
         return _.extend(App.getRenderedPropValues(document, filters), {
             'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') // Ensure the initial render is exactly the same
         });
     }
 
+    /**
+     * @type {Object} propTypes
+     * @property {*} [propTypes.sessionMayBeSet] - PropTypes definition.
+     * @public
+     * @constant
+     * @member
+     */
     static propTypes = {
         "sessionMayBeSet" : PropTypes.any,    // Whether Auth0 session exists or not.
-    }
+    };
 
+    /**
+     * @type {Object} defaultProps
+     * @property {boolean} [defaultProps.sessionMayBeSet=null] Whether user is currently likely to be logged in as determined by browser.js
+     * @public
+     * @constant
+     * @member
+     */
     static defaultProps = {
         'sessionMayBeSet' : null
-    }
+    };
 
-    static childContextTypes = {
-        dropdownComponent: PropTypes.string,
-        location_href: PropTypes.string,
-        onDropdownChange: PropTypes.func,
-        hidePublicAudits: PropTypes.bool,
-        session: PropTypes.bool,
-        navigate: PropTypes.func,
-        schemas: PropTypes.object
-    }
-
+    /**
+     * Does some initialization, checks if browser HistoryAPI is supported,
+     * sets state.session according to JWT in current cookie, etc.
+     *
+     * @constructor
+     * @member
+     */
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
 
         // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
-        this.handleDropdownChange = this.handleDropdownChange.bind(this);
-        this.handleAutocompleteChosenChange = this.handleAutocompleteChosenChange.bind(this);
-        this.handleAutocompleteFocusChange = this.handleAutocompleteFocusChange.bind(this);
-        this.handleAutocompleteHiddenChange = this.handleAutocompleteHiddenChange.bind(this);
-        this.handleLayoutClick = this.handleLayoutClick.bind(this);
-        this.handleKey = this.handleKey.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handlePopState = this.handlePopState.bind(this);
+
         this.setIsSubmitting = this.setIsSubmitting.bind(this);
         this.stayOnSubmissionsPage = this.stayOnSubmissionsPage.bind(this);
         this.authenticateUser = this.authenticateUser.bind(this);
@@ -203,11 +252,17 @@ export default class App extends React.Component {
 
         console.log('App Filters on Initial Page Load', Filters.currentExpSetFilters((props.context && props.context.filters) || null));
 
+        /**
+         * Whether HistoryAPI is supported in current browser.
+         * Assigned / determined in constructor.
+         *
+         * @type {boolean}
+         */
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
         // Todo: Migrate session & user_actions to redux store?
-        var session = false;
-        var user_actions = [];
+        var session = false,
+            user_actions = [];
 
         if (props.sessionMayBeSet !== null){ // Only provided from server
             if (props.sessionMayBeSet === false) session = false;
@@ -232,57 +287,71 @@ export default class App extends React.Component {
 
         if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
 
+        /**
+         * Initial state of application.
+         *
+         * @type {Object}
+         * @property {boolean}  state.session       Whether user is currently logged in or not. User details are retrieved using JWT utility.
+         * @property {Object[]} state.user_actions  List of actions that are permitted for current user.
+         * @property {Object[]} state.schemas       Current schemas; null until AJAX-ed in (may change).
+         * @property {boolean}  state.isSubmitting  Whether there's a submission in progress. If true, alert is shown to prevent user from accidentally navigating away.
+         * @property {boolean}  state.mounted       Whether app has been mounted into DOM in browser yet.
+         */
         this.state = {
-            'session': session,
-            'user_actions': user_actions,
-            'schemas': this.props.context.schemas || null,
-            'isSubmitting': false,
-            'mounted' : false
+            'session'           : session,
+            'user_actions'      : user_actions,
+            'schemas'           : this.props.context.schemas || null,
+            'isSubmitting'      : false,
+            'mounted'           : false,
+            'scrollState'       : null
         };
 
         console.log("App Initial State: ", this.state);
     }
 
-    // Once the app component is mounted, bind keydowns to handleKey function
+    /**
+     * Perform various actions once component is mounted which depend on browser environment:
+     *
+     * - Add URI hash from window.location.hash/href to Redux store (doesn't get sent server-side).
+     * - Bind 'handlePopState' function to window popstate event (e.g. back/forward button navigation).
+     * - Initializes Google Analytics
+     * - Exposes 'API' from browser window object via property {Object} 'fourfront' which has reference to Alerts, JWT, navigate, and this app component.
+     * - Emits an event from browser window named 'fourfrontinitialized', letting any listeners (parent windows, etc.) know that JS of this window has initialized. Posts message with same 'eventType' as well.
+     * - Shows browser suggestion alert if not using Chrome, Safari, Firefox.
+     * - Sets state.mounted to be true.
+     * - Clears out any UTM URI parameters three seconds after mounting (giving Google Analytics time to pick them up).
+     *
+     * @private
+     */
     componentDidMount() {
-        globals.bindEvent(window, 'keydown', this.handleKey);
+        var { href, context } = this.props;
 
+        // Load up analytics
+        analytics.initializeGoogleAnalytics( analytics.getTrackingId(href), context );
+
+        // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
 
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and update props.href (via Redux), if it is different.
-        var query_href;
+        var queryHref = href;
         // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
         if (document.querySelector('link[rel="canonical"]')){
-            query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        } else {
-            query_href = this.props.href;
+            queryHref = document.querySelector('link[rel="canonical"]').getAttribute('href');
         }
-        // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
-        query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
-        if (this.props.href !== query_href){
+        // Grab window.location.href w/ query_href as fallback.
+        queryHref = globals.windowHref(queryHref);
+        if (href !== queryHref){
             store.dispatch({
-                type: {'href':query_href}
+                type: {'href':queryHref}
             });
         }
 
-        // If the window href has a hash, which SHOULD NOT remain (!== globals.maybeRemoveHash()), strip it on mount to match app's props.href.
-        var parts = url.parse(query_href);
-        if (
-            typeof window.location.hash === 'string' &&
-            window.location.hash.length > 0 &&
-            (!parts.hash || parts.hash === '')
-        ){
-            window.location.hash = '';
-        }
-
-
         if (this.historyEnabled) {
-            var data = this.props.context;
             try {
-                window.history.replaceState(data, '', window.location.href);
+                window.history.replaceState(context, '', window.location.href);
             } catch (exc) {
                 // Might fail due to too large data
                 window.history.replaceState(null, '', window.location.href);
@@ -299,30 +368,84 @@ export default class App extends React.Component {
         }
         window.onbeforeunload = this.handleBeforeUnload;
 
-        // Load up analytics
-        analytics.initializeGoogleAnalytics(
-            analytics.getTrackingId(this.props.href),
-            this.props.context
-        );
-
         // Save some stuff to global window variables so we can access it in tests:
         // Normally would call this 'window.app' but ENCODE already sets this in browser.js to be the top-level Redux provider (not really useful, remove?)
         window.fourfront = _.extend(window.fourfront || {}, {
-            'app' : this,
-            'alerts' : Alerts,
-            'JWT' : JWT,
-            'navigate' : navigate
+            'app'       : this,
+            'alerts'    : Alerts,
+            'JWT'       : JWT,
+            'navigate'  : navigate
         });
 
-        this.setState({ 'mounted' : true });
+        // Detect browser and save it to state. Show alert to inform people we're too ~lazy~ under-resourced to support MS Edge to the max.
+        var browserInfo = detectBrowser(),
+            mounted     = true;
+
+        console.log('BROWSER', browserInfo);
+
+        if (browserInfo && typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
+            Alerts.queue({
+                'title' : 'Browser Suggestion',
+                'message' : (
+                    <div>
+                        <p className="mb-0">
+                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            the recommended browser(s) for using the 4DN Data Portal.
+                        </p>
+                        <p className="mb-0">
+                            Microsoft Edge, Safari, etc. should work for a majority of portal functions but are not explicitly supported and may present some glitches, e.g. during submission.
+                        </p>
+                    </div>
+                ),
+                'style' : 'warning'
+            });
+        }
+
+        // Post-mount stuff
+        this.setState({ mounted, browserInfo }, () => {
+
+            console.log('App is mounted, dispatching fourfrontinitialized event.');
+            // DEPRECATED:
+            // Emit event from our window object to notify that fourfront JS has initialized.
+            // This is to be used by, e.g. submissions view which might control a child window.
+            window.dispatchEvent(new Event('fourfrontinitialized'));
+            // CURRENT: If we have parent window, post a message to it as well.
+            if (window.opener) window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
+
+            // If we have UTM URL parameters in the URI, attempt to set history state (& browser) URL to exclude them after a few seconds
+            // after Google Analytics may have stored proper 'source', 'medium', etc. (async)
+            var urlParts = url.parse(queryHref, true),
+                paramsToClear = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+            if (urlParts.query && _.any(paramsToClear, function(prm){ return typeof urlParts.query[prm] !== 'undefined'; })){
+                setTimeout(()=>{
+                    var queryToSet = _.clone(urlParts.query);
+                    _.forEach(paramsToClear, function(prm){ typeof queryToSet[prm] !== 'undefined' && delete queryToSet[prm]; });
+                    var nextUrl = (
+                        urlParts.protocol + '//' + urlParts.host +
+                        urlParts.pathname + (_.keys(queryToSet).length > 0 ? '?' + queryString.stringify(queryToSet) : '')
+                    );
+                    if (nextUrl !== queryHref && this.historyEnabled){
+                        try {
+                            window.history.replaceState(context, '', nextUrl);
+                        } catch (exc) {
+                            // Might fail due to too large data
+                            window.history.replaceState(null, '', nextUrl);
+                        }
+                        console.info('Replaced UTM params in URI:', queryHref, nextUrl);
+                    }
+                }, 3000);
+            }
+        });
     }
 
+    /** @ignore */
     componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
         }
     }
 
+    /** @ignore */
     componentDidUpdate(prevProps, prevState) {
         var key;
         if (this.props) {
@@ -362,19 +485,15 @@ export default class App extends React.Component {
         }
     }
 
-    // Retrieve current React context
-    getChildContext() {
-        return {
-            dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            location_href: this.props.href,
-            onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
-            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
-            session: this.state.session,
-            navigate: navigate,
-            schemas : this.state.schemas
-        };
-    }
-
+    /**
+     * Calculates some actions available, given a category.
+     * Potentially deprecated-ish.
+     *
+     * @todo Potentially remove. Or document more.
+     * @public
+     * @param {string} category - Usually one of "user", "context", "user_section", "global_sections".
+     * @returns {{ href: string }[]} - List of actions available for category.
+     */
     listActionsFor(category) {
         if (category === 'context') {
             var context = this.props.context;
@@ -407,6 +526,12 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Calculates current action, if any, from URL hash.
+     *
+     * @public
+     * @returns {!string} Current action if any, or null.
+     */
     currentAction() {
         var href_url = url.parse(this.props.href);
         var hash = href_url.hash || '';
@@ -414,10 +539,18 @@ export default class App extends React.Component {
         if (hash.slice(0, 2) === '#!') {
             name = hash.slice(2);
         }
-        return name;
+        return name || null;
     }
 
-    loadSchemas(callback, forceFetch = false){
+    /**
+     * If no schemas yet stored in our state, we AJAX them in from `/profiles/?format=json`.
+     *
+     * @public
+     * @param {function} [callback=null] - If defined, will be executed upon completion of load, with schemas passed in as first argument.
+     * @param {boolean} [forceFetch=false] - If true, will ignore any previously-fetched schemas and fetch new ones.
+     * @returns {void}
+     */
+    loadSchemas(callback = null, forceFetch = false){
         if (this.state.schemas !== null && !forceFetch){
             // We've already loaded these successfully (hopefully)
             if (typeof callback === 'function') callback(this.state.schemas);
@@ -438,26 +571,14 @@ export default class App extends React.Component {
         });
     }
 
-    // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
-    handleDropdownChange(componentID) {
-        // Use React _rootNodeID to uniquely identify a dropdown menu;
-        // It's passed in as componentID
-        this.setState({dropdownComponent: componentID});
-    }
-
-    handleAutocompleteChosenChange(chosen) { this.setState({autocompleteTermChosen: chosen}); }
-
-    handleAutocompleteFocusChange(focused) { this.setState({autocompleteFocused: focused}); }
-
-    handleAutocompleteHiddenChange(hidden) { this.setState({autocompleteHidden: hidden}); }
-
-    // Handle a click outside a dropdown menu by clearing currently dropped down menu
-    handleLayoutClick(e) {
-        if (this.state.dropdownComponent !== undefined) {
-            this.setState({dropdownComponent: undefined});
-        }
-    }
-
+    /**
+     * Intercepts a click on a hyperlink HTML element
+     * and navigates to its target href if is an internal link.
+     * Skips for download links, external links, etc.
+     *
+     * @private
+     * @param {React.SyntheticEvent} event React SyntheticEvent for click MouseEvent.
+     */
     handleClick(event) {
         // https://github.com/facebook/react/issues/1691
         if (event.isDefaultPrevented()) return;
@@ -521,12 +642,19 @@ export default class App extends React.Component {
         }
     }
 
-    // Submitted forms are treated the same as links
+    /**
+     * Intercepts a form submission on a form HTML element
+     * and performs it via AJAX. Similar to handling of hyperlinks.
+     *
+     * @private
+     * @param {React.SyntheticEvent} event Form submission event.
+     */
     handleSubmit(event) {
-        var target = event.target;
+        var target      = event.target, // A form DOM element reference
+            hrefParts   = url.parse(this.props.href);
 
         // Skip POST forms
-        if (target.method != 'get') return;
+        if (target.method !== 'get') return;
 
         // Skip forms with a data-bypass attribute.
         if (target.getAttribute('data-bypass')) return;
@@ -534,10 +662,15 @@ export default class App extends React.Component {
         // Skip external forms
         if (!origin.same(target.action)) return;
 
-        var options = {};
-        var action_url = url.parse(url.resolve(this.props.href, target.action));
-        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
-        var search = serialize(target);
+        var actionUrlParts  = url.parse(url.resolve(this.props.href, target.action)),
+            search          = serialize(target),
+            href            = actionUrlParts.pathname,
+            currentAction   = this.currentAction(),
+            navOptions      = {
+                'replace'       : actionUrlParts.pathname == hrefParts.pathname,
+                'skipRequest'   : target.getAttribute('data-skiprequest')
+            };
+
         if (target.getAttribute('data-removeempty')) {
             search = _.map(
                 _.filter(search.split('&'), function (item) {
@@ -549,18 +682,25 @@ export default class App extends React.Component {
                 }
             ).join('&');
         }
-        var href = action_url.pathname;
-        if (search) {
-            href += '?' + search;
-        }
-        options.skipRequest = target.getAttribute('data-skiprequest');
+
+        // Append form name:vals as stringified URI params (`search`).
+        if (search) href += '?' + search;
+
+        // If we're submitting search form in selection mode, preserve selection mode at next URL.
+        if (currentAction === 'selection') href += '#!' + currentAction;
 
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, options);
-        }
+            navigate(href, navOptions);
+        } // Else is submitted as normal browser HTTP GET request if event.preventDefault() not called.
     }
 
+    /**
+     * Handles a history change event.
+     *
+     * @private
+     * @param {React.SyntheticEvent} event - A popstate event.
+     */
     handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
         var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
@@ -618,30 +758,21 @@ export default class App extends React.Component {
         navigate(href, {'replace': true});
     }
 
-    // If ESC pressed while drop-down menu open, close the menu
-    handleKey(e) {
-        if (e.which === 27) {
-            if (this.state.dropdownComponent !== undefined) {
-                e.preventDefault();
-                this.handleDropdownChange(undefined);
-            } else if (!this.state.autocompleteHidden) {
-                e.preventDefault();
-                this.handleAutocompleteHiddenChange(true);
-            }
-        } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
-            e.preventDefault();
-        }
-    }
-
+    /**
+     * Grabs JWT from local cookie and, if not already authenticated or are missing 'user_actions',
+     * perform authentication via AJAX to grab user actions, updated JWT token, and save to localStorage.
+     *
+     * @private
+     * @param {function} [callback=null] Optional callback to be ran upon completing authentication.
+     * @returns {void}
+     */
     authenticateUser(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
-
+        if (idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
+            console.info('AUTHENTICATING USER; JWT PRESENT BUT NO STATE.SESSION OR USER_ACTIONS'); // This is very unlikely due to us rendering re: session server-side.
             ajax.promise('/login', 'POST', {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+idToken
+                'Authorization' : 'Bearer ' + idToken
             }, JSON.stringify({id_token: idToken}))
             .then(response => {
                 if (response.code || response.status || response.id_token !== idToken) throw response;
@@ -650,6 +781,9 @@ export default class App extends React.Component {
             .then(response => {
                 JWT.saveUserInfo(response);
                 this.updateUserInfo(callback);
+                analytics.event('Authentication', 'ExistingSessionLogin', {
+                    'eventLabel' : 'Authenticated ClientSide'
+                });
             }, error => {
                 // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
                 // and unset state.session & state.user_actions (via this.updateUserInfo())
@@ -657,10 +791,23 @@ export default class App extends React.Component {
                 this.updateUserInfo(callback);
             });
             return idToken;
+        } else if (idToken && this.state.session && this.state.user_actions){
+            console.info('User is logged in already, continuing session.');
+            analytics.event('Authentication', 'ExistingSessionLogin', {
+                'eventLabel' : 'Authenticated ServerSide'
+            });
         }
         return null;
     }
 
+    /**
+     * Tests that JWT is present along with user info and user actions, and if so, updates `state.session`.
+     * Called by `authenticateUser` as well as Login.
+     *
+     * @public
+     * @param {function} [callback=null] Optional callback to be ran upon completing authentication.
+     * @returns {void}
+     */
     updateUserInfo(callback = null){
         // get user actions (a function of log in) from local storage
         var userActions = [];
@@ -686,21 +833,41 @@ export default class App extends React.Component {
         }
     }
 
-    // functions previously in navigate, mixins.js
-    onHashChange (event) {
-        // IE8/9
+    /**
+     * Updates Redux store with non-hash version of URI. For IE8/9 only.
+     *
+     * @deprecated
+     * @private
+     * @param {React.SyntheticEvent} event An event.
+     * @returns {void}
+     */
+    onHashChange(event) {
         store.dispatch({
             type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
         });
     }
 
-    /** Rules to prevent browser from changing to 'href' via back/forward buttons. */
+    /**
+     * Rules to prevent browser from changing to 'href' via back/forward buttons.
+     *
+     * @private
+     * @param {string} href - Next href.
+     * @returns {boolean} Whether to proceed with browser navigation.
+     */
     confirmPopState(href){
         if (this.stayOnSubmissionsPage(href)) return false;
         return true;
     }
 
-    /** Only navigate if href changes */
+    /**
+     * Only navigate if href changes unless is inPlace navigation, if don't need to stay on submissions
+     * view, etc.
+     *
+     * @private
+     * @param {string} href - New URI we're navigating to.
+     * @param {Object} [options] - Options for navigation request.
+     * @returns {boolean}
+     */
     confirmNavigation(href, options) {
 
         // check if user is currently on submission page
@@ -731,7 +898,8 @@ export default class App extends React.Component {
      * Check this.state.isSubmitting to prompt user if navigating away
      * from the submissions page.
      *
-     * @param {string} [href] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
+     * @param {string} [href=null] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
+     * @returns {boolean}
      */
     stayOnSubmissionsPage(href = null) {
         // can override state in options
@@ -757,6 +925,23 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Should not be called directly - aliased to global function `util.navigate` during App constructor.
+     * Function which is used/called to navigate us around the portal in single-page-application (AJAX)
+     * fashion.
+     *
+     * @alias navigate
+     * @private
+     * @param {string} href                 URI we're attempting to navigate to.
+     * @param {NavigateOpts} [options={}]   Options for the navigation request.
+     * @param {boolean} options.replace     If true, browser history entry is replaced, not added.
+     * @param {boolean} options.skipRequest If true, request is skipped but browser URI and history is updated.
+     * @param {boolean} options.inPlace     If true, will re-load page even if is at same URL. Also won't scroll to top of page.
+     * @param {function} [callback=null]    Optional callback, accepting response JSON as first argument.
+     * @param {function} [fallbackCallback=null] - Optional callback to be called in case request fails.
+     * @param {Object} [includeReduxDispatch={}] - Optional extra data to save to Redux store along with the next response.
+     * @returns {void}
+     */
     navigate(href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
@@ -820,13 +1005,7 @@ export default class App extends React.Component {
                 return null;
             }
 
-            var request = ajax.fetch(
-                href,
-                {
-                    'headers': {}, // Filled in by ajax.promise
-                    'cache' : options.cache === false ? false : true
-                }
-            );
+            var request = ajax.fetch(href, { 'cache' : options.cache === false ? false : true });
 
             this.requestCurrent = true; // Remember we have an outstanding GET request
             var timeout = new Timeout(App.SLOW_REQUEST_TIME);
@@ -861,10 +1040,7 @@ export default class App extends React.Component {
                         console.error(e);
                     }
 
-                    if ( // Bad or expired JWT
-                        (response.detail === "Bad or expired token.") ||
-                        (jwtHeader === 'expired')
-                    ){
+                    if (response.detail === "Bad or expired token." || jwtHeader === 'expired'){ // Bad or expired JWT
                         JWT.remove();
 
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
@@ -907,20 +1083,26 @@ export default class App extends React.Component {
                     if (options.replace) {
                         window.location.replace(href + fragment);
                     } else {
-                        var old_path = ('' + window.location).split('#')[0];
                         window.location.assign(href + fragment);
-                        return;
                     }
+                    return;
                 }
-                dispatch_dict.href = href + fragment;
+
+                var hrefToSet = (request && request.xhr && request.xhr.responseURL) || href; // Get correct URL from XHR, in case we hit a redirect during the request.
+                dispatch_dict.href = hrefToSet + fragment;
 
                 return response;
             })
             .then(response => this.receiveContextResponse(response, includeReduxDispatch, options))
             .then(response => {
                 this.state.slowLoad && this.setState({'slowLoad' : false});
-                if (typeof callback == 'function'){
+                if (typeof callback === 'function'){
                     callback(response);
+                }
+                if (response.code === 404){
+                    // This may not be caught as a server or network error.
+                    // If is explicit 404 (vs just 0 search results), pyramid will send it as 'code' property.
+                    analytics.exception('Page Not Found - ' + href);
                 }
             });
 
@@ -936,19 +1118,46 @@ export default class App extends React.Component {
                 if (typeof fallbackCallback == 'function'){
                     fallbackCallback(err);
                 }
+
+                if (err.status === 500){
+                    analytics.exception('Server Error: ' + err.status + ' - ' + href);
+                }
+
+                if (err.status === 404){
+                    analytics.exception('Page Not Found - ' + href);
+                }
+
                 // Err could be an XHR object if could not parse JSON.
-                if (
-                    typeof err.status === 'number' &&
-                    [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
-                ) {
+                if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
-                } else if (err.message !== 'HTTPForbidden'){
-                    console.error('Error in App.navigate():', err);
-                    throw err; // Bubble it up.
-                } else {
+                    analytics.exception('Network Error: ' + err.status + ' - ' + href);
+                } else if (err.message === 'HTTPForbidden'){
+                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response.
                     console.info("Logged Out");
+                } else {
+                    console.error('Error in App.navigate():', err);
+                    throw err; // Unknown/unanticipated error: Bubble it up.
                 }
+
+                // Possibly not needed: If no major JS error thrown, add entry in Browser History so that back/forward buttons still works after hitting a 404 or similar.
+                // title currently ignored by browsers
+                if (options.replace){
+                    try {
+                        window.history.replaceState(err, '', href + fragment);
+                    } catch (exc) {
+                        // Might fail due to too large data
+                        window.history.replaceState(null, '', href + fragment);
+                    }
+                } else {
+                    try {
+                        window.history.pushState(err, '', href + fragment);
+                    } catch (exc) {
+                        // Might fail due to too large data
+                        window.history.pushState(null, '', href + fragment);
+                    }
+                }
+
             });
             console.info('Navigating > ', request);
             dispatch_dict.contextRequest = request;
@@ -967,6 +1176,16 @@ export default class App extends React.Component {
 
     }
 
+    /**
+     * This function is called by `App.navigate` upon completing request.
+     * Redux store is updated with new JSON response here.
+     *
+     * @private
+     * @param {JSONContentResponse} data - Next JSON response.
+     * @param {Object} extendDispatchDict - Additional keys/values to save to Redux along with next response.
+     * @param {Object} requestOptions - Navigation options that were passed to `App.navigate`.
+     * @returns {JSONContentResponse} Data which was received and saved.
+     */
     receiveContextResponse (data, extendDispatchDict = {}, requestOptions = {}) {
         // title currently ignored by browsers
         if (requestOptions.replace){
@@ -1004,12 +1223,24 @@ export default class App extends React.Component {
         return data;
     }
 
-    /** Set 'isSubmitting' in state. works with handleBeforeUnload **/
+    /**
+     * Set 'isSubmitting' in state. works with handleBeforeUnload
+     *
+     * @public
+     * @param {boolean} bool - Value to set.
+     * @param {function} [callback=null] - Optional callback to execute after updating state.
+     */
     setIsSubmitting(bool, callback=null){
         this.setState({'isSubmitting': bool}, callback);
     }
 
-    /** Catch user navigating away from page if in submission process. */
+    /**
+     * Catch and alert user navigating away from page if in submission process.
+     *
+     * @private
+     * @param {React.SyntheticEvent} e Window beforeunload event.
+     * @returns {string|void} Dialog text which is to be shown to user.
+     */
     handleBeforeUnload(e){
         if(this.state.isSubmitting){
             var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
@@ -1018,25 +1249,33 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * Renders the entire HTML of the application.
+     *
+     * @private
+     * @returns {JSX.Element} An `<html>` element.
+     */
     render() {
         console.log('render app');
-        var context = this.props.context;
-        var content;
-        var href_url = url.parse(this.props.href);
-        // Switching between collections may leave component in place
-        var key = context && context['@id'] && context['@id'].split('?')[0];
-        var current_action = this.currentAction();
+        var canonical       = this.props.href,
+            context         = this.props.context,
+            href_url        = url.parse(canonical),
+            routeList       = href_url.pathname.split("/"),
+            routeLeaf       = routeList[routeList.length - 1],
+            key             = context && context['@id'] && context['@id'].split('?')[0], // Switching between collections may leave component in place
+            currentAction   = this.currentAction();
 
-        if (!current_action && context.default_page) {
+        var content, title, status; // Rendered values
+
+        if (!currentAction && context.default_page) {
             context = context.default_page;
         }
 
-        var appClass = 'done';
-        if (this.props.slow) {
-            appClass = 'communicating';
-        }
-
-        var canonical = this.props.href;
+        // `canonical` is meant to refer to the definitive URI for current resource.
+        // For example, https://data.4dnucleome.org/some-item, http://data.4dnucleome.org/some-item, http://www.data.4dnucleome.org/some-item
+        // refer to same item, and `canonical` URL is the one that should be used when referring to or citing "/some-item".
+        // In our case, it is "https://data.4dnucleome.org/"; this canonical code may be deprecated as we always redirect to https and
+        // [wwww.]4dnuclome.org is a separate domain/site.
 
         if (context.canonical_uri) {
             if (href_url.host) {
@@ -1045,40 +1284,8 @@ export default class App extends React.Component {
                 canonical = context.canonical_uri;
             }
         }
-        // add static page routing
-        var title;
-        var routeList = canonical.split("/");
-        var lowerList = [];
-        var scrollList = [];
-        var actionList = [];
-        routeList.map(function(value) {
-            if (value.includes('#') && value.charAt(0) !== "#"){
-                var navSplit = value.split("#");
-                lowerList.push(navSplit[0].toLowerCase());
-                if (navSplit[1].charAt(0) === '!'){
-                    actionList.push(navSplit[1].slice(1).toLowerCase());
-                }else{
-                    scrollList.push(navSplit[1].toLowerCase());
-                }
-            }else if(value.charAt(0) !== "!" && value.length > 0){
-                // test for edit handle
-                if (value === '#!edit'){
-                    actionList.push('edit');
-                }else if (value === '#!create'){
-                    actionList.push('create');
-                }else if (value === '#!clone'){
-                    actionList.push('clone');
-                }else if (value === '#!add'){
-                    actionList.push('add');
-                }else{
-                    lowerList.push(value.toLowerCase());
-                }
-            }
-        });
-        var currRoute = lowerList.slice(1); // eliminate http
+
         // check error status
-        var status;
-        var route = currRoute[currRoute.length-1];
 
         var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
         if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
@@ -1091,16 +1298,15 @@ export default class App extends React.Component {
             }
         } else if (context.code && context.code === 404){
             // check to ensure we're not looking at a static page
-            if (route != 'help' && route != 'about' && route !== 'home' && route !== 'submissions'){
+            if (routeLeaf != 'help' && routeLeaf != 'about' && routeLeaf !== 'home' && routeLeaf !== 'submissions'){
                 status = 'not_found';
             }
-        } else if (route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (routeLeaf == 'submissions' && !_.contains(_.pluck(this.state.user_actions, 'id'), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
         // Object of common props passed to all content_views.
-
-        let commonContentViewProps = {
+        var commonContentViewProps = {
             'context'           : context,
             'schemas'           : this.state.schemas,
             'session'           : this.state.session,
@@ -1111,80 +1317,68 @@ export default class App extends React.Component {
             'updateUploads'     : this.updateUploads,
             'listActionsFor'    : this.listActionsFor,
             'updateUserInfo'    : this.updateUserInfo,
-            'browseBaseState'   : this.props.browseBaseState
+            'browseBaseState'   : this.props.browseBaseState,
+            'currentAction'     : currentAction,
+            'setIsSubmitting'   : this.setIsSubmitting
         };
 
-        // first case is fallback
-        if (canonical === "about:blank"){
+        if (canonical === "about:blank"){   // first case is fallback
             title = portal.portal_title;
             content = null;
-        // error catching
-        }else if(status){
-            content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
+        } else if (status) {                // error catching
+            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
             title = 'Error';
-        }else if(actionList.length === 1){
-            // check if the desired action is allowed per user (in the context)
+        } else if (context) {               // What should occur (success)
 
-            var contextActionNames = this.listActionsFor('context').map(function(act){
-                return act.name || '';
-            });
-            // see if desired actions is not allowed for current user
-            if (!_.contains(contextActionNames, actionList[0])){
-                content = <ErrorPage status={'forbidden'}/>;
-                title = 'Action not permitted';
-            }else{
-                ContentView = globals.content_views.lookup(context, current_action);
-                if (ContentView){
-                    content = (
-                        <SubmissionView
-                            {...commonContentViewProps}
-                            setIsSubmitting={this.setIsSubmitting}
-                            create={actionList[0] === 'create' || actionList[0] === 'add'}
-                            edit={actionList[0] === 'edit'}
-                        />
-                    );
-                    title = object.itemUtil.getTitleStringFromContext(context);
-                    if (title && title != 'Home') {
-                        title = title + ' – ' + portal.portal_title;
-                    } else {
-                        title = portal.portal_title;
-                    }
-                }else{
-                    // Handle the case where context is not loaded correctly
-                    content = <ErrorPage status={null}/>;
-                    title = 'Error';
-                }
-            }
-        }else if (context) {
-            var ContentView = globals.content_views.lookup(context, current_action);
-            if (ContentView){
-                content = (
-                    <ContentView {...commonContentViewProps} />
-                );
-                title = context.display_title || context.title || context.name || context.accession || context['@id'];
-                if (title && title != 'Home') {
-                    title = title + ' – ' + portal.portal_title;
-                } else {
-                    title = portal.portal_title;
-                }
+            var ContentView = globals.content_views.lookup(context, currentAction);
+
+            // Set browser window title.
+            title = object.itemUtil.getTitleStringFromContext(context);
+            if (title && title != 'Home') {
+                title = title + ' – ' + portal.portal_title;
             } else {
-                // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null} />;
-                title = 'Error';
+                title = portal.portal_title;
             }
+
+            if (!ContentView){ // Handle the case where context is not loaded correctly
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
+
+                var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    content = <ErrorPage status="forbidden" />;
+                    title = 'Action not permitted';
+                }
+            }
+
+            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
+                content = <ContentView {...commonContentViewProps} />;
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
         }
         // Google does not update the content of 301 redirected pages
+        // We technically should never hit this condition as we redirect http to https, however leaving in
+        // as not 100% certain.
         var base;
         if (({'http://data.4dnucleome.org/': 1})[canonical]) {
-            base = canonical = 'http://data.4dnucleome.org/';
+            base = canonical = 'https://data.4dnucleome.org/';
             this.historyEnabled = false;
-
         }
 
-        // Set current path for per-page CSS rule targeting.
-        var hrefParts = url.parse(canonical || base);
-
-        var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4;
+        var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
+            baseDomain = (href_url.protocol || '') + '//' + href_url.host,
+            bodyElementProps = _.extend({}, this.state, this.props, {
+                baseDomain, isLoading,
+                'updateUserInfo' : this.updateUserInfo,
+                'listActionsFor' : this.listActionsFor,
+                'onBodyClick'    : this.handleClick,
+                'onBodySubmit'   : this.handleSubmit,
+                'hrefParts'      : href_url,
+                'children'       : content
+            });
 
         return (
             <html lang="en">
@@ -1193,86 +1387,425 @@ export default class App extends React.Component {
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-                    <meta name="google-site-verification" content="t0PnhAqm80xyWalBxJHZdld9adAk40SHjUyPspYNm7I" />
+                    <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
-                    <script async src='//www.google-analytics.com/analytics.js'></script>
+                    <script async src="//www.google-analytics.com/analytics.js"/>
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
-                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
+                    <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
-                    }}></script>
-                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
-                    <script data-prop-name="lastCSSBuildTime" type="application/ld+json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}></script>
+                    }}/>
+                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/>
+                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}/>
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
+                    <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname} className={isLoading ? "loading-request" : null}>
-                    <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
-                    }}></script>
-                    <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
-                    }}></script>
-                    <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
-                        <div className="inner">
-                            <i className="icon icon-circle-o-notch"/>
-                            { /*<img src="/static/img/ajax-loader.gif"/>*/ }
-                        </div>
-                    </div>
-                    <div id="slot-application">
-                        <div id="application" className={appClass}>
-                            <div className="loading-spinner"></div>
-                            <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation
-                                    href={this.props.href}
-                                    session={this.state.session}
-                                    updateUserInfo={this.updateUserInfo}
-                                    portal={portal}
-                                    listActionsFor={this.listActionsFor}
-                                    ref="navigation"
-                                    schemas={this.state.schemas}
-                                    context={context}
-                                    browseBaseState={this.props.browseBaseState}
-                                />
-                                <div id="pre-content-placeholder"/>
-                                <PageTitle context={this.props.context} session={this.state.session} href={this.props.href} schemas={this.state.schemas} />
-                                <div id="facet-charts-container" className="container">
-                                    <FacetCharts
-                                        href={this.props.href}
-                                        context={this.props.context}
-                                        navigate={navigate}
-                                        schemas={this.state.schemas}
-                                        session={this.state.session}
-                                    />
-                                </div>
-                                <div id="content" className="container">
-                                    <Alerts alerts={this.props.alerts} />
-                                    { content }
-                                </div>
-                                <div id="layout-footer"></div>
-                            </div>
-                            <Footer version={this.props.context.app_version} />
-                        </div>
-                    </div>
-                    <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={()=>{
-                        var _tooltip = this.refs && this.refs.tooltipComponent;
-                        // Grab tip & unset style.left and style.top using same method tooltip does internally.
-                        var node = ReactDOM.findDOMNode(_tooltip);
-                        node.style.left = null;
-                        node.style.top = null;
-                    }} globalEventOff="click" />
-                    <ChartDetailCursor
-                        href={this.props.href}
-                        schemas={this.state.schemas}
-                        verticalAlign="center" /* cursor position relative to popover */
-                        //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
-                    />
-                </body>
+                <BodyElement {...bodyElementProps} />
             </html>
         );
     }
 
 }
+
+/**
+ * This component provides some extra layout properties to certain components.
+ * Namely, it handles, stores, and passes down state related to scrolling up/down the page.
+ * This prevents needing to have numerous window scroll event listeners living throughout the app.
+ *
+ * @public
+ * @class
+ * @listens {Event} Window scroll events.
+ * @listens {Event} Window resize events.
+ * @todo Perhaps grab and pass down windowInnerWidth, windowInnerHeight, and/or similar props as well.
+ */
+class BodyElement extends React.PureComponent {
+
+    /**
+     * Instantiates the BodyElement component, binds functions.
+     */
+    constructor(props){
+        super(props);
+        this.onResize = _.debounce(this.onResize.bind(this), 300);
+        this.onTooltipAfterHide = this.onTooltipAfterHide.bind(this);
+        this.setupScrollHandler = this.setupScrollHandler.bind(this);
+
+        this.registerWindowOnResizeHandler = this.registerWindowOnResizeHandler.bind(this);
+        this.registerWindowOnScrollHandler = this.registerWindowOnScrollHandler.bind(this);
+        this.addToBodyClassList         = this.addToBodyClassList.bind(this);
+        this.removeFromBodyClassList    = this.removeFromBodyClassList.bind(this);
+
+        /**
+         * State object for BodyElement.
+         *
+         * @type {Object}
+         * @property {boolean} state.scrolledPastTop        Whether window has been scrolled past 0.
+         * @property {boolean} state.scrolledPastEighty     Whether window has been scrolled past 80px.
+         * @property {number} state.windowWidth             Window inner width.
+         * @property {number} state.windowHeight            Window inner height.
+         * @property {string[]} state.classList             List of additional classNames that are added to the body element.
+         */
+        this.state = {
+            'scrolledPastTop'       : null,
+            'scrolledPastEighty'    : null,
+            //'scrollTop'             : null // Not used, too many state updates if were to be.
+            'windowWidth'           : null,
+            'windowHeight'          : null,
+            'classList'             : []
+        };
+
+        /**
+         * Holds event handlers for window scroll event.
+         * @private
+         */
+        this.scrollHandlers = [];
+        /**
+         * Holds event handlers for window resize event.
+         * @private
+         */
+        this.resizeHandlers = [];
+    }
+
+    /**
+     * Initializes scroll event handler & loading of help menu tree.
+     *
+     * @private
+     * @returns {void}
+     */
+    componentDidMount(){
+        if (window && window.fourfront) window.fourfront.bodyElem = this;
+        this.setupScrollHandler();
+        window.addEventListener('resize', this.onResize);
+        this.onResize();
+    }
+
+    /**
+     * Unbinds event listeners.
+     * Probably not needed but lets be safe & cleanup.
+     *
+     * @private
+     * @returns {void}
+     */
+    componentWillUnmount(){
+        window.removeEventListener("scroll", this.throttledScrollHandler);
+        delete this.throttledScrollHandler;
+        window.removeEventListener('resize', this.onResize);
+    }
+
+    /**
+     * Function passed down as a prop to content views to register window on scroll handlers.
+     *
+     * @public
+     * @param {function} scrollHandlerFxn - Callback function which accepts a 'scrollTop' (number) and 'scrollVector' (number) param.
+     * @returns {function} A function to call to unregister newly registered handler.
+     */
+    registerWindowOnScrollHandler(scrollHandlerFxn){
+        var exists = this.scrollHandlers.indexOf(scrollHandlerFxn);// _.findIndex(this.scrollHandlers, scrollHandlerFxn);
+        if (exists > -1) {
+            console.warn('Function already registered.', scrollHandlerFxn);
+            return null;
+        } else {
+            this.scrollHandlers.push(scrollHandlerFxn);
+            console.info("Registered scroll handler", scrollHandlerFxn);
+            return () => {
+                var idxToRemove = this.scrollHandlers.indexOf(scrollHandlerFxn);
+                if (idxToRemove === -1){
+                    console.warn('Function no longer registered.', scrollHandlerFxn);
+                    return false;
+                }
+                this.scrollHandlers.splice(idxToRemove, 1);
+                console.info('Unregistered function from scroll events', scrollHandlerFxn);
+                return true;
+            };
+        }
+    }
+
+
+    /**
+     * Function passed down as a prop to content views to register window on resize handlers.
+     *
+     * @public
+     * @param {function} resizeHandlerFxn - Callback function which accepts a 'dims' ({ windowWidth: number, windowHeight: number }) and 'pastDims' param.
+     * @returns {function} A function to call to unregister newly registered handler.
+     */
+    registerWindowOnResizeHandler(resizeHandlerFxn){
+        var exists = this.resizeHandlers.indexOf(resizeHandlerFxn);
+        if (exists > -1) {
+            console.warn('Function already registered.', resizeHandlerFxn);
+            return null;
+        } else {
+            this.resizeHandlers.push(resizeHandlerFxn);
+            console.info("Registered resize handler", resizeHandlerFxn);
+            return () => {
+                var idxToRemove = this.resizeHandlers.indexOf(resizeHandlerFxn);
+                if (idxToRemove === -1){
+                    console.warn('Function no longer registered.', resizeHandlerFxn);
+                    return false;
+                }
+                this.resizeHandlers.splice(idxToRemove, 1);
+                console.info('Unregistered function from resize events', resizeHandlerFxn);
+                return true;
+            };
+        }
+    }
+
+    /**
+     * Adds param `className` to `state.classList`. Passed down through props for child components to be able to adjust
+     * body className in response to user interactions, such as setting a full screen state.
+     *
+     * @public
+     * @param {string}   className      ClassName to add to class list.
+     * @param {function} [callback]     Optional callback to be executed after state change.
+     * @returns {void}
+     */
+    addToBodyClassList(className, callback){
+        this.setState(function(currState){
+            var classList   = currState.classList,
+                foundIdx    = classList.indexOf(className);
+            if (foundIdx > -1){
+                console.warn('ClassName already set', className);
+                return null;
+            } else {
+                classList = classList.slice(0);
+                classList.push(className);
+                console.info('Adding "' + className + '" to body classList');
+                return { classList };
+            }
+        }, callback);
+    }
+
+    /**
+     * Removes param `className` from `state.classList`. Passed down through props for child components to be able to adjust
+     * body className in response to user interactions, such as removing a full screen state.
+     *
+     * @public
+     * @param {string}   className      ClassName to remove from class list.
+     * @param {function} [callback]     Optional callback to be executed after state change.
+     * @returns {void}
+     */
+    removeFromBodyClassList(className, callback){
+        this.setState(function(currState){
+            var classList   = currState.classList,
+                foundIdx    = classList.indexOf(className);
+            if (foundIdx === -1){
+                console.warn('ClassName not in list', className);
+                return null;
+            } else {
+                classList = classList.slice(0);
+                classList.splice(foundIdx, 1);
+                console.info('Removing "' + className + '" from body classList');
+                return { classList };
+            }
+        }, callback);
+    }
+
+
+    /**
+     * Updates windowWidth and windowHeight dimensions in this.state, if different.
+     * @private
+     * @returns {void}
+     */
+    onResize(e){
+        var dims, pastDims;
+        this.setState(function(currState, currProps){
+            var nextState = {};
+            dims = this.getViewportDimensions();
+            pastDims = _.pick(currState, 'windowWidth', 'windowHeight');
+            if (dims.windowWidth !== currState.windowWidth)     nextState.windowWidth = dims.windowWidth;
+            if (dims.windowHeight !== currState.windowHeight)   nextState.windowHeight = dims.windowHeight;
+            if (_.keys(nextState).length > 0){
+                return nextState;
+            }
+            return null;
+        }, ()=>{
+            console.info('Window resize detected.', dims);
+            if (this.resizeHandlers.length > 0){
+                _.forEach(this.resizeHandlers, (resizeHandlerFxn) => resizeHandlerFxn(dims, pastDims, e) );
+            }
+        });
+    }
+
+    /**
+     * Calculates and returns width and height of viewport.
+     *
+     * @private
+     * @returns {{ windowWidth: number, windowHeight: number }} Object with windowWidth and windowHeight properties.
+     */
+    getViewportDimensions(){
+        if (isServerSide()) return;
+
+        var scrollElem      = (window.document && window.document.scrollingElement) || null,
+            windowWidth     = (scrollElem && (scrollElem.clientWidth || scrollElem.offsetWidth)) || window.innerWidth,
+            windowHeight    = (scrollElem && (scrollElem.clientHeight || scrollElem.offsetHeight)) || window.innerHeight;
+            //documentHeight  = (widthElem && widthElem.scrollHeight); Not relevant re: resizing.
+
+        return { windowWidth, windowHeight };
+    }
+
+    /**
+     * Attaches event listeners to the `window` object and passes down 'registerOnWindowEvent' functions as props which children down the rendering tree can subscribe to.
+     * Updates `state.scrolledPastTop` and `<body/>` element className depending on window current scroll top.
+     *
+     * @private
+     * @listens {Event} Window scroll events.
+     * @returns {void}
+     */
+    setupScrollHandler(){
+        if (!(typeof window !== 'undefined' && window && document && document.body && typeof document.body.scrollTop !== 'undefined')){
+            return null;
+        }
+
+        var lastScrollTop = 0,
+            windowWidth = this.state.windowWidth || null,
+            handleScroll = (e) => {
+
+                // TODO: Maybe this.setState(function(currState){ ...stuf... }), but would update maybe couple of times extra...
+
+                var stateChange = {},
+                    currentScrollTop = layout.getPageVerticalScrollPosition(),
+                    scrollVector = currentScrollTop - lastScrollTop;
+
+                lastScrollTop = currentScrollTop;
+
+                if ( // Fixed nav takes effect at medium grid breakpoint or wider.
+                    ['xs','sm'].indexOf(layout.responsiveGridState(windowWidth)) === -1 && (
+                        (currentScrollTop > 20 && scrollVector >= 0) ||
+                        (currentScrollTop > 80)
+                    )
+                ){
+                    if (!this.state.scrolledPastTop){
+                        stateChange.scrolledPastTop = true;
+                    }
+                    if (currentScrollTop > 80){
+                        stateChange.scrolledPastEighty = true;
+                    }
+                } else {
+                    if (this.state.scrolledPastTop){
+                        stateChange.scrolledPastTop = false;
+                        stateChange.scrolledPastEighty = false;
+                    }
+                }
+
+                if (this.scrollHandlers.length > 0){
+                    _.forEach(this.scrollHandlers, (scrollHandlerFxn) => scrollHandlerFxn(currentScrollTop, scrollVector, e) );
+                }
+
+                if (_.keys(stateChange).length > 0){
+                    this.setState(stateChange);
+                }
+            };
+
+        // We add as property of class instance so we can remove event listener on unmount, for example.
+        this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(window, handleScroll), 10);
+
+        window.addEventListener("scroll", this.throttledScrollHandler);
+        setTimeout(this.throttledScrollHandler, 100, null);
+    }
+
+    /**
+     * Is executed after ReactTooltip is hidden e.g. via moving cursor away from an element.
+     * Used to unset lingering style.left and style.top property values which may interfere with placement
+     * of the next visible tooltip.
+     *
+     * @private
+     * @returns {void}
+     */
+    onTooltipAfterHide(){
+        var _tooltip = this.refs && this.refs.tooltipComponent,
+            domElem = ReactDOM.findDOMNode(_tooltip);
+        if (!domElem) {
+            console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
+            return;
+        }
+        requestAnimationFrame(function(){
+            // Grab tip & unset style.left and style.top using same method tooltip does internally.
+            domElem.style.left = null;
+            domElem.style.top = null;
+        });
+    }
+
+    /**
+     * Renders out the body layout of the application.
+     *
+     * @private
+     */
+    render(){
+        var {
+                onBodyClick, onBodySubmit, context, alerts,
+                currentAction, hrefParts, isLoading, slowLoad,
+                children
+            } = this.props,
+            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList } = this.state,
+            appClass = slowLoad ? 'communicating' : 'done',
+            bodyClassList = (classList && classList.slice(0)) || [],
+            registerWindowOnResizeHandler = this.registerWindowOnResizeHandler,
+            registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
+            addToBodyClassList            = this.addToBodyClassList,
+            removeFromBodyClassList       = this.removeFromBodyClassList;
+
+        if (isLoading)          bodyClassList.push('loading-request');
+        if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
+        if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
+
+        return (
+            <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
+                data-pathname={hrefParts.pathname} className={(bodyClassList.length > 0 && bodyClassList.join(' ')) || null}>
+
+                <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
+                    __html: jsonScriptEscape(JSON.stringify(context))
+                }}/>
+                <script data-prop-name="alerts" type="application/json" dangerouslySetInnerHTML={{
+                    __html: jsonScriptEscape(JSON.stringify(alerts))
+                }}/>
+
+                <div id="slow-load-container" className={slowLoad ? 'visible' : null}>
+                    <div className="inner">
+                        <i className="icon icon-circle-o-notch"/>
+                    </div>
+                </div>
+
+                <div id="slot-application">
+                    <div id="application" className={appClass}>
+                        <div id="layout">
+                            <NavigationBar {...{ portal, windowWidth, windowHeight }} ref="navigation"
+                                {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
+                                    'context', 'updateUserInfo', 'listActionsFor')}/>
+
+                            <div id="pre-content-placeholder"/>
+
+                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')}
+                                windowWidth={windowWidth} />
+
+                            <div id="facet-charts-container" className="container">
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
+                            </div>
+
+                            <div id="content" className="container" children={
+                                React.cloneElement(children, {
+                                    windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
+                                    addToBodyClassList, removeFromBodyClassList
+                                })
+                            } />
+
+                            <div id="layout-footer"/>
+                        </div>
+                        <Footer version={context.app_version} />
+                    </div>
+                </div>
+
+                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" />
+
+                <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
+                    verticalAlign="center" /* cursor position relative to popover */
+                    //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
+                />
+
+            </body>
+        );
+    }
+
+}
+
 

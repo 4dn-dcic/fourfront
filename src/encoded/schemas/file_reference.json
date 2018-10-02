@@ -19,6 +19,7 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -30,20 +31,13 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
-                "bwaIndex",
-                "chromsizes",
-                "barcode_file",
-                "compressed_fasta",
-                "fasta",
-                "juicer_format_restriction_site_file",
-                "other"
-            ]
+            "linkTo": "FileFormat",
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
@@ -57,6 +51,7 @@
                 "restriction sites",
                 "blacklisted regions",
                 "repeats",
+                "spike-in",
                 "other"
             ]
         },
@@ -85,6 +80,7 @@
         "compressed_fasta": ".fasta.gz",
         "fasta": ".fasta",
         "juicer_format_restriction_site_file": ".txt",
+        "conc": ".fasta.conc",
         "other": ""
     }
 }

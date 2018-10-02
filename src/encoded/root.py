@@ -24,7 +24,6 @@ from collections import OrderedDict
 
 def includeme(config):
     config.include(health_check)
-    config.include(run_workflow)
     config.include(item_counts)
     config.include(submissions_page)
     config.scan(__name__)
@@ -52,9 +51,8 @@ def item_counts(config):
         db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
         es_counts = {} # keyed by uppercase Item name, such as "ExperimentHic"
-        # need to search both status=deleted and status!=deleted (which is now
-        # done by default) to get real totals.
-        search_req = make_search_subreq(request, '/search/?type=Item&limit=1&status!=deleted')
+        # need to search for statuses that are hidden from search (deleted, replaced)
+        search_req = make_search_subreq(request, '/search/?type=Item&limit=1')
         search_resp = request.invoke_subrequest(search_req, True)
         if search_resp.status_int < 400: # catch errors
             es_count_facets = [facet for facet in search_resp.json.get('facets', []) if facet.get('field') == 'type']
@@ -62,7 +60,7 @@ def item_counts(config):
                 es_count_facets = es_count_facets[0]
                 for term in es_count_facets.get('terms'):
                     es_counts[term['key']] = term['doc_count']
-        search_req_del = make_search_subreq(request, '/search/?type=Item&limit=1&status=deleted')
+        search_req_del = make_search_subreq(request, '/search/?type=Item&limit=1&status=replaced&status=deleted')
         search_resp_del = request.invoke_subrequest(search_req_del, True)
         if search_resp_del.status_int < 400: # catch errors
             es_count_facets = [facet for facet in search_resp_del.json.get('facets', []) if facet.get('field') == 'type']
@@ -103,28 +101,6 @@ def item_counts(config):
         return responseDict
 
     config.add_view(counts_view, route_name='item-counts')
-
-
-def run_workflow(config):
-    """
-    Emulate a lite form of Alex's static page routing
-    """
-    config.add_route(
-        'run-workflow',
-        '/runworkflow'
-    )
-
-    def run_workflow_view(request):
-
-        response = request.response
-        response.content_type = 'application/json; charset=utf-8'
-        settings = request.registry.settings
-        print(settings)
-
-        responseDict = {'msg': "thanks"}
-        return responseDict
-
-    config.add_view(run_workflow_view, route_name='run-workflow', permission='add')
 
 
 def health_check(config):
@@ -288,10 +264,14 @@ class EncodedRoot(Root):
     def content(self, request):
         '''Returns -object- with pre-named sections'''
         sections_to_get = ['home.introduction']
-        try:
-            return [ request.embed('/static-sections', section_name, '@@embedded', as_user=True) for section_name in sections_to_get ]
-        except KeyError:
-            return [ ]
+        return_list = []
+        for section_name in sections_to_get:
+            try:
+                res = request.embed('/static-sections', section_name, '@@embedded', as_user=True)
+                return_list.append(res)
+            except:
+                pass
+        return return_list
 
 #    @calculated_property(schema={
 #        "title": "Announcements",

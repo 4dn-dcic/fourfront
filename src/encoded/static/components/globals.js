@@ -1,146 +1,52 @@
 'use strict';
 
-var Registry = require('../libs/registry');
-import url from 'url';
-import _ from 'underscore';
+import Registry from './../libs/registry';
 import { console, isServerSide } from './util';
 
-// Item pages
+/**
+ * Registry of views for Item pages, keyed by Item type.
+ * To register a new view for a given `@type`, may do the following:
+ *
+ * @type {Registry}
+ * @example content_views.register(SomeReactViewComponent, 'ItemType');
+ */
 export const content_views = new Registry();
 
-// Panel detail views
+/**
+ * Registry of views for panels. Works similarly to `content_views`.
+ * Currently not being used but may be at a future time/date.
+ *
+ * @type {Registry}
+ */
 export const panel_views = new Registry();
 
-// Listing detail views
-export const listing_views = new Registry();
-
-// Cell name listing titles
-export const listing_titles = new Registry();
-
-// Graph detail view
-export const graph_detail = new Registry();
-
-// Document panel components
-// +---------------------------------------+
-// | header                                |
-// +---------------------------+-----------+
-// |                           |           |
-// |          caption          |  preview  |
-// |                           |           |
-// +---------------------------+-----------+
-// | file                                  |
-// +---------------------------------------+
-// | detail                                |
-// +---------------------------------------+
-export const document_views = {};
-document_views.header = new Registry();
-document_views.caption = new Registry();
-document_views.preview = new Registry();
-document_views.file = new Registry();
-document_views.detail = new Registry();
 
 
-export function itemClass(context, htmlClass) {
-    htmlClass = htmlClass || '';
-    (context['@type'] || []).forEach(function (type) {
-        htmlClass += ' type-' + type;
-    });
-    return statusClass(context.status, htmlClass);
-}
-
-export function statusClass(status, htmlClass) {
-    htmlClass = htmlClass || '';
-    if (typeof status == 'string') {
-        htmlClass += ' status-' + status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,'');
-    }
-    return htmlClass;
-}
-
-export function validationStatusClass (status, htmlClass) {
-    htmlClass = htmlClass || '';
-    if (typeof status == 'string') {
-        htmlClass += ' validation-status-' + status.toLowerCase().replace(/ /g, '-');
-    }
-    return htmlClass;
-}
-
-export function truncateString (str, len) {
-    if (str.length > len) {
-        str = str.replace(/(^\s)|(\s$)/gi, ''); // Trim leading/trailing white space
-        var isOneWord = str.match(/\s/gi) === null; // Detect single-word string
-        str = str.substr(0, len - 1); // Truncate to length ignoring word boundary
-        str = (!isOneWord ? str.substr(0, str.lastIndexOf(' ')) : str) + '…'; // Back up to word boundary
-    }
-    return str;
-}
-
-// Given an array of objects with @id properties, this returns the same array but with any
-// duplicate @id objects removed.
-export function uniqueObjectsArray(objects){ 
-    return _.uniq(objects, false, function(o){ return o['@id']; } );
-}
-
-export function bindEvent(el, eventName, eventHandler) {
-    if (el.addEventListener) {
-        // Modern browsers
-        el.addEventListener(eventName, eventHandler, false);
-    } else if (el.attachEvent) {
-        // IE8 specific
-        el.attachEvent('on' + eventName, eventHandler);
-    }
-}
-
-export function unbindEvent(el, eventName, eventHandler) {
-    if (el.removeEventListener) {
-        // Modern browsers
-        el.removeEventListener(eventName, eventHandler, false);
-    } else if (el.detachEvent) {
-        // IE8 specific
-        el.detachEvent('on' + eventName, eventHandler);
-    }
-}
-
-// Make the first character of the given string uppercase. Can be less fiddly than CSS text-transform.
-// http://stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript#answer-1026087
-String.prototype.uppercaseFirstChar = function(string) {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-};
-
-// Order that antibody statuses should be displayed
-export const statusOrder = [
-    'eligible for new data',
-    'not eligible for new data',
-    'pending dcc review',
-    'awaiting lab characterization',
-    'not pursued',
-    'not reviewed'
-];
-
+/**
+ * Hostnames which are considered to be canonical for 4DN data.
+ * If "current" hostname is not in this list, is presumed to be a development environment,
+ * and minor visual changes, such as the test data warning banner, appear.
+ *
+ * @type {Object.<number>}
+ */
 export const productionHost = {
-    'www.data.4dnucleome.org'                   :1, 
-    'data.4dnucleome.org'                       :1,
-    //'www.testportal.4dnucleome.org'             :1, 
-    //'testportal.4dnucleome.org'                 :1,
+    'www.data.4dnucleome.org':1, 
+    'data.4dnucleome.org':1,
+    //'www.testportal.4dnucleome.org':1, 
+    //'testportal.4dnucleome.org':1,
     'fourfront-webdev.us-east-1.elasticbeanstalk.com':1,
 };
 
-export const encodeVersionMap = {
-    "ENCODE2": "2",
-    "ENCODE3": "3"
-};
 
-// Determine the given object's ENCODE version
-export function encodeVersion(context) {
-    var encodevers = "";
-    if (context.award && context.award.rfa) {
-        encodevers = encodeVersionMap[context.award.rfa.substring(0,7)];
-        if (typeof encodevers === "undefined") {
-            encodevers = "";
-        }
-    }
-    return encodevers;
-}
-
+/**
+ * Map of biological data URIs to type of UUID.
+ * Currently not used, but saved in case necessary later for something.
+ *
+ * @constant
+ * @public
+ * @deprecated
+ * @type {Object.<string>}
+ */
 export const dbxref_prefix_map = {
     "UniProtKB": "http://www.uniprot.org/uniprot/",
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
@@ -168,49 +74,13 @@ export const dbxref_prefix_map = {
 };
 
 /**
- * Rules for determining if a hash is part of the href.
- * For most, it isn't, and should be stripped on page load.
- * For a few, such as workflows, it's part of the href.
- * 
- * @export
- * @param {string} href - The href to test.
+ * Returns the current URL/HREF from the browser, if it is available.
+ * Accepts optional fallback href or value.
+ *
+ * @param {*} [fallbackHref] Fallback value if window.location.href is not available (e.g. if server-side).
+ * @returns {string} Current window href, or fallback value.
+ * @deprecated
  */
-export function isHashPartOfHref(href, parts = null){
-
-    if (!parts && typeof href !== 'string') throw Error("No href or parts passed.");
-    if (!parts) parts = url.parse(href);
-
-    // Edit Pages
-    if (parts.hash === '#!edit' || parts.hash === '#!create' || parts.hash === '#!add') return true;
-
-    // Workflow Pages
-    if (parts.path.slice(0,14) === '/workflow-runs' || parts.path.slice(0,11) === '/workflows/' ){
-        return true;
-    }
-
-    // Item pages with Workflow graphs
-    if (parts.path.slice(0,27) === '/experiment-set-replicates/' && parts.path.length > 28 ){
-        return true;
-    }
-    if (parts.path.slice(0,17) === '/files-processed/' && parts.path.length > 18 ){
-        return true;
-    }
-
-    return false;
-}
-
-export function maybeRemoveHash(href){
-    // Strip href fragment.
-    var hash_pos = href.indexOf('#');
-    if (hash_pos > -1) {
-        if (isHashPartOfHref(href)){
-            return href;
-        } else {
-            return href.slice(0, hash_pos);
-        }
-    } else return href;
-}
-
 export function windowHref(fallbackHref){
     if (!isServerSide() && window.location && window.location.href) return window.location.href;
     return fallbackHref;

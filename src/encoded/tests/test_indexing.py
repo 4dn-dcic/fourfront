@@ -140,13 +140,13 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
 
 
 @pytest.fixture
-def item_uuid(testapp, award, experiment, lab):
+def item_uuid(testapp, award, experiment, lab, file_formats):
     # this is a processed file
     item = {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
-        'file_format': 'pairs',
+        'file_format': file_formats.get('pairs').get('@id'),
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
@@ -154,6 +154,71 @@ def item_uuid(testapp, award, experiment, lab):
     res = testapp.post_json('/file_processed', item)
     return res.json['@graph'][0]['uuid']
 
+
 def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
     # Todo, input a list of accessions / uuids:
     verify_item(item_uuid, indexer_testapp, testapp, registry)
+
+
+@pytest.mark.performance
+def test_load_and_index_perf_data(testapp, indexer_testapp):
+    '''
+    PERFORMANCE TESTING
+    Loads all the perf-testing data and then indexes it
+    Prints time for both
+
+    this test is to ensure the performance testing data that is run
+    nightly through the mastertest_deployment process in the torb repo
+    it takes roughly 25 to run.
+    Note: run with bin/test -s -m performance to see the prints from the test
+    '''
+
+    from os import listdir
+    from os.path import isfile, join
+    from encoded import loadxl
+    from unittest import mock
+    from timeit import default_timer as timer
+    from pkg_resources import resource_filename
+    insert_dir = resource_filename('encoded', 'tests/data/perf-testing/')
+    inserts = [f for f in listdir(insert_dir) if isfile(join(insert_dir, f))]
+    json_inserts = {}
+
+    # pluck a few uuids for testing
+    test_types = ['biosample', 'user', 'lab', 'experiment_set_replicate']
+    test_inserts = []
+    for insert in inserts:
+        type_name = insert.split('.')[0]
+        json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
+        # pluck a few uuids for testing
+        if type_name in test_types:
+            test_inserts.append({'type_name': type_name, 'data': json_inserts[type_name][0]})
+
+    # load -em up
+    start = timer()
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', json_inserts, status=200)
+        assert res.json['status'] == 'success'
+    stop_insert = timer()
+    print("PERFORMANCE: Time to load data is %s" % (stop_insert - start))
+    index_res = indexer_testapp.post_json('/index', {'record': True})
+    assert index_res.json['indexing_status'] == 'finished'
+    stop_index = timer()
+    print("PERFORMANCE: Time to index is %s" % (stop_index - start))
+
+    # check a couple random inserts
+    for item in test_inserts:
+        start = timer()
+        assert testapp.get("/" + item['data']['uuid'] + "?frame=raw").json['uuid']
+        stop = timer()
+        frame_time = stop - start
+
+        start = timer()
+        assert testapp.get("/" + item['data']['uuid']).follow().json['uuid']
+        stop = timer()
+        embed_time = stop - start
+
+        print("PERFORMANCE: Time to query item %s - %s raw: %s embed %s" % (item['type_name'], item['data']['uuid'],
+                                                                            frame_time, embed_time))
+    # userful for seeing debug messages
+    # assert False

@@ -82,10 +82,6 @@ class ItemStore {
      * Call the backend
      */
     fetch(url, options, callback) {
-        options.headers = _.extend(options.headers || {}, {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        });
         ajax.promise(
             url,
             options.method || 'GET',

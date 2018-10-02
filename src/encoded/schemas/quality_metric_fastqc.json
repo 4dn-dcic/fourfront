@@ -17,6 +17,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "quality_metric.json#/properties" }
    ],
     "mixinFacets" : [

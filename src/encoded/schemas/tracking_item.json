@@ -1,0 +1,226 @@
+{
+    "title": "TrackingItem",
+    "description": "Schema for internal tracking of Fourfront events, such as downloads",
+    "id": "/profiles/tracking_item.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["tracking_type"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "status": {
+            "default": "in review by lab"
+        },
+        "tracking_type": {
+            "title": "Tracking Type",
+            "type": "string",
+            "description": "What this item tracks. Defaults to other",
+            "default": "other",
+            "enum" : [
+                "other",
+                "download_tracking",
+                "google_analytics"
+            ]
+		},
+        "download_tracking": {
+            "title": "Download Tracking",
+            "type": "object",
+            "description": "Subobject to hold download tracking field. Allows additional properties",
+            "additionalProperties": true,
+            "properties": {
+                "user_agent" : {
+                    "title": "User Agent",
+                    "type": "string"
+                },
+                "remote_ip" : {
+                    "title": "Remote IP",
+                    "type": "string"
+                },
+                "user_email" : {
+                    "title": "User Email",
+                    "type": "string"
+                },
+                "request_path" : {
+                    "title": "Request Path",
+                    "type": "string"
+                },
+                "filename" : {
+                    "title": "Filename",
+                    "type": "string"
+                },
+                "range_query" : {
+                    "title": "Range Query",
+                    "type": "boolean"
+                }
+            }
+        },
+        "google_analytics" : {
+            "title" : "Google Analytics Data",
+            "type" : "object",
+            "description" : "A high-level container object containing data from Google Analytics as well as metadata about the report.",
+            "properties": {
+                "for_date" : {
+                    "type" : "string",
+                    "format" : "date",
+                    "description": "The date for which analytics are gathered in reports.",
+                    "title" : "Analytics Date"
+                },
+                "reports" : {
+                    "type" : "object",
+                    "title" : "Report Data",
+                    "description" : "The analytics data that is applicable for the start_date to end_date range.",
+                    "additionalProperties" : true,
+                    "properties" : {
+
+                        "sessions_by_country": {
+                            "type" : "array",
+                            "title" : "User Sessions by Country",
+                            "items" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "ga:country" : {
+                                        "type" : "string",
+                                        "title" : "Country"
+                                    },
+                                    "ga:sessions" : {
+                                        "type" : "integer",
+                                        "title" : "Session Count",
+                                        "description" : "Number of sessions from ga:country for the given start->end date range."
+                                    },
+                                    "ga:avgSessionDuration" : {
+                                        "type" : "number",
+                                        "title" : "Avg. Session Duration"
+                                    },
+                                    "ga:bounceRate" : {
+                                        "type" : "number",
+                                        "title" : "Bounce Rate"
+                                    },
+                                    "ga:sessionsPerUser" : {
+                                        "type" : "number",
+                                        "title" : "Sessions per User",
+                                        "description": "Number of sessions divided by number of unique users."
+                                    }
+                                }
+                            }
+                        },
+
+                        "detail_views_by_experiment_set" : {
+                            "type" : "array",
+                            "title" : "Experiment Set Detail Views",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:productName" : {
+                                        "type" : "string",
+                                        "title" : "ExperimentSet Title"
+                                    },
+                                    "ga:productSku" : {
+                                        "type" : "string",
+                                        "title" : "ExperimentSet Accession"
+                                    },
+                                    "ga:productBrand" : {
+                                        "type" : "string",
+                                        "title" : "Lab Name"
+                                    },
+                                    "ga:productCategoryLevel2" : {
+                                        "type" : "string",
+                                        "title" : "Type of ExperimentSet"
+                                    },
+                                    "ga:productDetailViews" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this ExperimentSet has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this ExperimentSet has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this ExperimentSet has been seen present in a Browse or Search results page."
+                                    }
+                                }
+                            }
+                        },
+
+                        "detail_views_by_file" : {
+                            "type" : "array",
+                            "title" : "File Detail Views",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:productName" : {
+                                        "type" : "string",
+                                        "title" : "File Title"
+                                    },
+                                    "ga:productSku" : {
+                                        "type" : "string",
+                                        "title" : "File Accession"
+                                    },
+                                    "ga:productBrand" : {
+                                        "type" : "string",
+                                        "title" : "Lab Name"
+                                    },
+                                    "ga:productCategoryLevel2" : {
+                                        "type" : "string",
+                                        "title" : "Type of File"
+                                    },
+                                    "ga:productDetailViews" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this File has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this File has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this File has been seen present in a Browse or Search results page."
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        },
+        "other_tracking": {
+            "title": "Other Tracking",
+            "type": "object",
+            "description": "Subobject to misc. tracking fields. Allows additional properties",
+            "additionalProperties": true,
+            "properties": {}
+        }
+    },
+    "facets": {
+        "tracking_type": {
+            "title": "Tracking Type"
+        }
+    },
+    "columns": {
+        "tracking_type": {
+            "title": "Tracking Type"
+        },
+        "google_analytics.for_date": {
+            "title": "Analytics Date",
+            "default_hidden" : true
+        }
+    },
+    "excludedColumns" : ["lab.display_title"]
+}

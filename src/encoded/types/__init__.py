@@ -1,15 +1,17 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 from snovault.attachment import ItemWithAttachment
-
+from snovault.crud_views import collection_add as sno_collection_add
 from snovault import (
     # calculated_property,
     collection,
     load_schema,
+    CONNECTION
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
+    Item,
+    set_namekey_from_title
     # paths_filtered_by_status,
 )
 
@@ -36,7 +38,7 @@ class AnalysisStep(Item):
 
 @collection(
     name='badges',
-    unique_key='badge:badgename',
+    unique_key='badge:badge_name',
     properties={
         'title': 'Badges',
         'description': 'Listing of badges for 4DN items',
@@ -46,6 +48,13 @@ class Badge(Item):
 
     item_type = 'badge'
     schema = load_schema('encoded:schemas/badge.json')
+    name_key = 'badge_name'
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['badge_name'] = set_namekey_from_title(properties)
+
+        super(Badge, self)._update(properties, sheets)
 
 
 @collection(
@@ -112,6 +121,26 @@ class Enzyme(Item):
 
 
 @collection(
+    name='file-formats',
+    unique_key='file_format:file_format',
+    lookup_key='file_format',
+    properties={
+        'title': 'File Formats',
+        'description': 'Listing of file formats used by 4DN'
+    }
+)
+class FileFormat(Item, ItemWithAttachment):
+    """The class to store information about 4DN file formats"""
+    item_type = 'file_format'
+    schema = load_schema('encoded:schemas/file_format.json')
+    embedded_list = []
+    name_key = 'file_format'
+
+    def display_title(self):
+        return self.properties.get('file_format')
+
+
+@collection(
     name='genomic-regions',
     properties={
         'title': 'Genomic Regions',
@@ -139,6 +168,14 @@ class Organism(Item):
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
     embedded_list = []
+
+    def display_title(self):
+        if self.properties.get('scientific_name'):  # Defaults to "" so check if falsy not if is None
+            scientific_name_parts = self.properties['scientific_name'].split(' ')
+            if len(scientific_name_parts) > 1:
+                return ' '.join([scientific_name_parts[0][0].upper() + '.'] + scientific_name_parts[1:])
+            else:
+                return self.properties['scientific_name']
 
 
 @collection(
@@ -180,3 +217,82 @@ class Sysinfo(Item):
     schema = load_schema('encoded:schemas/sysinfo.json')
     name_key = 'name'
     embedded_list = []
+
+
+@collection(
+    name='tracking-items',
+    properties={
+        'title': 'TrackingItem',
+        'description': 'For internal tracking of Fourfront events',
+    })
+class TrackingItem(Item):
+    """tracking-item class."""
+
+    item_type = 'tracking_item'
+    schema = load_schema('encoded:schemas/tracking_item.json')
+    embedded_list = []
+
+    @classmethod
+    def create_and_commit(cls, request, properties, render=False):
+        """
+        Create a TrackingItem with a given request and properties, committing
+        it directly to the DB. This works by manually committing the
+        transaction, which may cause issues if this function is called as
+        part of another POST. For this reason, this function should be used to
+        track GET requests -- otherwise, use the standard POST method.
+        Skips validators.
+        Setting render to True/None may cause permission issues
+        """
+        import transaction
+        import uuid
+        tracking_uuid = str(uuid.uuid4())
+        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
+        properties['uuid'] = tracking_uuid
+        # no validators run, so status must be set manually if we want it
+        if 'status' not in properties:
+            properties['status'] = 'in review by lab'
+        request.validated = properties
+        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
+        transaction.get().commit()
+        del request.response.headers['Location']
+        return res
+
+    def display_title(self):
+        date_created = self.properties.get('date_created', '')[:10]
+        if self.properties.get('tracking_type') == 'google_analytics':
+            for_date = self.properties.get('google_analytics', {}).get('for_date', None)
+            if for_date:
+                return 'Google Analytics for ' + for_date
+            return 'Google Analytics Item'
+        elif self.properties.get('tracking_type') == 'download_tracking':
+            title = 'Download Tracking Item'
+            if date_created:
+                title = title + ' from ' + date_created
+            return title
+        else:
+            title = 'Tracking Item'
+            if date_created:
+                title = title + ' from ' + date_created
+            return title
+
+
+@collection(
+    name='vendors',
+    unique_key='vendor:name',
+    properties={
+        'title': 'Vendors',
+        'description': 'Listing of sources and vendors for 4DN material',
+    })
+class Vendor(Item):
+    """The Vendor class that contains the company/lab sources for reagents/cells... used."""
+
+    item_type = 'vendor'
+    schema = load_schema('encoded:schemas/vendor.json')
+    name_key = 'name'
+    embedded_list = ['award.project']
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['name'] = set_namekey_from_title(properties)
+
+        super(Vendor, self)._update(properties, sheets)

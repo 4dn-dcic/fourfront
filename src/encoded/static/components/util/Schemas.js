@@ -4,6 +4,7 @@ import _ from 'underscore';
 import url from 'url';
 import React from 'react';
 import { linkFromItem } from './object';
+import { LocalizedTime, format as dateFormat } from './date-utility';
 
 let cachedSchemas = null;
 
@@ -23,25 +24,27 @@ export function set(schemas){
 
 export const itemTypeHierarchy = {
     'Experiment': [
-        'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq', 'ExperimentAtacseq', 'ExperimentDamid'
+        'ExperimentAtacseq', 'ExperimentCaptureC', 'ExperimentChiapet', 'ExperimentDamid', 'ExperimentHiC',
+        'ExperimentMic', 'ExperimentRepliseq', 'ExperimentSeq', 'ExperimentTsaseq'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
+        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
     ],
     'Individual': [
         'IndividualHuman', 'IndividualMouse', 'IndividualFly'
     ],
     'Treatment': [
-        'TreatmentChemical', 'TreatmentAgent', 'TreatmentRnai'
+        'TreatmentAgent', 'TreatmentRnai'
     ],
     'QualityMetric' : [
-        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc',
+        'QualityMetricDedupqcRepliseq'
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
@@ -72,6 +75,12 @@ export const Term = {
             case 'status':
                 name = Term.capitalizeSentence(term);
                 break;
+            case 'date_created':
+            case 'public_release':
+            case 'project_release':
+                if (allowJSXOutput) name = <LocalizedTime timestamp={term} />;
+                else name = dateFormat(term);
+                break;
             default:
                 name = null;
                 break;
@@ -80,9 +89,13 @@ export const Term = {
         if (typeof name === 'string') return name;
 
         // Remove 'experiments_in_set' and test as if an experiment field. So can work for both ?type=Experiment, ?type=ExperimentSet.
+        field = field.replace('experiments_in_set.', '');
 
         switch (field) {
             case 'biosource_type':
+            case 'organism.name':
+            case 'individual.organism.name':
+            case 'biosource.individual.organism.name':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;
@@ -256,11 +269,31 @@ export const Field = {
 
 };
 
+
+/**
+ * Helper function which gets the most relevant `@type` for search page context from the
+ * current search filters. If none specified or is set to "Item", then null is returned.
+ *
+ * @param {Item} context - Current Item or backend response JSON representation.
+ * @returns {string|null} Type most relevant for current search, or `null`.
+ */
+export function getSchemaTypeFromSearchContext(context){
+    var thisType = _.pluck(_.filter(context.filters || [], function(o){
+        if (o.field === 'type' && o.term !== 'Item') return true;
+        return false;
+    }), 'term')[0] || null;
+    if (thisType){
+        return getTitleForType(thisType);
+    }
+    return null;
+}
+
 /**
  * Converts a nested object from this form: "key" : { ..., "items" : { ..., "properties" : { "property" : { ...details... } } } }
  * To this form: "key" : { ... }, "key.property" : { ...details... }, ...
  *
  * @param {Object} tips - Schema property object with a potentially nested 'items'->'properties' value(s).
+ * @param {number} [depth=0] - Current recursive depth.
  * @returns {Object} Object with period-delimited keys instead of nested value to represent nested schema structure.
  */
 export function flattenSchemaPropertyToColumnDefinition(tips, depth = 0){

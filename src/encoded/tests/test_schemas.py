@@ -21,16 +21,21 @@ def master_mixins():
         'aliases',
         'status',
         'submitted',
+        'release_dates',
         'modified',
         'references',
         'attribution',
         'notes',
         'documents',
         'attachment',
-        'attachments',
         'dbxrefs',
         'library',
-        'sop_mapping'
+        'antibody_info',
+        'spikein_info',
+        'sop_mapping',
+        'tags',
+        'badges',
+        'facets_common'
     ]
     for key in mixin_keys:
         assert(mixins[key])
@@ -47,7 +52,7 @@ def pluralize(name):
                 'quality-metric', 'summary-statistic', 'workflow-run',
                 'microscope-setting']
     for sp in specials:
-        if name.startswith(sp) and re.search('-(set|flag)', name) is None:
+        if name.startswith(sp) and re.search('-(set|flag|format)', name) is None:
             return name.replace(sp, sp + 's')
         elif name.startswith(sp) and re.search('setting', name):
             return name.replace(sp, sp + 's')
@@ -117,7 +122,8 @@ def test_load_schema(schema, master_mixins, registry):
             ]
             no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',
                                        'ontology.json', 'ontology_term.json', 'sysinfo.json',
-                                       'page.json', 'static_section.json', 'badge.json']
+                                       'page.json', 'static_section.json', 'badge.json',
+                                       'tracking_item.json', 'file_format.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties
@@ -179,9 +185,3 @@ def test_changelogs(testapp, registry):
             res = testapp.get(changelog)
             assert res.status_int == 200, changelog
             assert res.content_type == 'text/markdown'
-
-
-def test_schemas_etag(testapp):
-    etag = testapp.get('/profiles/', status=200).etag
-    assert etag
-    testapp.get('/profiles/', headers={'If-None-Match': etag}, status=304)

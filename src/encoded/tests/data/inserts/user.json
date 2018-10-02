@@ -17,7 +17,7 @@
         "first_name": "Submitter",
         "groups": ["submitter"],
         "job_title": "Submitter",
-        "lab": "test-not-4dn-lab",
+        "lab": "test-4dn-lab",
         "last_name": "Submitter",
         "status": "current",
         "submits_for": ["test-4dn-lab"],
@@ -63,6 +63,16 @@
         "status": "current",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e3d",
         "lab": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc",
-        "submits_for": ["811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc", "812cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"]
+        "submits_for": ["811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"]
+    },
+    {
+        "email": "someotherguy@somewhere.com",
+        "first_name": "Some",
+        "last_name": "Other Guy",
+        "groups": ["viewer", "submitter"],
+        "status": "current",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e4d",
+        "lab": "some-other-guys-lab",
+        "submits_for": ["some-other-guys-lab"]
     }
 ]

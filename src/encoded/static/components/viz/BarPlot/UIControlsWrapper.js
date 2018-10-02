@@ -6,15 +6,13 @@ import url from 'url';
 import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as vizUtil from './../utilities';
 import { RotatedLabel, Legend } from './../components';
-import { console, object, isServerSide, expFxn, Filters, Schemas, layout } from './../../util';
-import { Toggle } from './../../inputs';
+import { console, object, isServerSide, expFxn, Filters, Schemas, layout, analytics } from './../../util';
+import { Toggle } from './../../forms/components';
 import { boundActions } from './ViewContainer';
 
 /**
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
  * Passes props to BarPlot.Chart.
- * 
- * @type {Component}
  */
 export class UIControlsWrapper extends React.PureComponent {
 
@@ -31,14 +29,14 @@ export class UIControlsWrapper extends React.PureComponent {
     static defaultProps = {
         'titleMap' : {
             // Aggr type
-            'experiment_sets' : "Experiment Sets",
-            'experiments' : 'Experiments',
-            'files' : "Files",
+            'experiment_sets'   : "Experiment Sets",
+            'experiments'       : 'Experiments',
+            'files'             : "Files",
 
             // Show state
-            'all' : 'All',
-            'filtered' : 'Selected',
-            'both' : 'All & Selected'
+            'all'               : 'All',
+            'filtered'          : 'Selected',
+            'both'              : 'All & Selected'
         },
         'availableFields_XAxis' : [
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
@@ -47,17 +45,18 @@ export class UIControlsWrapper extends React.PureComponent {
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             { title : "Project", field : "award.project" },
-            { title : "Lab", field : "lab.title" },
+            { title : "Lab", field : "lab.display_title" },
             { title : "Status", field : "status" }
         ],
         'availableFields_Subdivision' : [
-            { title : "Project", field : "award.project" },
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-            { title : "Lab", field : "lab.title" },
+            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
+            { title : "Project", field : "award.project" },
+            { title : "Center", field : "award.center_title" },
+            { title : "Lab", field : "lab.display_title" },
             { title : "Status", field : "status" }
         ],
         'legend' : false,
@@ -162,7 +161,14 @@ export class UIControlsWrapper extends React.PureComponent {
         this.setState({ showState : eventKey });
     }
 
-    handleFieldSelect(fieldIndex, newFieldKey, event){
+    /**
+     * Handler for the Dropdown components which offer field options.
+     *
+     * @param {number} fieldIndex   Index of field in aggregation being changed -- must be 0 or 1.
+     * @param {string} newFieldKey  Dot-delimited name of field used for aggregation, e.g. 'lab.display_title'.
+     * @param {Event} [event]       Reference to event of DropDown change.
+     */
+    handleFieldSelect(fieldIndex, newFieldKey, event = null){
         var newFields;
         if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
             newFields = this.props.barplot_data_fields.slice(0,1);
@@ -190,6 +196,10 @@ export class UIControlsWrapper extends React.PureComponent {
         }
         setTimeout(()=>{
             this.props.updateBarPlotFields(_.pluck(newFields, 'field'));
+            analytics.event('BarPlot', 'Set Aggregation Field', {
+                'eventLabel' : '[' + _.pluck(newFields, 'field').join(', ') + ']',
+                'field' : newFieldKey
+            });
         }, 0);
     }
 
@@ -197,7 +207,7 @@ export class UIControlsWrapper extends React.PureComponent {
         if (!this.props.barplot_data_fields) return null;
         if (!Array.isArray(this.props.barplot_data_fields)) return null;
         if (this.props.barplot_data_fields.length < fieldIndex + 1) return null;
-        
+
         return (
             _.findWhere(this.props.availableFields_Subdivision.slice(0).concat(this.props.availableFields_XAxis.slice(0)), { 'field' : this.props.barplot_data_fields[fieldIndex] })
         ) || {
@@ -336,12 +346,13 @@ export class UIControlsWrapper extends React.PureComponent {
     }
 
     render(){
-        var { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight } = this.props;
+        var { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData,
+            availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth } = this.props;
         var { aggregateType, showState } = this.state;
 
         if (!UIControlsWrapper.canShowChart(barplot_data_unfiltered)) return null;
 
-        var windowGridSize = layout.responsiveGridState();
+        var windowGridSize = layout.responsiveGridState(windowWidth);
         var contextualView = this.contextualView();
 
         var legendContainerHeight = windowGridSize === 'xs' ? null :

@@ -20,7 +20,8 @@ export class FileDetailBody extends React.Component {
         'file' : PropTypes.object.isRequired,
         'schemas' : PropTypes.object.isRequired,
         'minHeight' : PropTypes.number,
-        'keyTitleDescriptionMap' : PropTypes.object
+        'keyTitleDescriptionMap' : PropTypes.object,
+        'windowWidth' : PropTypes.number.isRequired
     }
 
     static defaultProps = {
@@ -47,7 +48,8 @@ export class FileDetailBody extends React.Component {
     }
 
     maybeLoadFile(file = this.state.file){
-        var hrefToRequest = null;
+        var hrefToRequest = null,
+            node = this.props.node;
 
         if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
             if (file === 'Forbidden' || file.length === 0) return false;
@@ -55,8 +57,13 @@ export class FileDetailBody extends React.Component {
             else hrefToRequest = '/' + file + '/';
         } else if (file && typeof file === 'object' && !Array.isArray(file)){ // If we have file object but has little info. TODO: REMOVE
             if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.itemUtil.atId(file);
-        } else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){ // If we have a group of files
-            hrefToRequest = this.props.node.meta.workflow;
+        } else if (Array.isArray(file) && node && node.meta && node.meta.workflow){ // If we have a group of files
+            hrefToRequest = node.meta.workflow;
+            if (object.isUUID(hrefToRequest)){
+                hrefToRequest = '/workflows/' + hrefToRequest + '/';
+            } else if (hrefToRequest.charAt(0) !== '/') {
+                hrefToRequest = '/' + hrefToRequest;
+            }
         }
 
         if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
@@ -147,36 +154,37 @@ export class FileDetailBody extends React.Component {
     }
 
     downloadLinkBox(){
-        var gridSize = layout.responsiveGridState();
+        var { node, windowWidth } = this.props,
+            file         = this.state.file,
+            gridSize     = layout.responsiveGridState(windowWidth),
+            title        = <span>Download</span>,
+            disabled     = (!file.href && !file.url) || !this.canDownload(),
+            content      = <fileUtil.FileDownloadButton {...{ title, disabled }} href={file.href || file.url} filename={file.filename} />,
+            colClassName = this.doesDescriptionOrNotesExist() ? "col-sm-6 col-lg-4" : "col-sm-6 col-lg-6";
+    
         //if (gridSize === 'sm' || gridSize === 'xs') return null;
-        var file = this.state.file;
+
         //if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
-
-        var title = <span>Download</span>;
-        var disabled = (!file.href && !file.url) || !this.canDownload();
-        var content = <fileUtil.FileDownloadButton title={title} href={file.href || file.url} disabled={disabled} filename={file.filename} />;
-
-        var colClassName = "col-sm-6 col-lg-4";
-        if (!this.doesDescriptionOrNotesExist()){
-            colClassName = "col-sm-6 col-lg-6";
-        }
 
         return (
             <div className={colClassName + " right box buttons-container"}>
-                <ViewMetricButton node={this.props.node} file={file}/> { content }
+                <ViewMetricButton {...{ node, file }}/> { content }
             </div>
         );
     }
 
     descriptionBox(){
-        var file = this.state.file;
-        var gridSize = layout.responsiveGridState();
+        var windowWidth = this.props.windowWidth,
+            file = this.state.file,
+            gridSize = layout.responsiveGridState(windowWidth || null);
+
         if (!this.doesDescriptionOrNotesExist() || typeof file === 'string' || !fileUtil.isFileDataComplete(file)) return null;
         return (
             <div className="col-xs-12 col-lg-4 box">
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
                 <div className="description-box-container">
                     <FlexibleDescriptionBox
+                        windowWidth={windowWidth}
                         description={file.description || file.notes || <em>No description.</em>}
                         fitTo="self"
                         textClassName="text-medium"
@@ -204,10 +212,13 @@ export class FileDetailBody extends React.Component {
         );
     }
 
+    /**
+     * @todo Figure out if can use state.file always in place of props.file here.
+     */
     render(){
-        var node = this.props.node;
-        var file = this.state.file;
-        var body;
+        var { node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
+            file = this.state.file,
+            body;
 
         if (!file){
             return null;
@@ -235,7 +246,7 @@ export class FileDetailBody extends React.Component {
             }
         } else if (MetricsView.isNodeQCMetric(node)){
             // Case: QC Metric
-            var metrics = object.listFromTips(object.tipsFromSchema(this.props.schemas, this.state.file))
+            var metrics = object.listFromTips(object.tipsFromSchema(schemas, file))
                 .filter(function(m){
                     if (m.key === 'status') return false;
                     if (m.enum) return true;
@@ -256,7 +267,7 @@ export class FileDetailBody extends React.Component {
             if ( this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets)) ){
                 var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
                 if (setsByKey && _.keys(setsByKey).length > 0){
-                    table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+                    table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} windowWidth={windowWidth} />;
                 }
             }
             body = (
@@ -269,12 +280,8 @@ export class FileDetailBody extends React.Component {
                                 <span>Details</span>
                             </h3>
                             <hr className="tab-section-title-horiz-divider"/>
-                            <ItemDetailList
-                                context={this.state.file}
-                                schemas={this.props.schemas}
-                                minHeight={this.props.minHeight}
-                                keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                            />
+                            <ItemDetailList context={file} schemas={schemas}
+                                minHeight={minHeight} keyTitleDescriptionMap={keyTitleDescriptionMap} />
                         </div>
                     : <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div> }
                 </Fade>

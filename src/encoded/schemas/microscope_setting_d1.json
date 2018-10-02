@@ -20,6 +20,7 @@
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "microscope_setting.json#/properties"}
     ],
     "mixinFacets" : [

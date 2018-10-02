@@ -1,0 +1,22 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "dbxrefs": [], 
+        "uuid": "9eb64afa-705f-4710-a298-32ad67764d14", 
+        "mouse_strain": "129/Sv X Cast", 
+        "accession": "4DNINWEP34C1", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "sex": "male", 
+        "documents": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "alternate_accessions": [], 
+        "public_release": "2017-04-10T01:13:53.395604+00:00", 
+        "date_created": "2017-04-10T01:13:53.395604+00:00", 
+        "aliases": [
+            "dcic:castx129fmouse"
+        ], 
+        "organism": "3413218c-3d86-498b-a0a2-9a406638e786", 
+        "schema_version": "1"
+    }
+]

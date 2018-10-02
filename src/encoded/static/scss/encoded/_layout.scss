@@ -66,11 +66,8 @@
 #content {
 
 	padding-top: 0px;
+	padding-bottom: 20px;
 	position: relative;
-	
-	@media (min-width: $navbar-fixed-breakpoint) {
-		padding-bottom: 20px;
-	}
 
 	> .alerts {
 		margin-top: 20px;
@@ -231,8 +228,12 @@ h1.page-title + .page-subtitle {
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
+	border-top: 1px solid #f0f0f0;
+	//@include filter-gradient(#ffffff, #f8f8f8, vertical);
+	//@include background-image(linear-gradient(top, rgba(255,255,255,1) 0%,rgba(248,248,248,1) 100%));
 
-	a{
+
+	a {
 		color: #bfbfbf;
 	}
 	ul {
@@ -245,7 +246,7 @@ h1.page-title + .page-subtitle {
 		display: block;
 		text-align: center;
 		color: #bfbfbf;
-		padding: 16px 0px 14px;
+		padding: 15px 0px 14px;
 		@media (min-width: $screen-md-min) {
 
 			text-align: right;
@@ -357,6 +358,10 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 
 .clickable {
 	cursor: pointer;
+}
+
+.no-user-select {
+	@include user-select(none);
 }
 
 @media screen and (max-width: $screen-xs-max){
@@ -476,7 +481,7 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 
 /** Margin Classes, inspired by Swiss github-pages/jekyll template **/
 $margin-util-sizes: 0, 1, 2, 3, 4, 5, 6, 7, 8;  // * 10px
-$margin-util-sizes-mini: 2, 3, 5, 7, 8; 		// * 1px
+$margin-util-sizes-mini: 1, 2, 3, 5, 7, 8; 		// * 1px
 
 @each $util-size in $margin-util-sizes {
 	.mb-#{$util-size}, * > .mb-#{$util-size}{
@@ -497,8 +502,28 @@ $margin-util-sizes-mini: 2, 3, 5, 7, 8; 		// * 1px
 
 }
 
+// Do same for padding.
+@each $util-size in $margin-util-sizes {
+	.pb-#{$util-size}, * > .pb-#{$util-size}{
+		padding-bottom : $util-size * 10px !important;
+	}
+	.pt-#{$util-size}, * > .pt-#{$util-size}{
+		padding-top : $util-size * 10px !important;
+	}
+
+	@each $util-mini-size in $margin-util-sizes-mini {
+		.pb-#{$util-size}#{$util-mini-size}, * > .pb-#{$util-size}#{$util-mini-size}{
+			padding-bottom : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+		.pmt-#{$util-size}#{$util-mini-size}, * > .pt-#{$util-size}#{$util-mini-size}{
+			padding-top : ($util-size * 10px) + ($util-mini-size * 1px) !important;
+		}
+	}
+
+}
 
 
+// Margin left/right
 @each $util-size in $margin-util-sizes {
 	.ml-#{$util-size}, * > .ml-#{$util-size}{
 		margin-left : $util-size * 10px !important;

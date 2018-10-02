@@ -19,7 +19,8 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/dbxrefs" }
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -93,6 +94,16 @@
                 "Endoplasmic reticulum",
                 "Chromosomes"
             ]
+        }
+    },
+    "facets": {
+        "target_type": {
+            "title": "Target type"
+        }
+    },
+    "columns": {
+        "target_type": {
+          "title": "Target type"
         }
     }
 }

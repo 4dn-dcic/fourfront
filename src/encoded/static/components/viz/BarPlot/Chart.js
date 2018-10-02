@@ -15,15 +15,15 @@ import { PopoverViewContainer } from './ViewContainer';
 /** 
  * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
  *
- * @param {Object[]} fields - Array of fields (i.e. from props.fields) which contain counts by term and total added through @see aggregationFxn.genChartData().
- * @param {Object} fields.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiment_sets passed to genChartData.
- * @param {number} fields.total - Count of total experiments for which this field is applicable.
+ * @param {Object} rootField - Top-level field, the aggregations for which represent the X axis.
+ * @param {Object} rootField.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiment_sets passed to genChartData.
+ * @param {number} rootField.total - Count of total experiments for which this field is applicable.
  * @param {number} [availWidth=400] - Available width, in pixels, for chart.
  * @param {number} [availHeight=400] - Available width, in pixels, for chart.
  * @param {Object} [styleOpts=Chart.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
+ * @param {string} [aggregateType="experiment_sets"] - Type of value to count up. Should be one of ["experiment_sets", "files", "experiments"].
  * @param {boolean} [useOnlyPopulatedFields=false] - Determine which fields to show via checking for which fields have multiple terms present.
- * @param {number} [fullHeightCount] - 100% Y-Axis count value. Overrides height of bars.
- * 
+ * @param {?number} [fullHeightCount=null] - 100% Y-Axis count value. Overrides height of bars.
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
 export function genChartBarDims(
@@ -36,29 +36,23 @@ export function genChartBarDims(
     fullHeightCount         = null
 ){
 
-    
-    var numberOfTerms = _.keys(rootField.terms).length;
-    var largestExpCountForATerm = typeof fullHeightCount === 'number' ?
-        fullHeightCount
-        : _.reduce(rootField.terms, function(m,t){
+    var numberOfTerms = _.keys(rootField.terms).length,
+        largestExpCountForATerm = typeof fullHeightCount === 'number' ? fullHeightCount : _.reduce(rootField.terms, function(m,t){
             return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
-        }, 0);
-
-    var insetDims = {
-        width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
-        height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
-    };
-    
-    var availWidthPerBar = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap);
-    var barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
-    var barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
-
-    var sortByAggrCount = function(b){
-        if (typeof b[aggregateType] === 'number'){
-            return b[aggregateType];
-        }
-        return b.term;
-    };
+        }, 0),
+        insetDims           = {
+            width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
+            height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
+        },
+        availWidthPerBar    = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
+        barXCoords          = d3.range(0, insetDims.width, availWidthPerBar),
+        barWidth            = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth),
+        sortByAggrCount = function(b){
+            if (typeof b[aggregateType] === 'number'){
+                return b[aggregateType];
+            }
+            return b.term;
+        };
 
     function genBarData(fieldObj, outerDims = insetDims, parent = null){
         return _(fieldObj.terms).chain()
@@ -252,12 +246,10 @@ export class Chart extends React.PureComponent {
      * @ignore
      */
     componentWillReceiveProps(nextProps){
-        ///*
         if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
-        //*/
     }
 
 
@@ -268,14 +260,13 @@ export class Chart extends React.PureComponent {
 
     componentDidUpdate(pastProps){
 
-        ///*
         if (Chart.shouldPerformManualTransitions(this.props, pastProps)){
             // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
             setTimeout(()=>{
+                if (!this || !this.state || !this.state.mounted) return;
                 this.setState({ transitioning : false });
             }, 750);
         }
-        //*/
 
     }
 

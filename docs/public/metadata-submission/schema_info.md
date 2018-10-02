@@ -20,7 +20,6 @@ experiment\_seq.json | ExperimentSeq | experiments-seq, experiment\_seq
 experiment\_set.json | ExperimentSet | experiment-sets, experiment\_set
 experiment\_set\_replicate.json | ExperimentSetReplicate | experiment-set-replicates, experiment\_set\_replicate
 file\_calibration.json | FileCalibration | files-calibration, file\_calibration
-file\_fasta.json | FileFasta | files-fasta, file\_fasta
 file\_fastq.json | FileFastq | files-fastq, file\_fastq
 file\_processed.json | FileProcessed | files-processed, file\_processed
 file\_reference.json | FileReference | files-reference, file\_reference

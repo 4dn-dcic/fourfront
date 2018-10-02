@@ -1,4 +1,5 @@
 from pkg_resources import resource_filename
+from urllib.parse import urlencode
 from pyramid.events import (
     BeforeRender,
     subscriber,
@@ -63,7 +64,7 @@ def includeme(config):
 
 
 def add_x_user_info_header(response, request):
-    # Check if user logged in via Auth0 and set headers accordingly to inform React 
+    # Check if user logged in via Auth0 and set headers accordingly to inform React
     # server-side/client-side render.
     if hasattr(request, 'auth0_expired'):
 
@@ -135,7 +136,7 @@ def security_tween_factory(handler, registry):
                 # This is necessary because browsers do not yet universally support getting response headers from AJAX responses.
                 #
                 #
-                # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
+                # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end
                 # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
                 # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
                 # to ID an expired token using X-Request-JWT header set below.
@@ -189,9 +190,11 @@ def should_transform(request, response):
         return False
 
     format = request.params.get('format')
+
     if format is None:
         original_vary = response.vary or ()
         response.vary = original_vary + ('Accept', 'Authorization')
+        # Temporary -- remove below if clause once can assert all 3rd party scripts provide 'Accept: application/json' header.
         if request.authorization is not None:
             format = 'json'
         else:
@@ -312,8 +315,13 @@ def canonical_redirect(event):
         return
 
     qs = canonical_qs or request.query_string
-    location = canonical_path + ('?' if qs else '') + qs
-    raise HTTPMovedPermanently(location=location)
+    # add redirect information to the query string, but not for the routes specified below
+    if not any(route in canonical_path for route in ['/search/', '/browse/', '/metadata/']):
+        redir_qs = (qs + '&' if qs else '') + urlencode([('redirected_from', request.path_info)])
+    else:
+        redir_qs = qs
+    location = canonical_path + ('?' if redir_qs else '') + redir_qs
+    raise HTTPMovedPermanently(location=location, detail="Redirected from " + str(request.path_info))
 
 
 def should_transform_callable(request, response):

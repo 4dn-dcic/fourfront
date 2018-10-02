@@ -1,6 +1,10 @@
 from collections import OrderedDict
 from pyramid.compat import bytes_
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPMovedPermanently
+)
+from base64 import b64decode
 from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
@@ -23,15 +27,16 @@ import io
 import json
 from datetime import datetime
 
-import logging
+import structlog
 
 
-log = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 
 
 def includeme(config):
     config.add_route('batch_download', '/batch_download/{search_params}')
-    config.add_route('metadata', '/metadata/{search_params}/{tsv}')
+    config.add_route('metadata', '/metadata/')
+    config.add_route('metadata_redirect', '/metadata/{search_params}/{tsv}')
     config.add_route('peak_metadata', '/peak_metadata/{search_params}/{tsv}')
     config.add_route('report_download', '/report.tsv')
     config.scan(__name__)
@@ -50,7 +55,7 @@ TSV_MAPPING = OrderedDict([
     ('Size',                        (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
     ('File Type',                   (FILE,      ['file_type'])),
-    ('File Format',                 (FILE,      ['file_format'])),
+    ('File Format',                 (FILE,      ['file_format.display_title'])),
    #('Experiment Title',            (EXP,       ['display_title'])),
     ('Experiment Type',             (EXP,       ['experiment_type'])),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
@@ -64,10 +69,11 @@ TSV_MAPPING = OrderedDict([
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
     ('Related File',                (FILE,      ['related_files.file.accession'])),
     ('Paired end',                  (FILE,      ['paired_end'])),
-    ('Lab',                         (EXP_SET,   ['lab.title'])),
+    ('Lab',                         (EXP_SET,   ['lab.display_title'])),
     ('Project',                     (EXP_SET,   ['award.project'])),
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
+    ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
@@ -103,7 +109,7 @@ TSV_MAPPING = OrderedDict([
 ])
 
 EXTRA_FIELDS = {
-    EXP_SET : ['replicate_exps.replicate_exp.accession'],
+    EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
     EXP     : [],
     FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum']
 }
@@ -219,7 +225,7 @@ def metadata_tsv(context, request):
     Alternatively, can accept a GET request wherein all files from ExpSets matching search query params are included.
     '''
 
-    search_params = parse_qs(request.matchdict['search_params'])
+    search_params = dict(request.GET) # Must use request.GET to get URI query params only (exclude POST params, etc.)
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
@@ -248,17 +254,31 @@ def metadata_tsv(context, request):
     header = []
 
     def add_field_to_search_params(itemType, field):
-        if itemType == EXP_SET:
-            search_params['field'].append(param_field)
-        if itemType == EXP:
-            search_params['field'].append('experiments_in_set.' + param_field)
-        if itemType == FILE:
-            search_params['field'].append('experiments_in_set.files.' + param_field)
-            search_params['field'].append('experiments_in_set.processed_files.' + param_field)
-            search_params['field'].append('processed_files.' + param_field)
+        if search_params['type'][0:13] == 'ExperimentSet':
+            if itemType == EXP_SET:
+                search_params['field'].append(param_field)
+            elif itemType == EXP:
+                search_params['field'].append('experiments_in_set.' + param_field)
+            elif itemType == FILE:
+                search_params['field'].append('experiments_in_set.files.' + param_field)
+                search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+                search_params['field'].append('processed_files.' + param_field)
+        elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+            if itemType == EXP_SET:
+                search_params['field'].append('experiment_set.' + param_field)
+            elif itemType == EXP:
+                search_params['field'].append('experiment.' + param_field)
+            elif itemType == FILE:
+                search_params['field'].append(param_field)
+        else:
+            raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
 
     for prop in TSV_MAPPING:
-        header.append(prop)
+        if search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+            if TSV_MAPPING[prop][0] == FILE:
+                header.append(prop)
+        else:
+            header.append(prop)
         for param_field in TSV_MAPPING[prop][1]:
             add_field_to_search_params(TSV_MAPPING[prop][0], param_field)
     for itemType in EXTRA_FIELDS:
@@ -324,10 +344,11 @@ def metadata_tsv(context, request):
             return None
 
         experiment_accession = column_vals_dict.get('Experiment Accession')
-        if experiment_accession and ',' not in experiment_accession:
-            return get_val(experiment_accession)
-        else:
-            return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
+        if experiment_accession:
+            if ',' not in experiment_accession:
+                return get_val(experiment_accession)
+            else:
+                return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
         return None
 
     def should_file_row_object_be_included(column_vals_dict):
@@ -424,6 +445,18 @@ def metadata_tsv(context, request):
         all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
         all_row_vals['Bio Rep No']  = get_correct_rep_no('Bio Rep No',  all_row_vals, exp_set)
 
+        # If we do not have any publication info carried over from ExpSet, list out lab.correspondence instead
+        if not all_row_vals.get('Publication'):
+            lab_correspondence = exp_set.get('lab', {}).get('correspondence', [])
+            if len(lab_correspondence) > 0:
+                contact_emails = []
+                for contact in lab_correspondence:
+                    decoded_email = b64decode(contact['contact_email'].encode('utf-8')).decode('utf-8') if contact.get('contact_email') else None
+                    if decoded_email:
+                        contact_emails.append(decoded_email)
+                all_row_vals['Publication'] = "Correspondence: " + ", ".join(contact_emails)
+
+        # Add file to our return list which is to be bubbled upwards to iterable.
         files_returned.append(all_row_vals)
 
         # Add attached secondary files, if any; copies most values over from primary file & overrides distinct File Download URL, md5sum, etc.
@@ -476,16 +509,11 @@ def metadata_tsv(context, request):
 
         return file_row_dict
 
-
-    def format_graph_of_experiment_sets(graph):
+    def format_filter_resulting_file_row_dicts(file_row_dict_iterable):
         return map(
             post_process_file_row_dict,
-            enumerate(filter(
-                should_file_row_object_be_included,
-                chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
-            ))
+            enumerate(filter(should_file_row_object_be_included, file_row_dict_iterable))
         )
-
 
     def generate_summary_lines():
         ret_rows = [
@@ -547,16 +575,41 @@ def metadata_tsv(context, request):
         endpoints_initialized['metadata'] = True
         request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
 
+    # Prep - use dif functions if different type requested.
+    if search_params['type'][0:13] == 'ExperimentSet':
+        iterable_pipeline = format_filter_resulting_file_row_dicts(
+            chain.from_iterable(
+                map(
+                    format_experiment_set,
+                    get_iterable_search_results(request, search_path, search_params)
+                )
+            )
+        )
+    elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+        iterable_pipeline = format_filter_resulting_file_row_dicts(
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, {}, {}, {}, {}),
+                    get_iterable_search_results(request, search_path, search_params)
+                )
+            )
+        )
+    else:
+        raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
+
     return Response(
         content_type='text/tsv',
-        app_iter = stream_tsv_output(
-            format_graph_of_experiment_sets(
-                get_iterable_search_results(request, search_path, search_params)
-            )
-        ),
+        app_iter = stream_tsv_output(iterable_pipeline),
         content_disposition='attachment;filename="%s"' % filename_to_suggest
     )
 
+
+@view_config(route_name="metadata_redirect", request_method='GET')
+def redirect_new_metadata_route(context, request):
+    return HTTPMovedPermanently(
+        location='/metadata/?' + request.matchdict['search_params'],
+        comment="Redirected to current metadata route."
+    )
 
 @view_config(route_name='batch_download', request_method='GET')
 def batch_download(context, request):

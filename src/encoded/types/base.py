@@ -28,11 +28,12 @@ from snovault.validators import (
     validate_item_content_patch
 )
 from snovault.interfaces import CONNECTION
-from snovault.etag import if_match_tid
 from snovault.schema_utils import SERVER_DEFAULTS
 from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date
+import string
+import re
 
 
 @lru_cache()
@@ -118,29 +119,76 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 def get_item_if_you_can(request, value, itype=None):
+    """
+    Return the @@object view of an item from a number of different sources
+
+        :param value: String item identifier or a dict containing @id/uuid
+        :param itype: Optional string collection name for the item (e.g. /file-formats/)
+        :returns: the dictionary @@object view of the item
+    """
+    if isinstance(value, dict):
+        if 'uuid' in value:
+            value = value['uuid']
+        elif '@id' in value:
+            value = value['@id']
+    svalue = str(value)
+    if not svalue.startswith('/'):
+        svalue = '/' + svalue
     try:
-        value.get('uuid')
-        return value
-    except AttributeError:
-        svalue = str(value)
-        if not svalue.startswith('/'):
-            svalue = '/' + svalue
+        item = request.embed(svalue, '@@object')
+    except:
+        pass
+    else:
+        if item.get('uuid'):
+            return item
+    if itype is not None:
+        svalue = '/' + itype + svalue + '/?datastore=database'
         try:
-            item = request.embed(svalue, '@@object')
+            return request.embed(svalue, '@@object')
         except:
-            pass
-        else:
-            try:
-                item.get('uuid')
-                return item
-            except AttributeError:
-                pass
-        if itype is not None:
-            svalue = '/' + itype + svalue + '/?datastore=database'
-            try:
-                return request.embed(svalue, '@@object')
-            except:
-                return value
+            # this could lead to unexpected errors
+            return None
+
+
+def set_namekey_from_title(properties):
+    name = None
+    if properties.get('title'):
+        exclude = set(string.punctuation)
+        name = properties['title']
+        name = ''.join(ch for ch in name if ch not in exclude)
+        name = re.sub(r"\s+", '-', name)
+        name = name.lower()
+    return name
+
+
+def validate_item_type_of_linkto_field(context, request):
+    """We are doing this case by case on item specific types files,
+    but might want to carry it here if filter is used more often.
+    If any of the submitted fields contain an ff_flag property starting with "filter",
+    the field in the filter is used for validating the type of the linked item.
+    Example: file has field file_format which is a linkTo FileFormat.
+    FileFormat items contain a field called "valid_item_types".
+    We have the ff_flag on file_format field called "filter:valid_item_types"."""
+    pass
+
+
+# Common lists of embeds to be re-used in certain files (similar to schema mixins)
+
+lab_award_attribution_embed_list = [
+    "award.project",
+    "award.center_title",
+    "lab.city",
+    "lab.state",
+    "lab.country",
+    "lab.postal_code",
+    "lab.city",
+    "lab.display_title",
+    "lab.url",
+    "lab.correspondence",                                # Not a real linkTo - temp workaround
+    "contributing_labs.correspondence",                  # Not a real linkTo - temp workaround
+    "submitted_by.timezone",
+    "submitted_by.job_title"
+]
 
 
 class AbstractCollection(snovault.AbstractCollection):
@@ -213,9 +261,9 @@ def collection_add(context, request, render=None):
 
 
 @view_config(context=snovault.Item, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put], decorator=if_match_tid)
+             validators=[validate_item_content_put])
 @view_config(context=snovault.Item, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch], decorator=if_match_tid)
+             validators=[validate_item_content_patch])
 def item_edit(context, request, render=None):
     check_only = request.params.get('check_only', False)
 
@@ -238,7 +286,7 @@ class Item(snovault.Item):
         'revoked': ALLOW_CURRENT,
         'archived': ALLOW_CURRENT,
         'deleted': DELETED,
-        'replaced': DELETED,
+        'replaced': ALLOW_CURRENT,
         'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
         'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
@@ -374,13 +422,21 @@ class Item(snovault.Item):
             if last_modified['modified_by'] != NO_DEFAULT:
                 properties['last_modified'] = last_modified
 
-        date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
-        for datefield, status in date2status.items():
+        date2status = [{'public_release': ['released', 'current']}, {'project_release': ['released to project']}]
+        # if an item is directly released without first being released to project
+        # then project_release date is added for same date as public_release
+        for dateinfo in date2status:
+            datefield, statuses = next(iter(dateinfo.items()))
             if datefield not in props:
-                if datefield in self.schema['properties'] and datefield not in properties \
-                   and 'status' in properties and properties['status'] in status:
-                    # check the status and add the date if it's not provided and item has right status
-                    properties[datefield] = date.today().isoformat()
+                if datefield in self.schema['properties'] and datefield not in properties:
+                    if 'status' in properties and properties['status'] in statuses:
+                        # check the status and add the date if it's not provided and item has right status
+                        properties[datefield] = date.today().isoformat()
+                    elif datefield == 'project_release':
+                        # case where public_release is added and want to set project_release = public_release
+                        public_rel = properties.get('public_release')
+                        if public_rel:
+                            properties[datefield] = public_rel
 
         super(Item, self)._update(properties, sheets)
 
@@ -484,9 +540,17 @@ class Item(snovault.Item):
         return principals
 
     def rev_link_atids(self, request, rev_name):
+        """
+        Returns the list of reverse linked items given a defined reverse link,
+        which should be formatted like:
+        rev = {
+            '<reverse field name>': ('<reverse item class>', '<reverse field to find>'),
+        }
+
+        """
         conn = request.registry[CONNECTION]
         return [request.resource_path(conn[uuid]) for uuid in
-                paths_filtered_by_status(request, self.get_rev_links(rev_name))]
+                paths_filtered_by_status(request, self.get_rev_links(request, rev_name))]
 
 
 class SharedItem(Item):

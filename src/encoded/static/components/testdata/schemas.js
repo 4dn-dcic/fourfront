@@ -3480,7 +3480,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -9103,7 +9107,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -14725,17 +14733,6 @@ module.exports = {
                 "title": "Specific file format type",
                 "description": "Files of type bed and gff require further specification"
             },
-            "file_format_specifications": {
-                "items": {
-                    "comment": "See document.json for a list of available identifiers.",
-                    "type": "string",
-                    "linkTo": "Document"
-                },
-                "uniqueItems": true,
-                "type": "array",
-                "title": "File format specifications documents",
-                "description": "Text or .as files the further explain the file format"
-            },
             "restricted": {
                 "type": "boolean",
                 "title": "Restricted file",
@@ -17865,7 +17862,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -19595,7 +19596,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -20703,15 +20708,21 @@ module.exports = {
                         "title": "MIME type",
                         "type": "string",
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
-                            "image/png",
                             "image/tiff",
                             "image/gif",
-                            "text/html"
-                        ]
+                            "text/html",
+                            "image/png",
+                            "image/svs",
+                            "text/autosql"
+                        ],
                     },
                     "size": {
                         "title": "File size",
@@ -23563,7 +23574,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",
@@ -25710,7 +25725,11 @@ module.exports = {
                     },
                     "type": {
                         "enum": [
+                            "application/msword",
+                            "application/vnd.ms-excel",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             "application/pdf",
+                            "application/zip",
                             "text/plain",
                             "text/tab-separated-values",
                             "image/jpeg",

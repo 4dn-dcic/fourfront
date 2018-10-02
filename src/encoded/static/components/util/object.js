@@ -4,7 +4,7 @@ import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
-import { Field } from './Schemas';
+import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
 import { isServerSide } from './misc';
 import url from 'url';
@@ -13,8 +13,8 @@ import url from 'url';
 /**
  * Convert a link_id, if one exists on param 'object', to an '@id' link.
  * If an '@id' exists already, gets that.
- * 
- * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
+ *
+ * @param {Object} o - Must have a 'link_id' or '@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */
 export function atIdFromObject(o){
@@ -26,7 +26,7 @@ export function atIdFromObject(o){
 }
 
 
-export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps, suppressErrors = false){
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps = {}, suppressErrors = false){
     var href = atIdFromObject(item);
     var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href;
     if (!href || !title){
@@ -38,7 +38,7 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
         return null;
     }
     
-    var propsToInclude = elementProps && _.clone(elementProps) || {};
+    var propsToInclude = elementProps && _.clone(elementProps);
 
     if (typeof propsToInclude.key === 'undefined'){
         propsToInclude.key = href;
@@ -98,10 +98,11 @@ export function listFromTips(tips){
  * Find property within an object using a propertyName in object dot notation.
  * Recursively travels down object tree following dot-delimited property names.
  * If any node is an array, will return array of results.
- * 
+ *
  * @param {Object} object - Item to traverse or find propertyName in.
  * @param {string|string[]} propertyName - (Nested) property in object to retrieve, in dot notation or ordered array.
- * @return {*} - Value corresponding to propertyName.
+ * @param {boolean} [suppressNotFoundError=false] - If true, will not print a console warning message if no value found.
+ * @return {?any} Value corresponding to propertyName.
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
     var errorMsg;
@@ -146,8 +147,13 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
 
 }
 
-
-
+/**
+ * Check if parameter is a valid JSON object or array.
+ *
+ * @param {Object|Array} content - Parameter to test for JSON validity.
+ * @returns {boolean} Whether passed in param is JSON.
+ * @todo Research if a more performant option might exist for this.
+ */
 export function isValidJSON(content) {
     var isJson = true;
     try{
@@ -156,6 +162,94 @@ export function isValidJSON(content) {
         isJson = false;
     }
     return isJson;
+}
+
+
+/**
+ * Sets value to be deeply nested within an otherwise empty object, given a field with dot notation.
+ * Use for creating objects for PATCH requests. Does not currently support arrays.
+ * If want to update a full object rather than create an empty one, use @see deepExtendObject with output.
+ *
+ * @param {string|string[]} field   Property name of object of where to nest value, in dot-notation or pre-split into array.
+ * @param {*} value                 Any value to nest.
+ * @returns {Object} - Object with deepy-nested value.
+ * @example
+ *   generateSparseNestedProperty('human.body.leftArm.indexFinger', 'Orange') returns
+ *   { human : { body : { leftArm : { indexFinger : 'Orange' } } } }
+ */
+export function generateSparseNestedProperty(field, value){
+    if (typeof field === 'string') field = field.split('.');
+    if (!Array.isArray(field)) throw new Error("Could not create nested field in object. Check field name.");
+
+    var currObj = {};
+    currObj[field.pop()] = value;
+
+    if (field.length === 0) return currObj;
+    return generateSparseNestedProperty(field, currObj);
+}
+
+
+/**
+ * Performs an IN-PLACE 'deep merge' of a small object (one property per level, max) into a host object.
+ *
+ * @param {Object} hostObj           Object to merge/insert into.
+ * @param {Object} nestedObj         Object whose value to insert into hostObj.
+ * @param {number} [maxDepth=10]     Max number of recursions or object depth.
+ * @param {number} [currentDepth=0]  Current recursion depth.
+ * @returns {boolean} False if failed.
+ */
+export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
+    var nKey = Object.keys(nestedObj)[0]; // Should only be 1.
+    if (currentDepth > maxDepth){
+        // Doubt we'd go this deep... so cancel out
+        return false;
+    }
+    if (typeof hostObj[nKey] !== 'undefined'){
+        if (typeof nestedObj[nKey] === 'object' && !Array.isArray(hostObj[nKey]) ){
+            return deepExtend(hostObj[nKey], nestedObj[nKey], currentDepth + 1);
+        } else {
+            // No more nested objects, insert here.
+            hostObj[nKey] = nestedObj[nKey];
+            return true;
+        }
+    } else if (typeof nestedObj[nKey] !== 'undefined') {
+        // Field doesn't exist on hostObj, but does on nestedObj, == new field.
+        hostObj[nKey] = nestedObj[nKey];
+        return true;
+    } else {
+        // Whoops, doesn't seem like fields match.
+        return false;
+    }
+}
+
+
+/**
+ * Deep-clone a given object using JSON stringify/parse.
+ * Does not handle or clone references or non-serializable types.
+ *
+ * @param {Object|Array} obj - JSON to deep-clone.
+ * @returns {Object|Array} Cloned JSON.
+ */
+export function deepClone(obj){
+    return JSON.parse(JSON.stringify(obj));
+}
+
+
+
+
+
+/**
+ * Check if param is in form of an @id. Doesn't validate whether proper collection, etc. just URL format.
+ *
+ * @param {string} value - String to test.
+ * @returns {boolean} - Whether is valid-ish.
+ */
+export function isValidAtIDFormat(value){
+    return (
+        value && typeof value === 'string' && value.length > 3 &&
+        value.charAt(0) === '/' && value[value.length - 1] === '/' &&
+        (value.match(/\//g) || []).length === 3
+    );
 }
 
 /**
@@ -426,9 +520,9 @@ export const itemUtil = {
 
     // Aliases
 
-    isAnItem : isAnItem,
-    generateLink : linkFromItem,
-    atId : atIdFromObject,
+    isAnItem        : isAnItem,
+    generateLink    : linkFromItem,
+    atId            : atIdFromObject,
 
 
 
@@ -501,6 +595,16 @@ export const itemUtil = {
     },
 
 
+    /**
+     * Performs a `_.uniq` on list of Items by their @id.
+     *
+     * @param {Item[]} items - List of Items to unique.
+     * @returns {Item[]} Uniqued list.
+     */
+    uniq : function(items){
+        return _.uniq(items, false, function(o){ return atIdFromObject(o);  } );
+    },
+
 
     // Secondary Dictionaries -- functions by Item type.
 
@@ -534,6 +638,31 @@ export const itemUtil = {
          */
         gravatar(email, size=null, props={}, defaultImg='retro'){
             return <img title="Obtained via Gravatar" {...props} src={itemUtil.User.buildGravatarURL(email, size, defaultImg)} className={'gravatar' + (props.className ? ' ' + props.className : '')} />;
+        },
+
+
+        /**
+         * Definitions for regex validators.
+         *
+         * @public
+         * @constant
+         */
+        localRegexValidation : {
+            /**
+             * http://www.regular-expressions.info/email.html -> changed capital A to lowercase
+             *
+             * @public
+             * @constant
+             */
+            email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
+            /**
+             * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and
+             * optional leading plus sign (for international).
+             *
+             * @public
+             * @constant
+             */
+            phone : '[+]?[\\d]{10,36}((\\sx|\\sext|\\sextension)(\\s)?[\\d]{1,7})?$'
         }
 
     }

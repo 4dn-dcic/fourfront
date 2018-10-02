@@ -14,7 +14,8 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/attribution" }
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

@@ -121,7 +121,7 @@ describe('Testing ExperimentSetView', function() {
         expect(labBlockIndex).toBeGreaterThan(-1); // Ensure we have a lab block.
 
         //             .formatted-info-panel         > .row      > .details-col > h5.block-title > a innerHTML
-        var labTitle = formattedBlocks[labBlockIndex].children[1].children[1].children[0].children[0].innerHTML;
+        var labTitle = formattedBlocks[labBlockIndex].querySelectorAll('h5.block-title a')[0].innerHTML;
 
         expect(labTitle).toEqual('4DN DCIC Lab, HMS');
 

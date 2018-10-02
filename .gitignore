@@ -6,6 +6,10 @@ beanstalk.cfg
 /.mr.developer.cfg
 /.cache/
 /.sass-cache/
+.vscode
+/src/encoded/static/docs/
+/es_docs/
+/docs/javascript-reference/
 /annotations.json
 /aws-ip-ranges.json
 /bin/
@@ -33,6 +37,7 @@ package-lock.json
 /src/encoded/static/scss/_variables.original.scss
 
 *.swp
+*.hprof
 *.DS_Store
 *.egg-info
 *.pyc

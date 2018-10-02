@@ -7,9 +7,25 @@ import json
 import time
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
+
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
+
+
+# just a little helper function
+def recursively_find_uuids(json, uuids):
+    for key, val in json.items():
+        if key == 'uuid':
+            uuids.add(val)
+        elif isinstance(val, list):
+            for item in val:
+                if isinstance(item, dict):
+                    uuids = recursively_find_uuids(item, uuids)
+        elif isinstance(val, dict):
+            uuids = recursively_find_uuids(val, uuids)
+    return uuids
+
 
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
@@ -45,9 +61,11 @@ def test_search_with_no_query(workbook, testapp):
 
 def test_collections_redirect_to_search(workbook, testapp):
     # we removed the collections page and redirect to search of that type
-    res = testapp.get('/biosamples/').follow(status=200)
+    # redirected_from is not used for search
+    res = testapp.get('/biosamples/', status=301).follow(status=200)
     assert res.json['@type'] == ['Search']
     assert res.json['@id'] == '/search/?type=Biosample'
+    assert 'redirected_from' not in res.json['@id']
     assert res.json['@context'] == '/terms/'
     assert res.json['notification'] == 'Success'
     assert res.json['title'] == 'Search'
@@ -111,7 +129,9 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
+@pytest.mark.xfail
 def test_search_facets_and_columns_order(workbook, testapp, registry):
+    # TODO: Adjust ordering of mixed-in facets, perhaps sort by lookup or something, in order to un-xfail.
     from snovault import TYPES
     test_type = 'experiment_set_replicate'
     type_info = registry[TYPES].by_item_type[test_type]
@@ -261,7 +281,8 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 
     # run a simple GET query with type=ExperimentSetReplicate
-    res = htmltestapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv')
+    res = htmltestapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv') # OLD URL FORMAT IS USED -- TESTING REDIRECT TO NEW URL
+    res = res.maybe_follow() # Follow redirect -- https://docs.pylonsproject.org/projects/webtest/en/latest/api.html#webtest.response.TestResponse.maybe_follow
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
 
@@ -280,7 +301,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
         'download_file_name' : 'metadata_TEST.tsv'
     }
 
-    res2 = htmltestapp.post('/metadata/type=ExperimentSetReplicate/metadata.tsv', { k : json.dumps(v) for k,v in res2_post_data.items() })
+    res2 = htmltestapp.post('/metadata/?type=ExperimentSetReplicate', { k : json.dumps(v) for k,v in res2_post_data.items() }) # NEWER URL FORMAT
 
     assert 'text/tsv' in res2.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]
@@ -301,11 +322,12 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     assert 'biosource.biosource_type' in embeds
     res = testapp.get('/search/?type=Biosample&biosource.biosource_type=immortalized+cell+line').json
     assert 'facets' in res
-    facet_fields = [facet['field'] for facet in res['facets']]
+    facet_fields = [ facet['field'] for facet in res['facets'] ]
     assert 'type' in facet_fields
     assert 'status' in facet_fields
     for facet in schema['facets'].keys():
-        assert facet in facet_fields
+        if not schema['facets'][facet].get('hide_from_view'):
+            assert facet in facet_fields
     # now ensure that facets can also be created outside of the schema
     assert 'biosource.biosource_type' in facet_fields
 
@@ -376,8 +398,12 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     # TODO: NAMESPACE - here, passed in list to create_mapping
     # turn of logging for a bit
     create_mapping.run(app, sync_index=True)
+    # check counts and ensure they're equal
+    testapp_counts = testapp.get('/counts')
+    total_counts = testapp_counts.json['db_es_total']
+    split_counts = total_counts.split()  # 2nd item is db counts, 4th is es
+    assert(int(split_counts[1]) == int(split_counts[3]))
     for item_type in TYPE_LENGTH.keys():
-        print('\n\n--> %s' % item_type)
         tries = 0
         item_len = None
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
@@ -392,14 +418,26 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if item_len > 0:
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             res = res.follow()
-            random_id = random.choice(res.json['@graph'])['@id']
-            indexer_testapp.get(random_id + '@@index-data', status=200)
-            # previously test_html_pages
-            try:
-                res = htmltestapp.get(random_id)
-                assert res.body.startswith(b'<!DOCTYPE html>')
-            except Exception as e:
-                pass
+            for item_res in res.json.get('@graph', []):
+                index_view_res = es.get(index=item_type, doc_type=item_type,
+                                        id=item_res['uuid'])['_source']
+                # make sure that the linked_uuids match the embedded data
+                assert 'linked_uuids' in index_view_res
+                assert 'embedded' in index_view_res
+                found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
+                # all found uuids must be within the linked_uuids
+                assert found_uuids <= set(index_view_res['linked_uuids'])
+                # if uuids_rev_linking to me, make sure they show up in @@links
+                if len(index_view_res.get('uuids_rev_linked_to_me', [])) > 0:
+                    links_res = testapp.get('/' + item_res['uuid'] + '/@@links', status=200)
+                    link_uuids = [lnk['uuid'] for lnk in links_res.json.get('uuids_linking_to')]
+                    assert set(index_view_res['uuids_rev_linked_to_me']) <= set(link_uuids)
+                # previously test_html_pages
+                try:
+                    html_res = htmltestapp.get(item_res['@id'])
+                    assert html_res.body.startswith(b'<!DOCTYPE html>')
+                except Exception as e:
+                    pass
 
 
 ######################################

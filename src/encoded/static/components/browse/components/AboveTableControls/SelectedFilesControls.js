@@ -8,11 +8,12 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import { Modal, ButtonGroup, Checkbox, Button } from 'react-bootstrap';
-import { expFxn, Schemas, DateUtility, ajax, JWT } from './../../../util';
+import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
 import { windowHref } from './../../../globals';
 import * as vizUtil from './../../../viz/utilities';
 import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
 
+var { Item } = typedefs;
 
 
 export class SelectedFilesOverview extends React.Component {
@@ -28,25 +29,268 @@ export class SelectedFilesOverview extends React.Component {
     }
 }
 
-
+/**
+* Upon clicking the button, reveal a modal popup giving users more download instructions.
+*/
 export class SelectedFilesDownloadButton extends React.PureComponent {
 
-    static encodePlainText(text){
-        return 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
-    }
+    /**
+     * @type {Object}
+     * @constant
+     * @property {string} [gridState="lg"] - This should be passed in from parent `AboveTableControls` after mount. Default is set for server-side render + initial hydration.
+     */
+    static defaultProps = {
+        'gridState' : 'lg'
+    };
 
-    static generateListOfURIsFromFiles(files, hostPrefix = ''){
-        return _.pluck(files, 'href').map(function(downloadPath){ return hostPrefix + downloadPath; });
-    }
+    /**
+     * @constant
+     * @ignore
+     */
+    static propTypes = {
+        'gridState' : PropTypes.string.isRequired
+    };
 
     constructor(props){
         super(props);
-        this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
+        this.handleClickRevealModal = _.throttle(this.handleClickRevealModal.bind(this), 1000);
+        this.handleHideModal = this.handleHideModal.bind(this);
+        this.handleClickDisclaimer = this.handleClickDisclaimer.bind(this);
         this.renderModal = this.renderModal.bind(this);
+        this.findUnpublishedFiles = this.findUnpublishedFiles.bind(this);
         this.state = {
             'modalOpen' : false,
-            'urls' : null
+            'showDisclaimer' : false,
+            'showDownloadMetadata' : false,
+            'showDisclaimerButton' : false,
         };
+    }
+
+    /**
+    * Hide the modal window and its subwindows.
+    */
+    handleHideModal(){
+        this.setState({
+            'modalOpen' : false,
+            'showDisclaimer' : false,
+            'showDownloadMetadata' : false,
+            'showDisclaimerButton' : false,
+        });
+    }
+
+    renderModalCodeSnippet(meta_download_filename, isSignedIn){
+        return (
+            <pre className="mb-15">
+                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
+                { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
+            </pre>
+        );
+    }
+
+    /**
+    * The user wants to reveal the modal.
+    * This function renders out a React-Bootstrap Modal component.
+    *
+    * @returns {JSX.Element} A modal instance.
+    */
+    handleClickRevealModal(){
+        if (this.findUnpublishedFiles()) { // Determine if any of the targeted files need the disclaimer
+            // If they need the disclaimer
+            // Reveal the disclaimer widget
+            // Hide the download metadata widget
+            this.setState({
+                'modalOpen': true,
+                'showDisclaimer' : true,
+                'showDisclaimerButton' : true,
+                'showDownloadMetadata' : false,
+            });
+        }
+        else {
+            // Hide the disclaimer widget
+            // Show the download metadata widget
+            this.setState({
+                'modalOpen': true,
+                'showDisclaimer' : false,
+                'showDisclaimerButton' : false,
+                'showDownloadMetadata' : true,
+            });
+        }
+    }
+
+    /**
+    * User clicks on the acknowledgement button.
+    */
+    handleClickDisclaimer(){
+        // Update the state:
+        // - Hide the Disclaimer button
+        // - Show the Download Metadata widget
+        this.setState({
+            'modalOpen': true,
+            'showDisclaimer' : true,
+            'showDisclaimerButton' : false,
+            'showDownloadMetadata' : true,
+        });
+    }
+
+    /**
+    * Renders the modal content.
+    *
+    * @param {array} selectedFiles - Files to display and download.
+    */
+    renderModal(selectedFiles){
+        if (!this.state.modalOpen) return null;
+
+        var suggestedFilename           = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv',
+            userInfo                    = JWT.getUserInfo(),
+            isSignedIn                  = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token),
+            profileHref                 = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me',
+            countSelectedFiles          = _.keys(selectedFiles).length,
+            foundUnpublishedFiles       = this.findUnpublishedFiles();
+
+        return (
+            <Modal show className="batch-files-download-modal" onHide={this.handleHideModal} bsSize="large">
+                <Modal.Header closeButton>
+                    <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+
+                    <p>Please press the "Download" button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
+
+                    <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
+
+                    { this.renderModalCodeSnippet(suggestedFilename, isSignedIn) }
+
+                    { this.state.showDisclaimer ? <SelectedFilesDownloadDisclaimer {...{ foundUnpublishedFiles, suggestedFilename, userInfo }} showDisclaimerButton={this.state.showDisclaimerButton} onClickHandler={this.handleClickDisclaimer}/> : null }
+
+                    { this.state.showDownloadMetadata ? <SelectedFilesDownloadMetadataButton subSelectedFiles={this.props.subSelectedFiles} onClickHandler={this.handleHideModal} /> : null }
+                </Modal.Body>
+            </Modal>
+        );
+    }
+
+    /**
+    * Returns an object containing booleans which indicate if the user is trying to download unreleased or unpublished files.
+    *
+    * @returns {boolean} Whether found any files which lack a `produced_in_pub` in their parent ExperimentSet.
+    */
+    findUnpublishedFiles(){
+        var { selectedFiles } = this.props;
+
+        // Find out if at least 1 is unpublished.
+        // The file could be part of an experiment set with a publication
+        // Or the file could be part of an experiment which is in an experiment set with a publication
+        return _.any(_.values(selectedFiles), function(file){
+            var expSetHasPub = (
+                (file.from_experiment && file.from_experiment.from_experiment_set && file.from_experiment.from_experiment_set.produced_in_pub)
+                || (file.from_experiment_set && file.from_experiment_set.produced_in_pub)
+            );
+            return !expSetHasPub;
+        });
+    }
+
+    render(){
+        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles, gridState } = this.props,
+            selectedFilesCountIncludingDuplicates   = _.keys(selectedFiles).length,
+            subSelectedFilesCount                   = _.keys(subSelectedFiles).length,
+            disabled                                = selectedFilesUniqueCount === 0,
+            countDuplicates                         = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount,
+            countToShow                             = selectedFilesUniqueCount,
+            tip                                     = (
+                "Download metadata TSV sheet containing download URIs for " +
+                selectedFilesUniqueCount + " files" +
+                (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
+            );
+
+        if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
+            countToShow = subSelectedFilesCount;
+            tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
+        }
+
+        var innerBtnTitle  = (
+            ['lg', 'md'].indexOf(gridState) > -1 ? (
+                <span>Download { countToShow }<span className="text-400"> Selected Files</span></span>
+            ) : (
+                <span>{ countToShow }</span>
+            )
+        );
+
+        return (
+            <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
+                <i className="icon icon-download icon-fw"/> { innerBtnTitle }
+                { this.renderModal(subSelectedFiles) }
+            </Button>
+        );
+    }
+}
+
+/**
+* A disclaimer will appear if the user wants to download unpublished or unreleased files.
+*/
+export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
+
+    /**
+    * This function renders out a div containing information about
+    * unreleased and unpublished files.
+    *
+    * @returns {JSX.Element} A modal instance.
+    */
+    render(){
+        var { foundUnpublishedFiles, suggestedFilename, userInfo, showDisclaimerButton, onClickHandler } = this.props;
+
+        // If all data sets have been released and published, return nothing.
+        if (!foundUnpublishedFiles) return null;
+
+        // Find out if the user is signed in, and what their profile href is.
+        var isSignedIn = !!(
+                userInfo
+                && userInfo.details
+                && userInfo.details.email
+                && userInfo.id_token
+            ),
+            profileHref = (
+                isSignedIn
+                && userInfo.user_actions
+                && _.findWhere(
+                    userInfo.user_actions, { 'id' : 'profile' }).href
+            )
+            || '/me';
+
+        // Generate the div containing warnings about unpublished and unreleased files.
+        return(
+            <div id="file_disclaimer_div">
+                <h4 className="mt-2 mb-07 text-500">Notes</h4>
+                <ul className="mb-25">
+                    { isSignedIn ?
+                        <li className="mb-05">
+                            To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
+                            <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
+                        </li>
+                    : null }
+                    <li className="mb-05">
+                        {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
+                    </li>
+                    { foundUnpublishedFiles ?
+                        <li>
+                            For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
+                            In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                            Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
+                        </li>
+                    : null }
+                </ul>
+                {showDisclaimerButton ? <Button bsStyle="info" onClick={onClickHandler}><i className="icon icon-fw icon-check"></i>&nbsp;I have read and understand the notes.</Button> : null }
+            </div>
+        );
+    }
+}
+
+/**
+ * Use this button to download the tsv file metadata.
+ * Also has a close modal button.
+ */
+export class SelectedFilesDownloadMetadataButton extends React.PureComponent {
+    constructor(props){
+        super(props);
+        this.getAccessionTripleArrays = this.getAccessionTripleArrays.bind(this);
     }
 
     getAccessionTripleArrays(){
@@ -59,94 +303,28 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         );
     }
 
-    handleClick(e){
-        var urlParts = url.parse(windowHref(this.props.href));
-        var urlsString = SelectedFilesDownloadButton.generateListOfURIsFromFiles(
-            _.pluck(_.sortBy(_.pairs(this.props.subSelectedFiles || this.props.selectedFiles), function(pair){
-                var accessions = pair[0].split('~');
-            }), 1),
-            urlParts.protocol + '//' + urlParts.host
-        ).join('\n');
-        this.setState({ 'modalOpen' : true, 'urls' : urlsString });
-    }
-
-    renderModalCodeSnippet(meta_download_filename, isSignedIn){
-        return (
-            <pre className="mb-15">
-                cut -f 1 <b>{ meta_download_filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
-                { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
-            </pre>
-        );
-    }
-
-    renderModal(countSelectedFiles){
-        if (!this.state.modalOpen) return null;
-        var textAreaStyle = {
-            'minWidth' : '100%',
-            'minHeight' : 400,
-            'fontFamily' : 'monospace'
-        };
-
-        var meta_download_filename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
-
-        var userInfo = JWT.getUserInfo();
-        var isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
-        var profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-
-        return (
-            <Modal show={true} className="batch-files-download-modal" onHide={()=>{ this.setState({ 'modalOpen' : false }); }} bsSize="large">
-                <Modal.Header closeButton>
-                    <Modal.Title><span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span></Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-
-                    <p>Please press the "Download" button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
-
-                    <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
-
-                    { this.renderModalCodeSnippet(meta_download_filename, isSignedIn) }
-
-                    <h4 className="mt-2 mb-07 text-500">Notes</h4>
-                    <ul className="mb-25">
-                        { isSignedIn ?
-                            <li className="mb-05">
-                                To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank">your profile</a>.
-                                <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
-                            </li>
-                        : null }
-                        <li className="mb-05">
-                            {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.
-                        </li>
-                    </ul>
-
-                    <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
-                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
-                        <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
-                        <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual file in the 'files.txt' download list below.">
-                            <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
-                        </Button>
-                        {' '}
-
-                    </form>
-
-                </Modal.Body>
-            </Modal>
-        );
-    }
-
+    /**
+    * This function renders out a literal form which may be submitted, with 'accession triples'
+    * ([ExpSetAccession, ExpAccession, FileAccession]) included in the POSTed form fields which
+    * identify the individual files to download.
+    *
+    * @returns {JSX.Element} A modal instance.
+    */
     render(){
-        var countSelectedFiles = _.keys(this.props.selectedFiles).length;
-        var disabled = countSelectedFiles === 0;
-        var countSubSelectedFiles = _.keys(this.props.subSelectedFiles).length;
-        if (countSubSelectedFiles && countSubSelectedFiles !== countSelectedFiles){
-            countSelectedFiles = countSubSelectedFiles;
-        }
+        var { subSelectedFiles, onClickHandler } = this.props;
+        var suggestedFilename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
 
+        // Default download button to get file metadata.
         return (
-            <Button key="download" onClick={this.handleClick} disabled={disabled} className={disabled ? "btn-secondary" : "btn-primary"}>
-                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> Selected Files</span>
-                { this.renderModal(countSelectedFiles) }
-            </Button>
+            <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession">
+                <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
+                <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
+                <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
+                    <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
+                </Button>
+                {' '}
+                <Button type="reset" onClick={onClickHandler}>Close</Button>
+            </form>
         );
     }
 }
@@ -159,17 +337,24 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     static fieldsToRequest = [
+        'accession',
+        'produced_in_pub.display_title',
+
+        'processed_files.accession',
+        'processed_files.file_type_detailed',
+        'processed_files.uuid',
+
+        'experiments_in_set.accession',
+
         'experiments_in_set.files.accession',
         'experiments_in_set.files.file_type_detailed',
         'experiments_in_set.files.paired_end',
         'experiments_in_set.files.uuid',
         'experiments_in_set.files.related_files.file.accession',
+
         'experiments_in_set.processed_files.accession',
         'experiments_in_set.processed_files.file_type_detailed',
-        'processed_files.accession',
-        'processed_files.file_type_detailed',
-        'accession',
-        'experiments_in_set.accession'
+        'experiments_in_set.processed_files.uuid'
     ];
 
     constructor(props){
@@ -180,9 +365,16 @@ export class SelectAllFilesButton extends React.PureComponent {
         };
     }
 
+    isEnabled(){
+        if (!this.props.totalFilesCount) return true;
+        if (this.props.totalFilesCount > 8000) return false;
+        return true;
+    }
+
     isAllSelected(){
-        if (!this.props.totalFilesCount) return false;
-        if (this.props.totalFilesCount === _.keys(this.props.selectedFiles).length){
+        var { totalFilesCount, selectedFiles, selectedFilesUniqueCount } = this.props;
+        if (!totalFilesCount) return false;
+        if (totalFilesCount === selectedFilesUniqueCount){
             return true;
         }
         return false;
@@ -237,11 +429,14 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     render(){
-        var isAllSelected = this.isAllSelected(), selecting = this.state.selecting;
+        var isAllSelected = this.isAllSelected(),
+            isEnabled = this.isEnabled(),
+            selecting = this.state.selecting;
+
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button id="select-all-files-button" disabled={selecting} className="btn-secondary" onClick={this.handleSelect} children={this.buttonContent(isAllSelected)} />
+                    <Button id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)} className="btn-secondary" onClick={this.handleSelect} children={this.buttonContent(isAllSelected)} />
                 </ButtonGroup>
             </div>
         );
@@ -251,9 +446,13 @@ export class SelectAllFilesButton extends React.PureComponent {
 export class SelectedFilesFilterByContent extends React.PureComponent {
 
     /**
-     * @param {Object} format_buckets - File Type Details (keys) + lists of files (values)
-     * @param {string} [button_text_prefix=''] - Title to pre-pend to buttons.
-     * @param {function} clickHandler - Function to handle button click. Accepts fileTypeDetail as first param before MouseEvt.
+     * @todo Refactor/remove need to supply renderer function, maybe.
+     *
+     * @param {Object} format_buckets               File Type Details (keys) + lists of files (values)
+     * @param {string} [button_text_prefix='']      Title to pre-pend to buttons.
+     * @param {function} clickHandler               Function to handle button click. Accepts fileTypeDetail as first param before MouseEvt.
+     * @param {function} renderer                   Function to render checkbox or button to return a JSX element. Should be one of `renderBucketButton` or `renderBucketCheckbox`.
+     * @param {string[]|null} fileTypeFilters       List of currently filtered-in filetype, if any.
      * @returns {JSX.Element[]} List of JSX Button elements.
      */
     static renderFileFormatButtonsFromBuckets(format_buckets, button_text_prefix = '', clickHandler, renderer, fileTypeFilters){
@@ -271,11 +470,16 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         });
     }
 
+    /**
+     * Converts `selectedFiles` structure into groups of `file_type_detailed` property.
+     *
+     * @param {Object.<Item>} files - Object of files, keyed by accession triple string.
+     * @returns {Object.<Item>} Object of files, keyed by `file_type_detailed` property,
+     */
     static filesToFileTypeBuckets(files){
         return _.groupBy(
-            _.pairs(files).map(function(f){
-                f[1].selection_id = f[0];
-                return f[1];
+            _.map(_.pairs(files), function([accessionTripleString, file]){
+                return _.extend({ 'selection_id' : accessionTripleString }, file);
             }),
             'file_type_detailed'
         );
@@ -301,15 +505,27 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         );
     }
 
+    /**
+     * @constant
+     * @ignore
+     */
     static propTypes = {
         selectedFiles : PropTypes.object.isRequired
-    }
+    };
 
+    /**
+     * @constant
+     * @ignore
+     */
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
         'bsSize' : 'small'
-    }
+    };
 
+    /**
+     * @constant
+     * @ignore
+     */
     constructor(props){
         super(props);
         this.onClick = this.onClick.bind(this);
@@ -352,6 +568,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
 
 }
 
+
 export class SelectedFilesFilterByButton extends React.Component {
 
     constructor(props){
@@ -362,13 +579,20 @@ export class SelectedFilesFilterByButton extends React.Component {
     }
 
     render(){
-        var isDisabled = !this.props.selectedFiles || _.keys(this.props.selectedFiles).length === 0;
-
-        var currentFiltersLength = this.props.currentFileTypeFilters.length;
+        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel, gridState } = this.props,
+            isDisabled              = !selectedFiles || _.keys(selectedFiles).length === 0,
+            currentFiltersLength    = currentFileTypeFilters.length,
+            smallerSize             = ['lg', 'md'].indexOf(gridState) > -1;
 
         return (
-            <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} active={this.props.currentOpenPanel === 'filterFilesBy'}>
-                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.5 }}/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
+            <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'}>
+                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/> {
+                    currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : (
+                        smallerSize ? 'All ' : null
+                    )
+                }
+                { smallerSize ? <span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }&nbsp;&nbsp;</span> : null }
+                <i className="icon icon-angle-down icon-fw"/>
             </Button>
         );
     }
@@ -390,38 +614,21 @@ export class SelectedFilesControls extends React.PureComponent {
     }
 
     render(){
-        var barPlotData = (this.props.barplot_data_filtered || this.props.barplot_data_unfiltered);
-        var totalFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+        var barPlotData = (this.props.barplot_data_filtered || this.props.barplot_data_unfiltered),
+            totalFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
 
         // TODO:
         // var subSelectedFiles = SelectedFilesControls.filterSelectedFilesByFileTypeFilters(this.props.selectedFiles, this.state.fileTypeFilters);
 
         return (
             <div>
-                <SelectAllFilesButton
-                    href={this.props.href}
-                    totalFilesCount={totalFilesCount}
-                    selectedFiles={this.props.selectedFiles}
-                    selectFile={this.props.selectFile}
-                    unselectFile={this.props.unselectFile}
-                    resetSelectedFiles={this.props.resetSelectedFiles}
-                    includeProcessedFiles={this.props.includeProcessedFiles}
-                />
-
+                <SelectAllFilesButton {..._.pick(this.props, 'href', 'selectedFilesUniqueCount', 'selectedFiles', 'selectFile',
+                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles', 'gridState')} totalFilesCount={totalFilesCount} />
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
-                        <SelectedFilesFilterByButton
-                            //files={allFiles}
-                            setFileTypeFilters={this.props.setFileTypeFilters}
-                            currentFileTypeFilters={this.props.currentFileTypeFilters}
-                            totalFilesCount={totalFilesCount}
-                            selectedFiles={this.props.selectedFiles}
-                            selectFile={this.props.selectFile}
-                            unselectFile={this.props.unselectFile}
-                            resetSelectedFiles={this.props.resetSelectedFiles}
-                            onFilterFilesByClick={this.props.onFilterFilesByClick}
-                            currentOpenPanel={this.props.currentOpenPanel}
-                        />
+                        <SelectedFilesFilterByButton {..._.pick(this.props, 'setFileTypeFilters', 'currentFileTypeFilters',
+                            'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
+                            'currentOpenPanel', 'gridState' )} totalFilesCount={totalFilesCount} />
                         <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                     </ButtonGroup>
                 </div>

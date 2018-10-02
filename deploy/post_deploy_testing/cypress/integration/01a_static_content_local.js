@@ -73,13 +73,13 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                                 });
                                 if (count < listItems.length){
                                     cy.get('#help-menu-item').click().wait(500).then(()=>{
-                                        cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().then((nextListItem)=>{
+                                        cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().wait(300).then((nextListItem)=>{
                                             doVisit(nextListItem);
                                         });
                                     });
                                 }
                             }
-                            cy.wait(100).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                            cy.wait(300).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                                 var titleText = t.text();
                                 expect(titleText).to.have.length.above(0);
                                 prevTitle = titleText;
@@ -89,7 +89,7 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                                         if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
                                             haveWeSeenPageWithTableOfContents = true;
                                             const origScrollTop = w.scrollY;
-                                            cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(750).then(()=>{
+                                            cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(1500).then(()=>{
                                                 expect(w.scrollY).to.not.equal(origScrollTop);
                                                 finish(titleText);
                                             });

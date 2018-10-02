@@ -97,12 +97,8 @@ class FlexibleCharacterCountString extends React.Component {
 /**
  * Works by calculating height of text content using a temporary off-screen container element.
  * Not related to FlexibleCharacterCount.. classes above.
- * 
- * @export
- * @class FlexibleDescriptionBox
- * @extends {React.Component}
  */
-export class FlexibleDescriptionBox extends React.PureComponent {
+export class FlexibleDescriptionBox extends React.Component {
 
     static defaultDimensions = {
         'paddingWidth'  : 0,
@@ -125,7 +121,8 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         'textClassName' : PropTypes.string,
         'textElement'   : PropTypes.oneOf(['p', 'span', 'div', 'label', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
         'textStyle'     : PropTypes.object,
-        'expanded'      : PropTypes.bool
+        'expanded'      : PropTypes.bool,
+        'windowWidth'   : PropTypes.number.isRequired
     }
 
     static defaultProps = {
@@ -139,18 +136,16 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         'debug' : false,
         'linesOfText' : 1,
         'lineHeight' : 19,
-        'defaultExpanded' : false
+        'defaultExpanded' : false,
+        'collapsedHeight' : null
     }
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.dimensions = this.dimensions.bind(this);
         this.checkWillDescriptionFitOneLineAndUpdateHeight = this.checkWillDescriptionFitOneLineAndUpdateHeight.bind(this);
         this.toggleDescriptionExpand = this.toggleDescriptionExpand.bind(this);
         this.makeShortContent = this.makeShortContent.bind(this);
-        this.render = this.render.bind(this);
         this.descriptionHeight = null;
         this.state = {
             'descriptionExpanded' : props.defaultExpanded,
@@ -161,6 +156,28 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         };
     }
 
+    componentDidUpdate(pastProps, pastState){
+        // Handle window resize
+        if (pastProps.windowWidth !== this.props.windowWidth){ // Recalculate some layouting stuff
+
+            vizUtil.requestAnimationFrame(()=>{
+
+                this.setState((currState, currProps)=>{
+
+                    var oldHeight = this.descriptionHeight,
+                        willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
+
+                    return {
+                        'descriptionWillFitOneLine' : willDescriptionFitAtNewWindowSize,
+                        'shortContent' : this.props.linesOfText > 1 ? this.makeShortContent() : null
+                    };
+                });
+
+            });
+
+        }
+    }
+
     componentDidMount(){
         if (this.props.debug) console.info("Mounted FlexibleDescriptionBox");
         if (!isServerSide()){
@@ -168,25 +185,6 @@ export class FlexibleDescriptionBox extends React.PureComponent {
             // Create throttled version of toggleDescriptionExpand for button.
             this.throttledToggleDescriptionExpand = _.throttle(this.toggleDescriptionExpand, 350);
 
-            // Hookup window resize event listener to checkWillDescriptionFitOneLineAndUpdateHeight
-            this.debouncedLayoutResizeStateChange = _.debounce(() => {
-                // Debounce to prevent from executing more than once every 300ms.
-                var oldHeight = this.descriptionHeight;
-                var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
-                if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
-                    this.setState({
-                        descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize,
-                        shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
-                    });
-                } else if (this.descriptionHeight != oldHeight) {
-                    //this.forceUpdate();
-                    this.setState({
-                        shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
-                    });
-                }
-            }, 300, false);
-
-            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
             vizUtil.requestAnimationFrame(()=>{
                 var willDescriptionFitAtCurrentSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
                 this.setState({
@@ -201,8 +199,6 @@ export class FlexibleDescriptionBox extends React.PureComponent {
 
     componentWillUnmount(){
         if (typeof window != 'undefined'){
-            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
-            delete this.debouncedLayoutResizeStateChange;
             delete this.throttledToggleDescriptionExpand;
         }
     }
@@ -219,12 +215,15 @@ export class FlexibleDescriptionBox extends React.PureComponent {
 
     checkWillDescriptionFitOneLineAndUpdateHeight(){
 
+        var { description, textElement, textClassName, textStyle, windowWidth, linesOfText, lineHeight } = this.props;
+
         if (isServerSide()) return true;
-        var dims = this.dimensions();
-        var containerWidth;
+
+        var dims = this.dimensions(),
+            containerWidth;
 
         if (this.props.fitTo === 'grid'){
-            containerWidth = layout.gridContainerWidth();
+            containerWidth = layout.gridContainerWidth(windowWidth || null);
         } else if (this.props.fitTo === 'parent'){
             containerWidth = this.refs.box.parentElement.offsetWidth;
         } else if (this.props.fitTo === 'self'){
@@ -234,24 +233,21 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         containerWidth -= dims.paddingWidth; // Account for inner padding & border.
         
         var tcw = layout.textContentWidth(
-            this.props.description,
-            this.props.textElement,
-            this.props.textClassName,
+            description, textElement, textClassName,
             containerWidth - dims.buttonWidth, // Account for expand button.
-            this.props.textStyle
+            textStyle
         );
 
         if (!tcw) return true;
 
+
         this.descriptionHeight = tcw.containerHeight + dims.paddingHeight; // Account for padding, border.
         this.descriptionWidth = containerWidth;
 
-        //console.log('HEIGHT', this.descriptionHeight);
-
         // If we want more than 1 line, calculate if descriptionheight / lineheight > linesWanted.
-        if (typeof this.props.linesOfText === 'number' && this.props.linesOfText > 1 && typeof this.props.lineHeight === 'number'){
-            var div = Math.ceil(this.descriptionHeight / this.props.lineHeight);
-            if (div > this.props.linesOfText) {
+        if (typeof linesOfText === 'number' && linesOfText > 1 && typeof lineHeight === 'number'){
+            var divRes = Math.ceil(this.descriptionHeight / lineHeight);
+            if (divRes > linesOfText) {
                 return false;
             }
             return true;
@@ -282,7 +278,8 @@ export class FlexibleDescriptionBox extends React.PureComponent {
     }
 
     render(){
-        if (this.props.debug) console.log('render FlexibleDescriptionBox');
+        var { debug, showOnMount, lineHeight, linesOfText, collapsedHeight } = this.props;
+        if (debug) console.log('render FlexibleDescriptionBox');
         var expandButton;
         var expanded = (this.state.descriptionExpanded || this.props.expanded);
 
@@ -297,14 +294,14 @@ export class FlexibleDescriptionBox extends React.PureComponent {
         var containerHeightSet = (expanded ?
             this.descriptionHeight
             :
-            !this.state.mounted && this.props.showOnMount ? (
+            !this.state.mounted && showOnMount ? (
                 0
-            ) : Math.min(
+            ) : collapsedHeight || Math.min(
                 Math.max(
                     this.dimensions().initialHeight,
-                    this.props.lineHeight * (this.props.linesOfText || 1)
+                    lineHeight * (linesOfText || 1)
                 ),
-                this.state.mounted && this.descriptionHeight ? this.descriptionHeight : 1000
+                (this.state.mounted && this.descriptionHeight) || 1000
             )
         );
 

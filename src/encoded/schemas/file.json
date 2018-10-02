@@ -1,4 +1,3 @@
-
 {
     "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
@@ -34,9 +33,10 @@
         },
         "file_format": {
             "title": "File Format",
-            "description": "Format or extension of this file.",
             "type": "string",
-            "lookup": 20
+            "linkTo": "FileFormat",
+            "lookup": 20,
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
@@ -56,18 +56,6 @@
                 "ancillary file",
                 "other file"
             ]
-        },
-        "file_format_specifications": {
-            "title": "File format specifications documents",
-            "description": "Text or pdf files that further explain the file format",
-            "type": "array",
-            "lookup": 1000,
-            "uniqueItems": true,
-            "items": {
-                "comment": "See document.json for a list of available identifiers.",
-                "type": "string",
-                "linkTo": "Document"
-            }
         },
         "md5sum": {
             "title": "MD5sum",
@@ -96,21 +84,40 @@
         },
         "extra_files": {
             "title": "Extra Files",
-            "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "Links to extra files on s3 that don't have associated metadata",
             "type": "array",
+            "exclude_from": ["FFedit-create"],
             "items": {
                 "title": "Extra File",
                 "type": "object",
+                "required": ["file_format"],
                 "additionalProperties": true,
                 "properties": {
                     "file_format": {
                         "title": "File Format",
-                        "type": "string"
+                        "type": "string",
+                        "linkTo": "FileFormat",
+                        "lookup": 400
                     },
                     "href": {
                         "title": "Download URL",
-                        "type": "string"
+                        "type": "string",
+                        "exclude_from": ["submit4dn", "FFedit-create"]
+                    },
+                    "md5sum": {
+                        "title": "MD5sum",
+                        "description": "The md5sum of the extra file.",
+                        "type": "string",
+                        "exclude_from": ["submit4dn", "FFedit-create"],
+                        "ff_flag":"clear edit",
+                        "format": "hex"
+                    },
+                    "file_size": {
+                        "title": "File Size",
+                        "exclude_from": ["submit4dn", "FFedit-create"],
+                        "description": "Size of file of the extra file.",
+                        "comment": "File size is specified in bytes",
+                        "type": "integer"
                     }
                 }
             }
@@ -186,13 +193,16 @@
     },
     "facets": {
         "file_type" : {
-            "title" : "File Type"
+            "title" : "File Type",
+            "descripton" : "Type or categorization of this file."
         },
-        "file_format": {
-            "title" : "File Format"
+        "file_format.file_format": {
+            "title" : "File Format",
+            "description" : "Format of the file, i.e. the file extension."
         },
         "experiments.experiment_type" : {
-            "title" : "Experiment Type"
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
         },
         "experiments.biosample.biosource.individual.organism.name" : {
             "title" : "Organism"
@@ -208,6 +218,31 @@
         },
         "lab.display_title": {
             "title": "Lab"
+        },
+        "file_size" : {
+            "title" : "File Size",
+            "description" : "Filter using range of size of the file",
+            "aggregation_type" : "range",
+            "ranges" : [
+                { "to" : 1024 },
+                { "from" : 1024, "to" : 10240 },
+                { "from" : 10240, "to" : 102400 },
+                { "from" : 102400, "to" : 1048576 },
+                { "from" : 1048576, "to" : 10485760 },
+                { "from" : 10485760, "to" : 104857600 },
+                { "from" : 104857600, "to" : 1073741824 },
+                { "from" : 1073741824, "to" : 10737418240 },
+                { "from" : 10737418240, "to" : 107374182400 },
+                { "from" : 107374182400 }
+            ],
+            "disabled" : true,
+            "comment" : "disabled flag may be removed once we (a) can handle ?field=val1-to-val2 (ranges) in filters and (b) send ranges from FacetList to search URI."
+        },
+        "public_release" : {
+            "title" : "Public Release Date",
+            "aggregation_type" : "date_histogram",
+            "disabled" : true,
+            "comment" : "disabled flag may be removed after we can handle ranges in URI filters."
         }
     },
     "columns": {

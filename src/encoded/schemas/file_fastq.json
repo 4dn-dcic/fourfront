@@ -19,6 +19,8 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -30,14 +32,13 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
-                "fastq"
-            ]
+            "linkTo": "FileFormat",
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
@@ -57,6 +58,9 @@
             "enum": [
                 "raw file"
               ]
+        },
+        "extra_files": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "read_length": {
             "title": "Sequencing Read Length (bp)",
@@ -85,7 +89,6 @@
             "title": "Flowcells",
             "description": "For high-throughput sequencing, the flowcells used for the sequencing of the replicate.",
             "type": "array",
-            "default": [],
             "items": {
                 "title": "Flowcell details",
                 "type": "object",

@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import * as d3 from 'd3';
+import { NavItem, Navbar } from 'react-bootstrap';
 import { console, isServerSide } from './../util';
 
 /**
@@ -11,58 +12,65 @@ import { console, isServerSide } from './../util';
  * @module {Object} viz/utilities
  */
 
-/** @alias module:viz/utilities */
 
-/** 
+/**
  * Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
- * 
- * @param {string} str - String to generate a color form.
+ * Somewhat deprecated as we use D3 color scales for most part now.
+ *
+ * @deprecated
+ * @param {string} str - String to generate a color from. Any string.
  * @returns {string} A CSS color.
  */
 export function stringToColor(str) {
-    var hash = 0;
-    var i;
+    var hash = 0, color = '#', i;
     for (i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    var colour = '#';
     for (i = 0; i < 3; i++) {
         var value = (hash >> (i * 8)) & 0xFF;
-        colour += ('00' + value.toString(16)).substr(-2);
+        color += ('00' + value.toString(16)).substr(-2);
     }
-    return colour;
+    return color;
 }
 
 
 /** 
  * Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.
- * 
+ *
  * @param {function} cb - Callback method.
  * @returns {undefined|string} Undefined or timeout ID if falling back to setTimeout.
  */
 export function requestAnimationFrame(cb){
     if (!isServerSide() && typeof window !== 'undefined'){
-        if (typeof window.requestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
-        if (typeof window.webkitRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
-        if (typeof window.mozRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
+        if (typeof window.requestAnimationFrame !== 'undefined')        return window.requestAnimationFrame(cb);
+        if (typeof window.webkitRequestAnimationFrame !== 'undefined')  return window.webkitRequestAnimationFrame(cb);
+        if (typeof window.mozRequestAnimationFrame !== 'undefined')     return window.mozRequestAnimationFrame(cb);
     }
-    return setTimeout(cb, 0);
+    return setTimeout(cb, 0); // Mock it for old browsers and server-side.
 }
 
-
-export function extendStyleOptions(propsStyleOpts, defaultStyleOpts){
-    if (!defaultStyleOpts) throw new Error("No default style options provided.");
-    if (!propsStyleOpts) return defaultStyleOpts;
+/**
+ * Used in Barplot/Chart.js to merge 'style' options. Only merges keys which are present on `styleOptsToExtend`.
+ * Similar to underscore's `_.extend` but arguments are reversed and... sort of unnecessary.
+ *
+ * @deprecated
+ * @param {Object} styleOptsToExtendFrom     Object of styles to extend from.
+ * @param {Object} styleOptsToExtend         Object of styles to extend to.
+ * @returns {Object} Returns `styleOptsToExtend` with key vals overriden from `styleOptsToExtendFrom`.
+ */
+export function extendStyleOptions(styleOptsToExtendFrom, styleOptsToExtend){
+    if (!styleOptsToExtend) throw new Error("No default style options provided.");
+    if (!styleOptsToExtendFrom) return styleOptsToExtend;
     else {
-        Object.keys(defaultStyleOpts).forEach((styleProp) => {
-            if (typeof propsStyleOpts[styleProp] === 'undefined') return;
-            if (typeof propsStyleOpts[styleProp] === 'object' && propsStyleOpts[styleProp]){
-                _.extend(defaultStyleOpts[styleProp], propsStyleOpts[styleProp]);
+        _.keys(styleOptsToExtend).forEach((styleProp) => {
+            if (typeof styleOptsToExtendFrom[styleProp] === 'undefined') return;
+            if (typeof styleOptsToExtendFrom[styleProp] === 'object' && styleOptsToExtendFrom[styleProp]){
+                _.extend(styleOptsToExtend[styleProp], styleOptsToExtendFrom[styleProp]);
             } else {
-                defaultStyleOpts[styleProp] = propsStyleOpts[styleProp];
+                styleOptsToExtend[styleProp] = styleOptsToExtendFrom[styleProp];
             }
         });
-        return defaultStyleOpts;
+        return styleOptsToExtend;
     }
 }
 
@@ -102,6 +110,125 @@ export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, a
 }
 
 
+/** Renders out the 4DN Logo SVG as a React element(s) */
+export class FourfrontLogo extends React.PureComponent {
+
+    static defaultProps = {
+        'id'                        : "fourfront_logo_svg",
+        'circlePathDefinitionOrig'  : "m1,30c0,-16.0221 12.9779,-29 29,-29c16.0221,0 29,12.9779 29,29c0,16.0221 -12.9779,29 -29,29c-16.0221,0 -29,-12.9779 -29,-29z",
+        'circlePathDefinitionHover' : "m3.33331,34.33326c-2.66663,-17.02208 2.97807,-23.00009 29.99997,-31.33328c27.02188,-8.33321 29.66667,22.31102 16.6669,34.66654c-12.99978,12.35552 -15.64454,20.00017 -28.66669,19.00018c-13.02214,-0.99998 -15.33356,-5.31137 -18.00018,-22.33344z",
+        'textTransformOrig'         : "translate(9, 37)",
+        'textTransformHover'        : "translate(48, 24) scale(0.2, 0.6)",
+        'fgCircleTransformOrig'     : "translate(50, 20) scale(0.35, 0.35) rotate(-135)",
+        'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)",
+        'hoverDelayUntilTransform'  : 400,
+        'title'                     : "Data Portal"
+    };
+    
+    constructor(props){
+        super(props);
+        this.setHoverStateOnDoTiming = _.throttle(this.setHoverStateOnDoTiming.bind(this), 1000);
+        this.setHoverStateOn    = this.setHoverStateOn.bind(this);
+        this.setHoverStateOff   = this.setHoverStateOff.bind(this);
+    }
+
+    setHoverStateOn(e){
+        this.setState({ 'hover': true }, this.setHoverStateOnDoTiming);
+    }
+
+    setHoverStateOnDoTiming(e){
+        var { circlePathDefinitionHover, textTransformHover, fgCircleTransformHover, hoverDelayUntilTransform } = this.props;
+        var svg = d3.select(this.refs.svg);
+
+        // CSS styles controlled via stylesheets
+
+        setTimeout(()=>{
+            if (!this.state.hover) return; // No longer hovering. Cancel.
+            svg.select(".fourfront-logo-background-circle")
+                .transition()
+                .duration(1000)
+                .attr('d', circlePathDefinitionHover);
+
+            svg.select(".fourfront-logo-text")
+                .transition()
+                .duration(700)
+                .attr('transform', textTransformHover);
+
+            svg.select(".fourfront-logo-foreground-circle")
+                .transition()
+                .duration(1200)
+                .attr('transform', fgCircleTransformHover);
+
+        }, hoverDelayUntilTransform);
+    }
+
+    setHoverStateOff(e){
+        this.setState({ 'hover' : false }, ()=>{
+            var svg = d3.select(this.refs.svg);
+            svg.select(".fourfront-logo-background-circle")
+                .interrupt()
+                .transition()
+                .duration(1000)
+                .attr('d', this.props.circlePathDefinitionOrig);
+
+            svg.select(".fourfront-logo-text")
+                .interrupt()
+                .transition()
+                .duration(1200)
+                .attr('transform', this.props.textTransformOrig);
+
+            svg.select(".fourfront-logo-foreground-circle")
+                .interrupt()
+                .transition()
+                .duration(1000)
+                .attr('transform', this.props.fgCircleTransformOrig);
+        });
+    }
+
+    renderDefs(){
+        return (
+            <defs>
+                <linearGradient id="fourfront_linear_gradient" x1="1" y1="30" x2="59" y2="30" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#238bae"/>
+                    <stop offset="1" stopColor="#8ac640"/>
+                </linearGradient>
+                <linearGradient id="fourfront_linear_gradient_darker" x1="1" y1="30" x2="59" y2="30" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#238b8e"/>
+                    <stop offset="1" stopColor="#8aa640"/>
+                </linearGradient>
+            </defs>
+        );
+    }
+
+    render(){
+        var { id, circlePathDefinitionOrig, circlePathDefinitionHover, textTransformOrig,
+            textTransformHover, fgCircleTransformOrig, onClick, title } = this.props;
+        return (
+            <Navbar.Brand>
+                <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
+                    <span className="img-container">
+                        <svg id={id} ref="svg" viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
+                            { this.renderDefs() }
+                            <path d={circlePathDefinitionOrig} className="fourfront-logo-background-circle" />
+                            <text transform={textTransformOrig} className="fourfront-logo-text">4DN</text>
+                            <text transform={fgCircleTransformOrig} className="fourfront-logo-foreground-circle">O</text>
+                        </svg>
+                    </span>
+                    <span className="navbar-title">{ title }</span>
+                </NavItem>
+            </Navbar.Brand>
+        );
+    }
+
+}
+
+
+
+/**
+ * Object containing functions which might help in setting a CSS style.
+ *
+ * @constant
+ */
 export const style = {
     
     translate3d : function(x=0, y=0, z=0, append = 'px'){
@@ -114,7 +241,7 @@ export const style = {
         return 'translate(' + x + append + ',' + y + append + ')';
     },
 
-    /** 
+    /**
      * @param {number} rotation - How much to rotate, in degrees.
      * @param {string|string[]|Object} [axes='z'] - Axes around which to rotate.
      */

@@ -23,7 +23,6 @@
             "permission": "import_items",
             "enum": [
                 "released",
-                "current",
                 "revoked",
                 "archived",
                 "deleted",
@@ -90,7 +89,9 @@
                             "controlled by",
                             "control for",
                             "derived from",
-                            "source for"
+                            "source for",
+                            "input of",
+                            "has input"
                         ]
                     },
                     "experiment": {
@@ -151,51 +152,6 @@
                 "description": "File metadata.",
                 "type": "string",
                 "linkTo": "FileProcessed"
-            }
-        },
-        "other_processed_files": {
-            "title": "Archived or Preliminary Processed Files",
-            "description": "Archived or preliminary processed filesets that are derived from files in this experiment set.",
-            "type": "array",
-            "lookup": 410,
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "items": {
-                "title": "Archived/Preliminary Processed Filesets",
-                "description": "Fileset metadata",
-                "type": "object",
-                "required": ["title", "files"],
-                "properties": {
-                    "title": {
-                        "title": "Fileset Title",
-                        "type": "string",
-                        "lookup": 411
-                    },
-                    "type": {
-                        "title": "Fileset Type",
-                        "type": "string",
-                        "lookup": 412,
-                        "enum": [
-                            "archived",
-                            "preliminary",
-                            "visualization"
-                        ]
-                    },
-                    "description": {
-                        "title": "Description",
-                        "type": "string",
-                        "lookup": 413
-                    },
-                    "files": {
-                        "title": "Files",
-                        "type": "array",
-                        "lookup": 414,
-                        "items": {
-                            "title": "File",
-                            "type": "string",
-                            "linkTo": "FileProcessed"
-                        }
-                    }
-                }
             }
         },
         "reference_files": {
@@ -260,8 +216,8 @@
         "biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource Type"
+        "biosample.biosample_type": {
+            "title": "Sample Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
@@ -272,11 +228,11 @@
         "biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
-        "lab.display_title": {
-            "title": "Lab"
-        },
         "publications_of_exp.display_title": {
             "title": "Publications"
+        },
+        "award.center_title": {
+            "title": "Center"
         }
     },
     "columns": {

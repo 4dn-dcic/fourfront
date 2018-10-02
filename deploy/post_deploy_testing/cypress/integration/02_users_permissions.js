@@ -24,12 +24,12 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                 .get('ul.dropdown-menu[aria-labelledby="user_actions_dropdown"] a#profile').click().end()
                 .get('.page-container .user-title-row-container h1.user-title').should('contain', "Frontend").end() // Test only for first name as we're editing last name & it may change re: delayed indexing, etc.
                 .get('.page-container .access-keys-container h3').should('contain', "Access Keys").end()
-                .get('.page-container .access-keys-container #add-access-key').click().wait(100).end()
+                .get('.page-container .access-keys-container #add-access-key').scrollToCenterElement().click({ force : true }).wait(100).end()
                 .get('.modal-body').should('contain', 'Access Key ID').should('contain', 'Secret Access Key').end()
-                .get('.modal-body .key-value div:first-child dd').invoke('text').then((accessKeyID)=>{
+                .get('.modal-body div.row:first-of-type code').invoke('text').then((accessKeyID)=>{
                     return cy.get('.fade.in.modal').click().wait(500).end()
                         .get('.page-container .access-keys-container').should('contain', accessKeyID).end()
-                        .get('.page-container .access-keys-container .access-keys-table tr:last-child .access-key-buttons .btn-danger').click().end()
+                        .get('.page-container .access-keys-container .access-keys-table tr:last-child .access-key-buttons .btn-danger').click({ force : true }).end()
                         .get('.page-container .access-keys-container').should('not.contain', accessKeyID);
                 });
 
@@ -46,8 +46,9 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                 .url().then((currUrl)=>{
                     return cy.visit(currUrl + '?datastore=database').end() // Edit last name ON DATASTORE=DATABASE TO PREVENT ERRORS DUE TO INDEXING NOT BEING CAUGHT UP FROM PRIOR TEST
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
-                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').clear().type('SuperTest').then((inputfield)=>{
-                            return cy.wait(100).window().screenshot().end().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
+                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input')
+                        .scrollToCenterElement().clear({ force : true }).type('SuperTest', { force : true }).then((inputfield)=>{
+                            return cy.wait(100).window().screenshot().end().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click({ force : true })
                                 .should('have.length', 0).wait(100).end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
                                 .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").wait(500).end()
@@ -55,10 +56,11 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                                 .reload()//.visit(currUrl + '?datastore=database').end()
                                 .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").end()
                                 // Cleanup & test again
-                                .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
-                                .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperTest').clear().type('Test').then((inputfield)=>{
+                                .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click({ force : true }).end()
+                                .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperTest')
+                                .clear({ force : true }).type('Test', { force : true }).then((inputfield)=>{
                                     return cy.wait(100)
-                                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
+                                        .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click({ force : true })
                                         .should('have.length', 0).wait(100).end()
                                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
                                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").wait(500).end()

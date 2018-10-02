@@ -20,6 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/static_headers" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -31,7 +32,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "description": {
             "type": "string",
@@ -41,17 +42,9 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
+            "linkTo": "FileFormat",
             "lookup": 30,
-            "default": "zip",
-            "enum": [
-                "zip",
-                "tiff",
-                "ome.tiff",
-                "flex",
-                "dv",
-                "r3d",
-                "other"
-            ]
+            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
@@ -70,9 +63,6 @@
             "linkTo": "MicroscopeSetting"
         },
         "related_files": {
-            "exclude_from": ["submit4dn", "FFedit-create"]
-        },
-        "file_format_specifications": {
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "quality_metric": {
@@ -116,6 +106,7 @@
         "dv": ".dv",
         "r3d": ".r3d",
         "flex": ".flex",
+        "nd2": ".nd2",
         "other": ""
     }
 }

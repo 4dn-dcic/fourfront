@@ -6,11 +6,12 @@ from snovault import (
     collection,
     load_schema
 )
+from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     paths_filtered_by_status,
-    get_item_if_you_can,
-    ALLOW_SUBMITTER_ADD
+    ALLOW_SUBMITTER_ADD,
+    lab_award_attribution_embed_list
 )
 
 EXP_CATEGORIZER_SCHEMA = {
@@ -26,12 +27,13 @@ EXP_CATEGORIZER_SCHEMA = {
             "type": "string",
             "description": "The value displayed for the field"
         },
-        "combined" : {
-            "type" : "string",
-            "description" : "Combined field:value string used for categorization of this experiment."
+        "combined": {
+            "type": "string",
+            "description": "Combined field:value string used for categorization of this experiment."
         }
     }
 }
+
 
 @abstract_collection(
     name='experiments',
@@ -46,56 +48,57 @@ class Experiment(Item):
 
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
+    name_key = 'accession'
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded_list = ["award.project",
-                     "lab.city",
-                     "lab.state",
-                     "lab.country",
-                     "lab.postal_code",
-                     "lab.city",
-                     "lab.title",
+    embedded_list = lab_award_attribution_embed_list + [
+        "experiment_sets.experimentset_type",
+        "experiment_sets.@type",
+        "experiment_sets.accession",
+        "produced_in_pub.title",
+        "produced_in_pub.abstract",
+        "produced_in_pub.journal",
+        "produced_in_pub.authors",
+        "publications_of_exp.title",
+        "publications_of_exp.abstract",
+        "publications_of_exp.journal",
+        "publications_of_exp.authors",
+        "biosample.accession",
+        "biosample.modifications_summary",
+        "biosample.treatments_summary",
+        "biosample.biosource_summary",
+        "biosample.biosample_type",
+        "biosample.biosource.biosource_type",
+        "biosample.biosource.cell_line.slim_terms",
+        "biosample.biosource.cell_line.synonyms",
+        "biosample.biosource.tissue.slim_terms",
+        "biosample.biosource.tissue.synonyms",
+        "biosample.biosource.individual.organism.name",
+        'biosample.modifications.modification_type',
+        'biosample.modifications.display_title',
+        'biosample.treatments.treatment_type',
+        'biosample.treatments.display_title',
+        'biosample.badges.*',
 
-                     "experiment_sets.experimentset_type",
-                     "experiment_sets.@type",
-                     "experiment_sets.accession",
+        "files.href",
+        "files.accession",
+        "files.uuid",
+        "files.file_size",
+        "files.upload_key",
+        "files.file_format",
+        "files.file_classification",
+        "files.paired_end",
+        'files.badges.*',
 
-                     "produced_in_pub.*",
-                     "publications_of_exp.*",
-
-                     "biosample.accession",
-                     "biosample.modifications_summary",
-                     "biosample.treatments_summary",
-                     "biosample.biosource_summary",
-                     "biosample.biosource.biosource_type",
-                     "biosample.biosource.cell_line.slim_terms",
-                     "biosample.biosource.cell_line.synonyms",
-                     "biosample.biosource.tissue.slim_terms",
-                     "biosample.biosource.tissue.synonyms",
-                     "biosample.biosource.individual.organism.name",
-                     'biosample.modifications.modification_type',
-                     'biosample.modifications.display_title',
-                     'biosample.treatments.treatment_type',
-                     'biosample.treatments.display_title',
-
-                     "files.href",
-                     "files.accession",
-                     "files.uuid",
-                     "files.file_size",
-                     "files.upload_key",
-                     "files.file_format",
-                     "files.file_classification",
-                     "files.paired_end",
-
-                     "processed_files.href",
-                     "processed_files.accession",
-                     "processed_files.uuid",
-                     "processed_files.file_size",
-                     "processed_files.upload_key",
-                     "processed_files.file_format",
-                     "processed_files.file_classification"]
-    name_key = 'accession'
+        "processed_files.href",
+        "processed_files.accession",
+        "processed_files.uuid",
+        "processed_files.file_size",
+        "processed_files.upload_key",
+        "processed_files.file_format",
+        "processed_files.file_classification"
+    ]
 
     def generate_mapid(self, experiment_type, num):
         delim = '_'
@@ -166,7 +169,9 @@ class Experiment(Item):
             "controlled by": "control for",
             "derived from": "source for",
             "control for": "controlled by",
-            "source for": "derived from"
+            "source for": "derived from",
+            "input of": "has input",
+            "has input": "input of"
         }
         acc = str(self.uuid)
         if 'experiment_relation' in properties.keys():
@@ -370,7 +375,7 @@ class ExperimentCaptureC(Experiment):
                 return {
                     'field': 'Target',
                     'value': value,
-                    'combined' : 'Target: ' + value
+                    'combined': 'Target: ' + value
                 }
 
         return super(ExperimentCaptureC, self).experiment_categorizer(request)
@@ -430,7 +435,7 @@ class ExperimentRepliseq(Experiment):
             return {
                 'field': 'Fraction',
                 'value': value,
-                'combined' : 'Fraction: ' + value
+                'combined': 'Fraction: ' + value
             }
         else:
             return super(ExperimentRepliseq, self).experiment_categorizer(request)
@@ -564,11 +569,54 @@ class ExperimentDamid(Experiment):
         'title': 'Experiments CHIPseq, RNAseq ...',
         'description': 'Listing of ChIP and RNA seq type experiments',
     })
-class ExperimentSeq(Experiment):
+class ExperimentSeq(ItemWithAttachment, Experiment):
     """The experiment class for ChIPseq and RNAseq and potentially other types."""
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
+    embedded_list = Experiment.embedded_list
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
+        sum_str = experiment_type
+
+        if target:
+            target_props = request.embed(target, '@@object')
+            target_summary = target_props['target_summary']
+            sum_str += ('against ' + target_summary)
+
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+
+
+@collection(
+    name='experiments-tsaseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments TSA-Seq',
+        'description': 'Listing of TSA-seq type experiments',
+    })
+class ExperimentTsaseq(ItemWithAttachment, Experiment):
+    """The experiment class for TSA-seq."""
+
+    item_type = 'experiment_tsaseq'
+    schema = load_schema('encoded:schemas/experiment_tsaseq.json')
     embedded_list = Experiment.embedded_list
     name_key = 'accession'
 

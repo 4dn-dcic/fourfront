@@ -54,7 +54,6 @@
             "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
             "type": "array",
             "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
-            "default": [],
             "lookup": 1,
             "uniqueItems": true,
             "ff_flag": "clear clone",
@@ -176,6 +175,7 @@
             "title": "Reference publications",
             "description": "The publications that provide more information about the object.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "lookup": 1000,
             "uniqueItems": true,
             "items": {
@@ -279,6 +279,8 @@
                     "type": "string",
                     "enum": [
                         "application/msword",
+                        "application/vnd.ms-excel",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         "application/pdf",
                         "application/zip",
                         "text/plain",
@@ -321,23 +323,8 @@
             }
         }
     },
-    "attachments": {
-        "attachments": {
-            "title": "Attached Documents",
-            "type": "array",
-            "additionalProperties": false,
-            "uniqueItems": true,
-            "items": {
-                "title": "Attached Document",
-                "description": "A document to upload.",
-                "type":  { "$ref": "#/attachment" },
-                "formInput": "file",
-                "attachment": true
-            }
-        }
-    },
     "dbxrefs": {
-      "dbxrefs": {
+        "dbxrefs": {
             "@type": "@id",
             "rdfs:subPropertyOf": "rdfs:seeAlso",
             "title": "External identifiers",
@@ -376,6 +363,7 @@
               "chemical",
               "shearing",
               "sonication",
+              "tagmentation",
               "see protocol document",
               "none",
               "n/a"
@@ -429,6 +417,77 @@
             "lookup": 92
         }
     },
+    "spikein_info": {
+        "spikin_description": {
+            "title": "Spike in Description",
+            "description": "A description of the type/purpose of the spike-in",
+            "type": "string",
+            "lookup": 197,
+            "comment": "In some cases a spike in with heterologous non-specific DNA is used and this field can be used to indicate the source organism and concentration"
+        },
+        "spikein_sequences": {
+            "title": "Spike In Sequences",
+            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
+            "type": "string",
+            "lookup": 196,
+            "linkTo": "FileReference"
+        },
+        "spikein_source": {
+            "title": "Spike in source",
+            "description": "The vendor or lab that provided the spikein",
+            "type": "string",
+            "linkTo": "Vendor",
+            "lookup": 198
+        }
+    },
+    "supplementary_files": {
+        "other_processed_files": {
+            "title": "Supplementary Processed Files",
+            "description": "Additional, archived or preliminary processed filesets that are derived from files in this experiment set.",
+            "type": "array",
+            "lookup": 410,
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Supplementary Processed Filesets",
+                "description": "Fileset metadata",
+                "type": "object",
+                "required": ["title", "files"],
+                "properties": {
+                    "title": {
+                        "title": "Fileset Title",
+                        "type": "string",
+                        "lookup": 411
+                    },
+                    "type": {
+                        "title": "Fileset Type",
+                        "type": "string",
+                        "lookup": 412,
+                        "enum": [
+                            "supplementary",
+                            "archived",
+                            "preliminary",
+                            "visualization"
+                        ]
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string",
+                        "lookup": 413
+                    },
+                    "files": {
+                        "title": "Files",
+                        "type": "array",
+                        "lookup": 414,
+                        "items": {
+                            "title": "File",
+                            "type": "string",
+                            "linkTo": "FileProcessed"
+                        }
+                    }
+                }
+            }
+        }
+    },
     "sop_mapping": {
         "sop_mapping": {
             "title": "SOP Mappping",
@@ -474,20 +533,47 @@
             "title": "Badges",
             "description": "Badges that can be added to an item.",
             "type": "array",
-            "lookup": 1000,
             "ff_flag": "clear clone",
-            "exclude_from" : ["submit4dn"],
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "permission": "import-items",
             "items": {
-                "title": "Badge",
-                "description": "A badge for the item.",
-                "type":  "string",
-                "linkTo": "Badge"
+                "description": "A badge (and possibly message) for the item.",
+                "type":  "object",
+                "required": ["badge"],
+                "additionalProperties": false,
+                "exclude_from" : ["submit4dn", "FFedit-create"],
+                "permission": "import-items",
+                "properties": {
+                    "badge": {
+                        "title": "Badge",
+                        "type": "string",
+                        "linkTo": "Badge"
+                    },
+                    "message": {
+                        "title": "Info",
+                        "description": "Information about why the badge was added",
+                        "type": "string"
+                    }
+                }
             }
         }
     },
-
-
+    "static_headers": {
+        "static_headers": {
+            "title": "Static Headers",
+            "description": "Array of linkTos for static sections to be displayed at the top of an item page",
+            "type": "array",
+            "uniqueItems": true,
+            "permission": "import_items",
+            "exclude_from" : ["submit4dn"],
+            "items": {
+                "title": "Static Header",
+                "description": "Static section displayed at the top of an item page",
+                "type": "string",
+                "linkTo": "StaticSection"
+            }
+        }
+    },
     "facets_common" : {
         "award.project": {
             "title": "Project"

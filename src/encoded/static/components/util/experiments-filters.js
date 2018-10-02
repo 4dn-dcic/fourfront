@@ -27,43 +27,58 @@ export let getLimit = function(){ return 25; };
  */
 export const currentExpSetFilters = contextFiltersToExpSetFilters;
 
-/** If the given term is selected, return the href for the term */
-export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
+/**
+ * If the given term is selected, return the href for the term from context.filters.
+ * 
+ * @param {string} term - Term for which existence of active filter is checked.
+ * @param {string} field - Field for which filter is checked.
+ * @param {{ 'field' : string, 'term' : string, 'remove' : string }[]} filters - Filters as supplied by context.filters in API response.
+ * @param {boolean} [includePathName] - If true, will return the pathname in addition to the URI search query.
+ * @returns {!string} URL to remove active filter, or null if filter not currently active for provided field:term pair.
+ */
+export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters, includePathName = false) {
     for (var filter in filters) {
         if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
-            return url.parse(filters[filter]['remove']).search;
+            var parts = url.parse(filters[filter]['remove']);
+            var retHref = '';
+            if (includePathName) {
+                retHref += parts.pathname;
+            }
+            retHref += parts.search;
+            return retHref;
         }
     }
     return null;
 }
 
 /**
- * @param {string} unselectHref - Returned from unselectHrefIfSelected, if used.
+ * Extends `searchBase` (URL) query with that of field:term and returns new URL with field:term filter query included.
+ *
  * @param {string} field - What field to build for.
  * @param {string} term - What term to build for.
  * @param {string} searchBase - Original href or search base of current page.
+ * @returns {string} href - Search URL.
  */
-export function buildSearchHref(unselectHref, field, term, searchBase){
+export function buildSearchHref(field, term, searchBase){
     var href;
-    if (unselectHref) {
-        href = unselectHref;
-    } else {
-        var parts = url.parse(searchBase, true);
-        var query = _.clone(parts.query);
-        // format multiple filters on the same field
-        if(field in query){
-            if(Array.isArray(query[field])){
-                query[field] = query[field].concat(term);
-            }else{
-                query[field] = [query[field]].concat(term);
-            }
-        }else{
-            query[field] = term;
+
+    var parts = url.parse(searchBase, true),
+        query = _.clone(parts.query);
+
+    // format multiple filters on the same field
+    if (field in query){
+        if (Array.isArray(query[field])) {
+            query[field] = query[field].concat(term);
+        } else {
+            query[field] = [query[field]].concat(term);
         }
-        query = queryString.stringify(query);
-        parts.search = query && query.length > 0 ? ('?' + query) : '';
-        href = url.format(parts);
+    } else {
+        query[field] = term;
     }
+    query = queryString.stringify(query);
+    parts.search = query && query.length > 0 ? ('?' + query) : '';
+    href = url.format(parts);
+
     return href;
 }
 
@@ -71,12 +86,13 @@ export function buildSearchHref(unselectHref, field, term, searchBase){
 /**
  * Given a field/term, add or remove filter from expSetFilters (in redux store) within context of current state of filters.
  *
- * @param {string}  field               Field, in object dot notation.
- * @param {string}  term                Term to add/remove from active filters.
- * @param {Object}  [expSetFilters]     The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
- * @param {function}[callback]          Callback function to call after updating redux store.
- * @param {boolean} [returnInsteadOfSave=false]  - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
- * @param {string}  [href]              Current or base href to use for AJAX request if using AJAX to update.
+ * @param {string} field                        Field, in object dot notation.
+ * @param {string} term                         Term to add/remove from active filters.
+ * @param {?Object} [expSetFilters=null]        The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
+ * @param {?function} [callback=null]           Callback function to call after updating redux store.
+ * @param {boolean} [returnInsteadOfSave=false] Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
+ * @param {?string} [href=null]                 Current or base href to use for AJAX request if using AJAX to update.
+ * @returns {?Object} Next expSetFilters object representation, or void if returnInsteadOfSave is false.
  */
 export function changeFilter(
     field,
@@ -127,12 +143,12 @@ export function changeFilter(
  * Update expSetFilters by generating new href from supplied expSetFilters and fetching/navigating to copy of current href/URL with updated query.
  * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
  *
- * @param {Object}  expSetFilters   A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
- * @param {boolean} [useAjax=true]  Whether to use AJAX and update context & href in Redux store as well.
- * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
- * @param {function}[callback]      Callback function.
+ * @param {Object} newExpSetFilters    A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
+ * @param {?string} [href=null]        Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
+ * @param {?function} [callback=null]  Callback function.
+ * @returns {void}
  */
-export function saveChangedFilters(newExpSetFilters, href=null, callback = null){
+export function saveChangedFilters(newExpSetFilters, href=null, callback=null){
     if (!store)   store = require('./../../store');
     if (!Alerts) Alerts = require('../alerts').default;
 
@@ -214,24 +230,23 @@ export function transformExpSetFiltersToFileFilters(expSetFilters){
  * Convert expSetFilters to a URL, given a current URL whose path is used to append arguments
  * to (e.g. http://hostname.com/browse/  or http://hostname.com/search/).
  *
- * @param {Object}  expSetFilters    Filters as stored in Redux, keyed by facet field containing Set of term keys.
- * @param {string}  currentHref      String with at least current host & path which to use as base for resulting URL, e.g. http://localhost:8000/browse/[?type=ExperimentSetReplicate&experimentset_type=...].
- * @param {number}  [page=1]         Current page if using pagification.
- * @param {string}  [hrefPath]       Override the /path/ in URL returned, e.g. to /browse/.
+ * @param {Object} expSetFilters        Filters as stored in Redux, keyed by facet field containing Set of term keys.
+ * @param {string} currentHref          String with at least current host & path which to use as base for resulting URL, e.g. http://localhost:8000/browse/[?type=ExperimentSetReplicate&experimentset_type=...].
+ * @param {?string} [sortColumn=null]   Column being sorted on.
+ * @param {boolean} [sortReverse=false] If sort is reverse, e.g. incremental instead of decremental.
+ * @param {string} [hrefPath]           Override the /path/ in URL returned, e.g. to /browse/.
  * @returns {string} URL which can be used to request filtered results from back-end, e.g. http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&from=0&limit=50&field.name=term1&field2.something=term2[...]
  */
 export function filtersToHref(expSetFilters, currentHref, sortColumn = null, sortReverse = false, hrefPath = null){
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
-    var sep = navigate.determineSeparatorChar(baseHref);
-
-    var filterQuery = expSetFiltersToURLQuery(expSetFilters);
-
-    var urlString = (
-        baseHref +
-        (filterQuery.length > 0 ? sep + filterQuery : '')
-    );
+    var sep = navigate.determineSeparatorChar(baseHref),
+        filterQuery = expSetFiltersToURLQuery(expSetFilters),
+        urlString = (
+            baseHref +
+            (filterQuery.length > 0 ? sep + filterQuery : '')
+        );
 
     if (!sortColumn){
         var parts = url.parse(currentHref, true);
@@ -272,6 +287,7 @@ export const NON_FILTER_URL_PARAMS = [
  * Replaces now-removed 'hrefToFilters' function and copy of expSetFilters passed down from Redux store.
  * 
  * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
+ * @param {string} [browseBaseState] - Supply 'only_4dn' or 'all' to control which URI query params are filtered out. If 'search' is supplied, none are excluded.
  * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
 export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseState = null){

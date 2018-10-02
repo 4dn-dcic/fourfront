@@ -18,7 +18,8 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/accession" }
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -35,7 +36,6 @@
             "description": "List of data files to be associated with the experiment.",
             "type": "array",
             "lookup": 40,
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Data file",

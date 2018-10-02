@@ -21,7 +21,8 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/dbxrefs" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -83,7 +84,6 @@
             "comment": "See Modifications sheet or collection for existing items",
             "type": "array",
             "lookup": 40,
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Modifications",
@@ -97,7 +97,6 @@
             "type": "array",
             "lookup": 50,
             "comment": "See Treatment sheet or collection for exisiting items",
-            "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Treatment",
@@ -137,14 +136,14 @@
         }
     },
     "facets": {
-        "biosource.biosource_type": {
-            "title": "Biosource Type"
+        "biosample_type": {
+            "title": "Sample Type"
         },
-        "lab.display_title": {
-            "title": "Lab"
+        "biosource.cell_line_tier": {
+            "title": "4DN Cell Line Tier"
         },
         "biosource_summary": {
-            "title": "Sample Type"
+            "title": "Biosource"
         },
         "biosource.individual.organism.name": {
             "title": "Organism"
@@ -160,10 +159,10 @@
         "biosource.individual.organism.name": {
           "title": "Organism"
         },
-        "biosource.biosource_type": {
-            "title": "Biosource Type"
-        },
         "biosource_summary": {
+            "title": "Biosource"
+        },
+        "biosample_type": {
             "title": "Sample Type"
         },
         "modifications.display_title": {

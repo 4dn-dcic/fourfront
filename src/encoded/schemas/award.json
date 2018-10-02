@@ -10,7 +10,8 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
-        { "$ref": "mixins.json#/status" }
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "type": "object",
     "properties": {

@@ -6,7 +6,7 @@ describe("Individual Item Views", function(){
     context('FileProcessed MCOOL Collection', function(){
 
         it('Have at least 35 MCOOL FileProcessed files', function(){
-            cy.visit('/search/?type=FileProcessed&file_format=mcool').end()
+            cy.visit('/search/?type=FileProcessed&file_format.display_title=mcool').end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('be.greaterThan', 34);
         });
@@ -28,7 +28,7 @@ describe("Individual Item Views", function(){
 
             it('FileView loads correctly on click from SearchView', function(){
                 cy.get('.search-results-container .search-result-row[data-row-number="' + idx + '"] .search-result-column-block[data-field="display_title"] a')
-                    .should('contain', '.mcool').click({ force: true }).end();
+                    .should('contain', '.mcool').click({ force: true }).wait(200).end();
             });
 
             testGraphTabClick();

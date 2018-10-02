@@ -17,14 +17,15 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
-        { "$ref": "mixins.json#/notes"}
+        { "$ref": "mixins.json#/notes"},
+        { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "title": {
             "title": "Title",
@@ -45,7 +46,8 @@
         "description_only": {
             "title": "File Provenance Graph",
             "description": "When True the file provenance graph was generated without a run of a 4dn-dcic pipeline.",
-            "type": "boolean"
+            "type": "boolean",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "input_files": {
             "title": "Input files",
@@ -73,6 +75,16 @@
                         "description": "Ordinal of the file in the argument",
                         "type": "number",
                         "default": 1
+                    },
+                    "format_if_extra": {
+                        "title": "Format of extra file",
+                        "description": "the file format if the input file is an extra file of a file object",
+                        "type": "string",
+                        "linkTo": "FileFormat"
+                    },
+                    "notes": {
+                        "description": "internal notes",
+                        "type": "string"
                     }
                 }
             }
