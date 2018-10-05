@@ -51,17 +51,22 @@ export default class StatisticsPageView extends StaticPage {
     }
 
     renderUsageSection(){
+        /*
         var groupByOptions = {
             'sessions' : <span><i className="icon icon-fw icon-users"/>&nbsp; Sessions</span>,
             'views' : <span><i className="icon icon-fw icon-eye"/>&nbsp; Views</span>
         };
-        // GroupByController is on inside here because grouping etc is done client-side.
+        */
+        var groupByOptions = {
+            'monthly' : <span>By Month (last 12 months)</span>,
+            'daily' : <span>By Day (last 2 weeks)</span>
+        };
         return (
-            <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth')}>
-                <GroupByController groupByOptions={groupByOptions} initialGroupBy="views">
+            <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
+                <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth')}>
                     <UsageStatsView />
-                </GroupByController>
-            </UsageStatsViewController>
+                </UsageStatsViewController>
+            </GroupByController>
         );
     }
 
@@ -108,10 +113,20 @@ class UsageStatsViewController extends StatsViewController {
     static defaultProps = {
         'searchURIs' : {
             'TrackingItem' : function(props) {
-                return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14&format=json';
+                var uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
+                if (props.currentGroupBy === 'monthly'){
+                    uri += '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
+                } else if (props.currentGroupBy === 'daily'){
+                    uri += '&google_analytics.date_increment=daily&limit=14'; // 2 weeks (14 days)
+                }
+                return uri;
             }
         },
-        'shouldRefetchAggs' : StatsViewController.defaultProps.shouldRefetchAggs
+        'shouldRefetchAggs' : function(pastProps, nextProps){
+            return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
+                pastProps.currentGroupBy  !== nextProps.currentGroupBy
+            );
+        }
     };
 }
 
@@ -511,6 +526,7 @@ export const aggregationsToChartData = {
             return commonParsingFxn.analytics_to_buckets(resp, 'sessions_by_country', 'ga:country', countKey);
         }
     },
+    /*
     'browse_search_queries' : {
         'requires' : 'TrackingItem',
         'function' : function(resp, props){
@@ -533,6 +549,7 @@ export const aggregationsToChartData = {
             return commonParsingFxn.analytics_to_buckets(resp, 'search_search_queries', 'ga:searchKeyword', countKey);
         }
     },
+    */
     'experiment_set_views' : {
         'requires' : 'TrackingItem',
         'function' : function(resp, props){
@@ -558,25 +575,60 @@ class UsageStatsView extends StatsChartViewBase {
             'sessions_by_country', 'fields_faceted', 'browse_search_queries', 'other_search_queries',
             'experiment_set_views'
         ),
-        'shouldReaggregate' : function(pastProps, nextProps, state){
-            if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
-            if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
-            return false;
-        }
+        //'shouldReaggregate' : function(pastProps, nextProps, state){
+        //    if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
+        //    //if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
+        //    return false;
+        //}
     };
 
-    static fieldsFacetedByOptions = {
-        'field' : 'Field',
-        'term' : 'Term',
-        'field+term' : 'Field & Term'
-    };
-
+    
     constructor(props){
         super(props);
-        this.changeFieldFacetedByGrouping = this.changeFieldFacetedByGrouping.bind(this);
-        this.state['fields_faceted_group_by'] = 'field';
+        //this.changeFieldFacetedByGrouping = this.changeFieldFacetedByGrouping.bind(this);
+        this.changeCountByForChart = this.changeCountByForChart.bind(this);
+        this.state.countBy = {};
+        _.forEach(_.keys(this.state), (k)=>{
+            if (k === 'countBy' || k === 'chartToggles') {
+                return;
+            }
+            this.state.countBy[k] = 'views';
+        });
     }
 
+    changeCountByForChart(chartID, nextCountBy){
+        setTimeout(()=>{
+            // This might take some noticeable amount of time (not enough to justify a worker, tho) so we defer/deprioritize its execution to prevent blocking UI thread.
+            this.setState((currState)=>{
+                var countBy = _.clone(currState.countBy);
+                countBy[chartID] = nextCountBy;
+                var nextState = _.extend({}, currState, { countBy });
+                _.extend(nextState, this.generateAggsToState(this.props, nextState));
+                return nextState;
+            });
+        }, 0);
+    }
+
+    renderCountByDropdown(chartID){
+        var currCountBy = this.state.countBy[chartID],
+            titles      = {
+                'views'     : <span><i className="icon icon-fw icon-eye"/>&nbsp; Views</span>,
+                'sessions'  : <span><i className="icon icon-fw icon-users"/>&nbsp; Sessions</span>
+            },
+            ddtitle     = titles[currCountBy];
+        
+        return (
+            <div className="mb-15">
+                <div className="text-400 inline-block">Counting&nbsp;&nbsp;</div>
+                <DropdownButton id={"select_count_for_" + chartID} onSelect={(ek, e) => this.changeCountByForChart(chartID, ek)} title={ddtitle}>
+                    <MenuItem eventKey="views" key="views">{ titles.views }</MenuItem>
+                    <MenuItem eventKey="sessions" key="sessions">{ titles.sessions }</MenuItem>
+                </DropdownButton>
+            </div>
+        );
+    }
+    
+    /*
     changeFieldFacetedByGrouping(toState){
         if (_.keys(UsageStatsView.fieldsFacetedByOptions).indexOf(toState) === -1){
             throw new Error('Must be one of allowable keys.');
@@ -589,7 +641,7 @@ class UsageStatsView extends StatsChartViewBase {
             });
         }, 0);
     }
-
+    */
     render(){
         var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
             { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
@@ -597,7 +649,7 @@ class UsageStatsView extends StatsChartViewBase {
             } = this.state,
             width = this.getRefWidth() || null;
 
-        if (!mounted || (loadingStatus === 'loading')){
+        if (!mounted || !sessions_by_country){
             return <div className="stats-charts-container" ref="elem" children={ loadingIcon() }/>;
         }
         if (loadingStatus === 'failed'){
@@ -617,24 +669,25 @@ class UsageStatsView extends StatsChartViewBase {
         // Prevent needing to calculate for each chart
         //if (firstDateStr) commonXDomain[0] = new Date(firstDateStr.slice(0,10));
         if (lastDateStr){
+            var timeShift = currentGroupBy === 'daily' ? (24*60*60*1000) : (30*24*60*60*1000); // 24 hrs -v- 30 days
             commonXDomain[1] = new Date(lastDateStr + "T00:00:00.000");
-            commonXDomain[1].setTime(commonXDomain[1].getTime() + (4*60*60*1000));
+            commonXDomain[1].setTime(commonXDomain[1].getTime() + timeShift);
         }
         if (firstDateStr){
             commonXDomain[0] = new Date(firstDateStr + "T00:00:00.000");
         }
 
-        console.log('DD', sessions_by_country);
+        console.log('DD', currentGroupBy, sessions_by_country);
 
         return (
             <div className="stats-charts-container" ref="elem">
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
-                    title="Counting" outerClassName="dropdown-container mb-0" />
+                    title="Aggregate" outerClassName="dropdown-container mb-0" />
 
                 { sessions_by_country ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={sessions_by_country}>
+                    <GroupOfCharts width={width} resetScaleLegendWhenChange={sessions_by_country}>
 
                         <hr/>
 
@@ -649,34 +702,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                 : null }
 
-                { fields_faceted ?
-
-                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
-
-                        <hr className="mt-3"/>
-
-                        <div className="mb-15">
-                            <div className="text-400 inline-block">Grouping by&nbsp;&nbsp;</div>
-                            <DropdownButton id="select_fields_faceted_group_by" onSelect={this.changeFieldFacetedByGrouping}
-                                title={<span className="text-500">{ UsageStatsView.fieldsFacetedByOptions[fields_faceted_group_by] }</span>}>
-                                { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) => 
-                                    <MenuItem eventKey={key} key={key}>{ title }</MenuItem>
-                                ) }
-                            </DropdownButton>
-                        </div>
-
-                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
-
-                        <AreaChartContainer {...commonContainerProps} id="field_faceted"
-                            title={<span><span className="text-500">Fields Faceted</span> { currentGroupBy === 'sessions' ? '- Sessions' : '- Views' }</span>}>
-                            <AreaChart data={fields_faceted} xDomain={commonXDomain} />
-                        </AreaChartContainer>
-
-                    </GroupOfCharts>
-
-                : null }
-
-                { browse_search_queries || other_search_queries ?
+                {/* browse_search_queries || other_search_queries ?
 
                     <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
 
@@ -701,7 +727,7 @@ class UsageStatsView extends StatsChartViewBase {
                     </GroupOfCharts>
 
 
-                : null }
+                : null */}
 
                 { experiment_set_views ?
 
@@ -718,8 +744,34 @@ class UsageStatsView extends StatsChartViewBase {
 
 
                     </GroupOfCharts>
-                
-            
+
+                : null }
+
+                { fields_faceted ?
+
+                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
+
+                        <hr className="mt-3"/>
+                        {/*
+                        <div className="mb-15">
+                            <div className="text-400 inline-block">Grouping by&nbsp;&nbsp;</div>
+                            <DropdownButton id="select_fields_faceted_group_by" onSelect={this.changeFieldFacetedByGrouping}
+                                title={<span className="text-500">{ UsageStatsView.fieldsFacetedByOptions[fields_faceted_group_by] }</span>}>
+                                { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) => 
+                                    <MenuItem eventKey={key} key={key}>{ title }</MenuItem>
+                                ) }
+                            </DropdownButton>
+                        </div>
+                        */}
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
+                        <AreaChartContainer {...commonContainerProps} id="field_faceted"
+                            title={<span><span className="text-500">Fields Faceted</span> { currentGroupBy === 'sessions' ? '- Sessions' : '- Views' }</span>}>
+                            <AreaChart data={fields_faceted} xDomain={commonXDomain} />
+                        </AreaChartContainer>
+
+                    </GroupOfCharts>
+
                 : null }
 
             </div>

@@ -232,6 +232,12 @@ export class GroupByController extends React.PureComponent {
         };
     }
 
+    componentWillReceiveProps(nextProps){
+        if (this.props.groupByOptions !== nextProps.groupByOptions && this.props.initialGroupBy !== nextProps.initialGroupBy){
+            this.setState({ 'currentGroupBy' : nextProps.initialGroupBy });
+        }
+    }
+
     handleGroupByChange(field){
         this.setState(function(currState){
             if (currState.currentGroupBy === field){
@@ -264,7 +270,11 @@ export class GroupByDropdown extends React.PureComponent {
             'marginLeft' : 12,
             'textAlign' : 'left'
         },
-        'outerClassName' : "dropdown-container mb-15"
+        'outerClassName' : "dropdown-container mb-15",
+        'valueTitleTransform' : function(jsx){
+            // Use this prop to optionally prepend or append an icon or something.
+            return jsx;
+        }
     }
 
     constructor(props){
@@ -280,11 +290,11 @@ export class GroupByDropdown extends React.PureComponent {
     }
 
     render(){
-        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName } = this.props,
+        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, valueTitleTransform } = this.props,
             optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
                 <MenuItem eventKey={field} key={field} children={title} active={field === currentGroupBy} />
             ),
-            selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
+            selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : valueTitleTransform(groupByOptions[currentGroupBy]);
 
         return (
             <div className={outerClassName}>
@@ -308,6 +318,7 @@ export class GroupOfCharts extends React.Component {
         'chartMargin'           : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
         // Only relevant if --not-- providing own colorScale and letting this component create/re-create one.
         'resetScalesWhenChange' : null,
+        'resetScaleLegendWhenChange' : null,
         'colorScale'            : null
     }
 
@@ -324,10 +335,19 @@ export class GroupOfCharts extends React.Component {
         if (this.props.resetScalesWhenChange !== nextProps.resetScalesWhenChange){
             console.warn("Color scale reset");
             this.resetColorScale();
+        } else if (this.props.resetScaleLegendWhenChange !== nextProps.resetScaleLegendWhenChange){
+            console.warn("Color scale reset (LEGEND ONLY)");
+            this.resetColorScale(true);
         }
     }
 
-    resetColorScale(){
+    resetColorScale(onlyResetLegend=false){
+
+        if (onlyResetLegend){
+            this.setState({ 'colorScaleStore' : {} });
+            return;
+        }
+
         var colorScale, colorScaleStore = {};
 
         if (typeof this.props.colorScale === 'function'){
@@ -370,17 +390,17 @@ export class HorizontalD3ScaleLegend extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.colorScale !== this.props.colorScale){
-            if (nextProps.colorScaleStore !== this.props.colorScaleStore){
-                var currTerms = _.keys(this.props.colorScaleStore),
-                    nextTerms = _.keys(nextProps.colorScaleStore);
+        //if (nextProps.colorScale !== this.props.colorScale){
+        if (nextProps.colorScaleStore !== this.props.colorScaleStore){
+            var currTerms = _.keys(this.props.colorScaleStore),
+                nextTerms = _.keys(nextProps.colorScaleStore);
 
-                // Don't update if no terms in next props; most likely means colorScale[Store] has been reset and being repopulated.
-                if (currTerms.length > 0 && nextTerms.length === 0){
-                    return false;
-                }
+            // Don't update if no terms in next props; most likely means colorScale[Store] has been reset and being repopulated.
+            if (currTerms.length > 0 && nextTerms.length === 0){
+                return false;
             }
         }
+        //}
 
         // Emulates PureComponent
         var propKeys = _.keys(nextProps);

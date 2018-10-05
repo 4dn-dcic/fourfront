@@ -75,6 +75,16 @@
                     "description": "The date for which analytics are gathered in reports.",
                     "title" : "Analytics Date"
                 },
+                "date_increment" : {
+                    "title" : "Date Increment",
+                    "description": "For which date increment does this Item apply.",
+                    "type" : "string",
+                    "enum" : [
+                        "daily",
+                        "monthly",
+                        "yearly"
+                    ]
+                },
                 "reports" : {
                     "type" : "object",
                     "title" : "Report Data",
