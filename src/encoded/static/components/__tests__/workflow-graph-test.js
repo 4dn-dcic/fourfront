@@ -15,6 +15,13 @@ describe('Testing Workflow Graph', function() {
         return showParamsBox;
     }
 
+    function getShowReferenceFilesCheckBox(testInstance = testWorkflowInstance){
+        // Returns the checkbox element responsible for toggling the Reference Files on the graph.
+        var showReferenceFilesBox = TestUtils.scryRenderedDOMComponentsWithClass(testInstance, 'checkbox-container for-state-showReferenceFiles')[0];
+        showReferenceFilesBox = showReferenceFilesBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
+        return showReferenceFilesBox;
+    }
+
     beforeAll(function(){
         sinon = require('sinon');
         server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
@@ -86,7 +93,7 @@ describe('Testing Workflow Graph', function() {
 
         // Should be unchecked, initially.
         expect(showParamsBox.checked).toBe(false);
-        
+
         // Double check 8 original nodes.
         var nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
         expect(nodes.length).toBe(8);
@@ -120,7 +127,7 @@ describe('Testing Workflow Graph', function() {
 
         // Should be unchecked, initially.
         expect(showParamsBox.checked).toBe(false);
-        
+
         // Double check 8 original nodes.
         var nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
         expect(nodes.length).toBe(8);
@@ -150,7 +157,7 @@ describe('Testing Workflow Graph', function() {
 
         var stepNodeToClickName = 'add_hic_normvector_to_mcool'; // Lets click on the node w/ this name.
         var stepNodeToClick = _.find(stepNodes, function(n){ return n.getAttribute('data-node-key') === stepNodeToClickName; });
-        
+
         expect(stepNodeToClickName).toEqual(stepNodeToClick.getAttribute('data-node-key')); // Double check
         console.log("Will test clicking on step node in test-data WorkflowRun graph:", stepNodeToClick.getAttribute('data-node-key')); // Should === stepNodeToClickName
 
@@ -212,4 +219,90 @@ describe('Testing Workflow Graph', function() {
 
     });
 
+});
+
+describe('TODO Change name: Bug testing', function() {
+    var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
+
+    function getShowParamsCheckBox(){
+        var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showParameters')[0];
+        showParamsBox = showParamsBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
+        return showParamsBox;
+    }
+
+    function getShowReferenceFilesCheckBox(){
+        // Returns the checkbox element responsible for toggling the Reference Files on the graph.
+        var showReferenceFilesBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showReferenceFiles')[0];
+        showReferenceFilesBox = showReferenceFilesBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
+        return showReferenceFilesBox;
+    }
+
+    beforeAll(function(){
+        sinon = require('sinon');
+        server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
+    });
+
+    afterAll(function(){
+        server.restore();
+    });
+
+    beforeEach(function() {
+
+        // 3rd Party Deps
+        React = require('react');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
+        _ = require('underscore');
+
+        // Our own deps
+        WorkflowRunView = require('./../item-pages/WorkflowRunView').WorkflowRunView;
+
+
+        // Make a workflow run with at least 5 graph columns (including arrows.) The node in column 4 refers to a chromsize file whose node is already in column 0.
+        context = require('./../testdata/workflow_run/awsem-node-dup-check').default;
+        // Get test Data
+        schemas = require('../testdata/schemas');
+
+        // Setup
+        Wrapper = React.createClass({
+            render: function() {
+                return (
+                    <div>{this.props.children}</div>
+                );
+            }
+        });
+        // If we do not unset checkHrefForSelectedNode, checkWindowLocationHref, and onNodeClick -- graph will try to append '#nodeID' to document.location and use href to inform selected node state. Document location and href are not supported by test suite/lib so we must disable this.
+        testWorkflowInstance = TestUtils.renderIntoDocument(
+            <Wrapper>
+                <WorkflowRunView schemas={schemas} context={context} checkHrefForSelectedNode={false} checkWindowLocationHref={false} onNodeClick={null} />
+            </Wrapper>
+        );
+
+        jest.runAllTimers();
+
+    });
+
+    it('Should match Nodes with previous columns', function() {
+        // Graph generation must look for all of the previous columns for existing nodes, not just the direct ancestors.
+
+        // Now visit the graph.
+        var showReferenceFilesCheckBox = getShowReferenceFilesCheckBox();
+
+        // Should be unchecked, initially.
+        expect(showReferenceFilesCheckBox.checked).toBe(false);
+
+        // Toggle the checkbox input
+        TestUtils.Simulate.change(showReferenceFilesCheckBox);
+        jest.runAllTimers();
+
+        // You should only see 2 nodes in column 0: The input file and the chromsize file.
+        let nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+
+        let column0Nodes = _.filter(nodes, function(n){
+            return n.getAttribute('data-node-column') === '0';
+        });
+        expect(column0Nodes.length).toEqual(2);
+
+        // TODO: Make sure 3 edges total are coming from the column 0 nodes.
+
+    });
 });
