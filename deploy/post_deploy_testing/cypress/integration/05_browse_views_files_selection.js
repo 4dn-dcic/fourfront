@@ -88,7 +88,7 @@ describe('Browse Views - Files Selection', function () {
 
         it('Can click Download button, get modal with proper contents', function(){
             cy.getDownloadButton().click().wait(100).end()
-                .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
+                .get('div.modal-dialog .modal-body #file_disclaimer_div > button').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
                 .get('div.modal-dialog .modal-header button.close').click().wait(100).end();
         });
