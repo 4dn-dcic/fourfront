@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { StatsViewController, StatsChartViewBase, GroupByController, GroupByDropdown, GroupOfCharts,
-    AreaChart, AreaChartContainer, loadingIcon, errorIcon } from './../viz/AreaChart';
+    AreaChart, AreaChartContainer, loadingIcon, errorIcon, HorizontalD3ScaleLegend } from './../viz/AreaChart';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import * as d3 from 'd3';
@@ -58,7 +58,7 @@ export default class StatisticsPageView extends StaticPage {
         // GroupByController is on inside here because grouping etc is done client-side.
         return (
             <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth')}>
-                <GroupByController groupByOptions={groupByOptions} initialGroupBy="sessions">
+                <GroupByController groupByOptions={groupByOptions} initialGroupBy="views">
                     <UsageStatsView />
                 </GroupByController>
             </UsageStatsViewController>
@@ -84,7 +84,7 @@ export default class StatisticsPageView extends StaticPage {
                     <DropdownButton id="section-select-dropdown" title={currSectionTitle} children={_.map(StatisticsPageView.viewOptions, function({ title, id, icon }){
                         return (
                             <MenuItem {...{ title, 'key': id, 'eventKey' : id }} active={id === currentTab}>
-                                { icon ? [<i className={"icon icon-fw icon-" + icon}/>, ' '] : '' }{ title }
+                                { icon ? <span><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</span> : '' }{ title }
                             </MenuItem>
                         );
                     })} onSelect={this.onDropdownChange} />
@@ -108,7 +108,7 @@ class UsageStatsViewController extends StatsViewController {
     static defaultProps = {
         'searchURIs' : {
             'TrackingItem' : function(props) {
-                return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
+                return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14&format=json';
             }
         },
         'shouldRefetchAggs' : StatsViewController.defaultProps.shouldRefetchAggs
@@ -126,7 +126,11 @@ class SubmissionStatsViewController extends StatsViewController {
                     params['group_by'] = props.currentGroupBy;
                 }
                 //if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
-                return '/date_histogram_aggregations/?' + stringify(params) + '&limit=0';
+                var uri = '/date_histogram_aggregations/?' + stringify(params) + '&limit=0&format=json';
+
+                // For local dev/debugging; don't forget to comment out if using.
+                //uri = 'https://data.4dnucleome.org' + uri;
+                return uri;
             },
             //'TrackingItem' : function(props) {
             //    return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
@@ -143,7 +147,7 @@ class SubmissionStatsViewController extends StatsViewController {
     constructor(props){
         super(props);
         this.fetchAndGenerateExternalTermMap = this.fetchAndGenerateExternalTermMap.bind(this);
-        this.state.externalTermMap = {};
+        this.state.externalTermMap = null;
     }
 
     componentDidMount(){
@@ -159,7 +163,9 @@ class SubmissionStatsViewController extends StatsViewController {
         if (this.props.shouldRefetchAggs(pastProps, this.props)){
             this.setState({ 'loadingStatus' : 'loading' });
             this.performAggRequests();
-            this.fetchAndGenerateExternalTermMap(true);
+            if (pastProps.session !== this.props.session){ // Avoid triggering extra re-aggregation from new/unnecessary term map being loaded.
+                this.fetchAndGenerateExternalTermMap(true);
+            }
         }
     }
 
@@ -252,7 +258,7 @@ export const commonParsingFxn = {
             });
 
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), _.keys(externalTermMap)));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
 
         return aggsList;
     },
@@ -277,7 +283,7 @@ export const commonParsingFxn = {
             });
 
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), _.keys(externalTermMap))  );
+        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
 
         return aggsList;
     },
@@ -304,7 +310,52 @@ export const commonParsingFxn = {
             });
 
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), _.keys(externalTermMap)));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
+
+        return aggsList;
+    },
+    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey){
+        var subBucketKeysToDate = new Set();
+
+        // Notably, we do NOT sum up total here.
+        var aggsList =  _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
+
+            var totalSessions = _.reduce(trackingItem.google_analytics.reports[reportName], function(sum, trackingItemItem){
+                return sum + trackingItemItem[countKey];
+            }, 0);
+
+            var currItem = {
+                'date'      : trackingItem.google_analytics.for_date,
+                'count'     : totalSessions,
+                'total'     : totalSessions,
+                'children'  : _.map(trackingItem.google_analytics.reports[reportName], function(trackingItemItem){
+                    var term = typeof termBucketField === 'function' ? termBucketField(trackingItemItem) : trackingItemItem[termBucketField];
+                    subBucketKeysToDate.add(term);
+                    return {
+                        'term'      : term,
+                        'count'     : trackingItemItem[countKey],
+                        'total'     : trackingItemItem[countKey],
+                        'date'      : trackingItem.google_analytics.for_date
+                    };
+                })
+            };
+
+            // Unique-fy
+            currItem.children = _.values(_.reduce(currItem.children || [], function(memo, child){
+                if (memo[child.term]) {
+                    memo[child.term].count += child.count;
+                    memo[child.term].total += child.total;
+                } else {
+                    memo[child.term] = child;
+                }
+                return memo;
+            }, {}));
+
+            return currItem;
+
+        }).reverse(); // We get these in decrementing order from back-end
+
+        commonParsingFxn.fillMissingChildBuckets(aggsList, Array.from(subBucketKeysToDate));
 
         return aggsList;
     }
@@ -434,67 +485,116 @@ export const aggregationsToChartData = {
             );
         }
     },
+    'fields_faceted' : {
+        'requires' : 'TrackingItem',
+        'function' : function(resp, props){
+            if (!resp || !resp['@graph']) return null;
+
+            var countKey = 'ga:totalEvents',
+                groupingKey = "ga:dimension3"; // Field name, dot notation
+
+            if (props.currentGroupBy === 'sessions') countKey = 'ga:sessions';
+            if (props.fields_faceted_group_by === 'term') groupingKey = 'ga:dimension4';
+            if (props.fields_faceted_group_by === 'field+term') groupingKey = 'ga:eventLabel';
+
+            return commonParsingFxn.analytics_to_buckets(resp, 'fields_faceted', groupingKey, countKey);
+        }
+    },
     'sessions_by_country' : {
         'requires' : 'TrackingItem',
         'function' : function(resp, props){
             if (!resp || !resp['@graph']) return null;
 
-            var countKey = 'ga:sessions';
-            if (props.currentGroupBy === 'views') countKey = 'ga:pageviews';
+            var countKey = 'ga:pageviews';
+            if (props.currentGroupBy === 'sessions') countKey = 'ga:sessions';
 
-            var subBucketKeysToDate = new Set();
+            return commonParsingFxn.analytics_to_buckets(resp, 'sessions_by_country', 'ga:country', countKey);
+        }
+    },
+    'browse_search_queries' : {
+        'requires' : 'TrackingItem',
+        'function' : function(resp, props){
+            if (!resp || !resp['@graph']) return null;
 
-            // Notably, we do NOT sum up total here.
-            var aggsList =  _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
+            var countKey = 'ga:pageviews';
+            if (props.currentGroupBy === 'sessions') countKey = 'ga:users'; // "Sessions" not saved in analytics for search queries.
 
-                var totalSessions = _.reduce(trackingItem.google_analytics.reports.sessions_by_country, function(sum, trackingItemItem){
-                    return sum + trackingItemItem[countKey];
-                }, 0);
+            return commonParsingFxn.analytics_to_buckets(resp, 'browse_search_queries', 'ga:searchKeyword', countKey);
+        }
+    },
+    'other_search_queries' : {
+        'requires' : 'TrackingItem',
+        'function' : function(resp, props){
+            if (!resp || !resp['@graph']) return null;
 
-                return {
-                    'date'      : trackingItem.google_analytics.for_date,
-                    'count'     : totalSessions,
-                    'total'     : totalSessions,
-                    'children'  : _.map(trackingItem.google_analytics.reports.sessions_by_country, function(trackingItemItem){
-                        subBucketKeysToDate.add(trackingItemItem['ga:country']);
-                        return {
-                            'term'      : trackingItemItem['ga:country'],
-                            'count'     : trackingItemItem[countKey],
-                            'total'     : trackingItemItem[countKey],
-                            'date'      : trackingItem.google_analytics.for_date
-                        };
-                    })
-                };
+            var countKey = 'ga:pageviews';
+            if (props.currentGroupBy === 'sessions') countKey = 'ga:users'; // "Sessions" not saved in analytics for search queries.
 
-            }).reverse();
+            return commonParsingFxn.analytics_to_buckets(resp, 'search_search_queries', 'ga:searchKeyword', countKey);
+        }
+    },
+    'experiment_set_views' : {
+        'requires' : 'TrackingItem',
+        'function' : function(resp, props){
+            if (!resp || !resp['@graph']) return null;
+            
+            //var termBucketField = function(subBucket){ return subBucket['ga:productBrand'] + ' - ' + subBucket['ga:productName']; };
+            var termBucketField = 'ga:productBrand';
+            var countKey = 'ga:productDetailViews';
+            //if (props.currentGroupBy === 'sessions') countKey = 'ga:users'; // "Sessions" not saved in analytics for search queries.
 
-            commonParsingFxn.fillMissingChildBuckets(aggsList, Array.from(subBucketKeysToDate));
-
-            return aggsList;
-
+            return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey);
         }
     }
 };
 
 
 
-
-
 class UsageStatsView extends StatsChartViewBase {
 
     static defaultProps = {
-        'aggregationsToChartData' : aggregationsToChartData,
-        'shouldReaggregate' : function(pastProps, nextProps){
-            if (pastProps.currentGroupBy !== nextProps.currentGroupBy) {
-                return true;
-            }
+        'aggregationsToChartData' : _.pick(
+            aggregationsToChartData,
+            'sessions_by_country', 'fields_faceted', 'browse_search_queries', 'other_search_queries',
+            'experiment_set_views'
+        ),
+        'shouldReaggregate' : function(pastProps, nextProps, state){
+            if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
+            if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
             return false;
         }
     };
 
+    static fieldsFacetedByOptions = {
+        'field' : 'Field',
+        'term' : 'Term',
+        'field+term' : 'Field & Term'
+    };
+
+    constructor(props){
+        super(props);
+        this.changeFieldFacetedByGrouping = this.changeFieldFacetedByGrouping.bind(this);
+        this.state['fields_faceted_group_by'] = 'field';
+    }
+
+    changeFieldFacetedByGrouping(toState){
+        if (_.keys(UsageStatsView.fieldsFacetedByOptions).indexOf(toState) === -1){
+            throw new Error('Must be one of allowable keys.');
+        }
+        setTimeout(()=>{ // This might take some noticeable amount of time (not enough to justify a worker, tho) so we defer/deprioritize its execution to prevent blocking UI thread.
+            this.setState((currState)=>{
+                var nextState = _.extend({}, currState, { 'fields_faceted_group_by' : toState });
+                _.extend(nextState, this.generateAggsToState(this.props, nextState));
+                return nextState;
+            });
+        }, 0);
+    }
+
     render(){
-        var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy } = this.props,
-            { sessions_by_country, chartToggles } = this.state,
+        var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
+            { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
+                other_search_queries, experiment_set_views
+            } = this.state,
             width = this.getRefWidth() || null;
 
         if (!mounted || (loadingStatus === 'loading')){
@@ -504,30 +604,122 @@ class UsageStatsView extends StatsChartViewBase {
             return <div className="stats-charts-container" ref="elem" children={ errorIcon() }/>;
         }
 
-        var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
-            commonContainerProps = {
+        var anyExpandedCharts       = _.any(_.values(this.state.chartToggles)),
+            commonXDomain           = [ null, null ],
+            lastDateStr             = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][0] && respTrackingItem['@graph'][0].google_analytics && respTrackingItem['@graph'][0].google_analytics.for_date,
+            firstReportIdx          = respTrackingItem && respTrackingItem['@graph'] && (respTrackingItem['@graph'].length - 1),
+            firstDateStr            = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][firstReportIdx] && respTrackingItem['@graph'][firstReportIdx].google_analytics && respTrackingItem['@graph'][firstReportIdx].google_analytics.for_date,
+            commonContainerProps    = {
                 'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
                 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
             };
 
+        // Prevent needing to calculate for each chart
+        //if (firstDateStr) commonXDomain[0] = new Date(firstDateStr.slice(0,10));
+        if (lastDateStr){
+            commonXDomain[1] = new Date(lastDateStr + "T00:00:00.000");
+            commonXDomain[1].setTime(commonXDomain[1].getTime() + (4*60*60*1000));
+        }
+        if (firstDateStr){
+            commonXDomain[0] = new Date(firstDateStr + "T00:00:00.000");
+        }
+
+        console.log('DD', sessions_by_country);
+
         return (
             <div className="stats-charts-container" ref="elem">
 
-                <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }} title="Counting" />
+                <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
+                    title="Counting" outerClassName="dropdown-container mb-0" />
 
                 { sessions_by_country ?
 
                     <GroupOfCharts width={width} resetScalesWhenChange={sessions_by_country}>
 
+                        <hr/>
+
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                             title={<span className="text-500">{ currentGroupBy === 'sessions' ? 'User Sessions' : 'Page Views' }</span>}>
-                            <AreaChart data={sessions_by_country} xDomain={[ null, null ]} />
+                            <AreaChart data={sessions_by_country} xDomain={commonXDomain} />
                         </AreaChartContainer>
 
                     </GroupOfCharts>
 
+                : null }
+
+                { fields_faceted ?
+
+                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
+
+                        <hr className="mt-3"/>
+
+                        <div className="mb-15">
+                            <div className="text-400 inline-block">Grouping by&nbsp;&nbsp;</div>
+                            <DropdownButton id="select_fields_faceted_group_by" onSelect={this.changeFieldFacetedByGrouping}
+                                title={<span className="text-500">{ UsageStatsView.fieldsFacetedByOptions[fields_faceted_group_by] }</span>}>
+                                { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) => 
+                                    <MenuItem eventKey={key} key={key}>{ title }</MenuItem>
+                                ) }
+                            </DropdownButton>
+                        </div>
+
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
+                        <AreaChartContainer {...commonContainerProps} id="field_faceted"
+                            title={<span><span className="text-500">Fields Faceted</span> { currentGroupBy === 'sessions' ? '- Sessions' : '- Views' }</span>}>
+                            <AreaChart data={fields_faceted} xDomain={commonXDomain} />
+                        </AreaChartContainer>
+
+                    </GroupOfCharts>
+
+                : null }
+
+                { browse_search_queries || other_search_queries ?
+
+                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
+
+                        <hr className="mt-3"/>
+
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
+                        { browse_search_queries ?
+                            <AreaChartContainer {...commonContainerProps} id="browse_search_queries"
+                                title={<span><span className="text-500">Experiment Set Search Queries</span> { currentGroupBy === 'sessions' ? '- Sessions' : '- Views' }</span>}>
+                                <AreaChart data={browse_search_queries} xDomain={commonXDomain} />
+                            </AreaChartContainer>
+                        : null }
+
+                        { other_search_queries ?
+                            <AreaChartContainer {...commonContainerProps} id="other_search_queries"
+                                title={<span><span className="text-500">Other Search Queries</span> { currentGroupBy === 'sessions' ? '- Sessions' : '- Views' }</span>}>
+                                <AreaChart data={other_search_queries} xDomain={commonXDomain} />
+                            </AreaChartContainer>
+                        : null }
+
+                    </GroupOfCharts>
+
+
+                : null }
+
+                { experiment_set_views ?
+
+                    <GroupOfCharts width={width} resetScalesWhenChange={experiment_set_views}>
+
+                        <hr className="mt-3"/>
+
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
+                        <AreaChartContainer {...commonContainerProps} id="experiment_set_views"
+                            title={<span><span className="text-500">Experiment Set Detail Views</span></span>}>
+                            <AreaChart data={experiment_set_views} xDomain={commonXDomain} />
+                        </AreaChartContainer>
+
+
+                    </GroupOfCharts>
+                
+            
                 : null }
 
             </div>
@@ -630,14 +822,6 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                 </GroupOfCharts>
 
-                { sessions_by_country ?
-                    <GroupOfCharts>
-                        <AreaChartContainer {...commonContainerProps} id="sessions_by_country" title={<span><span className="text-500">User Sessions</span> last month</span>}>
-                            <AreaChart data={sessions_by_country} xDomain={[ null, null ]} />
-                        </AreaChartContainer>
-                    </GroupOfCharts>
-                : null }
-
             </div>
         );
     }
@@ -645,57 +829,6 @@ class SubmissionsStatsView extends StatsChartViewBase {
 }
 
 
-
-export class HorizontalD3ScaleLegend extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.renderColorItem = this.renderColorItem.bind(this);
-    }
-
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.colorScale !== this.props.colorScale){
-            if (nextProps.colorScaleStore !== this.props.colorScaleStore){
-                var currTerms = _.keys(this.props.colorScaleStore),
-                    nextTerms = _.keys(nextProps.colorScaleStore);
-
-                // Don't update if no terms in next props; most likely means colorScale[Store] has been reset and being repopulated.
-                if (currTerms.length > 0 && nextTerms.length === 0){
-                    return false;
-                }
-            }
-        }
-
-        // Emulates PureComponent
-        var propKeys = _.keys(nextProps);
-        for (var i = 0; i < propKeys.length; i++){
-            if (nextProps[propKeys[i]] !== this.props[propKeys[i]]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    renderColorItem([term, color], idx, all){
-        return (
-            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-ellipsis-container">
-                <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
-                { term }
-            </div>
-        );
-    }
-
-    render(){
-        var { colorScale, colorScaleStore } = this.props;
-        if (!colorScale || !colorScaleStore) return null;
-        return (
-            <div className="legend mb-27">
-                <div className="row" children={_.map(_.pairs(colorScaleStore), this.renderColorItem)}/>
-            </div>
-        );
-    }
-
-}
 
 
 
