@@ -29,7 +29,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     # name_key = 'accession'
     aggregated_items = {
         'biosource': ['biosource_type'],
-        'cell_culture_details': ['uuid', 'principals_allowed']
+        'cell_culture_details': ['uuid', 'principals_allowed.view']
     }
     embedded_list = [
         'biosource.biosource_type',
