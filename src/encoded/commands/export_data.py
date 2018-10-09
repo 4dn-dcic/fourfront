@@ -57,7 +57,7 @@ def run(search_url, username='', password=''):
         for item_key in item_keys:
             if item_key not in item_schema_properties or item_schema_properties[item_key].get('calculatedProperty', False) is True:
                 del item[item_key]
-            elif not item[item_key]:
+            elif not item[item_key] or item_key == 'schema_version':
                 del item[item_key]
         counter['count'] += 1
         logger.info('Got insert for ' + search_result['@id'] + ' - ' + str(counter['count']) + ' / ' + str(search_results_len) )
