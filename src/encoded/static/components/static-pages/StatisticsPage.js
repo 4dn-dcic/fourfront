@@ -6,6 +6,7 @@ import _ from 'underscore';
 import { stringify } from 'query-string';
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
+import url from 'url';
 import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { StatsViewController, StatsChartViewBase, GroupByController, GroupByDropdown, GroupOfCharts,
@@ -23,16 +24,40 @@ export default class StatisticsPageView extends StaticPage {
     };
 
     static viewOptions = [
-        { 'id' : 'submissions', 'title' : "Submissions Statistics", 'icon' : 'upload' },
-        { 'id' : 'usage', 'title' : "Usage Statistics", 'icon' : 'users' }
+        { 'id' : 'submissions', 'title' : "Submissions Statistics", 'icon' : 'upload', 'tip' : "View statistics related to submission and release of Experiment Set" },
+        { 'id' : 'usage', 'title' : "Usage Statistics", 'icon' : 'users', 'tip' : "View statistics related to usage of the 4DN Data Portal" }
     ];
 
     constructor(props){
         super(props);
+        this.maybeUpdateCurrentTabFromHref = this.maybeUpdateCurrentTabFromHref.bind(this);
         this.onDropdownChange = this.onDropdownChange.bind(this);
         this.renderSubmissionsSection = this.renderSubmissionsSection.bind(this);
         this.renderUsageSection = this.renderUsageSection.bind(this);
+        this.renderDropdown = this.renderDropdown.bind(this);
+        this.renderTopMenu = this.renderTopMenu.bind(this);
         this.state = { 'currentTab' : props.defaultTab };
+    }
+
+    componentDidMount(){
+        this.maybeUpdateCurrentTabFromHref();
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.href !== nextProps.href){
+            this.maybeUpdateCurrentTabFromHref(nextProps);
+        }
+    }
+
+    maybeUpdateCurrentTabFromHref(props = this.props){
+        var hrefParts = props.href && url.parse(props.href),
+            hash = hrefParts && hrefParts.hash && hrefParts.hash.replace('#', '');
+
+        if (hash && hash !== this.state.currentTab && hash.charAt(0) !== '!'){
+            if (_.pluck(StatisticsPageView.viewOptions, 'id').indexOf(hash) > -1){
+                this.setState({ 'currentTab' : hash });
+            }
+        }
     }
 
     onDropdownChange(currentTab){
@@ -51,28 +76,26 @@ export default class StatisticsPageView extends StaticPage {
     }
 
     renderUsageSection(){
-        /*
         var groupByOptions = {
-            'sessions' : <span><i className="icon icon-fw icon-users"/>&nbsp; Sessions</span>,
-            'views' : <span><i className="icon icon-fw icon-eye"/>&nbsp; Views</span>
-        };
-        */
-        var groupByOptions = {
-            'monthly' : <span>By Month (last 12 months)</span>,
-            'daily' : <span>By Day (last 2 weeks)</span>
+            'monthly'   : <span>By Month (last 12 months)</span>,
+            'daily'     : <span>By Day (last 2 weeks)</span>
         };
         return (
             <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
                 <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth')}>
-                    <UsageStatsView />
+                    <UsageStatsView/>
                 </UsageStatsViewController>
             </GroupByController>
         );
     }
 
-    render(){
+    /**
+     * Old dropdown for selecting 'Usage' or 'Submissions' view. May be removed after design iteration.
+     *
+     * @deprecated
+     */
+    renderDropdown(){
         var currentTab          = this.state.currentTab,
-            renderFxn           = currentTab === 'usage' ? this.renderUsageSection : this.renderSubmissionsSection,
             currSectionObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : currentTab }),
             currSectionTitle    = (
                 <h4 className="text-400 mb-07 mt-07">
@@ -83,17 +106,53 @@ export default class StatisticsPageView extends StaticPage {
             );
 
         return (
-            <StaticPage.Wrapper>
-                <div className="chart-section-control-wrapper">
-                    <h5 className="text-400 mb-08">Currently viewing</h5>
-                    <DropdownButton id="section-select-dropdown" title={currSectionTitle} children={_.map(StatisticsPageView.viewOptions, function({ title, id, icon }){
-                        return (
-                            <MenuItem {...{ title, 'key': id, 'eventKey' : id }} active={id === currentTab}>
-                                { icon ? <span><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</span> : '' }{ title }
-                            </MenuItem>
-                        );
-                    })} onSelect={this.onDropdownChange} />
+            <div className="chart-section-control-wrapper">
+                <h5 className="text-400 mb-08">Currently viewing</h5>
+                <DropdownButton id="section-select-dropdown" title={currSectionTitle} children={_.map(StatisticsPageView.viewOptions, function({ title, id, icon }){
+                    return (
+                        <MenuItem {...{ title, 'key': id, 'eventKey' : id }} active={id === currentTab}>
+                            { icon ? <span><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</span> : '' }{ title }
+                        </MenuItem>
+                    );
+                })} onSelect={this.onDropdownChange} />
+            </div>
+        );
+    }
+
+    renderTopMenu(){
+        var currentTab          = this.state.currentTab,
+            submissionsObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'submissions' }),
+            usageObj            = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'usage' });
+
+        return (
+            <div className="chart-section-control-wrapper row">
+                <div className="col-sm-6">
+                    <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
+                        href="#submissions" data-tip={submissionsObj.tip} data-target-offset={130}>
+                        { submissionsObj.icon ? <i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/> : '' }
+                        { submissionsObj.icon ? <span>&nbsp;&nbsp;</span> : null }
+                        { submissionsObj.title }
+                    </a>
                 </div>
+                <div className="col-sm-6">
+                    <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
+                        href="#usage" data-tip={usageObj.tip} data-target-offset={130}>
+                        { usageObj.icon ? <i className={"text-medium icon icon-fw icon-" + usageObj.icon}/> : '' }
+                        { usageObj.icon ? <span>&nbsp;&nbsp;</span> : null } 
+                        { usageObj.title }
+                    </a>
+                </div>
+            </div>
+        );
+    }
+
+    render(){
+        var currentTab          = this.state.currentTab,
+            renderFxn           = currentTab === 'usage' ? this.renderUsageSection : this.renderSubmissionsSection;
+
+        return (
+            <StaticPage.Wrapper>
+                { this.renderTopMenu() }
                 <hr/>
                 { renderFxn() }
             </StaticPage.Wrapper>
@@ -659,10 +718,10 @@ class UsageStatsView extends StatsChartViewBase {
             width = this.getRefWidth() || null;
 
         if (!mounted || !sessions_by_country){
-            return <div className="stats-charts-container" ref="elem" children={ loadingIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ loadingIcon() }/>;
         }
         if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" ref="elem" children={ errorIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ errorIcon() }/>;
         }
 
         var anyExpandedCharts       = _.any(_.values(this.state.chartToggles)),
@@ -686,10 +745,8 @@ class UsageStatsView extends StatsChartViewBase {
             commonXDomain[0] = new Date(firstDateStr + "T00:00:00.000");
         }
 
-        console.log('DD', currentGroupBy, sessions_by_country);
-
         return (
-            <div className="stats-charts-container" ref="elem">
+            <div className="stats-charts-container" key="charts" ref="elem" id="usage">
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                     title="Aggregate" outerClassName="dropdown-container mb-0" />
@@ -830,10 +887,10 @@ class SubmissionsStatsView extends StatsChartViewBase {
             width = this.getRefWidth() || null;
 
         if (!mounted || (!expsets_released)){
-            return <div className="stats-charts-container" ref="elem" children={ loadingIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref="elem" id="submissions" children={ loadingIcon() }/>;
         }
         if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" ref="elem" children={ errorIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref="elem" id="submissions" children={ errorIcon() }/>;
         }
 
         var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
@@ -844,7 +901,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
             showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal;
 
         return (
-            <div className="stats-charts-container" ref="elem">
+            <div className="stats-charts-container" key="charts" ref="elem" id="submissions">
 
                 { showInternalReleaseCharts ?
 

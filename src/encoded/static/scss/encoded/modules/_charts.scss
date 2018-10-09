@@ -1751,9 +1751,39 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 /***** Area Charts *****/
 
+.chart-section-control-wrapper {
+    &.row {
+        > .col-sm-6 {
+            > a.select-section-btn {
+                text-align: center;
+                color: #333;
+                border: 1px solid transparent;
+                border-top: 1px solid #ddd;
+                border-bottom: 1px solid #ddd;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                display: block;
+                transition: border-color .25s;
+                &.active {
+                    border-color: #777;
+                }
+                &:hover, &:active, &:focus {
+                    text-decoration: none;
+                }
+                &:hover {
+                    color: #000;
+                    text-shadow: 0 0 0;
+                    border-color: #333;
+                }
+            }
+        }
+    }
+}
+
 
 .stats-charts-container {
 
+    min-height: 1400px;
 
     .area-chart-inner-container {
         position: relative;

@@ -870,8 +870,6 @@ export class AreaChart extends React.PureComponent {
                 }), function(c){ return -c[tdp]; }),
                 topPosition         = yScale(total);
 
-            console.log('TOP', topPosition);
-
             // It's anti-pattern for component to update its children using setState instead of passing props as done here.
             // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
             // so performance/clarity-wise this approach seems more desirable.
