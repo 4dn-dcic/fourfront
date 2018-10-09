@@ -301,8 +301,18 @@ def date_histogram_aggregations(request):
     '''PREDEFINED aggregations which run against type=ExperimentSet'''
 
     # Defaults - may be overriden in URI params
-    date_histogram_fields   = ['public_release', 'project_release']
-    group_by_field          = 'award.center_title'
+    date_histogram_fields    = ['public_release', 'project_release']
+    group_by_field           = 'award.center_title'
+    date_histogram_intervals = ['weekly']
+
+    # Mapping of 'date_histogram_interval' options we accept to ElasticSearch interval vocab term.
+    interval_to_es_interval = {
+        'hourly'    : 'hour',
+        'daily'     : 'day',
+        'weekly'    : 'week',
+        'monthly'   : 'month',
+        'yearly'    : 'year'
+    }
 
     try:
         json_body = request.json_body
@@ -313,56 +323,82 @@ def date_histogram_aggregations(request):
         if 'group_by' in search_param_lists:
             group_by_field = search_param_lists['group_by'][0] if isinstance(search_param_lists['group_by'], list) else search_param_lists['group_by']
             del search_param_lists['group_by'] # We don't wanna use it as search filter.
+            if group_by_field in ['None', 'null']:
+                group_by_field = None
         if 'date_histogram' in search_param_lists:
             date_histogram_fields = search_param_lists['date_histogram'] if isinstance(search_param_lists['date_histogram'], list) else [search_param_lists['date_histogram']]
             del search_param_lists['date_histogram'] # We don't wanna use it as search filter.
+        if 'date_histogram_interval' in search_param_lists:
+            date_histogram_intervals = search_param_lists['date_histogram_interval'] if isinstance(search_param_lists['date_histogram_interval'], list) else [search_param_lists['date_histogram_interval']]
+            for interval in date_histogram_intervals:
+                if interval not in interval_to_es_interval.keys():
+                    raise IndexError('"{}" is not one of daily, weekly, monthly, or yearly.'.format(interval))
+            del search_param_lists['date_histogram_interval'] # We don't wanna use it as search filter.
         if not search_param_lists:
             search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
             del search_param_lists['award.project']
 
+    if 'ExperimentSet' in search_param_lists['type'] or 'ExperimentSetReplicate' in search_param_lists['type']:
+        # Add predefined sub-aggs to collect Exp and File counts from ExpSet items, in addition to getting own doc_count.
 
-    common_sub_agg = deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
+        common_sub_agg = deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
 
-    # Add on file_size_volume
-    for key_name in ['total_exp_raw_files', 'total_exp_processed_files', 'total_expset_processed_files']:
-        common_sub_agg[key_name + "_volume"] = {
-            "sum" : {
-                "field" : common_sub_agg[key_name]["cardinality"]["field"].replace('.accession.raw', '.file_size')
+        # Add on file_size_volume
+        for key_name in ['total_exp_raw_files', 'total_exp_processed_files', 'total_expset_processed_files']:
+            common_sub_agg[key_name + "_volume"] = {
+                "sum" : {
+                    "field" : common_sub_agg[key_name]["cardinality"]["field"].replace('.accession.raw', '.file_size')
+                }
+            }
+        common_sub_agg["total_files_volume"] = {
+            "bucket_script" : {
+                "buckets_path": {
+                    "expSetProcessedFilesVol": "total_expset_processed_files_volume",
+                    "expProcessedFilesVol": "total_exp_processed_files_volume",
+                    "expRawFilesVol": "total_exp_raw_files_volume"
+                },
+                "script" : "params.expSetProcessedFilesVol + params.expProcessedFilesVol + params.expRawFilesVol"
             }
         }
-    common_sub_agg["total_files_volume"] = {
-        "bucket_script" : {
-            "buckets_path": {
-                "expSetProcessedFilesVol": "total_expset_processed_files_volume",
-                "expProcessedFilesVol": "total_exp_processed_files_volume",
-                "expRawFilesVol": "total_exp_raw_files_volume"
-            },
-            "script" : "params.expSetProcessedFilesVol + params.expProcessedFilesVol + params.expRawFilesVol"
-        }
-    }
 
-    histogram_sub_aggs = dict(common_sub_agg, group_by={
-        "terms" : {
-            "field"     : "embedded." + group_by_field + ".raw",
-            "missing"   : TERM_NAME_FOR_NO_VALUE,
-            "size"      : 30
-        },
-        "aggs" : common_sub_agg
-    })
+        if group_by_field is not None:
+            histogram_sub_aggs = dict(common_sub_agg, group_by={
+                "terms" : {
+                    "field"     : "embedded." + group_by_field + ".raw",
+                    "missing"   : TERM_NAME_FOR_NO_VALUE,
+                    "size"      : 30
+                },
+                "aggs" : common_sub_agg
+            })
+        else:
+            histogram_sub_aggs = common_sub_agg
 
-    # Create an agg item for each date field in `date_histogram_fields`
-    outer_date_histogram_agg = {
-        "weekly_interval_" + dh_field : {
-            "date_histogram" : {
-                "field": "embedded." + dh_field,
-                "interval": "week",
-                "format": "yyyy-MM-dd"
-            },
-            "aggs" : histogram_sub_aggs
-        }
-        for dh_field in date_histogram_fields
-    }
+    else:
+        # Do simple date_histogram group_by sub agg, unless is set to 'None'
+        histogram_sub_aggs = {
+            "group_by" : {
+                "terms" : {
+                    "field"     : "embedded." + group_by_field + ".raw",
+                    "missing"   : TERM_NAME_FOR_NO_VALUE,
+                    "size"      : 30
+                }
+            }
+        } if group_by_field is not None else None
 
+    # Create an agg item for each interval in `date_histogram_intervals` x each date field in `date_histogram_fields`
+    # TODO: Figure out if we want to align these up instead of do each combination.
+    outer_date_histogram_agg = {}
+    for interval in date_histogram_intervals:
+        for dh_field in date_histogram_fields:
+            outer_date_histogram_agg[interval + '_interval_' + dh_field] = {
+                "date_histogram" : {
+                    "field": "embedded." + dh_field,
+                    "interval": interval_to_es_interval[interval],
+                    "format": "yyyy-MM-dd"
+                }
+            }
+            if histogram_sub_aggs:
+                outer_date_histogram_agg[interval + '_interval_' + dh_field]['aggs'] = histogram_sub_aggs
 
     search_param_lists['limit'] = search_param_lists['from'] = [0]
     subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
