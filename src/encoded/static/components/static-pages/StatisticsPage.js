@@ -505,10 +505,10 @@ export const aggregationsToChartData = {
         'function' : function(resp, props){
             if (!resp || !resp['@graph']) return null;
 
-            var countKey = 'ga:totalEvents',
+            var countKey    = 'ga:totalEvents',
                 groupingKey = "ga:dimension3"; // Field name, dot notation
 
-            if (props.currentGroupBy === 'sessions') countKey = 'ga:sessions';
+            if (props.countBy.fields_faceted === 'sessions') countKey = 'ga:sessions';
             if (props.fields_faceted_group_by === 'term') groupingKey = 'ga:dimension4';
             if (props.fields_faceted_group_by === 'field+term') groupingKey = 'ga:eventLabel';
 
@@ -521,7 +521,7 @@ export const aggregationsToChartData = {
             if (!resp || !resp['@graph']) return null;
 
             var countKey = 'ga:pageviews';
-            if (props.currentGroupBy === 'sessions') countKey = 'ga:sessions';
+            if (props.countBy.sessions_by_country === 'sessions') countKey = 'ga:sessions';
 
             return commonParsingFxn.analytics_to_buckets(resp, 'sessions_by_country', 'ga:country', countKey);
         }
@@ -556,9 +556,11 @@ export const aggregationsToChartData = {
             if (!resp || !resp['@graph']) return null;
             
             //var termBucketField = function(subBucket){ return subBucket['ga:productBrand'] + ' - ' + subBucket['ga:productName']; };
-            var termBucketField = 'ga:productBrand';
-            var countKey = 'ga:productDetailViews';
-            //if (props.currentGroupBy === 'sessions') countKey = 'ga:users'; // "Sessions" not saved in analytics for search queries.
+            var termBucketField = 'ga:productBrand',
+                countKey        = 'ga:productDetailViews';
+
+            if (props.countBy.experiment_set_views === 'list_views') countKey = 'ga:productListViews';
+            else if (props.countBy.experiment_set_views === 'clicks') countKey = 'ga:productListClicks';
 
             return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey);
         }
@@ -609,20 +611,27 @@ class UsageStatsView extends StatsChartViewBase {
         }, 0);
     }
 
-    renderCountByDropdown(chartID){
+    renderCountByDropdown(chartID, tooltip=null){
         var currCountBy = this.state.countBy[chartID],
             titles      = {
-                'views'     : <span><i className="icon icon-fw icon-eye"/>&nbsp; Views</span>,
-                'sessions'  : <span><i className="icon icon-fw icon-users"/>&nbsp; Sessions</span>
+                'views'     : <span><i className="icon icon-fw icon-eye"/>&nbsp; View</span>,
+                'sessions'  : <span><i className="icon icon-fw icon-user"/>&nbsp; User Session</span>
             },
             ddtitle     = titles[currCountBy];
+
+        if (chartID === 'experiment_set_views' || chartID === 'file_views'){
+            titles = {
+                'views'         : <span><i className="icon icon-fw icon-eye"/>&nbsp; Detail View</span>,
+                'list_views'    : <span><i className="icon icon-fw icon-list"/>&nbsp; Appearance within first 25 Search Results</span>,
+                'clicks'        : <span><i className="icon icon-fw icon-hand-o-up"/>&nbsp; Search Result Click</span>
+            };
+            ddtitle = titles[currCountBy];
+        }
         
         return (
-            <div className="mb-15">
-                <div className="text-400 inline-block">Counting&nbsp;&nbsp;</div>
-                <DropdownButton id={"select_count_for_" + chartID} onSelect={(ek, e) => this.changeCountByForChart(chartID, ek)} title={ddtitle}>
-                    <MenuItem eventKey="views" key="views">{ titles.views }</MenuItem>
-                    <MenuItem eventKey="sessions" key="sessions">{ titles.sessions }</MenuItem>
+            <div className="inline-block" style={{ 'marginRight' : 5 }}>
+                <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID} onSelect={(ek, e) => this.changeCountByForChart(chartID, ek)} title={ddtitle}>
+                    {_.map(_.keys(titles), function(k){ return <MenuItem eventKey={k} key={k} children={titles[k]} />; })}
                 </DropdownButton>
             </div>
         );
@@ -645,7 +654,7 @@ class UsageStatsView extends StatsChartViewBase {
     render(){
         var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
             { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
-                other_search_queries, experiment_set_views
+                other_search_queries, experiment_set_views, countBy
             } = this.state,
             width = this.getRefWidth() || null;
 
@@ -694,7 +703,8 @@ class UsageStatsView extends StatsChartViewBase {
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
-                            title={<span className="text-500">{ currentGroupBy === 'sessions' ? 'User Sessions' : 'Page Views' }</span>}>
+                            title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
+                            extraButtons={this.renderCountByDropdown('sessions_by_country')}>
                             <AreaChart data={sessions_by_country} xDomain={commonXDomain} />
                         </AreaChartContainer>
 
@@ -731,14 +741,21 @@ class UsageStatsView extends StatsChartViewBase {
 
                 { experiment_set_views ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={experiment_set_views}>
+                    <GroupOfCharts width={width} resetScaleLegendWhenChange={experiment_set_views}>
 
                         <hr className="mt-3"/>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                         <AreaChartContainer {...commonContainerProps} id="experiment_set_views"
-                            title={<span><span className="text-500">Experiment Set Detail Views</span></span>}>
+                            title={
+                                <span>
+                                    <span className="text-500">Experiment Set Detail Views</span>{' '}
+                                    { countBy.experiment_set_views === 'list_views' ? '- appearances within initial 25 browse results' :
+                                        countBy.experiment_set_views === 'clicks' ? '- clicks from browse results' : '- page detail views' }
+                                </span>
+                            }
+                            extraButtons={this.renderCountByDropdown('experiment_set_views')}>
                             <AreaChart data={experiment_set_views} xDomain={commonXDomain} />
                         </AreaChartContainer>
 
@@ -749,7 +766,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                 { fields_faceted ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
+                    <GroupOfCharts width={width} resetScaleLegendWhenChange={fields_faceted}>
 
                         <hr className="mt-3"/>
                         {/*
@@ -765,8 +782,9 @@ class UsageStatsView extends StatsChartViewBase {
                         */}
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                        <AreaChartContainer {...commonContainerProps} id="field_faceted"
-                            title={<span><span className="text-500">Fields Faceted</span> { currentGroupBy === 'sessions' ? '- Sessions' : '- Views' }</span>}>
+                        <AreaChartContainer {...commonContainerProps} id="fields_faceted"
+                            title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
+                            extraButtons={this.renderCountByDropdown('fields_faceted')}>
                             <AreaChart data={fields_faceted} xDomain={commonXDomain} />
                         </AreaChartContainer>
 

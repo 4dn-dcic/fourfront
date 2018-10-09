@@ -444,7 +444,8 @@ export class ChartTooltip extends React.PureComponent {
             'leftPosition'  : 0,
             'visible'       : false,
             'mounted'       : false,
-            'contentFxn'    : null
+            'contentFxn'    : null,
+            'topPosition'   : 0
         }, props.initialState || {});
     }
 
@@ -459,14 +460,20 @@ export class ChartTooltip extends React.PureComponent {
 
     render(){
         var { margin } = this.props,
-            { leftPosition, visible, contentFxn } = this.state;
+            { leftPosition, visible, contentFxn, topPosition, chartWidth, chartHeight } = this.state;
         return (
             <div className="chart-tooltip" ref="tooltipContainer" style={_.extend(_.pick(margin, 'left', 'top'), {
-                'transform' : 'translate(' + leftPosition + 'px, 0px)',
+                'transform' : 'translate(' + Math.min(leftPosition, chartWidth - 5) + 'px, 0px)',
                 'display' : visible ? 'block' : 'none',
                 'bottom' : margin.bottom + 5
             })}>
                 <div className="line"/>
+                <div className="line-notch" style={{ 'top' : topPosition }}>
+                    { chartWidth && topPosition < chartHeight ? [
+                        <div key="before" className="horiz-line-before" style={{ 'width' : leftPosition, 'left' : -leftPosition }}/>,
+                        <div key="after" className="horiz-line-after" style={{ 'width' : chartWidth - leftPosition }}/>
+                    ] : null }
+                </div>
                 { contentFxn && contentFxn(this.props, this.state) }
             </div>
         );
@@ -839,50 +846,56 @@ export class AreaChart extends React.PureComponent {
 
         requestAnimationFrame(()=>{
 
-            var xScale       = this.xScale(chartWidth),
-                hovDate      = xScale.invert(mouseCoords[0]),
-                dateString   = DateUtility.format(hovDate, 'date-sm'),
-                leftPosition = xScale(hovDate);
+            var xScale              = this.xScale(chartWidth),
+                yScale              = this.yScale(chartHeight),
+                hovDate             = xScale.invert(mouseCoords[0]),
+                dateString          = DateUtility.format(hovDate, 'date-sm'),
+                leftPosition        = xScale(hovDate),
+                isToLeft            = leftPosition > (chartWidth / 2),
+                maxTermsVisible     = Math.floor((chartHeight - 60) / 18),
+                stackedLegendItems  = _.filter(_.map(stackedData, function(sD){
+                    return _.find(sD, function(stackedDatum, i, all){
+                        var curr = stackedDatum.data,
+                            next = (all[i + 1] && all[i + 1].data) || null;
+
+                        if (hovDate > curr.date && (!next || next.date >= hovDate)){
+                            return true;
+                        }
+                        return false;
+                    });
+                })),
+                total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
+                termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
+                    return c && c[tdp] > 0;
+                }), function(c){ return -c[tdp]; }),
+                topPosition         = yScale(total);
+
+            console.log('TOP', topPosition);
 
             // It's anti-pattern for component to update its children using setState instead of passing props as done here.
             // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
             // so performance/clarity-wise this approach seems more desirable.
             tooltip.setState({
+                leftPosition, topPosition, chartWidth, chartHeight,
                 'visible'       : true,
-                'leftPosition'  : leftPosition,
-                'contentFxn'    : function(tProps, tState){
-                    var isToLeft           = leftPosition > (chartWidth / 2),
-                        maxTermsVisible    = Math.floor((chartHeight - 60) / 18),
-                        stackedLegendItems = _.filter(_.map(stackedData, function(sD){
-                            return _.find(sD, function(stackedDatum, i, all){
-                                var curr = stackedDatum.data,
-                                    next = (all[i + 1] && all[i + 1].data) || null;
-
-                                if (hovDate > curr.date && (!next || next.date >= hovDate)){
-                                    return true;
-                                }
-                                return false;
-                            });
-                        })),
-                        total = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
-                        termChildren = _.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
-                            return c && c[tdp] > 0;
-                        }).reverse();
+                'contentFxn'    : function(tProps, tState){                        
 
                     if (termChildren.length > maxTermsVisible){
-                        var lastTermIdx = maxTermsVisible - 1,
-                            currentActiveItemIndex = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
+                        var lastTermIdx             = maxTermsVisible - 1,
+                            currentActiveItemIndex  = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
+
                         if (currentActiveItemIndex && currentActiveItemIndex > lastTermIdx){
                             var temp = termChildren[lastTermIdx];
                             termChildren[lastTermIdx] = termChildren[currentActiveItemIndex];
                             termChildren[currentActiveItemIndex] = temp;
                         }
-                        var termChildrenRemainder = termChildren.slice(maxTermsVisible);
-                        termChildren = termChildren.slice(0, maxTermsVisible);
-                        var totalForRemainder = 0;
+                        var termChildrenRemainder = termChildren.slice(maxTermsVisible),
+                            totalForRemainder = 0;
+
                         _.forEach(termChildrenRemainder, function(r){
                             totalForRemainder += r[tdp];
                         });
+                        termChildren = termChildren.slice(0, maxTermsVisible);
                         var newChild = { 'term' : termChildrenRemainder.length + " More...", "noColor" : true };
                         newChild[tdp] = totalForRemainder;
                         termChildren.push(newChild);
@@ -890,14 +903,14 @@ export class AreaChart extends React.PureComponent {
 
                     return (
                         <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
-                            <h5 className="text-500 mt-0 mb-11">
-                                { dateString }{ total ? <span className="text-400">&nbsp;&nbsp; { total }</span> : null }
+                            <h5 className="text-500 mt-0 mb-11 clearfix">
+                                { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
                             </h5>
                             <table className="current-legend">
                                 <tbody>
                                     { _.map(termChildren, function(c, i){
                                         return (
-                                            <tr key={i} className={currentTerm === c.term ? 'active' : null}>
+                                            <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
                                                 <td className="patch-cell">
                                                     <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
                                                 </td>
@@ -1047,11 +1060,13 @@ export function errorIcon(label = "Loading failed. Please try again later."){
 export class AreaChartContainer extends React.Component {
 
     static defaultProps = {
-        'colorScale' : null
+        'colorScale' : null,
+        'extraButtons' : []
     }
 
     constructor(props){
         super(props);
+        this.buttonSection = this.buttonSection.bind(this);
         this.isExpanded = this.isExpanded.bind(this);
         this.toggleExpanded = _.throttle(this.toggleExpanded.bind(this), 1000);
         this.expandButton = this.expandButton.bind(this);
@@ -1087,9 +1102,18 @@ export class AreaChartContainer extends React.Component {
     expandButton(expanded, className){
         if (this.props.gridState && this.props.gridState !== 'lg') return null;
         return (
-            <Button className={className} bsSize="sm" onClick={this.toggleExpanded} style={{ 'marginTop' : -6 }}>
+            <Button className={className} bsSize="sm" onClick={this.toggleExpanded}>
                 <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
             </Button>
+        );
+    }
+
+    buttonSection(expanded){
+        return (
+            <div className="pull-right">
+                { this.props.extraButtons }
+                { this.expandButton(expanded) }
+            </div>
         );
     }
 
@@ -1115,7 +1139,7 @@ export class AreaChartContainer extends React.Component {
 
         return (
             <div className={className}>
-                <h4 className="text-300">{ title } { this.expandButton(expanded, 'pull-right') }</h4>
+                <h4 className="text-300 clearfix">{ title } { this.buttonSection(expanded) }</h4>
                 <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }} children={visualToShow} />
             </div>
         );

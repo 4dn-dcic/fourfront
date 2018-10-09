@@ -1774,8 +1774,35 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 bottom: 0;
                 left: 0;
                 width: 0px;
-                border-left: 1px solid #000;
+                border-left: 1px dashed #000;
                 pointer-events: none;
+            }
+
+            > .line-notch {
+                position: absolute;
+                pointer-events: none;
+                left: -5px;
+                width: 11px;
+                height: 0px;
+                border-top: 3px solid #000;
+                margin-top: -3px;
+                > .horiz-line-before,
+                > .horiz-line-after {
+                    position: relative;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                }
+                /*
+                &::before {
+                    content: ' ';
+                    display: block;
+                    position: relative;
+                    width: 2000px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    left: -2000px;
+                }
+                */
             }
 
             > .label-bg {
@@ -1783,7 +1810,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-right: 12px;
                 padding-top: 8px;
                 position: absolute;
-                min-width: 135px;
+                min-width: 150px;
                 background-color: rgba(255,255,255,0.8);
                 padding-bottom: 9px;
                 border-bottom-left-radius: 5px;
