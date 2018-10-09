@@ -221,7 +221,7 @@ describe('Testing Workflow Graph', function() {
 
 });
 
-describe('TODO Change name: Bug testing', function() {
+describe('Find nodes from other columns', function() {
     var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
 
     function getShowParamsCheckBox(){
@@ -258,7 +258,7 @@ describe('TODO Change name: Bug testing', function() {
 
 
         // Make a workflow run with at least 5 graph columns (including arrows.) The node in column 4 refers to a chromsize file whose node is already in column 0.
-        context = require('./../testdata/workflow_run/awsem-node-dup-check').default;
+        context = require('./../testdata/workflow_run/awsem-node-dupe-check').default;
         // Get test Data
         schemas = require('../testdata/schemas');
 
@@ -302,7 +302,8 @@ describe('TODO Change name: Bug testing', function() {
         });
         expect(column0Nodes.length).toEqual(2);
 
-        // TODO: Make sure 3 edges total are coming from the column 0 nodes.
-
+        // There should be 11 edges in total.
+        var edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+        expect(edges.length).toEqual(11);
     });
 });
