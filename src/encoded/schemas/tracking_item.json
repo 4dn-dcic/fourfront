@@ -46,6 +46,14 @@
                     "title": "Remote IP",
                     "type": "string"
                 },
+                "geo_country": {
+                    "title": "Country",
+                    "type": "string"
+                },
+                "geo_city": {
+                    "title": "City",
+                    "type": "string"
+                },
                 "user_email" : {
                     "title": "User Email",
                     "type": "string"
@@ -56,6 +64,14 @@
                 },
                 "filename" : {
                     "title": "Filename",
+                    "type": "string"
+                },
+                "file_format" : {
+                    "title": "File Format",
+                    "type": "string"
+                },
+                "experiment_type" : {
+                    "title": "Experiment Type",
                     "type": "string"
                 },
                 "range_query" : {
