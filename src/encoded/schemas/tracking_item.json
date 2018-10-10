@@ -77,6 +77,10 @@
                 "range_query" : {
                     "title": "Range Query",
                     "type": "boolean"
+                },
+                "is_visualization": {
+                    "title": "Is Visualization",
+                    "type": "boolean"
                 }
             }
         },

@@ -907,7 +907,7 @@ def download(context, request):
             found_experiment_type = 'Multiple types'
             break
     tracking_values['experiment_type'] = found_experiment_type
-
+    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
     tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
                      'status': 'in review by lab', 'tracking_type': 'download_tracking',
