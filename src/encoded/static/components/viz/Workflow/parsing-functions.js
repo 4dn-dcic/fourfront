@@ -726,7 +726,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                             var nodesWithFiles = _.filter(
                                 nodesBySource,
                                 function(datum) {
-                                    let n2 = datum.node;
+                                    const n2 = datum.node;
 
                                     const fileInNode = (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
 
