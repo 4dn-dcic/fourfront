@@ -709,7 +709,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                                     return {
                                         "node": n2,
                                         "source" : "currentIONodesMatched"
-                                    }
+                                    };
                                 }
                             ).concat(
                                 _.map(
@@ -718,7 +718,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                                         return {
                                             "node": n2,
                                             "source" : "nodes"
-                                        }
+                                        };
                                     }
                                 )
                             );
@@ -728,7 +728,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                                 function(datum) {
                                     let n2 = datum.node;
 
-                                    let fileInNode = (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
+                                    const fileInNode = (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
 
                                     return fileInNode !== null;
                                 }
@@ -740,14 +740,14 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                                     nodesWithFiles,
                                     function(datum){
                                         // Get the file from the node.
-                                        let f = datum.node.meta.run_data.file;
+                                        const f = datum.node.meta.run_data.file;
 
-                                        let doFilesMatch = compareTwoFilesByUUID(f, fileToMatch);
+                                        const doFilesMatch = compareTwoFilesByUUID(f, fileToMatch);
 
                                         // If the files are the same, check the source. We will have to make a new edge if it has not been currently matched.
                                         if (doFilesMatch && datum.node.source !== "currentIONodesMatched") {
                                             // Mark a new edge to be created later
-                                            let newEdge = {};
+                                            const newEdge = {};
                                             newEdge[stepIOTargetType] = datum.node;
                                             newEdge[oppIOTargetType] = stepNode;
                                             newEdge.capacity = ioNodeType;
