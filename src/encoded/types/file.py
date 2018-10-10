@@ -903,8 +903,8 @@ def download(context, request):
         exp_type = exp_info.get('experiment_type')
         if found_experiment_type is None or found_experiment_type == exp_type:
             found_experiment_type = exp_type
-        else:  # conflicting experiment types
-            found_experiment_type = 'Multiple types'
+        else:  # multiple experiment types
+            found_experiment_type = 'Integrative analysis'
             break
     tracking_values['experiment_type'] = found_experiment_type
     tracking_values['is_visualization'] = False
