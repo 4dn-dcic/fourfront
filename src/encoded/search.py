@@ -56,8 +56,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     from_, size = get_pagination(request)
 
-    before_date, after_date = get_date_range(request)
-
     # get desired frame for this search
     search_frame = request.params.get('frame', 'embedded')
 
@@ -98,7 +96,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    search, query_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
+    search, query_filters = set_filters(request, search, result, principals, doc_types, types)
 
     ### Set starting facets
     facets = initialize_facets(types, doc_types, prepared_terms, schemas)
@@ -237,17 +235,6 @@ def get_pagination(request):
         except ValueError:
             size = 0
     return from_, size
-
-
-def get_date_range(request):
-    """
-    Get 'before' and 'after' params from the request.
-    These determine the greater than and less than dates for the search
-    Date format is yyyy-MM-dd HH:mm.
-    """
-    before = request.params.get('before', None)
-    after = request.params.get('after', None)
-    return before, after
 
 
 def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
@@ -567,37 +554,46 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
-def set_filters(request, search, result, principals, doc_types, before_date=None, after_date=None):
+def set_filters(request, search, result, principals, doc_types, types):
     """
     Sets filters in the query
     """
+
     # these next two dictionaries should each have keys equal to query_field
     # and values: must_terms: [<list of terms>], must_not_terms: [<list of terms>], add_no_value: True/False/None
-    field_filters = {}
-    field_filters['principals_allowed.view'] = {
-        'must_terms': principals,
-        'must_not_terms': [],
-        'add_no_value': None
+    field_filters = {
+        'principals_allowed.view' : {
+            'must_terms': principals,
+            'must_not_terms': [],
+            'add_no_value': None
+        },
+        'embedded.@type.raw' : {
+            'must_terms': doc_types,
+            'must_not_terms': [],
+            'add_no_value': None
+        },
+        'embedded.status.raw' : {
+            'must_terms': [],
+            'must_not_terms': [],
+            'add_no_value': None
+        }
     }
-    field_filters['embedded.@type.raw'] = {
-        'must_terms': doc_types,
-        'must_not_terms': [],
-        'add_no_value': None
-    }
-    exclude_statuses = []
+
+    range_filters = {}
+
+    # Exclude status=deleted Items unless explicitly requested/filtered-in.
     if 'deleted' not in request.params.getall('status'):
-        exclude_statuses.append('deleted')
+        field_filters['embedded.status.raw']['must_not_terms'].append('deleted')
     if 'replaced' not in request.params.getall('status'):
-        exclude_statuses.append('replaced')
-    field_filters['embedded.status.raw'] = { # Exclude status=deleted Items unless explicitly requested/filtered-in.
-        'must_terms': [],
-        'must_not_terms': exclude_statuses,
-        'add_no_value': None
-    }
+        field_filters['embedded.status.raw']['must_not_terms'].append('replaced')
+
+
 
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
+        range_type = False # If we determine is a range request (field.to, field.from), will be populated with string 'date' or 'numerical'
+        range_direction = None
         if field in ['limit', 'y.limit', 'x.limit', 'mode', 'redirected_from',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
@@ -625,36 +621,61 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         if field == 'searchTerm':
             continue
 
+        # Check for date or numerical range filters
+        if (len(field) > 2 and field[-2:] == 'to') or (len(field) > 4 and field[-4:] == 'from'):
+            if field[-2:] == 'to':
+                f_field = field[:-3]
+                range_direction = "lte"
+            else:
+                f_field = field[:-5]
+                range_direction = "gte"
+            field_schema = schema_for_field(f_field, types, doc_types)
+            if field_schema:
+                range_type = 'date' if determine_if_is_date_field(f_field, field_schema) else 'numerical'
+
         # handle NOT
-        if field.endswith('!'):
+        elif field.endswith('!'): 
             field = field[:-1]
             not_field = True
 
         # Add filter to query
-        if field.startswith('audit'):
+        if range_type and f_field and range_type in ('date', 'numerical'):
+            query_field = 'embedded.' + field
+        elif field.startswith('audit'):
             query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
         else:
             query_field = 'embedded.' + field + '.raw'
 
-        if query_field not in field_filters:
-            field_filters[query_field] = {
-                'must_terms': [],
-                'must_not_terms': [],
-                'add_no_value': None
-            }
 
-        # handle case of filtering for null values
-        if exists_field:
-            # the value below is True when we want to include 'No value' as a filter
-            field_filters[query_field]['add_no_value'] = False if not_field else True
-            continue
+        if range_type:
+            if query_field not in range_filters:
+                range_filters[query_field] = {}
+                if range_type == 'date':
+                    range_filters[query_field]['format'] = 'yyyy-MM-dd'
 
-        if not_field:
-            field_filters[query_field]['must_not_terms'].append(term)
+            if range_direction in ('gt', 'gte', 'lt', 'lte'):
+                range_filters[query_field][range_direction] = term
+                
         else:
-            field_filters[query_field]['must_terms'].append(term)
+            if query_field not in field_filters:
+                field_filters[query_field] = {
+                    'must_terms': [],
+                    'must_not_terms': [],
+                    'add_no_value': None
+                }
+
+            # handle case of filtering for null values
+            if exists_field:
+                # the value below is True when we want to include 'No value' as a filter
+                field_filters[query_field]['add_no_value'] = False if not_field else True
+                continue
+
+            if not_field:
+                field_filters[query_field]['must_not_terms'].append(term)
+            else:
+                field_filters[query_field]['must_terms'].append(term)
 
     must_filters = []
     must_not_filters = []
@@ -675,14 +696,11 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
             if must_terms: must_filters.append(must_terms)
         if must_not_terms: must_not_filters.append(must_not_terms)
 
-    # lastly, add date limits to filters if given
-    if before_date or after_date:
-        date_limits = {'format':'yyyy-MM-dd HH:mm'}
-        if before_date:
-            date_limits['lte'] = before_date # lte is >=
-        if after_date:
-            date_limits['gte'] = after_date # gte is <=
-        must_filters.append({'range':{'embedded.date_created': date_limits}})
+    # lastly, add range limits to filters if given
+    for range_field, range_def in range_filters.items():
+        must_filters.append({
+            'range' : { range_field : range_def }
+        })
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
     # modify that, then update from the new dict
@@ -870,8 +888,16 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
 
         field_schema = schema_for_field(field, types, doc_types)
 
+        #is_date_range_or_histo = False
+        #if (len(field) > 2 and field[:2] == 'to') or (len(field) > 4 and field[:4] == 'from'):
+
+        #    pass
+
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
         is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
+
+        #print('TTT\n\n', is_date_field)
+        #print('TTT\n\n', field)
 
         if field == 'type':
             query_field = 'embedded.@type.raw'
