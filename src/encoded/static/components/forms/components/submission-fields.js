@@ -7,7 +7,7 @@ import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import * as globals from './../../globals';
-import { ajax, console, object, isServerSide, animateScrollTo, Schemas, fileUtil } from './../../util';
+import { ajax, console, object, Schemas } from './../../util';
 import Alerts from './../../alerts';
 import { BasicStaticSectionBody } from './../../static-pages/components/BasicStaticSectionBody';
 import { Line as ProgressBar } from 'rc-progress';
