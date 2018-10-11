@@ -662,7 +662,6 @@ def set_filters(request, search, result, principals, doc_types, types):
                     range_filters[query_field]['format'] = 'yyyy-MM-dd'
 
             if range_direction in ('gt', 'gte', 'lt', 'lte'):
-                print('\n\n\n\n', query_field, '\n\n', range_direction, '\n\n', term, '\n\n', range_filters)
                 if range_filters[query_field].get(range_direction) is None:
                     range_filters[query_field][range_direction] = term
                 else: # If have a value already (e.g. multiple ranges selected), choose the widening option.

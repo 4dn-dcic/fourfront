@@ -60,8 +60,6 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
             // Todo: var interval = ....
         }
 
-        console.log('TTT', toFilter, fromFilter);
-
         if (toFilter && !fromFilter){
             parts = url.parse(toFilter['remove']);
             if (includePathName) {
@@ -108,7 +106,6 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
             if (includePathName) {
                 retHref += partsFrom.pathname;
             }
-            console.log('TTT3', commonQs, retHref);
             return retHref;
         }
 
