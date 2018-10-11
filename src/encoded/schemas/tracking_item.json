@@ -46,8 +46,16 @@
                     "title": "Remote IP",
                     "type": "string"
                 },
-                "user_email" : {
-                    "title": "User Email",
+                "geo_country": {
+                    "title": "Country",
+                    "type": "string"
+                },
+                "geo_city": {
+                    "title": "City",
+                    "type": "string"
+                },
+                "user_uuid": {
+                    "title": "User UUID",
                     "type": "string"
                 },
                 "request_path" : {
@@ -58,8 +66,20 @@
                     "title": "Filename",
                     "type": "string"
                 },
+                "file_format" : {
+                    "title": "File Format",
+                    "type": "string"
+                },
+                "experiment_type" : {
+                    "title": "Experiment Type",
+                    "type": "string"
+                },
                 "range_query" : {
                     "title": "Range Query",
+                    "type": "boolean"
+                },
+                "is_visualization": {
+                    "title": "Is Visualization",
                     "type": "boolean"
                 }
             }

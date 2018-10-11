@@ -306,6 +306,8 @@ def session_properties(request):
         'user_actions' : [ v for k, v in sorted(user_actions.items(), key=itemgetter(0)) ]
     }
 
+    # add uuid to user details
+    properties['details']['uuid'] = userid
     #if 'auth.userid' in request.session:
     #    properties['auth.userid'] = request.session['auth.userid']
 

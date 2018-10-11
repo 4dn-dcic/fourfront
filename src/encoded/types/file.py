@@ -831,7 +831,7 @@ def download(context, request):
     except Exception as e:
         user_props = {'error': str(e)}
     tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
-                       'user_email': user_props.get('details', {}).get('email', 'anonymous'),
+                       'user_uuid': user_props.get('details', {}).get('uuid', 'anonymous'),
                        'request_path': request.path_info}
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
@@ -859,12 +859,17 @@ def download(context, request):
                 found = True
                 properties = extra
                 external = context.propsheets.get('external' + eformat.get('uuid'))
+                if eformat is not None:
+                    tracking_values['file_format'] = eformat.get('file_format')
                 break
         if not found:
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
+        if file_format is not None:
+            tracking_values['file_format'] = file_format.get('file_format')
     tracking_values['filename'] = filename
+
 
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
@@ -888,6 +893,21 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
+    # get the experiment type associated with this file
+    experiments_using_file = context.experiments(request)
+    found_experiment_type = None
+    for file_experiment in experiments_using_file:
+        exp_info = get_item_if_you_can(request, file_experiment)
+        if exp_info is None:
+            break
+        exp_type = exp_info.get('experiment_type')
+        if found_experiment_type is None or found_experiment_type == exp_type:
+            found_experiment_type = exp_type
+        else:  # multiple experiment types
+            found_experiment_type = 'Integrative analysis'
+            break
+    tracking_values['experiment_type'] = found_experiment_type
+    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
     tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
                      'status': 'in review by lab', 'tracking_type': 'download_tracking',
