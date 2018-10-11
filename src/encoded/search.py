@@ -1085,8 +1085,8 @@ def format_extra_aggregations(es_results):
 def format_results(request, hits, search_frame):
     """
     Loads results to pass onto UI
-    For now, add audits to the results so we can facet/not facet on audits
-    Also add aggregated_items
+    Will retrieve the desired frame from the search hits and automatically
+    add 'audit' and 'aggregated_items' frames if they are present
     """
     fields_requested = request.params.getall('field')
     if fields_requested:

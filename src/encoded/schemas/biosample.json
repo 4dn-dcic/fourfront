@@ -25,8 +25,7 @@
         { "$ref": "mixins.json#/static_headers" }
     ],
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" },
-        { "$ref": "mixins.json#/facets_aggregated_badges"}
+        { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {
@@ -154,12 +153,6 @@
         },
         "treatments.treatment_type": {
             "title": "Treatments"
-        },
-        "aggregated_items.biosource.item.biosource_type": {
-            "title": "Agg Biosource Type"
-        },
-        "aggregated_items.cell_culture_details.item.principals_allowed.view": {
-            "title": "Agg CCD View"
         }
     },
     "columns": {
