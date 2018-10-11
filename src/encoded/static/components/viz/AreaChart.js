@@ -47,6 +47,10 @@ export class StatsViewController extends React.PureComponent {
         this.setState(nextState);
     }
 
+    componentWillUnmount(){
+        this.setState({ 'mounted' : false });
+    }
+
     /* Enabling this would temporarily replace charts w loading icon. It's too big of a jumpy visual change to people to be good UI IMO.
     componentWillReceiveProps(nextProps){
         if (nextProps.shouldRefetchAggs((this.props, nextProps)){
@@ -71,7 +75,9 @@ export class StatsViewController extends React.PureComponent {
                 this.setState({ 'loadingStatus' : 'failed' });
             },
             uponAllRequestsCompleteCallback = (state = resultStateToSet) => {
-                this.setState(_.extend({ 'loadingStatus' : 'complete' }, state));
+                if (this && this.state.mounted){
+                    this.setState(_.extend({ 'loadingStatus' : 'complete' }, state));
+                }
             },
             uponSingleRequestsCompleteCallback = function(key, uri, resp){
                 if (resp && resp.code === 404){
@@ -534,7 +540,7 @@ export class AreaChart extends React.PureComponent {
         this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
 
         // D3 things
-        this.parseTime = d3.timeParse(props.d3TimeFormat);
+        this.parseTime = d3.utcParse(props.d3TimeFormat);
         this.stack = d3.stack().value(function(d, key){
             var currChild = _.findWhere(d.children || [], { 'term' : key });
             if (currChild) return currChild.total;
@@ -612,7 +618,7 @@ export class AreaChart extends React.PureComponent {
             else if (widthPerYear >= 750) monthsTick = 1;
 
             return function(x){
-                return d3.axisBottom(x).ticks(d3.timeMonth.every(monthsTick));
+                return d3.axisBottom(x).ticks(d3.utcMonth.every(monthsTick));
             };
         } else if (widthPerYear >= 3600){
             var widthPerMonth = widthPerYear / 12, daysTick;
@@ -627,7 +633,7 @@ export class AreaChart extends React.PureComponent {
             }
 
             return function(x){
-                return d3.axisBottom(x).ticks(d3.timeDay.every(daysTick));
+                return d3.axisBottom(x).ticks(d3.utcDay.every(daysTick));
             };
         }
     }
@@ -715,7 +721,7 @@ export class AreaChart extends React.PureComponent {
     }
 
     xScale(width, xExtents = this.state.xExtents){
-        return d3.scaleTime().rangeRound([0, width]).domain(xExtents);
+        return d3.scaleUtc().rangeRound([0, width]).domain(xExtents);
     }
 
     yScale(height, yExtents = this.state.yExtents){
@@ -866,8 +872,10 @@ export class AreaChart extends React.PureComponent {
                 })),
                 total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
                 termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
+                    if (c.term === null) return false;
                     return c && c[tdp] > 0;
                 }), function(c){ return -c[tdp]; }),
+                isEmpty             = termChildren.length === 0,
                 topPosition         = yScale(total);
 
             // It's anti-pattern for component to update its children using setState instead of passing props as done here.
@@ -901,27 +909,29 @@ export class AreaChart extends React.PureComponent {
 
                     return (
                         <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
-                            <h5 className="text-500 mt-0 mb-11 clearfix">
+                            <h5 className={"text-500 mt-0 clearfix" + (isEmpty ? ' mb-0' : ' mb-11')}>
                                 { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
                             </h5>
-                            <table className="current-legend">
-                                <tbody>
-                                    { _.map(termChildren, function(c, i){
-                                        return (
-                                            <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
-                                                <td className="patch-cell">
-                                                    <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
-                                                </td>
-                                                <td className="term-name-cell">{ c.term }</td>
-                                                <td className="term-name-total">
-                                                    { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
-                                                    { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
-                                                </td>
-                                            </tr>
-                                        );
-                                    }) }
-                                </tbody>
-                            </table>
+                            { isEmpty ? null :
+                                <table className="current-legend">
+                                    <tbody>
+                                        { _.map(termChildren, function(c, i){
+                                            return (
+                                                <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
+                                                    <td className="patch-cell">
+                                                        <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
+                                                    </td>
+                                                    <td className="term-name-cell">{ c.term }</td>
+                                                    <td className="term-name-total">
+                                                        { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
+                                                        { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
+                                                    </td>
+                                                </tr>
+                                            );
+                                        }) }
+                                    </tbody>
+                                </table>
+                            }
                         </div>
                     );
                 }

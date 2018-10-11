@@ -128,7 +128,7 @@ export default class StatisticsPageView extends StaticPage {
             <div className="chart-section-control-wrapper row">
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
-                        href="#submissions" data-tip={submissionsObj.tip} data-target-offset={130}>
+                        href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={130}>
                         { submissionsObj.icon ? <i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/> : '' }
                         { submissionsObj.icon ? <span>&nbsp;&nbsp;</span> : null }
                         { submissionsObj.title }
@@ -136,7 +136,7 @@ export default class StatisticsPageView extends StaticPage {
                 </div>
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
-                        href="#usage" data-tip={usageObj.tip} data-target-offset={130}>
+                        href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={130}>
                         { usageObj.icon ? <i className={"text-medium icon icon-fw icon-" + usageObj.icon}/> : '' }
                         { usageObj.icon ? <span>&nbsp;&nbsp;</span> : null } 
                         { usageObj.title }
@@ -179,6 +179,15 @@ class UsageStatsViewController extends StatsViewController {
                     uri += '&google_analytics.date_increment=daily&limit=14'; // 2 weeks (14 days)
                 }
                 return uri;
+            },
+            'TrackingItemDownload' : function(props) {
+                var uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=None&tracking_type=download_tracking';
+                if (props.currentGroupBy === 'monthly'){
+                    uri += '&date_histogram_interval=monthly'; // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
+                } else if (props.currentGroupBy === 'daily'){
+                    uri += '&date_histogram_interval=daily';
+                }
+                return uri;
             }
         },
         'shouldRefetchAggs' : function(pastProps, nextProps){
@@ -205,10 +214,7 @@ class SubmissionStatsViewController extends StatsViewController {
                 // For local dev/debugging; don't forget to comment out if using.
                 //uri = 'https://data.4dnucleome.org' + uri;
                 return uri;
-            },
-            //'TrackingItem' : function(props) {
-            //    return '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&limit=14';
-            //}
+            }
         },
         'shouldRefetchAggs' : function(pastProps, nextProps){
             return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
@@ -247,11 +253,13 @@ class SubmissionStatsViewController extends StatsViewController {
         if (!refresh && this.state.externalTermMap && _.keys(this.state.externalTermMap).length > 0) return;
 
         ajax.load('/search/?type=Award&limit=all', (resp)=>{
-            this.setState({
-                'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
-                    return [ award.center_title, award.project !== '4DN' ];
-                }))
-            });
+            if (this && this.state.mounted){
+                this.setState({
+                    'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
+                        return [ award.center_title, award.project !== '4DN' ];
+                    }))
+                });
+            }
         });
     }
 
@@ -308,13 +316,15 @@ export const commonParsingFxn = {
     'bucketDocCounts' : function(weeklyIntervalBuckets, externalTermMap, excludeChildren = false){
         var subBucketKeysToDate = new Set(),
             aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
-                if (excludeChildren){
+                if (excludeChildren === true){
                     return {
                         'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
                         'count'    : bucket.doc_count
                     };
                 } else {
+
                     _.forEach(_.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
+
                     var children = _.map(Array.from(subBucketKeysToDate), function(term){
                         // Create a parsed 'bucket' even if none returned from ElasticSearch agg but it has appeared earlier.
                         var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
@@ -330,6 +340,13 @@ export const commonParsingFxn = {
                     };
                 }
             });
+
+        if (subBucketKeysToDate.size === 0){ // No group by defined, fill with dummy child for each.
+            _.forEach(aggsList, function(dateBucket){
+                dateBucket.children = [{ term : null, count : dateBucket.count }];
+            });
+            subBucketKeysToDate.add(null);
+        }
 
         // Ensure each datum has all child terms, even if blank.
         commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
@@ -623,7 +640,21 @@ export const aggregationsToChartData = {
 
             return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey);
         }
-    }
+    },
+    'file_downloads' : {
+        'requires'  : 'TrackingItemDownload',
+        'function'  : function(resp, props){
+            if (!resp || !resp.aggregations) return null;
+            var dateAggBucket = props.currentGroupBy && props.currentGroupBy + '_interval_date_created',
+                weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations[dateAggBucket] && resp.aggregations[dateAggBucket].buckets;
+
+            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
+
+            return commonParsingFxn.countsToTotals(
+                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets)
+            );
+        }
+    },
 };
 
 
@@ -633,8 +664,8 @@ class UsageStatsView extends StatsChartViewBase {
     static defaultProps = {
         'aggregationsToChartData' : _.pick(
             aggregationsToChartData,
-            'sessions_by_country', 'fields_faceted', 'browse_search_queries', 'other_search_queries',
-            'experiment_set_views'
+            'sessions_by_country', 'fields_faceted', /* 'browse_search_queries', 'other_search_queries', */
+            'experiment_set_views', 'file_downloads'
         ),
         //'shouldReaggregate' : function(pastProps, nextProps, state){
         //    if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
@@ -713,7 +744,7 @@ class UsageStatsView extends StatsChartViewBase {
     render(){
         var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
             { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
-                other_search_queries, experiment_set_views, countBy
+                other_search_queries, experiment_set_views, file_downloads, countBy
             } = this.state,
             width = this.getRefWidth() || null;
 
@@ -738,11 +769,12 @@ class UsageStatsView extends StatsChartViewBase {
         //if (firstDateStr) commonXDomain[0] = new Date(firstDateStr.slice(0,10));
         if (lastDateStr){
             var timeShift = currentGroupBy === 'daily' ? (24*60*60*1000) : (30*24*60*60*1000); // 24 hrs -v- 30 days
-            commonXDomain[1] = new Date(lastDateStr + "T00:00:00.000");
+            commonXDomain[1] = new Date(lastDateStr + "T00:00:00.000Z");
             commonXDomain[1].setTime(commonXDomain[1].getTime() + timeShift);
+            
         }
         if (firstDateStr){
-            commonXDomain[0] = new Date(firstDateStr + "T00:00:00.000");
+            commonXDomain[0] = new Date(firstDateStr + "T00:00:00.000Z");
         }
 
         return (
@@ -750,6 +782,21 @@ class UsageStatsView extends StatsChartViewBase {
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                     title="Aggregate" outerClassName="dropdown-container mb-0" />
+
+                { file_downloads ?
+
+                    <GroupOfCharts width={width} resetScaleLegendWhenChange={file_downloads}>
+
+                        <hr/>
+
+                        <AreaChartContainer {...commonContainerProps} id="file_downloads"
+                            title={<span><span className="text-500">File Downloads</span> - all</span>}>
+                            <AreaChart data={file_downloads} xDomain={commonXDomain} />
+                        </AreaChartContainer>
+
+                    </GroupOfCharts>
+
+                : null }
 
                 { sessions_by_country ?
 
