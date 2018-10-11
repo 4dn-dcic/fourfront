@@ -9,7 +9,9 @@ import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, typedefs } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
+    AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
+    AboveSearchTablePanel } from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
@@ -52,9 +54,7 @@ class ResultTableHandlersContainer extends React.PureComponent {
         return ['status'].concat(defaultHiddenColumnsFromSchemas);
     }
 
-    isTermSelected(term, facet){
-        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
-    }
+    isTermSelected(term, facet){ return Filters.determineIfTermFacetSelected(term, facet, this.props); }
 
     render(){
         return (

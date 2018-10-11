@@ -6,6 +6,7 @@ var store = null;
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
+import moment from 'moment';
 import * as ajax from './ajax';
 import * as object from './object';
 import * as Schemas from './Schemas';
@@ -36,17 +37,95 @@ export const currentExpSetFilters = contextFiltersToExpSetFilters;
  * @param {boolean} [includePathName] - If true, will return the pathname in addition to the URI search query.
  * @returns {!string} URL to remove active filter, or null if filter not currently active for provided field:term pair.
  */
-export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters, includePathName = false) {
-    for (var filter in filters) {
-        if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
-            var parts = url.parse(filters[filter]['remove']);
-            var retHref = '';
+export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filters, includePathName = false) {
+    var field   = facet.field,
+        isRange = facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1,
+        i, filter, parts, retHref = '';
+
+
+    if (facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1) {
+        var toFilter, fromFilter;
+        
+        if (facet.aggregation_type === 'range'){
+            toFilter    = _.findWhere(filters, { 'field' : field + '.to',   'term' : term.to }),
+            fromFilter  = _.findWhere(filters, { 'field' : field + '.from', 'term' : term.from });
+        } else if (facet.aggregation_type === 'date_histogram'){
+            var interval = getDateHistogramIntervalFromFacet(facet) || 'month',
+                toDate = moment.utc(term.key);
+            toDate.add(1, interval + 's');
+            toFilter    = _.findWhere(filters, { 'field' : field + '.to',   'term' : toDate.format().slice(0,10) }),
+            fromFilter  = _.findWhere(filters, { 'field' : field + '.from', 'term' : term.key });
+        } else {
+            throw new Error('Histogram not currently supported.');
+            // Todo: var interval = ....
+        }
+
+        console.log('TTT', toFilter, fromFilter);
+
+        if (toFilter && !fromFilter){
+            parts = url.parse(toFilter['remove']);
             if (includePathName) {
                 retHref += parts.pathname;
             }
             retHref += parts.search;
             return retHref;
+        } else if (!toFilter && fromFilter){
+            parts = url.parse(fromFilter['remove']);
+            if (includePathName) {
+                retHref += parts.pathname;
+            }
+            retHref += parts.search;
+            return retHref;
+        } else if (toFilter && fromFilter){
+            var partsFrom   = url.parse(fromFilter['remove'], true),
+                partsTo     = url.parse(toFilter['remove'], true),
+                partsFromQ  = partsFrom.query,
+                partsToQ    = partsTo.query,
+                commonQs    = {};
+
+            _.forEach(_.keys(partsFromQ), function(qk){
+                if (typeof partsToQ[qk] !== 'undefined'){
+                    if (Array.isArray(partsToQ[qk]) || Array.isArray(partsFromQ[qk])){
+                        var a1, a2;
+                        if (Array.isArray(partsToQ[qk])) {
+                            a1 = partsToQ[qk];
+                        } else {
+                            a1 = [partsToQ[qk]];
+                        }
+                        if (Array.isArray(partsFromQ[qk])) {
+                            a2 = partsFromQ[qk];
+                        } else {
+                            a2 = [partsFromQ[qk]];
+                        }
+                        commonQs[qk] = _.intersection(a1, a2);
+                    } else {
+                        commonQs[qk] = partsToQ[qk];
+                    }
+                }
+            });
+            
+            retHref = '?' + queryString.stringify(commonQs);
+            if (includePathName) {
+                retHref += partsFrom.pathname;
+            }
+            console.log('TTT3', commonQs, retHref);
+            return retHref;
         }
+
+    } else {
+        // Terms
+        for (i = 0; i < filters.length; i++) {
+            filter  = filters[i];
+            if (filter.field == field && filter.term == term) {
+                parts = url.parse(filter['remove']);
+                if (includePathName) {
+                    retHref += parts.pathname;
+                }
+                retHref += parts.search;
+                return retHref;
+            }
+        }
+
     }
     return null;
 }
@@ -182,6 +261,81 @@ export function saveChangedFilters(newExpSetFilters, href=null, callback=null){
 }
 
 
+export function getDateHistogramIntervalFromFacet(facet){
+    return (facet && facet.aggregation_definition
+        && facet.aggregation_definition.date_histogram
+        && facet.aggregation_definition.date_histogram.interval
+    );
+}
+
+
+/**
+ * Determine if term and facet objects are 'selected'.
+ * The range check is likely to change or be completely removed
+ * in response to needing different component to facet ranges.
+ *
+ * @param {*} term 
+ * @param {*} facet 
+ * @param {*} props 
+ */
+export function determineIfTermFacetSelected(term, facet, props){
+    var field = facet.field || null,
+        fromFilter, fromFilterTerm, toFilter, toFilterTerm;
+
+    if (facet.aggregation_type === 'date_histogram'){
+        // Instead of checking presense of filters here, we find earliest from and latest to and see if are within range.
+
+        fromFilter = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.from' }), 'term');
+        fromFilterTerm = fromFilter.length && fromFilter[0].term;
+
+        toFilter = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.to' }), 'term').reverse();
+        toFilterTerm = toFilter.length && toFilter[0].term;
+
+        var toDate = fromFilter && moment.utc(term.key);
+        toDate && toDate.add(1, 'months');
+        var toDateTerm = toDate.format().slice(0,10);
+
+        if (fromFilterTerm && term.key >= fromFilterTerm && !toFilterTerm) return true;
+        if (!fromFilterTerm && toFilterTerm && toDateTerm <= toFilterTerm) return true;
+        if (fromFilterTerm && toFilterTerm && toDateTerm <= toFilterTerm && term.key >= fromFilterTerm) return true;
+        return false;
+
+        // Check both from and to
+        //field       = facet.field || null;
+        //fromFilter  = _.findWhere(props.context.filters, { 'field' : field + '.from', 'term' : term.key });
+        //toDate      = fromFilter && moment.utc(term.key);
+
+        //toDate && toDate.add(1, 'months');
+        //toFilter = toDate && _.findWhere(props.context.filters, { 'field' : field + '.to', 'term' : toDate.format().slice(0,10) });
+
+        //return !!(toFilter);
+
+    } else if (facet.aggregation_type === 'range'){
+        fromFilter  = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.from' }), 'term');
+        fromFilterTerm = fromFilter.length && fromFilter[0].term;
+        toFilter    = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.to' }), 'term').reverse();
+        toFilterTerm = toFilter.length && toFilter[0].term;
+
+        if (fromFilterTerm && term.from + '' >= fromFilterTerm && !toFilterTerm) return true;
+        if (!fromFilterTerm && toFilterTerm && term.to + '' <= toFilterTerm) return true;
+        if (fromFilterTerm && toFilterTerm && term.to + '' <= toFilterTerm && term.from + '' >= fromFilterTerm) return true;
+        return false;
+
+        //fromFilter  = _.findWhere(props.context.filters, { 'field' : field + '.from', 'term' : term.from + '' });
+        //toFilter    = fromFilter && _.findWhere(props.context.filters, { 'field' : field + '.to', 'term' : term.to + '' });
+        //return !!(toFilter);
+    } else {
+        return !!(
+            getUnselectHrefIfSelectedFromResponseFilters(
+                term.key,
+                (facet || {field:null}).field,
+                props.context.filters
+            )
+        );
+    }
+}
+
+/** @deprecated */
 export function isTermSelectedAccordingToExpSetFilters(term, field, expSetFilters = null){
     if (!expSetFilters) expSetFilters = currentExpSetFilters(); // If no expSetFilters are supplied, get them from Redux store.
     if (typeof expSetFilters[field] !== 'undefined' && typeof expSetFilters[field].has === 'function' && expSetFilters[field].has(term)) return true;

@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import moment from 'moment';
 import * as store from './../../../store';
 import { Collapse, Fade } from 'react-bootstrap';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT, navigate, DateUtility } from './../../util';
@@ -91,9 +92,10 @@ class Term extends React.PureComponent {
     }
 
     handleClick(e) {
+        var { facet, term, onClick } = this.props;
         e.preventDefault();
-        this.setState({ filtering : true }, () => {
-            this.props.onFilter( this.props.facet.field, this.props.term.key, () => this.setState({ filtering : false }) );
+        this.setState({ 'filtering' : true }, () => {
+            onClick(facet, term, e, () => this.setState({ 'filtering' : false }));
         });
     }
 
@@ -116,12 +118,9 @@ class Term extends React.PureComponent {
         }
 
         if (facet.aggregation_type === 'date_histogram'){
-            var interval = (facet && facet.aggregation_definition
-                && facet.aggregation_definition.date_histogram
-                && facet.aggregation_definition.date_histogram.interval
-            );
+            var interval = Filters.getDateHistogramIntervalFromFacet(facet);
             if (interval === 'month'){
-                return <DateUtility.LocalizedTime timestamp={term.key} formatType="date-month" />;
+                return <DateUtility.LocalizedTime timestamp={term.key} formatType="date-month" localize={false} />;
             }
         }
 
@@ -131,7 +130,7 @@ class Term extends React.PureComponent {
     render() {
         var { term, facet, isTermSelected } = this.props;
         //var selected = this.isSelectedExpItem();
-        var selected = isTermSelected(term.key, (facet || {field:null}).field);
+        var selected = isTermSelected(term, facet);
         var title = this.customTitleRender() || this.props.title || Schemas.Term.toName(facet.field, term.key);
 
         if (!title || title === 'null' || title === 'undefined') title = 'None';
@@ -221,7 +220,9 @@ class FacetTermsList extends React.Component {
 
 
     renderTerms(terms){
-        var { facet, persistentCount } = this.props;
+        var { facet, persistentCount, onTermClick } = this.props;
+
+        var makeTermComponent = (term) => <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />;
 
         if (terms.length > this.props.persistentCount){
             var persistentTerms = terms.slice(0, persistentCount);
@@ -246,16 +247,14 @@ class FacetTermsList extends React.Component {
             return (
                 <div className="facet-list nav">
                     <PartialList open={this.state.expanded}
-                        persistent={ _.map(persistentTerms,  (term) => <Term {...this.props} key={term.key} term={term} total={facet.total} />)}
-                        collapsible={_.map(collapsibleTerms, (term) => <Term {...this.props} key={term.key} term={term} total={facet.total} />)} />
+                        persistent={ _.map(persistentTerms,  makeTermComponent)}
+                        collapsible={_.map(collapsibleTerms, makeTermComponent)} />
                     <div className="view-more-button" onClick={this.handleExpandListToggleClick} children={expandButtonTitle} />
                 </div>
             );
         } else {
             return (
-                <div className="facet-list nav" children={_.map(terms, (term) =>
-                    <Term {...this.props} key={term.key} term={term} total={facet.total} />
-                )} />
+                <div className="facet-list nav" children={_.map(terms, makeTermComponent)} />
             );
         }
     }
@@ -338,6 +337,7 @@ class Facet extends React.PureComponent {
         this.isStatic = this.isStatic.bind(this);
         this.isEmpty = this.isEmpty.bind(this);
         this.handleStaticClick = this.handleStaticClick.bind(this);
+        this.handleTermClick = this.handleTermClick.bind(this);
         this.state = {
             'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true
         };
@@ -349,12 +349,36 @@ class Facet extends React.PureComponent {
 
     isEmpty(props = this.props) { return !!(props.facet.terms.length === 0); }
 
+    /**
+     * For cases when there is only one option for a facet - we render a 'static' row.
+     * This may change in response to design.
+     * Unlike in `handleTermClick`, we handle own state/UI here.
+     *
+     * @todo Allow to specify interval for histogram & date_histogram in schema instead of hard-coding 'month' interval.
+     */
     handleStaticClick(e) {
+        var { facet } = this.props,
+            term = facet.terms[0];
+
         e.preventDefault();
         if (!this.isStatic()) return false;
-        this.setState({ filtering : true }, () => {
-            this.props.onFilter( this.props.facet.field, this.props.facet.terms[0].key, () => this.setState({ filtering : false }) );
+
+        this.setState({ 'filtering' : true }, () => {
+            this.handleTermClick(facet, term, e, () =>
+                this.setState({ 'filtering' : false })
+            );
         });
+
+    }
+
+    /**
+     * Each Term component instance provides their own callback, we just route the navigation request.
+     *
+     * @todo Allow to specify interval for histogram & date_histogram in schema instead of hard-coding 'month' interval.
+     */
+    handleTermClick(facet, term, e, callback) {
+        var { onFilter, href } = this.props;
+        onFilter(facet, term, callback, false, href);
     }
 
     render() {
@@ -378,7 +402,7 @@ class Facet extends React.PureComponent {
 
         if (this.isStatic()){
             // Only one term
-            var selected = isTermSelected(facet.terms[0].key, facet.field),
+            var selected = isTermSelected(facet.terms[0], facet),
                 termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
 
             if (!termName || termName === 'null' || termName === 'undefined') termName = 'None';
@@ -412,7 +436,7 @@ class Facet extends React.PureComponent {
                 </div>
             );
         } else {
-            return <FacetTermsList {...this.props} tooltip={description} />;
+            return <FacetTermsList {...this.props} onTermClick={this.handleTermClick} tooltip={description} />;
         }
 
 
@@ -430,22 +454,45 @@ class Facet extends React.PureComponent {
  * @param {string} field - Field for which a Facet term was clicked on. 
  * @param {string} term - Term clicked on.
  * @param {function} callback - Any function to execute afterwards.
+ * @param {boolean} [skipNavigation=false] - If true, will return next targetSearchHref instead of going to it. Use to e.g. batch up filter changes on multiple fields.
  */
-export function onFilterHandlerMixin(field, term, callback){
+export function onFilterHandlerMixin(facet, term, callback, skipNavigation = false, currentHref = null){
 
-    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters),
+    var targetSearchHref;
+
+    if (!currentHref) {
+        currentHref = this.props.href;
+    }
+
+    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters),
         isUnselecting = !!(unselectHrefIfSelected);
 
-    var targetSearchHref = unselectHrefIfSelected || Filters.buildSearchHref(field, term, this.props.href);
+    if (unselectHrefIfSelected){
+        targetSearchHref = unselectHrefIfSelected;
+    } else {
+        var interval, nextHref;
+        if (facet.aggregation_type === 'date_histogram'){
+            interval = Filters.getDateHistogramIntervalFromFacet(facet) || 'month';
+            nextHref            = Filters.buildSearchHref(facet.field + '.from', term.key, currentHref); //onFilter(facet.field + '.from', term.key, null, true, href);
+            var toDate = moment.utc(term.key);
+            toDate.add(1, interval + 's');
+            targetSearchHref    = Filters.buildSearchHref(facet.field + '.to', toDate.format().slice(0,10), nextHref); // onFilter(facet.field + '.to', toDate.format().slice(0,10), null, true, nextHref);
+        } else if (facet.aggregation_type === 'range') {
+            nextHref            = Filters.buildSearchHref(facet.field + '.from', term.from, currentHref);
+            targetSearchHref    = Filters.buildSearchHref(facet.field + '.to', term.to, nextHref);
+        } else { // Default - regular term matching
+            targetSearchHref    = Filters.buildSearchHref(facet.field, term.key, currentHref);
+        }
+    }
 
     // If we have a '#' in URL, add to target URL as well.
-    var hashFragmentIdx = this.props.href.indexOf('#');
+    var hashFragmentIdx = currentHref.indexOf('#');
     if (hashFragmentIdx > -1 && targetSearchHref.indexOf('#') === -1){
-        targetSearchHref += this.props.href.slice(hashFragmentIdx);
+        targetSearchHref += currentHref.slice(hashFragmentIdx);
     }
 
     // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
-    if (field === 'type'){
+    if (facet.field === 'type'){
         if (!(unselectHrefIfSelected)){
             var parts = url.parse(targetSearchHref, true);
             if (Array.isArray(parts.query.type)){
@@ -453,7 +500,7 @@ export function onFilterHandlerMixin(field, term, callback){
                 if (types.length > 1){
                     var queryParts = _.clone(parts.query);
                     delete queryParts[""]; // Safety
-                    queryParts.type = encodeURIComponent(term); // Only 1 Item type selected at once.
+                    queryParts.type = encodeURIComponent(term.key); // Only 1 Item type selected at once.
                     var searchString = queryString.stringify(queryParts);
                     parts.search = searchString && searchString.length > 0 ? ('?' + searchString) : '';
                     targetSearchHref = url.format(parts);
@@ -463,13 +510,18 @@ export function onFilterHandlerMixin(field, term, callback){
     }
 
     analytics.event('FacetList', (isUnselecting ? 'Unset Filter' : 'Set Filter'), {
-        field, term,
-        'eventLabel'        : analytics.eventLabelFromChartNode({ field, term }),
+        'field'             : facet.field,
+        'term'              : term.key,
+        'eventLabel'        : analytics.eventLabelFromChartNode({ 'field' : facet.field, 'term' : term.key }),
         'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
     });
 
-    (this.props.navigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true });
-    setTimeout(callback, 100);
+    if (!skipNavigation){
+        (this.props.navigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true }, callback);
+    } else {
+        return targetSearchHref;
+    }
+
 }
 
 export class FacetList extends React.PureComponent {
@@ -592,9 +644,9 @@ export class FacetList extends React.PureComponent {
          * These 'default' functions don't do anything except show parameters passed.
          * Callback must be called because it changes Term's 'loading' state back to false.
          */
-        'onFilter'          : function(field, term, callback){
+        'onFilter'          : function(facet, term, callback){
             // Set redux filter accordingly, or update search query/href.
-            console.log('FacetList: props.onFilter(' + field + ', ' + term + ', callback)');
+            console.log('FacetList: props.onFilter(' + facet.field + ', ' + term.key + ', callback)');
             if (typeof callback === 'function'){
                 setTimeout(callback, 1000);
             }
@@ -607,7 +659,7 @@ export class FacetList extends React.PureComponent {
                 setTimeout(callback, 1000);
             }
         },
-        'isTermSelected'    : function (termKey, facetField, expsOrSets = 'sets'){
+        'isTermSelected'    : function (term, facet){
             // Check against responseContext.filters, or expSetFilters in Redux store.
             return false;
         }
@@ -667,8 +719,7 @@ export class FacetList extends React.PureComponent {
                 facet={facet} href={href} isTermSelected={isTermSelected}
                 schemas={schemas} itemTypeForSchemas={itemTypeForSchemas} mounted={this.state.mounted}
                 defaultFacetOpen={ !this.state.mounted ? false : !!(
-                    facet.terms.filter((t)=> this.props.isTermSelected(t.key, facet.field)).length ||
-                    (
+                    _.any(facet.terms, (t) => isTermSelected(t, facet)) || (
                         layout.responsiveGridState(windowWidth || null) !== 'xs' &&
                         i < (facetIndexWherePastXTerms || 1)
                     )
