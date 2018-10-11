@@ -211,6 +211,7 @@ def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, expe
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
         assert dl_tracking['range_query'] is False
         assert dl_tracking['is_visualization'] is False
+        assert dl_tracking['user_uuid'] == 'anonymous'
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 

@@ -54,8 +54,8 @@
                     "title": "City",
                     "type": "string"
                 },
-                "user_email" : {
-                    "title": "User Email",
+                "user_uuid": {
+                    "title": "User UUID",
                     "type": "string"
                 },
                 "request_path" : {
