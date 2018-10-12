@@ -4,7 +4,6 @@ import logging
 from pyramid.path import DottedNameResolver
 from pyramid.paster import get_app
 from encoded import configure_dbsession
-from dcicutils.log_utils import set_logging
 import sys
 import os
 
@@ -30,17 +29,11 @@ def main():
     parser.add_argument('--drop-db-on-mt', action='store_true',  help="path to configfile")
     args = parser.parse_args()
 
-
-
     #get the pyramids app
     app = get_app(args.config_uri, args.app_name)
 
-    #set non-prod logging, since load-data was getting a segfault with ES logs
-    set_logging(in_prod=False)
-
     #create db schema
     configure_dbsession(app)
-
 
     load_test_data = app.registry.settings.get('snovault.load_test_data')
     print("****** load test data is %s" % (load_test_data))
