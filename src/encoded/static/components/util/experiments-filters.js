@@ -42,7 +42,7 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
         isRange = facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1,
         i, filter, parts, retHref = '';
 
-
+    // THE CONTENTS UNDER THIS IF CONDITION WILL CHANGE ONCE WE CREATE NEW 'RANGE' FACET COMPONENT
     if (facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1) {
         var toFilter, fromFilter;
         
@@ -113,8 +113,8 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
         // Terms
         for (i = 0; i < filters.length; i++) {
             filter  = filters[i];
-            if (filter.field == field && filter.term == term) {
-                parts = url.parse(filter['remove']);
+            if (filter.field == field && filter.term == term.key) {
+                parts = url.parse(filter.remove);
                 if (includePathName) {
                     retHref += parts.pathname;
                 }
@@ -276,9 +276,14 @@ export function getDateHistogramIntervalFromFacet(facet){
  * @param {*} props 
  */
 export function determineIfTermFacetSelected(term, facet, props){
+    return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, props.context.filters));
+
+    // The below might be re-introduced ... but more likely to be removed since we'll have different 'range' Facet component.
+
+    /*
     var field = facet.field || null,
         fromFilter, fromFilterTerm, toFilter, toFilterTerm;
-
+    
     if (facet.aggregation_type === 'date_histogram'){
         // Instead of checking presense of filters here, we find earliest from and latest to and see if are within range.
 
@@ -322,14 +327,9 @@ export function determineIfTermFacetSelected(term, facet, props){
         //toFilter    = fromFilter && _.findWhere(props.context.filters, { 'field' : field + '.to', 'term' : term.to + '' });
         //return !!(toFilter);
     } else {
-        return !!(
-            getUnselectHrefIfSelectedFromResponseFilters(
-                term.key,
-                (facet || {field:null}).field,
-                props.context.filters
-            )
-        );
+        return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, props.context.filters));
     }
+    */
 }
 
 /** @deprecated */

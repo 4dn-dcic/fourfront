@@ -203,7 +203,9 @@ class ResultTableContainer extends React.PureComponent {
         );
     }
 
-    isTermSelected(term, facet){ return Filters.determineIfTermFacetSelected(term, facet, this.props); }
+    isTermSelected(term, facet){
+        return Filters.determineIfTermFacetSelected(term, facet, this.props);
+    }
 
     colDefOverrides(props = this.props){
         if (!props.selectedFiles) return props.columnDefinitionOverrides || null;
