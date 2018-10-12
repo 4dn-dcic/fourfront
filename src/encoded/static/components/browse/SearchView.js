@@ -252,7 +252,7 @@ export default class SearchView extends React.PureComponent {
                 'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
                 'render' : function(result, columnDefinition, props, width){
                     if (!result.google_analytics || !result.google_analytics.for_date) return null;
-                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' />;
+                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
                 }
             }
         },

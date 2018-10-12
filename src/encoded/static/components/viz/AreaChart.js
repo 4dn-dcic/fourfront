@@ -476,8 +476,8 @@ export class ChartTooltip extends React.PureComponent {
                 <div className="line"/>
                 <div className="line-notch" style={{ 'top' : topPosition }}>
                     { chartWidth && topPosition < chartHeight ? [
-                        <div key="before" className="horiz-line-before" style={{ 'width' : leftPosition, 'left' : -leftPosition }}/>,
-                        <div key="after" className="horiz-line-after" style={{ 'width' : chartWidth - leftPosition }}/>
+                        <div key="before" className="horiz-line-before" style={{ 'width' : (leftPosition - 5), 'left' : -(leftPosition - 5) }}/>,
+                        <div key="after" className="horiz-line-after" style={{ 'right' : - ((chartWidth - leftPosition) - 4) }}/>
                     ] : null }
                 </div>
                 { contentFxn && contentFxn(this.props, this.state) }
@@ -509,6 +509,7 @@ export class AreaChart extends React.PureComponent {
         'yAxisPower'            : null,
         'xDomain'               : [ new Date('2017-03-01'), null ],
         'yDomain'               : [ 0, null ],
+        'curveFxn'              : d3.curveStepAfter,
         'transitionDuration'    : 1500,
         'colorScale'            : null, // d3.scaleOrdinal(d3.schemeCategory10)
         'tooltipDataProperty'   : 'total',
@@ -734,7 +735,7 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, yAxisScale, yAxisPower, xDomain, yDomain } = this.props,
+        var { margin, yAxisScale, yAxisPower, xDomain, yDomain, curveFxn } = this.props,
             { stackedData, mergedDataForExtents } = this.state,
             svg         = this.svg || d3.select(this.refs.svg),
             width       = this.getInnerChartWidth(),
@@ -744,7 +745,7 @@ export class AreaChart extends React.PureComponent {
             bottomAxisGenerator = this.getXAxisGenerator(width)(x),
             area        = d3.area()
                 .x ( function(d){ return x(d.date || d.data.date);  } )
-                .curve(d3.curveStepAfter)
+                .curve(curveFxn)
                 //.x0 ( function(d){ return x(d.date || d.data.date);  } )
                 //.x1 ( function(d){ return x(d.date || d.data.date) + 10;  } )
                 .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )

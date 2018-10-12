@@ -1,6 +1,9 @@
 from pyramid import paster
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
+from simplejson.scanner import JSONDecodeError
+from socket import gaierror
+import time
 import requests, logging, json
 
 EPILOG = __doc__
@@ -48,9 +51,29 @@ def run(search_url, username='', password=''):
     counter = { 'count' : 0 }
 
     def worker(search_result):
-        object_response = requests.get(url.scheme + '://' + url.netloc + search_result['@id'] + '@@object', auth=auth_to_use, headers=common_headers)
-        #print(url.scheme + '://' + url.netloc + search_result['@id'] + '@@object')
-        item = object_response.json()
+
+        def perform_request(uri, attempt = 1):
+            if attempt > 5:
+                raise Exception('Failed 5x to get response for ' + uri)
+
+            try:
+                object_response = requests.get(item_uri, auth=auth_to_use, headers=common_headers)
+            except (requests.exceptions.ConnectionError, gaierror) as e:
+                logger.info('Encountered connection error during request to "' + item_uri + '"')
+                time.sleep(3 * attempt)
+                return perform_request(uri, attempt + 1)
+
+            try:
+                item = object_response.json()
+            except JSONDecodeError:
+                logger.info('Encountered JSONDecodeError during request to "' + item_uri + '"')
+                time.sleep(0.5 * attempt)
+                return perform_request(uri, attempt + 1)
+
+            return item
+
+        item_uri = url.scheme + '://' + url.netloc + search_result['@id'] + '@@object'
+        item = perform_request(item_uri)
         item_collection = app.registry['collections'][ search_result['@id'].split('/')[1] ]
         item_schema_properties = item_collection.type_info.schema['properties']
         item_keys = list(item.keys())

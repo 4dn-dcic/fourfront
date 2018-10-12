@@ -1764,13 +1764,14 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-top: 15px;
                 padding-bottom: 15px;
                 display: block;
-                transition: border-color .25s;
+                transition: border-color .25s ease-in-out, background-color .25s ease-in-out, color .25s ease-in-out;
                 background-color: #22656d;
                 color: #fff;
                 border-radius: 3px;
                 line-height: 1.35rem;
+                font-size: 1.125rem;
                 &.active {
-                    border-color: #ddd;
+                    border-color: #888;
                     color: #333;
                     background-color: transparent;
                     pointer-events: none;
@@ -1825,14 +1826,20 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 pointer-events: none;
                 left: -5px;
                 width: 11px;
-                height: 0px;
-                border-top: 3px solid #000;
-                margin-top: -3px;
+                height: 3px;
+                background-color: #333;
+                border-radius: 2px;
+                margin-top: -1px;
                 > .horiz-line-before,
                 > .horiz-line-after {
-                    position: relative;
+                    position: absolute;
+                    top: 1px;
                     height: 0;
                     border-top: 1px solid rgba(0,0,0,0.2);
+                    border-top: 1px dashed #000;
+                }
+                > .horiz-line-after {
+                    left: 11px;
                 }
                 /*
                 &::before {

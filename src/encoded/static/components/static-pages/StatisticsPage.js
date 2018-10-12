@@ -14,7 +14,7 @@ import { StatsViewController, StatsChartViewBase, GroupByController, GroupByDrop
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import * as d3 from 'd3';
-import { map } from 'bluebird';
+import moment from 'moment';
 
 
 export default class StatisticsPageView extends StaticPage {
@@ -77,8 +77,8 @@ export default class StatisticsPageView extends StaticPage {
 
     renderUsageSection(){
         var groupByOptions = {
-            'monthly'   : <span>By Month (last 12 months)</span>,
-            'daily'     : <span>By Day (last 2 weeks)</span>
+            'monthly'   : <span>Last 12 Months</span>,
+            'daily'     : <span>Last 30 Days</span>
         };
         return (
             <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
@@ -176,16 +176,19 @@ class UsageStatsViewController extends StatsViewController {
                 if (props.currentGroupBy === 'monthly'){
                     uri += '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
                 } else if (props.currentGroupBy === 'daily'){
-                    uri += '&google_analytics.date_increment=daily&limit=14'; // 2 weeks (14 days)
+                    uri += '&google_analytics.date_increment=daily&limit=30'; // 30 days
                 }
                 return uri;
             },
             'TrackingItemDownload' : function(props) {
-                var uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=None&tracking_type=download_tracking';
+                var untilDate = moment.utc(),
+                    uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=None&tracking_type=download_tracking';
                 if (props.currentGroupBy === 'monthly'){
-                    uri += '&date_histogram_interval=monthly'; // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
+                    untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
+                    uri += '&date_histogram_interval=monthly&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
                 } else if (props.currentGroupBy === 'daily'){
-                    uri += '&date_histogram_interval=daily';
+                    untilDate.startOf('day').subtract(1, 'minute'); // Last minute of previous day
+                    uri += '&date_histogram_interval=daily&date_created.to=' + untilDate.format('YYYY-MM-DD');
                 }
                 return uri;
             }
@@ -284,6 +287,19 @@ export const commonParsingFxn = {
             });
         });
 
+        return parsedBuckets;
+    },
+    /**
+     * Doesn't add up totals, just renames 'count' property to 'total' property.
+     * MODIFIES IN PLACE.
+     */
+    'countsToCountTotals' : function(parsedBuckets, excludeChildren = false){
+        _.forEach(parsedBuckets, function(bkt){
+            bkt.total = bkt.count;
+            _.forEach(bkt.children, function(c){
+                c.total = c.count;
+            });
+        });
         return parsedBuckets;
     },
     /**
@@ -650,7 +666,7 @@ export const aggregationsToChartData = {
 
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
-            return commonParsingFxn.countsToTotals(
+            return commonParsingFxn.countsToCountTotals(
                 commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets)
             );
         }
@@ -781,7 +797,7 @@ class UsageStatsView extends StatsChartViewBase {
             <div className="stats-charts-container" key="charts" ref="elem" id="usage">
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
-                    title="Aggregate" outerClassName="dropdown-container mb-0" />
+                    title="Show" outerClassName="dropdown-container mb-0" />
 
                 { file_downloads ?
 
