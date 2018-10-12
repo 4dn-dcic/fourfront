@@ -596,7 +596,7 @@ def set_filters(request, search, result, principals, doc_types, types):
         range_direction = None
         if field in ['limit', 'y.limit', 'x.limit', 'mode', 'redirected_from',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
-                     'sort', 'from', 'referrer', 'q', 'before', 'after']:
+                     'sort', 'from', 'referrer', 'q']:
             continue
         elif field == 'type' and term != 'Item':
             continue
@@ -656,15 +656,25 @@ def set_filters(request, search, result, principals, doc_types, types):
 
 
         if range_type:
+
             if query_field not in range_filters:
                 range_filters[query_field] = {}
                 if range_type == 'date':
-                    range_filters[query_field]['format'] = 'yyyy-MM-dd'
+                    range_filters[query_field]['format'] = 'yyyy-MM-dd HH:mm'
 
             if range_direction in ('gt', 'gte', 'lt', 'lte'):
+
+                if len(term) == 10:
+                    # Correct term to have hours, e.g. 00:00 or 23:59, if not otherwise supplied.
+                    if range_direction == 'gt' or range_direction == 'lte':
+                        term += ' 23:59'
+                    elif range_direction == 'gte' or range_direction == 'lt':
+                        term += ' 00:00'
+
                 if range_filters[query_field].get(range_direction) is None:
                     range_filters[query_field][range_direction] = term
-                else: # If have a value already (e.g. multiple ranges selected), choose the widening option.
+                else:
+                    # If have a value already (e.g. multiple ranges selected), choose the widening option.
                     if range_direction == 'gt' or range_direction == 'gte':
                         if term < range_filters[query_field][range_direction]:
                             range_filters[query_field][range_direction] = term
