@@ -72,3 +72,18 @@ class IndividualFly(Individual):
     item_type = 'individual_fly'
     schema = load_schema('encoded:schemas/individual_fly.json')
     embedded_list = Individual.embedded_list + ['fly_vendor.name']
+
+
+@collection(
+    name='individuals-chicken',
+    unique_key='accession',
+    properties={
+        'title': 'Individuals-Chickens',
+        'description': 'Listing Biosample Chicken Individuals',
+    })
+class IndividualChicken(Individual):
+    """the sub class of individuals for chickens."""
+
+    item_type = 'individual_chicken'
+    schema = load_schema('encoded:schemas/individual_chicken.json')
+    embedded_list = Individual.embedded_list + ['chicken_vendor.name']
