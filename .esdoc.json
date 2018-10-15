@@ -15,14 +15,21 @@
         "unexportIdentifier" : { "enable" : true },
         "brand" : {
           "logo" : "./src/encoded/static/img/4dn-logo-raster.png",
-          "title" : "4DN Portal Front-End Reference",
+          "image" : "https://data.4dnucleome.org/static/img/4dn-logo-raster.png",
+          "title" : "4DN Data Portal Front-End Reference",
           "repository": "https://github.com/4dn-dcic/fourfront",
-          "site" : "https://data.4dnucleome.org"
+          "site" : "https://data.4dnucleome.org",
+          "description" : "ECMAScript & React Component reference for the 4DN Data Portal",
+          "author": "http://dcic.4dnucleome.org/"
         }
       }
     },
-    {"name": "esdoc-react-plugin"},
-    {"name": "esdoc-jsx-plugin"},
+    { "name": "esdoc-react-plugin", "option": { "enable": true } },
+    { "name": "esdoc-jsx-plugin", "option": { "enable": true } },
+    { "name": "esdoc-external-nodejs-plugin", "option": { "enable": false } },
+    { "name": "esdoc-unexported-identifier-plugin", "option": { "enable": true } },
+    { "name": "esdoc-undocumented-identifier-plugin", "option": { "enable": false } },
+    { "name": "esdoc-lint-plugin", "option": { "enable": true } },
     {
       "name": "esdoc-ecmascript-proposal-plugin",
       "option": {

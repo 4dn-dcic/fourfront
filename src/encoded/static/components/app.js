@@ -30,6 +30,7 @@ import { NavigateOpts } from './util/navigate';
 /**
  * Used to temporarily store Redux store values for simultaneous dispatch.
  *
+ * @private
  * @var
  * @type {Object}
  */
@@ -38,6 +39,7 @@ let dispatch_dict = {};
 /**
  * Top bar navigation & link schema definition.
  *
+ * @private
  * @constant
  * @type {Object}
  */
@@ -93,9 +95,19 @@ class Title extends React.Component {
  * Creates a promise which completes after a delay, performing no network request.
  * Used to perform a promise.race to see if this timeout or a network requests completes first, which
  * then allows us to set app.state.slow and render a loading icon until long-running network request completes.
+ *
+ * @private
  */
 class Timeout {
+    /**
+     * @param {number} timeout - The length of time before this promise resolves.
+     */
     constructor(timeout) {
+        /**
+         * Internal promise object which resolves after length of time as specified by `timeout`.
+         *
+         * @private
+         */
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
     }
 }

@@ -246,12 +246,10 @@ export class Chart extends React.PureComponent {
      * @ignore
      */
     componentWillReceiveProps(nextProps){
-        ///*
         if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
-        //*/
     }
 
 

@@ -253,7 +253,7 @@ export class StackedBlockListViewMoreButton extends React.Component {
  */
 export class StackedBlockList extends React.Component {
 
-    static ViewMoreButton = StackedBlockListViewMoreButton
+    static ViewMoreButton = StackedBlockListViewMoreButton;
 
     static propTypes = {
         title               : PropTypes.string,
@@ -262,13 +262,13 @@ export class StackedBlockList extends React.Component {
         collapseShow        : PropTypes.number,
         expTable            : PropTypes.any,
         collapseLongLists   : PropTypes.bool.isRequired
-    }
+    };
 
     static defaultProps = {
         'collapseLimit'     : 4,
         'collapseShow'      : 3,
         'collapseLongLists' : true
-    }
+    };
 
     constructor(props){
         super(props);

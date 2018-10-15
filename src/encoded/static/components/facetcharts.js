@@ -77,6 +77,7 @@ export class FacetCharts extends React.PureComponent {
 
     /**
      * Updates `state.mounted`.
+     * Initializes ChartDataController if not yet initialized, which fetches data used for charts.
      */
     componentDidMount(){
         var { debug, browseBaseState, initialFields } = this.props;
@@ -119,7 +120,7 @@ export class FacetCharts extends React.PureComponent {
     }
 
     /**
-     * Given this.props, determines if element is currently meant to be invisible (false) or a certain layout ({string}).
+     * Given `this.props`, determines if element is currently meant to be invisible (false) or a certain layout ({string}).
      * 
      * @instance
      * @private

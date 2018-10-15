@@ -13,9 +13,9 @@ var vizUtil = require('./utilities');
 /** 
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
  * The mechanism for this is roughly diagrammed here:
- * 
+ *
  * .. image:: https://files.slack.com/files-pri/T0723UERE-F4C8KQKMM/chartdatacontroller.png
- * 
+ *
  * @module {Object} viz/chart-data-controller
  */
 
@@ -48,7 +48,6 @@ var refs = {
  * @property {booolean} isLoadingChartData                                  Whether we are currently loading.
  */
 var state = {
-
     'barplot_data_filtered'   : null,
     'barplot_data_unfiltered' : null,
     'barplot_data_fields'     : null,
@@ -146,8 +145,8 @@ var providerCallbacks = {};
 var providerLoadStartCallbacks = {};
 
 /**
- * After load & update, call registered Update callbacks.
- * @private
+ * After load & update, called to start any registered 'on update' callbacks.
+ *
  * @ignore
  */
 function notifyUpdateCallbacks(){
@@ -158,7 +157,8 @@ function notifyUpdateCallbacks(){
 }
 
 /**
- * Before load, call registered Load Start callbacks.
+ * Before load, called to start any registered 'on load start' callbacks.
+ *
  * @private
  * @ignore
  */
@@ -264,8 +264,8 @@ class Provider extends React.Component {
     }
 
     /**
-     * Sets 'barplot_data_filtered' and 'barplot_data_unfiltered' props on props.children.
-     * 
+     * Adds various properties from state, plus callback to update 'barplot_data_fields', to children.
+     *
      * @returns {JSX.Element} Cloned & adjusted props.children.
      * @memberof module:viz/chart-data-controller.Provider
      * @private

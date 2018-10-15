@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {  Button, Fade } from 'react-bootstrap';
 import _ from 'underscore';
 import * as store from '../store';
@@ -15,8 +16,6 @@ let alertNavigatationCountMap = {};
  * queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
  * the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
  * title for alert that was queued.
- *
- * @prop {AlertObj[]} alerts - List of Alert objects currently being displayed. Should be passed down from Redux store from App.
  */
 export default class Alerts extends React.Component {
 
@@ -146,6 +145,25 @@ export default class Alerts extends React.Component {
         'navigateDisappearThreshold' : 1
     };
 
+    /**
+     * @ignore
+     * @constant
+     * @type {Object}
+     */
+    static propTypes = {
+        /**
+         * List of Alert objects currently being displayed. Should be passed down from Redux store from App.
+         *
+         * @type {AlertObj[]}
+         */
+        'alerts' : PropTypes.arrayOf(PropTypes.shape({
+            'title' : PropTypes.string.isRequired,
+            'message' : PropTypes.string.isRequired,
+            'style' : PropTypes.string,
+            'navigationDissappearThreshold' : PropTypes.number
+        }))
+    };
+
     /** @ignore */
     constructor(props){
         super(props);
@@ -189,6 +207,10 @@ export default class Alerts extends React.Component {
 
 /**
  * Component which renders out an individual Alert.
+ * Rendered by `Alerts` component.
+ *
+ * @ignore
+ * @private
  */
 class AlertItem extends React.PureComponent {
 

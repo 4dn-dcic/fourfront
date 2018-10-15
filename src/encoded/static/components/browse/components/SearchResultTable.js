@@ -811,9 +811,13 @@ class DimensioningContainer extends React.PureComponent {
 
         setTimeout(()=>{
 
+            // Means this callback was finally (after setTimeout) called after `innerContainer` or `this` have been dismounted -- negligible occurence.
+            if (!this || !this.refs.innerContainer) return null;
+
             var { windowHeight, windowWidth } = this.props,
+                innerContainer  = this.refs.innerContainer,
                 scrollTop       = layout.getPageVerticalScrollPosition(),
-                tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
+                tableTopOffset  = layout.getElementOffset(innerContainer).top;
 
             //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
 
@@ -869,7 +873,7 @@ class DimensioningContainer extends React.PureComponent {
             */
 
             if (!done){
-                var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
+                var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(innerContainer, windowHeight, scrollTop, tableTopOffset);
                 if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
                     this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
                 }
