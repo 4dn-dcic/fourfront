@@ -37,7 +37,7 @@ export const itemTypeHierarchy = {
         'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
     ],
     'Individual': [
-        'IndividualHuman', 'IndividualMouse', 'IndividualFly'
+        'IndividualHuman', 'IndividualMouse', 'IndividualFly', 'IndividualChicken'
     ],
     'Treatment': [
         'TreatmentAgent', 'TreatmentRnai'
