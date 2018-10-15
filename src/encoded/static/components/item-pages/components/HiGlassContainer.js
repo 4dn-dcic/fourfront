@@ -731,7 +731,7 @@ export class HiGlassContainer extends React.PureComponent {
                 window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
                 // Would ideally load non-compiled app, but requires CSS webpack loaders (see HiGlass webpack.config.js).
                 //HiGlassComponent = require('higlass/app/scripts/hglib').HiGlassComponent;
-                HiGlassComponent = require('higlass/dist/scripts/hglib').HiGlassComponent;
+                HiGlassComponent = require('higlass/dist/hglib').HiGlassComponent;
             }
             this.setState({ 'mounted' : true });
         }, 500);
@@ -876,7 +876,7 @@ export class HiGlassContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.3/dist/styles/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.5/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
             </div>
