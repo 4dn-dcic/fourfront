@@ -895,7 +895,7 @@ def download(context, request):
 
     # get the experiment type associated with this file
     experiments_using_file = context.experiments(request)
-    found_experiment_type = None
+    found_experiment_type = 'None'
     for file_experiment in experiments_using_file:
         exp_info = get_item_if_you_can(request, file_experiment)
         if exp_info is None:
