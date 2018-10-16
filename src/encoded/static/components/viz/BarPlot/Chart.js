@@ -240,6 +240,10 @@ export class Chart extends React.PureComponent {
         this.setState({ 'mounted' : true });
     }
 
+    componentWillUnmount(){
+        this.setState({ 'mounted' : false });
+    }
+
     /**
      * @deprecated
      * @instance

@@ -1,101 +1,22 @@
+'use strict';
+
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, ajax, console, fileUtil } from './../../util';
-import { requestAnimationFrame } from './../../viz/utilities';
+import { isServerSide, ajax, console, fileUtil } from './../../../util';
+import { requestAnimationFrame } from './../../../viz/utilities';
+import { HiGlassLocalStorage } from './HiGlassLocalStorage';
+import { HiGlassPlainContainer } from './HiGlassPlainContainer';
 
-let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
-
-/* To be deleted (probably)
-function loadJS(src){
-    return new Promise(function(resolve, reject){
-        var script = document.createElement('script');
-        script.src = src;
-        script.addEventListener('load', function () {
-            resolve();
-        });
-        script.addEventListener('error', function (e) {
-            reject(e);
-        });
-        document.body.appendChild(script);
-    });
-}
-*/
 
 
 /**
- * Singleton class used for communicating with LocalStorage
+ * Default set of options for HiGlassConfigurator functions.
+ *
+ * @type {Object}
+ * @constant
  */
-export class HiGlassLocalStorage {
-
-    static instances = {}
-
-    static DEFAULT_PREFIX = "higlass_4dn_data_";
-
-    static validators = {
-        'domains' : function(val){
-            if (!val || !Array.isArray(val.x) || !Array.isArray(val.y)) return false;
-            if (val.x.length != 2) return false;
-            if (val.y.length != 2) return false;
-            return true;
-        }
-    }
-
-    constructor(prefix = HiGlassLocalStorage.DEFAULT_PREFIX){
-        if (HiGlassLocalStorage.instances[prefix]){
-            return HiGlassLocalStorage.instances[prefix];
-        }
-
-        if (!this.doesLocalStorageExist()){
-            return null;
-        }
-
-        this.prefix = prefix;
-        HiGlassLocalStorage.instances[prefix] = this;
-
-        return HiGlassLocalStorage.instances[prefix];
-    }
-
-    doesLocalStorageExist(){
-        var someVariable = 'helloworld';
-        try {
-            localStorage.setItem(someVariable, someVariable);
-            localStorage.removeItem(someVariable);
-            return true;
-        } catch(e) {
-            return false;
-        }
-    }
-
-    getDomains(){
-        var localStorageKey = this.prefix + 'domains';
-        var domains = localStorage.getItem(localStorageKey);
-        if (domains) domains = JSON.parse(domains);
-        if (!HiGlassLocalStorage.validators.domains(domains)){
-            localStorage.removeItem(localStorageKey);
-            console.error('Domains failed validation, removing key & value - ' + localStorageKey, domains);
-            return null;
-        }
-        return domains || null;
-    }
-
-    /**
-     * Save domain range location to localStorage.
-     *
-     * @param {{ 'x' : number[], 'y' : number[] }} domains - Domains to save from viewConfig.
-     */
-    saveDomains(domains){
-        if (!HiGlassLocalStorage.validators.domains(domains)){
-            console.error('Invalid value for domains passed in', domains);
-            return false;
-        }
-        localStorage.setItem(this.prefix + 'domains', JSON.stringify(domains));
-        return true;
-    }
-}
-
-export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
+const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'height' : 600,
     'baseUrl' : "https://higlass.4dnucleome.org",
     'supplementaryTracksBaseUrl' : "https://higlass.io",
@@ -113,7 +34,13 @@ export const DEFAULT_GEN_VIEW_CONFIG_OPTIONS = {
     'annotationTrackOptions' : null
 };
 
-/** Dictionary (Object) of functions for building out a viewConfig. Uses common 'options' dictionary. */
+
+
+/**
+ * Dictionary (Object) of functions for building out a viewConfig. Uses common 'options' dictionary.
+ *
+ * @type {Object.<function>}
+ */
 export const HiGlassConfigurator = {
 
     /**
@@ -121,7 +48,7 @@ export const HiGlassConfigurator = {
      *
      * @async
      */
-    validateTilesetUid : function(tilesetUid, successCallback, failureCallback = null, server = null){
+    'validateTilesetUid' : function(tilesetUid, successCallback, failureCallback = null, server = null){
         if (!failureCallback) failureCallback = function(){ console.error('Failed to validate tilesetUid:', tilesetUid, server); };
         if (!server) server = DEFAULT_GEN_VIEW_CONFIG_OPTIONS.baseUrl;
 
@@ -160,7 +87,7 @@ export const HiGlassConfigurator = {
         doValidation(tilesetUid);
     },
 
-    getInitialDomainsFromStorage : function(options){
+    'getInitialDomainsFromStorage' : function(options){
         var storagePrefix = options.storagePrefix || HiGlassLocalStorage.DEFAULT_PREFIX,
             initialDomains = options.initialDomains || DEFAULT_GEN_VIEW_CONFIG_OPTIONS.initialDomains;
 
@@ -173,7 +100,7 @@ export const HiGlassConfigurator = {
         return (storage && storage.getDomains()) || initialDomains;
     },
 
-    generateViewConfigBase : function(options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    'generateViewConfigBase' : function(options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
         return _.extend({
             "editable"  : true,
             "zoomFixed" : false,
@@ -192,7 +119,7 @@ export const HiGlassConfigurator = {
         }, options.viewConfigBase || {});
     },
 
-    generateViewConfigViewBase : function(viewUID = null, chromosomeAndAnnotation = {}, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    'generateViewConfigViewBase' : function(viewUID = null, chromosomeAndAnnotation = {}, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
         var { index, extraViewProps, baseUrl, supplementaryTracksBaseUrl } = options;
 
         viewUID = viewUID || "view-4dn-" + index;
@@ -217,7 +144,7 @@ export const HiGlassConfigurator = {
         }, _.omit(extraViewProps, 'layout', 'genomePositionSearchBox'));
     },
 
-    chromosomeAndAnnotationFromGenomeAssembly : function(genomeAssembly = 'GRCh38'){
+    'chromosomeAndAnnotationFromGenomeAssembly' : function(genomeAssembly = 'GRCh38'){
         if (genomeAssembly === 'GRCh38'){ // Human
             return {
                 'annotation' : {
@@ -247,7 +174,7 @@ export const HiGlassConfigurator = {
         }
     },
 
-    generateDefaultLayoutForViewItem(viewItemID, extraLayout = {}){
+    'generateDefaultLayoutForViewItem'(viewItemID, extraLayout = {}){
         return _.extend({
             'moved' : false,
             'static' : true,
@@ -260,11 +187,7 @@ export const HiGlassConfigurator = {
 
     // ViewConfig
 
-    isTilesetUidAValidListOfObjects : function(tilesetUid){
-        return (Array.isArray(tilesetUid) && _.every(tilesetUid, function(uidObj){  return (uidObj && typeof uidObj === 'object' && typeof uidObj.tilesetUid === 'string'); })) || false;
-    },
-
-    generateViewConfigForMultipleViews : function(viewConfigGenFxn = HiGlassConfigurator.mcool.generateViewConfig, files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+    'generateViewConfigForMultipleViews' : function(viewConfigGenFxn = HiGlassConfigurator.mcool.generateViewConfig, files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
         // Generate all configs normally
         var allConfigs = _.map(files, function(file, idx){
@@ -297,7 +220,7 @@ export const HiGlassConfigurator = {
         return primaryConf;
     },
 
-    generateTopAnnotationTrack : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
+    'generateTopAnnotationTrack' : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
         return {
             "name": annotation.name,
             //"created": "2017-07-14T15:27:46.989053Z",
@@ -323,7 +246,7 @@ export const HiGlassConfigurator = {
         };
     },
 
-    generateTopChromosomeTrack : function(trackBaseServer, { chromosome, annotation }){
+    'generateTopChromosomeTrack' : function(trackBaseServer, { chromosome, annotation }){
         return {
             "name": chromosome.name,
             //"created": "2017-07-17T14:16:45.346835Z",
@@ -344,9 +267,9 @@ export const HiGlassConfigurator = {
 
     // The following sub-objects' 'generateViewConfig' functions take in a tilesetUid (str or list of objects) + and options object (super-set of 'props' passed to HiGlassContainer).
 
-    mcool : {
+    'mcool' : {
 
-        generateCenterTrack : function(file, height, options){
+        'generateCenterTrack' : function(file, height, options){
             /*
             var tilesetUidStr;
             if (typeof file.higlass_uid !== 'string') {
@@ -375,7 +298,7 @@ export const HiGlassConfigurator = {
             };
         },
 
-        generateLeftAnnotationTrack : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
+        'generateLeftAnnotationTrack' : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
             return {
                 "name": annotation.name,
                 //"created": "2017-07-14T15:27:46.989053Z",
@@ -400,7 +323,7 @@ export const HiGlassConfigurator = {
             };
         },
 
-        generateLeftChromosomeTrack : function(trackBaseServer, { chromosome, annotation }){
+        'generateLeftChromosomeTrack' : function(trackBaseServer, { chromosome, annotation }){
             return {
                 "name": chromosome.name,
                 //"created": "2017-07-17T14:16:45.346835Z",
@@ -417,7 +340,7 @@ export const HiGlassConfigurator = {
             };
         },
 
-        generateView : function(file, options){
+        'generateView' : function(file, options){
             var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index, contentTrackOptions } = options;
 
             var passedOptions = _.extend({}, options, {
@@ -459,7 +382,7 @@ export const HiGlassConfigurator = {
          * @param {number} [options.index=0] - Passed down recursively if tilesetUid param is list of objects to help generate unique id for each view.
          * @returns {{ views : { uid : string, initialXDomain : number[], initialYDomain: number[], tracks: { top: {}[], bottom: {}[], left: {}[], center: {}[], right: {}[], bottom: {}[] } }[], trackSourceServers: string[] }} - The ViewConfig for HiGlass.
          */
-        generateViewConfig : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+        'generateViewConfig' : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
 
             options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
 
@@ -493,9 +416,9 @@ export const HiGlassConfigurator = {
 
     },
 
-    bigwig : {
+    'bigwig' : {
 
-        generateTopContentTrack : function(bigWigFile, options, { chromosome, annotation }, idx, all){
+        'generateTopContentTrack' : function(bigWigFile, options, { chromosome, annotation }, idx, all){
 
             var trackHeight = Math.min(Math.max(Math.floor((options.height - 150) / all.length), 20), options.height - 150),
                 styleOptions = {
@@ -549,7 +472,7 @@ export const HiGlassConfigurator = {
             };
         },
 
-        generateView : function(files, options){
+        'generateView' : function(files, options){
             var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index, excludeAnnotationTracks } = options;
 
             // Track definitions, default to human.
@@ -584,7 +507,7 @@ export const HiGlassConfigurator = {
             });
         },
 
-        generateViewConfig : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+        'generateViewConfig' : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
             options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
 
             // Make sure to override non-falsy-allowed values with defaults.
@@ -608,9 +531,8 @@ export const HiGlassConfigurator = {
 
     }
 
-
-
 };
+
 
 
 export class HiGlassContainer extends React.PureComponent {
@@ -651,39 +573,6 @@ export class HiGlassContainer extends React.PureComponent {
         return fxnToUse;
     }
 
-    static does2DTrackExist(viewConfig){
-
-        var found = false;
-        
-        _.forEach(viewConfig.views || [], function(view){
-            if (found) return;
-            _.forEach((view.tracks && view.tracks.center) || [], function(centerTrack){
-                if (found) return;
-                if (centerTrack.position === 'center') {
-                    found = true;
-                }
-            });
-        });
-
-        return found;
-    }
-
-    static defaultProps = {
-        'options' : { 'bounded' : true },
-        'isValidating' : false,
-        'disabled' : false,
-        'height' : 400,
-        'viewConfig' : null,
-        'groupID' : null,
-        'files' : null,
-        'generateViewConfigUsingFxn' : null,
-        'extraViewProps' : [],
-        'viewConfigBase' : {
-            "editable"  : true,
-            "zoomFixed" : false
-        }
-    }
-
     static propsToViewConfigGeneratorOptions(props){
         return _.pick(props, 'height', 'groupID', 'extraViewProps', 'viewConfigBase', 'contentTrackOptions', 'annotationTrackOptions');
     }
@@ -700,236 +589,48 @@ export class HiGlassContainer extends React.PureComponent {
             }),
             'genome_assembly' : PropTypes.string.isRequired
         })).isRequired,
-        'extraViewProps' : PropTypes.arrayOf(PropTypes.object)
+        'extraViewProps' : PropTypes.arrayOf(PropTypes.object),
+        'viewConfigBase' : PropTypes.object.isRequired,
+        'contentTrackOptions' : PropTypes.object
+    }
+
+    static defaultProps = {
+        'options' : { 'bounded' : true },
+        'isValidating' : false,
+        'disabled' : false,
+        'height' : 400,
+        'groupID' : null,
+        'files' : null,
+        'generateViewConfigUsingFxn' : null,
+        'extraViewProps' : [],
+        'viewConfigBase' : {
+            "editable"  : true,
+            "zoomFixed" : false
+        }
     }
 
     constructor(props){
         super(props);
-        this.initializeStorage = this.initializeStorage.bind(this);
-        this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
-        this.getPrimaryViewID = this.getPrimaryViewID.bind(this);
-        this.bindHiGlassEventHandlers = this.bindHiGlassEventHandlers.bind(this);
-        this.updateCurrentDomainsInStorage = _.debounce(this.updateCurrentDomainsInStorage.bind(this), 200);
-
-        this.initializeStorage(props); // Req'd before this.storagePrefix can be referenced.
-
         this.state = {
-            'mounted' : false,
-            'hasRuntimeError' : false,
-            'viewConfig' : props.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, HiGlassContainer.propsToViewConfigGeneratorOptions(props))
+            'viewConfig' : HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, HiGlassContainer.propsToViewConfigGeneratorOptions(props))
         };
     }
 
-    initializeStorage(props = this.props){
-        this.storagePrefix = props.groupID ? HiGlassLocalStorage.DEFAULT_PREFIX + props.groupID + '_' : HiGlassLocalStorage.DEFAULT_PREFIX; // Cache it
-        this.storage = new HiGlassLocalStorage(this.storagePrefix);
-    }
-
-    componentDidMount(){
-        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            if (!HiGlassComponent) {
-                window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
-                // Would ideally load non-compiled app, but requires CSS webpack loaders (see HiGlass webpack.config.js).
-                //HiGlassComponent = require('higlass/app/scripts/hglib').HiGlassComponent;
-                HiGlassComponent = require('higlass/dist/hglib').HiGlassComponent;
-            }
-            this.setState({ 'mounted' : true });
-        }, 500);
-    }
-
-    componentDidCatch(){
-        this.setState({ 'hasRuntimeError' : true });
-    }
 
     componentWillReceiveProps(nextProps){
         var nextState = {};
 
-        if (nextProps.groupID !== this.props.groupID) {
-            this.initializeStorage(nextProps); // Doesn't update own HiGlassComponent (or its viewConfig), but starts saving location to new groupID instance. May change depending on requirements.
-        }
-
-        if (this.props.files != nextProps.files || nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
-            nextState.viewConfig = nextProps.viewConfig || HiGlassContainer.whichGenerateViewConfigFxnToUse(nextProps)(nextProps.files, HiGlassContainer.propsToViewConfigGeneratorOptions(nextProps));
-        }
-        if (_.keys(nextState).length > 0){
-            this.setState(nextState);
-        }
-    }
-
-    componentDidUpdate(pastProps, pastState){
-        var hiGlassComponentExists = !!(this.refs.hiGlassComponent);
-        if (!this.hiGlassComponentExists && hiGlassComponentExists){
-            this.bindHiGlassEventHandlers();
-            console.info('Binding event handlers to HiGlassComponent.');
-            // Check if we have same initialDomains as props, which indicates it came not from storage, so then zoom out to extents.
-            /*
-            var viewConfig = this.state.viewConfig;
-            if (viewConfig && Array.isArray(viewConfig.views)){
-                _.forEach(viewConfig.views, (v) => {
-                    if (
-                        (v.initialXDomain && v.initialXDomain === DEFAULT_GEN_VIEW_CONFIG_OPTIONS.initialDomains.x) &&
-                        (v.initialYDomain && v.initialYDomain === DEFAULT_GEN_VIEW_CONFIG_OPTIONS.initialDomains.y)
-                    ) {
-                        console.info('Zooming view w/ uid ' + v.uid + ' to extents');
-                        this.refs.hiGlassComponent.api.zoomToDataExtent(v.uid);
-                    }
-                });
-            }
-            */
-        }
-        this.hiGlassComponentExists = hiGlassComponentExists;
-    }
-
-    /**
-     * Fade in div element containing HiGlassComponent after HiGlass initiates & loads in first tile etc. (about 500ms).
-     * For prettiness only.
-     */
-    instanceContainerRefFunction(element){
-        if (element){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
-            setTimeout(function(){
-                requestAnimationFrame(function(){
-                    element.style.transition = null; // Use transition as defined in stylesheet
-                    element.style.opacity = 1;
-                });
-            }, 500);
-        }
-    }
-
-    getPrimaryViewID(){
-        if (!this.state.viewConfig || !Array.isArray(this.state.viewConfig.views) || this.state.viewConfig.views.length === 0){
-            return null;
-        }
-        return _.uniq(_.pluck(this.state.viewConfig.views, 'uid'))[0];
-    }
-
-    updateCurrentDomainsInStorage(){
-        if (this.storage && this.refs.hiGlassComponent){
-            var hiGlassComponent = this.refs.hiGlassComponent;
-            var viewID = this.getPrimaryViewID();
-            var hiGlassDomains = hiGlassComponent.api.getLocation(viewID);
-            if (hiGlassDomains && Array.isArray(hiGlassDomains.xDomain) && Array.isArray(hiGlassDomains.yDomain) && hiGlassDomains.xDomain.length === 2 && hiGlassDomains.yDomain.length === 2){
-                var newDomainsToSave = { 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain };
-                if (!HiGlassContainer.does2DTrackExist(this.state.viewConfig)){ // If we only have 1D tracks, don't update Y position.
-                    var existingDomains = this.storage.getDomains();
-                    if (existingDomains){
-                        newDomainsToSave.y = existingDomains.y;
-                    }
-                }
-                this.storage.saveDomains(newDomainsToSave);
-            }
-        }
-    }
-
-    /**
-     * Binds functions to HiGlass events.
-     *
-     * - this.updateCurrentDomainsInStorage is bound to 'location' change event.
-     * - TODO: onDrag/Drop stuff.
-     */
-    bindHiGlassEventHandlers(){
-        if (this.state.viewConfig && this.refs.hiGlassComponent){
-            var hiGlassComponent = this.refs.hiGlassComponent,
-                viewID = this.getPrimaryViewID();
-            hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
-        } else {
-            console.warn('No HiGlass instance available.');
+        if (this.props.files != nextProps.files || nextProps.height !== this.props.height){
+            this.setState({
+                'viewConfig' : HiGlassContainer.whichGenerateViewConfigFxnToUse(nextProps)(nextProps.files, HiGlassContainer.propsToViewConfigGeneratorOptions(nextProps))
+            });
         }
     }
 
     render(){
-        var { disabled, isValidating, tilesetUid, height, width, options, style, className } = this.props;
-        let hiGlassInstance = null;
-        const mounted = (this.state && this.state.mounted) || (this.props && this.props.mounted) || false;
-        if (isValidating || !mounted){
-            var placeholderStyle = (typeof height === 'number' && height >= 140) ? { 'paddingTop' : (height / 2) - 70 } : null;
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4" style={placeholderStyle}>
-                    <h3>
-                        <i className="icon icon-lg icon-television"/>
-                    </h3>
-                    Initializing
-                </div>
-            );
-        } else if (disabled) {
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h4 className="text-400">Not Available</h4>
-                </div>
-            );
-        } else if (this.state.hasRuntimeError) {
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4">
-                    <h4 className="text-400">Runtime Error</h4>
-                </div>
-            );
-        } else {
-            hiGlassInstance = (
-                <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
-                    <HiGlassComponent options={options} viewConfig={this.state.viewConfig} width={width} ref="hiGlassComponent" />
-                </div>
-            );
-        }
-
-        /**
-         * TODO: Some state + UI functions to make higlass view full screen.
-         * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
-         */
-        return (
-            <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.5/dist/hglib.css" crossOrigin="true" />
-                {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
-                <div className="higlass-wrapper row" children={hiGlassInstance} />
-            </div>
-        );
+        var props = _.extend({}, _.omit(this.props, 'files', 'extraViewProps'), this.state);
+        return <HiGlassPlainContainer {...props} />;
     }
 
 }
-
-
-
-export class HiGlassTabView extends React.Component {
-
-    static getTabObject(context, disabled, isValidating, viewConfig=null){
-        return {
-            'tab' : <span><i className={"icon icon-fw icon-" + (isValidating ? 'circle-o-notch icon-spin' : 'television')}/> HiGlass Browser</span>,
-            'key' : 'higlass',
-            'disabled' : disabled,
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>HiGlass Browser</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <HiGlassTabView viewConfig={viewConfig} context={context} disabled={disabled} isValidating={isValidating} />
-                </div>
-            )
-        };
-    }
-
-    static defaultProps = {
-        'isValidating' : false,
-        'disabled' : false,
-        'height' : 600
-    }
-
-    render(){
-        var file = this.props.context,
-            contentTrackOptions = {},
-            fileFormat = fileUtil.getFileFormatStr(file);
-
-        if (fileFormat === 'bg' || fileFormat === 'bw'){
-            contentTrackOptions.showTooltip = true;
-        }
-        /**
-         * TODO: Some state + UI functions to make higlass view full screen.
-         * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
-         */
-        return (
-            <div className="higlass-tab-view-contents">
-                <HiGlassContainer {..._.omit(this.props, 'context')} files={[file]} contentTrackOptions={contentTrackOptions} />
-            </div>
-        );
-    }
-}
-
 
