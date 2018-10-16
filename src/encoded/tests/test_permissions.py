@@ -937,7 +937,6 @@ def planned_experiment_set_data(lab, award):
 def status2date():
     return {
         'released': 'public_release',
-        'current': 'public_release',
         'released to project': 'project_release'
     }
 
