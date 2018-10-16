@@ -35,6 +35,26 @@
         "accession": {
             "accessionType": "ES"
         },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "in review by lab",
+            "permission": "import_items",
+            "enum": [
+                "released",
+                "planned",
+                "revoked",
+                "archived",
+                "deleted",
+                "obsolete",
+                "replaced",
+                "in review by lab",
+                "submission in progress",
+                "released to project",
+                "archived to project",
+                "ready to process"
+            ]
+        },
         "orig_proposed_submission_date": {
             "title": "Original proposed submission date",
             "description": "YYYY-MM-DD formatted original proposed date of submission",
