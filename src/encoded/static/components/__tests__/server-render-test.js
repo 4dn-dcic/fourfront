@@ -1,5 +1,13 @@
 'use strict';
 
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ReactDOMServer from 'react-dom/server';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -7,10 +15,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe("Server rendering", function () {
-    var React;
     var App;
-    var ReactDOM;
-    var ReactDOMServer;
     var document;
     var store;
     var fetch;
@@ -67,9 +72,6 @@ describe("Server rendering", function () {
 
     beforeEach(function () {
         require('../../libs/react-patches');
-        React = require('react');
-        ReactDOM = require('react-dom');
-        ReactDOMServer = require('react-dom/server');
         App = require('..');
         store = require('../../store');
         // test dispatching some values to store

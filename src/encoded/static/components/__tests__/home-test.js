@@ -2,6 +2,9 @@
 
 import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
+import TestUtils from 'react-dom/test-utils';
+import React from 'react';
+import _ from 'underscore';
 
 /* Written by Carl, used to test the homepage rendered by home.js
 Specifically, test the creation of Accouncements and Getting Started entries,
@@ -15,12 +18,9 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing home.js', function() {
-    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper, sinon, server;
+    var HomePage, testItem, page, data, banners, Wrapper, sinon, server;
 
     beforeAll(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         HomePage = require('../static-pages/HomePage').default;
 
         sinon = require('sinon');

@@ -3,6 +3,11 @@
 /* Written by Carl, test for search.js (used for objs such as expts and
 biosources). Test data captured from Nov. 2016 metadata.*/
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -22,12 +27,9 @@ function filterRowsToResults(rows){
 
 describe('Testing search.js', function() {
     var sinon, server;
-    var React, SearchView, searchViewCommonProps, testSearch, TestUtils, context, schemas, _;
+    var SearchView, searchViewCommonProps, testSearch, context, schemas;
 
     beforeEach(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         SearchView = require('./../browse/SearchView').default;
         context = require('../testdata/expt_search');
 

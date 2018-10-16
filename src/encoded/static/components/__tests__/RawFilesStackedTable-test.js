@@ -1,5 +1,8 @@
 'use strict';
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
 import createReactClass from 'create-react-class';
 
 /** Test RawFilesStackedTable for Replicate Experiment Set */
@@ -12,12 +15,9 @@ jest.dontMock('underscore');
 
 
 describe('Testing RawFilesStackedTable', function() {
-    var React, RawFilesStackedTable, expFuncs, testRawFilesStackedTable, TestUtils, FetchContext, context, schemas, _, RawFilesStackedTableWrapper, SelectedFilesController, initiallySelectedFiles;
+    var  RawFilesStackedTable, expFuncs, testRawFilesStackedTable, FetchContext, context, schemas, RawFilesStackedTableWrapper, SelectedFilesController, initiallySelectedFiles;
 
     beforeEach(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
 
         RawFilesStackedTable = require('./../browse/components').RawFilesStackedTable;
         SelectedFilesController = require('./../browse/components').SelectedFilesController;

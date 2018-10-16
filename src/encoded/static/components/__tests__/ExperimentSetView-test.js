@@ -1,5 +1,9 @@
 'use strict';
 
+import React from 'react';
+import TestUtils from 'react-dom/test-utils';
+import _ from 'underscore';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -15,13 +19,10 @@ function getActiveTabIndex(tabs){
 
 
 describe('Testing ExperimentSetView', function() {
-    var sinon, server, React, TestUtils;
-    var expFuncs, context, schemas, _, ExperimentSetView, testView, RawFilesStackedTable;
+    var sinon, server;
+    var expFuncs, context, schemas, ExperimentSetView, testView, RawFilesStackedTable;
 
     beforeAll(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
