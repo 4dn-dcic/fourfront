@@ -12,7 +12,6 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/submitted" },

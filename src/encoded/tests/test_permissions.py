@@ -1075,3 +1075,55 @@ def test_4dn_can_view_nofic_joint_analysis_planned_and_in_progress(
         eset_item['status'] = status
         res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
         viewing_group_member_testapp.get(res1['@id'], status=200)
+
+
+@pytest.fixture
+def replicate_experiment_set_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test replicate experiment set',
+        'experimentset_type': 'replicate',
+    }
+
+
+def test_ready_to_process_set_status_admin_can_edit(
+        submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'ready to process'}).json['@graph'][0]
+    assert res2['status'] == 'ready to process'
+    # admin can Edit
+    res3 = wrangler_testapp.patch_json(res1['@id'], {'description': 'admin edit'}, status=200).json['@graph'][0]
+    assert res3['description'] == 'admin edit'
+
+
+def test_ready_to_process_set_status_submitter_can_view(
+        submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'ready to process'}).json['@graph'][0]
+    assert res2['status'] == 'ready to process'
+    # submitter can view
+    res3 = wrangler_testapp.get(res1['@id'], status=200).json
+    assert res3['description'] == 'test replicate experiment set'
+
+
+def test_ready_to_process_set_status_submitter_can_not_edit(
+        submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'ready to process'}).json['@graph'][0]
+    assert res2['status'] == 'ready to process'
+    # submitter can not edit
+    submitter_testapp.patch_json(res1['@id'], {'description': 'submitter edit'}, status=403)
+
+
+def test_ready_to_process_set_status_others_can_not_view(
+        submitter_testapp, wrangler_testapp, viewing_group_member_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'ready to process'}).json['@graph'][0]
+    assert res2['status'] == 'ready to process'
+    # submitter can not edit
+    viewing_group_member_testapp.get(res1['@id'], {'description': 'submitter edit'}, status=403)
