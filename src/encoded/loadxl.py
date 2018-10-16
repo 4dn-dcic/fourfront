@@ -51,6 +51,7 @@ ORDER = [
     'individual_human',
     'individual_mouse',
     'individual_fly',
+    'individual_chicken',
     'biosource',
     'antibody',
     'enzyme',

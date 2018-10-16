@@ -1,0 +1,13 @@
+[
+    {
+        "aliases": ["dcic:chicken"],
+        "award": "1U01CA200059-01",
+        "strain": "Hyline SC",
+        "lab": "4dn-dcic-lab",
+        "sex": "unknown",
+        "status": "released",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://www.ncbi.nlm.nih.gov/pubmed/2998040",
+        "uuid": "2dfe2618-e68f-a540-9aa9-45b77cf156b8"
+    }
+]
