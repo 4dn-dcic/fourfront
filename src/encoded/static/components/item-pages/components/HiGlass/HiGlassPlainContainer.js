@@ -137,6 +137,12 @@ export class HiGlassPlainContainer extends React.PureComponent {
         return _.uniq(_.pluck(viewConfig.views, 'uid'))[0];
     }
 
+    getCurrentViewConfig(){
+        return (
+            this.refs && this.refs.hiGlassComponent && this.refs.hiGlassComponent.state.viewConfig
+        ) || null;
+    }
+
     updateCurrentDomainsInStorage(){
         if (this.storage && this.refs.hiGlassComponent){
             var hiGlassComponent    = this.refs.hiGlassComponent,

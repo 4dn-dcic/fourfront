@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button } from 'react-bootstrap';
 import * as globals from './../globals';
+import Alerts from './../alerts';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock, HiGlassPlainContainer } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
@@ -27,7 +28,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
         // return initTabs.concat(this.getCommonTabs()); // We don't want attribution or detail view for this Item... for now.
 
-        initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props));
+        initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
 
         return initTabs;
     }
@@ -38,15 +39,15 @@ globals.content_views.register(HiGlassViewConfigView, 'HiGlassViewConfig');
 
 
 
-export class HiGlassViewConfigTabView extends React.Component {
+export class HiGlassViewConfigTabView extends React.PureComponent {
 
-    static getTabObject(props, viewConfig=null){
+    static getTabObject(props, width, viewConfig=null){
         viewConfig = viewConfig || props.viewsConfig || (props.context && props.context.viewconfig);
         return {
             'tab' : <span><i className="icon icon-fw icon-television"/> HiGlass Browser</span>,
             'key' : 'higlass',
             'disabled' : false,
-            'content' : <HiGlassViewConfigTabView {...props} viewConfig={viewConfig} />
+            'content' : <HiGlassViewConfigTabView {...props} width={width} viewConfig={viewConfig} />
         };
     }
 
@@ -60,39 +61,153 @@ export class HiGlassViewConfigTabView extends React.Component {
         super(props);
         this.fullscreenButton = this.fullscreenButton.bind(this);
         this.saveButtons = this.saveButtons.bind(this);
-
-        // TODO: _maybe_ Use this variable
-        // TODO: Update this variable upon movement, maybe bind methods to HiGlassComponentAPI (req: extend HiGlassPlainContainer)
-        // TODO: When update, make sure it doesn't change/reload HiGlassComponent -- if it does, update this but don't pass it further.
-        // TODO: Use it when saving, performing save as, etc.
+        this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
+        this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.handleSaveAs = this.handleSaveAs.bind(this);
+        this.handleShare = this.handleShare.bind(this);
+    
         this.state = {
-            'viewConfig' : props.viewConfig
+            'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
+            'originalViewConfig' : null, //object.deepClone(props.viewConfig)
+            'saveLoading' : false
         };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.viewConfig !== this.props.viewConfig){
+            this.setState({
+                'originalViewConfig' : null //object.deepClone(nextProps.viewConfig)
+            });
+        }
     }
 
     componentDidUpdate(pastProps, pastState){
         if (this.props.isFullscreen !== pastProps.isFullscreen){
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
+        if (this.state.originalViewConfig === null && pastState.originalViewConfig){
+            var hgc = this.getHiGlassComponent();
+            if (hgc){
+                this.setState({
+                    'originalViewConfigString' : hgc.api.exportAsViewConfString()
+                });
+            }
+        }
+    }
+
+    componentDidMount(){
+        // Hacky... we need to wait for HGC to load up and resize itself and such...
+        var initOriginalViewConfState = () => {
+            var hgc = this.getHiGlassComponent();
+            if (hgc){
+                setTimeout(()=>{
+                    this.setState({
+                        'originalViewConfigString' : hgc.api.exportAsViewConfString()
+                    });
+                }, 2000);
+            } else {
+                setTimeout(initOriginalViewConfState, 200);
+            }
+        };
+
+        initOriginalViewConfState();
+    }
+
+    havePermissionToEdit(){
+        return !!(_.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
+    }
+
+    handleSave(evt){
+        evt.preventDefault();
+
+        var hgc                 = this.getHiGlassComponent(),
+            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        if (!currentViewConf){
+            throw new Error('Could not get current view configuration.');
+        }
+
+        if (!this.havePermissionToEdit()){
+            // I guess would also get caught in ajax error callback.
+            throw new Error('No edit permissions.');
+        }
+
+        this.setState({ 'saveLoading' : true }, ()=>{
+            ajax.load(
+                this.props.href,
+                (resp)=>{
+                    // Success callback... maybe update state.originalViewConfigString or something...
+                    // At this point we're saved maybe just notify user somehow
+                    this.setState({ 'saveLoading' : false });
+                },
+                'PATCH',
+                ()=>{
+                    // Error callback
+                    Alerts.queue({
+                        'title' : "Failed to save display.",
+                        'message' : "For some reason",
+                        'style' : 'danger'
+                    });
+                    this.setState({ 'saveLoading' : false });
+                }, 
+                JSON.stringify({ 'viewconfig' : currentViewConf })
+            );
+        });
+    }
+
+    handleSaveAs(evt){
+        evt.preventDefault();
+        // TODO
+    }
+
+    /**
+     * Copies current URL to clipbard.
+     * Releases 
+     */
+    handleShare(evt){
+        evt.preventDefault();
+
+        if (this.props.context.status !== 'released' && this.havePermissionToEdit()){
+            // TODO - PATCH `status: released` to current href, then in a callback, proceed w/ below copywrapper stuff (prly put it in own method).
+        }
+
+        object.CopyWrapper.copyToClipboard(
+            this.props.href,
+            ()=>{ console.log('Succeeded in copying to clipboard'); /* TODO: Temporarily change/flash button color or something to indicate success */ },
+            ()=>{ console.log('Failed to copy to clipboard'); },
+        );
+    }
+
+    getHiGlassComponent(){
+        return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
     }
 
     saveButtons(){
-        // TODO
+        var { session, context } = this.props,
+            { saveLoading } = this.state;
+
+        if (!session) return null;
+
+        var editPermission  = this.havePermissionToEdit(),
+            sharePermission = (context.status === 'released' || editPermission);
+
         return (
             <div className="text-right inline-block">
                 <div className="inline-block" key="savebtn">
-                    <Button onClick={null /* TODO */} disabled bsStyle="success" data-tip="Save....">
-                        <i className={"icon icon-fw icon-save"}/>&nbsp; Save
+                    <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success">
+                        <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
                     </Button>
                 </div>&nbsp;
                 <div className="inline-block" key="saveasbtn">
-                    <Button onClick={null /* TODO */} bsStyle="success" data-tip="Save....">
+                    <Button onClick={this.handleSaveAs} bsStyle="success">
                         <i className={"icon icon-fw icon-save"}/>&nbsp; Save As...
                     </Button>
                 </div>&nbsp;
                 <div className="inline-block" key="clonebtn">
-                    <Button onClick={null /* TODO */} bsStyle="info" data-tip="Save....">
-                        <i className={"icon icon-fw icon-copy"}/>&nbsp; Clone
+                    <Button onClick={this.handleShare} disabled={!sharePermission} bsStyle="info" data-tip={context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'}>
+                        <i className={"icon icon-fw icon-copy"}/>&nbsp; Share
                     </Button>
                 </div>&nbsp;
             </div>
@@ -114,12 +229,21 @@ export class HiGlassViewConfigTabView extends React.Component {
     }
 
     render(){
-        /**
-         * TODO: Some state + UI functions to make higlass view full screen.
-         * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
-         */
+        var { isFullscreen, windowWidth, windowHeight, width } = this.props;
+    
+        /*
+        if (hgc){
+            var currentViewConfStr = hgc.api.exportAsViewConfString();
+            console.log(
+                'ViewConf from HiGlassComponent',
+                this.state.originalViewConfigString === currentViewConfStr,
+                currentViewConfStr,
+                '\n\n\n',
+                this.state.originalViewConfigString
+            );
+        }
+        */
 
-        var { isFullscreen, windowWidth } = this.props;
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -132,7 +256,10 @@ export class HiGlassViewConfigTabView extends React.Component {
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
-                        <HiGlassPlainContainer {..._.omit(this.props, 'context')} width={isFullscreen ? windowWidth + 10 : null} />
+                        <HiGlassPlainContainer {..._.omit(this.props, 'context')}
+                            width={isFullscreen ? windowWidth : width + 20 }
+                            height={isFullscreen ? windowHeight -110 : 500}
+                            ref="higlass" />
                     </div>
                 </div>
             </div>
