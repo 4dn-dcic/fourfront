@@ -1,5 +1,10 @@
 'use strict';
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 /* Written by Carl, used to test the IPannel of item.js. Statically uses a library
 and a json of all schemas (such as is called by <fetched.Param name="schemas" url="/profiles/")>*/
 
@@ -11,7 +16,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing DefaultItemView.js', function() {
-    var React, DefaultItemView, testItem, TestUtils, FetchContext, context, schemas, _, Wrapper, sinon, server;
+    var DefaultItemView, testItem, FetchContext, context, schemas, Wrapper, sinon, server;
 
     beforeAll(function(){
         
@@ -44,13 +49,10 @@ describe('Testing DefaultItemView.js', function() {
     });
 
     beforeEach(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         DefaultItemView = require('./../item-pages/DefaultItemView').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
-        Wrapper = React.createClass({
+        Wrapper = createReactClass({
             render: function() {
                 return (
                     <div>{this.props.children}</div>

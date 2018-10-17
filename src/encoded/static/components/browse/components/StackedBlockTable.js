@@ -694,7 +694,6 @@ export class FileEntryBlock extends React.PureComponent {
         this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
         this.filledFileRow = this.filledFileRow.bind(this);
         this.renderName = this.renderName.bind(this);
-        this.render = this.render.bind(this);
     }
 
     fileTypeSummary(file = this.props.file){
@@ -899,13 +898,10 @@ export class FileEntryBlock extends React.PureComponent {
 
     renderName(){
         var { file, colWidthStyles } = this.props;
-        return <div
-            className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
-            style={colWidthStyles ? colWidthStyles.file : null}
-            children={[
+        return <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
+            style={colWidthStyles ? colWidthStyles.file : null} children={[
                 this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
-            ]}
-        />;
+            ]} />;
     }
 
     render(){

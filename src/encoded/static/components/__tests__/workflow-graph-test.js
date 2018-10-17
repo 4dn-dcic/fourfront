@@ -1,5 +1,10 @@
 'use strict';
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -7,7 +12,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing Workflow Graph', function() {
-    var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
+    var ItemView, context, schemas, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
 
     function getShowParamsCheckBox(){
         var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showParameters')[0];
@@ -25,12 +30,6 @@ describe('Testing Workflow Graph', function() {
     });
 
     beforeEach(function() {
-
-        // 3rd Party Deps
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
-
         // Our own deps
         WorkflowRunView = require('./../item-pages/WorkflowRunView').WorkflowRunView;
 
@@ -39,7 +38,7 @@ describe('Testing Workflow Graph', function() {
         schemas = require('../testdata/schemas');
 
         // Setup
-        Wrapper = React.createClass({
+        Wrapper = createReactClass({
             render: function() {
                 return (
                     <div>{this.props.children}</div>
