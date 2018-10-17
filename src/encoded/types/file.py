@@ -901,7 +901,7 @@ def download(context, request):
         if exp_info is None:
             break
         exp_type = exp_info.get('experiment_type')
-        if found_experiment_type is None or found_experiment_type == exp_type:
+        if found_experiment_type == 'None' or found_experiment_type == exp_type:
             found_experiment_type = exp_type
         else:  # multiple experiment types
             found_experiment_type = 'Integrative analysis'
