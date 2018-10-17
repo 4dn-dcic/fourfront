@@ -895,13 +895,13 @@ def download(context, request):
 
     # get the experiment type associated with this file
     experiments_using_file = context.experiments(request)
-    found_experiment_type = None
+    found_experiment_type = 'None'
     for file_experiment in experiments_using_file:
         exp_info = get_item_if_you_can(request, file_experiment)
         if exp_info is None:
             break
         exp_type = exp_info.get('experiment_type')
-        if found_experiment_type is None or found_experiment_type == exp_type:
+        if found_experiment_type == 'None' or found_experiment_type == exp_type:
             found_experiment_type = exp_type
         else:  # multiple experiment types
             found_experiment_type = 'Integrative analysis'
