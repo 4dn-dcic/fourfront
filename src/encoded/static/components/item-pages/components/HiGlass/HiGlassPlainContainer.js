@@ -58,8 +58,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
 
         this.state = {
             'mounted' : false,
-            'hasRuntimeError' : false,
-            'viewConfig' : props.viewConfig
+            'hasRuntimeError' : false
         };
     }
 
@@ -86,18 +85,8 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     componentWillReceiveProps(nextProps){
-        var nextState = {};
-
         if (nextProps.groupID !== this.props.groupID) {
             this.initializeStorage(nextProps); // Doesn't update own HiGlassComponent (or its viewConfig), but starts saving location to new groupID instance. May change depending on requirements.
-        }
-
-        if (nextProps.height !== this.props.height || nextProps.viewConfig !== this.props.viewConfig){
-            nextState.viewConfig = nextProps.viewConfig;
-        }
-
-        if (_.keys(nextState).length > 0){
-            this.setState(nextState);
         }
     }
 
@@ -141,20 +130,22 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     getPrimaryViewID(){
-        if (!this.state.viewConfig || !Array.isArray(this.state.viewConfig.views) || this.state.viewConfig.views.length === 0){
+        var viewConfig = this.props.viewConfig;
+        if (!viewConfig || !Array.isArray(viewConfig.views) || viewConfig.views.length === 0){
             return null;
         }
-        return _.uniq(_.pluck(this.state.viewConfig.views, 'uid'))[0];
+        return _.uniq(_.pluck(viewConfig.views, 'uid'))[0];
     }
 
     updateCurrentDomainsInStorage(){
         if (this.storage && this.refs.hiGlassComponent){
-            var hiGlassComponent = this.refs.hiGlassComponent;
-            var viewID = this.getPrimaryViewID();
-            var hiGlassDomains = hiGlassComponent.api.getLocation(viewID);
+            var hiGlassComponent    = this.refs.hiGlassComponent,
+                viewID              = this.getPrimaryViewID(),
+                hiGlassDomains      = hiGlassComponent.api.getLocation(viewID);
+
             if (hiGlassDomains && Array.isArray(hiGlassDomains.xDomain) && Array.isArray(hiGlassDomains.yDomain) && hiGlassDomains.xDomain.length === 2 && hiGlassDomains.yDomain.length === 2){
                 var newDomainsToSave = { 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain };
-                if (!HiGlassPlainContainer.does2DTrackExist(this.state.viewConfig)){ // If we only have 1D tracks, don't update Y position.
+                if (!HiGlassPlainContainer.does2DTrackExist(this.props.viewConfig)){ // If we only have 1D tracks, don't update Y position.
                     var existingDomains = this.storage.getDomains();
                     if (existingDomains){
                         newDomainsToSave.y = existingDomains.y;
@@ -172,9 +163,9 @@ export class HiGlassPlainContainer extends React.PureComponent {
      * - TODO: onDrag/Drop stuff.
      */
     bindHiGlassEventHandlers(){
-        if (this.state.viewConfig && this.refs.hiGlassComponent){
-            var hiGlassComponent = this.refs.hiGlassComponent,
-                viewID = this.getPrimaryViewID();
+        if (this.props.viewConfig && this.refs.hiGlassComponent){
+            var hiGlassComponent    = this.refs.hiGlassComponent,
+                viewID              = this.getPrimaryViewID();
             hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
         } else {
             console.warn('No HiGlass instance available.');
@@ -183,9 +174,10 @@ export class HiGlassPlainContainer extends React.PureComponent {
 
 
     render(){
-        var { disabled, isValidating, tilesetUid, height, width, options, style, className } = this.props;
-        let hiGlassInstance = null;
-        const mounted = (this.state && this.state.mounted) || false;
+        var { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig } = this.props,
+            hiGlassInstance = null,
+            mounted         = (this.state && this.state.mounted) || false;
+
         if (isValidating || !mounted){
             var placeholderStyle = (typeof height === 'number' && height >= 140) ? { 'paddingTop' : (height / 2) - 70 } : null;
             hiGlassInstance = (
@@ -211,12 +203,10 @@ export class HiGlassPlainContainer extends React.PureComponent {
         } else {
             hiGlassInstance = (
                 <div className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
-                    <HiGlassComponent options={options} viewConfig={this.state.viewConfig} width={width} ref="hiGlassComponent" />
+                    <HiGlassComponent {...{ options, viewConfig, width }} ref="hiGlassComponent" />
                 </div>
             );
         }
-
-        console.log('VIEWCONFIG', this.state.viewConfig);
 
         /**
          * TODO: Some state + UI functions to make higlass view full screen.
