@@ -1124,5 +1124,5 @@ def test_ready_to_process_set_status_others_can_not_view(
     assert res1['status'] == 'in review by lab'
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'ready to process'}).json['@graph'][0]
     assert res2['status'] == 'ready to process'
-    # submitter can not edit
-    viewing_group_member_testapp.get(res1['@id'], {'description': 'submitter edit'}, status=403)
+    # others can not view
+    viewing_group_member_testapp.get(res1['@id'], status=403)
