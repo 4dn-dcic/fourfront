@@ -1444,7 +1444,9 @@ class BodyElement extends React.PureComponent {
             //'scrollTop'             : null // Not used, too many state updates if were to be.
             'windowWidth'           : null,
             'windowHeight'          : null,
-            'classList'             : []
+            'classList'             : [],
+            'hasError'              : false,
+            'errorInfo'             : null
         };
 
         /**
@@ -1483,6 +1485,22 @@ class BodyElement extends React.PureComponent {
         window.removeEventListener("scroll", this.throttledScrollHandler);
         delete this.throttledScrollHandler;
         window.removeEventListener('resize', this.onResize);
+    }
+
+    /**
+     * Catches exceptions in NavBar and similar 'outer' component areas.
+     *
+     * @private
+     * @returns {void}
+     */
+    componentDidCatch(err, info){
+        this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
+            analytics.exception('Client Error - ' + this.props.href + ': ' + err, true);
+            // Unset app.historyEnabled so that user may navigate backward w/o JS.
+            if (window && window.fourfront && window.fourfront.app){
+                window.fourfront.app.historyEnabled = false;
+            }
+        });
     }
 
     /**
@@ -1717,6 +1735,22 @@ class BodyElement extends React.PureComponent {
         });
     }
 
+    renderErrorState(){
+        return (
+            <body>
+                <div id="slot-application">
+                    <div id="application" className="done error">
+                        <div id="layout">
+                            <div id="pre-content-placeholder"/>
+                            { ContentErrorBoundary.errorNotice() }
+                            <div id="layout-footer"/>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        );
+    }
+
     /**
      * Renders out the body layout of the application.
      *
@@ -1728,13 +1762,15 @@ class BodyElement extends React.PureComponent {
                 currentAction, hrefParts, isLoading, slowLoad,
                 children
             } = this.props,
-            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList } = this.state,
+            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
             bodyClassList = (classList && classList.slice(0)) || [],
             registerWindowOnResizeHandler = this.registerWindowOnResizeHandler,
             registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
             addToBodyClassList            = this.addToBodyClassList,
             removeFromBodyClassList       = this.removeFromBodyClassList;
+
+        if (hasError) return this.renderErrorState();
 
         if (isLoading)          bodyClassList.push('loading-request');
         if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
@@ -1773,12 +1809,12 @@ class BodyElement extends React.PureComponent {
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
                             </div>
 
-                            <div id="content" className="container" children={
-                                React.cloneElement(children, {
+                            <div className="container" id="content">
+                                { React.cloneElement(children, {
                                     windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
                                     addToBodyClassList, removeFromBodyClassList
-                                })
-                            } />
+                                }) }
+                            </div>
 
                             <div id="layout-footer"/>
                         </div>
@@ -1799,4 +1835,53 @@ class BodyElement extends React.PureComponent {
 
 }
 
+class ContentErrorBoundary extends React.Component {
+
+    static errorNotice(){
+        return (
+            <div className="error-boundary container" id="content">
+                <hr/>
+                <div className="mb-2 mt-2">
+                    <h3 className="text-400">A client-side error has occured, please go back or try again later.</h3>
+                </div>
+            </div>
+        );
+    }
+
+    constructor(props){
+        super(props);
+        this.state = { 'hasError' : false, 'errorInfo' : null };
+    }
+
+    componentDidCatch(err, info){
+        this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
+            analytics.exception('Client Error - ' + this.props.href + ': ' + err, true);
+        });
+    }
+
+    /**
+     * Unsets the error state if we navigate to a different view/href .. which normally should be different ContentView.
+     */
+    componentWillReceiveProps(nextProps){
+        if (nextProps.href !== this.props.href){
+            this.setState(function(currState){
+                if (currState.hasError) {
+                    return {
+                        'hasError' : false,
+                        'errorInfo' : null
+                    };
+                }
+                return {};
+            });
+        }
+    }
+
+    render(){
+        if (this.state.hasError){
+            return ContentErrorBoundary.errorNotice();
+        }
+
+        return <div className="container" id="content">{ this.props.children }</div>;
+    }
+}
 
