@@ -247,7 +247,7 @@ export class WorkflowGraphSectionControls extends React.Component {
     wrapper(element){
         var isOpen = (this.state.mounted && layout.responsiveGridState(this.props.windowWidth) === 'lg') || this.state.open;
         return (
-            <div className="pull-right workflow-view-controls-container">
+            <div className="pull-right tabview-title-controls-container">
                 <Collapse in={isOpen}>
                     <div className="inner-panel">
                         {[...arguments]}
@@ -427,7 +427,7 @@ export class WorkflowGraphSection extends React.Component {
         var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
             { isFullscreen } = this.props;
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
+            <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls
