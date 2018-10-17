@@ -1427,6 +1427,7 @@ class BodyElement extends React.PureComponent {
         this.registerWindowOnScrollHandler = this.registerWindowOnScrollHandler.bind(this);
         this.addToBodyClassList         = this.addToBodyClassList.bind(this);
         this.removeFromBodyClassList    = this.removeFromBodyClassList.bind(this);
+        this.toggleFullScreen           = this.toggleFullScreen.bind(this);
 
         /**
          * State object for BodyElement.
@@ -1446,7 +1447,8 @@ class BodyElement extends React.PureComponent {
             'windowHeight'          : null,
             'classList'             : [],
             'hasError'              : false,
-            'errorInfo'             : null
+            'errorInfo'             : null,
+            'isFullscreen'          : false
         };
 
         /**
@@ -1735,6 +1737,16 @@ class BodyElement extends React.PureComponent {
         });
     }
 
+    toggleFullScreen(isFullscreen, callback){
+        if (typeof isFullscreen === 'boolean'){
+            this.setState({ isFullscreen }, callback);
+        } else {
+            this.setState(function(currState){
+                return { 'isFullscreen' : !currState.isFullscreen };
+            }, callback);
+        }
+    }
+
     renderErrorState(){
         return (
             <body>
@@ -1762,19 +1774,21 @@ class BodyElement extends React.PureComponent {
                 currentAction, hrefParts, isLoading, slowLoad,
                 children
             } = this.props,
-            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError } = this.state,
+            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
             bodyClassList = (classList && classList.slice(0)) || [],
             registerWindowOnResizeHandler = this.registerWindowOnResizeHandler,
             registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
             addToBodyClassList            = this.addToBodyClassList,
-            removeFromBodyClassList       = this.removeFromBodyClassList;
+            removeFromBodyClassList       = this.removeFromBodyClassList,
+            toggleFullScreen              = this.toggleFullScreen;
 
         if (hasError) return this.renderErrorState();
 
         if (isLoading)          bodyClassList.push('loading-request');
         if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
         if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
+        if (isFullscreen)       bodyClassList.push('is-full-screen');
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
@@ -1812,7 +1826,7 @@ class BodyElement extends React.PureComponent {
                             <div className="container" id="content">
                                 { React.cloneElement(children, {
                                     windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
-                                    addToBodyClassList, removeFromBodyClassList
+                                    addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen
                                 }) }
                             </div>
 
