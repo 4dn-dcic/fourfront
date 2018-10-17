@@ -3,12 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
+import { Button, Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
 import Alerts from './../alerts';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
-import { FormattedInfoBlock, HiGlassPlainContainer } from './components';
+import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
+import JSONTree from 'react-json-tree';
 
 
 
@@ -29,6 +30,8 @@ export default class HiGlassViewConfigView extends DefaultItemView {
         // return initTabs.concat(this.getCommonTabs()); // We don't want attribution or detail view for this Item... for now.
 
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
+
+        initTabs.push(ItemDetailList.getTabObject(context, this.props.schemas));
 
         return initTabs;
     }
@@ -63,14 +66,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.saveButtons = this.saveButtons.bind(this);
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
-        this.handleSave = this.handleSave.bind(this);
+        this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleSaveAs = this.handleSaveAs.bind(this);
         this.handleShare = this.handleShare.bind(this);
     
         this.state = {
             'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
             'originalViewConfig' : null, //object.deepClone(props.viewConfig)
-            'saveLoading' : false
+            'saveLoading' : false,
         };
     }
 
@@ -119,6 +122,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     handleSave(evt){
+        // Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
         evt.preventDefault();
 
         var hgc                 = this.getHiGlassComponent(),
@@ -139,7 +143,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 this.props.href,
                 (resp)=>{
                     // Success callback... maybe update state.originalViewConfigString or something...
-                    // At this point we're saved maybe just notify user somehow
+                    // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     this.setState({ 'saveLoading' : false });
                 },
                 'PATCH',
@@ -228,6 +232,20 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return null;
     }
 
+    extNonFullscreen(){
+        // TODO: temp add file text input box to go here
+        // we can use temp text input box which take @id and then iterate on it later
+        // in any case, we'll need logic to AJAX in the file, check its file_type, genome_assembly, higlass_uid, and craftfully extend hgc.api.exportAsViewConfString() with it.
+        // Would use/add to HiGlassConfigurator functions.
+
+
+        return (
+            <div className="bottom-panel">
+
+            </div>
+        );
+    }
+
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props;
     
@@ -261,7 +279,51 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             height={isFullscreen ? windowHeight -110 : 500}
                             ref="higlass" />
                     </div>
+                    { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>
+            </div>
+        );
+    }
+}
+
+/**
+ * Dont use. Was testing stuff. Not fun UX. Details tab is nicer.
+ *
+ * @deprecated
+ * @class CollapsibleViewConfOutput
+ * @extends {React.PureComponent}
+ */
+class CollapsibleViewConfOutput extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.toggle = this.toggle.bind(this);
+        this.state = {
+            'open' : false
+        };
+    }
+
+    toggle(e){
+        e.preventDefault();
+        this.setState(function(currState){
+            return { 'open' : !currState.open };
+        });
+    }
+
+    render(){
+        var { viewConfig } = this.props,
+            { open } = this.state;
+
+        return (
+            <div className="viewconfig-panel">
+                <hr/>
+                <h4 className="clickable inline-block text-400" onClick={this.toggle}>
+                    <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus' )} />&nbsp;&nbsp;
+                    { open ? 'Close' : 'View' } Configuration
+                </h4>
+                <Collapse in={open}>
+                    <pre>{ viewConfig }</pre>
+                </Collapse>
             </div>
         );
     }
