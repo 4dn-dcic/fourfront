@@ -1,9 +1,8 @@
 {
-    "title": "Static Section",
+    "title": "HiGlass View Configuration",
     "id": "https://data.4dnucleome.org/profiles/higlassviewconfig.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid"],
     "mixinProperties": [
@@ -28,7 +27,9 @@
             "type": "object",
             "additionalProperties": true,
             "description": "The viewconfig JSON",
+            "exclude_from": ["FFedit-create"],
             "lookup" : 7,
+            "formInput" : "code",
             "properties": {
                 "editable" : {
                     "type" : "boolean",
@@ -212,7 +213,6 @@
                                                 "options" : {
                                                     "additionalProperties" : true,
                                                     "type" : "object",
-                                                    "required" : ["name"],
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
@@ -718,16 +718,10 @@
         }
     },
     "facets" : {
-        "section_type" : {
-            "title" : "Type"
-        }
     },
     "columns" : {
-        "name" : {
-            "title" : "Name / ID"
-        },
-        "section_type" : {
-            "title" : "Type"
+        "submitted_by" : {
+            "title" : "Creator"
         }
     },
     "excludedColumns" : ["lab.display_title"]
