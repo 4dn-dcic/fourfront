@@ -13,9 +13,9 @@ var vizUtil = require('./utilities');
 /** 
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
  * The mechanism for this is roughly diagrammed here:
- * 
+ *
  * .. image:: https://files.slack.com/files-pri/T0723UERE-F4C8KQKMM/chartdatacontroller.png
- * 
+ *
  * @module {Object} viz/chart-data-controller
  */
 
@@ -194,7 +194,7 @@ var reduxSubscription = null;
  * Is set when ChartDataController.initialize() is called.
  *
  * @todo Perhaps move initialize() call from facetcharts.js to app.js.
- * @ignore
+ * @private
  * @type {boolean}
  */
 var isInitialized = false;
@@ -265,7 +265,7 @@ class Provider extends React.Component {
 
     /**
      * Adds various properties from state, plus callback to update 'barplot_data_fields', to children.
-     * 
+     *
      * @returns {JSX.Element} Cloned & adjusted props.children.
      * @memberof module:viz/chart-data-controller.Provider
      * @private

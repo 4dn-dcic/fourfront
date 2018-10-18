@@ -1,6 +1,7 @@
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var webpack = require('webpack');
+var gulp        = require('gulp'),
+    PluginError = require('plugin-error'),
+    log         = require('fancy-log'),
+    webpack     = require('webpack');
 
 
 gulp.task('default', ['webpack', 'watch']);
@@ -26,13 +27,13 @@ var webpackOnBuild = function (done) {
     var start = Date.now();
     return function (err, stats) {
         if (err) {
-            throw new gutil.PluginError("webpack", err);
+            throw new PluginError("webpack", err);
         }
-        gutil.log("[webpack]", stats.toString({
+        log("[webpack]", stats.toString({
             colors: true
         }));
         var end = Date.now();
-        gutil.log("Build Completed, running for " + ((end - start)/1000)) + 's';
+        log("Build Completed, running for " + ((end - start)/1000)) + 's';
         if (done) { done(err); }
     };
 };

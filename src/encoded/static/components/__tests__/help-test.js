@@ -1,6 +1,7 @@
 'use strict';
 
-import createReactClass from 'create-react-class';
+import TestUtils from 'react-dom/test-utils';
+import React from 'react';
 
 /**
  * Written by Alex, based on Carl's homepage test, to test the 'Help' page
@@ -17,26 +18,12 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing help.js', function() {
-    var React, HelpPage, testItem, TestUtils, page, context, _, banners, Wrapper, helpEntries;
+    var HelpPage, testItem, page, context, _, banners, Wrapper, helpEntries;
 
     beforeAll(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         HelpPage = require('../static-pages/StaticPage').default;
         context = require('../testdata/static/helppage');
-
-        /*
-
-        Wrapper = createReactClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
-
-        */
 
         page = TestUtils.renderIntoDocument(<HelpPage context={context} />);
         helpEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'help-entry');

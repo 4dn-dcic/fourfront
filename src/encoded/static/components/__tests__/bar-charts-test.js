@@ -1,5 +1,10 @@
 'use strict';
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -8,13 +13,10 @@ jest.dontMock('underscore');
 
 
 describe('Testing FacetCharts with a dummy sinon response returning test @graph', function() {
-    var React, FacetCharts, ChartDataController, testItem, TestUtils, page, store, context, filters, _, Wrapper, href, sinon, server, fieldEndpointResult, propInitialFields;
+    var FacetCharts, ChartDataController, testItem, page, store, context, filters, Wrapper, href, sinon, server, fieldEndpointResult, propInitialFields;
 
     beforeAll(function() {
-        React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         FacetCharts = require('./../facetcharts').FacetCharts;
         ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
 

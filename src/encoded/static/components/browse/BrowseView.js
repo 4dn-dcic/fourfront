@@ -541,7 +541,7 @@ export default class BrowseView extends React.Component {
                     }
                 }
             }
-        });
+        }, 10);
     }
 
 

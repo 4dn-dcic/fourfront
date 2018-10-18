@@ -82,6 +82,7 @@ describe('Deployment/CI Static Page & Content Tests', function () {
                             cy.wait(300).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                                 var titleText = t.text();
                                 expect(titleText).to.have.length.above(0);
+                                cy.title().should('equal', titleText + ' – 4DN Data Portal').end(); // Ensure <head>...<title>TITLE</title>...</head> matches.
                                 prevTitle = titleText;
 
                                 if (!haveWeSeenPageWithTableOfContents) {

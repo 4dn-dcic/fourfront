@@ -216,12 +216,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 
         var { context, files } = this.props;
 
-        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
-        var expTableColumnHeaders = [
-                { columnClass: 'file-detail', title: 'File Info'},
-                { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
-            ],
-            fileCount = files.length,
+        var fileCount = files.length,
             expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0,
             anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
 
@@ -621,10 +616,10 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
                 }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                    { currentlyVisualizedFiles ? (
-                        <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} windowWidth={windowWidth} mounted={mounted} width={width - 21}
-                            renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
-                        ) : this.renderFilesTable(width - 21) }
+                        { currentlyVisualizedFiles ? (
+                            <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} windowWidth={windowWidth} mounted={mounted} width={width - 21}
+                                renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />)
+                        : this.renderFilesTable(width - 21) }
                     </div>
                 </Collapse>
             </div>
