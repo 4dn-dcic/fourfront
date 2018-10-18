@@ -640,7 +640,7 @@ def set_filters(request, search, result, principals, doc_types, types):
 
 
         # handle NOT
-        elif field.endswith('!'): 
+        elif field.endswith('!'):
             field = field[:-1]
             not_field = True
 
