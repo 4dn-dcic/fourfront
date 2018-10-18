@@ -1,6 +1,6 @@
 {
     "title": "HiGlass View Configuration",
-    "id": "https://data.4dnucleome.org/profiles/higlassviewconfig.json",
+    "id": "/profiles/higlassviewconfig.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,
