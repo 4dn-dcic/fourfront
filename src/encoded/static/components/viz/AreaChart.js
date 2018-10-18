@@ -21,7 +21,7 @@ import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility }
  * Can be extended.
  */
 export class StatsViewController extends React.PureComponent {
-    
+
     static defaultProps = {
         'searchURIs' : {},
         'shouldRefetchAggs' : function(pastProps, nextProps){

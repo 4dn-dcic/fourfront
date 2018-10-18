@@ -271,9 +271,10 @@ export function getDateHistogramIntervalFromFacet(facet){
  * The range check is likely to change or be completely removed
  * in response to needing different component to facet ranges.
  *
- * @param {*} term 
- * @param {*} facet 
- * @param {*} props 
+ * @param {{ key: string }} term - Object for term option
+ * @param {{ field: string }} facet - Object for facet, containing field
+ * @param {Object} props - Props from FacetList. Should have context.filters.
+ * @returns {boolean}
  */
 export function determineIfTermFacetSelected(term, facet, props){
     return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, props.context.filters));
