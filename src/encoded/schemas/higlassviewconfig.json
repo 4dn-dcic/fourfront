@@ -1,5 +1,5 @@
 {
-    "title": "HiGlass View Configuration",
+    "title": "HiGlass Display",
     "id": "/profiles/higlassviewconfig.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -701,7 +701,7 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "released",
+            "default": "draft",
             "enum" : [
                 "released",
                 "released to project",

@@ -29,6 +29,7 @@ ORDER = [
     'award',
     'lab',
     'static_section',
+    'higlassviewconfig',
     'page',
     'ontology',
     'ontology_term',
