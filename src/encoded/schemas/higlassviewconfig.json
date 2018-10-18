@@ -327,7 +327,6 @@
                                                 "options" : {
                                                     "additionalProperties" : true,
                                                     "type" : "object",
-                                                    "required" : ["name"],
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
@@ -442,7 +441,6 @@
                                                 "options" : {
                                                     "additionalProperties" : true,
                                                     "type" : "object",
-                                                    "required" : ["name"],
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
@@ -557,7 +555,6 @@
                                                 "options" : {
                                                     "additionalProperties" : true,
                                                     "type" : "object",
-                                                    "required" : ["name"],
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
