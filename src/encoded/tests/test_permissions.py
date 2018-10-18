@@ -1104,7 +1104,7 @@ def test_ready_to_process_set_status_submitter_can_view(
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'ready to process'}).json['@graph'][0]
     assert res2['status'] == 'ready to process'
     # submitter can view
-    res3 = wrangler_testapp.get(res1['@id'], status=200).json
+    res3 = submitter_testapp.get(res1['@id'], status=200).json
     assert res3['description'] == 'test replicate experiment set'
 
 
