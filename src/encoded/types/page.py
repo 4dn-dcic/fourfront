@@ -266,18 +266,18 @@ for field in ['display_title', 'name', 'description', 'content.name']:
 
 
 @collection(
-    name='higlass-viewconfigs',
+    name='higlass-view-configs',
     properties={
-        'title': 'HiGlass ViewConfigs',
-        'description': 'View configurations for HiGlass',
+        'title': 'HiGlass Displays',
+        'description': 'Dsiplays and view configurations for HiGlass',
     })
-class HiGlassViewConfig(Item):
+class HiglassViewConfig(Item):
     """
     Item type which contains a `view_config` property and other metadata.
     TODO: Perhaps make a base class for this and StaticSection once we have more permissioning logic.
     """
-    item_type = 'higlassviewconfig'
-    schema = load_schema('encoded:schemas/higlassviewconfig.json')
+    item_type = 'higlass_view_config'
+    schema = load_schema('encoded:schemas/higlass_view_config.json')
     embedded_list = [
         "submitted_by.display_title"
     ]

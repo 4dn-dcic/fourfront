@@ -1,6 +1,6 @@
 {
     "title": "HiGlass Display",
-    "id": "/profiles/higlassviewconfig.json",
+    "id": "/profiles/higlass_view_config.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,
