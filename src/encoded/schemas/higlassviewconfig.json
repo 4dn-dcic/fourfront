@@ -717,7 +717,7 @@
     "facets" : {
     },
     "columns" : {
-        "submitted_by" : {
+        "submitted_by.display_title" : {
             "title" : "Creator"
         }
     },
