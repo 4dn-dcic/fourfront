@@ -182,7 +182,7 @@ class UsageStatsViewController extends StatsViewController {
             },
             'TrackingItemDownload' : function(props) {
                 var untilDate = moment.utc(),
-                    uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=None&tracking_type=download_tracking';
+                    uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=download_tracking.experiment_type&tracking_type=download_tracking';
                 if (props.currentGroupBy === 'monthly'){
                     untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
                     uri += '&date_histogram_interval=monthly&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
@@ -764,7 +764,7 @@ class UsageStatsView extends StatsChartViewBase {
             } = this.state,
             width = this.getRefWidth() || null;
 
-        if (!mounted || !sessions_by_country){
+        if (!mounted || loadingStatus === 'loading'){
             return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ loadingIcon() }/>;
         }
         if (loadingStatus === 'failed'){
