@@ -70,7 +70,8 @@
             "enum": [
                 "GRCh38",
                 "GRCm38",
-                "dm6"
+                "dm6",
+                "galGal5"
             ]
         }
     },
