@@ -38,7 +38,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 }
 
-globals.content_views.register(HiGlassViewConfigView, 'HiGlassViewConfig');
+globals.content_views.register(HiGlassViewConfigView, 'HiglassViewConfig');
 
 
 
