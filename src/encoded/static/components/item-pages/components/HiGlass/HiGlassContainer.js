@@ -611,11 +611,14 @@ export class HiGlassContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.initializeStorage = this.initializeStorage.bind(this);
+        this.updateCurrentDomainsInStorage = this.updateCurrentDomainsInStorage.bind(this);
+        this.bindHiGlassEventHandlers = this.bindHiGlassEventHandlers.bind(this);
+        this.initializeStorage();
         this.state = {
             'viewConfig' : HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, HiGlassContainer.propsToViewConfigGeneratorOptions(props))
         };
     }
-
 
     componentWillReceiveProps(nextProps){
         var nextState = {};
@@ -625,11 +628,71 @@ export class HiGlassContainer extends React.PureComponent {
                 'viewConfig' : HiGlassContainer.whichGenerateViewConfigFxnToUse(nextProps)(nextProps.files, HiGlassContainer.propsToViewConfigGeneratorOptions(nextProps))
             });
         }
+
+        if (nextProps.groupID !== this.props.groupID) {
+            // Doesn't update own HiGlassComponent (or its viewConfig), but starts saving location to new groupID instance. May change depending on requirements.
+            this.initializeStorage(nextProps); 
+        }
+    }
+
+    componentDidMount(){
+        this.bindHiGlassEventHandlers();
+    }
+
+    initializeStorage(props = this.props){
+        this.storagePrefix = props.groupID ? HiGlassLocalStorage.DEFAULT_PREFIX + props.groupID + '_' : HiGlassLocalStorage.DEFAULT_PREFIX; // Cache it
+        this.storage = new HiGlassLocalStorage(this.storagePrefix);
+    }
+
+    updateCurrentDomainsInStorage(){
+        var viewConfig       = this.state.viewConfig,
+            hiGlassComponent = this.getHiGlassComponent();
+
+        if (this.storage && hiGlassComponent){
+            var viewID              = HiGlassPlainContainer.getPrimaryViewID(viewConfig),
+                hiGlassDomains      = hiGlassComponent.api.getLocation(viewID);
+
+            if (hiGlassDomains && Array.isArray(hiGlassDomains.xDomain) && Array.isArray(hiGlassDomains.yDomain) && hiGlassDomains.xDomain.length === 2 && hiGlassDomains.yDomain.length === 2){
+                var newDomainsToSave = { 'x' : hiGlassDomains.xDomain, 'y' : hiGlassDomains.yDomain };
+                if (!HiGlassPlainContainer.does2DTrackExist(viewConfig)){ // If we only have 1D tracks, don't update Y position.
+                    var existingDomains = this.storage.getDomains();
+                    if (existingDomains){
+                        newDomainsToSave.y = existingDomains.y;
+                    }
+                }
+                this.storage.saveDomains(newDomainsToSave);
+            }
+        }
+    }
+
+    /**
+     * Binds functions to HiGlass events.
+     *
+     * - this.updateCurrentDomainsInStorage is bound to 'location' change event.
+     * - TODO: onDrag/Drop stuff.
+     */
+    bindHiGlassEventHandlers(){
+        var viewConfig          = this.state.viewConfig,
+            hiGlassComponent    = this.getHiGlassComponent(),
+            viewID              = HiGlassPlainContainer.getPrimaryViewID(viewConfig);
+
+        if (viewConfig && hiGlassComponent){
+            hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
+        } else if (!hiGlassComponent) {
+            console.warn('No HiGlass instance available. Retrying...');
+            setTimeout(()=>{
+                this.bindHiGlassEventHandlers();
+            }, 500);
+        }
+    }
+
+    getHiGlassComponent(){
+        return this && this.refs && this.refs.plainContainer && this.refs.plainContainer.getHiGlassComponent();
     }
 
     render(){
         var props = _.extend({}, _.omit(this.props, 'files', 'extraViewProps'), this.state);
-        return <HiGlassPlainContainer {...props} />;
+        return <HiGlassPlainContainer {...props} ref="plainContainer" />;
     }
 
 }

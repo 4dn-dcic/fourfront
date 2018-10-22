@@ -20,9 +20,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
         var initTabs    = [],
             context     = this.props.context,
             windowWidth = this.props.windowWidth,
-            width       = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-
-        if (width) width -= 20;
+            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth));
 
         //initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
         //initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
@@ -276,7 +274,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context')}
                             width={isFullscreen ? windowWidth : width + 20 }
-                            height={isFullscreen ? windowHeight -110 : 500}
+                            height={isFullscreen ? windowHeight -120 : 500}
                             ref="higlass" />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
