@@ -239,8 +239,19 @@ export class GroupByController extends React.PureComponent {
     }
 
     componentWillReceiveProps(nextProps){
-        if (this.props.groupByOptions !== nextProps.groupByOptions && this.props.initialGroupBy !== nextProps.initialGroupBy){
-            this.setState({ 'currentGroupBy' : nextProps.initialGroupBy });
+        if (this.props.groupByOptions !== nextProps.groupByOptions){
+
+            var nextGroupByKeys = _.keys(nextProps.groupByOptions);
+
+            if (nextGroupByKeys.indexOf(this.state.currentGroupBy) === -1){
+                if (nextGroupByKeys.indexOf(nextProps.initialGroupBy) === -1){
+                    throw new Error('Changed props.groupByOptions but state.currentGroupBy and props.initialGroupBy are now both invalid.');
+                } else {
+                    this.setState({ 'currentGroupBy' : nextProps.initialGroupBy });
+                    return;
+                }
+            }
+
         }
     }
 

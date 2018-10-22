@@ -66,8 +66,21 @@ export default class StatisticsPageView extends StaticPage {
 
     renderSubmissionsSection(){
         // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
+        var groupByOptions = {
+                'award.project'                      : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span>
+            },
+            initialGroupBy = 'award.project';
+
+        if (this.props.browseBaseState !== 'all'){
+            _.extend(groupByOptions, {
+                'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
+                'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
+                'experiments_in_set.experiment_type' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+            }),
+            initialGroupBy = 'award.center_title';
+        }
         return (
-            <GroupByController>
+            <GroupByController {...{ groupByOptions, initialGroupBy }}>
                 <SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
                     <SubmissionsStatsView />
                 </SubmissionStatsViewController>
