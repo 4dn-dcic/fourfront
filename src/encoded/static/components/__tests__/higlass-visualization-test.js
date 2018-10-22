@@ -26,7 +26,7 @@ describe('Higlass Visualization Page', function() {
         // TODO Load App dependencies
 
         // Get test Data
-        context = require('./../higlassview/config-00').default[0];
+        viewConfig = require('./../higlassview/config-00').default[0];
         schemas = require('../testdata/schemas');
 
         // Setup
@@ -37,6 +37,23 @@ describe('Higlass Visualization Page', function() {
                 );
             }
         });
+
+        const user_permissions = {
+            'lab_user': [{ 'name' : 'edit' }],
+            'public_user': [],
+        }
+
+        // Render the higlass container here.
+        const context = {
+            "session": { "hi": 1 },
+            "actions" : user_permissions['lab_user'],
+        };
+
+        testWorkflowInstance = TestUtils.renderIntoDocument(
+            <Wrapper>
+                <HiGlassViewConfigTabView context={context} width={width} viewConfig={viewConfig} />
+            </Wrapper>
+        );
 
         jest.runAllTimers();
 
@@ -54,6 +71,12 @@ describe('Higlass Visualization Page', function() {
 
     it("Can save an existing higlass file", function() {
         // User can save an existing higlass viewconf.
+
+        // Should see a "save" button
+
+        // Click on the button
+
+        // There should be a file there.
     });
 
     it("Can reset a higlass file", function() {

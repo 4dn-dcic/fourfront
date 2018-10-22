@@ -67,7 +67,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleSaveAs = this.handleSaveAs.bind(this);
         this.handleShare = this.handleShare.bind(this);
-    
+
         this.state = {
             'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
             'originalViewConfig' : null, //object.deepClone(props.viewConfig)
@@ -153,20 +153,72 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         'style' : 'danger'
                     });
                     this.setState({ 'saveLoading' : false });
-                }, 
+                },
                 JSON.stringify({ 'viewconfig' : currentViewConf })
             );
         });
     }
 
+    /**
+    * Create a new higlass viewconfig for the user, based on the current data.
+    */
     handleSaveAs(evt){
         evt.preventDefault();
-        // TODO
+
+        var hgc                 = this.getHiGlassComponent(),
+            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        if (!currentViewConf){
+            throw new Error('Could not get current view configuration.');
+        }
+
+        // Make sure you are logged in
+        if (this.props.session !== true) {
+            Alerts.queue({
+                'title' : "Please log in.",
+                'message' : "Please log in or sign in before saving this display.",
+                'style' : 'danger'
+            });
+        }
+
+        // Get the current title and description
+        const viewConfTitle = currentViewConf.title.title;
+        const viewConfDesc = currentViewConf.title.description;
+
+        // Try to PUT a new viewconf.
+        this.setState(
+            { 'saveLoading' : true },
+            ()=>{
+                ajax.load(
+                    this.props.href,
+                    (resp)=>{
+                        Alerts.queue({
+                            'title' : "Saved " + viewConfTitle,
+                            'message' : "Saved new display.",
+                            'style' : 'info'
+                        });
+                        this.setState({ 'saveLoading' : false });
+                    },
+                    'PUT',
+                    ()=>{
+                        // Error callback
+                        Alerts.queue({
+                            'title' : "Failed to save display.",
+                            'message' : "For some reason",
+                            'style' : 'danger'
+                        });
+                        this.setState({ 'saveLoading' : false });
+                    },
+                    JSON.stringify({ 'viewconfig' : currentViewConf })
+                );
+            }
+        );
     }
 
     /**
      * Copies current URL to clipbard.
-     * Releases 
+     * Releases
      */
     handleShare(evt){
         evt.preventDefault();
@@ -246,7 +298,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props;
-    
+
         /*
         if (hgc){
             var currentViewConfStr = hgc.api.exportAsViewConfString();
@@ -326,5 +378,3 @@ class CollapsibleViewConfOutput extends React.PureComponent {
         );
     }
 }
-
-
