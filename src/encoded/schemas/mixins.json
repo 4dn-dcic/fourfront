@@ -84,6 +84,7 @@
                 "replaced",
                 "in review by lab",
                 "submission in progress",
+                "pre-release",
                 "released to project",
                 "archived to project"
             ]

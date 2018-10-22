@@ -66,10 +66,6 @@ ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-#ALLOW_VIEWING_GROUP_VIEW = [
-#    (Allow, 'role.viewing_group_member', 'view'),
-#] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
-
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
 ] + ALLOW_LAB_MEMBER_VIEW
@@ -306,7 +302,7 @@ class Item(snovault.Item):
         # publication
         'published': ALLOW_CURRENT,
         # experiment sets
-        'ready to process': ALLOW_LAB_VIEW_ADMIN_EDIT
+        'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
 
     def __init__(self, registry, models):
