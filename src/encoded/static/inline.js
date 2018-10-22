@@ -1,8 +1,20 @@
 'use strict';
 
-// Load the rest of the app as a separate chunk.
-// require.ensure creates & append to <head> a <script src="/static/build/bundle.[chunkName].js" ...> element
-// consisting of compilation from libs/compat.js and browser.js
+/**
+ * Load the rest of the app as a separate chunk.
+ * require.ensure creates & append to <head> a <script src="/static/build/bundle.[chunkName].js" ...> element
+ * consisting of compilation from libs/compat.js and browser.js.
+ *
+ * This has been deprecated as there is no longer any shims in libs/compat, window onload handler no longer needed, etc.
+ * It is being kept for reference in case we need some in-line JS to send to React.
+ *
+ * To make use of this file, change webpack.config.js to have `entry: {inline: './inline'},` instead of `entry: {bundle: './browser'},`.
+ * Uncomment lines in libs/react-middleware.js accordingly as well.
+ *
+ * @module
+ * @deprecated
+ */
+
 require.ensure(['./libs/compat', './browser'], function(require) {
     require('./libs/compat');  // Shims first
     require('./browser');

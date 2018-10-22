@@ -77,6 +77,16 @@
               "custom"
             ]
         },
+        "dataset_label": {
+            "title": "Dataset",
+            "description": "Name of the dataset this experiment is part of",
+            "type": "string"
+        },
+        "condition": {
+            "title": "Condition",
+            "description": "Condition that differentiates this from other sets in Dataset",
+            "type": "string"
+        },
         "description": {
             "title": "Description",
             "description": "A description of why experiments are part of the set.",
@@ -110,6 +120,9 @@
     "facets": {
         "experiments_in_set.experiment_type": {
           "title": "Experiment Type"
+        },
+        "dataset_label" : {
+            "title" : "Dataset"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
@@ -152,6 +165,12 @@
     "columns": {
         "experimentset_type": {
             "title": "Set Type"
+        },
+        "dataset_label": {
+            "title": "Dataset"
+        },
+        "condition": {
+            "title": "Condition"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title" : "Organism"

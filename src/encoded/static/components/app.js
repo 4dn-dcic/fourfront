@@ -77,15 +77,9 @@ const portal = {
 // See https://github.com/facebook/react/issues/2323
 class Title extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.render = this.render.bind(this);
-    }
-
     componentDidMount() {
         var node = document.querySelector('title');
-        if (node && !node.getAttribute('data-reactid')) {
+        if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
             node.setAttribute('data-reactid', this._rootNodeID);
         }
     }
@@ -448,41 +442,36 @@ export default class App extends React.Component {
     /** @ignore */
     componentDidUpdate(prevProps, prevState) {
         var key;
-        if (this.props) {
 
-            if (this.props.href !== prevProps.href){ // We navigated somewhere else.
+        if (this.props.href !== prevProps.href){ // We navigated somewhere else.
 
-                // Register google analytics pageview event.
-                analytics.registerPageView(this.props.href, this.props.context);
+            // Register google analytics pageview event.
+            analytics.registerPageView(this.props.href, this.props.context);
 
-                // We need to rebuild tooltips after navigation to a different page.
-                ReactTooltip.rebuild();
+            // We need to rebuild tooltips after navigation to a different page.
+            ReactTooltip.rebuild();
 
+        }
+
+
+        for (key in this.props) {
+            if (this.props[key] !== prevProps[key]) {
+                console.log('changed props: %s', key);
             }
-
-
-            for (key in this.props) {
-                if (this.props[key] !== prevProps[key]) {
-                    console.log('changed props: %s', key);
-                }
+        }
+        for (key in this.state) {
+            if (this.state[key] !== prevState[key]) {
+                console.log('changed state: %s', key);
             }
         }
 
-        if (this.state) {
-            if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
-                setTimeout(function(){
-                    // Delay 100ms.
-                    console.log("SYNCING CHART DATA");
-                    ChartDataController.sync();
-                }, 100);
-            }
-
-            for (key in this.state) {
-                if (this.state[key] !== prevState[key]) {
-                    console.log('changed state: %s', key);
-                }
-            }
+        if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
+            setTimeout(function(){
+                console.log("SYNCING CHART DATA");
+                ChartDataController.sync();
+            }, 0);
         }
+
     }
 
     /**
@@ -1256,9 +1245,8 @@ export default class App extends React.Component {
      * @returns {JSX.Element} An `<html>` element.
      */
     render() {
-        console.log('render app');
-        var canonical       = this.props.href,
-            context         = this.props.context,
+        var { context, lastCSSBuildTime } = this.props,
+            canonical       = this.props.href,
             href_url        = url.parse(canonical),
             routeList       = href_url.pathname.split("/"),
             routeLeaf       = routeList[routeList.length - 1],
@@ -1380,6 +1368,8 @@ export default class App extends React.Component {
                 'children'       : content
             });
 
+        // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
+
         return (
             <html lang="en">
                 <head>
@@ -1391,17 +1381,18 @@ export default class App extends React.Component {
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
-                    <script async src="//www.google-analytics.com/analytics.js"/>
-                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}/>
-                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/>
-                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}/>
-                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
+                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
+                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
+                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
+                    <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
+                    <script async type="application/javascript" src="//www.google-analytics.com/analytics.js" />
+                    {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
                 <BodyElement {...bodyElementProps} />
             </html>
@@ -1453,7 +1444,9 @@ class BodyElement extends React.PureComponent {
             //'scrollTop'             : null // Not used, too many state updates if were to be.
             'windowWidth'           : null,
             'windowHeight'          : null,
-            'classList'             : []
+            'classList'             : [],
+            'hasError'              : false,
+            'errorInfo'             : null
         };
 
         /**
@@ -1492,6 +1485,22 @@ class BodyElement extends React.PureComponent {
         window.removeEventListener("scroll", this.throttledScrollHandler);
         delete this.throttledScrollHandler;
         window.removeEventListener('resize', this.onResize);
+    }
+
+    /**
+     * Catches exceptions in NavBar and similar 'outer' component areas.
+     *
+     * @private
+     * @returns {void}
+     */
+    componentDidCatch(err, info){
+        this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
+            analytics.exception('Client Error - ' + this.props.href + ': ' + err, true);
+            // Unset app.historyEnabled so that user may navigate backward w/o JS.
+            if (window && window.fourfront && window.fourfront.app){
+                window.fourfront.app.historyEnabled = false;
+            }
+        });
     }
 
     /**
@@ -1726,6 +1735,22 @@ class BodyElement extends React.PureComponent {
         });
     }
 
+    renderErrorState(){
+        return (
+            <body>
+                <div id="slot-application">
+                    <div id="application" className="done error">
+                        <div id="layout">
+                            <div id="pre-content-placeholder"/>
+                            { ContentErrorBoundary.errorNotice() }
+                            <div id="layout-footer"/>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        );
+    }
+
     /**
      * Renders out the body layout of the application.
      *
@@ -1737,13 +1762,15 @@ class BodyElement extends React.PureComponent {
                 currentAction, hrefParts, isLoading, slowLoad,
                 children
             } = this.props,
-            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList } = this.state,
+            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
             bodyClassList = (classList && classList.slice(0)) || [],
             registerWindowOnResizeHandler = this.registerWindowOnResizeHandler,
             registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
             addToBodyClassList            = this.addToBodyClassList,
             removeFromBodyClassList       = this.removeFromBodyClassList;
+
+        if (hasError) return this.renderErrorState();
 
         if (isLoading)          bodyClassList.push('loading-request');
         if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
@@ -1782,12 +1809,12 @@ class BodyElement extends React.PureComponent {
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
                             </div>
 
-                            <div id="content" className="container" children={
-                                React.cloneElement(children, {
+                            <div className="container" id="content">
+                                { React.cloneElement(children, {
                                     windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
                                     addToBodyClassList, removeFromBodyClassList
-                                })
-                            } />
+                                }) }
+                            </div>
 
                             <div id="layout-footer"/>
                         </div>
@@ -1808,4 +1835,53 @@ class BodyElement extends React.PureComponent {
 
 }
 
+class ContentErrorBoundary extends React.Component {
+
+    static errorNotice(){
+        return (
+            <div className="error-boundary container" id="content">
+                <hr/>
+                <div className="mb-2 mt-2">
+                    <h3 className="text-400">A client-side error has occured, please go back or try again later.</h3>
+                </div>
+            </div>
+        );
+    }
+
+    constructor(props){
+        super(props);
+        this.state = { 'hasError' : false, 'errorInfo' : null };
+    }
+
+    componentDidCatch(err, info){
+        this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
+            analytics.exception('Client Error - ' + this.props.href + ': ' + err, true);
+        });
+    }
+
+    /**
+     * Unsets the error state if we navigate to a different view/href .. which normally should be different ContentView.
+     */
+    componentWillReceiveProps(nextProps){
+        if (nextProps.href !== this.props.href){
+            this.setState(function(currState){
+                if (currState.hasError) {
+                    return {
+                        'hasError' : false,
+                        'errorInfo' : null
+                    };
+                }
+                return {};
+            });
+        }
+    }
+
+    render(){
+        if (this.state.hasError){
+            return ContentErrorBoundary.errorNotice();
+        }
+
+        return <div className="container" id="content">{ this.props.children }</div>;
+    }
+}
 

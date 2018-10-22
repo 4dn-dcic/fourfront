@@ -9,6 +9,12 @@
  * presence of nav bar and other global elements may be tested+covered as well.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -19,14 +25,9 @@ describe('Testing about.js', function() {
     
     // Setup required variables/dependencies before running tests.
     
-    var React, ReactDOM, About, testItem, TestUtils, page, data, _, banners, Wrapper, App, app, sinon, server;
+    var About, testItem, page, data, banners, Wrapper, App, app, sinon, server;
 
     beforeAll(function() {
-        React = require('react');
-        ReactDOM = require('react-dom');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
-
         // Get App from ../index instead of ../app to make sure prerequisite modules/components 
         // have loaded and initialized, e.g. AboutPage registered as handler for AboutPage @type in about.js.
         App = require('../index');

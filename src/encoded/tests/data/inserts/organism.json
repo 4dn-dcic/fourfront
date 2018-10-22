@@ -16,5 +16,11 @@
         "scientific_name": "Drosophila melanogaster",
         "taxon_id": "7227",
         "uuid": "b3911449-1b28-44cf-af23-084ae4eff147"
+    },
+    {
+        "name": "chicken",
+        "scientific_name": "Gallus gallus",
+        "taxon_id": "9031",
+        "uuid": "fed8c206-762f-497f-821b-1c8ff7900bd2"
     }
 ]
