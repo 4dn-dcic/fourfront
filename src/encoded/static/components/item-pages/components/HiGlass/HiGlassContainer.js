@@ -45,8 +45,15 @@ export const HiGlassConfigurator = {
 
     /**
      * AJAX request tilesetUid from higlass server then call either successCallback or fallbackCallback param.
+     * Used as a helper function by FileView to check if HiGlass UID of file is valid/registered with HiGlass server
+     * before marking the tab as not disabled.
      *
      * @async
+     * @param {string} tilesetUid - Same as FileItem.higlass_uid.
+     * @param {function} successCallback - Executed upon successful validation of tilesetUid param.
+     * @param {function?} [failureCallback] - Executed upon failure to validate tilesetUid.
+     * @param {string?} [server] - The base URL or server where tilesetUid would be registered. If not supplied, DEFAULT_GEN_VIEW_CONFIG_OPTIONS.baseUrl is used.
+     * @returns {void}
      */
     'validateTilesetUid' : function(tilesetUid, successCallback, failureCallback = null, server = null){
         if (!failureCallback) failureCallback = function(){ console.error('Failed to validate tilesetUid:', tilesetUid, server); };
@@ -87,6 +94,13 @@ export const HiGlassConfigurator = {
         doValidation(tilesetUid);
     },
 
+    /**
+     * Grabs values for `initialXDomain` and `initialYDomain` from LocalStorage via HiGlassLocalStorage.
+     * If none available, falls back to and returns `options.initialDomains` values.
+     *
+     * @param {{ storagePrefix: string, initialDomains: { x: number[], y: number[] }, groupID: string }} options - Options for configurator.
+     * @returns {{ x: number[], y: number[] }} Object with 'x' and 'y' keys & initial domain values to use as part of a newly-generated viewConfig.
+     */
     'getInitialDomainsFromStorage' : function(options){
         var storagePrefix = options.storagePrefix || HiGlassLocalStorage.DEFAULT_PREFIX,
             initialDomains = options.initialDomains || DEFAULT_GEN_VIEW_CONFIG_OPTIONS.initialDomains;
@@ -100,6 +114,13 @@ export const HiGlassConfigurator = {
         return (storage && storage.getDomains()) || initialDomains;
     },
 
+    /**
+     * Returns a JSON object pre-filled with some common values to use as base of VIEWCONFIG which to extend with views.
+     * Updates key values from `options.viewConfigBase` object, if any supplied.
+     *
+     * @param {{ viewConfigBase?: Object, supplementaryTracksBaseUrl: string }} options - Options for configurator. Should have value for `supplementaryTracksBaseUrl`, at minimum.
+     * @returns {{ editable: boolean, zoomFixed: boolean, exportViewUrl: string, zoomLocks: Object, locationLocks: Object, trackSourceServers: string[] }} ViewConfig base object.
+     */
     'generateViewConfigBase' : function(options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
         return _.extend({
             "editable"  : true,
@@ -119,6 +140,22 @@ export const HiGlassConfigurator = {
         }, options.viewConfigBase || {});
     },
 
+    /**
+     * Returns a JSON object pre-filled with some common values to use as base of viewConfig VIEW which to extend with tracks.
+     * Updates key values from `options.extraViewProps` object, if any supplied.
+     *
+     * Uses `options.extraViewProps.genomePositionSearchBox` for genome search box values, if supplied, or generates it dynamically from
+     * `options.supplementaryTracksBaseUrl` (subject to change, if we move supplementary tracks), `chromosomeAndAnnotation`, and hard-coded
+     * value for autocomplete tileset.
+     *
+     * Sets layout using `options.extraViewProps.layout` (if available) and/or hard-coded defaults, via `HiGlassConfigurator.generateDefaultLayoutForViewItem`.
+     * Sets initialXDomain and initialYDomain using `HiGlassConfigurator.getInitialDomainsFromStorage()` which falls back to `options.initialDomains`.
+     *
+     * @param {string?} [viewUID] - ID of view to set. If not supplied, one is generated from a static string and `options.index` where `options.index` is assumed to be sourced from a counter of views.
+     * @param {{ chromosome: { infoid: string } }} [chromosomeAndAnnotation={}] - Object with chromosome and annotation config info to get infoid from.
+     * @param {{ extraViewProps?: Object, supplementaryTracksBaseUrl: string, index?: number, baseUrl: string }} options - Options for configurator. Should have value for `supplementaryTracksBaseUrl`, at minimum.
+     * @returns {{ uid: string, layout: Object, initialXDomain: number[], initialYDomain: number[], autocompleteSource: string, genomePositionSearchBox: Object }} ViewConfig base object.
+     */
     'generateViewConfigViewBase' : function(viewUID = null, chromosomeAndAnnotation = {}, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
         var { index, extraViewProps, baseUrl, supplementaryTracksBaseUrl } = options;
 
