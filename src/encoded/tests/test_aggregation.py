@@ -1,10 +1,6 @@
 from .features.conftest import app_settings, app, workbook
 import pytest
-# import random
-# from encoded.commands.upgrade_test_inserts import get_inserts
 import json
-# import time
-# pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 def test_aggregation_facet(workbook, testapp):
@@ -18,7 +14,6 @@ def test_aggregation_facet(workbook, testapp):
 def test_aggregation_itemview(workbook, testapp):
     res = testapp.get('/experiment-set-replicates/4DNESAAAAAA1/').json
     assert 'aggregated-items' in res.keys()
-    #agg = res['aggregated-items']['badges']
     parents = ''.join([badge['parent'] for badge in res['aggregated-items']['badges']])
     assert 'biosample' in parents and 'experiment-set-replicate' in parents
 
