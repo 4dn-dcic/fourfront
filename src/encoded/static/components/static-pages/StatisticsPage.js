@@ -342,9 +342,17 @@ export const commonParsingFxn = {
             }));
         }
     },
-    'bucketDocCounts' : function(weeklyIntervalBuckets, externalTermMap, excludeChildren = false){
+    /**
+     * Converts date_histogram, histogram, or range aggregations from ElasticSearch result into similar but simpler bucket structure.
+     * Sets 'count' to be 'doc_count' value from histogram.
+     *
+     * @param {{ key_as_string: string, doc_count: number, group_by?: { buckets: { doc_count: number, key: string  }[] } }[]} intervalBuckets - Raw aggregation results returned from ElasticSearch
+     * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
+     * @param {boolean} [excludeChildren=false] - If true, skips aggregating up children to increase performance very slightly.
+     */
+    'bucketDocCounts' : function(intervalBuckets, externalTermMap, excludeChildren = false){
         var subBucketKeysToDate = new Set(),
-            aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+            aggsList = _.map(intervalBuckets, function(bucket, index){
                 if (excludeChildren === true){
                     return {
                         'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
@@ -382,9 +390,16 @@ export const commonParsingFxn = {
 
         return aggsList;
     },
-    'bucketTotalFilesCounts' : function(weeklyIntervalBuckets, externalTermMap){
+    /**
+     * Converts date_histogram, histogram, or range aggregations from ElasticSearch result into similar but simpler bucket structure.
+     * Sets 'count' to be 'bucket.total_files.value' value from histogram.
+     *
+     * @param {{ key_as_string: string, doc_count: number, group_by?: { buckets: { doc_count: number, key: string  }[] } }[]} intervalBuckets - Raw aggregation results returned from ElasticSearch
+     * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
+     */
+    'bucketTotalFilesCounts' : function(intervalBuckets, externalTermMap){
         var subBucketKeysToDate = new Set(),
-            aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+            aggsList = _.map(intervalBuckets, function(bucket, index){
 
                 _.forEach(_.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
 
@@ -407,10 +422,10 @@ export const commonParsingFxn = {
 
         return aggsList;
     },
-    'bucketTotalFilesVolume' : function(weeklyIntervalBuckets, externalTermMap){
+    'bucketTotalFilesVolume' : function(intervalBuckets, externalTermMap){
         var gigabyte = 1024 * 1024 * 1024,
             subBucketKeysToDate = new Set(),
-            aggsList = _.map(weeklyIntervalBuckets, function(bucket, index){
+            aggsList = _.map(intervalBuckets, function(bucket, index){
 
                 _.forEach(_.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
 
@@ -675,12 +690,12 @@ export const aggregationsToChartData = {
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
             var dateAggBucket = props.currentGroupBy && props.currentGroupBy + '_interval_date_created',
-                weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations[dateAggBucket] && resp.aggregations[dateAggBucket].buckets;
+                dateIntervalBuckets = resp && resp.aggregations && resp.aggregations[dateAggBucket] && resp.aggregations[dateAggBucket].buckets;
 
-            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
+            if (!Array.isArray(dateIntervalBuckets) || dateIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToCountTotals(
-                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets)
+                commonParsingFxn.bucketDocCounts(dateIntervalBuckets)
             );
         }
     },
