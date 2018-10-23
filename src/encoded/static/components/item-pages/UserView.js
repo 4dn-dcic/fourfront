@@ -510,22 +510,26 @@ class ProfileWorkFields extends React.Component {
     * @return {Item[]} List of all unique awards in labs.
     */
     static getAwardsList(labDetails){
+
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return [];
+        }
+
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
 
         function addAwardToList(award){
-            if (_.pluck(awardsList, 'uuid').indexOf(labDetails[i].awards[j].uuid) === -1){
-                awardsList.push(labDetails[i].awards[j]);
+            if (typeof award['@id'] !== 'string') return;
+            if (_.pluck(awardsList, '@id').indexOf(award['@id']) === -1){
+                awardsList.push(award);
             }
         }
 
-        for (var i = 0; i < labDetails.length; i++){
-            if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
-                for (var j = 0; j < labDetails[i].awards.length; j++){
-                    addAwardToList(labDetails[i].awards[j]);
-                }
+        _.forEach(labDetails, function(lab){
+            if (Array.isArray(lab.awards) && lab.awards.length > 0){
+                _.forEach(lab.awards, addAwardToList);
             }
-        }
+        });
 
         return awardsList;
     }
@@ -556,13 +560,12 @@ class ProfileWorkFields extends React.Component {
      */
     updateAwardsList(labDetails){
 
-        if (!labDetails){
-            return null;
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return;
         }
 
-        this.setState((currState)=>{
+        this.setState(function(currState){
             // As of React 16 we can return null in setState func to cancel out of state update.
-
             var currAwardsList      = (currState.awards_list && currState.awards_list.slice(0)) || [],
                 currAwardsListIDs   = new Set(currAwardsList.map(object.atIdFromObject)),
                 newAwards           = ProfileWorkFields.getAwardsList(labDetails);
