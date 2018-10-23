@@ -10,6 +10,7 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
+
 describe('Higlass Visualization Page', function() {
     var context, schemas, sinon, server, Wrapper;
 
@@ -26,8 +27,8 @@ describe('Higlass Visualization Page', function() {
         // TODO Load App dependencies
 
         // Get test Data
-        viewConfig = require('./../higlassview/config-00').default[0];
-        schemas = require('../testdata/schemas');
+        context = require('./../testdata/higlassview/config-00').default[0];
+        schemas = require('./../testdata/schemas');
 
         // Setup
         Wrapper = createReactClass({
