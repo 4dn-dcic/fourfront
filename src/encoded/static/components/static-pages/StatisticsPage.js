@@ -151,7 +151,7 @@ export default class StatisticsPageView extends StaticPage {
                     <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
                         href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={130}>
                         { usageObj.icon ? <i className={"text-medium icon icon-fw icon-" + usageObj.icon}/> : '' }
-                        { usageObj.icon ? <span>&nbsp;&nbsp;</span> : null } 
+                        { usageObj.icon ? <span>&nbsp;&nbsp;</span> : null }
                         { usageObj.title }
                     </a>
                 </div>
@@ -659,7 +659,7 @@ export const aggregationsToChartData = {
         'requires' : 'TrackingItem',
         'function' : function(resp, props){
             if (!resp || !resp['@graph']) return null;
-            
+
             //var termBucketField = function(subBucket){ return subBucket['ga:productBrand'] + ' - ' + subBucket['ga:productName']; };
             var termBucketField = 'ga:productBrand',
                 countKey        = 'ga:productDetailViews';
@@ -907,7 +907,7 @@ class UsageStatsView extends StatsChartViewBase {
                             <div className="text-400 inline-block">Grouping by&nbsp;&nbsp;</div>
                             <DropdownButton id="select_fields_faceted_group_by" onSelect={this.changeFieldFacetedByGrouping}
                                 title={<span className="text-500">{ UsageStatsView.fieldsFacetedByOptions[fields_faceted_group_by] }</span>}>
-                                { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) => 
+                                { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) =>
                                     <MenuItem eventKey={key} key={key}>{ title }</MenuItem>
                                 ) }
                             </DropdownButton>
@@ -935,7 +935,7 @@ class UsageStatsView extends StatsChartViewBase {
 
 class SubmissionsStatsView extends StatsChartViewBase {
 
-     /**
+    /**
      * Use this only for charts with child terms 'Internal Release' and 'Public Release', which are
      * meant to have a separate color scale and child terms from other charts.
      *

@@ -151,7 +151,7 @@ var DateUtility = module.exports = (function(){
             var { formatType, dateTimeSeparator, localize, customOutputFormat } = this.props;
             if (!this.state.mounted || isServerSide()) {
                 return (
-                    <span className={this.props.className + ' utc'}> 
+                    <span className={this.props.className + ' utc'}>
                         { DateUtility.display(this.state.moment, formatType, dateTimeSeparator, false, customOutputFormat) }
                     </span>
                 );

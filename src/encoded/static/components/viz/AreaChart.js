@@ -152,7 +152,7 @@ export class StatsChartViewBase extends React.Component {
         var updateState = false,
             keys        = _.keys(nextProps),
             i, k;
-        
+
         for (i = 0; i < keys.length; i++){
             k = keys[i];
             if (nextProps[k] !== this.props[k]){
@@ -896,7 +896,7 @@ export class AreaChart extends React.PureComponent {
             tooltip.setState({
                 leftPosition, topPosition, chartWidth, chartHeight,
                 'visible'       : true,
-                'contentFxn'    : function(tProps, tState){                        
+                'contentFxn'    : function(tProps, tState){
 
                     if (termChildren.length > maxTermsVisible){
                         var lastTermIdx             = maxTermsVisible - 1,

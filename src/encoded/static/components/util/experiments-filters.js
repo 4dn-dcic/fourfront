@@ -45,7 +45,7 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
     // THE CONTENTS UNDER THIS IF CONDITION WILL CHANGE ONCE WE CREATE NEW 'RANGE' FACET COMPONENT
     if (facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1) {
         var toFilter, fromFilter;
-        
+
         if (facet.aggregation_type === 'range'){
             toFilter    = _.findWhere(filters, { 'field' : field + '.to',   'term' : term.to }),
             fromFilter  = _.findWhere(filters, { 'field' : field + '.from', 'term' : term.from });
