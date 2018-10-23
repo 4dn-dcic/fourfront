@@ -13,6 +13,7 @@ import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStep
 // Test/Debug Data
 //import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
 //import { WFR_JSON } from './../testdata/workflow_run/awsem-bad-output-file';
+//import { WFR_JSON } from './../testdata/workflow_run/awsem-dupe-post-alignment';
 
 
 /**
@@ -107,17 +108,21 @@ export class WorkflowRunView extends DefaultItemView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
+        var { context, schemas } = this.props;
+
+        //context = WFR_JSON;
+
+        var listWithGraph = !doValidAnalysisStepsExist(context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
-                content : <GraphSection {...this.props} mounted={this.state.mounted} />
+                content : <GraphSection {...this.props} mounted={this.state.mounted} context={context} />
             }
         ];
 
         return listWithGraph.concat([
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
+            ItemDetailList.getTabObject(context, schemas),
+            AuditTabView.getTabObject(context)
         ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
                 'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }

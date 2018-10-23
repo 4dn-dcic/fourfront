@@ -492,20 +492,16 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
          * @returns {boolean} True if both have same file.
          */
         function areInputRunDataPresentAndEqual(node, stepIO){
-            if (!(node.meta && node.meta.run_data)) return false;
-            if (!(stepIO[stepIOTargetType].length === 1 && typeof stepIO[stepIOTargetType][0].step === 'undefined')) return false;
-            return (
-                (node.meta.run_data.file && node.meta.run_data.file.uuid && typeof stepIO[stepIOTargetType][0].for_file === 'string' && node.meta.run_data.file.uuid === stepIO[stepIOTargetType][0].for_file) ||
-                (typeof node.meta.run_data.value !== 'undefined' && stepIO.run_data && typeof stepIO.run_data.value !== 'undefined' && node.meta.run_data.value === stepIO.run_data.value)
-            );
+            // False if our step IO argument has a source step -- means is not a global input argument.
+            if (stepIO[stepIOTargetType].length > 1 || typeof stepIO[stepIOTargetType][0].step !== 'undefined') return false;
+            return areAnyRunDataPresentAndEqual(node, stepIO);
         }
 
         function areAnyRunDataPresentAndEqual(node, stepIO){
-            if (!(node.meta && node.meta.run_data)) return false;
+            if (!node.meta || !node.meta.run_data) return false;
+            var stepIOFiles = (stepIO.run_data && Array.isArray(stepIO.run_data.file) && stepIO.run_data.file) || [];
             return (
-                (node.meta.run_data.file && node.meta.run_data.file.uuid && (
-                    _.any(stepIO[stepIOTargetType], function(tg){ return (typeof tg.for_file === 'string' && node.meta.run_data.file.uuid === tg.for_file); })
-                )) ||
+                (node.meta.run_data.file && _.any(stepIOFiles, compareTwoFilesByUUID.bind(null, node.meta.run_data.file))) ||
                 (typeof node.meta.run_data.value !== 'undefined' && stepIO.run_data && typeof stepIO.run_data.value !== 'undefined' && node.meta.run_data.value === stepIO.run_data.value)
             );
         }
@@ -590,7 +586,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                 })
             );
 
-            //console.log('MATCHED', currentIONodesMatched, nodes, ioNodeIDsMatched);
+            //console.log('MATCHED', stepIO.name, currentIONodesMatched, nodes, ioNodeIDsMatched);
 
             // Step 1b. Create input nodes we need to add, and extend our matched node with its fake-new-node-counterpart's data.
             var ioNodesToCreate = expandIONodes(stepIO, column, stepNode, ioNodeType, true);
@@ -691,7 +687,6 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
             }
 
             // Step 2. Filter out nodes from ioNodesToCreate which we have matched already, then for any unmatched input nodes, create them (via adding to high-level output 'nodes' list & cementing their ID).
-            var extraEdges = [];
             if (currentIONodesMatched.length < ioNodesToCreate.length){
                 var unmatchedIONodesToCreate = _.map(
                     _.filter(ioNodesToCreate, function(n,idx){
@@ -699,64 +694,14 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
 
                         // Compare new node's file with already-matched files to filter new node out, if have files.
                         if (n.meta && n.meta.run_data && n.meta.run_data.file){
-                            // Get the uuid of the file we want to match.
-                            var fileToMatch = n.meta.run_data.file;
 
-                            // Compile all of the nodes with files. Track if they are from currentIONodesMatched.
-                            var nodesBySource = _.map(
-                                currentIONodesMatched,
-                                function(n2){
-                                    return {
-                                        "node": n2,
-                                        "source" : "currentIONodesMatched"
-                                    };
-                                }
-                            ).concat(
-                                _.map(
-                                    nodes,
-                                    function(n2){
-                                        return {
-                                            "node": n2,
-                                            "source" : "nodes"
-                                        };
-                                    }
-                                )
-                            );
+                            // Get the uuid or obj representation of the file we want to match.
+                            var fileToMatch = n.meta.run_data.file,
+                                filesToCheck = _.filter(_.map(currentIONodesMatched, function(n2){	
+                                    return (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;	
+                                }), function(file){ return file !== null; });
 
-                            var nodesWithFiles = _.filter(
-                                nodesBySource,
-                                function(datum) {
-                                    const n2 = datum.node;
-
-                                    const fileInNode = (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
-
-                                    return fileInNode !== null;
-                                }
-                            );
-
-                            // See if any of the nodes with files contain the same file as the new node.
-                            if (
-                                _.any(
-                                    nodesWithFiles,
-                                    function(datum){
-                                        // Get the file from the node.
-                                        const f = datum.node.meta.run_data.file;
-
-                                        const doFilesMatch = compareTwoFilesByUUID(f, fileToMatch);
-
-                                        // If the files are the same, check the source. We will have to make a new edge if it has not been currently matched.
-                                        if (doFilesMatch && datum.node.source !== "currentIONodesMatched") {
-                                            // Mark a new edge to be created later
-                                            const newEdge = {};
-                                            newEdge[stepIOTargetType] = datum.node;
-                                            newEdge[oppIOTargetType] = stepNode;
-                                            newEdge.capacity = ioNodeType;
-                                            extraEdges.push(newEdge);
-                                        }
-                                        return doFilesMatch;
-                                    }
-                                )
-                            ){
+                            if ( _.any(filesToCheck, compareTwoFilesByUUID.bind(compareTwoFilesByUUID, fileToMatch))){
                                 return false;
                             }
                         }
@@ -799,8 +744,6 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                 });
             }
 
-            // Add all of the predetermined extra edges.
-            edges = edges.concat(extraEdges);
         });
 
         return { 'created' : ioNodesCreated, 'matched' : ioNodesMatched };
