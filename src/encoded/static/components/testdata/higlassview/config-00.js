@@ -1,4 +1,4 @@
-const HiGlassViewConfigDataBlob = [
+export const HiGlassViewConfigDataBlob = [
     {
         "title" : "Test BigWig Display",
         "description" : "Two BigWig tracks plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
