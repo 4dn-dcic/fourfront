@@ -56,6 +56,7 @@ STATUS_LEVEL = {
     'revoked': 3,
     'planned': 2,
     'released to project': 3,
+    'pre-release': 3,
     'submission in progress': 1,
     'archived to project': 2,
     'in review by lab': 1,
