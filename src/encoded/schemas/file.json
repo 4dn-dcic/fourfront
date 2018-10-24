@@ -175,6 +175,7 @@
                 "replaced",
                 "revoked",
                 "archived",
+                "pre-release",
                 "released",
                 "released to project",
                 "archived to project",
