@@ -211,6 +211,11 @@ class UsageStatsViewController extends StatsViewController {
                 return uri;
             }
         },
+        /**
+         * Return a boolean to refetch all, or list of strings to refetch specific searchURIs.
+         *
+         * @returns {boolean|string[]}
+         */
         'shouldRefetchAggs' : function(pastProps, nextProps){
             return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
                 pastProps.currentGroupBy  !== nextProps.currentGroupBy
@@ -797,11 +802,11 @@ class UsageStatsView extends StatsChartViewBase {
             } = this.state,
             width = this.getRefWidth() || null;
 
-        if (!mounted || loadingStatus === 'loading'){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ loadingIcon() }/>;
-        }
         if (loadingStatus === 'failed'){
             return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ errorIcon() }/>;
+        }
+        if (!mounted || (loadingStatus === 'loading' && (!file_downloads && !sessions_by_country))){
+            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ loadingIcon() }/>;
         }
 
         var anyExpandedCharts       = _.any(_.values(this.state.chartToggles)),
