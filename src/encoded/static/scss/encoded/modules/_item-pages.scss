@@ -962,23 +962,6 @@ $download-button-width : 100px;
 .formatted-info-panel,
 .formatted-info-panel-list {
 
-	&.loading > li,
-	&.loading > .row {
-		opacity : 1;
-	}
-
-	&.loaded > li,
-	&.loaded > .row {
-		opacity : 0;
-		transition: opacity 0s;
-	}
-
-	&.loaded.transitioned > li,
-	&.loaded.transitioned > .row {
-		opacity : 1;
-		transition: opacity .5s;
-	}
-
 	&.formatted-wrapper {
 
 		ul {
