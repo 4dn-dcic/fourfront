@@ -98,8 +98,7 @@ export class StatsViewController extends React.PureComponent {
                 uri,
                 uponSingleRequestsCompleteCallback.bind(this, key, uri),
                 'GET',
-                failureCallback,
-                null, null, ['Content-Type']
+                failureCallback
             );
         });
 

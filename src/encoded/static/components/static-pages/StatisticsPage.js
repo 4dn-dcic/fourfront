@@ -194,14 +194,19 @@ class UsageStatsViewController extends StatsViewController {
                 return uri;
             },
             'TrackingItemDownload' : function(props) {
-                var untilDate = moment.utc(),
-                    uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=download_tracking.experiment_type&tracking_type=download_tracking';
+                var untilDate   = moment.utc(),
+                    fromDate,
+                    uri         = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=download_tracking.experiment_type&tracking_type=download_tracking';
                 if (props.currentGroupBy === 'monthly'){
                     untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
-                    uri += '&date_histogram_interval=monthly&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
+                    fromDate = untilDate.clone();
+                    fromDate.subtract(12, 'month'); // Go back 12 months
+                    uri += '&date_histogram_interval=monthly&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
                 } else if (props.currentGroupBy === 'daily'){
                     untilDate.startOf('day').subtract(1, 'minute'); // Last minute of previous day
-                    uri += '&date_histogram_interval=daily&date_created.to=' + untilDate.format('YYYY-MM-DD');
+                    fromDate = untilDate.clone();
+                    fromDate.subtract(30, 'day'); // Go back 30 days
+                    uri += '&date_histogram_interval=daily&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
                 }
                 return uri;
             }
