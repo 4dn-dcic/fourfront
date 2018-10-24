@@ -1034,10 +1034,10 @@ export default class App extends React.Component {
 
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
-                        callback = function(response){
+                        callback = (response) => {
                             Alerts.queue(Alerts.LoggedOut);
                             if (typeof oldCallback === 'function') oldCallback(response);
-                        }.bind(this);
+                        };
                     }
 
                     // Update state.session after (possibly) removing expired JWT.
@@ -1045,15 +1045,13 @@ export default class App extends React.Component {
                     this.updateUserInfo();
 
                     if (repeatIfError) {
-                        setTimeout(function(){
-                            if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
-                                // Redirect to home if on a 'private' page (e.g. user profile).
-                                if (setupRequest.call(this, '/')) doRequest.call(this, false);
-                            } else {
-                                // Otherwise redo request after any other error handling (unset JWT, etc.).
-                                doRequest.call(this, false);
-                            }
-                        }.bind(this), 0);
+                        if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
+                            // Redirect to home if on a 'private' page (e.g. user profile).
+                            if (setupRequest.call(this, '/')) doRequest.call(this, false);
+                        } else {
+                            // Otherwise redo request after any other error handling (unset JWT, etc.).
+                            doRequest.call(this, false);
+                        }
                         throw new Error('HTTPForbidden');   // Cancel out of this request's promise chain
                     } else {
                         console.error("Authentication-related error -", response); // Log error & continue down promise chain.
@@ -1108,6 +1106,8 @@ export default class App extends React.Component {
                     fallbackCallback(err);
                 }
 
+                console.error('Error in App.navigate():', err);
+
                 if (err.status === 500){
                     analytics.exception('Server Error: ' + err.status + ' - ' + href);
                 }
@@ -1117,15 +1117,19 @@ export default class App extends React.Component {
                 }
 
                 // Err could be an XHR object if could not parse JSON.
-                if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
+                if (err.message === 'HTTPForbidden'){
+                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response
+                    if (typeof callback === 'function'){
+                        callback(err);
+                    }
+                    return request; // We return out so this request href isn't set.
+                } else if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
                     analytics.exception('Network Error: ' + err.status + ' - ' + href);
-                } else if (err.message === 'HTTPForbidden'){
-                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response.
-                    console.info("Logged Out");
                 } else {
-                    console.error('Error in App.navigate():', err);
+                    Alerts.queue(Alerts.ConnectionError);
+                    analytics.exception('Unknown Network Error: ' + err.status + ' - ' + href);
                     throw err; // Unknown/unanticipated error: Bubble it up.
                 }
 

@@ -100,7 +100,7 @@ export default class Alerts extends React.Component {
         "title"     : "Logged Out",
         "message"   : "You have been logged out due to an expired session.",
         "style"     : 'danger',
-        'navigateDisappearThreshold' : 1
+        'navigateDisappearThreshold' : 2
     };
 
     /**
