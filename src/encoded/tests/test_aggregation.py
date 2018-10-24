@@ -1,5 +1,4 @@
-from .features.conftest import app_settings, app, workbook
-import pytest
+from .features.conftest import app_settings, workbook
 import json
 
 
