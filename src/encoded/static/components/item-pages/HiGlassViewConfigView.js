@@ -6,12 +6,10 @@ import _ from 'underscore';
 import { Button, Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
 import Alerts from './../alerts';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
+import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import JSONTree from 'react-json-tree';
-
-
 
 export default class HiGlassViewConfigView extends DefaultItemView {
 
@@ -154,6 +152,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     });
                     this.setState({ 'saveLoading' : false });
                 },
+                // We're only updating this object's view conf.
                 JSON.stringify({ 'viewconfig' : currentViewConf })
             );
         });
@@ -182,35 +181,50 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             });
         }
 
-        // Get the current title and description
-        const viewConfTitle = currentViewConf.title.title;
-        const viewConfDesc = currentViewConf.title.description;
+        // Generate a new title and description based on the current display.
+        var userDetails = JWT.getUserDetails();
+        let userFirstName = "unknown";
+        if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
+
+        const viewConfTitle = this.props.context.title + "-" + userFirstName + "'s copy";
+        const viewConfDesc = this.props.context.description;
 
         // Try to PUT a new viewconf.
         this.setState(
             { 'saveLoading' : true },
             ()=>{
                 ajax.load(
-                    this.props.href,
-                    (resp)=>{
-                        Alerts.queue({
-                            'title' : "Saved " + viewConfTitle,
-                            'message' : "Saved new display.",
-                            'style' : 'info'
-                        });
-                        this.setState({ 'saveLoading' : false });
-                    },
-                    'PUT',
+                    '/higlass-view-configs/',
                     ()=>{
-                        // Error callback
-                        Alerts.queue({
-                            'title' : "Failed to save display.",
-                            'message' : "For some reason",
-                            'style' : 'danger'
-                        });
+                        // Creating a new record doesn't return a status code of 200, so this callback shouldn't trigger.
                         this.setState({ 'saveLoading' : false });
                     },
-                    JSON.stringify({ 'viewconfig' : currentViewConf })
+                    'POST',
+                    (resp)=>{
+                        // We're likely to get a status code of 201 - Created.
+                        if (resp.status === 'success') {
+                            Alerts.queue({
+                                'title' : "Saved " + viewConfTitle,
+                                'message' : "Saved new display.",
+                                'style' : 'info'
+                            });
+                        }
+                        else {
+                            // Error callback
+                            Alerts.queue({
+                                'title' : "Failed to save display.",
+                                'message' : "Sorry, can you try to save again?",
+                                'style' : 'danger'
+                            });
+                        }
+                        // TODO Do we go to the new display or stay on the current one?
+                        this.setState({ 'saveLoading' : false });
+                    },
+                    JSON.stringify({
+                        'title' : viewConfTitle,
+                        'description' : viewConfDesc,
+                        'viewconfig' : currentViewConf
+                    })
                 );
             }
         );
