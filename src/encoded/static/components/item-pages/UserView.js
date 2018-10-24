@@ -519,16 +519,13 @@ class ProfileWorkFields extends React.Component {
         var awardsList = [];
 
         function addAwardToList(award){
-            if (typeof award['@id'] !== 'string') return;
-            if (_.pluck(awardsList, '@id').indexOf(award['@id']) === -1){
-                awardsList.push(award);
-            }
+            if (!award || typeof award['@id'] !== 'string' || _.pluck(awardsList, '@id').indexOf(award['@id']) > -1) return;
+            awardsList.push(award);
         }
 
         _.forEach(labDetails, function(lab){
-            if (Array.isArray(lab.awards) && lab.awards.length > 0){
-                _.forEach(lab.awards, addAwardToList);
-            }
+            if (!lab || !lab.awards || !Array.isArray(lab.awards) || lab.awards.length === 0) return;
+            _.forEach(lab.awards, addAwardToList);
         });
 
         return awardsList;
@@ -626,7 +623,7 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
                             renderItem={object.itemUtil.generateLink}
-                            endpoints={(submits_for && _.map(submits_for, object.itemUtil.atId)) || []}
+                            endpoints={(submits_for && _.filter(_.map(submits_for, object.itemUtil.atId))) || []}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
                             ajaxCallback={this.updateAwardsList}
