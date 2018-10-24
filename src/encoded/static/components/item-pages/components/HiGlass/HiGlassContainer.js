@@ -161,7 +161,7 @@ export const HiGlassConfigurator = {
 
         viewUID = viewUID || "view-4dn-" + index;
 
-        var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
+        var genomeSearchUrl = (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.server) || supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
         var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
         var evp_gpsb = (extraViewProps && extraViewProps.genomePositionSearchBox) || {};
 
@@ -204,6 +204,18 @@ export const HiGlassConfigurator = {
                     'name':         'Chromosome Axis',
                     'tilesetUid':   'EtrWT0VtScixmsmwFSd7zg',
                     'infoid':       'mm10'
+                }
+            };
+        } else if (genomeAssembly == 'dm6') { // Fly
+            return {
+                'annotation' : {
+                    'name':         'Gene Annotations (dm6)',
+                    'tilesetUid':   'B2skqtzdSLyWYPTYM8t8lQ'
+                },
+                'chromosome' : {
+                    'name':         'Chromosome Axis',
+                    'tilesetUid':   'f2FZsbCBTbyIx7A-xiRq5Q',
+                    'infoid':       'hg19'
                 }
             };
         } else {
@@ -261,7 +273,7 @@ export const HiGlassConfigurator = {
         return {
             "name": annotation.name,
             //"created": "2017-07-14T15:27:46.989053Z",
-            "server": trackBaseServer + "/api/v1",
+            "server": (annotation.server || trackBaseServer) + "/api/v1",
             "tilesetUid": annotation.tilesetUid,
             "type": "horizontal-gene-annotations",
             "options": _.extend({
@@ -287,14 +299,13 @@ export const HiGlassConfigurator = {
         return {
             "name": chromosome.name,
             //"created": "2017-07-17T14:16:45.346835Z",
-            "server": trackBaseServer + "/api/v1",
+            "server": (chromosome.server || trackBaseServer) + "/api/v1",
             "tilesetUid": chromosome.tilesetUid,
             "type": "horizontal-chromosome-labels",
             "local": true,
             "minHeight": 30,
             "thumbnail": null,
             "options": {},
-            //"width": 20,
             "height": 30,
             "position": "top",
             "orientation": "1d-horizontal",
@@ -364,7 +375,7 @@ export const HiGlassConfigurator = {
             return {
                 "name": chromosome.name,
                 //"created": "2017-07-17T14:16:45.346835Z",
-                "server": trackBaseServer + "/api/v1",
+                "server": (chromosome.server || trackBaseServer) + "/api/v1",
                 "tilesetUid": chromosome.tilesetUid,
                 "uid": "left-chromosome-track",
                 "type": "vertical-chromosome-labels",
@@ -372,7 +383,6 @@ export const HiGlassConfigurator = {
                 "width": 20,
                 "minWidth" : 20,
                 "orientation": "1d-vertical",
-                //"height": 30,
                 "position": "left"
             };
         },
