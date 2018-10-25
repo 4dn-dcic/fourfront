@@ -1050,7 +1050,11 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                     <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    <AreaChartContainer {...commonContainerProps} id="expsets_released" title={<span><span className="text-500">Experiment Sets</span> - publicly released</span>}>
+                    <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
+                            <React.Fragment>
+                                <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
+                            </React.Fragment>
+                        }>
                         <AreaChart data={expsets_released} />
                     </AreaChartContainer>
 
@@ -1061,16 +1065,28 @@ class SubmissionsStatsView extends StatsChartViewBase {
                     : null */}
 
                     { showInternalReleaseCharts ?
-                        <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={<span><span className="text-500">Experiment Sets</span> - internally released</span>}>
+                        <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
+                                <React.Fragment>
+                                    <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
+                                </React.Fragment>
+                            }>
                             <AreaChart data={expsets_released_internal} />
                         </AreaChartContainer>
                     : null }
 
-                    <AreaChartContainer {...commonContainerProps} id="files_released" title={<span><span className="text-500">Files</span> - publicly released</span>}>
+                    <AreaChartContainer {...commonContainerProps} id="files_released" title={
+                            <React.Fragment>
+                                <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
+                            </React.Fragment>
+                        }>
                         <AreaChart data={files_released} />
                     </AreaChartContainer>
 
-                    <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={<span><span className="text-500">Total File Size</span> - publicly released</span>}>
+                    <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
+                            <React.Fragment>
+                                <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
+                            </React.Fragment>
+                        }>
                         <AreaChart data={file_volume_released} yAxisLabel="GB" />
                     </AreaChartContainer>
 
