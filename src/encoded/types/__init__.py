@@ -37,27 +37,6 @@ class AnalysisStep(Item):
 
 
 @collection(
-    name='badges',
-    unique_key='badge:badge_name',
-    properties={
-        'title': 'Badges',
-        'description': 'Listing of badges for 4DN items',
-    })
-class Badge(Item):
-    """The Badge class that descrbes a badge that can be associated with an item."""
-
-    item_type = 'badge'
-    schema = load_schema('encoded:schemas/badge.json')
-    name_key = 'badge_name'
-
-    def _update(self, properties, sheets=None):
-        # set name based on what is entered into title
-        properties['badge_name'] = set_namekey_from_title(properties)
-
-        super(Badge, self)._update(properties, sheets)
-
-
-@collection(
     name='biosample-cell-cultures',
     properties={
         'title': 'Biosample Cell Culture Information',
