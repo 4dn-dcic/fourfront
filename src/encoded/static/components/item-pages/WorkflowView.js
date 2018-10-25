@@ -49,7 +49,7 @@ export function checkIfIndirectOrReferenceNodesExist(steps){
 }
 
 export function commonGraphPropsFromProps(props){
-    return {
+    var graphProps = {
         'href'              : props.href,
         'renderDetailPane'  : function(selectedNode, paneProps){
             return (
@@ -66,6 +66,12 @@ export function commonGraphPropsFromProps(props){
         'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false,
         'windowWidth'       : props.windowWidth
     };
+
+    if (props.isFullscreen) {
+        graphProps.width = props.windowWidth;
+    }
+
+    return graphProps;
 }
 
 /** Optional check to ensure steps are there and properly formatted */
@@ -241,7 +247,7 @@ export class WorkflowGraphSectionControls extends React.Component {
     wrapper(element){
         var isOpen = (this.state.mounted && layout.responsiveGridState(this.props.windowWidth) === 'lg') || this.state.open;
         return (
-            <div className="pull-right workflow-view-controls-container">
+            <div className="pull-right tabview-title-controls-container">
                 <Collapse in={isOpen}>
                     <div className="inner-panel">
                         {[...arguments]}
@@ -334,13 +340,12 @@ export class WorkflowGraphSection extends React.Component {
             'showParameters' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'compact',
-            'fullscreenViewEnabled' : false,
         }, props.context && props.context.steps ? checkIfIndirectOrReferenceNodesExist(props.context.steps) : {});
     }
 
     componentWillUnmount(){
-        if (this.state.fullscreenViewEnabled){
-            this.props.removeFromBodyClassList('is-full-screen');
+        if (this.props.isFullscreen){
+            this.props.toggleFullScreen(false);
         }
     }
 
@@ -408,22 +413,7 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     onToggleFullScreenView(){
-        var { addToBodyClassList, removeFromBodyClassList } = this.props;
-
-        requestAnimationFrame(()=>{
-            var fullscreenViewEnabled;
-            this.setState((currState, currProps)=>{
-                fullscreenViewEnabled = !currState.fullscreenViewEnabled;
-                return { fullscreenViewEnabled };
-            }, function(){
-                if (fullscreenViewEnabled){
-                    addToBodyClassList('is-full-screen');
-                } else {
-                    removeFromBodyClassList('is-full-screen');
-                }
-                ReactTooltip.rebuild();
-            });
-        });
+        this.props.toggleFullScreen(null, ReactTooltip.rebuild);
     }
 
     body(){
@@ -434,24 +424,22 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     render(){
-
+        var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
+            { isFullscreen } = this.props;
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
+            <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls
                         {..._.pick(this.props, 'context', 'href', 'windowWidth')}
-                        showChartType={this.state.showChart}
-                        rowSpacingType={this.state.rowSpacingType}
-                        showParameters={this.state.showParameters}
-                        showReferenceFiles={this.state.showReferenceFiles}
+                        showChartType={showChart} rowSpacingType={rowSpacingType} showParameters={showParameters}
+                        showReferenceFiles={showReferenceFiles} fullscreenViewEnabled={isFullscreen}
                         onChangeShowChartType={this.onChangeShowChartType}
                         onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleShowParameters={this.onToggleShowParameters}
                         onToggleReferenceFiles={this.onToggleReferenceFiles}
-                        fullscreenViewEnabled={this.state.fullscreenViewEnabled}
                         onToggleFullScreenView={this.onToggleFullScreenView}
-                        isReferenceFilesCheckboxDisabled={!this.state.anyReferenceFileNodes}
+                        isReferenceFilesCheckboxDisabled={!anyReferenceFileNodes}
                     />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>

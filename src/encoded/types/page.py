@@ -157,10 +157,6 @@ def includeme(config):
     config.add_view(static_page, route_name='staticpage')
 
 
-def listFilesInInDirectory(dirLocation):
-    return [fn for fn in os.listdir(dirLocation) if os.path.isfile(dirLocation + '/' + fn)]
-
-
 def get_local_file_contents(filename, contentFilesLocation=None):
     if contentFilesLocation is None:
         full_file_path = filename
@@ -263,6 +259,65 @@ class Page(Item):
 
 for field in ['display_title', 'name', 'description', 'content.name']:
     Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
+
+
+
+
+
+
+@collection(
+    name='higlass-view-configs',
+    properties={
+        'title': 'HiGlass Displays',
+        'description': 'Dsiplays and view configurations for HiGlass',
+    })
+class HiglassViewConfig(Item):
+    """
+    Item type which contains a `view_config` property and other metadata.
+    TODO: Perhaps make a base class for this and StaticSection once we have more permissioning logic.
+    """
+    item_type = 'higlass_view_config'
+    schema = load_schema('encoded:schemas/higlass_view_config.json')
+    embedded_list = [
+        "submitted_by.display_title"
+    ]
+
+    STATUS_ACL = { # Same as StaticSection
+        'released': ALLOW_CURRENT,
+        'archived': ALLOW_CURRENT,
+        'deleted': DELETED,
+        'draft': ONLY_ADMIN_VIEW,
+        'released to project': ALLOW_VIEWING_GROUP_VIEW,
+        'archived to project': ALLOW_VIEWING_GROUP_VIEW
+    }
+
+    #@calculated_property(schema={
+    #    "title": "ViewConfig Files",
+    #    "description": "List of files which are defined in ViewConfig",
+    #    "type": "array",
+    #    "linkTo" : "File"
+    #})
+    #def viewconfig_files(self, request):
+    #    '''
+    #    TODO: Calculate which files are defined in viewconfig, if any.
+    #    '''
+    #    return None
+
+
+    #@calculated_property(schema={
+    #    "title": "ViewConfig Tileset UIDs",
+    #    "description": "List of UIDs which are defined in ViewConfig",
+    #    "type": "array",
+    #    "items" : {
+    #        "type" : "string"
+    #    }
+    #})
+    #def viewconfig_tileset_uids(self, request):
+    #    '''
+    #    TODO: Calculate which tilesetUids are defined in viewconfig, if any.
+    #    '''
+    #    return None
+
 
 
 

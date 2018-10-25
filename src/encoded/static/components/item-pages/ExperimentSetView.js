@@ -8,7 +8,8 @@ import { Collapse, Button } from 'react-bootstrap';
 import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import * as globals from './../globals';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable, HiGlassContainer, AdjustableDividerRow } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
+    AttributionTabView, SimpleFilesTable, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -289,18 +290,14 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
      */
     correctHiGlassTrackDimensions(){
         var hiGlassContainer = this.refs && this.refs.adjustableRow && this.refs.adjustableRow.refs && this.refs.adjustableRow.refs.hiGlassContainer;
-        var internalHiGlassComponent = hiGlassContainer && hiGlassContainer.refs && hiGlassContainer.refs.hiGlassComponent;
+        var internalHiGlassComponent = hiGlassContainer && hiGlassContainer.getHiGlassComponent();
         if (hiGlassContainer && !internalHiGlassComponent) {
             console.warn('Internal HiGlass Component not accessible.');
             return;
         } else if (!hiGlassContainer) {
             return;
         }
-        setTimeout(()=>{
-            requestAnimationFrame(()=>{
-                _.forEach(internalHiGlassComponent.tiledPlots, (tp) => tp && tp.measureSize());
-            });
-        }, 10);
+        setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
     }
 
     collapsedToolTipContent(){

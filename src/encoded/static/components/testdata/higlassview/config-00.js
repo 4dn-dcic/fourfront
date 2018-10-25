@@ -1,0 +1,446 @@
+export const HiGlassViewConfigDataBlob = [
+    {
+        "title" : "Test BigWig Display",
+        "description" : "Two BigWig tracks plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
+        "uuid" : "00000000-1111-0000-1111-000000000001",
+        "status" : "released",
+        "viewconfig" : {
+            "views":[
+                {
+                    "uid":"view-4dn-bigwig-0",
+                    "layout":{
+                        "h":12,
+                        "i":"view-4dn-bigwig-0",
+                        "w":12,
+                        "x":0,
+                        "y":0,
+                        "moved":false,
+                        "static":true
+                    },
+                    "tracks":{
+                        "top":[
+                            {
+                                "uid":"top-annotation-track",
+                                "name":"Gene Annotations (mm10)",
+                                "type":"horizontal-gene-annotations",
+                                "header":"",
+                                "height":55,
+                                "server":"https://higlass.io/api/v1",
+                                "options":{
+                                    "name":"Gene Annotations (mm10)",
+                                    "fontSize":11,
+                                    "labelColor":"black",
+                                    "coordSystem":"mm10",
+                                    "showTooltip":false,
+                                    "valueScaling":"linear",
+                                    "labelPosition":"hidden",
+                                    "plusStandColor":"blue",
+                                    "plusStrandColor":"blue",
+                                    "minusStrandColor":"red",
+                                    "trackBorderColor":"black",
+                                    "trackBorderWidth":0,
+                                    "geneLabelPosition":"outside",
+                                    "geneStrandSpacing":4,
+                                    "showMousePosition":false,
+                                    "mousePositionColor":"#999999",
+                                    "geneAnnotationHeight":10
+                                },
+                                "position":"top",
+                                "minHeight":55,
+                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "orientation":"1d-horizontal"
+                            },
+                            {
+                                "uid":"top-chromosome-track",
+                                "name":"Chromosome Axis",
+                                "type":"horizontal-chromosome-labels",
+                                "local":true,
+                                "height":35,
+                                "server":"https://higlass.io/api/v1",
+                                "options":{
+                                    "color":"#777777",
+                                    "stroke":"#FFFFFF",
+                                    "fontSize":12,
+                                    "labelColor":"#888",
+                                    "coordSystem":"mm10",
+                                    "showTooltip":false,
+                                    "valueScaling":"linear",
+                                    "fontIsAligned":false,
+                                    "labelPosition":"hidden",
+                                    "plusStandColor":"blue",
+                                    "minusStrandColor":"red",
+                                    "trackBorderColor":"black",
+                                    "trackBorderWidth":0,
+                                    "showMousePosition":false,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "position":"top",
+                                "minHeight":30,
+                                "thumbnail":null,
+                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "orientation":"1d-horizontal"
+                            },
+                            {
+                                "uid":"bigwig-content-track-0",
+                                "name":"4DNFIBAK3H3F.bw",
+                                "type":"horizontal-line",
+                                "height":75,
+                                "server":"https://higlass.4dnucleome.org/api/v1",
+                                "options":{
+                                    "name":"4DNFIBAK3H3F.bedGraph.gz",
+                                    "labelColor":"#888",
+                                    "coordSystem":"mm10",
+                                    "showTooltip":false,
+                                    "valueScaling":"linear",
+                                    "labelPosition":"topRight",
+                                    "plusStandColor":"blue",
+                                    "lineStrokeColor":"#333",
+                                    "lineStrokeWidth":1.25,
+                                    "labelTextOpacity":0.5,
+                                    "minusStrandColor":"red",
+                                    "trackBorderColor":"black",
+                                    "trackBorderWidth":0,
+                                    "showMousePosition":true,
+                                    "mousePositionColor":"#999999",
+                                    "axisPositionHorizontal":"left"
+                                },
+                                "position":"top",
+                                "tilesetUid":"LiQp5dy7SoycoZ7qF0sqxQ",
+                                "orientation":"1d-horizontal"
+                            },
+                            {
+                                "uid":"bigwig-content-track-1",
+                                "name":"4DNFIHN2B9WI.bw",
+                                "type":"horizontal-line",
+                                "height":75,
+                                "server":"https://higlass.4dnucleome.org/api/v1",
+                                "options":{
+                                    "name":"4DNFIHN2B9WI.bedGraph.gz",
+                                    "labelColor":"#888",
+                                    "coordSystem":"mm10",
+                                    "showTooltip":false,
+                                    "valueScaling":"linear",
+                                    "labelPosition":"topRight",
+                                    "plusStandColor":"blue",
+                                    "lineStrokeColor":"#333",
+                                    "lineStrokeWidth":1.25,
+                                    "labelTextOpacity":0.5,
+                                    "minusStrandColor":"red",
+                                    "trackBorderColor":"black",
+                                    "trackBorderWidth":0,
+                                    "showMousePosition":true,
+                                    "mousePositionColor":"#999999",
+                                    "axisPositionHorizontal":"left"
+                                },
+                                "position":"top",
+                                "tilesetUid":"KvHa6_NgT_WG1ilBfa9HLg",
+                                "orientation":"1d-horizontal"
+                            }
+                        ],
+                        "left":[
+
+                        ],
+                        "right":[
+
+                        ],
+                        "whole":[
+
+                        ],
+                        "bottom":[
+
+                        ],
+                        "center":[
+
+                        ],
+                        "gallery":[
+
+                        ]
+                    },
+                    "initialXDomain":[
+                        -544140022.2230138,
+                        579928228.3034478
+                    ],
+                    "initialYDomain":[
+                        -58953193.651658446,
+                        139996939.18488348
+                    ],
+                    "autocompleteSource":"/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                    "genomePositionSearchBox":{
+                        "visible":true,
+                        "chromInfoId":"mm10",
+                        "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
+                        "chromInfoServer":"https://higlass.io/api/v1",
+                        "autocompleteServer":"https://higlass.io/api/v1"
+                    }
+                }
+            ],
+            "editable":true,
+            "zoomFixed":false,
+            "zoomLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "exportViewUrl":"/api/v1/viewconfs",
+            "locationLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "valueScaleLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "trackSourceServers":[
+                "https://higlass.io/api/v1"
+            ]
+        }
+    },
+    {
+        "title" : "Test MCOOL Display",
+        "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
+        "viewconfig" : {
+            "editable":true,
+            "zoomFixed":false,
+            "exportViewUrl":"/api/v1/viewconfs",
+            "zoomLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "locationLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "trackSourceServers":[
+                "https://higlass.io/api/v1"
+            ],
+            "views":[
+                {
+                    "uid":"view-4dn-mcool-0",
+                    "layout":{
+                        "w":12,
+                        "h":12,
+                        "x":0,
+                        "y":0,
+                        "i":"view-4dn-mcool-0",
+                        "moved":false,
+                        "static":true
+                    },
+                    "initialXDomain":[
+                        102391829.2052902,
+                        2938891536.27695
+                    ],
+                    "initialYDomain":[
+                        129711724.73566854,
+                        1810982460.1999617
+                    ],
+                    "autocompleteSource":"/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                    "genomePositionSearchBox":{
+                        "autocompleteServer":"https://higlass.io/api/v1",
+                        "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
+                        "chromInfoServer":"https://higlass.io/api/v1",
+                        "chromInfoId":"mm10",
+                        "visible":true
+                    },
+                    "tracks":{
+                        "top":[
+                            {
+                                "name":"Gene Annotations (mm10)",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "type":"horizontal-gene-annotations",
+                                "options":{
+                                    "labelColor":"black",
+                                    "labelPosition":"hidden",
+                                    "plusStrandColor":"blue",
+                                    "minusStrandColor":"red",
+                                    "trackBorderWidth":0,
+                                    "trackBorderColor":"black",
+                                    "name":"Gene Annotations (mm10)",
+                                    "showMousePosition":false,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "minHeight":55,
+                                "height":55,
+                                "header":"",
+                                "position":"top",
+                                "orientation":"1d-horizontal",
+                                "uid":"top-annotation-track"
+                            },
+                            {
+                                "name":"Chromosome Axis",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "type":"horizontal-chromosome-labels",
+                                "local":true,
+                                "minHeight":30,
+                                "thumbnail":null,
+                                "options":{
+                                    "showMousePosition":false,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "height":30,
+                                "position":"top",
+                                "orientation":"1d-horizontal",
+                                "uid":"top-chromosome-track"
+                            }
+                        ],
+                        "left":[
+                            {
+                                "name":"Gene Annotations (mm10)",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "uid":"left-annotation-track",
+                                "type":"vertical-gene-annotations",
+                                "options":{
+                                    "labelColor":"black",
+                                    "labelPosition":"hidden",
+                                    "plusStrandColor":"blue",
+                                    "minusStrandColor":"red",
+                                    "trackBorderWidth":0,
+                                    "trackBorderColor":"black",
+                                    "name":"Gene Annotations (mm10)",
+                                    "showMousePosition":false,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "width":55,
+                                "header":"",
+                                "orientation":"1d-vertical",
+                                "position":"left"
+                            },
+                            {
+                                "name":"Chromosome Axis",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "uid":"left-chromosome-track",
+                                "type":"vertical-chromosome-labels",
+                                "options":{
+                                    "showMousePosition":false,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "width":20,
+                                "minWidth":20,
+                                "orientation":"1d-vertical",
+                                "position":"left"
+                            }
+                        ],
+                        "center":[
+                            {
+                                "uid":"center-mcool-track",
+                                "type":"combined",
+                                "height":250,
+                                "contents":[
+                                    {
+                                        "server":"https://higlass.4dnucleome.org/api/v1",
+                                        "tilesetUid":"LTiacew8TjCOaP9gpDZwZw",
+                                        "type":"heatmap",
+                                        "position":"center",
+                                        "uid":"GjuZed1ySGW1IzZZqFB9BA",
+                                        "name":"4DNFI1TBYKV3.mcool",
+                                        "options":{
+                                            "backgroundColor":"#eeeeee",
+                                            "labelPosition":"bottomRight",
+                                            "colorRange":[
+                                                "white",
+                                                "rgba(245,166,35,1.0)",
+                                                "rgba(208,2,27,1.0)",
+                                                "black"
+                                            ],
+                                            "maxZoom":null,
+                                            "colorbarPosition":"topRight",
+                                            "trackBorderWidth":0,
+                                            "trackBorderColor":"black",
+                                            "heatmapValueScaling":"log",
+                                            "showMousePosition":false,
+                                            "mousePositionColor":"#999999",
+                                            "showTooltip":false,
+                                            "name":"4DNFI1TBYKV3.mcool",
+                                            "scaleStartPercent":"0.00000",
+                                            "scaleEndPercent":"1.00000"
+                                        },
+                                        "transforms":[
+                                            {
+                                                "name":"KR",
+                                                "value":"KR"
+                                            },
+                                            {
+                                                "name":"ICE",
+                                                "value":"weight"
+                                            },
+                                            {
+                                                "name":"VC",
+                                                "value":"VC"
+                                            },
+                                            {
+                                                "name":"VC_SQRT",
+                                                "value":"VC_SQRT"
+                                            }
+                                        ],
+                                        "resolutions":[
+                                            1000,
+                                            2000,
+                                            5000,
+                                            10000,
+                                            25000,
+                                            50000,
+                                            100000,
+                                            250000,
+                                            500000,
+                                            1000000,
+                                            2500000,
+                                            5000000,
+                                            10000000
+                                        ]
+                                    }
+                                ],
+                                "position":"center",
+                                "options":{
+
+                                }
+                            }
+                        ],
+                        "right":[
+
+                        ],
+                        "bottom":[
+
+                        ],
+                        "whole":[
+
+                        ],
+                        "gallery":[
+
+                        ]
+                    }
+                }
+            ],
+            "valueScaleLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+                }
+            }
+        }
+    }
+];
+
+export default HiGlassViewConfigDataBlob;
