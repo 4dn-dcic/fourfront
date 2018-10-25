@@ -1,5 +1,5 @@
 
-Last updated on October 10th, 2017.
+Last updated on October 25th, 2018.
 
 The 4DN DCIC ("us", "we", or "our") operates https://data.4dnucleome.org (the "Portal"). This page informs you of our policies regarding the collection, use and disclosure of
 Personal Information we receive from users of the Portal. We use your Personal Information only for providing and improving the Portal. By using the Portal, you
@@ -17,7 +17,7 @@ We may collect non-personal information about the computer, mobile device or oth
 
 ## Cookies
 
-Cookies are files with small amount of data, which may include an anonymous unique identifier. Cookies are sent to your browser from a web site and stored on your computer's hard drive. We use cookies to understand and save your preferences for future visits and compile aggregate data about site traffic and site interaction so that we can offer better site experiences and tools in the future. We may contract with third-party service providers to assist us in better understanding our site visitors. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Site or sign in.
+Cookies are files with small amount of data, which may include an anonymous unique identifier. Cookies are sent to your browser from a web site and stored on your computer's hard drive. We use cookies to understand and save your preferences for future visits and compile aggregate data about site traffic and site interaction so that we can offer better site experiences and tools in the future. We may contract with third-party service providers to assist us in better understanding our site visitors. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Portal or sign in.
 
 ## Third-Party Cookies
 
@@ -39,11 +39,15 @@ transmission over the Internet, or method of electronic storage, is 100% secure.
 use commercially acceptable means to protect your Personal Information, we cannot guarantee its
 absolute security.
 
-Your privacy is important.  4DN DCIC makes the following commitment regarding the information support staff may be exposed to:
+## Users Located in the European Economic Area
+
+If you are located in the European Union, Iceland, Liechtenstein or Norway (the “European Economic Area”), 
+please click [here](https://gdpr.harvard.edu/eeaprivacydisclosures) for additional information about ways that certain Harvard University Schools, Centers, units 
+and controlled entities, including this portal, may collect, use, and share information about you.
 
 ## Changes To This Privacy Policy
 
-This Privacy Policy is effective as of October 10th, 2017 and will remain in effect except with respect to any
+This Privacy Policy is effective as of October 25th, 2018 and will remain in effect except with respect to any
 changes in its provisions in the future, which will be in effect immediately after being posted on this
 page.
 
