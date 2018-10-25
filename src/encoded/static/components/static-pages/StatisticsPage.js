@@ -860,7 +860,13 @@ class UsageStatsView extends StatsChartViewBase {
                         <hr/>
 
                         <AreaChartContainer {...commonContainerProps} id="file_downloads"
-                            title={<span><span className="text-500">File Downloads</span> - all</span>}>
+                            title={
+                                <React.Fragment>
+                                    <span className="text-500">File Downloads</span>
+                                    <br/>
+                                    <small><em>Download tracking started in August 2018</em></small>
+                                </React.Fragment>
+                            }>
                             <AreaChart data={file_downloads} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
 
@@ -921,8 +927,6 @@ class UsageStatsView extends StatsChartViewBase {
 
                         <hr className="mt-3"/>
 
-                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
-
                         <AreaChartContainer {...commonContainerProps} id="experiment_set_views"
                             title={
                                 <span>
@@ -934,6 +938,8 @@ class UsageStatsView extends StatsChartViewBase {
                             extraButtons={this.renderCountByDropdown('experiment_set_views')}>
                             <AreaChart data={experiment_set_views} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
+
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     </GroupOfCharts>
 
@@ -955,13 +961,14 @@ class UsageStatsView extends StatsChartViewBase {
                             </DropdownButton>
                         </div>
                         */}
-                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                         <AreaChartContainer {...commonContainerProps} id="fields_faceted"
                             title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
                             extraButtons={this.renderCountByDropdown('fields_faceted')}>
                             <AreaChart data={fields_faceted} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
+
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     </GroupOfCharts>
 
@@ -1037,7 +1044,9 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                 <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
 
-                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }}/>
+                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By"/>
+
+                    <hr/>
 
                     <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 

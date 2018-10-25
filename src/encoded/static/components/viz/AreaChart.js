@@ -430,7 +430,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
 
     renderColorItem([term, color], idx, all){
         return (
-            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-ellipsis-container">
+            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-ellipsis-container" key={term}>
                 <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
                 { term }
             </div>
@@ -442,7 +442,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
         if (!colorScale || !colorScaleStore) return null;
         return (
             <div className="legend mb-27">
-                <div className="row" children={_.map(_.pairs(colorScaleStore), this.renderColorItem)}/>
+                <div className="row" children={_.map(_.sortBy(_.pairs(colorScaleStore), function(p){ return p[0].toLowerCase(); }), this.renderColorItem)}/>
             </div>
         );
     }
