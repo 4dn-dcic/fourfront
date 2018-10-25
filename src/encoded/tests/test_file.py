@@ -222,7 +222,6 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
     """
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
-    import pdb; pdb.set_trace()
     testapp.patch_json(two_experiment_replicate_set['@id'],
                        {'other_processed_files': [{'title': 'Test', 'files': [resobj['@id']]}]})
     # hard-coded for convenience; should match experiment_data in datafixtures
