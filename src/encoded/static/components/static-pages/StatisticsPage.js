@@ -141,7 +141,7 @@ export default class StatisticsPageView extends StaticPage {
             <div className="chart-section-control-wrapper row">
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
-                        href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={130}>
+                        href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
                         { submissionsObj.icon ? <i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/> : '' }
                         { submissionsObj.icon ? <span>&nbsp;&nbsp;</span> : null }
                         { submissionsObj.title }
@@ -149,7 +149,7 @@ export default class StatisticsPageView extends StaticPage {
                 </div>
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
-                        href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={130}>
+                        href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
                         { usageObj.icon ? <i className={"text-medium icon icon-fw icon-" + usageObj.icon}/> : '' }
                         { usageObj.icon ? <span>&nbsp;&nbsp;</span> : null }
                         { usageObj.title }
@@ -848,6 +848,8 @@ class UsageStatsView extends StatsChartViewBase {
                             <AreaChart data={file_downloads} xDomain={commonXDomain} />
                         </AreaChartContainer>
 
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
                     </GroupOfCharts>
 
                 : null }
@@ -858,13 +860,13 @@ class UsageStatsView extends StatsChartViewBase {
 
                         <hr/>
 
-                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
-
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                             title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
                             extraButtons={this.renderCountByDropdown('sessions_by_country')}>
                             <AreaChart data={sessions_by_country} xDomain={commonXDomain} />
                         </AreaChartContainer>
+
+                        <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     </GroupOfCharts>
 
