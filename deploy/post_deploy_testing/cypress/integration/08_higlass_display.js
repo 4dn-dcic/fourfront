@@ -1,8 +1,12 @@
+'use strict';
+
+import _ from 'underscore';
+
 /**
 * Test you can visit the Higlass Display page.
 */
 describe("HiGlass Display pages", function(){
-/*
+
     context('Higlass Display summary page', function(){
         it('Can visit HiGlass Display summary page without login', function(){
             // Visit the page and confirm you can see the table and facet properties.
@@ -33,14 +37,8 @@ describe("HiGlass Display pages", function(){
             cy.get("a[href='" + draftUrl + "']");
         });
     });
-*/
+
     context('Individual Higlass display page', function() {
-        // TODO Reset all displays to original after saving
-
-        /*
-        beforeEach
-        */
-
         it('Can clone new draft views', function() {
             // Verify logged in users can save higlass displays.
 
@@ -55,23 +53,37 @@ describe("HiGlass Display pages", function(){
 
             // Get the raw JSON of the display.
             let originalJson = null;
-            cy.request(draftUrl + "?format=json").then((resp)=>{
+            cy.request(draftUrl + "?format=json&datastore=database").then((resp)=>{
                 originalJson = resp.body;
             });
 
             // Click the save as button.
-            cy.get('.text-right.inline-block .inline-block:nth-child(2) button.btn.btn-success').click().wait(500);
+            cy.get('.text-right.inline-block .inline-block:nth-child(2) button.btn.btn-success').click().then(() => {
+                // Confirm the underlying JSON of the original has not changed.
+                cy.request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
+                    const newJsonStr = JSON.stringify(newJson.body);
+                    const originalJsonStr = JSON.stringify(originalJson);
+                    expect(newJsonStr).to.equal(originalJsonStr);
+                });
 
-            // Confirm the underlying JSON of the original has not changed.
-            cy.request(draftUrl + "?format=json").then((newJson)=>{
-                const newJsonStr = JSON.stringify(newJson.body);
-                const originalJsonStr = JSON.stringify(originalJson);
+                // Confirm there is a success message.
+                cy.get('.alert div').should('have.text', 'Saved new display.');
 
-                expect(newJsonStr).to.equal(originalJsonStr);
+                // Confirm a new record was created.
+                cy.request("/higlass-view-configs/?format=json&datastore=database").then((response)=>{
+
+                    // Delete the newly created record.
+                    _.forEach(response.body["@graph"], (higlassViewConf)=>{
+                        if (['00000000-1111-0000-1111-000000000001', '00000000-1111-0000-1111-000000000002'].indexOf(higlassViewConf.uuid) !== -1) {
+                            return;
+                        }
+                        cy.request("DELETE", higlassViewConf["@id"]).wait(100).then(() => {
+                            cy.log(higlassViewConf["@id"]);
+                        });
+                    });
+                });
+
             });
-
-            // Confirm there is a success message.
-            // Confirm a new record was created.
         });
     });
 });
