@@ -583,8 +583,11 @@
         }
     },
     "facets_aggregated_badges" : {
-        "aggregated_items.badges.item.badge.badge_classification": {
-            "title": "Badge Classification"
+        "aggregated_items.badges.item.badge.positive_badge": {
+            "title": "Positive Badges"
+        },
+        "aggregated_items.badges.item.badge.warning_badge": {
+            "title": "Warning Badges"
         }
     }
 
