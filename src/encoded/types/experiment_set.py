@@ -73,6 +73,9 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
+    aggregated_items = {
+        "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
+    }
     embedded_list = lab_award_attribution_embed_list + [
         "badges.badge.*",
         "static_headers.content",
@@ -279,9 +282,6 @@ class ExperimentSetReplicate(ExperimentSet):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    aggregated_items = {
-        "badges": ["message", "badge.badge_classification", "badge.uuid"]
-    }
     embedded_list = ExperimentSet.embedded_list + [
         "replicate_exps.replicate_exp.accession"
     ]
