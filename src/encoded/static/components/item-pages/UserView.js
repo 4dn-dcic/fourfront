@@ -510,22 +510,23 @@ class ProfileWorkFields extends React.Component {
     * @return {Item[]} List of all unique awards in labs.
     */
     static getAwardsList(labDetails){
+
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return [];
+        }
+
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
 
         function addAwardToList(award){
-            if (_.pluck(awardsList, 'uuid').indexOf(labDetails[i].awards[j].uuid) === -1){
-                awardsList.push(labDetails[i].awards[j]);
-            }
+            if (!award || typeof award['@id'] !== 'string' || _.pluck(awardsList, '@id').indexOf(award['@id']) > -1) return;
+            awardsList.push(award);
         }
 
-        for (var i = 0; i < labDetails.length; i++){
-            if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
-                for (var j = 0; j < labDetails[i].awards.length; j++){
-                    addAwardToList(labDetails[i].awards[j]);
-                }
-            }
-        }
+        _.forEach(labDetails, function(lab){
+            if (!lab || !lab.awards || !Array.isArray(lab.awards) || lab.awards.length === 0) return;
+            _.forEach(lab.awards, addAwardToList);
+        });
 
         return awardsList;
     }
@@ -556,13 +557,12 @@ class ProfileWorkFields extends React.Component {
      */
     updateAwardsList(labDetails){
 
-        if (!labDetails){
-            return null;
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return;
         }
 
-        this.setState((currState)=>{
+        this.setState(function(currState){
             // As of React 16 we can return null in setState func to cancel out of state update.
-
             var currAwardsList      = (currState.awards_list && currState.awards_list.slice(0)) || [],
                 currAwardsListIDs   = new Set(currAwardsList.map(object.atIdFromObject)),
                 newAwards           = ProfileWorkFields.getAwardsList(labDetails);
@@ -623,7 +623,7 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
                             renderItem={object.itemUtil.generateLink}
-                            endpoints={(submits_for && _.map(submits_for, object.itemUtil.atId)) || []}
+                            endpoints={(submits_for && _.filter(_.map(submits_for, object.itemUtil.atId))) || []}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
                             ajaxCallback={this.updateAwardsList}
