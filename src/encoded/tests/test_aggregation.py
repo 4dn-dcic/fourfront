@@ -1,13 +1,15 @@
 from .features.conftest import app_settings, workbook
-import json
 
 
 def test_aggregation_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
-    badge_facet = [facet for facet in res['facets'] if facet['title'] == 'Badge Classification']
-    assert badge_facet
-    terms = [term['key'] for term in badge_facet[0]['terms']]
-    assert 'WARNING' in terms and 'KUDOS' in terms
+    badge_facets = [facet for facet in res['facets'] if facet['title'] in
+                   ['Positive Badges', 'Warning Badges']]
+    assert badge_facets
+    titles = [facet['title'] for facet in badge_facets]
+    assert 'Positive Badges' in titles and 'Warning Badges' in titles
+    terms = [term['key'] for i in range(2) for term in badge_facets[i]['terms']]
+    assert len([t for t in terms if t != 'No value']) == 3
 
 
 def test_aggregation_itemview(workbook, testapp):
@@ -15,9 +17,11 @@ def test_aggregation_itemview(workbook, testapp):
     assert 'aggregated-items' in res.keys()
     parents = ''.join([badge['parent'] for badge in res['aggregated-items']['badges']])
     assert 'biosample' in parents and 'experiment-set-replicate' in parents
+    items = [badge['parent'] + ', ' + badge['item']['badge']['uuid'] for
+             badge in res['aggregated-items']['badges']]
+    assert len(items) == len(list(set(items)))
 
 
-# test for @@aggregated-items view
 def test_aggregation_view(workbook, testapp):
     res = testapp.get('/experiment-set-replicates/4DNESAAAAAA1/@@aggregated-items').json
     agg = res['aggregated_items']
