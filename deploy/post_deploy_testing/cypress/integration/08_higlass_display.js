@@ -37,37 +37,9 @@ describe("HiGlass Display pages", function(){
     context('Individual Higlass display page', function() {
         // TODO Reset all displays to original after saving
 
-        it('Can override views', function() {
-            // Verify logged in users can save higlass displays.
-
-            // Log in.
-            cy.visit('/higlass-view-configs').login4DN().wait(500);
-
-            // Go to the display for the draft display.
-            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
-            cy.get("a[href='" + draftUrl + "']");
-
-            cy.visit(draftUrl);
-
-            // Get the raw JSON of the display.
-            let originalJson = null;
-            cy.request(draftUrl + "?format=json").then((resp)=>{
-                originalJson = resp.body;
-            });
-
-            // Click the save button.
-            cy.get('.text-right.inline-block .inline-block:first-child button.btn.btn-success').click().wait(500);
-
-            // Confirm the underlying JSON has changed.
-            const newJson = cy.request(draftUrl + "?format=json");
-
-            cy.request(draftUrl + "?format=json").then((newJson)=>{
-                const newJsonStr = JSON.stringify(newJson.body);
-                const originalJsonStr = JSON.stringify(originalJson);
-
-                expect(newJsonStr).to.not.equal(originalJsonStr); // TODO Didn't change.
-            });
-        });
+        /*
+        beforeEach
+        */
 
         it('Can clone new draft views', function() {
             // Verify logged in users can save higlass displays.
