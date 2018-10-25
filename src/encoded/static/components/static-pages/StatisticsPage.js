@@ -203,8 +203,8 @@ class UsageStatsViewController extends StatsViewController {
                     fromDate.subtract(12, 'month'); // Go back 12 months
                     uri += '&date_histogram_interval=monthly&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
                 } else if (props.currentGroupBy === 'daily'){
-                    untilDate.startOf('day').subtract(1, 'minute'); // Last minute of previous day
                     fromDate = untilDate.clone();
+                    untilDate.subtract(1, 'day');
                     fromDate.subtract(30, 'day'); // Go back 30 days
                     uri += '&date_histogram_interval=daily&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
                 }
@@ -822,13 +822,29 @@ class UsageStatsView extends StatsChartViewBase {
         // Prevent needing to calculate for each chart
         //if (firstDateStr) commonXDomain[0] = new Date(firstDateStr.slice(0,10));
         if (lastDateStr){
-            var timeShift = currentGroupBy === 'daily' ? (24*60*60*1000) : (30*24*60*60*1000); // 24 hrs -v- 30 days
-            commonXDomain[1] = new Date(lastDateStr + "T00:00:00.000Z");
-            commonXDomain[1].setTime(commonXDomain[1].getTime() + timeShift);
-            
+            var lastDateMoment = moment.utc(lastDateStr, 'YYYY-MM-DD');
+            if (currentGroupBy === 'daily'){
+                lastDateMoment.endOf('day').subtract(45, 'minute');
+            } else if (currentGroupBy === 'monthly') {
+                lastDateMoment.endOf('month').subtract(1, 'day');
+            }
+            commonXDomain[1] = lastDateMoment.toDate();
         }
         if (firstDateStr){
-            commonXDomain[0] = new Date(firstDateStr + "T00:00:00.000Z");
+            var firstDateMoment = moment.utc(firstDateStr, 'YYYY-MM-DD');
+            if (currentGroupBy === 'daily'){
+                firstDateMoment.startOf('day').add(15, 'minute');
+            } else if (currentGroupBy === 'monthly') {
+                firstDateMoment.startOf('month').add(1, 'hour');
+            }
+            commonXDomain[0] = firstDateMoment.toDate();
+        }
+
+        var dateRoundInterval = 'day';
+        if (currentGroupBy === 'monthly'){
+            dateRoundInterval = 'month';
+        } else if (currentGroupBy === 'yearly'){ // Not yet implemented
+            dateRoundInterval = 'year';
         }
 
         return (
@@ -845,7 +861,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                         <AreaChartContainer {...commonContainerProps} id="file_downloads"
                             title={<span><span className="text-500">File Downloads</span> - all</span>}>
-                            <AreaChart data={file_downloads} xDomain={commonXDomain} />
+                            <AreaChart data={file_downloads} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
@@ -863,7 +879,7 @@ class UsageStatsView extends StatsChartViewBase {
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                             title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
                             extraButtons={this.renderCountByDropdown('sessions_by_country')}>
-                            <AreaChart data={sessions_by_country} xDomain={commonXDomain} />
+                            <AreaChart data={sessions_by_country} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
@@ -899,7 +915,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                 : null */}
 
-                { experiment_set_views ?
+                { session && experiment_set_views ?
 
                     <GroupOfCharts width={width} resetScaleLegendWhenChange={experiment_set_views}>
 
@@ -916,15 +932,14 @@ class UsageStatsView extends StatsChartViewBase {
                                 </span>
                             }
                             extraButtons={this.renderCountByDropdown('experiment_set_views')}>
-                            <AreaChart data={experiment_set_views} xDomain={commonXDomain} />
+                            <AreaChart data={experiment_set_views} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
-
 
                     </GroupOfCharts>
 
                 : null }
 
-                { fields_faceted ?
+                { session && fields_faceted ?
 
                     <GroupOfCharts width={width} resetScaleLegendWhenChange={fields_faceted}>
 
@@ -945,7 +960,7 @@ class UsageStatsView extends StatsChartViewBase {
                         <AreaChartContainer {...commonContainerProps} id="fields_faceted"
                             title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
                             extraButtons={this.renderCountByDropdown('fields_faceted')}>
-                            <AreaChart data={fields_faceted} xDomain={commonXDomain} />
+                            <AreaChart data={fields_faceted} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
                         </AreaChartContainer>
 
                     </GroupOfCharts>

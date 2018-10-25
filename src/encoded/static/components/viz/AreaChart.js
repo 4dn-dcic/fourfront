@@ -835,27 +835,39 @@ export class AreaChart extends React.PureComponent {
     }
 
     updateTooltip(evt){
-        var svg         = this.svg      || d3.select(this.refs.svg), // SHOULD be same as evt.target.
-            tooltip     = this.refs.tooltip,
-            //tooltip     = this.tooltip  || d3.select(this.refs.tooltipContainer),
-            chartMargin = this.props.chartMargin,
-            mouseCoords = d3.clientPoint(svg.node(), evt), // [x: number, y: number]
-            stackedData = this.state.stackedData,
-            colorScale  = this.props.colorScale || this.colorScale,
-            chartWidth  = this.innerWidth || this.getInnerChartWidth(),
-            chartHeight = this.innerHeight || this.getInnerChartHeight(),
-            currentTerm = (evt && evt.target.getAttribute('data-term')) || null,
-            yAxisLabel  = this.props.yAxisLabel,
-            tdp         = this.props.tooltipDataProperty || 'total';
+        var svg                 = this.svg      || d3.select(this.refs.svg), // SHOULD be same as evt.target.
+            tooltip             = this.refs.tooltip,
+            //tooltip           = this.tooltip  || d3.select(this.refs.tooltipContainer),
+            chartMargin         = this.props.chartMargin,
+            mouseCoords         = d3.clientPoint(svg.node(), evt), // [x: number, y: number]
+            stackedData         = this.state.stackedData,
+            colorScale          = this.props.colorScale || this.colorScale,
+            chartWidth          = this.innerWidth || this.getInnerChartWidth(),
+            chartHeight         = this.innerHeight || this.getInnerChartHeight(),
+            currentTerm         = (evt && evt.target.getAttribute('data-term')) || null,
+            yAxisLabel          = this.props.yAxisLabel,
+            dateRoundInterval   = this.props.dateRoundInterval,
+            tdp                 = this.props.tooltipDataProperty || 'total',
+            dateFormatFxn       = function(aDate){ return DateUtility.format(aDate, 'date-sm'); };
 
         if (!mouseCoords) {
             throw new Error("Could not get mouse coordinates.");
         }
 
+        if (dateRoundInterval === 'month'){
+            dateFormatFxn = function(aDate){
+                return DateUtility.format(aDate, 'date-month');
+            };
+        } else if (dateRoundInterval === 'week'){
+            // TODO maybe. Currently just keeps day format.
+        } else if (dateRoundInterval === 'year'){
+            dateFormatFxn = function(aDate){
+                return aDate.getFullYear();
+            };
+        }
+
         mouseCoords[0] -= (chartMargin.left || 0);
         mouseCoords[1] -= (chartMargin.top  || 0);
-
-        // console.log(evt.target);
 
         if (mouseCoords[0] < 0 || mouseCoords[1] < 0 || mouseCoords[0] > chartWidth + 1 || mouseCoords[1] > chartHeight + 1){
             return this.removeTooltip();
@@ -866,7 +878,7 @@ export class AreaChart extends React.PureComponent {
             var xScale              = this.xScale(chartWidth),
                 yScale              = this.yScale(chartHeight),
                 hovDate             = xScale.invert(mouseCoords[0]),
-                dateString          = DateUtility.format(hovDate, 'date-sm'),
+                dateString          = dateFormatFxn(hovDate),
                 leftPosition        = xScale(hovDate),
                 isToLeft            = leftPosition > (chartWidth / 2),
                 maxTermsVisible     = Math.floor((chartHeight - 60) / 18),

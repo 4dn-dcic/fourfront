@@ -1803,6 +1803,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         position: relative;
 
         svg {
+            cursor: crosshair;
             .right-axis-tick-line {
                 pointer-events: none;
             }
@@ -1860,7 +1861,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-right: 12px;
                 padding-top: 8px;
                 position: absolute;
-                min-width: 165px;
+                min-width: 175px;
                 background-color: rgba(255,255,255,0.8);
                 padding-bottom: 9px;
                 border-bottom-left-radius: 5px;
