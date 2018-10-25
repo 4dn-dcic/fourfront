@@ -8,7 +8,7 @@ import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HiGlassContainer, HiGlassConfigurator } from './components';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
@@ -94,7 +94,7 @@ export default class FileView extends WorkflowRunTracingView {
         }
 
         if (FileView.shouldHiGlassViewExist(context)){
-            initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
+            initTabs.push(HiGlassFileTabView.getTabObject(this.props, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
         return initTabs.concat(this.getCommonTabs(this.props));

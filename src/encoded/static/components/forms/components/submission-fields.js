@@ -35,7 +35,7 @@ export class BuildField extends React.PureComponent {
     static fieldTypeFromFieldSchema(fieldSchema){
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         // transform some types...
-        if(fieldType === 'string'){
+        if (fieldType === 'string'){
             fieldType = 'text';
             if (typeof fieldSchema.formInput === 'string'){
                 if (['textarea', 'html', 'code'].indexOf(fieldSchema.formInput) > -1) return fieldSchema.formInput;

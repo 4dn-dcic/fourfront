@@ -226,7 +226,6 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'stacked',
-            'fullscreenViewEnabled' : false,
             'showParameters' : false,
             'anyIndirectPathIONodes' : true, // Overriden
             'anyReferenceFileNodes' : true // Overriden
@@ -292,17 +291,19 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     render(){
-        var graphProps = Array.isArray(this.props.steps) ? this.commonGraphProps() : null,
-            isReferenceFilesCheckboxDisabled = !this.state.anyReferenceFileNodes,
-            isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false),
-            isShowMoreContextCheckboxDisabled = !this.state.showIndirectFiles && !this.state.anyIndirectPathIONodes;
+        var { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props,
+            { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state,
+            graphProps = Array.isArray(steps) ? this.commonGraphProps() : null,
+            isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes,
+            isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false),
+            isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
 
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
+            <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <TracedGraphSectionControls
-                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')} loading={this.props.loadingGraphSteps}
+                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')} loading={loadingGraphSteps} fullscreenViewEnabled={isFullscreen}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType} onToggleFullScreenView={this.onToggleFullScreenView} onToggleShowParameters={this.onToggleShowParameters}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />
