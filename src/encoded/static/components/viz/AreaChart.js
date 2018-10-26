@@ -141,9 +141,11 @@ export class StatsChartViewBase extends React.Component {
         super(props);
         this.getRefWidth = this.getRefWidth.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
+        this.handleToggleSmoothEdges = this.handleToggleSmoothEdges.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
         this.state = _.extend(this.generateAggsToState(props, {}), {
-            'chartToggles' : {}
+            'chartToggles' : {},
+            'smoothEdges' : false
         });
     }
 
@@ -187,6 +189,20 @@ export class StatsChartViewBase extends React.Component {
             nextTogglesState[key] = !(nextTogglesState[key]);
             return { 'chartToggles' : nextTogglesState };
         }, cb);
+    }
+
+    handleToggleSmoothEdges(smoothEdges, cb){
+        this.setState(function(currState){
+            if (typeof smoothEdges === 'boolean'){
+                if (smoothEdges === currState.smoothEdges){
+                    return null;
+                }
+                return { smoothEdges };
+            } else {
+                smoothEdges = !currState.smoothEdges;
+                return { smoothEdges };
+            }
+        });
     }
 
     componentWillUpdate(nextProps, nextState){
@@ -306,7 +322,7 @@ export class GroupByDropdown extends React.PureComponent {
     }
 
     render(){
-        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, valueTitleTransform } = this.props,
+        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, valueTitleTransform, children } = this.props,
             optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
                 <MenuItem eventKey={field} key={field} children={title} active={field === currentGroupBy} />
             ),
@@ -316,6 +332,7 @@ export class GroupByDropdown extends React.PureComponent {
             <div className={outerClassName}>
                 <span className="text-500">{ title }</span>
                 <DropdownButton id="select_primary_charts_group_by" title={selectedValueTitle} onSelect={this.onSelect} children={optionItems} style={buttonStyle} />
+                { children }
             </div>
         );
     }
@@ -527,6 +544,7 @@ export class AreaChart extends React.PureComponent {
             var shouldDrawNewChart = false;
 
             if (pastProps.data !== nextProps.data) shouldDrawNewChart = true;
+            if (pastProps.curveFxn !== nextProps.curveFxn) shouldDrawNewChart = true;
             if (shouldDrawNewChart) console.info('Will redraw chart');
 
             return shouldDrawNewChart;
@@ -605,6 +623,9 @@ export class AreaChart extends React.PureComponent {
                     });
                 });
             }, 300);
+        } else if (this.isDataUpdating) {
+            this.isDataUpdating = false;
+            // Skip below else condition.
         } else {
             setTimeout(this.updateExistingChart, 300);
         }
@@ -672,6 +693,8 @@ export class AreaChart extends React.PureComponent {
     updateDataInState(props = this.props, callback = null){
         var data = this.correctDatesInData(props.data);
         this.stack.keys(this.childKeysFromData(data));
+
+        this.isDataUpdating = true;
 
         var stackedData          = this.stack(data),
             mergedDataForExtents = AreaChart.mergeStackedDataForExtents(stackedData),

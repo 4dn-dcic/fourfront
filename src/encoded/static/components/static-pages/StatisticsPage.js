@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import { Button, DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import url from 'url';
 import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
@@ -90,8 +90,8 @@ export default class StatisticsPageView extends StaticPage {
 
     renderUsageSection(){
         var groupByOptions = {
-            'monthly'   : <span>Last 12 Months</span>,
-            'daily'     : <span>Last 30 Days</span>
+            'monthly'   : <span>Previous 12 Months</span>,
+            'daily'     : <span>Previous 30 Days</span>
         };
         return (
             <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
@@ -124,7 +124,7 @@ export default class StatisticsPageView extends StaticPage {
                 <DropdownButton id="section-select-dropdown" title={currSectionTitle} children={_.map(StatisticsPageView.viewOptions, function({ title, id, icon }){
                     return (
                         <MenuItem {...{ title, 'key': id, 'eventKey' : id }} active={id === currentTab}>
-                            { icon ? <span><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</span> : '' }{ title }
+                            { icon ? <React.Fragment><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</React.Fragment> : '' }{ title }
                         </MenuItem>
                     );
                 })} onSelect={this.onDropdownChange} />
@@ -142,16 +142,14 @@ export default class StatisticsPageView extends StaticPage {
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
                         href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
-                        { submissionsObj.icon ? <i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/> : '' }
-                        { submissionsObj.icon ? <span>&nbsp;&nbsp;</span> : null }
+                        { submissionsObj.icon ? <React.Fragment><i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/>&nbsp;&nbsp;</React.Fragment> : '' }
                         { submissionsObj.title }
                     </a>
                 </div>
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
                         href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
-                        { usageObj.icon ? <i className={"text-medium icon icon-fw icon-" + usageObj.icon}/> : '' }
-                        { usageObj.icon ? <span>&nbsp;&nbsp;</span> : null }
+                        { usageObj.icon ? <React.Fragment><i className={"text-medium icon icon-fw icon-" + usageObj.icon}/>&nbsp;&nbsp;</React.Fragment> : '' }
                         { usageObj.title }
                     </a>
                 </div>
@@ -196,7 +194,8 @@ class UsageStatsViewController extends StatsViewController {
             'TrackingItemDownload' : function(props) {
                 var untilDate   = moment.utc(),
                     fromDate,
-                    uri         = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&group_by=download_tracking.experiment_type&tracking_type=download_tracking';
+                    uri         = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
+                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.is_visualization&group_by=download_tracking.file_format';
                 if (props.currentGroupBy === 'monthly'){
                     untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
                     fromDate = untilDate.clone();
@@ -360,7 +359,7 @@ export const commonParsingFxn = {
      * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
      * @param {boolean} [excludeChildren=false] - If true, skips aggregating up children to increase performance very slightly.
      */
-    'bucketDocCounts' : function(intervalBuckets, externalTermMap, excludeChildren = false){
+    'bucketDocCounts' : function(intervalBuckets, groupByField, externalTermMap, excludeChildren = false){
         var subBucketKeysToDate = new Set(),
             aggsList = _.map(intervalBuckets, function(bucket, index){
                 if (excludeChildren === true){
@@ -370,11 +369,11 @@ export const commonParsingFxn = {
                     };
                 } else {
 
-                    _.forEach(_.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
+                    _.forEach(_.pluck((bucket[groupByField] && bucket[groupByField].buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
 
                     var children = _.map(Array.from(subBucketKeysToDate), function(term){
                         // Create a parsed 'bucket' even if none returned from ElasticSearch agg but it has appeared earlier.
-                        var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
+                        var subBucket = bucket[groupByField] && bucket[groupByField].buckets && _.findWhere(bucket[groupByField].buckets, { 'key' : term }),
                             count     = ((subBucket && subBucket.doc_count) || 0);
 
                         return { term, count };
@@ -407,14 +406,14 @@ export const commonParsingFxn = {
      * @param {{ key_as_string: string, doc_count: number, group_by?: { buckets: { doc_count: number, key: string  }[] } }[]} intervalBuckets - Raw aggregation results returned from ElasticSearch
      * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
      */
-    'bucketTotalFilesCounts' : function(intervalBuckets, externalTermMap){
+    'bucketTotalFilesCounts' : function(intervalBuckets, groupByField, externalTermMap){
         var subBucketKeysToDate = new Set(),
             aggsList = _.map(intervalBuckets, function(bucket, index){
 
-                _.forEach(_.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
+                _.forEach(_.pluck((bucket[groupByField] && bucket[groupByField].buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
 
                 var children = _.map(Array.from(subBucketKeysToDate), function(term){
-                    var subBucket = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
+                    var subBucket = bucket[groupByField] && bucket[groupByField].buckets && _.findWhere(bucket[groupByField].buckets, { 'key' : term }),
                         count     = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0);
 
                     return { term, count };
@@ -432,16 +431,16 @@ export const commonParsingFxn = {
 
         return aggsList;
     },
-    'bucketTotalFilesVolume' : function(intervalBuckets, externalTermMap){
+    'bucketTotalFilesVolume' : function(intervalBuckets, groupByField, externalTermMap){
         var gigabyte = 1024 * 1024 * 1024,
             subBucketKeysToDate = new Set(),
             aggsList = _.map(intervalBuckets, function(bucket, index){
 
-                _.forEach(_.pluck((bucket.group_by && bucket.group_by.buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
+                _.forEach(_.pluck((bucket[groupByField] && bucket[groupByField].buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
 
                 var fileSizeVol = ((bucket.total_files_volume && bucket.total_files_volume.value) || 0) / gigabyte,
                     children = _.map(Array.from(subBucketKeysToDate), function(term){
-                        var subBucket      = bucket.group_by && bucket.group_by.buckets && _.findWhere(bucket.group_by.buckets, { 'key' : term }),
+                        var subBucket      = bucket[groupByField] && bucket[groupByField].buckets && _.findWhere(bucket[groupByField].buckets, { 'key' : term }),
                             subFileSizeVol = ((subBucket && subBucket.total_files_volume && subBucket.total_files_volume.value) || 0) / gigabyte;
 
                         return { term, 'count' : subFileSizeVol };
@@ -515,7 +514,7 @@ export const aggregationsToChartData = {
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.externalTermMap)
+                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap)
             );
         }
     },
@@ -527,7 +526,7 @@ export const aggregationsToChartData = {
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.externalTermMap)
+                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap)
             );
         }
     },
@@ -614,7 +613,7 @@ export const aggregationsToChartData = {
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketTotalFilesCounts(weeklyIntervalBuckets, props.externalTermMap)
+                commonParsingFxn.bucketTotalFilesCounts(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap)
             );
         }
     },
@@ -626,7 +625,7 @@ export const aggregationsToChartData = {
             if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketTotalFilesVolume(weeklyIntervalBuckets, props.externalTermMap)
+                commonParsingFxn.bucketTotalFilesVolume(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap)
             );
         }
     },
@@ -695,17 +694,21 @@ export const aggregationsToChartData = {
             return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey);
         }
     },
+    /**
+     * For this function, props.currentGroupBy is the interval or time duration, not the actual 'group by' as it is for submissions.
+     * Instead, `props.countBy.file_downloads` is used similar to the google analytics approach.
+     */
     'file_downloads' : {
         'requires'  : 'TrackingItemDownload',
         'function'  : function(resp, props){
-            if (!resp || !resp.aggregations) return null;
+            if (!resp || !resp.aggregations || !props.countBy || !props.countBy.file_downloads) return null;
             var dateAggBucket = props.currentGroupBy && props.currentGroupBy + '_interval_date_created',
                 dateIntervalBuckets = resp && resp.aggregations && resp.aggregations[dateAggBucket] && resp.aggregations[dateAggBucket].buckets;
 
             if (!Array.isArray(dateIntervalBuckets) || dateIntervalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToCountTotals(
-                commonParsingFxn.bucketDocCounts(dateIntervalBuckets)
+                commonParsingFxn.bucketDocCounts(dateIntervalBuckets, props.countBy.file_downloads)
             );
         }
     },
@@ -731,14 +734,17 @@ class UsageStatsView extends StatsChartViewBase {
     
     constructor(props){
         super(props);
-        //this.changeFieldFacetedByGrouping = this.changeFieldFacetedByGrouping.bind(this);
         this.changeCountByForChart = this.changeCountByForChart.bind(this);
         this.state.countBy = {};
         _.forEach(_.keys(this.state), (k)=>{
-            if (k === 'countBy' || k === 'chartToggles') {
+            if (k === 'countBy' || k === 'chartToggles' || k === 'smoothEdges') {
                 return;
             }
-            this.state.countBy[k] = 'views';
+            if (k === 'file_downloads'){
+                this.state.countBy[k] = 'download_tracking.experiment_type';
+            } else {
+                this.state.countBy[k] = 'views';
+            }
         });
     }
 
@@ -758,16 +764,25 @@ class UsageStatsView extends StatsChartViewBase {
     renderCountByDropdown(chartID, tooltip=null){
         var currCountBy = this.state.countBy[chartID],
             titles      = {
-                'views'     : <span><i className="icon icon-fw icon-eye"/>&nbsp; View</span>,
-                'sessions'  : <span><i className="icon icon-fw icon-user"/>&nbsp; User Session</span>
+                'views'     : <React.Fragment><i className="icon icon-fw icon-eye"/>&nbsp; View</React.Fragment>,
+                'sessions'  : <React.Fragment><i className="icon icon-fw icon-user"/>&nbsp; User Session</React.Fragment>
             },
             ddtitle     = titles[currCountBy];
 
         if (chartID === 'experiment_set_views' || chartID === 'file_views'){
             titles = {
-                'views'         : <span><i className="icon icon-fw icon-eye"/>&nbsp; Detail View</span>,
-                'list_views'    : <span><i className="icon icon-fw icon-list"/>&nbsp; Appearance within first 25 Search Results</span>,
-                'clicks'        : <span><i className="icon icon-fw icon-hand-o-up"/>&nbsp; Search Result Click</span>
+                'views'         : <React.Fragment><i className="icon icon-fw icon-eye"/>&nbsp; Detail View</React.Fragment>,
+                'list_views'    : <React.Fragment><i className="icon icon-fw icon-list"/>&nbsp; Appearance within first 25 Search Results</React.Fragment>,
+                'clicks'        : <React.Fragment><i className="icon icon-fw icon-hand-o-up"/>&nbsp; Search Result Click</React.Fragment>
+            };
+            ddtitle = titles[currCountBy];
+        } else if (chartID === 'file_downloads'){
+            '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.is_visualization&group_by=download_tracking.file_format';
+            titles = {
+                'download_tracking.experiment_type'     : <React.Fragment><i className="icon icon-fw icon-folder-o"/>&nbsp; Experiment Type</React.Fragment>,
+                'download_tracking.geo_country'         : <React.Fragment><i className="icon icon-fw icon-globe"/>&nbsp; Country</React.Fragment>,
+                'download_tracking.is_visualization'    : <React.Fragment><i className="icon icon-fw icon-television"/>&nbsp; Downloads as part of visualization</React.Fragment>,
+                'download_tracking.file_format'         : <React.Fragment><i className="icon icon-fw icon-file-text-o"/>&nbsp; File Format</React.Fragment>,
             };
             ddtitle = titles[currCountBy];
         }
@@ -798,7 +813,7 @@ class UsageStatsView extends StatsChartViewBase {
     render(){
         var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
             { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
-                other_search_queries, experiment_set_views, file_downloads, countBy
+                other_search_queries, experiment_set_views, file_downloads, countBy, smoothEdges
             } = this.state,
             width = this.getRefWidth() || null;
 
@@ -817,10 +832,10 @@ class UsageStatsView extends StatsChartViewBase {
             commonContainerProps    = {
                 'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
                 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
-            };
+            },
+            dateRoundInterval       = 'day';
 
         // Prevent needing to calculate for each chart
-        //if (firstDateStr) commonXDomain[0] = new Date(firstDateStr.slice(0,10));
         if (lastDateStr){
             var lastDateMoment = moment.utc(lastDateStr, 'YYYY-MM-DD');
             if (currentGroupBy === 'daily'){
@@ -830,6 +845,7 @@ class UsageStatsView extends StatsChartViewBase {
             }
             commonXDomain[1] = lastDateMoment.toDate();
         }
+
         if (firstDateStr){
             var firstDateMoment = moment.utc(firstDateStr, 'YYYY-MM-DD');
             if (currentGroupBy === 'daily'){
@@ -840,18 +856,24 @@ class UsageStatsView extends StatsChartViewBase {
             commonXDomain[0] = firstDateMoment.toDate();
         }
 
-        var dateRoundInterval = 'day';
         if (currentGroupBy === 'monthly'){
             dateRoundInterval = 'month';
         } else if (currentGroupBy === 'yearly'){ // Not yet implemented
             dateRoundInterval = 'year';
         }
 
+        var commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+
         return (
             <div className="stats-charts-container" key="charts" ref="elem" id="usage">
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
-                    title="Show" outerClassName="dropdown-container mb-0" />
+                    title="Show" outerClassName="dropdown-container mb-0">
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div className="inline-block">
+                        <Checkbox value={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
+                    </div>
+                </GroupByDropdown>
 
                 { file_downloads ?
 
@@ -866,8 +888,9 @@ class UsageStatsView extends StatsChartViewBase {
                                     <br/>
                                     <small><em>Download tracking started in August 2018</em></small>
                                 </React.Fragment>
-                            }>
-                            <AreaChart data={file_downloads} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
+                            }
+                            extraButtons={this.renderCountByDropdown('file_downloads')}>
+                            <AreaChart {...commonChartProps} data={file_downloads} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
@@ -885,7 +908,7 @@ class UsageStatsView extends StatsChartViewBase {
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                             title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
                             extraButtons={this.renderCountByDropdown('sessions_by_country')}>
-                            <AreaChart data={sessions_by_country} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
+                            <AreaChart {...commonChartProps} data={sessions_by_country} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
@@ -936,7 +959,7 @@ class UsageStatsView extends StatsChartViewBase {
                                 </span>
                             }
                             extraButtons={this.renderCountByDropdown('experiment_set_views')}>
-                            <AreaChart data={experiment_set_views} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
+                            <AreaChart {...commonChartProps} data={experiment_set_views} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
@@ -965,7 +988,7 @@ class UsageStatsView extends StatsChartViewBase {
                         <AreaChartContainer {...commonContainerProps} id="fields_faceted"
                             title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
                             extraButtons={this.renderCountByDropdown('fields_faceted')}>
-                            <AreaChart data={fields_faceted} xDomain={commonXDomain} dateRoundInterval={dateRoundInterval} />
+                            <AreaChart {...commonChartProps} data={fields_faceted} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
@@ -1008,7 +1031,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
     render(){
         var { loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange } = this.props,
             { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country, expsets_released_vs_internal,
-                expsets_created, chartToggles } = this.state,
+                expsets_created, chartToggles, smoothEdges } = this.state,
             width = this.getRefWidth() || null;
 
         if (!mounted || (!expsets_released)){
@@ -1023,7 +1046,8 @@ class SubmissionsStatsView extends StatsChartViewBase {
                 'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
                 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
             },
-            showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal;
+            showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal,
+            commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
 
         return (
             <div className="stats-charts-container" key="charts" ref="elem" id="submissions">
@@ -1033,7 +1057,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
                     <GroupOfCharts width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
 
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal" title={<span><span className="text-500">Experiment Sets</span> - internal vs public release</span>}>
-                            <AreaChart data={expsets_released_vs_internal} />
+                            <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
                         </AreaChartContainer>
 
                         <hr/>
@@ -1044,7 +1068,12 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                 <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
 
-                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By"/>
+                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <div className="inline-block">
+                            <Checkbox value={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
+                        </div>
+                    </GroupByDropdown>
 
                     <hr/>
 
@@ -1055,7 +1084,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
                                 <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
                             </React.Fragment>
                         }>
-                        <AreaChart data={expsets_released} />
+                        <AreaChart {...commonChartProps} data={expsets_released} />
                     </AreaChartContainer>
 
                     {/* expsets_created ?           // ~=== 'Experiment Sets Submitted'
@@ -1070,7 +1099,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
                                     <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
                                 </React.Fragment>
                             }>
-                            <AreaChart data={expsets_released_internal} />
+                            <AreaChart {...commonChartProps} data={expsets_released_internal} />
                         </AreaChartContainer>
                     : null }
 
@@ -1079,7 +1108,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
                                 <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
                             </React.Fragment>
                         }>
-                        <AreaChart data={files_released} />
+                        <AreaChart {...commonChartProps} data={files_released} />
                     </AreaChartContainer>
 
                     <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
@@ -1087,7 +1116,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
                                 <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
                             </React.Fragment>
                         }>
-                        <AreaChart data={file_volume_released} yAxisLabel="GB" />
+                        <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                     </AreaChartContainer>
 
                 </GroupOfCharts>

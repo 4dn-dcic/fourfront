@@ -302,7 +302,7 @@ def date_histogram_aggregations(request):
 
     # Defaults - may be overriden in URI params
     date_histogram_fields    = ['public_release', 'project_release']
-    group_by_field           = 'award.center_title'
+    group_by_fields          = ['award.center_title']
     date_histogram_intervals = ['weekly']
 
     # Mapping of 'date_histogram_interval' options we accept to ElasticSearch interval vocab term.
@@ -316,20 +316,19 @@ def date_histogram_aggregations(request):
 
     try:
         json_body = request.json_body
-        search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
-        fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
+        search_param_lists = json_body.get('search_query_params', deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
     except:
-        search_param_lists      = dict(request.GET)
+        search_param_lists = request.GET.dict_of_lists()
         if 'group_by' in search_param_lists:
-            group_by_field = search_param_lists['group_by'][0] if isinstance(search_param_lists['group_by'], list) else search_param_lists['group_by']
+            group_by_fields = search_param_lists['group_by']
             del search_param_lists['group_by'] # We don't wanna use it as search filter.
-            if group_by_field in ['None', 'null']:
-                group_by_field = None
+            if len(group_by_fields) == 1 and group_by_fields[0] in ['None', 'null']:
+                group_by_fields = None
         if 'date_histogram' in search_param_lists:
-            date_histogram_fields = search_param_lists['date_histogram'] if isinstance(search_param_lists['date_histogram'], list) else [search_param_lists['date_histogram']]
+            date_histogram_fields = search_param_lists['date_histogram']
             del search_param_lists['date_histogram'] # We don't wanna use it as search filter.
         if 'date_histogram_interval' in search_param_lists:
-            date_histogram_intervals = search_param_lists['date_histogram_interval'] if isinstance(search_param_lists['date_histogram_interval'], list) else [search_param_lists['date_histogram_interval']]
+            date_histogram_intervals = search_param_lists['date_histogram_interval']
             for interval in date_histogram_intervals:
                 if interval not in interval_to_es_interval.keys():
                     raise IndexError('"{}" is not one of daily, weekly, monthly, or yearly.'.format(interval))
@@ -337,6 +336,8 @@ def date_histogram_aggregations(request):
         if not search_param_lists:
             search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
             del search_param_lists['award.project']
+
+
 
     if 'ExperimentSet' in search_param_lists['type'] or 'ExperimentSetReplicate' in search_param_lists['type']:
         # Add predefined sub-aggs to collect Exp and File counts from ExpSet items, in addition to getting own doc_count.
@@ -361,29 +362,37 @@ def date_histogram_aggregations(request):
             }
         }
 
-        if group_by_field is not None:
-            histogram_sub_aggs = dict(common_sub_agg, group_by={
-                "terms" : {
-                    "field"     : "embedded." + group_by_field + ".raw",
-                    "missing"   : TERM_NAME_FOR_NO_VALUE,
-                    "size"      : 30
-                },
-                "aggs" : common_sub_agg
-            })
+        if group_by_fields is not None:
+            group_by_agg_dict = {
+                group_by_field : {
+                    "terms" : {
+                        "field"     : "embedded." + group_by_field + ".raw",
+                        "missing"   : TERM_NAME_FOR_NO_VALUE,
+                        "size"      : 30
+                    },
+                    "aggs" : common_sub_agg
+                }
+                for group_by_field in group_by_fields if group_by_field is not None
+            }
+            histogram_sub_aggs = dict(common_sub_agg, **group_by_agg_dict)
         else:
             histogram_sub_aggs = common_sub_agg
 
     else:
-        # Do simple date_histogram group_by sub agg, unless is set to 'None'
-        histogram_sub_aggs = {
-            "group_by" : {
-                "terms" : {
-                    "field"     : "embedded." + group_by_field + ".raw",
-                    "missing"   : TERM_NAME_FOR_NO_VALUE,
-                    "size"      : 30
+        if group_by_fields is not None:
+            # Do simple date_histogram group_by sub agg, unless is set to 'None'
+            histogram_sub_aggs = {
+                group_by_field : {
+                    "terms" : {
+                        "field"     : "embedded." + group_by_field + ".raw",
+                        "missing"   : TERM_NAME_FOR_NO_VALUE,
+                        "size"      : 30
+                    }
                 }
+                for group_by_field in group_by_fields if group_by_field is not None
             }
-        } if group_by_field is not None else None
+        else:
+            histogram_sub_aggs = None
 
     # Create an agg item for each interval in `date_histogram_intervals` x each date field in `date_histogram_fields`
     # TODO: Figure out if we want to align these up instead of do each combination.
