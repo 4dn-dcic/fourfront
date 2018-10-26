@@ -76,6 +76,12 @@
                         "type": "number",
                         "default": 1
                     },
+                    "dimension": {
+                        "title": "Dimsneion",
+                        "description": "Dimension of the file in the argument, in format of e.g. "0" (singlet or 1D array), "1-2" (2D array), or "2-0-1" (3D array)",
+                        "type": "string",
+                        "default": "0"
+                    },
                     "format_if_extra": {
                         "title": "Format of extra file",
                         "description": "the file format if the input file is an extra file of a file object",
@@ -171,6 +177,12 @@
                         "description": "Ordinal of the parameter in the argument",
                         "type": "number",
                         "default": 1
+                    },
+                    "dimension": {
+                        "title": "Dimsneion",
+                        "description": "Dimension of the file in the argument, in format of e.g. "0" (singlet or 1D array), "1-2" (2D array), or "2-0-1" (3D array)",
+                        "type": "string",
+                        "default": "0"
                     }
                 }
             }
