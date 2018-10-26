@@ -949,7 +949,6 @@ def get_file_experiment_type(request, context, properties):
         elif hasattr(context, 'experiment_sets'):  # FileProcessed only
             rev_exp_sets = context.experiment_sets(request)
             if rev_exp_sets:
-                experiments_using_file = []
                 for exp_set in rev_exp_sets:
                     exp_set_info = get_item_if_you_can(request, exp_set)
                     if exp_set_info:
@@ -958,7 +957,7 @@ def get_file_experiment_type(request, context, properties):
     for file_experiment in experiments_using_file:
         exp_info = get_item_if_you_can(request, file_experiment)
         if exp_info is None:
-            break
+            continue
         exp_type = exp_info.get('experiment_type')
         if found_experiment_type == 'None' or found_experiment_type == exp_type:
             found_experiment_type = exp_type
