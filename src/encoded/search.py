@@ -796,15 +796,33 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
         if field.startswith('embedded'):
             split_field = field.strip().split('.')
             use_field = '.'.join(split_field[1:])
+            aggregation_type = 'terms' # default for all non-schema facets
+
             # use the last part of the split field to get the title
             title_field = split_field[-1]
+    
             if title_field in used_facets or title_field in disabled_facets:
                 continue  # Cancel if already in facets or is disabled
+
+            if title_field == 'from' or title_field == 'to':
+                f_field = split_field[-2]
+                field_schema = schema_for_field(f_field, types, doc_types)
+                if field_schema:
+                    title_field = f_field
+                    use_field = '.'.join(split_field[1:-1])
+                    aggregation_type = 'date_histogram' if determine_if_is_date_field(f_field, field_schema) else 'histogram'
+
             for schema in schemas:
                 if title_field in schema['properties']:
                     title_field = schema['properties'][title_field].get('title', title_field)
                     break
-            facets.append((use_field, {'title': title_field}))
+
+            facet_tuple = (use_field, {'title': title_field, 'aggregation_type' : aggregation_type})
+
+            if aggregation_type != 'terms': # Temporary until we handle these better on front-end
+                facet_tuple[1]['hide_from_view'] = True
+
+            facets.append(facet_tuple)
 
     ## Append additional facets (status, audit, ...) at the end of list unless were already added via schemas, etc.
     used_facets = [ facet[0] for facet in facets ] # Reset this var

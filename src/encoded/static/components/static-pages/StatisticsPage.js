@@ -877,7 +877,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                 { file_downloads ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={file_downloads}>
+                    <GroupOfCharts width={width} resetScalesWhenChange={file_downloads}>
 
                         <hr/>
 
