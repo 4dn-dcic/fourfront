@@ -162,7 +162,8 @@
             "enum": [
                 "CWL",
                 "WDL"
-            ]
+            ],
+            "default": "CWL"
         },
         "docker_registry_url": {
             "title": "Docker Registry URL",
