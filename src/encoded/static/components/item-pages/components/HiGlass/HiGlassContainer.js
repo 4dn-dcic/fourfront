@@ -215,7 +215,7 @@ export const HiGlassConfigurator = {
                 'chromosome' : {
                     'name':         'Chromosome Axis',
                     'tilesetUid':   'f2FZsbCBTbyIx7A-xiRq5Q',
-                    'infoid':       'hg19'
+                    'infoid':       'dm6'
                 }
             };
         } else {
