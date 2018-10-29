@@ -54,7 +54,7 @@ describe('Testing search.js', function() {
             "registerWindowOnScrollHandler" : function(fxn){
                 setTimeout(()=> console.log(fxn(345, 345)), 2000);
                 setTimeout(()=> console.log(fxn(40, -305)), 5000);
-                console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
+                console.log("Will call `fxn(scrollTop, scrollTopVector)` which was registered to registerWindowOnScrollHandler in 2 & 5 seconds and print its return val. Fine if 'undefined'.");
                 jest.runAllTimers();
             }
         };
@@ -66,12 +66,13 @@ describe('Testing search.js', function() {
     });
 
     it('has the correct number of facets and experiment accessions listed', function() {
-        var facets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet');
-        var rows = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
-        var results = filterRowsToResults(rows);
+        var facets      = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet'),
+            rows        = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row'),
+            results     = filterRowsToResults(rows),
+            facetFields = facets.map(function(f){ return f.getAttribute('data-field'); });
 
-        var facetFields = facets.map(function(f){ return f.getAttribute('data-field'); });
-        console.log("Facets shown for:", facetFields.join(', '));
+        console.log("Facets are visible for:", facetFields.join(', '));
+
         expect(facets.length).toBeGreaterThan(7);
         expect(results.length).toEqual(5);
     });
@@ -81,9 +82,10 @@ describe('Testing search.js', function() {
         testSearch = TestUtils.renderIntoDocument(
             <SearchView {...searchViewCommonProps} context={context} href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII' />
         );
-        var rows = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
-        var results = filterRowsToResults(rows);
-        var selectedFacets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
+        var rows            = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row'),
+            results         = filterRowsToResults(rows),
+            selectedFacets  = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
+
         expect(results.length).toEqual(2);
         expect(selectedFacets.length).toEqual(2);
     });

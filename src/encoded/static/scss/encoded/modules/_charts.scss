@@ -1751,14 +1751,59 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 /***** Area Charts *****/
 
+.chart-section-control-wrapper {
+    &.row {
+        > .col-sm-6 {
+            > a.select-section-btn {
+                text-align: center;
+                color: #333;
+                //border: 1px solid #ddd;
+                //border-top: 1px solid #ddd;
+                //border-bottom: 1px solid #ddd;
+                border: 1px solid transparent;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                display: block;
+                transition: border-color .25s ease-in-out, background-color .25s ease-in-out, color .25s ease-in-out;
+                background-color: #22656d;
+                color: #fff;
+                border-radius: 3px;
+                line-height: 1.35rem;
+                font-size: 1.125rem;
+                &.active {
+                    border-color: #888;
+                    color: #333;
+                    background-color: transparent;
+                    pointer-events: none;
+                    cursor: default;
+                    border-left-color: transparent;
+                    border-right-color: transparent;
+                    border-radius: 0px;
+                    font-size: 1.2rem;
+                }
+                &:hover, &:active, &:focus {
+                    text-decoration: none;
+                }
+                &:not(.active):hover {
+                    //color: #000;
+                    background-color: #227b86;
+                    text-shadow: 0 0 0;
+                }
+            }
+        }
+    }
+}
+
 
 .stats-charts-container {
 
+    min-height: 1400px;
 
     .area-chart-inner-container {
         position: relative;
 
         svg {
+            cursor: crosshair;
             .right-axis-tick-line {
                 pointer-events: none;
             }
@@ -1774,8 +1819,41 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 bottom: 0;
                 left: 0;
                 width: 0px;
-                border-left: 1px solid #000;
+                border-left: 1px dashed #000;
                 pointer-events: none;
+            }
+
+            > .line-notch {
+                position: absolute;
+                pointer-events: none;
+                left: -5px;
+                width: 11px;
+                height: 3px;
+                background-color: #333;
+                border-radius: 2px;
+                margin-top: -1px;
+                > .horiz-line-before,
+                > .horiz-line-after {
+                    position: absolute;
+                    top: 1px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    border-top: 1px dashed #000;
+                }
+                > .horiz-line-after {
+                    left: 11px;
+                }
+                /*
+                &::before {
+                    content: ' ';
+                    display: block;
+                    position: relative;
+                    width: 2000px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    left: -2000px;
+                }
+                */
             }
 
             > .label-bg {
@@ -1783,7 +1861,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-right: 12px;
                 padding-top: 8px;
                 position: absolute;
-                min-width: 135px;
+                min-width: 175px;
                 background-color: rgba(255,255,255,0.8);
                 padding-bottom: 9px;
                 border-bottom-left-radius: 5px;
