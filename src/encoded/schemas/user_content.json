@@ -1,0 +1,54 @@
+{
+    "title": "User Content",
+    "id": "/profiles/user_content.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "name"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "name": {
+            "title": "Unique Identifier",
+            "description": "Unique name or ID of this section.",
+            "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. search-info-header.WorkflowRun --> '/static-section/search-info-header.WorkflowRun'.",
+            "type": "string",
+            "uniqueKey": "user_content:name",
+            "lookup" : 1
+        },
+        "title": {
+            "title": "Title",
+            "description": "Title for the section. Optional.",
+            "type": "string",
+            "lookup" : 5
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "released",
+            "enum" : [
+                "released",
+                "released to project",
+                "draft",
+                "deleted"
+            ],
+            "lookup" : 20
+        },
+        "description": {
+            "title": "Description",
+            "type": "string",
+            "formInput" : "textarea",
+            "lookup" : 21
+        }
+        
+    },
+    "excludedColumns" : ["lab.display_title"]
+}
