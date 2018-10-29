@@ -38,7 +38,6 @@ class UserContent(Item):
 
 
     def _update(self, properties, sheets=None):
-        print('\n\n\n', self.uuid)
         if properties.get('name') is None and self.uuid is not None:
             properties['name'] = str(self.uuid)
         super(UserContent, self)._update(properties, sheets)
@@ -47,8 +46,7 @@ class UserContent(Item):
 
 @collection(
     name='static-sections',
-    #unique_key='static_section:name',
-    unique_key='static_section:name',
+    unique_key='user_content:name',
     properties={
         'title': 'Static Sections',
         'description': 'Static Sections for the Portal',
