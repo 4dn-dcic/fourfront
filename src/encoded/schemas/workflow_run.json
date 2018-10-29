@@ -78,7 +78,7 @@
                     },
                     "dimension": {
                         "title": "Dimension",
-                        "description": "Dimension of the file in the argument, in format of e.g. "0" (singlet or 1D array), "1-2" (2D array), or "2-0-1" (3D array)",
+                        "description": "Dimension of the file in the argument, in format of e.g. \"0\" (singlet or 1D array), \"1-2\" (2D array), or \"2-0-1\" (3D array)",
                         "type": "string",
                         "default": "0"
                     },
@@ -180,7 +180,7 @@
                     },
                     "dimension": {
                         "title": "Dimension",
-                        "description": "Dimension of the parameter in the argument, in format of e.g. "0" (singlet or 1D array), "1-2" (2D array), or "2-0-1" (3D array)",
+                        "description": "Dimension of the parameter in the argument, in format of e.g. \"0\" (singlet or 1D array), \"1-2\" (2D array), or \"2-0-1\" (3D array)",
                         "type": "string",
                         "default": "0"
                     }
