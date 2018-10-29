@@ -56,8 +56,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     from_, size = get_pagination(request)
 
-    before_date, after_date = get_date_range(request)
-
     # get desired frame for this search
     search_frame = request.params.get('frame', 'embedded')
 
@@ -98,7 +96,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    search, query_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
+    search, query_filters = set_filters(request, search, result, principals, doc_types, types)
 
     ### Set starting facets
     facets = initialize_facets(types, doc_types, prepared_terms, schemas)
@@ -237,17 +235,6 @@ def get_pagination(request):
         except ValueError:
             size = 0
     return from_, size
-
-
-def get_date_range(request):
-    """
-    Get 'before' and 'after' params from the request.
-    These determine the greater than and less than dates for the search
-    Date format is yyyy-MM-dd HH:mm.
-    """
-    before = request.params.get('before', None)
-    after = request.params.get('after', None)
-    return before, after
 
 
 def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
@@ -567,94 +554,153 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
-def set_filters(request, search, result, principals, doc_types, before_date=None, after_date=None):
+def set_filters(request, search, result, principals, doc_types, types):
     """
     Sets filters in the query
     """
+
     # these next two dictionaries should each have keys equal to query_field
     # and values: must_terms: [<list of terms>], must_not_terms: [<list of terms>], add_no_value: True/False/None
-    field_filters = {}
-    field_filters['principals_allowed.view'] = {
-        'must_terms': principals,
-        'must_not_terms': [],
-        'add_no_value': None
+    field_filters = {
+        'principals_allowed.view' : {
+            'must_terms': principals,
+            'must_not_terms': [],
+            'add_no_value': None
+        },
+        'embedded.@type.raw' : {
+            'must_terms': doc_types,
+            'must_not_terms': [],
+            'add_no_value': None
+        },
+        'embedded.status.raw' : {
+            'must_terms': [],
+            'must_not_terms': [],
+            'add_no_value': None
+        }
     }
-    field_filters['embedded.@type.raw'] = {
-        'must_terms': doc_types,
-        'must_not_terms': [],
-        'add_no_value': None
-    }
-    exclude_statuses = []
+
+    range_filters = {}
+
+    # Exclude status=deleted Items unless explicitly requested/filtered-in.
     if 'deleted' not in request.params.getall('status'):
-        exclude_statuses.append('deleted')
+        field_filters['embedded.status.raw']['must_not_terms'].append('deleted')
     if 'replaced' not in request.params.getall('status'):
-        exclude_statuses.append('replaced')
-    field_filters['embedded.status.raw'] = { # Exclude status=deleted Items unless explicitly requested/filtered-in.
-        'must_terms': [],
-        'must_not_terms': exclude_statuses,
-        'add_no_value': None
-    }
+        field_filters['embedded.status.raw']['must_not_terms'].append('replaced')
+
+
 
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
+        range_type = False # If we determine is a range request (field.to, field.from), will be populated with string 'date' or 'numerical'
+        range_direction = None
         if field in ['limit', 'y.limit', 'x.limit', 'mode', 'redirected_from',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
-                     'sort', 'from', 'referrer', 'q', 'before', 'after']:
+                     'sort', 'from', 'referrer', 'q']:
             continue
         elif field == 'type' and term != 'Item':
             continue
         elif term == 'No value':
             exists_field = True
+
+
+        # Check for date or numerical range filters
+        if (len(field) > 3 and field[-3:] == '.to') or (len(field) > 5 and field[-5:] == '.from'):
+            if field[-3:] == '.to':
+                f_field = field[:-3]
+                range_direction = "lte"
+            else:
+                f_field = field[:-5]
+                range_direction = "gte"
+            # The field schema below will only be found for top-level fields.
+            # If schema for field is not found (and range_type thus not set), then treated as ordinary term filter (likely will get 0 results)
+            field_schema = schema_for_field(f_field, types, doc_types)
+            if field_schema:
+                range_type = 'date' if determine_if_is_date_field(f_field, field_schema) else 'numerical'
+
+
         # Add filter to result
         qs = urlencode([
             (k.encode('utf-8'), v.encode('utf-8'))
-            for k, v in request.params.items() if (k != field or v != term)
+            for k, v in request.params.items()
+            if (k != field or v != term)
         ])
         remove_path = '{}?{}'.format(request.path, qs)
+
         # default to searching type=Item rather than empty filter path
         if remove_path[-1] == '?':
             remove_path += 'type=Item'
 
         result['filters'].append({
-            'field': field,
-            'term': term,
+            'field' : field,
+            'term'  : term,
             'remove': remove_path
         })
 
         if field == 'searchTerm':
             continue
 
+
         # handle NOT
-        if field.endswith('!'):
+        elif field.endswith('!'):
             field = field[:-1]
             not_field = True
 
         # Add filter to query
-        if field.startswith('audit'):
+        if range_type and f_field and range_type in ('date', 'numerical'):
+            query_field = 'embedded.' + f_field
+        elif field.startswith('audit'):
             query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
         else:
             query_field = 'embedded.' + field + '.raw'
 
-        if query_field not in field_filters:
-            field_filters[query_field] = {
-                'must_terms': [],
-                'must_not_terms': [],
-                'add_no_value': None
-            }
 
-        # handle case of filtering for null values
-        if exists_field:
-            # the value below is True when we want to include 'No value' as a filter
-            field_filters[query_field]['add_no_value'] = False if not_field else True
-            continue
+        if range_type:
 
-        if not_field:
-            field_filters[query_field]['must_not_terms'].append(term)
+            if query_field not in range_filters:
+                range_filters[query_field] = {}
+                if range_type == 'date':
+                    range_filters[query_field]['format'] = 'yyyy-MM-dd HH:mm'
+
+            if range_direction in ('gt', 'gte', 'lt', 'lte'):
+
+                if len(term) == 10:
+                    # Correct term to have hours, e.g. 00:00 or 23:59, if not otherwise supplied.
+                    if range_direction == 'gt' or range_direction == 'lte':
+                        term += ' 23:59'
+                    elif range_direction == 'gte' or range_direction == 'lt':
+                        term += ' 00:00'
+
+                if range_filters[query_field].get(range_direction) is None:
+                    range_filters[query_field][range_direction] = term
+                else:
+                    # If have a value already (e.g. multiple ranges selected), choose the widening option.
+                    if range_direction == 'gt' or range_direction == 'gte':
+                        if term < range_filters[query_field][range_direction]:
+                            range_filters[query_field][range_direction] = term
+                    elif range_direction == 'lt' or range_direction == 'lte':
+                        if term > range_filters[query_field][range_direction]:
+                            range_filters[query_field][range_direction] = term
         else:
-            field_filters[query_field]['must_terms'].append(term)
+            if query_field not in field_filters:
+                field_filters[query_field] = {
+                    'must_terms': [],
+                    'must_not_terms': [],
+                    'add_no_value': None
+                }
+
+            # handle case of filtering for null values
+            if exists_field:
+                # the value below is True when we want to include 'No value' as a filter
+                field_filters[query_field]['add_no_value'] = False if not_field else True
+                continue
+
+            if not_field:
+                field_filters[query_field]['must_not_terms'].append(term)
+            else:
+                field_filters[query_field]['must_terms'].append(term)
 
     must_filters = []
     must_not_filters = []
@@ -675,14 +721,11 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
             if must_terms: must_filters.append(must_terms)
         if must_not_terms: must_not_filters.append(must_not_terms)
 
-    # lastly, add date limits to filters if given
-    if before_date or after_date:
-        date_limits = {'format':'yyyy-MM-dd HH:mm'}
-        if before_date:
-            date_limits['lte'] = before_date # lte is >=
-        if after_date:
-            date_limits['gte'] = after_date # gte is <=
-        must_filters.append({'range':{'embedded.date_created': date_limits}})
+    # lastly, add range limits to filters if given
+    for range_field, range_def in range_filters.items():
+        must_filters.append({
+            'range' : { range_field : range_def }
+        })
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
     # modify that, then update from the new dict
@@ -748,17 +791,37 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
     used_facets = [ facet[0] for facet in facets + append_facets ]
     for field in prepared_terms:
         if field.startswith('embedded'):
-            split_field = field.strip().split('.')
+            split_field = field.strip().split('.') # e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
             use_field = '.'.join(split_field[1:])
+            aggregation_type = 'terms' # default for all non-schema facets
+
             # use the last part of the split field to get the title
             title_field = split_field[-1]
+    
             if title_field in used_facets or title_field in disabled_facets:
                 continue  # Cancel if already in facets or is disabled
+
+            if title_field == 'from' or title_field == 'to':
+                # Range filters are only supported on root-level schema fields, e.g. ['embedded', >>'date_created'<<, 'from']
+                if len(split_field) == 3:
+                    f_field = split_field[-2]
+                    field_schema = schema_for_field(f_field, types, doc_types)
+                    if field_schema:
+                        title_field = f_field
+                        use_field = '.'.join(split_field[1:-1])
+                        aggregation_type = 'stats'
+
             for schema in schemas:
                 if title_field in schema['properties']:
                     title_field = schema['properties'][title_field].get('title', title_field)
                     break
-            facets.append((use_field, {'title': title_field}))
+
+            facet_tuple = (use_field, {'title': title_field, 'aggregation_type' : aggregation_type})
+
+            if aggregation_type != 'terms': # Temporary until we handle these better on front-end
+                facet_tuple[1]['hide_from_view'] = True
+
+            facets.append(facet_tuple)
 
     ## Append additional facets (status, audit, ...) at the end of list unless were already added via schemas, etc.
     used_facets = [ facet[0] for facet in facets ] # Reset this var
@@ -809,7 +872,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     for filter_type in ['must', 'must_not']:
         if search_filters['bool'][filter_type] == []:
             continue
-        for active_filter in search_filters['bool'][filter_type]:
+        for active_filter in search_filters['bool'][filter_type]:  # active_filter => e.g. { 'terms' : { 'embedded.@type.raw': ['ExperimentSetReplicate'] } }
             if 'bool' in active_filter and 'should' in active_filter['bool']:
                 # handle No value case
                 inner_bool = None
@@ -829,16 +892,21 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
                     compare_field = inner_bool.get('bool', {}).get('must_not', {}).get('exists', {}).get('field')
                 if compare_field == query_field and query_field != 'embedded.@type.raw':
                     facet_filters[filter_type].remove(active_filter)
-            # else if not a terms filter, dont do anything (do use as a filter)
-            if 'terms' not in active_filter:
-                continue
-            # there should only be one key here
-            for compare_field in active_filter['terms'].keys():
-                # remove filter for a given field for that facet
-                # skip this for type facet (field = 'type')
-                # since we always want to include that filter.
-                if compare_field == query_field and query_field != 'embedded.@type.raw':
-                    facet_filters[filter_type].remove(active_filter)
+
+            if 'terms' in active_filter:
+                # there should only be one key here
+                for compare_field in active_filter['terms'].keys():
+                    # remove filter for a given field for that facet
+                    # skip this for type facet (field = 'type')
+                    # since we always want to include that filter.
+                    if compare_field == query_field and query_field != 'embedded.@type.raw':
+                        facet_filters[filter_type].remove(active_filter)
+
+            elif 'range' in active_filter:
+                for compare_field in active_filter['range'].keys():
+                    # Do same as for terms
+                    if compare_field == query_field:
+                        facet_filters[filter_type].remove(active_filter)
 
     # add the string_query, if present, to the bool term with facet_filters
     if string_query and string_query['must']:
@@ -869,7 +937,6 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
     for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
         field_schema = schema_for_field(field, types, doc_types)
-
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
         is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
 
@@ -877,7 +944,7 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
             query_field = 'embedded.@type.raw'
         elif field.startswith('audit'):
             query_field = field + '.raw'
-        elif facet.get('aggregation_type') in ('date_histogram', 'histogram', 'range'):
+        elif facet.get('aggregation_type') in ('stats', 'date_histogram', 'histogram', 'range'):
             query_field = 'embedded.' + field
         else:
             query_field = 'embedded.' + field + '.raw'
@@ -886,72 +953,22 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
         ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
 
-        if facet.get('aggregation_definition') is not None:
-            # Custom aggregation is defined. Rare / unused.
+        if facet.get('aggregation_type') == 'stats':
+
+            if is_date_field:
+                facet['field_type'] = 'date'
+            elif is_numerical_field:
+                facet['field_type'] = 'number'
 
             aggs[agg_name] = {
                 'aggs': {
-                    agg_name: facet['aggregation_definition']
+                    agg_name : {
+                        'stats' : {
+                            'field' : query_field
+                        }
+                    }
                 },
-                'filter' : search_filters # Use current for now
-            }
-
-        if is_numerical_field and facet.get('aggregation_type') == 'histogram':
-            # Make a histogram instead of term buckets. Rare / unused.
-
-            # TODO:
-            # facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
-            facet['aggregation_definition'] = histogram_aggregation = {
-                "histogram" : {
-                    'field'         : query_field,
-                    'interval'      : facet.get('interval', 100),
-                    "min_doc_count" : facet.get('min_doc_count', 1)
-                }
-            }
-
-            aggs[agg_name] = {
-                'aggs': {
-                    agg_name: histogram_aggregation
-                },
-                'filter' : search_filters # Use current for now
-            }
-
-        elif is_numerical_field and facet.get('aggregation_type') == 'range':
-            # Bucket into predefined ranges, e.g. for exponentially-scaling file_size.
-
-            # TODO:
-            # facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
-            facet['aggregation_definition'] = histogram_aggregation = {
-                "range" : {
-                    'field'         : query_field,
-                    "ranges"        : facet['ranges']
-                }
-            }
-
-            aggs[agg_name] = {
-                'aggs': {
-                    agg_name: histogram_aggregation
-                },
-                'filter' : search_filters # Use current for now
-            }
-
-        elif is_date_field and facet.get('aggregation_type') == 'date_histogram':
-            # Date histogram
-
-            facet['aggregation_definition'] = date_histogram_aggregation = {
-                "date_histogram" : {
-                    'field'         : query_field,
-                    'interval'      : facet.get('interval', "month"),
-                    'format'        : facet.get('interval', "yyyy-MM-dd"),
-                    "min_doc_count" : facet.get('min_doc_count', 1)
-                }
-            }
-
-            aggs[agg_name] = {
-                'aggs': {
-                    agg_name           : date_histogram_aggregation
-                },
-                'filter' : search_filters # Use search query filters as-is, don't need to remove own field from filter.
+                'filter': search_filters
             }
 
         else: # Default -- facetable terms
@@ -1048,8 +1065,8 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
-            'total' : 0,
-            'terms' : None
+            'total' : 0
+            # To be added depending on facet['aggregation_type']: 'terms', 'min', 'max', 'min_as_string', 'max_as_string', ...
         }
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
@@ -1057,21 +1074,19 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
 
         if field_agg_name in aggregations:
             result_facet['total'] = aggregations[field_agg_name]['doc_count']
-            result_facet['terms'] = aggregations[field_agg_name][field_agg_name]['buckets']
+            if facet['aggregation_type'] == 'stats':
+                # Used for fields on which can do range filter on, to provide min + max bounds
+                for k in aggregations[field_agg_name][field_agg_name].keys():
+                    result_facet[k] = aggregations[field_agg_name][field_agg_name][k]
+            else:
+                # Default - terms, range, or histogram buckets.
+                result_facet['terms'] = aggregations[field_agg_name][field_agg_name]['buckets']
+                # Choosing to show facets with one term for summary info on search it provides
+                if len(result_facet.get('terms', [])) < 1:
+                    continue
 
             if len(aggregations[field_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', field_agg_name) }
-
-            if facet['aggregation_type'] == 'date_histogram':
-                # By default these have integer timestamps as "key", we want their "key_as_string" which has more apt info for front-end usage/filter.
-                for bucket in result_facet['terms']:
-                    if bucket.get('key_as_string') is not None:
-                        bucket['raw_key_value'] = bucket['key']
-                        bucket['key'] = bucket['key_as_string']
-
-        # Choosing to show facets with one term for summary info on search it provides
-        if len(result_facet.get('terms', [])) < 1:
-            continue
 
         result.append(result_facet)
 

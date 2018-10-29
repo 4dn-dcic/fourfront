@@ -204,7 +204,7 @@ class ResultTableContainer extends React.PureComponent {
     }
 
     isTermSelected(term, facet){
-        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
+        return Filters.determineIfTermFacetSelected(term, facet, this.props);
     }
 
     colDefOverrides(props = this.props){
