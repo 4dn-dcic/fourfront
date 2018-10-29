@@ -773,9 +773,6 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
 
-    # hold range facets used so we can skip them later when building up facets from URL query.
-    range_facets_used = [  ]
-
     # Add facets from schema if one Item type is defined.
     # Also, conditionally add extra appendable facets if relevant for type from schema.
     if len(doc_types) == 1 and doc_types[0] != 'Item':
@@ -786,15 +783,13 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
                 if schema_facet[1].get('disabled', False):
                     disabled_facets.append(schema_facet[0])
                     continue # Skip disabled facets.
-                if schema_facet[1].get('aggregation_type') in ('range', 'histogram', 'date_histogram'):
-                    range_facets_used.append(schema_facet[0])
                 facets.append(schema_facet)
 
     ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
-    used_facets = [ facet[0] for facet in facets + append_facets ] + (['from', 'to'] if len(range_facets_used) > 0 else [])
+    used_facets = [ facet[0] for facet in facets + append_facets ]
     for field in prepared_terms:
         if field.startswith('embedded'):
-            split_field = field.strip().split('.')
+            split_field = field.strip().split('.') # e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
             use_field = '.'.join(split_field[1:])
             aggregation_type = 'terms' # default for all non-schema facets
 
@@ -805,12 +800,14 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
                 continue  # Cancel if already in facets or is disabled
 
             if title_field == 'from' or title_field == 'to':
-                f_field = split_field[-2]
-                field_schema = schema_for_field(f_field, types, doc_types)
-                if field_schema:
-                    title_field = f_field
-                    use_field = '.'.join(split_field[1:-1])
-                    aggregation_type = 'date_histogram' if determine_if_is_date_field(f_field, field_schema) else 'histogram'
+                # Range filters are only supported on root-level schema fields, e.g. ['embedded', >>'date_created'<<, 'from']
+                if len(split_field) == 3:
+                    f_field = split_field[-2]
+                    field_schema = schema_for_field(f_field, types, doc_types)
+                    if field_schema:
+                        title_field = f_field
+                        use_field = '.'.join(split_field[1:-1])
+                        aggregation_type = 'stats'
 
             for schema in schemas:
                 if title_field in schema['properties']:
@@ -945,7 +942,7 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
             query_field = 'embedded.@type.raw'
         elif field.startswith('audit'):
             query_field = field + '.raw'
-        elif facet.get('aggregation_type') in ('date_histogram', 'histogram', 'range'):
+        elif facet.get('aggregation_type') in ('stats', 'date_histogram', 'histogram', 'range'):
             query_field = 'embedded.' + field
         else:
             query_field = 'embedded.' + field + '.raw'
@@ -954,71 +951,22 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
         ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
 
-        if facet.get('aggregation_definition') is not None:
-            # Custom aggregation is defined. Rare / unused.
+        if facet.get('aggregation_type') == 'stats':
+
+            if is_date_field:
+                facet['field_type'] = 'date'
+            elif is_numerical_field:
+                facet['field_type'] = 'number'
 
             aggs[agg_name] = {
                 'aggs': {
-                    agg_name: facet['aggregation_definition']
+                    agg_name : {
+                        'stats' : {
+                            'field' : query_field
+                        }
+                    }
                 },
-                'filter' : search_filters # Use current for now
-            }
-
-        if is_numerical_field and facet.get('aggregation_type') == 'histogram':
-            # Make a histogram instead of term buckets. Rare / unused.
-
-            facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
-            facet['aggregation_definition'] = histogram_aggregation = {
-                "histogram" : {
-                    'field'         : query_field,
-                    'interval'      : facet.get('interval', 100),
-                    "min_doc_count" : facet.get('min_doc_count', 1)
-                }
-            }
-
-            aggs[agg_name] = {
-                'aggs': {
-                    agg_name: histogram_aggregation
-                },
-                'filter' : {'bool': facet_filters}
-            }
-
-        elif is_numerical_field and facet.get('aggregation_type') == 'range':
-            # Bucket into predefined ranges, e.g. for exponentially-scaling file_size.
-
-            facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
-            facet['aggregation_definition'] = histogram_aggregation = {
-                "range" : {
-                    'field'         : query_field,
-                    "ranges"        : facet['ranges']
-                }
-            }
-
-            aggs[agg_name] = {
-                'aggs': {
-                    agg_name: histogram_aggregation
-                },
-                'filter' : {'bool': facet_filters}
-            }
-
-        elif is_date_field and facet.get('aggregation_type') == 'date_histogram':
-            # Date histogram
-
-            facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
-            facet['aggregation_definition'] = date_histogram_aggregation = {
-                "date_histogram" : {
-                    'field'         : query_field,
-                    'interval'      : facet.get('interval', "month"),
-                    'format'        : facet.get('interval', "yyyy-MM-dd"),
-                    "min_doc_count" : facet.get('min_doc_count', 1)
-                }
-            }
-
-            aggs[agg_name] = {
-                'aggs': {
-                    agg_name           : date_histogram_aggregation
-                },
-                'filter' : {'bool': facet_filters}
+                'filter': search_filters
             }
 
         else: # Default -- facetable terms
@@ -1115,8 +1063,8 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
-            'total' : 0,
-            'terms' : None
+            'total' : 0
+            # To be added depending on facet['aggregation_type']: 'terms', 'min', 'max', 'min_as_string', 'max_as_string', ...
         }
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
@@ -1124,26 +1072,19 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
 
         if field_agg_name in aggregations:
             result_facet['total'] = aggregations[field_agg_name]['doc_count']
-            result_facet['terms'] = aggregations[field_agg_name][field_agg_name]['buckets']
+            if facet['aggregation_type'] == 'stats':
+                # Used for fields on which can do range filter on, to provide min + max bounds
+                for k in aggregations[field_agg_name][field_agg_name].keys():
+                    result_facet[k] = aggregations[field_agg_name][field_agg_name][k]
+            else:
+                # Default - terms, range, or histogram buckets.
+                result_facet['terms'] = aggregations[field_agg_name][field_agg_name]['buckets']
+                # Choosing to show facets with one term for summary info on search it provides
+                if len(result_facet.get('terms', [])) < 1:
+                    continue
 
             if len(aggregations[field_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', field_agg_name) }
-
-            if facet['aggregation_type'] == 'date_histogram':
-                # By default these have integer timestamps as "key", we want their "key_as_string" which has more apt info for front-end usage/filter.
-                for bucket in result_facet['terms']:
-                    if bucket.get('key_as_string') is not None:
-                        bucket['raw_key_value'] = bucket['key']
-                        bucket['key'] = bucket['key_as_string']
-
-            if facet['aggregation_type'] == 'range':
-                # Remove ranges with 0 doc_count
-                result_facet['terms'] = [ bucket for bucket in result_facet['terms'] if bucket['doc_count'] > 0 ]
-
-
-        # Choosing to show facets with one term for summary info on search it provides
-        if len(result_facet.get('terms', [])) < 1:
-            continue
 
         result.append(result_facet)
 
