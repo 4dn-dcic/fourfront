@@ -8,6 +8,7 @@ import { compiler } from 'markdown-to-jsx';
 import Alerts from './../alerts';
 import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
 import * as globals from './../globals';
+import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
 
 
@@ -20,7 +21,7 @@ import { layout, console, object, isServerSide } from './../util';
 export function parseSectionsContent(context = this.props.context){
 
     function parse(section){
-        if (section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
+        if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1 && section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
             var content = compiler(section.content, {
                 'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
                     return [type, {
@@ -30,6 +31,10 @@ export function parseSectionsContent(context = this.props.context){
                 }))
             });
             section =  _.extend({}, section, { 'content' : content });
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1 && section.viewconfig){
+            section =  _.extend({}, section, {
+                'content' : <HiGlassPlainContainer viewConfig={section.viewconfig} />
+            });
         }
         // TODO: other parsing stuff based on other filetypes.
         // Else: return the plaintext representation.
@@ -41,7 +46,7 @@ export function parseSectionsContent(context = this.props.context){
     return _.extend(
         {}, context, {
             'content' : _.map(
-                _.filter(context.content || [], function(section){ return section && section.content && !section.error; }),
+                _.filter(context.content || [], function(section){ return section && (section.content || section.viewconfig) && !section.error; }),
                 parse
             )
         });
@@ -186,11 +191,14 @@ export class StaticEntry extends React.PureComponent {
     }
 
     renderEntryContent(baseClassName){
-        var content  = (this.props.content && this.props.content.content)  || null;
+        var { context } = this.props,
+            section = this.props.content,
+            content = (section && section.content) || null;
+
         if (!content) return null;
 
-        var filetype = this.props.content.filetype || null;
-        var placeholder = false;
+        var filetype = this.props.content.filetype || null,
+            placeholder = false;
 
         if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
             placeholder = true;
@@ -201,7 +209,7 @@ export class StaticEntry extends React.PureComponent {
 
         if (filetype === 'csv'){
             return <CSVMatrixView csv={content} options={this.props.content.options} />;
-        } else if (placeholder || (filetype === 'md')){
+        } else if (placeholder || filetype === 'md' || (section.viewconfig && section['@type'].indexOf('HiglassViewConfig') > -1)){
             content = correctRelativeLinks(content, this.props.context);
             //console.log(this.props.section, content, this.props.context);
             return <div className={className}>{ content }</div>;
@@ -211,12 +219,12 @@ export class StaticEntry extends React.PureComponent {
     }
 
     render(){
-        var { content, entryType, sectionName, className } = this.props;
+        var { content, entryType, sectionName, className, context } = this.props;
         var id = TableOfContents.elementIDFromSectionName(sectionName);
         return (
             <div className={entryType + "-entry static-section-entry"} id={id}>
                 { content && content.title ?
-                    <HeaderWithLink className="section-title" link={id} context={this.props.context}>{ content.title }</HeaderWithLink>
+                    <HeaderWithLink className="section-title" link={id} context={context}>{ content.title }</HeaderWithLink>
                 : null }
                 { this.renderEntryContent(className) }
             </div>

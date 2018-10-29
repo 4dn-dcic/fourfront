@@ -12,10 +12,10 @@ import { isServerSide, console, navigate, object } from './../../util';
 class TableEntry extends React.Component {
 
     static getChildHeaders(content, maxHeaderDepth, currentDepth){
-        if (!TableOfContents.isContentJSX(content)) return [];
-        return content.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
-        );
+        if (!TableOfContents.isContentJSX(content) || !content.props || !content.props.children) return [];
+        return _.filter(content.props.children, function(child,i,a){
+            return TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && (child.props.type === 'h' + (currentDepth + 1));
+        });
     }
 
     static defaultProps = {

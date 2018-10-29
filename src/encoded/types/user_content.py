@@ -36,7 +36,6 @@ class UserContent(Item):
         'archived to project': ALLOW_VIEWING_GROUP_VIEW
     }
 
-
     def _update(self, properties, sheets=None):
         if properties.get('name') is None and self.uuid is not None:
             properties['name'] = str(self.uuid)

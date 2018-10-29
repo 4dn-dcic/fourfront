@@ -49,7 +49,7 @@
         "options": {
             "title": "Options",
             "type": "object",
-            "description": "Options for section display. Currently only applicable for .CSVs",
+            "description": "Options for section display.",
             "properties" : {
                 "filetype" : {
                     "title" : "File Type",

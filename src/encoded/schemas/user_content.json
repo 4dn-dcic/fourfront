@@ -47,6 +47,33 @@
             "type": "string",
             "formInput" : "textarea",
             "lookup" : 21
+        },
+        "options" : {
+            "title": "Options",
+            "type": "object",
+            "description": "Options for section display.",
+            "properties" : {
+                "collapsible" : {
+                    "title" : "Is Collapsible",
+                    "type" : "boolean",
+                    "description": "Whether this StaticSection should be collapsible (wherever collapsibility is an option). This property is ignored in some places, e.g. lists where all sections are explicitly collapsible.",
+                    "lookup": 2,
+                    "default" : false
+                },
+                "default_open" : {
+                    "title" : "Is Expanded by Default",
+                    "type" : "boolean",
+                    "description": "Whether this StaticSection should appear as expanded by default (in places where it may be collapsible). Does not necessarily depend on 'collapsible' being true, e.g. in lists where all sections are explicitly collapsible.",
+                    "lookup": 3,
+                    "default": true
+                },
+                "title_icon" : {
+                    "title" : "Title Icon",
+                    "description": "Icon to be showed next to title in selected places.",
+                    "type" : "string",
+                    "lookup" : 5
+                }
+            }
         }
         
     },
