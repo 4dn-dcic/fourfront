@@ -612,6 +612,8 @@ def set_filters(request, search, result, principals, doc_types, types):
             else:
                 f_field = field[:-5]
                 range_direction = "gte"
+            # The field schema below will only be found for top-level fields.
+            # If schema for field is not found (and range_type thus not set), then treated as ordinary term filter (likely will get 0 results)
             field_schema = schema_for_field(f_field, types, doc_types)
             if field_schema:
                 range_type = 'date' if determine_if_is_date_field(f_field, field_schema) else 'numerical'
