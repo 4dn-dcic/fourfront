@@ -7771,5 +7771,104 @@
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme",
         "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
         "workflow_type": "Hi-C data analysis"
+    },
+    {
+        "accession": "4DNWJV73GVL",
+        "app_name": "bedGraphToBigWig",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bgpairs"
+            },
+            {   
+                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsize"
+            },
+            {   
+                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Output to-be-extra-input file",
+                "workflow_argument_name": "bwfile"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "format conversion",
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/master/cwl/",
+        "cwl_main_filename": "bedGraphToBigWig.cwl",
+        "cwl_pointer": "",
+        "data_types": [
+            "Hi-C", "Repli-seq"
+        ],
+        "description": "Converting bedgraph to bigwig",
+        "docker_image_name": "4dn-dcic/docker-4dn-bedgraphtobigwig",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "bedGraphToBigWig",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bgpairs",
+                        "source": [
+                            {
+                                "name": "bgpairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chromsize",
+                        "source": [
+                            {
+                                "name": "chromsize"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/00eda937-3149-4252-8dc9-c27de59d75ed/"
+                    ]
+                },
+                "name": "bedGraphToBigWig",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bwfile",
+                        "target": [
+                            {
+                                "name": "bwfile"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Converting bedgraph to bigwig",
+        "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e",
+        "workflow_diagram": "",
+        "workflow_type": "Other"
     }
 ]
