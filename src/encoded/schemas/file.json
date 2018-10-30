@@ -190,8 +190,6 @@
             "linkTo": "QualityMetric"
         }
     },
-    "file_format_file_extension": {
-    },
     "facets": {
         "file_type" : {
             "title" : "File Type",
