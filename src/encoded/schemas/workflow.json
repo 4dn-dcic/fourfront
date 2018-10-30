@@ -222,6 +222,7 @@
                             "Output processed file",
                             "Output QC file",
                             "Output report file",
+                            "Output to-be-extra-input file",
                             "parameter",
                             "NA"
                         ]

@@ -632,12 +632,9 @@ export default class App extends React.Component {
                 if (targetOffset) targetOffset = parseInt(targetOffset);
                 if (!targetOffset || isNaN(targetOffset)) targetOffset = 112;
 
-                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
+                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1 && hrefHash[1] !== '!'){
                     hrefHash = hrefHash.slice(1); // Strip out '#'
-                    setTimeout(
-                        layout.animateScrollTo.call(layout.animateScrollTo, hrefHash, 750, targetOffset),
-                        100
-                    );
+                    setTimeout(layout.animateScrollTo.bind(null, hrefHash, 750, targetOffset), 100);
                 }
             });
 
