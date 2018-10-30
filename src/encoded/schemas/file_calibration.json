@@ -70,10 +70,5 @@
             "title": "Microscopy Files (Zip/TIFF)",
             "description": "Single zipped file with microscopy files, or a sigle TIFF file"
         }
-    },
-    "file_format_file_extension": {
-        "other": "",
-        "zip": ".zip",
-        "tiff": ".tiff"
     }
 }
