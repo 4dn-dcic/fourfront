@@ -6,6 +6,7 @@ import _ from 'underscore';
 * Test you can visit the Higlass Display page.
 */
 describe("HiGlass Display pages", function(){
+
     context('Higlass Display summary page', function(){
         it('Can visit HiGlass Display summary page without login', function(){
             // Visit the page and confirm you can see the table and facet properties.
@@ -53,8 +54,6 @@ describe("HiGlass Display pages", function(){
                 });
             });
         });
-
-/*
         it('Can clone new draft views', function() {
             // Verify logged in users can save higlass displays.
 
@@ -84,7 +83,7 @@ describe("HiGlass Display pages", function(){
                 cy.get('.alert div').should('have.text', 'Saved new display.');
             });
         });
-*/
+
         it('Can edit the title and description', function(){
             // Assuming you are already logged in,
             // Go to the display for the view conf display.
