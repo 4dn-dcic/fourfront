@@ -30,13 +30,18 @@ describe("HiGlass Display pages", function(){
     });
 
     context('Individual Higlass display page', function() {
-        afterEach(function(){
-            // Assuming you're logged in, delete all newly created higlass views.
+
+        beforeEach(function(){
+            // Log in.
+            cy.visit('/higlass-view-configs/').login4DN().wait(500);
+
+            // Delete all newly created higlass views.
+            const userDisplayTitle = "4dn DCIC";
             cy.request("/higlass-view-configs/?format=json&datastore=database").then((response)=>{
 
                 // Delete the newly created record.
                 _.forEach(response.body["@graph"], (higlassViewConf)=>{
-                    if (higlassViewConf.submitted_by && higlassViewConf.submitted_by.display_title !== "4dn DCIC") {
+                    if (higlassViewConf.submitted_by && higlassViewConf.submitted_by.display_title != userDisplayTitle) {
                         return;
                     }
                     if (['00000000-1111-0000-1111-000000000001', '00000000-1111-0000-1111-000000000002'].indexOf(higlassViewConf.uuid) !== -1) {
@@ -49,12 +54,11 @@ describe("HiGlass Display pages", function(){
             });
         });
 
+/*
         it('Can clone new draft views', function() {
             // Verify logged in users can save higlass displays.
 
-            // Log in.
-            cy.visit('/higlass-view-configs/').login4DN().wait(500);
-
+            // You should be logged in already.
             // Go to the display for the draft display.
             const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
             cy.get("a[href='" + draftUrl + "']");
@@ -80,11 +84,9 @@ describe("HiGlass Display pages", function(){
                 cy.get('.alert div').should('have.text', 'Saved new display.');
             });
         });
-
+*/
         it('Can edit the title and description', function(){
-            // Log in
-            cy.visit('/higlass-view-configs/').login4DN().wait(500);
-
+            // Assuming you are already logged in,
             // Go to the display for the view conf display.
             const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
             cy.get("a[href='" + draftUrl + "']");
@@ -92,12 +94,19 @@ describe("HiGlass Display pages", function(){
             cy.visit(draftUrl);
 
             // Click Save As to make a new copy.
-            cy.get('.text-right.inline-block .inline-block:nth-child(2) button.btn.btn-success').click().then(() => {
+            cy.get('.text-right.inline-block .inline-block:nth-child(2) button.btn.btn-success').click().wait(10000).then(() => {
+                cy.visit("/higlass-view-configs/?datastore=database");
                 // Visit the newly created viewconf.
                 cy.request("/higlass-view-configs/?format=json&datastore=database").then((response)=>{
                     const newViewConf = _.filter(response.body["@graph"], (higlassViewConf)=>{
+                        if (['00000000-1111-0000-1111-000000000001', '00000000-1111-0000-1111-000000000002'].indexOf(higlassViewConf.uuid) !== -1) {
+                            return false;
+                        }
+
                         return (higlassViewConf.submitted_by && higlassViewConf.submitted_by.display_title === "4dn DCIC");
                     })[0];
+
+                    cy.visit("/higlass-view-configs/" + newViewConf.uuid);
 
                     // Click on the edit button and wait for the page load.
                     cy.get(".action-button[data-action='edit'] a").click();
@@ -109,9 +118,9 @@ describe("HiGlass Display pages", function(){
                         cy.get('#field_for_description').clear().type(newDescription).then(() => {
                             // Click validate then click submit
                             cy.get(".action-buttons-container button.btn-info").click().then(() => {
-                                cy.get(".action-buttons-container button.btn-success").click().then(() => {
+                                cy.get(".action-buttons-container button.btn-success").click().wait(10000).then(() => {
                                     // Once the page reloads, look for the updated title/description
-                                    cy.request(draftUrl + "?format=json&datastore=database").then((resp)=>{
+                                    cy.request("/higlass-view-configs/" + newViewConf.uuid + "/?format=json&datastore=database").then((resp)=>{
                                         expect(resp.body.title ).to.equal(newTitle);
 
                                         expect(resp.body.description ).to.equal(newDescription);
