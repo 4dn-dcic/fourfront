@@ -619,7 +619,8 @@ export default class App extends React.Component {
             navigate(href, navOpts, ()=>{
                 var hrefParts = url.parse(href);
                 var hrefHash = hrefParts.hash;
-                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
+                // Make sure the fragment of the URL does not begin with #!. This usually indicates an action and not a HTML bookmark.
+                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1 && hrefHash[1] !== '!'){
                     hrefHash = hrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
                 }
@@ -1902,4 +1903,3 @@ class ContentErrorBoundary extends React.Component {
         return <div className="container" id="content">{ this.props.children }</div>;
     }
 }
-
