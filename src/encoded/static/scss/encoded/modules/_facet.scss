@@ -329,9 +329,10 @@
                         transition : background-color .5s;
                     }
 
-                    .facet-selector{
-                        margin-left: -17px;
-                        font-size: 90%;
+                    .facet-selector {
+                        margin-left: -19px;
+                        transform: scale(0.9);
+                        transform-origin: 50% 0%;
                     }
 
                     .facet-count {

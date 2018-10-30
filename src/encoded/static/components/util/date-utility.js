@@ -114,7 +114,8 @@ var DateUtility = module.exports = (function(){
             dateTimeSeparator : ' ',
             customOutputFormat : null,
             fallback : "N/A",
-            className : "localized-date-time"
+            className : "localized-date-time",
+            localize : true
         }
 
         static propTypes = {
@@ -147,29 +148,18 @@ var DateUtility = module.exports = (function(){
         }
 
         render(){
+            var { formatType, dateTimeSeparator, localize, customOutputFormat } = this.props;
             if (!this.state.mounted || isServerSide()) {
                 return (
-                    <span className={this.props.className + ' utc'}>{ 
-                        DateUtility.display(
-                            this.state.moment, 
-                            this.props.formatType,
-                            this.props.dateTimeSeparator,
-                            false,
-                            this.props.customOutputFormat
-                        )
-                    }</span>
+                    <span className={this.props.className + ' utc'}>
+                        { DateUtility.display(this.state.moment, formatType, dateTimeSeparator, false, customOutputFormat) }
+                    </span>
                 );
             } else {
                 return (
-                    <span className={this.props.className + ' local'}>{ 
-                        DateUtility.display(
-                            this.state.moment, 
-                            this.props.formatType,
-                            this.props.dateTimeSeparator,
-                            true,
-                            this.props.customOutputFormat
-                        )
-                    }</span>
+                    <span className={this.props.className + (localize ? ' local' : ' utc')}>
+                        { DateUtility.display(this.state.moment, formatType, dateTimeSeparator, localize, customOutputFormat) }
+                    </span>
                 );
             }
         }

@@ -196,7 +196,7 @@ def test_search_date_range_find_within(mboI_dts, testapp, workbook):
     ]
 
     for dp in datepairs:
-        search = '/search/?type=Enzyme&after=%s&before=%s' % dp
+        search = '/search/?type=Enzyme&date_created.from=%s&date_created.to=%s' % dp
         sres = testapp.get(search).json
         s_uuids = [item['uuid'] for item in sres['@graph'] if 'uuid' in item]
         assert set(g_uuids).issubset(set(s_uuids))
@@ -211,7 +211,7 @@ def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
         (dts['daybefore'], dts['hourbefore'])
     ]
     for dp in datepairs:
-        search = '/search/?type=Enzyme&after=%s&before=%s' % dp
+        search = '/search/?type=Enzyme&date_created.from=%s&date_created.to=%s' % dp
         assert testapp.get(search, status=404)
 
 
