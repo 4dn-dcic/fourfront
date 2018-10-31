@@ -278,7 +278,6 @@ export default class StaticPage extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.entryRenderFxn = typeof this.entryRenderFxn === 'function' ? this.entryRenderFxn.bind(this) : this.props.entryRenderFxn;
     }
 

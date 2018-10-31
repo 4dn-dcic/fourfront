@@ -142,8 +142,5 @@
                 }
             }
         }
-    },
-    "file_format_file_extension": {
-        "fastq": ".fastq.gz"
     }
 }

@@ -608,26 +608,40 @@ export default class App extends React.Component {
         // Skip @@download links
         if (href.indexOf('/@@download') != -1) return;
 
-        // Don't cache requests to user profile.
-        var navOpts = {};
-        if (target.getAttribute('data-no-cache')) navOpts.cache = false;
-
         // With HTML5 history supported, local navigation is passed
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, navOpts, ()=>{
-                var hrefParts = url.parse(href);
-                var hrefHash = hrefParts.hash;
-                // Make sure the fragment of the URL does not begin with #!. This usually indicates an action and not a HTML bookmark.
+
+            var navOpts      = {},
+                hrefParts    = url.parse(href),
+                pHrefParts   = url.parse(this.props.href),
+                hrefHash     = hrefParts.hash,
+                targetOffset = target.getAttribute('data-target-offset'),
+                noCache      = target.getAttribute('data-no-cache');
+
+            // Don't cache requests to user profile.
+            if (noCache) navOpts.cache = false;
+
+            if ((!hrefParts.path || hrefParts.path === pHrefParts.path) && hrefParts.hash !== pHrefParts.hash){
+                navOpts.skipRequest = navOpts.dontScrollToTop = true;
+            }
+
+            navigate(href, navOpts, function(){
+
+                if (targetOffset) targetOffset = parseInt(targetOffset);
+                if (!targetOffset || isNaN(targetOffset)) targetOffset = 112;
+
                 if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1 && hrefHash[1] !== '!'){
                     hrefHash = hrefHash.slice(1); // Strip out '#'
-                    setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
+                    setTimeout(layout.animateScrollTo.bind(null, hrefHash, 750, targetOffset), 100);
                 }
             });
+
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
+
             if (target && target.blur) target.blur();
         }
     }
@@ -1161,7 +1175,7 @@ export default class App extends React.Component {
         if (setupRequest.call(this, href)){
             var request = doRequest.call(this, true);
             if (request === null){
-                if (typeof callback === 'function') callback();
+                if (typeof callback === 'function') setTimeout(callback, 100);
             }
             return request;
         } else {

@@ -202,10 +202,45 @@ def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, expe
     ti_coll = registry['collections']['TrackingItem']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
     tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
-                            if ti.properties.get('download_tracking', {}).get('experiment_type') is not None]
+                            if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
     assert len(tracked_exp_file_dls) > 0
     for dl_tracking in tracked_exp_file_dls:
         assert dl_tracking['experiment_type'] == experiment_data['experiment_type']
+        assert 'file_format' in dl_tracking
+        # this needs to be updated if the proc_file_json fixture is
+        assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
+        assert dl_tracking['range_query'] is False
+        assert dl_tracking['is_visualization'] is False
+        assert dl_tracking['user_uuid'] == 'anonymous'
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+
+
+def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
+                                             two_experiment_replicate_set, file_formats):
+    """
+    Use exp_set.other_processed_files field to really test this
+    """
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    testapp.patch_json(two_experiment_replicate_set['@id'],
+                       {'other_processed_files': [{'title': 'Test', 'files': [resobj['@id']]}]})
+    # hard-coded for convenience; should match experiment_data in datafixtures
+    expected_exp_type = 'micro-C'
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
+                  Body=str.encode('12346789abcd'))
+    download_filename = resobj['upload_key'].split('/')[1]
+    download_link = resobj['href']
+    resp = testapp.get(download_link)
+
+    # ensure that the download tracking item was created
+    ti_coll = registry['collections']['TrackingItem']
+    tracking_items = [ti_coll.get(id) for id in ti_coll]
+    tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
+                            if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
+    assert len(tracked_exp_file_dls) > 0
+    for dl_tracking in tracked_exp_file_dls:
+        assert dl_tracking['experiment_type'] == expected_exp_type
         assert 'file_format' in dl_tracking
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
