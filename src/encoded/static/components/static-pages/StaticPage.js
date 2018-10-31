@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import { compiler } from 'markdown-to-jsx';
+import { Collapse } from 'react-bootstrap'; 
 import Alerts from './../alerts';
 import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
 import * as globals from './../globals';
@@ -195,7 +196,23 @@ export class StaticEntry extends React.PureComponent {
         super(props);
         this.replacePlaceholder = this.replacePlaceholder.bind(this);
         this.renderEntryContent = this.renderEntryContent.bind(this);
-        this.render = this.render.bind(this);
+        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 750);
+        var options = (props.section && props.section.options) || {};
+        this.state = {
+            //'isCollapsible' : options.collapsible,
+            'open' : options.default_open,
+            'closing' : false
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.sectionName === this.props.sectionName) return;
+        var options = (nextProps.section && nextProps.section.options) || {};
+        this.setState({
+            //'isCollapsible' : options.collapsible,
+            'open' : options.default_open,
+            'closing' : false
+        });
     }
 
     replacePlaceholder(placeholderString){
@@ -206,9 +223,9 @@ export class StaticEntry extends React.PureComponent {
     }
 
     renderEntryContent(baseClassName){
-        var { context } = this.props,
-            section     = this.props.content,
+        var { context, section } = this.props,
             content     = (section && section.content) || null,
+            options     = (section && section.options) || {},
             filetype    = (section && section.filetype) || null, // Only set on StaticSection; not HiglassViewConfig or other Item types.
             placeholder = false;
 
@@ -230,13 +247,55 @@ export class StaticEntry extends React.PureComponent {
         }
     }
 
+    toggleOpen(open, e){
+        this.setState(function(currState){
+            if (typeof open !== 'boolean'){
+                open = !currState.open;
+            }
+            var closing = !open && currState.open;
+            return { open, closing };
+        }, ()=>{
+            setTimeout(()=>{
+                this.setState(function(currState){
+                    if (!currState.open && currState.closing){
+                        return { 'closing' : false };
+                    }
+                    return null;
+                });
+            }, 750);
+        });
+    }
+
     render(){
-        var { content, entryType, sectionName, className, context } = this.props;
-        var id = TableOfContents.elementIDFromSectionName(sectionName);
+        var { section, entryType, sectionName, className, context } = this.props,
+            { open, closing } = this.state,
+            id              = TableOfContents.elementIDFromSectionName(sectionName),
+            options         = (section && section.options) || {},
+            outerClassName  = entryType + "-entry static-section-entry";
+
+        if (options.collapsible){
+            outerClassName += ' can-collapse ' + (open ? 'open' : 'closed');
+            return (
+                <div className={outerClassName} id={id}>
+                    { section && section.title ?
+                        <HeaderWithLink className={"section-title can-collapse " + (open ? 'open' : 'closed')} link={id} context={context} onClick={this.toggleOpen}>
+                            <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus')}/>&nbsp;&nbsp;
+                            { section.title }
+                        </HeaderWithLink>
+                    : null }
+                    <Collapse in={open}>
+                        <div className="inner">
+                            { (open || closing) ? this.renderEntryContent(className) : null }
+                        </div>
+                    </Collapse>
+                </div>
+            );
+        }
+
         return (
-            <div className={entryType + "-entry static-section-entry"} id={id}>
-                { content && content.title ?
-                    <HeaderWithLink className="section-title" link={id} context={context}>{ content.title }</HeaderWithLink>
+            <div className={outerClassName} id={id}>
+                { section && section.title ?
+                    <HeaderWithLink className="section-title" link={id} context={context}>{ section.title }</HeaderWithLink>
                 : null }
                 { this.renderEntryContent(className) }
             </div>
@@ -282,8 +341,8 @@ export default class StaticPage extends React.PureComponent {
                 }
             }
         },
-        'entryRenderFxn' : function(sectionName, content, context){
-            return <StaticEntry key={sectionName} sectionName={sectionName} content={content} context={context} />;
+        'entryRenderFxn' : function(sectionName, section, context){
+            return <StaticEntry key={sectionName} sectionName={sectionName} section={section} context={context} />;
         }
     };
 
