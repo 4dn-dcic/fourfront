@@ -14,9 +14,16 @@ describe("HiGlass Display pages", function(){
                 .get(".search-headers-column-block span.column-title").should('have.text', ['Title', 'Creator', 'Date Created', 'Date Modified'].join('')).end()
                 .get(".facets-header .facets-title").should('have.text', 'Properties');
 
-            // You should NOT be able to see the draft higlass view.
-            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
-            cy.get("a[href='" + draftUrl + "']").should('not.exist');
+            // All of the higlass displays you can view should have the "released" status.
+            cy.request("/higlass-view-configs/?format=json&datastore=database").then((response)=>{
+                const nonReleasedFound = _.some(response.body["@graph"], (higlassViewConf)=>{
+                    if (higlassViewConf.status && higlassViewConf.status === "released") {
+                        return false;
+                    }
+                    return true;
+                });
+                expect(nonReleasedFound).to.not.be.ok;
+            });
         });
 
         it('Can visit HiGlass Display summary page after logging in', function(){
@@ -129,6 +136,54 @@ describe("HiGlass Display pages", function(){
                         });
                     });
                 });
+            });
+        });
+    });
+
+    context('Individual Higlass display page', function() {
+        beforeEach(function(){
+            // log in.
+            const receivingUserEmail = "ud4dntest@gmail.com";
+            const userDisplayTitle = "Frontend Test";
+
+            cy.visit('/higlass-view-configs/').login4DN({'email': receivingUserEmail}).wait(500);
+
+            // Delete all newly created higlass views.
+            cy.request("/higlass-view-configs/?format=json&datastore=database").then((response)=>{
+
+                // Delete the newly created record.
+                _.forEach(response.body["@graph"], (higlassViewConf)=>{
+                    if (higlassViewConf.submitted_by && higlassViewConf.submitted_by.display_title != userDisplayTitle) {
+                        return;
+                    }
+                    if (['00000000-1111-0000-1111-000000000001', '00000000-1111-0000-1111-000000000002'].indexOf(higlassViewConf.uuid) !== -1) {
+                        return;
+                    }
+                    cy.request("DELETE", higlassViewConf["@id"]).wait(100).then(() => {
+                        cy.log(higlassViewConf["@id"]);
+                    });
+                });
+            });
+        });
+
+        it('Can share draft URL', function() {
+            // Log in as the sharing user.
+            cy.visit('/higlass-view-configs/').login4DN().wait(500);
+
+            // Go to the draft higlass display.
+            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
+            cy.get("a[href='" + draftUrl + "']");
+
+            cy.visit(draftUrl);
+
+            // Click on the Share button.
+            // Wait for the message popup to indicate success.
+            cy.get(".inner-panel button.btn-info").click().wait(1000)
+                cy.get('.alert div').should('have.text', 'Copied HiGlass URL to clipboard.');
+
+            // Download the JSON to see if the higlass display is released
+            cy.request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
+                expect(newJson.body.status).to.equal("released");
             });
         });
     });

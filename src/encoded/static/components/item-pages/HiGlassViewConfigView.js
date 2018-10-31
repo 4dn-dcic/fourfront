@@ -117,8 +117,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return !!(_.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
     }
 
+    /**
+    * Update the current higlass viewconfig for the user, based on the current data.
+    * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
+    * @returns Nothing
+    */
     handleSave(evt){
-        // Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
         evt.preventDefault();
 
         var hgc                 = this.getHiGlassComponent(),
@@ -140,6 +144,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 (resp)=>{
                     // Success callback... maybe update state.originalViewConfigString or something...
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
+                    Alerts.queue({
+                        'title' : "Saved " + this.props.context.title,
+                        'message' : "",
+                        'style' : 'success'
+                    });
                     this.setState({ 'saveLoading' : false });
                 },
                 'PATCH',
@@ -160,6 +169,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     /**
     * Create a new higlass viewconfig for the user, based on the current data.
+    * @returns Nothing
     */
     handleSaveAs(evt){
         evt.preventDefault();
@@ -206,7 +216,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             Alerts.queue({
                                 'title' : "Saved " + viewConfTitle,
                                 'message' : "Saved new display.",
-                                'style' : 'info'
+                                'style' : 'success'
                             });
                         }
                         else {
@@ -217,7 +227,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 'style' : 'danger'
                             });
                         }
-                        // TODO Do we go to the new display or stay on the current one?
                         this.setState({ 'saveLoading' : false });
                     },
                     JSON.stringify({
@@ -230,21 +239,78 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
+
     /**
-     * Copies current URL to clipbard.
-     * Releases
-     */
+    * Copies current URL to clipbard.
+    * Sets the higlass display status to released if it isn't already.
+    * @returns Nothing
+    */
     handleShare(evt){
         evt.preventDefault();
 
-        if (this.props.context.status !== 'released' && this.havePermissionToEdit()){
-            // TODO - PATCH `status: released` to current href, then in a callback, proceed w/ below copywrapper stuff (prly put it in own method).
+        var hgc                 = this.getHiGlassComponent(),
+            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        if (!currentViewConf){
+            throw new Error('Could not get current view configuration.');
         }
 
-        object.CopyWrapper.copyToClipboard(
-            this.props.href,
-            ()=>{ console.log('Succeeded in copying to clipboard'); /* TODO: Temporarily change/flash button color or something to indicate success */ },
-            ()=>{ console.log('Failed to copy to clipboard'); },
+        const viewConfTitle = this.props.context.title;
+        var copyHrefToClip = function(props, alertTitle) {
+            // Alert the user the URL has been copied.
+            Alerts.queue({
+                'title' : alertTitle,
+                'message' : "Copied HiGlass URL to clipboard.",
+                'style' : 'success'
+            });
+
+            object.CopyWrapper.copyToClipboard(
+                props.href,
+                ()=>{ },
+                ()=>{ },
+            );
+        }
+
+        // If the view config has already been released, just copy the URL to the clipboard and return.
+        console.log(currentViewConf);
+        if (this.props.context.status === "released") {
+            copyHrefToClip(this.props,  "Copied URL for " + viewConfTitle);
+            return;
+        }
+
+        if (!this.havePermissionToEdit()){
+            throw new Error('No edit permissions.');
+        }
+
+        // PATCH `status: released` to current href, then in a callback, copy the URL to the clipboard.
+        this.setState(
+            { 'saveLoading' : true },
+            ()=>{
+                ajax.load(
+                    this.props.href,
+                    (resp)=>{
+                        // Success! Generate an alert telling the user it's successful
+                        copyHrefToClip(this.props, "Released " + viewConfTitle);
+                        this.setState({ 'saveLoading' : false });
+                    },
+                    'PATCH',
+                    (resp)=>{
+                        // Error callback
+                        Alerts.queue({
+                            'title' : "Failed to release display.",
+                            'message' : "Sorry, can you try to share again?",
+                            'style' : 'danger'
+                        });
+
+                        this.setState({ 'saveLoading' : false });
+                    },
+                    JSON.stringify({
+                        'viewconfig' : currentViewConf,
+                        'status': 'released',
+                    })
+                );
+            }
         );
     }
 
