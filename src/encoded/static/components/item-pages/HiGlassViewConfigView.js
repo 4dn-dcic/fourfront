@@ -273,7 +273,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
-        console.log(currentViewConf);
         if (this.props.context.status === "released") {
             copyHrefToClip(this.props,  "Copied URL for " + viewConfTitle);
             return;
