@@ -12,6 +12,7 @@ import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
 
 
+
 /**
  * Converts context.content into different format if necessary and returns copy of context with updated 'content'.
  * Currently only converts Markdown content (if a context.content[] item has 'filetype' === 'md'). Others may follow.
@@ -21,21 +22,35 @@ import { layout, console, object, isServerSide } from './../util';
 export function parseSectionsContent(context = this.props.context){
 
     function parse(section){
-        if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1 && section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
-            var content = compiler(section.content, {
-                'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
-                    return [type, {
-                        'component' : MarkdownHeading,
-                        'props'     : { 'type' : type }
-                    }];
-                }))
-            });
-            section =  _.extend({}, section, { 'content' : content });
-        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1 && section.viewconfig){
+
+        if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1){
+            // StaticSection Parsing
+            if (section.filetype === 'md' && typeof section.content === 'string'){
+                section =  _.extend({}, section, {
+                    'content' : compiler(section.content, {
+                        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+                            return [type, {
+                                'component' : MarkdownHeading,
+                                'props'     : { 'type' : type }
+                            }];
+                        }))
+                    })
+                });
+            } else if (section.filetype === 'html' && typeof section.content === 'string'){
+                section =  _.extend({}, section, {
+                    'content' : object.htmlToJSX(section.content)
+                });
+            } // else: retain plaintext or HTML representation
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
+            // HiglassViewConfig Parsing
+            if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
             section =  _.extend({}, section, {
                 'content' : <HiGlassPlainContainer viewConfig={section.viewconfig} />
             });
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
+            // TODO
         }
+
         // TODO: other parsing stuff based on other filetypes.
         // Else: return the plaintext representation.
         return section;
@@ -192,29 +207,26 @@ export class StaticEntry extends React.PureComponent {
 
     renderEntryContent(baseClassName){
         var { context } = this.props,
-            section = this.props.content,
-            content = (section && section.content) || null;
+            section     = this.props.content,
+            content     = (section && section.content) || null,
+            filetype    = (section && section.filetype) || null, // Only set on StaticSection; not HiglassViewConfig or other Item types.
+            placeholder = false;
 
         if (!content) return null;
-
-        var filetype = this.props.content.filetype || null,
-            placeholder = false;
 
         if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
             placeholder = true;
             content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
         }
 
-        var className ="section-content" + (baseClassName? ' ' + baseClassName : '');
+        var className = "section-content" + (baseClassName? ' ' + baseClassName : '');
 
         if (filetype === 'csv'){
+            // Special case
             return <CSVMatrixView csv={content} options={this.props.content.options} />;
-        } else if (placeholder || filetype === 'md' || (section.viewconfig && section['@type'].indexOf('HiglassViewConfig') > -1)){
-            content = correctRelativeLinks(content, this.props.context);
-            //console.log(this.props.section, content, this.props.context);
-            return <div className={className}>{ content }</div>;
         } else {
-            return <div className={className} dangerouslySetInnerHTML={{__html: content }}></div>;
+            // Common case - markdown, plaintext, etc.
+            return <div className={className}>{ content }</div>;
         }
     }
 
