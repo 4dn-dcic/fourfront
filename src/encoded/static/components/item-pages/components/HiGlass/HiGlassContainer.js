@@ -135,7 +135,7 @@ export const HiGlassConfigurator = {
                 "locksDict" : {}
             },
             "trackSourceServers": [
-                options.supplementaryTracksBaseUrl + "/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
+                (options.supplementaryTracksBaseUrl || options.baseUrl) + "/api/v1" // Needs to be higlass currently for searchbox to work (until have some coord/search tracks or something in 54.86.. server?).
             ]
         }, options.viewConfigBase || {});
     },
@@ -166,17 +166,17 @@ export const HiGlassConfigurator = {
         var evp_gpsb = (extraViewProps && extraViewProps.genomePositionSearchBox) || {};
 
         return _.extend({
-            "uid" : viewUID,
-            "layout": HiGlassConfigurator.generateDefaultLayoutForViewItem(viewUID, (extraViewProps && extraViewProps.layout) || null),
-            "initialXDomain": initialDomains.x,
-            "initialYDomain" : initialDomains.y,
-            "autocompleteSource": "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
-            "genomePositionSearchBox": {
-                "autocompleteServer": evp_gpsb.autocompleteServer || (genomeSearchUrl + "/api/v1"),
-                "autocompleteId": evp_gpsb.autocompleteId || "P0PLbQMwTYGy-5uPIQid7A",
-                "chromInfoServer": evp_gpsb.chromInfoServer || (genomeSearchUrl + "/api/v1"),
-                "chromInfoId": evp_gpsb.chromInfoId || (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
-                "visible": (typeof evp_gpsb.visible === 'boolean' ? evp_gpsb.visible : true)
+            "uid"                       : viewUID,
+            "layout"                    : HiGlassConfigurator.generateDefaultLayoutForViewItem(viewUID, (extraViewProps && extraViewProps.layout) || null),
+            "initialXDomain"            : initialDomains.x,
+            "initialYDomain"            : initialDomains.y,
+            "autocompleteSource"        : "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+            "genomePositionSearchBox"   : {
+                "autocompleteServer"        : evp_gpsb.autocompleteServer || (genomeSearchUrl + "/api/v1"),
+                "autocompleteId"            : evp_gpsb.autocompleteId || "P0PLbQMwTYGy-5uPIQid7A",
+                "chromInfoServer"           : evp_gpsb.chromInfoServer || (genomeSearchUrl + "/api/v1"),
+                "chromInfoId"               : evp_gpsb.chromInfoId || (chromosomeAndAnnotation && chromosomeAndAnnotation.chromosome && chromosomeAndAnnotation.chromosome.infoid) || "NOT SET",
+                "visible"                   : (typeof evp_gpsb.visible === 'boolean' ? evp_gpsb.visible : true)
             }
         }, _.omit(extraViewProps, 'layout', 'genomePositionSearchBox'));
     },
@@ -273,43 +273,42 @@ export const HiGlassConfigurator = {
         return {
             "name": annotation.name,
             //"created": "2017-07-14T15:27:46.989053Z",
-            "server": (annotation.server || trackBaseServer) + "/api/v1",
+            "server"    : (annotation.server || trackBaseServer) + "/api/v1",
             "tilesetUid": annotation.tilesetUid,
-            "type": "horizontal-gene-annotations",
-            "options": _.extend({
-                "labelColor": "black",
-                "labelPosition": "hidden",
-                "plusStrandColor": "blue",
-                "minusStrandColor": "red",
-                "trackBorderWidth": 0,
-                "trackBorderColor": "black",
-                "name": annotation.name
+            "type"      : "horizontal-gene-annotations",
+            "options"   : _.extend({
+                "labelColor"        : "black",
+                "labelPosition"     : "hidden",
+                "plusStrandColor"   : "black", //"blue",
+                "minusStrandColor"  : "black", //"red",
+                "trackBorderWidth"  : 0,
+                "trackBorderColor"  : "black",
+                "name"              : annotation.name
             }, annotationTrackOptions || {}),
-            //"width": 20,
             "minHeight" : 55,
-            "height": 55,
-            "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-            "position": "top",
+            "height"    : 55,
+            "header"    : "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+            "position"  : "top",
             "orientation": "1d-horizontal",
-            "uid" : "top-annotation-track"
+            "uid"       : "top-annotation-track"
         };
     },
 
     'generateTopChromosomeTrack' : function(trackBaseServer, { chromosome, annotation }){
         return {
-            "name": chromosome.name,
+            "name"          : chromosome.name,
             //"created": "2017-07-17T14:16:45.346835Z",
-            "server": (chromosome.server || trackBaseServer) + "/api/v1",
-            "tilesetUid": chromosome.tilesetUid,
-            "type": "horizontal-chromosome-labels",
-            "local": true,
-            "minHeight": 30,
-            "thumbnail": null,
-            "options": {},
-            "height": 30,
-            "position": "top",
-            "orientation": "1d-horizontal",
-            "uid" : "top-chromosome-track"
+            "server"        : (chromosome.server || trackBaseServer) + "/api/v1",
+            "tilesetUid"    : chromosome.tilesetUid,
+            "type"          : "horizontal-chromosome-labels",
+            "local"         : true,
+            "minHeight"     : 30,
+            "thumbnail"     : null,
+            "options"       : {},
+            "height"        : 30,
+            "position"      : "top",
+            "orientation"   : "1d-horizontal",
+            "uid"           : "top-chromosome-track"
         };
     },
 
@@ -348,42 +347,41 @@ export const HiGlassConfigurator = {
 
         'generateLeftAnnotationTrack' : function(trackBaseServer, { chromosome, annotation }, annotationTrackOptions){
             return {
-                "name": annotation.name,
+                "name"      : annotation.name,
                 //"created": "2017-07-14T15:27:46.989053Z",
-                "server": trackBaseServer + "/api/v1",
+                "server"    : trackBaseServer + "/api/v1",
                 "tilesetUid": annotation.tilesetUid,
-                "uid": "left-annotation-track",
-                "type": "vertical-gene-annotations",
+                "uid"       : "left-annotation-track",
+                "type"      : "vertical-gene-annotations",
                 "options": _.extend({
-                    "labelColor": "black",
-                    "labelPosition": "hidden",
-                    "plusStrandColor": "blue",
-                    "minusStrandColor": "red",
-                    "trackBorderWidth": 0,
-                    "trackBorderColor": "black",
+                    "labelColor"        : "black",
+                    "labelPosition"     : "hidden",
+                    "plusStrandColor"   : "black", //"blue",
+                    "minusStrandColor"  : "black", //"red",
+                    "trackBorderWidth"  : 0,
+                    "trackBorderColor"  : "black",
                     "name": annotation.name
                 }, annotationTrackOptions || {}),
-                "width": 55,
-                //"height": 20,
-                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                "width"     : 55,
+                "header"    : "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                 "orientation": "1d-vertical",
-                "position": "left"
+                "position"  : "left"
             };
         },
 
         'generateLeftChromosomeTrack' : function(trackBaseServer, { chromosome, annotation }){
             return {
-                "name": chromosome.name,
+                "name"          : chromosome.name,
                 //"created": "2017-07-17T14:16:45.346835Z",
-                "server": (chromosome.server || trackBaseServer) + "/api/v1",
-                "tilesetUid": chromosome.tilesetUid,
-                "uid": "left-chromosome-track",
-                "type": "vertical-chromosome-labels",
-                "options": {},
-                "width": 20,
-                "minWidth" : 20,
-                "orientation": "1d-vertical",
-                "position": "left"
+                "server"        : (chromosome.server || trackBaseServer) + "/api/v1",
+                "tilesetUid"    : chromosome.tilesetUid,
+                "uid"           : "left-chromosome-track",
+                "type"          : "vertical-chromosome-labels",
+                "options"       : {},
+                "width"         : 20,
+                "minWidth"      : 20,
+                "orientation"   : "1d-vertical",
+                "position"      : "left"
             };
         },
 
@@ -469,25 +467,25 @@ export const HiGlassConfigurator = {
 
             var trackHeight = Math.min(Math.max(Math.floor((options.height - 150) / all.length), 20), options.height - 150),
                 styleOptions = {
-                    "lineStrokeColor": "black",
-                    "labelPosition": "topRight",
-                    "labelColor": "black",
-                    "labelTextOpacity": 0.3,
-                    "lineStrokeWidth": 1.25,
-                    "trackBorderWidth": 0,
-                    "trackBorderColor": "black",
-                    "showMousePosition": true,
-                    "mousePositionColor": "#999999",
-                    "showTooltip": false,
+                    "lineStrokeColor"       : "black",
+                    "labelPosition"         : "topRight",
+                    "labelColor"            : "black",
+                    "labelTextOpacity"      : 0.3,
+                    "lineStrokeWidth"       : 1.25,
+                    "trackBorderWidth"      : 0,
+                    "trackBorderColor"      : "black",
+                    "showMousePosition"     : true,
+                    "mousePositionColor"    : "#999999",
+                    "showTooltip"           : false,
                     "axisPositionHorizontal": "left",
-                };
-
-            var hasExpSetInfo = !!(bigWigFile.from_experiment && bigWigFile.from_experiment.from_experiment_set && bigWigFile.from_experiment.from_experiment_set.accession);
-            var isOnlyFile = all.length === 1;
+                },
+                hasExpSetInfo = !!(bigWigFile.from_experiment && bigWigFile.from_experiment.from_experiment_set && bigWigFile.from_experiment.from_experiment_set.accession),
+                isOnlyFile = all.length === 1,
+                contentTrackOptions = options.contentTrackOptions;
 
             if (!isOnlyFile && hasExpSetInfo){
                 var isFromExperiment = bigWigFile.from_experiment.accession !== 'NONE';
-                if (!isFromExperiment){
+                if (!isFromExperiment){ // Means it came from ExpSet and not Exp, style it to be more prominent compared to Exp processed files.
                     styleOptions.lineStrokeWidth = 2;
                     //styleOptions.showTooltip = true;
                     styleOptions.labelTextOpacity = 1;
@@ -499,22 +497,21 @@ export const HiGlassConfigurator = {
                 }
             }
 
-            var contentTrackOptions = options.contentTrackOptions;
             if (Array.isArray(contentTrackOptions)){
                 contentTrackOptions = contentTrackOptions[options.index];
             }
 
             return {
-                "uid": "bigwig-content-track-" + idx,
+                "uid"       : "bigwig-content-track-" + idx,
                 "tilesetUid": bigWigFile.higlass_uid,
-                "height": trackHeight,
-                "position": "top",
-                "server": options.baseUrl + "/api/v1",
-                "type": "horizontal-line",
-                "options": _.extend(styleOptions, {
-                    "name" : bigWigFile.display_title,
-                    "valueScaling": "linear",
-                    "coordSystem": chromosome.infoid || "NOT SET",
+                "height"    : trackHeight,
+                "position"  : "top",
+                "server"    : options.baseUrl + "/api/v1",
+                "type"      : "horizontal-bar",
+                "options"   : _.extend(styleOptions, {
+                    "name"          : bigWigFile.display_title,
+                    "valueScaling"  : "linear",
+                    "coordSystem"   : chromosome.infoid || "NOT SET",
                 }, contentTrackOptions || {})
             };
         },
