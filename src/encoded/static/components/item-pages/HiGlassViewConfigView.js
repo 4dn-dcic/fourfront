@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Button, Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
 import Alerts from './../alerts';
-import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
+import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility, navigate } from './../util';
 import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import JSONTree from 'react-json-tree';
@@ -120,7 +120,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     /**
     * Update the current higlass viewconfig for the user, based on the current data.
     * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
-    * @returns Nothing
+    * @returns {void}
     */
     handleSave(evt){
         evt.preventDefault();
@@ -156,7 +156,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     // Error callback
                     Alerts.queue({
                         'title' : "Failed to save display.",
-                        'message' : "For some reason",
+                        'message' : "Sorry, can you try to save again?",
                         'style' : 'danger'
                     });
                     this.setState({ 'saveLoading' : false });
@@ -169,7 +169,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     /**
     * Create a new higlass viewconfig for the user, based on the current data.
-    * @returns Nothing
+    * @returns {void}
     */
     handleSaveAs(evt){
         evt.preventDefault();
@@ -182,21 +182,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('Could not get current view configuration.');
         }
 
-        // Make sure you are logged in
-        if (this.props.session !== true) {
-            Alerts.queue({
-                'title' : "Please log in.",
-                'message' : "Please log in or sign in before saving this display.",
-                'style' : 'danger'
-            });
-        }
-
         // Generate a new title and description based on the current display.
         var userDetails = JWT.getUserDetails();
         let userFirstName = "unknown";
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        const viewConfTitle = this.props.context.title + "-" + userFirstName + "'s copy";
+        const viewConfTitle = this.props.context.display_title + " - " + userFirstName + "'s copy";
         const viewConfDesc = this.props.context.description;
 
         // Try to PUT a new viewconf.
@@ -206,27 +197,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 ajax.load(
                     '/higlass-view-configs/',
                     ()=>{
-                        // Creating a new record doesn't return a status code of 200, so this callback shouldn't trigger.
-                        this.setState({ 'saveLoading' : false });
-                    },
-                    'POST',
-                    (resp)=>{
                         // We're likely to get a status code of 201 - Created.
-                        if (resp.status === 'success') {
+                        const newHref = resp['@graph'][0]['@id'];
+                        const navFunction = this.props.navigate || navigate;
+
+                        // Redirect the user to the new Higlass display.
+                        navFunction(newHref, { }, (resp)=>{
                             Alerts.queue({
                                 'title' : "Saved " + viewConfTitle,
                                 'message' : "Saved new display.",
                                 'style' : 'success'
                             });
-                        }
-                        else {
-                            // Error callback
-                            Alerts.queue({
-                                'title' : "Failed to save display.",
-                                'message' : "Sorry, can you try to save again?",
-                                'style' : 'danger'
-                            });
-                        }
+                        });
+                        this.setState({ 'saveLoading' : false });
+                    },
+                    'POST',
+                    (resp)=>{
+                        // Error callback
+                        Alerts.queue({
+                            'title' : "Failed to save display.",
+                            'message' : "Sorry, can you try to save again?",
+                            'style' : 'danger'
+                        });
                         this.setState({ 'saveLoading' : false });
                     },
                     JSON.stringify({
@@ -243,7 +235,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     /**
     * Copies current URL to clipbard.
     * Sets the higlass display status to released if it isn't already.
-    * @returns Nothing
+    * @returns {void}
     */
     handleShare(evt){
         evt.preventDefault();
@@ -270,7 +262,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 ()=>{ },
                 ()=>{ },
             );
-        }
+        };
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
         if (this.props.context.status === "released") {
