@@ -179,7 +179,8 @@
                 "released",
                 "released to project",
                 "archived to project",
-                "to be uploaded by workflow"
+                "to be uploaded by workflow",
+                "restricted"
             ]
         },
         "quality_metric": {

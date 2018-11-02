@@ -94,6 +94,14 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
+def test_restricted_no_href(testapp, fastq_json):
+    res1 = testapp.post_json('/file_fastq', fastq_json, status=201)
+    fq = res1.json['@graph'][0]
+    assert 'href' in fq
+    res2 = testapp.patch_json(fq['@id'], {'status': 'restricted'}, status=200)
+    assert 'href' not in res2.json['@graph'][0]
+
+
 def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files

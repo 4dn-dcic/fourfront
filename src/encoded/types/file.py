@@ -369,6 +369,9 @@ class File(Item):
                 except Exception as e:
                     print(e)
 
+        # deal with removed the href if it exists
+        if properties.get('href') is not None:
+            del(properties['href'])
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
@@ -436,6 +439,10 @@ class File(Item):
         "description": "Use this link to download this file."
     })
     def href(self, request):
+        # check to see if status is Restricted
+        status = self.properties.get('status')
+        if status == 'restricted':
+            return
         file_format = self.properties.get('file_format')
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
         try:
