@@ -38,7 +38,7 @@ describe("HiGlass Display pages", function(){
 
     context('Edit Individual Higlass display page', function() {
         // Tracks uuids across tests so they can be deleted afterwards.
-        let testUuidsToDelete = [];
+        var testUuidsToDelete = [];
 
         beforeEach(function() {
             // Log in.
@@ -66,12 +66,6 @@ describe("HiGlass Display pages", function(){
             // Go to the display for the draft display.
             const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
             cy.visit(draftUrl);
-
-            // Get the raw JSON of the display.
-            let originalJson = null;
-            cy.request(draftUrl + "?format=json&datastore=database").then((resp)=>{
-                originalJson = resp.body;
-            });
 
             // When the app creates a new HiGlass display, we'll capture the JSON of the POST call.
             cy.server();
@@ -103,12 +97,6 @@ describe("HiGlass Display pages", function(){
             const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
             cy.visit(draftUrl);
 
-            // Get the raw JSON of the display.
-            let originalJson = null;
-            cy.request(draftUrl + "?format=json&datastore=database").then((resp)=>{
-                originalJson = resp.body;
-            });
-
             // There will be an AJAX response to a POST for the new Higlass display, so capture it here.
             cy.server();
             cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
@@ -129,7 +117,7 @@ describe("HiGlass Display pages", function(){
 
                 // Add the test uuid so we can delete it later.
                 testUuidsToDelete.push(xhr.responseBody["@graph"][0]["uuid"]);
-                let newUuid = xhr.responseBody["@graph"][0]["uuid"];
+                const newUuid = xhr.responseBody["@graph"][0]["uuid"];
                 expect(newUuid).to.be.ok;
 
                 // Clicking the SaveAs button should redirect us to the new page

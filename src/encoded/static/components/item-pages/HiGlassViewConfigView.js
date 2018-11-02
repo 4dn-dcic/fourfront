@@ -196,7 +196,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             ()=>{
                 ajax.load(
                     '/higlass-view-configs/',
-                    ()=>{
+                    (resp)=>{
                         // We're likely to get a status code of 201 - Created.
                         const newHref = resp['@graph'][0]['@id'];
                         const navFunction = this.props.navigate || navigate;
