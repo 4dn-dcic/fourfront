@@ -132,7 +132,7 @@ def test_patch_extra_files(testapp, proc_file_json):
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
-    assert resobj['extra_files'][0]['status'] = 'to be uploaded by workflow'
+    assert resobj['extra_files'][0]['status'] == 'to be uploaded by workflow'
 
 
 def test_extra_files_download(testapp, registry, proc_file_json):
