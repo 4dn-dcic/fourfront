@@ -63,7 +63,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
-        this.handleSaveAs = this.handleSaveAs.bind(this);
+        this.handleSaveAs = _.throttle(this.handleSaveAs.bind(this), 3000, { 'trailing' : false });
         this.handleShare = this.handleShare.bind(this);
 
         this.state = {
@@ -198,20 +198,20 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             ()=>{
                 ajax.load(
                     '/higlass-view-configs/',
-                    (resp)=>{
-                        // We're likely to get a status code of 201 - Created.
-                        const newHref = resp['@graph'][0]['@id'];
-                        const navFunction = this.props.navigate || navigate;
+                    (resp)=>{ // We're likely to get a status code of 201 - Created.
+                        this.setState({ 'saveLoading' : false }, ()=>{
+                            const newHref = object.itemUtil.atId(resp['@graph'][0]);
+                            const navFunction = this.props.navigate || navigate;
 
-                        // Redirect the user to the new Higlass display.
-                        navFunction(newHref, { }, (resp)=>{
-                            Alerts.queue({
-                                'title' : "Saved " + viewConfTitle,
-                                'message' : "Saved new display.",
-                                'style' : 'success'
+                            // Redirect the user to the new Higlass display.
+                            navFunction(newHref, { }, (resp)=>{
+                                Alerts.queue({
+                                    'title' : "Saved " + viewConfTitle,
+                                    'message' : "Saved new display.",
+                                    'style' : 'success'
+                                });
                             });
                         });
-                        this.setState({ 'saveLoading' : false });
                     },
                     'POST',
                     (resp)=>{
