@@ -464,7 +464,7 @@ def metadata_tsv(context, request):
             for xfile in f['extra_files']:
                 xfile_vals = all_row_vals.copy()
                 xfile_vals['File Download URL'] = request.host_url + xfile['href'] if xfile.get('href') else None
-                xfile_vals['File Format'] = xfile.get('file_format')
+                xfile_vals['File Format'] = xfile.get('file_format', {}).get('display_title')
                 xfile_vals['md5sum'] = xfile.get('md5sum')
                 xfile_vals['Size'] = xfile.get('file_size')
                 xfile_vals['Related File Relationship'] = 'secondary file for'

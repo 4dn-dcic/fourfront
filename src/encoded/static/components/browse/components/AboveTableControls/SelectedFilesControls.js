@@ -69,7 +69,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     /**
     * Hide the modal window and its subwindows.
     */
-    handleHideModal(){
+    handleHideModal(evt){
+        evt.stopPropagation();
         this.setState({
             'modalOpen' : false,
             'showDisclaimer' : false,
@@ -120,7 +121,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     /**
     * User clicks on the acknowledgement button.
     */
-    handleClickDisclaimer(){
+    handleClickDisclaimer(evt){
+        evt.stopPropagation();
         // Update the state:
         // - Hide the Disclaimer button
         // - Show the Download Metadata widget
@@ -215,10 +217,12 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         );
 
         return (
-            <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
-                <i className="icon icon-download icon-fw"/> { innerBtnTitle }
+            <React.Fragment>
+                <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
+                    <i className="icon icon-download icon-fw"/> { innerBtnTitle }
+                </Button>
                 { this.renderModal(subSelectedFiles) }
-            </Button>
+            </React.Fragment>
         );
     }
 }
@@ -288,6 +292,7 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
  * Also has a close modal button.
  */
 export class SelectedFilesDownloadMetadataButton extends React.PureComponent {
+
     constructor(props){
         super(props);
         this.getAccessionTripleArrays = this.getAccessionTripleArrays.bind(this);

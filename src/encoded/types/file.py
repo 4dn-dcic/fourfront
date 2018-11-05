@@ -346,7 +346,8 @@ class File(Item):
                 # just need a filename to trigger creation of credentials
                 xfile['filename'] = xfile['accession']
                 xfile['uuid'] = str(uuid)
-                xfile['status'] = properties.get('status')
+                # if not 'status' in xfile or not bool(xfile['status']):
+                #    xfile['status'] = properties.get('status')
                 ext = self.build_external_creds(self.registry, uuid, xfile)
                 # build href
                 file_extension = xfile_format.properties.get('standard_file_extension')
