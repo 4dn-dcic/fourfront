@@ -5,7 +5,8 @@ import _ from 'underscore';
 /**
 * Test you can visit the Higlass Display page.
 */
-describe("HiGlass Display pages", function(){
+describe.skip("HiGlass Display pages", function(){
+
     context('Higlass Display summary page', function(){
         it('Can visit HiGlass Display summary page without login', function(){
             // Visit the page and confirm you can see the table and facet properties.
@@ -27,7 +28,7 @@ describe("HiGlass Display pages", function(){
 
         it('Can visit HiGlass Display summary page after logging in', function(){
             // Log in, visit the page and look for the create button
-            cy.visit('/higlass-view-configs/').login4DN({"options": {'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}}).wait(500).end()
+            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500).end()
                 .get(".create-add-button .btn").should('have.text', 'Create');
 
             // You should be able to visit the higlass view that is still in "draft" status.
@@ -42,14 +43,14 @@ describe("HiGlass Display pages", function(){
 
         beforeEach(function() {
             // Log in.
-            cy.visit('/higlass-view-configs/').login4DN({"options": {'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
         });
 
         afterEach(function(){
             if (testUuidsToDelete.length === 0) return;
 
             // Log in.
-            cy.visit('/higlass-view-configs/').login4DN({"options": {'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
 
             // Delete all newly created higlass views.
             _.forEach(testUuidsToDelete, (newUuid) => {
@@ -57,7 +58,7 @@ describe("HiGlass Display pages", function(){
             });
 
             // Empty the array now that we're done.
-            testUuidsToDelete.length = 0;
+            testUuidsToDelete = [];
         });
 
         it('Can clone new draft views', function() {
@@ -149,7 +150,7 @@ describe("HiGlass Display pages", function(){
 
     context('Sharing on the Individual Higlass display page', function() {
         beforeEach(function(){
-            cy.visit('/higlass-view-configs/').login4DN({"options": {'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
 
             // Edit the higlass display back to draft status.
             cy.request(
@@ -162,7 +163,7 @@ describe("HiGlass Display pages", function(){
         });
 
         afterEach(function(){
-            cy.visit('/higlass-view-configs/').login4DN({"options": {'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
 
             // Edit the higlass display back to draft status.
             cy.request(
@@ -176,7 +177,7 @@ describe("HiGlass Display pages", function(){
 
         it('Can share draft URL', function() {
             // Log in as the sharing user.
-            cy.visit('/higlass-view-configs/').login4DN({"options": {'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
 
             // Go to the draft higlass display.
             // Click on the Share button.
