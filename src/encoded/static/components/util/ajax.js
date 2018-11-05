@@ -43,19 +43,19 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
+            if ([200,201,202,203].indexOf(xhr.status) > -1) {
                 if (typeof callback === 'function'){
-                    callback(JSON.parse(xhr.responseText));
+                    callback(JSON.parse(xhr.responseText), xhr);
                 }
             } else {
                 var response;
                 try {
                     response = JSON.parse(xhr.responseText);
                     console.error('ajax.load error: ', response);
-                    if (typeof fallback === 'function') fallback(response);
+                    if (typeof fallback === 'function') fallback(response, xhr);
                 } catch (error) {
                     console.error('Non-JSON error response:', xhr.responseText);
-                    if (typeof fallback === 'function') fallback(xhr);
+                    if (typeof fallback === 'function') fallback({}, xhr);
                 }
             }
         }

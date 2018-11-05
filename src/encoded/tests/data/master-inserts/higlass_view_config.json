@@ -1,7 +1,6 @@
 [
     {
         "title" : "Test MCOOL Display",
-        "name" : "view-4d-mcool-01",
         "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
         "uuid" : "00000000-1111-0000-1111-000000000002",
         "viewconfig" : {
