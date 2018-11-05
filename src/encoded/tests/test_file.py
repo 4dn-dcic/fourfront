@@ -108,11 +108,10 @@ def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
-    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
 def test_patch_extra_files(testapp, proc_file_json):
-    extra_files = [{'file_format': 'pairs_px2'}]
+    extra_files = [{'file_format': 'pairs_px2', 'status': 'to be uploaded by workflow'}]
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
@@ -133,7 +132,7 @@ def test_patch_extra_files(testapp, proc_file_json):
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
-    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
+    assert resobj['extra_files'][0]['status'] = 'to be uploaded by workflow'
 
 
 def test_extra_files_download(testapp, registry, proc_file_json):
