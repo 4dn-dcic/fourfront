@@ -70,6 +70,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
             'originalViewConfig' : null, //object.deepClone(props.viewConfig)
             'saveLoading' : false,
+            'saveAsLoading' : false,
+            'releaseLoading' : false
         };
     }
 
@@ -192,7 +194,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         // Try to PUT a new viewconf.
         this.setState(
-            { 'saveLoading' : true },
+            { 'saveAsLoading' : true },
             ()=>{
                 ajax.load(
                     '/higlass-view-configs/',
@@ -219,7 +221,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             'message' : "Sorry, can you try to save again?",
                             'style' : 'danger'
                         });
-                        this.setState({ 'saveLoading' : false });
+                        this.setState({ 'saveAsLoading' : false });
                     },
                     JSON.stringify({
                         'title' : viewConfTitle,
@@ -276,14 +278,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         // PATCH `status: released` to current href, then in a callback, copy the URL to the clipboard.
         this.setState(
-            { 'saveLoading' : true },
+            { 'releaseLoading' : true },
             ()=>{
                 ajax.load(
                     this.props.href,
                     (resp)=>{
                         // Success! Generate an alert telling the user it's successful
                         copyHrefToClip(this.props, "Released " + viewConfTitle);
-                        this.setState({ 'saveLoading' : false });
+                        this.setState({ 'releaseLoading' : false });
                     },
                     'PATCH',
                     (resp)=>{
@@ -294,7 +296,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             'style' : 'danger'
                         });
 
-                        this.setState({ 'saveLoading' : false });
+                        this.setState({ 'releaseLoading' : false });
                     },
                     JSON.stringify({
                         'viewconfig' : currentViewConf,
@@ -311,7 +313,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     saveButtons(){
         var { session, context } = this.props,
-            { saveLoading } = this.state;
+            { saveLoading, saveAsLoading, releaseLoading } = this.state;
 
         if (!session) return null;
 
@@ -326,13 +328,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     </Button>
                 </div>&nbsp;
                 <div className="inline-block" key="saveasbtn">
-                    <Button onClick={this.handleSaveAs} bsStyle="success">
-                        <i className={"icon icon-fw icon-save"}/>&nbsp; Save As...
+                    <Button onClick={this.handleSaveAs} disabled={saveAsLoading} bsStyle="success">
+                        <i className={"icon icon-fw icon-" + (saveAsLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save As...
                     </Button>
                 </div>&nbsp;
                 <div className="inline-block" key="clonebtn">
-                    <Button onClick={this.handleShare} disabled={!sharePermission} bsStyle="info" data-tip={context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'}>
-                        <i className={"icon icon-fw icon-copy"}/>&nbsp; Share
+                    <Button onClick={this.handleShare} disabled={!sharePermission || releaseLoading} bsStyle="info" data-tip={context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'}>
+                        <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; Share
                     </Button>
                 </div>&nbsp;
             </div>
