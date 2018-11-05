@@ -1917,4 +1917,3 @@ class ContentErrorBoundary extends React.Component {
         return <div className="container" id="content">{ this.props.children }</div>;
     }
 }
-
