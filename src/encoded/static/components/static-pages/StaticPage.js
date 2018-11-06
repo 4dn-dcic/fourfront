@@ -22,10 +22,40 @@ import { layout, console, object, isServerSide } from './../util';
  */
 export function parseSectionsContent(context = this.props.context){
 
+    var markdownCompilerOptions = {
+        // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
+        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+            return [type, {
+                'component' : MarkdownHeading,
+                'props'     : { 'type' : type }
+            }];
+        }))
+    };
+
     function parse(section){
-        return _.extend({}, section, {
-            'content' : <BasicUserContentBody context={section} />
-        });
+
+        if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1){
+            // StaticSection Parsing
+            if (section.filetype === 'md' && typeof section.content === 'string'){
+                section =  _.extend({}, section, {
+                    'content' : compiler(section.content, markdownCompilerOptions)
+                });
+            } else if (section.filetype === 'html' && typeof section.content === 'string'){
+                section =  _.extend({}, section, {
+                    'content' : object.htmlToJSX(section.content)
+                });
+            } // else: retain plaintext or HTML representation
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
+            // HiglassViewConfig Parsing
+            if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
+            section =  _.extend({}, section, {
+                'content' : <HiGlassPlainContainer viewConfig={section.viewconfig} />
+            });
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
+            // TODO
+        }
+
+        return section;
     }
 
     if (!Array.isArray(context.content)) throw new Error('context.content is not an array.');

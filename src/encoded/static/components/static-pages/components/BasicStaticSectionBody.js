@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, analytics } from './../../util';
+import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { HiGlassPlainContainer } from '../../item-pages/components';
 import * as store from './../../../store';
@@ -41,7 +41,7 @@ export class BasicUserContentBody extends React.PureComponent {
     }
 
     render(){
-        var { context } = this.props;
+        var { context, markdownCompilerOptions } = this.props;
         if (this.state.hasError){
             return (
                 <div className="error">
@@ -53,7 +53,7 @@ export class BasicUserContentBody extends React.PureComponent {
         var itemType = this.itemType();
 
         if (itemType === 'StaticSection') {
-            return <BasicStaticSectionBody content={context.content} filetype={context.filetype}  />;
+            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} />;
         } else if (itemType === 'HiglassViewConfig') {
             return <HiGlassPlainContainer viewConfig={context.viewconfig} />;
         } else {
@@ -74,21 +74,20 @@ export class BasicStaticSectionBody extends React.PureComponent {
         "content" : PropTypes.string.isRequired,
         "filetype" : PropTypes.string,
         "element" : PropTypes.string.isRequired,
-        "compileOptions" : PropTypes.any
+        "markdownCompilerOptions" : PropTypes.any
     }
 
     static defaultProps = {
         "filetype" : "md",
-        "element" : "div",
-        "compileOptions" : null
+        "element" : "div"
     }
 
     render(){
-        var { content, filetype, element, compileOptions } = this.props,
-            passedProps = _.omit(this.props, 'content', 'filetype', 'children', 'element', 'compileOptions');
+        var { content, filetype, element, markdownCompilerOptions } = this.props,
+            passedProps = _.omit(this.props, 'content', 'filetype', 'children', 'element', 'markdownCompilerOptions');
 
         if (filetype === 'md'){
-            return React.createElement(element, passedProps, compiler(content, compileOptions || undefined) );
+            return React.createElement(element, passedProps, compiler(content, markdownCompilerOptions || undefined) );
         } else if (filetype === 'html' && typeof content === 'string'){
             return React.createElement(element, passedProps, object.htmlToJSX(content));
         } else {
