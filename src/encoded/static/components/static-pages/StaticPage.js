@@ -7,7 +7,7 @@ import url from 'url';
 import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap'; 
 import Alerts from './../alerts';
-import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink, BasicUserContentBody } from './components';
 import * as globals from './../globals';
 import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
@@ -23,38 +23,9 @@ import { layout, console, object, isServerSide } from './../util';
 export function parseSectionsContent(context = this.props.context){
 
     function parse(section){
-
-        if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1){
-            // StaticSection Parsing
-            if (section.filetype === 'md' && typeof section.content === 'string'){
-                section =  _.extend({}, section, {
-                    'content' : compiler(section.content, {
-                        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
-                            return [type, {
-                                'component' : MarkdownHeading,
-                                'props'     : { 'type' : type }
-                            }];
-                        }))
-                    })
-                });
-            } else if (section.filetype === 'html' && typeof section.content === 'string'){
-                section =  _.extend({}, section, {
-                    'content' : object.htmlToJSX(section.content)
-                });
-            } // else: retain plaintext or HTML representation
-        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
-            // HiglassViewConfig Parsing
-            if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
-            section =  _.extend({}, section, {
-                'content' : <HiGlassPlainContainer viewConfig={section.viewconfig} />
-            });
-        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
-            // TODO
-        }
-
-        // TODO: other parsing stuff based on other filetypes.
-        // Else: return the plaintext representation.
-        return section;
+        return _.extend({}, section, {
+            'content' : <BasicUserContentBody context={section} />
+        });
     }
 
     if (!Array.isArray(context.content)) throw new Error('context.content is not an array.');
@@ -196,7 +167,7 @@ export class StaticEntry extends React.PureComponent {
         super(props);
         this.replacePlaceholder = this.replacePlaceholder.bind(this);
         this.renderEntryContent = this.renderEntryContent.bind(this);
-        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 750);
+        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 1000);
         var options = (props.section && props.section.options) || {};
         this.state = {
             //'isCollapsible' : options.collapsible,
@@ -236,7 +207,7 @@ export class StaticEntry extends React.PureComponent {
             content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
         }
 
-        var className = "section-content" + (baseClassName? ' ' + baseClassName : '');
+        var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
 
         if (filetype === 'csv'){
             // Special case
@@ -262,7 +233,7 @@ export class StaticEntry extends React.PureComponent {
                     }
                     return null;
                 });
-            }, 750);
+            }, 500);
         });
     }
 
