@@ -103,7 +103,8 @@ ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
 
 ALLOW_ANY_USER_ADD = [
     (Allow, Authenticated, 'add'),
-    (Allow, Authenticated, 'create')
+    (Allow, Authenticated, 'create'),
+    (Allow, 'role.owner', 'edit')
 ] + ALLOW_EVERYONE_VIEW
 
 
@@ -376,6 +377,10 @@ class Item(snovault.Item):
                             grps.append(group)
                     for g in grps:
                         del roles[g]
+        # This emulates __ac_local_roles__ of User.py (role.owner)
+        if 'submitted_by' in properties:
+            submitter = 'userid.%s' % properties['submitted_by']
+            roles[submitter] = 'role.owner'
         return roles
 
     def add_accession_to_title(self, title):
