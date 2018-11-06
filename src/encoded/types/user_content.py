@@ -14,6 +14,7 @@ from .base import (
     ALLOW_LAB_SUBMITTER_EDIT,
     ALLOW_VIEWING_GROUP_VIEW,
     ONLY_ADMIN_VIEW,
+    ALLOW_OWNER_EDIT,
     ALLOW_ANY_USER_ADD
 )
 
@@ -32,13 +33,13 @@ class UserContent(Item):
     schema = load_schema('encoded:schemas/user_content.json')
     embedded_list = ["submitted_by.display_title"]
 
-    STATUS_ACL = {
-        'released': ALLOW_CURRENT,
-        'archived': ALLOW_CURRENT,
-        'deleted': DELETED,
-        'draft': ONLY_ADMIN_VIEW,
-        'released to project': ALLOW_VIEWING_GROUP_VIEW,
-        'archived to project': ALLOW_VIEWING_GROUP_VIEW
+    STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
+        'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
+        'archived'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
+        'deleted'               : ALLOW_OWNER_EDIT + DELETED,
+        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
+        'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW,
+        'archived to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
     }
 
     def _update(self, properties, sheets=None):
@@ -117,8 +118,6 @@ class HiglassViewConfig(UserContent):
     item_type = 'higlass_view_config'
     schema = load_schema('encoded:schemas/higlass_view_config.json')
 
-    STATUS_ACL = dict(UserContent.STATUS_ACL, released=ALLOW_ANY_USER_ADD)
-
     #@calculated_property(schema={
     #    "title": "ViewConfig Files",
     #    "description": "List of files which are defined in ViewConfig",
@@ -147,9 +146,16 @@ class HiglassViewConfig(UserContent):
     #    return None
 
     class Collection(Item.Collection):
+        '''
+        This extension of the default Item collection allows any User to create a new version of these.
+        Emulates base.py Item collection setting of self.__acl__
+
+        TODO:
+            Eventually we can move this up to UserContent or replicate it on JupyterNotebook if want any
+            User to be able to create new one.
+        '''
         def __init__(self, *args, **kw):
             super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
-            # Emulates base.py Item.Collection
             self.__acl__ = ALLOW_ANY_USER_ADD
 
 

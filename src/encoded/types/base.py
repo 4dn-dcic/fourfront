@@ -98,13 +98,16 @@ ALLOW_LAB_VIEW_ADMIN_EDIT = [
     (Allow, 'role.lab_submitter', 'view'),
 ] + ONLY_ADMIN_VIEW
 
+ALLOW_OWNER_EDIT = [
+    (Allow, 'role.owner', ['edit', 'view']),
+]
+
 # Collection acls
 ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
 
 ALLOW_ANY_USER_ADD = [
     (Allow, Authenticated, 'add'),
-    (Allow, Authenticated, 'create'),
-    (Allow, 'role.owner', 'edit')
+    (Allow, Authenticated, 'create')
 ] + ALLOW_EVERYONE_VIEW
 
 

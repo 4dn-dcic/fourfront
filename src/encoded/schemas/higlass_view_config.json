@@ -681,13 +681,6 @@
                     }
                 }
             }
-        },
-        "files": {
-            "title": "File List",
-            "type": "string",
-            "comment" : "There should be no 'viewconfig' if this is set.",
-            "description": "List of files from which to auto-generate a viewconfig. Used only if viewconfig itself is not defined.",
-            "lookup" : 10
         }
     },
     "facets" : {
