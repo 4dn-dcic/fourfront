@@ -1030,28 +1030,20 @@ export default class SubmissionView extends React.PureComponent{
 
 
         var submitProcess = function(me_data){ // me_data = current user fields
-            if(!me_data || !me_data.submits_for || me_data.submits_for.length == 0){
-                console.error('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
+
+            if(!me_data){
+                console.error('Could not get user account info.');
                 keyValid[inKey] = 2;
                 this.setState(stateToSet);
                 return;
             }
-            // use first lab for now
-            var submits_for = me_data.submits_for[0];
-            lab = object.atIdFromObject(submits_for);
-            ajax.promise(lab).then(lab_data => {
-                if(!lab || !lab_data.awards || lab_data.awards.length == 0){
-                    console.error('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
-                    keyValid[inKey] = 2;
-                    this.setState(stateToSet);
-                    return;
-                }
-                // should we really always use the first award?
-                award = lab_data.awards[0];
+
+
+            var submitProcessContd = (userlab = null, userAward = null) => {
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 // this should only be done on the primary object
-                if(this.state.edit && inKey === 0 && propContext.award && propContext.lab){
+                if (this.state.edit && inKey === 0 && propContext.award && propContext.lab){
                     if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = object.atIdFromObject(propContext.award);
                     }
@@ -1068,20 +1060,23 @@ export default class SubmissionView extends React.PureComponent{
                             finalizedContext.submitted_by = object.atIdFromObject(me_data);
                         }
                     }
-                }else{ // use info of person creating/cloning unless values present
-                    if(currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.atIdFromObject(award);
+                } else if (userlab && userAward) { // use info of person creating/cloning unless values present
+                    if (currSchema.properties.award && !('award' in finalizedContext)){
+                        finalizedContext.award = object.atIdFromObject(userAward);
                     }
-                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = lab;
+                    if (currSchema.properties.lab && !('lab' in finalizedContext)){
+                        finalizedContext.lab = userlab;
                     }
                 }
+
                 // if testing validation, use check_only=True (see /types/base.py)
-                var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType;
-                var actionMethod = 'POST';
+                var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType,
+                    actionMethod = 'POST';
+
                 // used to keep track of fields to delete with PATCH for edit/round two
                 // comma-separated string
                 var deleteFields;
+
                 // change actionMethod and destination based on edit/round two
                 if(!test){
                     if (this.state.roundTwo){
@@ -1230,7 +1225,20 @@ export default class SubmissionView extends React.PureComponent{
                     }
                 });
 
-            });
+            };
+
+
+            if (me_data && Array.isArray(me_data.submits_for) && me_data.submits_for.length > 0){
+                // use first lab for now
+                ajax.promise(object.itemUtil.atId(me_data.submits_for[0])).then(myLab => {
+                    // use first award for now
+                    var myAward = (myLab && Array.isArray(myLab.awards) && myLab.awards.length > 0 && myLab.awards[0]) || null;
+                    submitProcessContd(myLab, myAward);
+                });
+            } else {
+                submitProcessContd();
+            }
+
         }.bind(this);
 
         if (this.state.currentSubmittingUser){
