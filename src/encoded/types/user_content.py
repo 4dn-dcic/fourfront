@@ -21,7 +21,7 @@ from .base import (
 
 
 @abstract_collection(
-    name='user-content',
+    name='user-contents',
     unique_key='user_content:name',
     properties={
         'title': "User Content Listing",
