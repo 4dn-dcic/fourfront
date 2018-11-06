@@ -1039,33 +1039,33 @@ export default class SubmissionView extends React.PureComponent{
             }
 
 
-            var submitProcessContd = (userlab = null, userAward = null) => {
+            var submitProcessContd = (userLab = null, userAward = null) => {
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 // this should only be done on the primary object
                 if (this.state.edit && inKey === 0 && propContext.award && propContext.lab){
                     if(currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.atIdFromObject(propContext.award);
+                        finalizedContext.award = object.itemUtil.atId(propContext.award);
                     }
                     if(currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = object.atIdFromObject(propContext.lab);
+                        finalizedContext.lab = object.itemUtil.atId(propContext.lab);
                     }
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(me_data.groups && _.contains(me_data.groups, 'admin')){
                         if(propContext.submitted_by){
-                            finalizedContext.submitted_by = object.atIdFromObject(propContext.submitted_by);
+                            finalizedContext.submitted_by = object.itemUtil.atId(propContext.submitted_by);
                         }else{
                             // use current user
-                            finalizedContext.submitted_by = object.atIdFromObject(me_data);
+                            finalizedContext.submitted_by = object.itemUtil.atId(me_data);
                         }
                     }
-                } else if (userlab && userAward) { // use info of person creating/cloning unless values present
+                } else if (userLab && userAward) { // use info of person creating/cloning unless values present
                     if (currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.atIdFromObject(userAward);
+                        finalizedContext.award = object.itemUtil.atId(userAward);
                     }
                     if (currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = userlab;
+                        finalizedContext.lab = object.itemUtil.atId(userLab);
                     }
                 }
 

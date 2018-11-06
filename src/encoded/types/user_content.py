@@ -108,7 +108,7 @@ class StaticSection(UserContent):
     name='higlass-view-configs',
     properties={
         'title': 'HiGlass Displays',
-        'description': 'Dsiplays and view configurations for HiGlass',
+        'description': 'Displays and view configurations for HiGlass',
     })
 class HiglassViewConfig(UserContent):
     """
