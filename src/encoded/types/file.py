@@ -369,9 +369,6 @@ class File(Item):
                 except Exception as e:
                     print(e)
 
-        # deal with removed the href if it exists
-        if properties.get('href') is not None:
-            del(properties['href'])
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
@@ -441,8 +438,8 @@ class File(Item):
     def href(self, request):
         # check to see if status is Restricted
         status = self.properties.get('status')
-        if status == 'restricted':
-            return
+        # if status == 'restricted':
+        #    return
         file_format = self.properties.get('file_format')
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
         try:
@@ -833,6 +830,9 @@ def is_file_to_download(properties, file_format, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        return
     try:
         user_props = session_properties(request)
     except Exception as e:
