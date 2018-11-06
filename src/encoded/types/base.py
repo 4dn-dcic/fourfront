@@ -86,9 +86,7 @@ ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-ALLOW_CURRENT = [
-    (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+ALLOW_CURRENT = ALLOW_EVERYONE_VIEW
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
@@ -102,6 +100,11 @@ ALLOW_LAB_VIEW_ADMIN_EDIT = [
 
 # Collection acls
 ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
+
+ALLOW_ANY_USER_ADD = [
+    (Allow, Authenticated, 'add'),
+    (Allow, Authenticated, 'create')
+] + ALLOW_EVERYONE_VIEW
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):

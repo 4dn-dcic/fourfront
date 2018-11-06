@@ -9,7 +9,12 @@ from snovault import (
 )
 from .base import (
     Item,
-    ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
+    ALLOW_CURRENT,
+    DELETED,
+    ALLOW_LAB_SUBMITTER_EDIT,
+    ALLOW_VIEWING_GROUP_VIEW,
+    ONLY_ADMIN_VIEW,
+    ALLOW_ANY_USER_ADD
 )
 
 
@@ -107,10 +112,12 @@ class StaticSection(UserContent):
 class HiglassViewConfig(UserContent):
     """
     Item type which contains a `view_config` property and other metadata.
-    TODO: Perhaps make a base class for this and StaticSection once we have more permissioning logic.
     """
+
     item_type = 'higlass_view_config'
     schema = load_schema('encoded:schemas/higlass_view_config.json')
+
+    STATUS_ACL = dict(UserContent.STATUS_ACL, released=ALLOW_ANY_USER_ADD)
 
     #@calculated_property(schema={
     #    "title": "ViewConfig Files",
@@ -139,6 +146,11 @@ class HiglassViewConfig(UserContent):
     #    '''
     #    return None
 
+    class Collection(Item.Collection):
+        def __init__(self, *args, **kw):
+            super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
+            # Emulates base.py Item.Collection
+            self.__acl__ = ALLOW_ANY_USER_ADD
 
 
 
