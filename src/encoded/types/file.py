@@ -876,7 +876,6 @@ def download(context, request):
             tracking_values['file_format'] = file_format.get('file_format')
     tracking_values['filename'] = filename
 
-
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
