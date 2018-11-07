@@ -192,32 +192,32 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        var viewConfTitleAppendStr = " - " + userFirstName + "'s copy",
-            viewConfDesc  = context.description,
+        var viewConfTitleAppendStr  = " - " + userFirstName + "'s copy",
+            viewConfDesc            = context.description,
             viewConfTitle;
-            //viewConfTitle = context.display_title + " - " + userFirstName + "'s copy",
 
-
+        // Check if our title already has " - user's copy" substring and if so, increment counter instead of re-adding.
         if (context.display_title.indexOf(viewConfTitleAppendStr) > -1){
-            var regexCheck = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d\\)'),
+            var regexCheck = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d+\\)$'),
                 regexMatches = context.display_title.match(regexCheck);
 
             if (regexMatches && regexMatches.length === 2) {
+                // regexMatches[0] ==> " - user's copy (int)"
+                // regexMatches[1] ==> " - user's copy"
                 var copyCount = parseInt(
-                    regexMatches[0].replace(regexMatches[1], '')
-                        .trim()
-                        .replace('(', '')
-                        .replace(')', '')
+                        regexMatches[0].replace(regexMatches[1], '')
+                            .trim()
+                            .replace('(', '')
+                            .replace(')', '')
                     );
+                
                 copyCount++;
-
                 viewConfTitle = (
                     context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
                     + viewConfTitleAppendStr + ' (' + copyCount + ')'  // Add new count
                 );
             } else {
-                // Our title already has "" - user's copy" substring, but nothing else.
-                // Do windows format stuff
+                // Our title already has " - user's copy" substring, but not an " (int)"
                 viewConfTitle = context.display_title + ' (2)';
             }
 
@@ -255,9 +255,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             navigate(newItemHref, {}, (resp)=>{
                                 // Show alert on new Item page
                                 Alerts.queue({
-                                    'title' : "Saved " + viewConfTitle,
-                                    'message' : "Saved new display.",
-                                    'style' : 'success'
+                                    'title'     : "Saved " + viewConfTitle,
+                                    'message'   : "Saved new display.",
+                                    'style'     : 'success'
                                 });
                             });
                         });
@@ -292,10 +292,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var copyHrefToClip = function(props, alertTitle) {
             // Alert the user the URL has been copied.
             Alerts.queue({
-                'title' : alertTitle,
-                'message' : "Copied HiGlass URL to clipboard.",
-                'style' : 'success',
-                'navigateDisappearThreshold' : 1
+                'title'     : alertTitle,
+                'message'   : "Copied HiGlass URL to clipboard.",
+                'style'     : 'info'
             });
 
             object.CopyWrapper.copyToClipboard(
@@ -330,16 +329,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     (resp)=>{
                         // Error callback
                         Alerts.queue({
-                            'title' : "Failed to release display.",
-                            'message' : "Sorry, can you try to share again?",
-                            'style' : 'danger'
+                            'title'     : "Failed to release display.",
+                            'message'   : "Sorry, can you try to share again?",
+                            'style'     : 'danger'
                         });
 
                         this.setState({ 'releaseLoading' : false });
                     },
                     JSON.stringify({
-                        'viewconfig' : currentViewConf,
-                        'status': 'released',
+                        'viewconfig'    : currentViewConf,
+                        'status'        : 'released',
                     })
                 );
             }
