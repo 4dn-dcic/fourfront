@@ -176,7 +176,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     handleSaveAs(evt){
         evt.preventDefault();
 
-        var hgc                 = this.getHiGlassComponent(),
+        var { context }         = this.props,
+            hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
             currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
 
@@ -185,52 +186,87 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         // Generate a new title and description based on the current display.
-        var userDetails = JWT.getUserDetails();
-        let userFirstName = "unknown";
+        var userDetails     = JWT.getUserDetails(),
+            userUUID        = (userDetails && userDetails.uuid) || null,
+            userFirstName   = "Unknown";
+
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        const viewConfTitle = this.props.context.display_title + " - " + userFirstName + "'s copy";
-        const viewConfDesc = this.props.context.description;
+        const viewConfTitle = context.display_title + " - " + userFirstName + "'s copy",
+            viewConfDesc    = context.description;
+
+        var fallbackCallback = (err) => {
+            // Error callback
+            Alerts.queue({
+                'title' : "Failed to save display.",
+                'message' : "Sorry, can you try to save again?",
+                'style' : 'danger'
+            });
+            this.setState({ 'saveAsLoading' : false });
+        };
+
+        /**
+         * Try to PUT a new viewconf.
+         */
+        var saveAsProcess = (postData) => {
+            ajax.load(
+                '/higlass-view-configs/',
+                (resp)=>{ // We're likely to get a status code of 201 - Created.
+                    this.setState({ 'saveLoading' : false }, ()=>{
+                        const newHref = object.itemUtil.atId(resp['@graph'][0]);
+                        const navFunction = this.props.navigate || navigate;
+
+                        // Redirect the user to the new Higlass display.
+                        navFunction(newHref, { }, (resp)=>{
+                            Alerts.queue({
+                                'title' : "Saved " + viewConfTitle,
+                                'message' : "Saved new display.",
+                                'style' : 'success'
+                            });
+                        });
+                    });
+                },
+                'POST',
+                fallbackCallback,
+                JSON.stringify(postData)
+            );
+        };
+
+        var payload = {
+            'title'         : viewConfTitle,
+            'description'   : viewConfDesc,
+            'viewconfig'    : currentViewConf
+        };
 
         // Try to PUT a new viewconf.
         this.setState(
             { 'saveAsLoading' : true },
             ()=>{
-                ajax.load(
-                    '/higlass-view-configs/',
-                    (resp)=>{ // We're likely to get a status code of 201 - Created.
-                        this.setState({ 'saveLoading' : false }, ()=>{
-                            const newHref = object.itemUtil.atId(resp['@graph'][0]);
-                            const navFunction = this.props.navigate || navigate;
-
-                            // Redirect the user to the new Higlass display.
-                            navFunction(newHref, { }, (resp)=>{
-                                Alerts.queue({
-                                    'title' : "Saved " + viewConfTitle,
-                                    'message' : "Saved new display.",
-                                    'style' : 'success'
-                                });
-                            });
-                        });
-                    },
-                    'POST',
-                    (resp)=>{
-                        // Error callback
-                        Alerts.queue({
-                            'title' : "Failed to save display.",
-                            'message' : "Sorry, can you try to save again?",
-                            'style' : 'danger'
-                        });
-                        this.setState({ 'saveAsLoading' : false });
-                    },
-                    JSON.stringify({
-                        'title' : viewConfTitle,
-                        'description' : viewConfDesc,
-                        'viewconfig' : currentViewConf
-                    })
-                );
+                if (userUUID) {
+                    // If we have user UUID, grab full user representation to see if any lab or award.
+                    // If user has lab and/or award, add them to the POSTed JSON used to create new Item
+                    // So that other members of their lab/award may see the ViewConf if is released to project
+                    ajax.load(
+                        '/users/' + userUUID,
+                        (fullUserObj)=>{
+                            if (fullUserObj.lab){
+                                payload.lab = object.itemUtil.atId(fullUserObj.lab);
+                            }
+                            if (Array.isArray(fullUserObj.awards) && fullUserObj.awards.length > 0){
+                                payload.award = object.itemUtil.atId(fullUserObj.awards[0]);
+                            }
+                            saveAsProcess(payload);
+                        },
+                        'GET',
+                        fallbackCallback
+                    );
+                } else {
+                    saveAsProcess(payload);
+                }
             }
         );
+
+        
     }
 
 
