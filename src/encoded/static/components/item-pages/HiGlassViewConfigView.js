@@ -249,8 +249,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     ajax.load(
                         '/users/' + userUUID,
                         (fullUserObj)=>{
-                            if (fullUserObj.lab){
-                                payload.lab = object.itemUtil.atId(fullUserObj.lab);
+                            if (Array.isArray(fullUserObj.submits_for) && fullUserObj.submits_for.length > 0){
+                                payload.lab = object.itemUtil.atId(fullUserObj.submits_for[0]);
                             }
                             if (Array.isArray(fullUserObj.awards) && fullUserObj.awards.length > 0){
                                 payload.award = object.itemUtil.atId(fullUserObj.awards[0]);
