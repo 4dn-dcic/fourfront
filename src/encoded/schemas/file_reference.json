@@ -49,6 +49,7 @@
             "enum": [
                 "genome reference",
                 "genome index",
+                "genome index, uncompressed",
                 "index",
                 "barcodes",
                 "oligo sequences",
