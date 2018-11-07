@@ -192,10 +192,40 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        const viewConfTitle = context.display_title + " - " + userFirstName + "'s copy",
-            viewConfDesc    = context.description;
+        var viewConfTitleAppendStr = " - " + userFirstName + "'s copy",
+            viewConfDesc  = context.description,
+            viewConfTitle;
+            //viewConfTitle = context.display_title + " - " + userFirstName + "'s copy",
 
-        var fallbackCallback = (err) => {
+
+        if (context.display_title.indexOf(viewConfTitleAppendStr) > -1){
+            var regexCheck = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d\\)'),
+                regexMatches = context.display_title.match(regexCheck);
+
+            if (regexMatches && regexMatches.length === 2) {
+                var copyCount = parseInt(
+                    regexMatches[0].replace(regexMatches[1], '')
+                        .trim()
+                        .replace('(', '')
+                        .replace(')', '')
+                    );
+                copyCount++;
+
+                viewConfTitle = (
+                    context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
+                    + viewConfTitleAppendStr + ' (' + copyCount + ')'  // Add new count
+                );
+            } else {
+                // Our title already has "" - user's copy" substring, but nothing else.
+                // Do windows format stuff
+                viewConfTitle = context.display_title + ' (2)';
+            }
+
+        } else { // Our title does not have " - [this user]'s copy" substring.
+            viewConfTitle = context.display_title + viewConfTitleAppendStr;
+        }
+
+        var fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
                 'title' : "Failed to save display.",
@@ -205,67 +235,39 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({ 'saveAsLoading' : false });
         };
 
-        /**
-         * Try to PUT a new viewconf.
-         */
-        var saveAsProcess = (postData) => {
-            ajax.load(
-                '/higlass-view-configs/',
-                (resp)=>{ // We're likely to get a status code of 201 - Created.
-                    this.setState({ 'saveLoading' : false }, ()=>{
-                        const newHref = object.itemUtil.atId(resp['@graph'][0]);
-                        const navFunction = this.props.navigate || navigate;
-
-                        // Redirect the user to the new Higlass display.
-                        navFunction(newHref, { }, (resp)=>{
-                            Alerts.queue({
-                                'title' : "Saved " + viewConfTitle,
-                                'message' : "Saved new display.",
-                                'style' : 'success'
-                            });
-                        });
-                    });
-                },
-                'POST',
-                fallbackCallback,
-                JSON.stringify(postData)
-            );
-        };
-
         var payload = {
             'title'         : viewConfTitle,
             'description'   : viewConfDesc,
             'viewconfig'    : currentViewConf
         };
 
-        // Try to PUT a new viewconf.
+        // Try to POST/PUT a new viewconf.
         this.setState(
             { 'saveAsLoading' : true },
-            ()=>{
-                if (userUUID) {
-                    // If we have user UUID, grab full user representation to see if any lab or award.
-                    // If user has lab and/or award, add them to the POSTed JSON used to create new Item
-                    // So that other members of their lab/award may see the ViewConf if is released to project
-                    ajax.load(
-                        '/users/' + userUUID,
-                        (fullUserObj)=>{
-                            if (Array.isArray(fullUserObj.submits_for) && fullUserObj.submits_for.length > 0){
-                                payload.lab = object.itemUtil.atId(fullUserObj.submits_for[0]);
-                            }
-                            if (Array.isArray(fullUserObj.awards) && fullUserObj.awards.length > 0){
-                                payload.award = object.itemUtil.atId(fullUserObj.awards[0]);
-                            }
-                            saveAsProcess(payload);
-                        },
-                        'GET',
-                        fallbackCallback
-                    );
-                } else {
-                    saveAsProcess(payload);
-                }
+            () => {
+                ajax.load(
+                    '/higlass-view-configs/',
+                    (resp) => { // We're likely to get a status code of 201 - Created.
+                        this.setState({ 'saveLoading' : false }, ()=>{
+                            const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
+    
+                            // Redirect the user to the new Higlass display.
+                            navigate(newItemHref, {}, (resp)=>{
+                                // Show alert on new Item page
+                                Alerts.queue({
+                                    'title' : "Saved " + viewConfTitle,
+                                    'message' : "Saved new display.",
+                                    'style' : 'success'
+                                });
+                            });
+                        });
+                    },
+                    'POST',
+                    fallbackCallback,
+                    JSON.stringify(payload)
+                );
             }
         );
-
         
     }
 
@@ -292,7 +294,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             Alerts.queue({
                 'title' : alertTitle,
                 'message' : "Copied HiGlass URL to clipboard.",
-                'style' : 'success'
+                'style' : 'success',
+                'navigateDisappearThreshold' : 1
             });
 
             object.CopyWrapper.copyToClipboard(
