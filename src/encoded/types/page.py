@@ -1,7 +1,6 @@
-"""The type file for the collection Pages.  Which is used for static pages on the portal
 """
-import os
-import requests
+The type file for the collection Pages.  Which is used for static pages on the portal
+"""
 from urllib.parse import (
     urlparse,
     urlencode
@@ -13,7 +12,6 @@ from pyramid.httpexceptions import ( # 301-307 redirect code response
     HTTPTemporaryRedirect
 )
 from snovault import (
-    calculated_property,
     collection,
     load_schema,
     COLLECTIONS,

@@ -32,7 +32,7 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "released",
+            "default": "draft",
             "enum" : [
                 "released",
                 "released to project",

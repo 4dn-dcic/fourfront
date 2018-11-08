@@ -196,21 +196,22 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             viewConfDesc            = context.description,
             viewConfTitle;
 
-        // Check if our title already has " - user's copy" substring and if so, increment counter instead of re-adding.
+        // Check if our title already has " - user's copy" substring and if so,
+        // increment an appended counter instead of re-adding the substring.
         if (context.display_title.indexOf(viewConfTitleAppendStr) > -1){
-            var regexCheck = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d+\\)$'),
-                regexMatches = context.display_title.match(regexCheck);
+            var regexCheck      = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d+\\)'),
+                regexMatches    = context.display_title.match(regexCheck);
 
             if (regexMatches && regexMatches.length === 2) {
                 // regexMatches[0] ==> " - user's copy (int)"
                 // regexMatches[1] ==> " - user's copy"
                 var copyCount = parseInt(
-                        regexMatches[0].replace(regexMatches[1], '')
-                            .trim()
-                            .replace('(', '')
-                            .replace(')', '')
-                    );
-                
+                    regexMatches[0].replace(regexMatches[1], '')
+                        .trim()
+                        .replace('(', '')
+                        .replace(')', '')
+                );
+
                 copyCount++;
                 viewConfTitle = (
                     context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
@@ -250,7 +251,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     (resp) => { // We're likely to get a status code of 201 - Created.
                         this.setState({ 'saveLoading' : false }, ()=>{
                             const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
-    
+
                             // Redirect the user to the new Higlass display.
                             navigate(newItemHref, {}, (resp)=>{
                                 // Show alert on new Item page
@@ -268,7 +269,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 );
             }
         );
-        
+
     }
 
 

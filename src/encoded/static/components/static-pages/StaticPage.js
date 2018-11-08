@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import { compiler } from 'markdown-to-jsx';
-import { Collapse } from 'react-bootstrap'; 
+import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
 import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink, BasicUserContentBody } from './components';
 import * as globals from './../globals';
