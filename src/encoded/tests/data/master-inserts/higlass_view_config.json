@@ -4,6 +4,7 @@
         "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
         "uuid" : "00000000-1111-0000-1111-000000000002",
         "name" : "higlass-mcool-test-view",
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
         "viewconfig" : {
             "editable":true,
             "zoomFixed":false,
@@ -65,8 +66,8 @@
                                 "options":{
                                     "labelColor":"black",
                                     "labelPosition":"hidden",
-                                    "plusStrandColor":"blue",
-                                    "minusStrandColor":"red",
+                                    "plusStrandColor":"black",
+                                    "minusStrandColor":"black",
                                     "trackBorderWidth":0,
                                     "trackBorderColor":"black",
                                     "name":"Gene Annotations (mm10)",
@@ -108,8 +109,8 @@
                                 "options":{
                                     "labelColor":"black",
                                     "labelPosition":"hidden",
-                                    "plusStrandColor":"blue",
-                                    "minusStrandColor":"red",
+                                    "plusStrandColor":"black",
+                                    "minusStrandColor":"black",
                                     "trackBorderWidth":0,
                                     "trackBorderColor":"black",
                                     "name":"Gene Annotations (mm10)",

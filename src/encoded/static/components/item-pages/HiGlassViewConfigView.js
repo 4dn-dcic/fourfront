@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse } from 'react-bootstrap';
+import { Button, Collapse, SplitButton, MenuItem, ButtonToolbar } from 'react-bootstrap';
 import * as globals from './../globals';
 import Alerts from './../alerts';
 import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility, navigate } from './../util';
@@ -64,6 +64,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleSaveAs = _.throttle(this.handleSaveAs.bind(this), 3000, { 'trailing' : false });
+        this.handleShareRelease = this.handleShare.bind(this, 'released');
         this.handleShare = this.handleShare.bind(this);
 
         this.state = {
@@ -276,38 +277,53 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     /**
     * Copies current URL to clipbard.
     * Sets the higlass display status to released if it isn't already.
+    *
     * @returns {void}
     */
-    handleShare(evt){
+    handleShare(statusToSet = 'released', evt){
         evt.preventDefault();
 
-        var hgc                 = this.getHiGlassComponent(),
+        var { context, href }   = this.props,
+            hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr),
+            viewConfTitle       = context.title || context.display_title;
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
 
-        const viewConfTitle = this.props.context.title;
-        var copyHrefToClip = function(props, alertTitle) {
+        function copyHrefToClip(statusChangedTo = null) {
             // Alert the user the URL has been copied.
             Alerts.queue({
-                'title'     : alertTitle,
-                'message'   : "Copied HiGlass URL to clipboard.",
+                'title'     : (statusChangedTo ? "Updated Status and " : '') + "Copied URL for " + viewConfTitle,
+                'message'   : (
+                    <React.Fragment>
+                        { statusChangedTo ?
+                            <p className="mb-02">
+                                Changed Display status to <b>{ statusChangedTo }</b>.
+                                It may take some time for this edit to take effect.
+                            </p>
+                        : null }
+                        <p className="mb-0">Copied HiGlass Display URL to clipboard.</p>
+                    </React.Fragment>
+                ),
                 'style'     : 'info'
             });
 
             object.CopyWrapper.copyToClipboard(
-                props.href,
-                ()=>{ },
+                href,
+                ()=>{
+                    // TODO: temporarily change style of button for second or two to signify success instead of Alert
+                    // move Alert down to 'release' callback and have it say "released & copied to clipbaord"
+                },
                 ()=>{ },
             );
-        };
+        }
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
-        if (this.props.context.status === "released") {
-            copyHrefToClip(this.props,  "Copied URL for " + viewConfTitle);
+        if (context.status === statusToSet) {
+            copyHrefToClip();
             return;
         }
 
@@ -320,10 +336,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             { 'releaseLoading' : true },
             ()=>{
                 ajax.load(
-                    this.props.href,
+                    href,
                     (resp)=>{
                         // Success! Generate an alert telling the user it's successful
-                        copyHrefToClip(this.props, "Released " + viewConfTitle);
+                        copyHrefToClip(statusToSet);
                         this.setState({ 'releaseLoading' : false });
                     },
                     'PATCH',
@@ -339,7 +355,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     },
                     JSON.stringify({
                         'viewconfig'    : currentViewConf,
-                        'status'        : 'released',
+                        'status'        : statusToSet
                     })
                 );
             }
@@ -348,6 +364,43 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     getHiGlassComponent(){
         return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
+    }
+
+    shareButton(){
+        var { session, context } = this.props,
+            { saveLoading, saveAsLoading, releaseLoading } = this.state;
+
+        var editPermission  = this.havePermissionToEdit(),
+            sharePermission = (context.status === 'released' || editPermission),
+            commonBtnProps  = {
+                'onClick' : this.handleShareRelease,
+                'bsStyle' : 'info',
+                'disabled' : !sharePermission || releaseLoading,
+                'key' : 'sharebtn',
+                'data-tip' : context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'
+            },
+            btnTitle        = (
+                <React.Fragment>
+                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; Share
+                </React.Fragment>
+            );
+
+        if (!session || !editPermission){
+            return (
+                <Button {...commonBtnProps} children={btnTitle} />
+            );
+        }
+
+        return (
+            <SplitButton {...commonBtnProps} onSelect={this.handleShare} pullRight title={btnTitle}>
+                <MenuItem active={context.status === "released to project"} eventKey="released to project">Release to Project Only</MenuItem>
+                <MenuItem active={context.status === "draft"} eventKey="draft">Release to Lab Only</MenuItem>
+                <MenuItem divider />
+                <MenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</MenuItem>
+                <MenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</MenuItem>
+                <MenuItem active={context.status === "deleted"} eventKey="deleted">Delete</MenuItem>
+            </SplitButton>
+        );
     }
 
     saveButtons(){
@@ -360,23 +413,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             sharePermission = (context.status === 'released' || editPermission);
 
         return (
-            <div className="text-right inline-block">
-                <div className="inline-block" key="savebtn">
-                    <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success">
-                        <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
-                    </Button>
-                </div>&nbsp;
-                <div className="inline-block" key="saveasbtn">
-                    <Button onClick={this.handleSaveAs} disabled={saveAsLoading} bsStyle="success">
-                        <i className={"icon icon-fw icon-" + (saveAsLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save As...
-                    </Button>
-                </div>&nbsp;
-                <div className="inline-block" key="clonebtn">
-                    <Button onClick={this.handleShare} disabled={!sharePermission || releaseLoading} bsStyle="info" data-tip={context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'}>
-                        <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; Share
-                    </Button>
-                </div>&nbsp;
-            </div>
+            <React.Fragment>
+                <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success" key="savebtn">
+                    <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
+                </Button>
+                <Button onClick={this.handleSaveAs} disabled={saveAsLoading} bsStyle="success" key="saveasbtn">
+                    <i className={"icon icon-fw icon-" + (saveAsLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save As...
+                </Button>
+            </React.Fragment>
         );
     }
 
@@ -384,11 +428,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var { isFullscreen, toggleFullScreen } = this.props;
         if( typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
-                <div className="inline-block for-state-fullscreenViewEnabled" key="toggle-fullscreen">
-                    <Button onClick={toggleFullScreen} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                        <i className={"icon icon-fw icon-" + (!isFullscreen ? 'arrows-alt' : 'crop')}/>
-                    </Button>
-                </div>
+                <Button onClick={toggleFullScreen} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
+                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'arrows-alt' : 'crop')}/>
+                </Button>
             );
         }
         return null;
@@ -429,8 +471,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <h3 className="tab-section-title">
                     <span>HiGlass Browser</span>
                     <div className="inner-panel constant-panel pull-right tabview-title-controls-container">
-                        { this.saveButtons() }
-                        { this.fullscreenButton() }
+                        <ButtonToolbar>
+                            { this.saveButtons() }
+                            { this.shareButton() }
+                            { this.fullscreenButton() }
+                        </ButtonToolbar>
                     </div>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
