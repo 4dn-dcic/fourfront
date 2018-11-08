@@ -75,6 +75,7 @@ ORDER = [
     'file_set',
     'file_set_calibration',
     'file_set_microscope_qc',
+    'file_vistrack',
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',

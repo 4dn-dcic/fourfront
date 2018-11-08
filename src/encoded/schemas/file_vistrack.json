@@ -47,16 +47,9 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "enum": [
-                "genome reference",
-                "genome index",
-                "index",
-                "barcodes",
-                "oligo sequences",
-                "restriction sites",
-                "blacklisted regions",
-                "repeats",
-                "spike-in",
-                "other"
+                "intensity values",
+                "peaks",
+                "fold change values"
             ]
         },
         "file_classification": {
@@ -86,18 +79,14 @@
             "lookup": 22
         },
         "external_file_accession": {
-            "title": "External Accession",
-            "description": "The primary accession for this file from the external source",
-            "@type": "@id",
-            "rdfs:subPropertyOf": "rdfs:seeAlso",
-            "comment": "Enter as a database name:identifier eg. ENC:ENCFF252ZFN",
+            "title": "External File Accession",
+            "description": "The primary accession for the file",
+            "comment": "Enter as a database name:identifier eg. ENC:ENCFF798HCY",
             "type": "string"
         },
         "external_experiment_accession": {
             "title": "External Experiment Accession",
             "description": "The accession for the Experiment or Dataset that this file is linked to",
-            "@type": "@id",
-            "rdfs:subPropertyOf": "rdfs:seeAlso",
             "comment": "Enter as a database name:identifier eg. ENC:ENCSR301HRV",
             "type": "string"
         },

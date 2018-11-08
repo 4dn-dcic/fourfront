@@ -55,12 +55,13 @@
     {
         "file_format": "bw",
         "standard_file_extension": "bw",
+        "other_allowed_extensions": ["bigWig"],
         "description": "Bigwig file format",
         "uuid": "d1311111-218e-4f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
         "file_format": "bg",
