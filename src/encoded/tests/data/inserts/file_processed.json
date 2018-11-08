@@ -315,7 +315,8 @@
     "accession": "4DNFIBEHSOE4",
     "extra_files": [
        {
-          "file_format": "pairs_px2"
+          "file_format": "pairs_px2",
+          "status": "to be uploaded by workflow"
        }
     ]
 }
