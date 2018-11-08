@@ -85,7 +85,7 @@ export class ExperimentSetTablesLoaded extends React.Component {
 
     innerTable(){
         return (
-            <ExperimentSetTables {..._.pick(this.props, 'sortFxn', 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')} />
+            <ExperimentSetTables {..._.pick(this.props, 'sortFxn', 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad')} />
         );
     }
 
@@ -101,7 +101,7 @@ export class ExperimentSetTablesLoaded extends React.Component {
 export class ExperimentSetTablesLoadedFromSearch extends ExperimentSetTablesLoaded {
     render(){
         return (
-            <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth')} children={this.innerTable()} />
+            <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth', 'title', 'onLoad')} children={this.innerTable()} />
         );
     }
 }

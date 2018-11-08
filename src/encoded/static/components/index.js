@@ -36,6 +36,7 @@ require('./item-pages/FileMicroscopyView');
 require('./item-pages/BiosampleView');
 require('./item-pages/BiosourceView');
 require('./item-pages/ProtocolView');
+require('./item-pages/PublicationView');
 require('./forms/SubmissionView');
 require('./browse/BrowseView');
 require('./browse/SearchView');
