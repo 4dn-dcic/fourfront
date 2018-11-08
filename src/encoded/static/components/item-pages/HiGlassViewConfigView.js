@@ -396,8 +396,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <MenuItem active={context.status === "released to project"} eventKey="released to project">Release to Project Only</MenuItem>
                 <MenuItem active={context.status === "draft"} eventKey="draft">Release to Lab Only</MenuItem>
                 <MenuItem divider />
+                {/* These statuses currently not available.
                 <MenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</MenuItem>
                 <MenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</MenuItem>
+                */}
                 <MenuItem active={context.status === "deleted"} eventKey="deleted">Delete</MenuItem>
             </SplitButton>
         );

@@ -36,8 +36,6 @@
             "enum" : [
                 "released",
                 "released to project",
-                "archived to project",
-                "archived",
                 "draft",
                 "deleted"
             ],
