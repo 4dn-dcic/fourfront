@@ -370,6 +370,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var { session, context } = this.props,
             { saveLoading, saveAsLoading, releaseLoading } = this.state;
 
+        if (!session) return null; // TODO: Remove and implement for anon users. Eventually.
+
         var editPermission  = this.havePermissionToEdit(),
             sharePermission = (context.status === 'released' || editPermission),
             commonBtnProps  = {
@@ -381,11 +383,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             },
             btnTitle        = (
                 <React.Fragment>
-                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; Share
+                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; {
+                        context.status === 'released' ? 'Share' : 'Release to Public'
+                    }
                 </React.Fragment>
             );
 
-        if (!session || !editPermission){
+        if (!editPermission){
             return (
                 <Button {...commonBtnProps} children={btnTitle} />
             );
@@ -393,14 +397,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         return (
             <SplitButton {...commonBtnProps} onSelect={this.handleShare} pullRight title={btnTitle}>
-                <MenuItem active={context.status === "released to project"} eventKey="released to project">Release to Project Only</MenuItem>
-                <MenuItem active={context.status === "draft"} eventKey="draft">Release to Lab Only</MenuItem>
+                <StatusMenuItem eventKey="released" context={context}>Release to Public</StatusMenuItem>
+                <StatusMenuItem eventKey="released to project" context={context}>Release to Project Only</StatusMenuItem>
+                <StatusMenuItem eventKey="draft" context={context}>Release to Lab Only</StatusMenuItem>
                 <MenuItem divider />
                 {/* These statuses currently not available.
-                <MenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</MenuItem>
-                <MenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</MenuItem>
+                <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
+                <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
                 */}
-                <MenuItem active={context.status === "deleted"} eventKey="deleted">Delete</MenuItem>
+                <StatusMenuItem eventKey="deleted" context={context}>Delete</StatusMenuItem>
             </SplitButton>
         );
     }
@@ -455,19 +460,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props;
 
-        /*
-        if (hgc){
-            var currentViewConfStr = hgc.api.exportAsViewConfString();
-            console.log(
-                'ViewConf from HiGlassComponent',
-                this.state.originalViewConfigString === currentViewConfStr,
-                currentViewConfStr,
-                '\n\n\n',
-                this.state.originalViewConfigString
-            );
-        }
-        */
-
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -494,6 +486,23 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 }
+
+
+class StatusMenuItem extends React.PureComponent {
+    render(){
+        var { eventKey, context, children } = this.props,
+            active = context.status === eventKey;
+
+        children = (
+            <span className={active ? "text-500" : null}>
+                <i className="item-status-indicator-dot" data-status={eventKey} />&nbsp;  { children }
+            </span>
+        );
+
+        return <MenuItem {..._.omit(this.props, 'context')} active={active} children={children} />;
+    }
+}
+
 
 /**
  * Dont use. Was testing stuff. Not fun UX. Details tab is nicer.
