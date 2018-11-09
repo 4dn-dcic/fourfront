@@ -103,7 +103,7 @@ def test_restricted_no_download(testapp, fastq_json):
     download_link = resobj['href']
     testapp.get(download_link, status=307)
     # fail download of restricted file (although with a 200 status?)
-    res2 = testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
+    testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
     testapp.get(download_link, status=403)
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 

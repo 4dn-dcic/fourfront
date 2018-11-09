@@ -509,7 +509,6 @@ def metadata_tsv(context, request):
             summary['counts']['Total Files'] += 1
             summary['lists']['Not Available'].append(('Restricted', file_row_dict ))
             return file_row_dict
-        
 
         summary['counts']['Total Unique Files to Download'] += 1
         summary['counts']['Total Files'] += 1
