@@ -64,7 +64,9 @@
                 "compartments",
                 "insulation score - diamond",
                 "insulation score - potential",
-                "other"
+                "other",
+                "domains",
+                "boundaries"
             ]
         },
         "file_classification": {
