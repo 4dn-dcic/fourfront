@@ -7926,6 +7926,11 @@
                 "workflow_argument_name": "chip.gensz"
             },
             {   
+                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.macs2_pooled.sig_fc"
+            },
+            {   
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
@@ -8116,6 +8121,20 @@
                 },
                 "name": "chip",
                 "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.macs2_pooled.sig_fc",
+                        "target": [
+                            {
+                                "name": "chip.macs2_pooled.sig_fc"
+                            }
+                        ]
+                    },
                     {
                         "meta": {
                             "cardinality": "single",
