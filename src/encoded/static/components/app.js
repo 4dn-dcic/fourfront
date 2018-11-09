@@ -1495,6 +1495,25 @@ class BodyElement extends React.PureComponent {
         this.onResize();
     }
 
+    componentDidUpdate(pastProps){
+        if (pastProps.href !== this.props.href){
+            // Remove tooltip if still lingering from previous page
+            var _tooltip    = this.refs && this.refs.tooltipComponent,
+                domElem     = ReactDOM.findDOMNode(_tooltip);
+
+            if (!domElem) return;
+
+            var className = domElem.className || '',
+                classList = className.split(' '),
+                isShowing = classList.indexOf('show') > -1;
+
+            if (isShowing){
+                domElem.className = _.without(classList, 'show').join(' ');
+            }
+
+        }
+    }
+
     /**
      * Unbinds event listeners.
      * Probably not needed but lets be safe & cleanup.
@@ -1743,8 +1762,8 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     onTooltipAfterHide(){
-        var _tooltip = this.refs && this.refs.tooltipComponent,
-            domElem = ReactDOM.findDOMNode(_tooltip);
+        var _tooltip    = this.refs && this.refs.tooltipComponent,
+            domElem     = ReactDOM.findDOMNode(_tooltip);
         if (!domElem) {
             console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
             return;
@@ -1855,7 +1874,7 @@ class BodyElement extends React.PureComponent {
                     </div>
                 </div>
 
-                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" />
+                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" key="tooltip" />
 
                 <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
                     verticalAlign="center" /* cursor position relative to popover */

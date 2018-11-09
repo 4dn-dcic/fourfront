@@ -161,6 +161,42 @@ class PublicationSummary extends React.PureComponent {
 
     }
 
+    contributingLabs(){
+        var { context } = this.props,
+            contributingLabs = _.filter(
+                (Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0 && context.contributing_labs) || [],
+                function(lab){
+                    // Exclude labs which don't have permission to view, in case any exist.
+                    return lab && !lab.error;
+                }
+            );
+
+        if (contributingLabs.length === 0) return null;
+
+        function labListItem(lab){
+            var labHref = object.itemUtil.atId(lab);
+            if (!labHref || lab.error) return null;
+
+            return (
+                <li className="contributing-lab" key={lab.uuid || labHref}>
+                    <a href={labHref}>{ lab.display_title }</a>
+                </li>
+            );
+        }
+
+        return (
+            <div>
+                <hr className="mb-0" />
+                <h4 className="mt-2 mb-15 text-500">
+                    { contributingLabs.length > 1 ? 'Contributing Labs' : 'Contributing Lab' }
+                </h4>
+                <ul>
+                    { _.map(contributingLabs, labListItem) }
+                </ul>
+            </div>
+        );
+    }
+
     render(){
         var { context } = this.props,
             abstractCol = this.abstract();
@@ -179,6 +215,7 @@ class PublicationSummary extends React.PureComponent {
                     </div>
                 </div>
                 { this.details() }
+                { this.contributingLabs() }
             </div>
         );
     }
