@@ -216,7 +216,6 @@ class PublicationExperimentSets extends React.PureComponent {
     }
 
     getCountCallback(resp){
-        console.log('TT');
         if (resp && typeof resp.total === 'number'){
             this.setState({ 'totalCount' : resp.total });
         }
