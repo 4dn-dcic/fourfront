@@ -299,6 +299,7 @@ class Item(snovault.Item):
         'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
+        'restricted': ALLOW_CURRENT,
         # publication
         'published': ALLOW_CURRENT,
         # experiment sets
