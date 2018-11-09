@@ -70,6 +70,7 @@
                 "Image processing",
                 "Visualization processing",
                 "Repli-seq data processing",
+                "ChIP-seq data processing",
                 "Data QC",
                 "Other"
             ]
@@ -156,8 +157,8 @@
             }
         },
         "workflow_language": {
-            "title": "CWL main file name",
-            "description": "Name of the main CWL file for the workflow",
+            "title": "Workflow language",
+            "description": "Language used to describe workflow, either CWL or WDL",
             "type": "string",
             "enum": [
                 "CWL",
