@@ -770,7 +770,6 @@ def post_upload(context, request):
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
-
     accession_or_external = properties.get('accession')
     external = context.propsheets.get('external', None)
 
@@ -842,6 +841,9 @@ def is_file_to_download(properties, file_format, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        raise HTTPForbidden('This is a restricted file not available for download')
     try:
         user_props = session_properties(request)
     except Exception as e:
@@ -885,7 +887,6 @@ def download(context, request):
         if file_format is not None:
             tracking_values['file_format'] = file_format.get('file_format')
     tracking_values['filename'] = filename
-
 
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)

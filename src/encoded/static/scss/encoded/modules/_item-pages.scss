@@ -263,7 +263,8 @@ h3.submission-subtitle {
 		}
 
 		&.expset-status[data-status="revoked"]:before,
-		&.expset-status[data-status="obsolete"]:before {
+		&.expset-status[data-status="obsolete"]:before,
+		&.expset-status[data-status="restricted"]:before {
 			color: #fff;
 			background-color: #812423;
 		}

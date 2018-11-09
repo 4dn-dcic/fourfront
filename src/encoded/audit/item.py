@@ -54,6 +54,7 @@ STATUS_LEVEL = {
     'archived': 3,
     'current': 3,
     'revoked': 3,
+    'restricted': 3,
     'planned': 2,
     'released to project': 3,
     'pre-release': 3,
