@@ -8027,6 +8027,84 @@
                                 "name": "chip.chrsz"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.pipeline_type",
+                        "source": [
+                            {
+                                "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.paired_end",
+                        "source": [
+                            {
+                                "name": "chip.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.choose_ctl.always_use_pooled_ctl",
+                        "source": [
+                            {
+                                "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.gensz",
+                        "source": [
+                            {
+                                "name": "chip.gensz"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
