@@ -315,37 +315,9 @@ h1.page-title + .page-subtitle {
 	padding-right : ($grid-gutter-width / 2);
 }
 
-.text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
-.text-uppercase 	{ text-transform: uppercase; }
-.text-justify 		{ text-align: justify; }
-
-.text-100 { font-weight: 100; }
-a.text-100, button.text-100 { font-weight: 100 !important; }
-.text-200 { font-weight: 200; }
-a.text-200, button.text-200 { font-weight: 200 !important; }
-.text-300 { font-weight: 300; }
-a.text-300, button.text-300 { font-weight: 300 !important; }
-.text-400 { font-weight: 400; }
-a.text-400, button.text-400 { font-weight: 400 !important; }
-.text-500 { font-weight: 500; }
-a.text-500, button.text-500 { font-weight: 500 !important; }
-.text-600 { font-weight: 600; }
-a.text-600, button.text-600 { font-weight: 600 !important; }
-
-.text-normal { font-size: 1rem; } // Reset to default size.
-.text-small { font-size: 0.9rem; }
-.text-smaller { font-size: 0.75rem; }
-.text-medium { font-size: 15px; font-size: 15.75px; }
-.text-large { font-size: 17.5px; }
-.text-larger { font-size: 20px; line-height: 25px; }
-
 .left { float: left; }
 .right { float: right; }
 
-.mono-text,
-.accession {
-	font-family: $font-family-monospace;
-}
 
 /** This is especially useful for elements with data-tip attribute (for React Tooltip) so that tip is positioned at center. **/
 .inline-block {
@@ -362,22 +334,6 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 
 .no-user-select {
 	@include user-select(none);
-}
-
-@media screen and (max-width: $screen-xs-max){
-
-	.text-left-xs {
-		// Make text left-aligned for collapsed mobile view(s),
-		// e.g. if is aligned right on larger screens.
-		text-align: left !important;
-	}
-
-}
-
-.text-ellipsis-container {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 /** Extending Bootstrap grid to allow blocks to flow right in a row **/
