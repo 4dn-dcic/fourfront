@@ -17,10 +17,14 @@ export default class PublicationView extends DefaultItemView {
 
         var initTabs    = [],
             windowWidth = this.props.windowWidth,
-            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth));
+            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth)),
+            context     = this.props.context;
 
         initTabs.push(PublicationSummary.getTabObject(this.props, width));
-        initTabs.push(PublicationExperimentSets.getTabObject(this.props, width));
+
+        if ((context.exp_sets_used_in_pub || []).length > 0 || (context.exp_sets_prod_in_pub || []).length > 0){
+            initTabs.push(PublicationExperimentSets.getTabObject(this.props, width));
+        }
 
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
     }
@@ -59,11 +63,7 @@ class PublicationSummary extends React.PureComponent {
 
     attribution(){
         var { context }     = this.props,
-            journal         = context.journal,
             authors         = Array.isArray(context.authors) && context.authors.length > 0 && context.authors,
-            categories      = Array.isArray(context.categories) && context.categories.length > 0 && context.categories,
-            datePublished   = context.date_published && moment(context.date_published),
-            id              = context.ID,
             url             = context.url,
             retArr          = [];
 
@@ -148,7 +148,7 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <Button bsSize="xs" bsStyle="info"
+                                        <Button bsSize="xs" bsStyle="info" className="mr-02 mb-02 text-capitalize"
                                             children={cat} href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }/>
                                     )
                                 }
@@ -223,12 +223,20 @@ class PublicationExperimentSets extends React.PureComponent {
 
 
     render(){
-        var { windowWidth } = this.props,
-            requestHref = "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate";
+        var { windowWidth, context } = this.props,
+            { totalCount } = this.state,
+            requestHref = (
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type&publications_of_set.uuid=" + context.uuid
+            ),
+            title = 'Experiment Sets Published';
+
+        if (totalCount){
+            title = totalCount + ' Experiment Sets Published';
+        }
 
         return (
             <div>
-                <ExperimentSetTablesLoadedFromSearch requestHref={requestHref} windowWidth={windowWidth} onLoad={this.getCountCallback} />
+                <ExperimentSetTablesLoadedFromSearch requestHref={requestHref} windowWidth={windowWidth} onLoad={this.getCountCallback} title={title} />
                 { this.state.totalCount && this.state.totalCount > 25 ?
                     <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
                         View all Experiment Sets ({ this.state.totalCount - 25 + ' more' })

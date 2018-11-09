@@ -440,18 +440,22 @@ $margin-util-sizes: 0, 1, 2, 3, 4, 5, 6, 7, 8;  // * 10px
 $margin-util-sizes-mini: 1, 2, 3, 5, 7, 8; 		// * 1px
 
 @each $util-size in $margin-util-sizes {
-	.mb-#{$util-size}, * > .mb-#{$util-size}{
+	.mb-#{$util-size},
+	* > .mb-#{$util-size}{
 		margin-bottom : $util-size * 10px !important;
 	}
-	.mt-#{$util-size}, * > .mt-#{$util-size}{
+	.mt-#{$util-size},
+	* > .mt-#{$util-size}{
 		margin-top : $util-size * 10px !important;
 	}
 
 	@each $util-mini-size in $margin-util-sizes-mini {
-		.mb-#{$util-size}#{$util-mini-size}, * > .mb-#{$util-size}#{$util-mini-size}{
+		.mb-#{$util-size}#{$util-mini-size},
+		* > .mb-#{$util-size}#{$util-mini-size}{
 			margin-bottom : ($util-size * 10px) + ($util-mini-size * 1px) !important;
 		}
-		.mt-#{$util-size}#{$util-mini-size}, * > .mt-#{$util-size}#{$util-mini-size}{
+		.mt-#{$util-size}#{$util-mini-size},
+		* > .mt-#{$util-size}#{$util-mini-size}{
 			margin-top : ($util-size * 10px) + ($util-mini-size * 1px) !important;
 		}
 	}
@@ -481,18 +485,22 @@ $margin-util-sizes-mini: 1, 2, 3, 5, 7, 8; 		// * 1px
 
 // Margin left/right
 @each $util-size in $margin-util-sizes {
-	.ml-#{$util-size}, * > .ml-#{$util-size}{
+	.ml-#{$util-size},
+	* > .ml-#{$util-size}{
 		margin-left : $util-size * 10px !important;
 	}
-	.mr-#{$util-size}, * > .mr-#{$util-size}{
+	.mr-#{$util-size},
+	* > .mr-#{$util-size}{
 		margin-right : $util-size * 10px !important;
 	}
 
 	@each $util-mini-size in $margin-util-sizes-mini {
-		.ml-0#{$util-mini-size}, * > .ml-0#{$util-mini-size}{
+		.ml-#{$util-size}#{$util-mini-size},
+		* > .ml-#{$util-size}#{$util-mini-size}{
 			margin-left : ($util-size * 10px) + ($util-mini-size * 1px) !important;
 		}
-		.mr-0#{$util-mini-size}, * > .mr-0#{$util-mini-size}{
+		.mr-#{$util-size}#{$util-mini-size},
+		* > .mr-#{$util-size}#{$util-mini-size}{
 			margin-right : ($util-size * 10px) + ($util-mini-size * 1px) !important;
 		}
 	}
