@@ -7946,7 +7946,7 @@
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
         "wdl_main_filename": "chip.wdl",
-        "workflow_language": "wdl",
+        "workflow_language": "WDL",
         "data_types": [
             "ChIP-seq"
         ],
