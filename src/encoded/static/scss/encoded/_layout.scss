@@ -583,6 +583,17 @@ $margin-util-sizes-mini: 1, 2, 3, 5, 7, 8; 		// * 1px
 	}
 }
 
+div.dropdown.btn-group {
+	.dropdown-toggle.btn {
+		> span.caret {
+			position: relative;
+			position: static;
+			top: none;
+			right: none;
+		}
+	}
+}
+
 @mixin button-no-focus-outline {
 	&:active, &:focus, &.focus, &:focus.active, &.focus:active, &.focus:focus {
 		outline: none;

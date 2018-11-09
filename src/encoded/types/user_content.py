@@ -7,6 +7,10 @@ from snovault import (
     collection,
     load_schema
 )
+<<<<<<< HEAD
+=======
+from snovault.interfaces import STORAGE
+>>>>>>> origin/viewconf_permissions
 from .base import (
     Item,
     ALLOW_CURRENT,
@@ -14,6 +18,7 @@ from .base import (
     ALLOW_LAB_SUBMITTER_EDIT,
     ALLOW_VIEWING_GROUP_VIEW,
     ONLY_ADMIN_VIEW,
+<<<<<<< HEAD
     ALLOW_ANY_USER_ADD
 )
 import uuid
@@ -21,6 +26,17 @@ import uuid
 
 @abstract_collection(
     name='user-content',
+=======
+    ALLOW_OWNER_EDIT,
+    ALLOW_ANY_USER_ADD,
+    get_item_if_you_can
+)
+
+
+
+@abstract_collection(
+    name='user-contents',
+>>>>>>> origin/viewconf_permissions
     unique_key='user_content:name',
     properties={
         'title': "User Content Listing",
@@ -32,6 +48,7 @@ class UserContent(Item):
     schema = load_schema('encoded:schemas/user_content.json')
     embedded_list = ["submitted_by.display_title"]
 
+<<<<<<< HEAD
     STATUS_ACL = {
         'released': ALLOW_CURRENT,
         'archived': ALLOW_CURRENT,
@@ -39,6 +56,15 @@ class UserContent(Item):
         'draft': ONLY_ADMIN_VIEW,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         'archived to project': ALLOW_VIEWING_GROUP_VIEW
+=======
+    STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
+        'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
+        'deleted'               : ALLOW_OWNER_EDIT + DELETED,
+        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
+        'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW,
+        # 'archived'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
+        # 'archived to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
+>>>>>>> origin/viewconf_permissions
     }
 
     def _update(self, properties, sheets=None):
@@ -46,6 +72,38 @@ class UserContent(Item):
             properties['name'] = str(self.uuid)
         super(UserContent, self)._update(properties, sheets)
 
+<<<<<<< HEAD
+=======
+    @classmethod
+    def create(cls, registry, uuid, properties, sheets=None):
+        submitted_by_uuid   = properties.get('submitted_by')
+        lab_schema          = cls.schema and cls.schema.get('properties', {}).get('lab')
+        award_schema        = cls.schema and cls.schema.get('properties', {}).get('award')
+        if (
+            not submitted_by_uuid                               # Shouldn't happen
+            or (not lab_schema and not award_schema)            # If not applicable for Item type (shouldn't happen as props defined on UserContent schema)
+            or ('lab' in properties or 'award' in properties)   # If values exist already - ideal case - occurs for general submission process(es)
+        ):
+            # Default for all other Items
+            return super(UserContent, cls).create(registry, uuid, properties, sheets)
+
+        submitted_by_item = registry[STORAGE].get_by_uuid(submitted_by_uuid)
+
+        if submitted_by_item:
+            # All linkTo property values, if present, are UUIDs
+            if 'lab' not in properties and 'lab' in submitted_by_item.properties:
+                # Use lab of submitter - N.B. this differs from other Items where lab comes from 'submits_for' list.
+                properties['lab'] = submitted_by_item.properties['lab']
+
+            if 'award' not in properties and 'lab' in submitted_by_item.properties:
+                lab_item = registry[STORAGE].get_by_uuid(submitted_by_item.properties['lab'])
+                if lab_item and len(lab_item.properties.get('awards', [])) > 0:
+                    # Using first award as default/fallback when award not explicitly selected/sent.
+                    properties['award'] = lab_item.properties['awards'][0]
+
+        return super(UserContent, cls).create(registry, uuid, properties, sheets)
+
+>>>>>>> origin/viewconf_permissions
 
 
 @collection(
@@ -107,7 +165,11 @@ class StaticSection(UserContent):
     name='higlass-view-configs',
     properties={
         'title': 'HiGlass Displays',
+<<<<<<< HEAD
         'description': 'Dsiplays and view configurations for HiGlass',
+=======
+        'description': 'Displays and view configurations for HiGlass',
+>>>>>>> origin/viewconf_permissions
     })
 class HiglassViewConfig(UserContent):
     """
@@ -117,8 +179,11 @@ class HiglassViewConfig(UserContent):
     item_type = 'higlass_view_config'
     schema = load_schema('encoded:schemas/higlass_view_config.json')
 
+<<<<<<< HEAD
     STATUS_ACL = dict(UserContent.STATUS_ACL, released=ALLOW_ANY_USER_ADD)
 
+=======
+>>>>>>> origin/viewconf_permissions
     #@calculated_property(schema={
     #    "title": "ViewConfig Files",
     #    "description": "List of files which are defined in ViewConfig",
@@ -147,11 +212,28 @@ class HiglassViewConfig(UserContent):
     #    return None
 
     class Collection(Item.Collection):
+<<<<<<< HEAD
         def __init__(self, *args, **kw):
             super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
             # Emulates base.py Item.Collection
             self.__acl__ = ALLOW_ANY_USER_ADD
 
+=======
+        '''
+        This extension of the default Item collection allows any User to create a new version of these.
+        Emulates base.py Item collection setting of self.__acl__
+
+        TODO:
+            Eventually we can move this up to UserContent or replicate it on JupyterNotebook if want any
+            User to be able to create new one.
+        '''
+        def __init__(self, *args, **kw):
+            super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
+            self.__acl__ = ALLOW_ANY_USER_ADD
+
+
+
+>>>>>>> origin/viewconf_permissions
 def get_local_file_contents(filename, contentFilesLocation=None):
     if contentFilesLocation is None:
         full_file_path = filename
@@ -169,6 +251,7 @@ def get_remote_file_contents(uri):
     resp = requests.get(uri)
     return resp.text
 
+<<<<<<< HEAD
 """ Begin Chad's section
 """
 @view_config(name='add_files', context=File, request_method='PATCH',
@@ -630,3 +713,5 @@ def repack_higlass_views(viewconf, viewconf_files_by_position):
 
 """ End Chad's section
 """
+=======
+>>>>>>> origin/viewconf_permissions
