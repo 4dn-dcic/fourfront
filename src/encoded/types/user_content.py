@@ -7,10 +7,7 @@ from snovault import (
     collection,
     load_schema
 )
-<<<<<<< HEAD
-=======
 from snovault.interfaces import STORAGE
->>>>>>> origin/viewconf_permissions
 from .base import (
     Item,
     ALLOW_CURRENT,
@@ -18,25 +15,15 @@ from .base import (
     ALLOW_LAB_SUBMITTER_EDIT,
     ALLOW_VIEWING_GROUP_VIEW,
     ONLY_ADMIN_VIEW,
-<<<<<<< HEAD
-    ALLOW_ANY_USER_ADD
+    ALLOW_OWNER_EDIT,
+    ALLOW_ANY_USER_ADD,
+    get_item_if_you_can
 )
 import uuid
 
 
 @abstract_collection(
-    name='user-content',
-=======
-    ALLOW_OWNER_EDIT,
-    ALLOW_ANY_USER_ADD,
-    get_item_if_you_can
-)
-
-
-
-@abstract_collection(
     name='user-contents',
->>>>>>> origin/viewconf_permissions
     unique_key='user_content:name',
     properties={
         'title': "User Content Listing",
@@ -48,15 +35,6 @@ class UserContent(Item):
     schema = load_schema('encoded:schemas/user_content.json')
     embedded_list = ["submitted_by.display_title"]
 
-<<<<<<< HEAD
-    STATUS_ACL = {
-        'released': ALLOW_CURRENT,
-        'archived': ALLOW_CURRENT,
-        'deleted': DELETED,
-        'draft': ONLY_ADMIN_VIEW,
-        'released to project': ALLOW_VIEWING_GROUP_VIEW,
-        'archived to project': ALLOW_VIEWING_GROUP_VIEW
-=======
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
         'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
         'deleted'               : ALLOW_OWNER_EDIT + DELETED,
@@ -64,7 +42,6 @@ class UserContent(Item):
         'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW,
         # 'archived'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
         # 'archived to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
->>>>>>> origin/viewconf_permissions
     }
 
     def _update(self, properties, sheets=None):
@@ -72,8 +49,6 @@ class UserContent(Item):
             properties['name'] = str(self.uuid)
         super(UserContent, self)._update(properties, sheets)
 
-<<<<<<< HEAD
-=======
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
         submitted_by_uuid   = properties.get('submitted_by')
@@ -103,7 +78,6 @@ class UserContent(Item):
 
         return super(UserContent, cls).create(registry, uuid, properties, sheets)
 
->>>>>>> origin/viewconf_permissions
 
 
 @collection(
@@ -165,11 +139,7 @@ class StaticSection(UserContent):
     name='higlass-view-configs',
     properties={
         'title': 'HiGlass Displays',
-<<<<<<< HEAD
-        'description': 'Dsiplays and view configurations for HiGlass',
-=======
         'description': 'Displays and view configurations for HiGlass',
->>>>>>> origin/viewconf_permissions
     })
 class HiglassViewConfig(UserContent):
     """
@@ -179,11 +149,6 @@ class HiglassViewConfig(UserContent):
     item_type = 'higlass_view_config'
     schema = load_schema('encoded:schemas/higlass_view_config.json')
 
-<<<<<<< HEAD
-    STATUS_ACL = dict(UserContent.STATUS_ACL, released=ALLOW_ANY_USER_ADD)
-
-=======
->>>>>>> origin/viewconf_permissions
     #@calculated_property(schema={
     #    "title": "ViewConfig Files",
     #    "description": "List of files which are defined in ViewConfig",
@@ -212,13 +177,6 @@ class HiglassViewConfig(UserContent):
     #    return None
 
     class Collection(Item.Collection):
-<<<<<<< HEAD
-        def __init__(self, *args, **kw):
-            super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
-            # Emulates base.py Item.Collection
-            self.__acl__ = ALLOW_ANY_USER_ADD
-
-=======
         '''
         This extension of the default Item collection allows any User to create a new version of these.
         Emulates base.py Item collection setting of self.__acl__
@@ -233,7 +191,6 @@ class HiglassViewConfig(UserContent):
 
 
 
->>>>>>> origin/viewconf_permissions
 def get_local_file_contents(filename, contentFilesLocation=None):
     if contentFilesLocation is None:
         full_file_path = filename
@@ -251,7 +208,6 @@ def get_remote_file_contents(uri):
     resp = requests.get(uri)
     return resp.text
 
-<<<<<<< HEAD
 """ Begin Chad's section
 """
 @view_config(name='add_files', context=File, request_method='PATCH',
@@ -273,26 +229,9 @@ def add_files_to_higlass_viewconf(context, request):
     # TODO Clone the base view conf so the original remains unchanged.
     higlass_viewconf = base_higlass_viewconf.copy() # TODO
 
-    # slugid.nice();
-    #https://github.com/higlass/higlass/blob/v1.2.8/app/scripts/HiGlassComponent.js#L2546-L2626
-
-    # always place on the bottom
-    #const jsonString = JSON.stringify(lastView);
-    #const newView = JSON.parse(jsonString);
-    #newView.initialXDomain = this.xScales[newView.uid].domain();
-    #newView.initialYDomain = this.yScales[newView.uid].domain();
-
-    # Unique ID
-    #newView.uid = slugid.nice();
-    #newView.layout.i = newView.uid;
-
-    # Get the initial X & Y Domain. Copy the domain from the current viewconf.
-
-    # Generate a new unique id, or reuse the uuid?
-
-
     # Get the file list.
     new_file_uuids = request.params.get('files').split(',')
+    new_viewconf = None
 
     for file_uuid in new_file_uuids:
         # Get the new file.
@@ -321,37 +260,12 @@ def add_files_to_higlass_viewconf(context, request):
 def add_single_file_to_higlass_viewconf(viewconf, new_file_model):
     """ Add a single file to the view config.
     """
-    # All files should have the same genome assembly (or have no assembly). Return an error if they don't match.
-    if new_file_model.genome_assembly:
-        for file in viewconf_files:
-            # If it doesn't have a genome, skip.
-            if not file.genome_assembly:
-                continue
-            if file.genome_assembly != new_file_model.genome_assembly:
-                # TODO
-                return None, "Genome Assemblies do not match, cannot add"
-
-    # Get the new file's type.
-    new_file_info = {
-        "higlass_uid": new_file_model.higlass_uid,
-        "higlass_type": "TODO",
-        "dimensions": 0,
-    }
-
-    # Guess the number of dimensions based on the filetype.
-    if new_file.file_type in ("chromefile", "contact matrix"):
-        new_file_info["dimensions"] = 2
-    elif new_file.file_type in ("bigwig"): # TODO. Other formats?
-        new_file_info["dimensions"] = 1
-
-    if new_file_info["dimensions"] == 0:
-        return None, f"Unknown new file type {new_file.file_type}"
 
     # Find all of the files in the viewconf. Determine their type and their dimension (1 or 2).
-    viewconf_files_by_position = {
-        "top" : [],
-        "left" : [],
-        "center" : [],
+    viewconf_file_counts_by_position = {
+        "top" : 0,
+        "left" : 0,
+        "center" : 0,
     }
 
     for direction in ("top", "left", "center"):
@@ -363,41 +277,41 @@ def add_single_file_to_higlass_viewconf(viewconf, new_file_model):
             elif direction == "center":
                 tracks = new_view.tracks.center.contents
 
-            for track in tracks:
-                track_info = {
-                    "higlass_uid": track["tilesetUid"],
-                    "higlass_type": track["type"],
-                    "dimensions": 0,
-                }
+            # All files should have the same genome assembly (or have no assembly). Return an error if they don't match.
+            if new_file_model.genome_assembly:
+                for track in tracks:
+                    # If it doesn't have a genome, skip.
+                    if not "options" in track:
+                        continue
+                    if not "coordSystem" in track["options"]:
+                        continue
+                    if track["options"]["coordSystem"] != new_file_model.genome_assembly:
+                        # TODO
+                        return None, "Genome Assemblies do not match, cannot add"
 
-                # Based on the type of higlass display, determine the file dimensions.
-                if track_info["higlass_type"] in ("heatmap"):
-                    track_info["dimensions"] = 2
-                elif track_info["higlass_type"] in ("horizontal-line"):
-                    track_info["dimensions"] = 1
-
-                viewconf_files_by_position[direction].append(track_info)
+            viewconf_file_counts_by_position[direction] += len(tracks)
 
     # If there are already 6 views, stop and return an error.
     views_count = len(viewconf.viewconfig.views)
     if views_count >= 6:
         return None, "You cannot have more than 6 views in a single display."
 
-    # If the new file is 1-D, try to add it to the top section.
-    if new_file_info["dimensions"] == 1:
-        add_1d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_file)
-
-    # If the new file is 2-D, try to add it to the center section.
-    if new_file_info["dimensions"] == 2:
-        add_2d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_file)
+    # Based on the filetype's dimensions, try to add the file to the viewconf
+    # TODO Handle other dimensions
+    if new_file_model.file_type in ("chromefile", "contact matrix"):
+        add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file_model.higlass_uid)
+    elif new_file_model.file_type in ("bigwig"):
+        add_1d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file_model.higlass_uid)
+    else:
+        return None, f"Unknown new file type {new_file.file_type}"
 
     # Resize the sections so they fit into a 12 x 12 grid.
-    repack_higlass_views(viewconf, viewconf_files_by_position)
+    repack_higlass_views(viewconf, viewconf_file_counts_by_position)
 
     # Success! Return the modified view conf.
     return viewconf, None
 
-def add_1d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_file):
+def add_1d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file_higlass_uid):
     """Decide on the best location to add a 1-D file to the Higlass View Config's top track.
     """
 
@@ -422,7 +336,9 @@ def add_1d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_fi
                 left: [ ],
                 whole: [ ],
                 bottom: [ ],
-                top: [ ],
+                top: [
+                    {}
+                ],
                 center: [ ],
             },
             uid: "Not set yet",
@@ -437,52 +353,26 @@ def add_1d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_fi
             }
         }
 
-    # TODO
-    new_view.tracks.top[0] = {
-        tilesetUid: "QDutvmyiSrec5nX4pA5WGQ",
-        server: "https://higlass.io/api/v1",
-        minHeight: 55,
-        position: "top",
-        header: "",
-        orientation: "1d-horizontal",
-        type: "horizontal-line",
-        options: {
-            geneStrandSpacing: 4,
-            geneLabelPosition: "outside",
-            trackBorderColor: "black",
-            valueScaling: "linear",
-            geneAnnotationHeight: 10,
-            labelColor: "black",
-            mousePositionColor: "#999999",
-            minusStrandColor: "red",
-            showMousePosition: false,
-            labelPosition: "hidden",
-            coordSystem: "mm10",
-            showTooltip: false,
-            plusStandColor: "blue",
-            name: "Gene Annotations (mm10)",
-            trackBorderWidth: 0,
-            fontSize: 11,
-            plusStrandColor: "blue"
-        },
-        name: "Gene Annotations (mm10)", # TODO
-        uid: "top-annotation-track", # TODO
-        height: 55
-    }
-
     new_view = base_view.deepcopy()
-    new_view.uid = uuid.uuid4()
-    new_view.layout.i = new_view.uid
+    new_view["uid"] = uuid.uuid4()
+    new_view["layout"]["i"] = new_view["uid"]
 
-    viewconf_files_by_position["top"].append({
-        "higlass_uid": new_file.higlass_uid,
-        "higlass_type": "TODO",
-        "dimensions": 1,
-    })
+    # Get the tileset information for this file
+    tileset_info = get_higlass_tileset_info_from_file(new_file_higlass_uid)
+
+    new_view["tracks"]["top"][0]["tilesetUid"] = new_file_higlass_uid
+    new_view["tracks"]["top"][0]["name"] = tileset_info["name"]
+    new_view["tracks"]["top"][0]["type"] = "horizontal-line"
+    new_view["tracks"]["top"][0]["options"]["coordSystem"] = tileset_info["coordSystem"]
+    new_view["tracks"]["top"][0]["options"]["name"] = tileset_info["name"]
+
+    viewconf_file_counts_by_position["top"] += 1
 
     viewconf.viewconfig.views.append(new_view)
+    # exportAsViewConfString
+    # zoomToDataExtent
 
-def add_2d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_file):
+def add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file):
     """Decide on the best location to add a 2-D file to the Higlass View Config's center track.
     """
 
@@ -508,7 +398,11 @@ def add_2d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_fi
                 whole: [ ],
                 bottom: [ ],
                 top: [ ],
-                center: [ ],
+                center: [
+                    {
+                        contents: {}
+                    }
+                ],
             },
             uid: "Not set yet",
             layout: {
@@ -522,42 +416,21 @@ def add_2d_file_to_higlass_viewconf(viewconf, viewconf_files_by_position, new_fi
             }
         }
 
-    # TODO
-    new_view.tracks.center[0]= {
-        contents: [
-            {
-                server: "https://higlass.4dnucleome.org/api/v1",
-                type: "heatmap",
-                transforms: [],
-                tilesetUid: "LTiacew8TjCOaP9gpDZwZw",
-                uid: "GjuZed1ySGW1IzZZqFB9BA",
-                resolutions: [],
-                options: {},
-                position: "center",
-                name: "4DNFI1TBYKV3.mcool"
-            }
-        ],
-        type: "combined",
-        height: 250,
-        options: { },
-        uid: "center-mcool-track",
-        position: "center"
-    }
-    new_view.tracks.center[0].contents[0].type = "heatmap"
+    # Get the tileset information for this file
+    tileset_info = get_higlass_tileset_info_from_file(new_file_higlass_uid)
 
-    new_view = base_view.deepcopy()
-    new_view.uid = uuid.uuid4()
-    new_view.layout.i = new_view.uid
+    # TODO Do I need to add 1-D tracks?
+    new_view["tracks"]["center"][0]["contents"]["tilesetUid"] = new_file_higlass_uid
+    new_view["tracks"]["center"][0]["contents"]["name"] = tileset_info["name"]
+    new_view["tracks"]["center"][0]["contents"]["type"] = "combined"
+    new_view["tracks"]["center"][0]["contents"]["options"]["coordSystem"] = tileset_info["coordSystem"]
+    new_view["tracks"]["center"][0]["contents"]["options"]["name"] = tileset_info["name"]
 
-    viewconf_files_by_position["center"].append({
-        "higlass_uid": new_file.higlass_uid,
-        "higlass_type": "TODO",
-        "dimensions": 2,
-    })
+    viewconf_file_counts_by_position["center"] += 1
 
     viewconf.viewconfig.views.append(new_view)
 
-def repack_higlass_views(viewconf, viewconf_files_by_position):
+def repack_higlass_views(viewconf, viewconf_file_counts_by_position):
     """Set up the higlass views.
     """
 
@@ -640,11 +513,11 @@ def repack_higlass_views(viewconf, viewconf_files_by_position):
     }
 
     # Count the number of 1-D views.
-    horizontal_1d_views = len(viewconf_files_by_position["left"])
-    vertical_1d_views = len(viewconf_files_by_position["top"])
+    horizontal_1d_views = viewconf_file_counts_by_position["left"]
+    vertical_1d_views = viewconf_file_counts_by_position["top"]
 
     # Count the number of 2-D views.
-    count_2d_views = len(viewconf_files_by_position["center"])
+    count_2d_views = viewconf_file_counts_by_position["center"]
 
     # Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
     # 1 2 5
@@ -708,10 +581,44 @@ def repack_higlass_views(viewconf, viewconf_files_by_position):
             # Set the y location, then increment it.
             higlass_view.layout.y = y
             height = size_for_2d_items[horizontal_1d_views][horizontal_2d_views]
-            y += height # TODO I don't think I can increment the height yet
+            y += height
             higlass_view.layout.h = height
+
+def get_higlass_tileset_info_from_file(new_file_higlass_uid):
+    """ Contacts higlass servers and returns a dict.
+    """
+    # TODO if the file lacks higlass_uid, feel free to bail
+
+    # Get the Higlass server.
+    higlass_server_urls = ("https://higlass.io/api/v1", "https://higlass.4dnucleome.org/api/v1/")
+
+    # TODO: Generate auth headers for requests to higlass
+
+    for server_url in higlass_server_urls:
+        # Query the server.
+        #TODO auth = HTTPBasicAuth(settings.PHENOTIPSUSER, settings.PHENOTIPSPASSWORD)
+        headers = {'Content-Type': 'application/json'}
+
+        try:
+            response = requests.get(
+                endpoint_url,
+                #auth=auth,
+                headers=headers,
+                verify=False
+            )
+        except Exception, e:
+            # TODO log the exception
+            continue
+
+        # If it says no info was found, skip.
+        if "error" in response[new_file_higlass_uid]:
+            continue
+
+        # Extract the relevant fields
+        return response[new_file_higlass_uid]
+
+    # At this point, none of the servers replied anything useful.
+    return None
 
 """ End Chad's section
 """
-=======
->>>>>>> origin/viewconf_permissions
