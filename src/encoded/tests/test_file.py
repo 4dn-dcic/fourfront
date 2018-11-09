@@ -94,6 +94,20 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
+def test_restricted_no_download(testapp, fastq_json):
+    # check that initial download works
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    download_link = resobj['href']
+    testapp.get(download_link, status=307)
+    # fail download of restricted file (although with a 200 status?)
+    testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
+    testapp.get(download_link, status=403)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+
+
 def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files

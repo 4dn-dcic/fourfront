@@ -302,7 +302,7 @@ def metadata_tsv(context, request):
             'Total Unique Files to Download'    : 0
         },
         'lists' : {
-            'Not Yet Uploaded'  : [],
+            'Not Available'     : [],
             'Duplicate Files'   : [],
             'Extra Files'       : []
         }
@@ -486,7 +486,7 @@ def metadata_tsv(context, request):
         if file_row_dict['File Download URL'] is None:
             file_row_dict['File Download URL'] = '### No URL currently available'
             summary['counts']['Total Files'] += 1
-            summary['lists']['Not Yet Uploaded'].append(('No URL available', file_row_dict ))
+            summary['lists']['Not Available'].append(('No URL available', file_row_dict ))
             return file_row_dict
 
         if file_cache.get(file_row_dict['File Download URL']) is not None:
@@ -501,7 +501,13 @@ def metadata_tsv(context, request):
         if file_row_dict['File Status'] in ['uploading', 'to be uploaded', 'upload failed']:
             file_row_dict['File Download URL'] = '### Not Yet Uploaded: ' + file_row_dict['File Download URL']
             summary['counts']['Total Files'] += 1
-            summary['lists']['Not Yet Uploaded'].append(('Not yet uploaded', file_row_dict ))
+            summary['lists']['Not Available'].append(('Not yet uploaded', file_row_dict ))
+            return file_row_dict
+
+        if file_row_dict['File Status'] == 'restricted':
+            file_row_dict['File Download URL'] = '### Restricted: ' + file_row_dict['File Download URL']
+            summary['counts']['Total Files'] += 1
+            summary['lists']['Not Available'].append(('Restricted', file_row_dict ))
             return file_row_dict
 
         summary['counts']['Total Unique Files to Download'] += 1
@@ -537,9 +543,9 @@ def metadata_tsv(context, request):
         if len(summary['lists']['Duplicate Files']) > 0:
             ret_rows.append(['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Duplicate Files'])
-        if len(summary['lists']['Not Yet Uploaded']) > 0:
-            ret_rows.append(['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Yet Uploaded'])), 's' if len(summary['lists']['Not Yet Uploaded']) > 1 else ''), '', '', '', ''])
-            gen_mini_table(summary['lists']['Not Yet Uploaded'])
+        if len(summary['lists']['Not Available']) > 0:
+            ret_rows.append(['###', '- Commented out {} file{} which are not yet available (e.g. not yet finished uploading):'.format(str(len(summary['lists']['Not Available'])), 's' if len(summary['lists']['Not Available']) > 1 else ''), '', '', '', ''])
+            gen_mini_table(summary['lists']['Not Available'])
 
         return ret_rows
 

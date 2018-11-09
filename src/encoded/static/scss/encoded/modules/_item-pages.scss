@@ -211,7 +211,8 @@ h3.submission-subtitle {
 	}
 
 	&[data-status="revoked"]:before,
-	&[data-status="obsolete"]:before {
+	&[data-status="obsolete"]:before,
+	&[data-status="restricted"]:before {
 		color: #fff;
 		background-color: #812423;
 	}
