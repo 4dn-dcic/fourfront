@@ -814,9 +814,10 @@ export default class App extends React.Component {
      */
     updateUserInfo(callback = null){
         // get user actions (a function of log in) from local storage
-        var userActions = [];
-        var session = false;
-        var userInfo = JWT.getUserInfo();
+        var userActions = [],
+            session     = false,
+            userInfo    = JWT.getUserInfo();
+
         if (userInfo){
             userActions = userInfo.user_actions;
             var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.

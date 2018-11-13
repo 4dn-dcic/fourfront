@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse, SplitButton, MenuItem, ButtonToolbar } from 'react-bootstrap';
+import { Button, Collapse, MenuItem, ButtonToolbar, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import Alerts from './../alerts';
 import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility, navigate } from './../util';
@@ -63,15 +63,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
-        this.handleSaveAs = _.throttle(this.handleSaveAs.bind(this), 3000, { 'trailing' : false });
-        this.handleShareRelease = this.handleShare.bind(this, 'released');
-        this.handleShare = this.handleShare.bind(this);
+        this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
+        this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
+        this.handleStatusChange = this.handleStatusChange.bind(this);
 
         this.state = {
             'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
             'originalViewConfig' : null, //object.deepClone(props.viewConfig)
             'saveLoading' : false,
-            'saveAsLoading' : false,
+            'cloneLoading' : false,
             'releaseLoading' : false
         };
     }
@@ -117,7 +117,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     havePermissionToEdit(){
-        return !!(_.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
+        return !!(this.props.session && _.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
     }
 
     /**
@@ -174,7 +174,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     * Create a new higlass viewconfig for the user, based on the current data.
     * @returns {void}
     */
-    handleSaveAs(evt){
+    handleClone(evt){
         evt.preventDefault();
 
         var { context }         = this.props,
@@ -195,7 +195,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         var viewConfTitleAppendStr  = " - " + userFirstName + "'s copy",
             viewConfDesc            = context.description,
-            viewConfTitle;
+            viewConfTitle           = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
 
         // Check if our title already has " - user's copy" substring and if so,
         // increment an appended counter instead of re-adding the substring.
@@ -222,9 +222,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 // Our title already has " - user's copy" substring, but not an " (int)"
                 viewConfTitle = context.display_title + ' (2)';
             }
-
-        } else { // Our title does not have " - [this user]'s copy" substring.
-            viewConfTitle = context.display_title + viewConfTitleAppendStr;
         }
 
         var fallbackCallback = (errResp, xhr) => {
@@ -234,23 +231,26 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 'message' : "Sorry, can you try to save again?",
                 'style' : 'danger'
             });
-            this.setState({ 'saveAsLoading' : false });
+            this.setState({ 'cloneLoading' : false });
         };
 
         var payload = {
             'title'         : viewConfTitle,
             'description'   : viewConfDesc,
-            'viewconfig'    : currentViewConf
+            'viewconfig'    : currentViewConf,
+            // We don't include other properties and let them come from schema default values.
+            // For example, default status is 'draft', which will be used.
+            // Lab and award do not carry over as current user might be from different lab.
         };
 
         // Try to POST/PUT a new viewconf.
         this.setState(
-            { 'saveAsLoading' : true },
+            { 'cloneLoading' : true },
             () => {
                 ajax.load(
                     '/higlass-view-configs/',
                     (resp) => { // We're likely to get a status code of 201 - Created.
-                        this.setState({ 'saveLoading' : false }, ()=>{
+                        this.setState({ 'cloneLoading' : false }, ()=>{
                             const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
 
                             // Redirect the user to the new Higlass display.
@@ -280,50 +280,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     *
     * @returns {void}
     */
-    handleShare(statusToSet = 'released', evt){
+    handleStatusChange(statusToSet = 'released', evt){
         evt.preventDefault();
 
         var { context, href }   = this.props,
             hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr),
             viewConfTitle       = context.title || context.display_title;
-
-        if (!currentViewConf){
-            throw new Error('Could not get current view configuration.');
-        }
-
-        function copyHrefToClip(statusChangedTo = null) {
-            // Alert the user the URL has been copied.
-            Alerts.queue({
-                'title'     : (statusChangedTo ? "Updated Status and " : '') + "Copied URL for " + viewConfTitle,
-                'message'   : (
-                    <React.Fragment>
-                        { statusChangedTo ?
-                            <p className="mb-02">
-                                Changed Display status to <b>{ statusChangedTo }</b>.
-                                It may take some time for this edit to take effect.
-                            </p>
-                        : null }
-                        <p className="mb-0">Copied HiGlass Display URL to clipboard.</p>
-                    </React.Fragment>
-                ),
-                'style'     : 'info'
-            });
-
-            object.CopyWrapper.copyToClipboard(
-                href,
-                ()=>{
-                    // TODO: temporarily change style of button for second or two to signify success instead of Alert
-                    // move Alert down to 'release' callback and have it say "released & copied to clipbaord"
-                },
-                ()=>{ },
-            );
-        }
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
         if (context.status === statusToSet) {
-            copyHrefToClip();
             return;
         }
 
@@ -339,23 +304,30 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     href,
                     (resp)=>{
                         // Success! Generate an alert telling the user it's successful
-                        copyHrefToClip(statusToSet);
                         this.setState({ 'releaseLoading' : false });
+                        Alerts.queue({
+                            'title'     : "Updated Status for " + viewConfTitle,
+                            'message'   : (
+                                <p className="mb-02">
+                                    Changed Display status to <b>{ statusToSet }</b>.
+                                    It may take some time for this edit to take effect.
+                                </p>
+                            ),
+                            'style'     : 'info'
+                        });
                     },
                     'PATCH',
                     (resp)=>{
                         // Error callback
+                        this.setState({ 'releaseLoading' : false });
                         Alerts.queue({
                             'title'     : "Failed to release display.",
                             'message'   : "Sorry, can you try to share again?",
                             'style'     : 'danger'
                         });
-
-                        this.setState({ 'releaseLoading' : false });
                     },
                     JSON.stringify({
-                        'viewconfig'    : currentViewConf,
-                        'status'        : statusToSet
+                        'status' : statusToSet
                     })
                 );
             }
@@ -366,53 +338,47 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
     }
 
-    shareButton(){
+    statusChangeButton(){
         var { session, context } = this.props,
-            { saveLoading, saveAsLoading, releaseLoading } = this.state;
+            { saveLoading, cloneLoading, releaseLoading } = this.state,
+            editPermission = this.havePermissionToEdit();
 
-        if (!session) return null; // TODO: Remove and implement for anon users. Eventually.
+        if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
 
-        var editPermission  = this.havePermissionToEdit(),
-            sharePermission = (context.status === 'released' || editPermission),
-            commonBtnProps  = {
-                'onClick' : this.handleShareRelease,
-                'bsStyle' : 'info',
-                'disabled' : !sharePermission || releaseLoading,
-                'key' : 'sharebtn',
-                'data-tip' : context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'
-            },
-            btnTitle        = (
-                <React.Fragment>
-                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; {
-                        context.status === 'released' ? 'Share' : 'Release to Public'
-                    }
-                </React.Fragment>
-            );
-
-        if (!editPermission){
-            return (
-                <Button {...commonBtnProps} children={btnTitle} />
-            );
-        }
+        var btnProps  = {
+            'onSelect'      : this.handleStatusChange,
+            //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
+            'bsStyle'       : context.status === 'released' ? 'default' : 'info',
+            'disabled'      : releaseLoading,
+            'key'           : 'sharebtn',
+            'data-tip'      : context.status === 'released' ? 'Change status of this item to not be publically viewable' : 'Release display to public.',
+            'title'         : (
+                    <React.Fragment>
+                        <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'id-badge')}/>&nbsp; Manage
+                    </React.Fragment>
+                ),
+            'pullRight'     : true
+        };
 
         return (
-            <SplitButton {...commonBtnProps} onSelect={this.handleShare} pullRight title={btnTitle}>
-                <StatusMenuItem eventKey="released" context={context}>Release to Public</StatusMenuItem>
-                <StatusMenuItem eventKey="released to project" context={context}>Release to Project Only</StatusMenuItem>
-                <StatusMenuItem eventKey="draft" context={context}>Release to Lab Only</StatusMenuItem>
+            <DropdownButton {...btnProps}>
+                <StatusMenuItem eventKey="released" context={context}>Visible by Everyone</StatusMenuItem>
+                <StatusMenuItem eventKey="released to project" context={context}>Visible by Network</StatusMenuItem>
+                <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
+                <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
                 <MenuItem divider />
                 {/* These statuses currently not available.
                 <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
                 <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
                 */}
                 <StatusMenuItem eventKey="deleted" context={context}>Delete</StatusMenuItem>
-            </SplitButton>
+            </DropdownButton>
         );
     }
 
     saveButtons(){
         var { session, context } = this.props,
-            { saveLoading, saveAsLoading, releaseLoading } = this.state;
+            { saveLoading, cloneLoading, releaseLoading } = this.state;
 
         if (!session) return null;
 
@@ -424,10 +390,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success" key="savebtn">
                     <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
                 </Button>
-                <Button onClick={this.handleSaveAs} disabled={saveAsLoading} bsStyle="success" key="saveasbtn">
-                    <i className={"icon icon-fw icon-" + (saveAsLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save As...
+                <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="saveasbtn">
+                    <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Clone
                 </Button>
             </React.Fragment>
+        );
+    }
+
+    copyURLButton(){
+        return (
+            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement={Button} value={this.props.href}>
+                <i className="icon icon-fw icon-copy"/>
+            </object.CopyWrapper>
         );
     }
 
@@ -467,7 +441,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     <div className="inner-panel constant-panel pull-right tabview-title-controls-container">
                         <ButtonToolbar>
                             { this.saveButtons() }
-                            { this.shareButton() }
+                            { this.statusChangeButton() }
+                            { this.copyURLButton() }
                             { this.fullscreenButton() }
                         </ButtonToolbar>
                     </div>

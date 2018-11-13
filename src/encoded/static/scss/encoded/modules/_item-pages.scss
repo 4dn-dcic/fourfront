@@ -247,6 +247,11 @@ h3.submission-subtitle {
 		background-color: #397855;
 	}
 
+	&[data-status="released to lab"]:before {
+		color: #fff;
+		background-color: #80921c;
+	}
+
 	&[data-status="unspecified"]:before,
 	&[data-status="archived"]:before,
 	&[data-status="archived to project"]:before {

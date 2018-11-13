@@ -704,6 +704,11 @@ export class ImpersonateUserForm extends React.Component {
         'updateUserInfo': PropTypes.func.isRequired
     }
 
+    constructor(props){
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
     /**
      * Handler for Impersonate User submit button/action.
      * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
@@ -713,20 +718,20 @@ export class ImpersonateUserForm extends React.Component {
      * @param {Object} data - User ID or email address.
      */
     handleSubmit(data) {
-        var url = "/impersonate-user";
-        var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function(payload) {
-            alert('Success! ' + data + ' is being impersonated.');
-            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            //    localStorage.setItem("user_info", JSON.stringify(payload));
-            //}
-            JWT.saveUserInfo(payload);
-            this.props.updateUserInfo();
-            navigate('/');
-        }.bind(this);
-        var fallbackFxn = function() {
-            alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-        };
+        var url = "/impersonate-user",
+            postData = { 'userid' : data },
+            callbackFxn = (resp) => {
+                //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                //    localStorage.setItem("user_info", JSON.stringify(payload));
+                //}
+                JWT.saveUserInfo(resp);
+                this.props.updateUserInfo();
+                navigate('/', { 'inPlace' : true });
+                alert('Success! ' + data + ' is being impersonated.');
+            },
+            fallbackFxn = function() {
+                alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+            };
 
         //var userInfo = localStorage.getItem('user_info') || null;
         //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
@@ -734,7 +739,7 @@ export class ImpersonateUserForm extends React.Component {
         //if(userInfo){
         //    reqHeaders['Authorization'] = 'Bearer '+idToken;
         //}
-        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, JSON.stringify(postData));
     }
 
     render() {

@@ -161,7 +161,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         if not jwt_info:
             return None
 
-        email = request._auth0_authenticated = jwt_info['email'].lower()
+        email = request._auth0_authenticated = jwt_info['email']
 
         # At this point, email has been authenticated with their Auth0 provider, but we don't know yet if this email is in our database.
         # If not authenticated (not in our DB), request.user_info will throw an HTTPForbidden error.
@@ -171,9 +171,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
             if not user_props.get('details'):
                 raise HTTPForbidden(title="Not logged in.")
-            user_props.update({
-                "id_token": id_token
-            })
+            user_props['id_token'] = id_token
             return user_props
 
         request.set_property(get_user_info, "user_info", True)
@@ -283,16 +281,7 @@ def me(request):
     return properties
 
 
-@view_config(route_name='session-properties', request_method='GET',
-             permission=NO_PERMISSION_REQUIRED)
-def session_properties(request):
-    for principal in request.effective_principals:
-        if principal.startswith('userid.'):
-            break
-    else:
-        return {}
-
-    namespace, userid = principal.split('.', 1)
+def get_basic_properties_for_user(request, userid):
     user = request.registry[COLLECTIONS]['user'][userid]
     user_dict = user.__json__(request)
 
@@ -308,6 +297,22 @@ def session_properties(request):
 
     # add uuid to user details
     properties['details']['uuid'] = userid
+
+    return properties
+
+
+@view_config(route_name='session-properties', request_method='GET',
+             permission=NO_PERMISSION_REQUIRED)
+def session_properties(request):
+    for principal in request.effective_principals:
+        if principal.startswith('userid.'):
+            break
+    else:
+        return {}
+
+    namespace, userid = principal.split('.', 1)
+    properties = get_basic_properties_for_user(request, userid)
+
     #if 'auth.userid' in request.session:
     #    properties['auth.userid'] = request.session['auth.userid']
 
@@ -343,6 +348,7 @@ def basic_auth_check(username, password, request):
              permission='impersonate')
 def impersonate_user(request):
     """As an admin, impersonate a different user."""
+
     userid = request.validated['userid']
     users = request.registry[COLLECTIONS]['user']
 
@@ -354,10 +360,7 @@ def impersonate_user(request):
     if user.properties.get('status') != 'current':
         raise ValidationFailure('body', ['userid'], 'User is not enabled.')
 
-    user_actions = calculate_properties(users[userid], request, category='user_action')
-    user_properties = {
-        'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
-    }
+    user_properties = get_basic_properties_for_user(request, userid)
     # pop off impersonate user action if not admin
     user_properties['user_actions'] = [x for x in user_properties['user_actions'] if (x['id'] and x['id'] != 'impersonate')]
     # make a key
@@ -367,11 +370,13 @@ def impersonate_user(request):
     if not(auth0_client and auth0_secret):
         raise HTTPForbidden(title="no keys to impersonate user")
 
-    payload = {'email': userid,
-               'email_verified': True,
-               'aud': auth0_client,
-              }
-    id_token = jwt.encode(payload, b64decode(auth0_secret, '-_'), algorithm='HS256')
+    jwt_contents = {
+        'email': userid,
+        'email_verified': True,
+        'aud': auth0_client,
+    }
+
+    id_token = jwt.encode(jwt_contents, b64decode(auth0_secret, '-_'), algorithm='HS256')
     user_properties['id_token'] = id_token.decode('utf-8')
 
     return user_properties
