@@ -12,6 +12,7 @@ from urllib.parse import (
     urlencode,
 )
 from datetime import datetime
+import uuid
 from .search import (
     DEFAULT_BROWSE_PARAM_LISTS,
     make_search_subreq,
@@ -24,14 +25,14 @@ from .types.workflow import (
     WorkflowRunTracingException,
     item_model_to_object
 )
-
+from .types.base import get_item_if_you_can
 
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
     config.add_route('date_histogram_aggregations', '/date_histogram_aggregations/')
+    config.add_route('add_files_to_higlass_viewconf', '/add_files_to_higlass_viewconf/')
     config.scan(__name__)
-
 
 # TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
 @view_config(route_name='trace_workflow_runs', request_method='GET', permission='view', context=Item)
@@ -420,3 +421,392 @@ def date_histogram_aggregations(request):
 
     return search_result
 
+""" Begin Chad's section
+"""
+@view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
+def add_files_to_higlass_viewconf(request):
+    """ Add multiple files to the given Higlass view config.
+    Assumes request's request is JSON and contains these keys:
+        "higlass_viewconf"  : String containing the uuid of the Higlass View Config. If not found, assumes an empty view config.
+        "files"             : A comma-separated list of file uuids to add.
+
+    Returns a dict:
+        "success"  : Boolean indicating success.
+        "errors"   : A string (may be None) containing errors.
+        "viewconf" : dict of the new viewconfig JSON
+    """
+
+    # Get the view conf. If none is provided, use the empty higlass viewconf.
+    base_higlass_viewconf_uuid = request.json_body.get('higlass_viewconf', "00000000-1111-0000-1111-000000000003")
+
+    higlass_viewconf = get_item_if_you_can(request, base_higlass_viewconf_uuid)
+
+    # Get the file list.
+    filestring = request.json_body.get('files')
+    new_file_uuids = []
+    if filestring:
+        new_file_uuids = filestring.split(',')
+    new_viewconf = higlass_viewconf
+
+    for file_uuid in new_file_uuids:
+        # Get the new file.
+        new_file_dict = get_item_if_you_can(request, file_uuid)
+
+        # Try to add the new file to the given viewconf.
+        new_viewconf, errors = add_single_file_to_higlass_viewconf(higlass_viewconf, new_file_dict)
+
+        # If any of the new files failed, abandon progress and return failure.
+        if errors:
+            return {
+                "success" : False,
+                "errors" : f"errors found while adding {file_uuid} : {errors}",
+                "viewconf": None
+            }
+
+    # Return success.
+    return {
+        "success" : True,
+        "errors": "",
+        "viewconf" : higlass_viewconf #new_viewconf,
+    }
+
+def add_single_file_to_higlass_viewconf(viewconf, new_file_dict):
+    """ Add a single file to the view config.
+    """
+
+    # Find all of the files in the viewconf. Determine their type and their dimension (1 or 2).
+    viewconf_file_counts_by_position = {
+        "top" : 0,
+        "left" : 0,
+        "center" : 0,
+    }
+
+    for direction in ("top", "left", "center"):
+        for new_view in viewconf["viewconfig"]["views"]:
+            # TODO everything's a dict, RIP
+            if direction == "top":
+                tracks = new_view["tracks"]["top"]
+            elif direction == "left":
+                tracks = new_view["tracks"]["left"]
+            elif direction == "center":
+                tracks = new_view["tracks"]["center"]["contents"]
+
+            # All files should have the same genome assembly (or have no assembly). Return an error if they don't match.
+            if new_file_dict["genome_assembly"]:
+                for track in tracks:
+                    # If it doesn't have a genome, skip.
+                    if not "options" in track:
+                        continue
+                    if not "coordSystem" in track["options"]:
+                        continue
+
+                    # coordSystem is set to file.genome_assembly when registering higlass files, so we can compare the two and make sure they match.
+                    if track["options"]["coordSystem"] != new_file_dict["genome_assembly"]:
+                        return None, f"Genome Assemblies do not match, cannot add. Expected {new_file_dict['genome_assembly']}, found {track['options']['coordSystem']} instead"
+
+            viewconf_file_counts_by_position[direction] += len(tracks)
+
+    # If there are already 6 views, stop and return an error.
+    views_count = len(viewconf.viewconfig.views)
+    if views_count >= 6:
+        return None, "You cannot have more than 6 views in a single display."
+
+    # Based on the filetype's dimensions, try to add the file to the viewconf
+    # TODO Handle other file types
+    if new_file_dict["file_type"] in ("chromefile", "contact matrix"):
+        status, errors = add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file_dict["higlass_uid"])
+        if error:
+            return None, error
+    elif new_file_dict["file_type"] in ("bigwig"):
+        status, errors = add_1d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file_dict["higlass_uid"])
+        if error:
+            return None, error
+    else:
+        return None, f"Unknown new file type {new_file_dict['file_type']}"
+
+    # Resize the sections so they fit into a 12 x 12 grid.
+    repack_higlass_views(viewconf, viewconf_file_counts_by_position)
+
+    # Success! Return the modified view conf.
+    return viewconf, None
+
+def add_1d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file_higlass_uid):
+    """Decide on the best location to add a 1-D file to the Higlass View Config's top track.
+
+    Returns:
+    - a boolean indicating succes
+    - a string containing an error message, if any (may be None)
+    """
+
+    # Choose the first available view. If there are no views, make up some defaults.
+    base_view = None
+
+    if viewconf["viewconfig"]["views"]:
+        base_view = viewconf["viewconfig"]["views"][0]
+    else:
+        base_view = {
+            initialYDomain: [
+                -10000,
+                10000
+            ],
+            initialXDomain: [
+                -10000,
+                10000
+            ],
+            tracks: {
+                right: [ ],
+                gallery: [ ],
+                left: [ ],
+                whole: [ ],
+                bottom: [ ],
+                top: [
+                    {}
+                ],
+                center: [ ],
+            },
+            uid: "Not set yet",
+            layout: {
+                w: 12,
+                static: true,
+                h: 12,
+                y: 0,
+                i: "Not set yet",
+                moved: false,
+                x: 0
+            }
+        }
+
+    new_view = base_view.deepcopy()
+    new_view["uid"] = uuid.uuid4()
+    new_view["layout"]["i"] = new_view["uid"]
+
+    new_view["tracks"]["top"][0]["tilesetUid"] = new_file["higlass_uid"]
+    new_view["tracks"]["top"][0]["name"] = new_file["display_title"]
+    new_view["tracks"]["top"][0]["type"] = "horizontal-line"
+    new_view["tracks"]["top"][0]["options"]["coordSystem"] = new_file["genome_assembly"]
+    new_view["tracks"]["top"][0]["options"]["name"] = new_file["display_title"]
+
+    viewconf_file_counts_by_position["top"] += 1
+
+    viewconf["viewconfig"]["views"].append(new_view)
+    # TODO exportAsViewConfString - Is this needed?
+    # TODO zoomToDataExtent - Is this needed?
+    return True, None
+
+def add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, new_file):
+    """Decide on the best location to add a 2-D file to the Higlass View Config's center track.
+
+    Returns:
+    - a boolean indicating succes
+    - a string containing an error message, if any (may be None)
+    """
+
+    # Choose the first available view. If there are no views, make up some defaults.
+    base_view = None
+
+    if viewconf["viewconfig"]["views"]:
+        base_view = viewconf["viewconfig"]["views"][0]
+    else:
+        base_view = {
+            initialYDomain: [
+                -10000,
+                10000
+            ],
+            initialXDomain: [
+                -10000,
+                10000
+            ],
+            tracks: {
+                right: [ ],
+                gallery: [ ],
+                left: [ ],
+                whole: [ ],
+                bottom: [ ],
+                top: [ ],
+                center: [
+                    {
+                        contents: {}
+                    }
+                ],
+            },
+            uid: "Not set yet",
+            layout: {
+                w: 12,
+                static: true,
+                h: 12,
+                y: 0,
+                i: "Not set yet",
+                moved: false,
+                x: 0
+            }
+        }
+
+    # TODO Do I need to add 1-D tracks?
+    new_view["tracks"]["center"][0]["contents"]["tilesetUid"] = new_file["higlass_uid"]
+    new_view["tracks"]["center"][0]["contents"]["name"] = new_file["display_title"]
+    new_view["tracks"]["center"][0]["contents"]["type"] = "combined"
+    new_view["tracks"]["center"][0]["contents"]["options"]["coordSystem"] = new_file["genome_assembly"]
+    new_view["tracks"]["center"][0]["contents"]["options"]["name"] = new_file["display_title"]
+
+    viewconf_file_counts_by_position["center"] += 1
+
+    viewconf["viewconfig"]["views"].append(new_view)
+
+    return True, None
+
+def repack_higlass_views(viewconf, viewconf_file_counts_by_position):
+    """Set up the higlass views.
+    """
+
+    views_count = len(viewconf["viewconfig"]["views"])
+
+    # No views are present, stop
+    if views_count < 1:
+        return
+
+    # Too many views to deal with, stop
+    if views_count > 6:
+        return
+
+    # Here are lookup tables to decide on the size of each 1-D and 2-D components per axis.
+    # * 2-D content should take up the majority of each axis.
+    # * 2-D content should be at least twice as large as 1-D content.
+    # * Size for all components should not exceed 12 units.
+
+    # Lookup is organized by the number of 1-D items, then the number of 2-D items. 2-D items will never exceed 3 (because we're using a 3x2 arrangement,) and 1-D items will never exceed 6 (since we assume a max of 6 views.)
+    size_for_1d_items = {
+        1 : {
+            0 : 12,
+            1 : 2,
+            2 : 2,
+            3 : 3
+        },
+        2 : {
+            0 : 6,
+            1 : 2,
+            2 : 1,
+            3 : 1
+        },
+        3 : {
+            0 : 4,
+            1 : 1,
+            2 : 1,
+            3 : 1
+        },
+        4 : {
+            0 : 3,
+            1 : 1,
+            2 : 1,
+        },
+        5 : {
+            0 : 2,
+            1 : 1,
+        },
+        6 : {
+            0 : 2,
+        },
+    }
+    size_for_2d_items = {
+        0 : {
+            1 : 12,
+            2 : 6,
+            3 : 4
+        },
+        1 : {
+            1 : 10,
+            2 : 5,
+            3 : 3
+        },
+        2 : {
+            1 : 8,
+            2 : 5,
+            3 : 3
+        },
+        3 : {
+            1 : 9,
+            2 : 4,
+            3 : 3
+        },
+        4 : {
+            1 : 8,
+            2 : 4,
+        },
+        5 : {
+            1 : 7,
+        },
+    }
+
+    # Count the number of 1-D views.
+    horizontal_1d_views = viewconf_file_counts_by_position["left"]
+    vertical_1d_views = viewconf_file_counts_by_position["top"]
+
+    # Count the number of 2-D views.
+    count_2d_views = viewconf_file_counts_by_position["center"]
+
+    # Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
+    # 1 2 5
+    # 3 4 6
+    horizontal_2d_views = 0
+    if count_2d_views == 1:
+        horizontal_2d_views = 1
+    elif count_2d_views in (2, 3, 4):
+        horizontal_2d_views = 2
+    elif count_2d_views in (5, 6):
+        horizontal_2d_views = 3
+
+    vertical_2d_views = 0
+    if count_2d_views in (1, 2):
+        vertical_2d_views = 1
+    elif count_2d_views > 2:
+        vertical_2d_views = 2
+
+    # Handle horizontal placement.
+    x = 0
+    for higlass_view in viewconf["viewconfig"]["views"]:
+        # For each left track,
+        for track in higlass_view["tracks"]["left"]:
+            # Set the x location, then increment it.
+            higlass_view["layout"]["x"] = x
+            width = size_for_1d_items[horizontal_1d_views][horizontal_2d_views]
+            x += width
+            higlass_view["layout"]["w"] = width
+
+        # For each top track,
+        for track in higlass_view["tracks"]["top"]:
+            # Set the x location.
+            higlass_view["layout"]["x"] = x
+
+        # For each center track,
+        for track in higlass_view["tracks"]["center"]["contents"]:
+            # Set the x location, then increment it.
+            higlass_view["layout"]["x"] = x
+            width = size_for_2d_items[horizontal_1d_views][horizontal_2d_views]
+            x += width
+            higlass_view["layout"]["w"] = width
+
+    # Handle vertical placement.
+    y = 0
+    for higlass_view in viewconf["viewconfig"]["views"]:
+        # For each left track,
+        for track in higlass_view["tracks"]["left"]:
+            # Set the y location.
+            higlass_view["layout"]["y"] = y
+
+        # For each top track,
+        for track in higlass_view["tracks"]["top"]:
+            # Set the y location, then increment it.
+            higlass_view["layout"]["y"] = y
+            height = size_for_1d_items[horizontal_1d_views][horizontal_2d_views]
+            y += height
+            higlass_view["layout"]["h"] = height
+
+        # For each center track,
+        for track in higlass_view["tracks"]["center"]["contents"]:
+            # Set the y location, then increment it.
+            higlass_view["layout"]["y"] = y
+            height = size_for_2d_items[horizontal_1d_views][horizontal_2d_views]
+            y += height
+            higlass_view["layout"]["h"] = height
+
+""" End Chad's section
+"""

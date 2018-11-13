@@ -3,20 +3,272 @@ pytestmark = pytest.mark.working
 
 # Test HiGlass config view endpoints on fourfront.
 
-def test_higlass_noop(testapp):
+@pytest.fixture
+def higlass_mcool_viewconf(testapp):
+    viewconf = {
+        "title" : "Test MCOOL Display",
+        "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
+        "uuid" : "00000000-1111-0000-1111-000000000002",
+        "name" : "higlass-mcool-test-view",
+        "viewconfig" : {
+            "editable": True,
+            "zoomFixed": False,
+            "exportViewUrl":"/api/v1/viewconfs",
+            "zoomLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "locationLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            },
+            "trackSourceServers":[
+                "https://higlass.io/api/v1"
+            ],
+            "views":[
+                {
+                    "uid":"view-4dn-mcool-0",
+                    "layout":{
+                        "w":12,
+                        "h":12,
+                        "x":0,
+                        "y":0,
+                        "i":"view-4dn-mcool-0",
+                        "moved":False,
+                        "static":True
+                    },
+                    "initialXDomain":[
+                        102391829.2052902,
+                        2938891536.27695
+                    ],
+                    "initialYDomain":[
+                        129711724.73566854,
+                        1810982460.1999617
+                    ],
+                    "autocompleteSource":"/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                    "genomePositionSearchBox":{
+                        "autocompleteServer":"https://higlass.io/api/v1",
+                        "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
+                        "chromInfoServer":"https://higlass.io/api/v1",
+                        "chromInfoId":"mm10",
+                        "visible":True
+                    },
+                    "tracks":{
+                        "top":[
+                            {
+                                "name":"Gene Annotations (mm10)",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "type":"horizontal-gene-annotations",
+                                "options":{
+                                    "labelColor":"black",
+                                    "labelPosition":"hidden",
+                                    "plusStrandColor":"black",
+                                    "minusStrandColor":"black",
+                                    "trackBorderWidth":0,
+                                    "trackBorderColor":"black",
+                                    "name":"Gene Annotations (mm10)",
+                                    "showMousePosition":False,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "minHeight":55,
+                                "height":55,
+                                "header":"",
+                                "position":"top",
+                                "orientation":"1d-horizontal",
+                                "uid":"top-annotation-track"
+                            },
+                            {
+                                "name":"Chromosome Axis",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "type":"horizontal-chromosome-labels",
+                                "local":True,
+                                "minHeight":30,
+                                "thumbnail":None,
+                                "options":{
+                                    "showMousePosition":False,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "height":30,
+                                "position":"top",
+                                "orientation":"1d-horizontal",
+                                "uid":"top-chromosome-track"
+                            }
+                        ],
+                        "left":[
+                            {
+                                "name":"Gene Annotations (mm10)",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "uid":"left-annotation-track",
+                                "type":"vertical-gene-annotations",
+                                "options":{
+                                    "labelColor":"black",
+                                    "labelPosition":"hidden",
+                                    "plusStrandColor":"black",
+                                    "minusStrandColor":"black",
+                                    "trackBorderWidth":0,
+                                    "trackBorderColor":"black",
+                                    "name":"Gene Annotations (mm10)",
+                                    "showMousePosition":False,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "width":55,
+                                "header":"",
+                                "orientation":"1d-vertical",
+                                "position":"left"
+                            },
+                            {
+                                "name":"Chromosome Axis",
+                                "server":"https://higlass.io/api/v1",
+                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "uid":"left-chromosome-track",
+                                "type":"vertical-chromosome-labels",
+                                "options":{
+                                    "showMousePosition":False,
+                                    "mousePositionColor":"#999999"
+                                },
+                                "width":20,
+                                "minWidth":20,
+                                "orientation":"1d-vertical",
+                                "position":"left"
+                            }
+                        ],
+                        "center":[
+                            {
+                                "uid":"center-mcool-track",
+                                "type":"combined",
+                                "height":250,
+                                "contents":[
+                                    {
+                                        "server":"https://higlass.4dnucleome.org/api/v1",
+                                        "tilesetUid":"LTiacew8TjCOaP9gpDZwZw",
+                                        "type":"heatmap",
+                                        "position":"center",
+                                        "uid":"GjuZed1ySGW1IzZZqFB9BA",
+                                        "name":"4DNFI1TBYKV3.mcool",
+                                        "options":{
+                                            "backgroundColor":"#eeeeee",
+                                            "labelPosition":"bottomRight",
+                                            "colorRange":[
+                                                "white",
+                                                "rgba(245,166,35,1.0)",
+                                                "rgba(208,2,27,1.0)",
+                                                "black"
+                                            ],
+                                            "maxZoom":None,
+                                            "colorbarPosition":"topRight",
+                                            "trackBorderWidth":0,
+                                            "trackBorderColor":"black",
+                                            "heatmapValueScaling":"log",
+                                            "showMousePosition":False,
+                                            "mousePositionColor":"#999999",
+                                            "showTooltip":False,
+                                            "name":"4DNFI1TBYKV3.mcool",
+                                            "scaleStartPercent":"0.00000",
+                                            "scaleEndPercent":"1.00000"
+                                        },
+                                        "transforms":[
+                                            {
+                                                "name":"KR",
+                                                "value":"KR"
+                                            },
+                                            {
+                                                "name":"ICE",
+                                                "value":"weight"
+                                            },
+                                            {
+                                                "name":"VC",
+                                                "value":"VC"
+                                            },
+                                            {
+                                                "name":"VC_SQRT",
+                                                "value":"VC_SQRT"
+                                            }
+                                        ],
+                                        "resolutions":[
+                                            1000,
+                                            2000,
+                                            5000,
+                                            10000,
+                                            25000,
+                                            50000,
+                                            100000,
+                                            250000,
+                                            500000,
+                                            1000000,
+                                            2500000,
+                                            5000000,
+                                            10000000
+                                        ]
+                                    }
+                                ],
+                                "position":"center",
+                                "options":{
+
+                                }
+                            }
+                        ],
+                        "right":[
+
+                        ],
+                        "bottom":[
+
+                        ],
+                        "whole":[
+
+                        ],
+                        "gallery":[
+
+                        ]
+                    }
+                }
+            ],
+            "valueScaleLocks":{
+                "locksByViewUid":{
+
+                },
+                "locksDict":{
+
+                }
+            }
+        }
+    }
+    return testapp.post_json('/higlass-view-configs/', viewconf).json
+
+def test_higlass_noop(testapp, higlass_mcool_viewconf):
     """ Test the python endpoint exists
     Given a viewconf and no experiments, the viewconf should remain unchanged.
     """
 
     # Get the Higlass Viewconf that will be edited.
     # Get the JSON.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get(f"/higlass-view-configs/{higlass_conf_uuid}/?format=json")
+    higlass_json = response.json
 
     # Patch a request, passing in the current viewconf with no additional data.
-    #response = testapp.patch_json(f'/higlass-viewconf{}')
-    #target = res.json
-
     # Get the new json.
-    # The viewconfig of both old and new files should be unchanged.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconf': higlass_conf_uuid
+    })
+
+    new_higlass_json = response.json["viewconf"]
+
+    # The new viewconfig should be a subset of the old one.
+    for key in new_higlass_json:
+        assert higlass_json[key] == new_higlass_json[key]
+
+def test_create_new_higlass_viewconf(testapp):
     pass
 
 def test_add_bigwig_higlass(testapp):
