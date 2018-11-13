@@ -3,8 +3,6 @@ pytestmark = pytest.mark.working
 
 # Test HiGlass config view endpoints on fourfront.
 
-# TODO stub/mock this function: get_higlass_tileset_info_from_file(new_file):
-
 def test_higlass_noop(testapp):
     """ Test the python endpoint exists
     Given a viewconf and no experiments, the viewconf should remain unchanged.
