@@ -99,7 +99,7 @@ ALLOW_LAB_VIEW_ADMIN_EDIT = [
 ] + ONLY_ADMIN_VIEW
 
 ALLOW_OWNER_EDIT = [
-    (Allow, 'role.owner', ['edit', 'view']),
+    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
 ]
 
 # Collection acls

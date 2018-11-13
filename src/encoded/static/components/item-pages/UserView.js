@@ -713,20 +713,20 @@ export class ImpersonateUserForm extends React.Component {
      * @param {Object} data - User ID or email address.
      */
     handleSubmit(data) {
-        var url = "/impersonate-user";
-        var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function(payload) {
-            alert('Success! ' + data + ' is being impersonated.');
-            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            //    localStorage.setItem("user_info", JSON.stringify(payload));
-            //}
-            JWT.saveUserInfo(payload);
-            this.props.updateUserInfo();
-            navigate('/');
-        }.bind(this);
-        var fallbackFxn = function() {
-            alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-        };
+        var url = "/impersonate-user",
+            postData = { 'userid' : data },
+            callbackFxn = (resp) => {
+                alert('Success! ' + data + ' is being impersonated.');
+                //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                //    localStorage.setItem("user_info", JSON.stringify(payload));
+                //}
+                JWT.saveUserInfo(resp);
+                this.props.updateUserInfo();
+                navigate('/');
+            },
+            fallbackFxn = function() {
+                alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+            };
 
         //var userInfo = localStorage.getItem('user_info') || null;
         //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
@@ -734,7 +734,7 @@ export class ImpersonateUserForm extends React.Component {
         //if(userInfo){
         //    reqHeaders['Authorization'] = 'Bearer '+idToken;
         //}
-        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, JSON.stringify(postData));
     }
 
     render() {
