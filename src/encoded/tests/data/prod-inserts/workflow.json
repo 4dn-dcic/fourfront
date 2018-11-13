@@ -8108,6 +8108,19 @@
                                 "name": "chip.gensz"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
