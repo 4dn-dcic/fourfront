@@ -54,7 +54,6 @@
             "title": "Genome Assembly",
             "description": "The genome assembly associated with the file - for processing or reference",
             "type": "string",
-            "lookup": 30,
             "enum": [
                 "GRCh38",
                 "GRCm38",
@@ -66,15 +65,23 @@
             "title": "Biosource",
             "description": "The cell line or tissue sample for this track",
             "type": "string",
-            "linkTo": "Biosource",
-            "lookup": 22
+            "linkTo": "Biosource"
         },
-        "experiment_description": {
-            "title": "Experiment Description",
+        "dataset_description": {
+            "title": "Dataset Description",
             "description": "A description of the Experiment or Dataset from whence this file.",
             "type": "string",
-            "lookup": 10,
             "formInput": "textarea"
+        },
+        "dataset_type": {
+            "title": "Dataset Type",
+            "description": "The type of dataset to which this file is associated",
+            "type": "string"
+        },
+        "replicate_identifier": {
+            "title": "Replicate Number",
+            "description": "If file is part of an identified replicate - the ID for that replicate",
+            "type": "string"
         },
         "project_lab": {
             "title": "Wet Lab",
