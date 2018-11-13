@@ -195,7 +195,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         var viewConfTitleAppendStr  = " - " + userFirstName + "'s copy",
             viewConfDesc            = context.description,
-            viewConfTitle;
+            viewConfTitle           = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
 
         // Check if our title already has " - user's copy" substring and if so,
         // increment an appended counter instead of re-adding the substring.
@@ -222,9 +222,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 // Our title already has " - user's copy" substring, but not an " (int)"
                 viewConfTitle = context.display_title + ' (2)';
             }
-
-        } else { // Our title does not have " - [this user]'s copy" substring.
-            viewConfTitle = context.display_title + viewConfTitleAppendStr;
         }
 
         var fallbackCallback = (errResp, xhr) => {
@@ -240,7 +237,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var payload = {
             'title'         : viewConfTitle,
             'description'   : viewConfDesc,
-            'viewconfig'    : currentViewConf
+            'viewconfig'    : currentViewConf,
+            // We don't include other properties and let them come from schema default values.
+            // For example, default status is 'draft', which will be used.
+            // Lab and award do not carry over as current user might be from different lab.
         };
 
         // Try to POST/PUT a new viewconf.
@@ -285,13 +285,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         var { context, href }   = this.props,
             hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr),
             viewConfTitle       = context.title || context.display_title;
-
-        if (!currentViewConf){
-            throw new Error('Could not get current view configuration.');
-        }
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
         if (context.status === statusToSet) {
@@ -333,8 +327,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         });
                     },
                     JSON.stringify({
-                        'viewconfig'    : currentViewConf,
-                        'status'        : statusToSet
+                        'status' : statusToSet
                     })
                 );
             }

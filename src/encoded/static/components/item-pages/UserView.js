@@ -704,6 +704,11 @@ export class ImpersonateUserForm extends React.Component {
         'updateUserInfo': PropTypes.func.isRequired
     }
 
+    constructor(props){
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
     /**
      * Handler for Impersonate User submit button/action.
      * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
@@ -716,13 +721,13 @@ export class ImpersonateUserForm extends React.Component {
         var url = "/impersonate-user",
             postData = { 'userid' : data },
             callbackFxn = (resp) => {
-                alert('Success! ' + data + ' is being impersonated.');
                 //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 //    localStorage.setItem("user_info", JSON.stringify(payload));
                 //}
                 JWT.saveUserInfo(resp);
                 this.props.updateUserInfo();
-                navigate('/');
+                navigate('/', { 'inPlace' : true });
+                alert('Success! ' + data + ' is being impersonated.');
             },
             fallbackFxn = function() {
                 alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
