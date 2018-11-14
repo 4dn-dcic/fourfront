@@ -1,4 +1,5 @@
 import pytest
+from .test_file import mcool_file_json # TODO move to centralized fixture file
 pytestmark = pytest.mark.working
 
 # Test HiGlass config view endpoints on fourfront.
@@ -213,33 +214,93 @@ def higlass_mcool_viewconf(testapp):
                                     }
                                 ],
                                 "position":"center",
-                                "options":{
-
-                                }
+                                "options":{}
                             }
                         ],
-                        "right":[
-
-                        ],
-                        "bottom":[
-
-                        ],
-                        "whole":[
-
-                        ],
-                        "gallery":[
-
-                        ]
+                        "right":[],
+                        "bottom":[],
+                        "whole":[],
+                        "gallery":[]
                     }
                 }
             ],
             "valueScaleLocks":{
-                "locksByViewUid":{
+                "locksByViewUid":{},
+                "locksDict":{}
+            }
+        }
+    }
+    return testapp.post_json('/higlass-view-configs/', viewconf).json
 
-                },
-                "locksDict":{
-
+@pytest.fixture
+def higlass_blank_viewconf(testapp):
+    viewconf = {
+        "title" : "Empty Higlass Viewconfig",
+        "description" : "No files in viewconf, ready to clone.",
+        "uuid" : "00000000-1111-0000-1111-000000000003",
+        "name" : "empty-higlass-viewconf",
+        "viewconfig" : {
+            "editable": True,
+            "zoomFixed": False,
+            "trackSourceServers": [
+                "//higlass.io/api/v1"
+            ],
+            "exportViewUrl": "/api/v1/viewconfs",
+            "views": [
+                {
+                    "uid": "aa",
+                    "initialXDomain": [
+                        -167962308.59835115,
+                        3260659599.528857
+                    ],
+                    "autocompleteSource": "/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
+                    "genomePositionSearchBox": {
+                        "autocompleteServer": "//higlass.io/api/v1",
+                        "autocompleteId": "OHJakQICQD6gTD7skx4EWA",
+                        "chromInfoServer": "//higlass.io/api/v1",
+                        "chromInfoId": "hg19",
+                        "visible": True
+                    },
+                    "chromInfoPath": "//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
+                    "tracks": {
+                    "top": [],
+                    "left": [],
+                    "center": [
+                        {
+                            "contents" : []
+                        }
+                    ],
+                    "right": [],
+                    "bottom": [],
+                    "whole": [],
+                    "gallery": []
+                    },
+                    "layout": {
+                        "w": 12,
+                        "h": 12,
+                        "x": 0,
+                        "y": 0,
+                        "i": "aa",
+                        "moved": False,
+                        "static": False
+                    },
+                    "initialYDomain": [
+                        549528857.4793874,
+                        2550471142.5206127
+                    ]
                 }
+            ],
+            "zoomLocks": {
+                "locksByViewUid": {},
+                "locksDict": {}
+            },
+            "locationLocks": {
+                "locksByViewUid": {},
+                "locksDict": {}
+            },
+            "valueScaleLocks": {
+                "locksByViewUid": {},
+                "locksDict": {}
             }
         }
     }
@@ -268,8 +329,36 @@ def test_higlass_noop(testapp, higlass_mcool_viewconf):
     for key in new_higlass_json:
         assert higlass_json[key] == new_higlass_json[key]
 
-def test_create_new_higlass_viewconf(testapp):
-    pass
+def test_create_new_higlass_viewconf(testapp, higlass_blank_viewconf, mcool_file_json):
+    """ Don't pass in an existing higlass viewconf, but do add a file.
+    Expect a new higlass viewconf with a file.
+    """
+
+    # Post an mcool file and retrieve its uuid. Add a higlass_uid.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = "GRCm38"
+    mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+
+    # Try to create a viewconf, adding a file but no viewconf.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'files': f"{mcool_file['uuid']}"
+    })
+
+    new_higlass_json = response.json["viewconf"]
+
+    assert "name" in new_higlass_json
+    assert "title" in new_higlass_json
+    assert "viewconfig" in new_higlass_json
+    assert "description" in new_higlass_json
+    assert "date_created" in new_higlass_json
+    assert "schema_version" in new_higlass_json
+    assert "@id" in new_higlass_json
+    assert "@type" in new_higlass_json
+    assert "uuid" in new_higlass_json
+    assert "external_references" in new_higlass_json
+    assert "display_title" in new_higlass_json
+    assert "link_id" in new_higlass_json
+    assert "principals_allowed" in new_higlass_json
 
 def test_add_bigwig_higlass(testapp):
     """ Given a viewconf with an mcool file, the viewconf should add a bigwig on top.
