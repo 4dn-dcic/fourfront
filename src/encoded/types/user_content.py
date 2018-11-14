@@ -138,6 +138,7 @@ class StaticSection(UserContent):
 
 @collection(
     name='higlass-view-configs',
+    unique_key='user_content:name',
     properties={
         'title': 'HiGlass Displays',
         'description': 'Displays and view configurations for HiGlass',

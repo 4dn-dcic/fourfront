@@ -79,8 +79,14 @@ class ControlsAndResults extends React.PureComponent {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
+    }
+
+    forceUpdateOnSelf(){
+        var searchResultTable   = this.refs.searchResultTable,
+            dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
+        return dimContainer && dimContainer.resetWidths();
     }
 
     handleClearFilters(evt){
@@ -204,7 +210,7 @@ class ControlsAndResults extends React.PureComponent {
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                     <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
-                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight')}
+                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
                         hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                             SearchResultTable.defaultProps.constantColumnDefinitions,
@@ -214,6 +220,7 @@ class ControlsAndResults extends React.PureComponent {
                         )} />
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                         'currentAction', 'windowWidth', 'registerWindowOnScrollHandler')}
+                        ref="searchResultTable"
                         results={results} totalExpected={context.total} columns={context.columns || {}}
                         hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
                         renderDetailPane={(result, rowNumber, containerWidth) =>

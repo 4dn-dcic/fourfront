@@ -41,7 +41,6 @@ export default class DefaultItemView extends React.PureComponent {
         this.getTabViewWidth = this.getTabViewWidth.bind(this);
         this.setTabViewKey = this.setTabViewKey.bind(this);
         this.itemHeader = this.itemHeader.bind(this);
-        this.render = this.render.bind(this);
 
         /**
          * Empty state object. May be extended by sub-classes.
@@ -114,10 +113,10 @@ export default class DefaultItemView extends React.PureComponent {
             { context, schemas, windowWidth } = this.props;
     
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(context));
+            returnArr.push(AttributionTabView.getTabObject(this.props));
         }
-        returnArr.push(ItemDetailList.getTabObject(context, schemas));
-        returnArr.push(AuditTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(this.props));
+        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 
@@ -131,9 +130,11 @@ export default class DefaultItemView extends React.PureComponent {
      */
     getDefaultTabs(context = this.props.context){
         var returnArr = [];
-        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
-        returnArr.push(AuditTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(this.props));
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+            returnArr.push(AttributionTabView.getTabObject(this.props));
+        }
+        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 

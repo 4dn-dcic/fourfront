@@ -16,20 +16,13 @@ export default class HiGlassViewConfigView extends DefaultItemView {
     getTabViewContents(){
 
         var initTabs    = [],
-            context     = this.props.context,
             windowWidth = this.props.windowWidth,
             width       = (!isServerSide() && layout.gridContainerWidth(windowWidth));
 
-        //initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
-        //initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
-
-        // return initTabs.concat(this.getCommonTabs()); // We don't want attribution or detail view for this Item... for now.
 
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
 
-        initTabs.push(ItemDetailList.getTabObject(context, this.props.schemas));
-
-        return initTabs;
+        return initTabs.concat(this.getCommonTabs());
     }
 
 }
@@ -351,7 +344,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'bsStyle'       : context.status === 'released' ? 'default' : 'info',
             'disabled'      : releaseLoading,
             'key'           : 'sharebtn',
-            'data-tip'      : context.status === 'released' ? 'Change status of this item to not be publically viewable' : 'Release display to public.',
+            'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
             'title'         : (
                     <React.Fragment>
                         <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'id-badge')}/>&nbsp; Manage
@@ -410,7 +403,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if( typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
                 <Button onClick={toggleFullScreen} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'arrows-alt' : 'crop')}/>
+                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </Button>
             );
         }
