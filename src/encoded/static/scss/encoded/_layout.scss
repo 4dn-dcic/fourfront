@@ -583,8 +583,11 @@ $margin-util-sizes-mini: 1, 2, 3, 5, 7, 8; 		// * 1px
 	}
 }
 
+/*
+TODO: Re-enable for split buttons w/ specific className maybe.
 div.dropdown.btn-group {
 	.dropdown-toggle.btn {
+		padding-right: 14px;
 		> span.caret {
 			position: relative;
 			position: static;
@@ -593,6 +596,7 @@ div.dropdown.btn-group {
 		}
 	}
 }
+*/
 
 @mixin button-no-focus-outline {
 	&:active, &:focus, &.focus, &:focus.active, &.focus:active, &.focus:focus {

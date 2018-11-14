@@ -2,6 +2,7 @@
 
 import _ from 'underscore';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import parseDOM from 'html-dom-parser/lib/html-to-dom-server';
@@ -468,7 +469,10 @@ export class CopyWrapper extends React.Component {
         'wrapperElement' : 'div',
         'className' : null,
         'flash' : true,
-        'iconProps' : {}
+        'iconProps' : {},
+        'includeIcon' : true,
+        'flashActiveTransform' : 'scale3d(1.2, 1.2, 1.2) translate3d(0, 0, 0)',
+        'flashInactiveTransform' : 'translate3d(0, 0, 0)'
     }
 
     static copyToClipboard(value, successCallback = null, failCallback = null){
@@ -521,10 +525,19 @@ export class CopyWrapper extends React.Component {
     }
 
     flashEffect(){
-        if (!this.props.flash || !this.refs || !this.refs.wrapper) return null;
-        this.refs.wrapper.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
+        var wrapper = this.refs.wrapper;
+        if (!this.props.flash || !this.refs || !wrapper) return null;
+
+        if (typeof this.props.wrapperElement === 'function'){
+            // Means we have a React component vs a React/JSX element.
+            wrapper = ReactDOM.findDOMNode(wrapper);
+        }
+
+        if (!wrapper) return null;
+
+        wrapper.style.transform = this.props.flashActiveTransform;
         setTimeout(()=>{
-            this.refs.wrapper.style.transform = 'translate3d(0, 0, 0)';
+            wrapper.style.transform = this.props.flashInactiveTransform;
         }, 100);
     }
 
@@ -534,33 +547,38 @@ export class CopyWrapper extends React.Component {
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps } = this.props;
+        var { value, children, mounted, wrapperElement, iconProps, includeIcon } = this.props;
         if (!value) return null;
         var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
-        function copy(){
-            return CopyWrapper.copyToClipboard(value, function(v){
+        var copy = (e) => {
+            return CopyWrapper.copyToClipboard(value, (v)=>{
                 this.onCopy();
                 analytics.event('CopyWrapper', 'Copy', {
                     'eventLabel' : 'Value',
                     'name' : v
                 });
-            }, function(v){
+            }, (v)=>{
                 analytics.event('CopyWrapper', 'ERROR', {
                     'eventLabel' : 'Unable to copy value',
                     'name' : v
                 });
             });
-        }
+        };
 
         var elemsToWrap = [];
-        if (children)               elemsToWrap.push(children);
-        if (children && isMounted)  elemsToWrap.push(' ');
-        if (isMounted)              elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
+        if (children)                   elemsToWrap.push(children);
+        if (children && isMounted)      elemsToWrap.push(' ');
+        if (isMounted && includeIcon)   elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy" title="Copy to clipboard" />);
 
         var wrapperProps = _.extend(
-            { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },
-            _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted', 'iconProps')
+            {
+                'ref'       : 'wrapper',
+                'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
+                'className' : 'clickable copy-wrapper ' + this.props.className || '',
+                'onClick'   : copy
+            },
+            _.omit(this.props, 'children', 'style', 'value', 'onCopy', 'mounted', ..._.keys(CopyWrapper.defaultProps))
         );
 
         return React.createElement(wrapperElement, wrapperProps, elemsToWrap);
